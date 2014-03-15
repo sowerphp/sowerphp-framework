@@ -1,0 +1,25 @@
+{
+	"name": "sowerphp/sowerphp",
+	"description": "SowerPHP: Minimalist Framework for PHP",
+	"type": "library",
+	"keywords": ["framework"],
+	"homepage": "http://sowerphp.org",
+	"license": "GPL",
+	"authors": [
+		{
+			"name": "Equipo de SowerPHP",
+			"homepage": "https://github.com/sowerphp/sowerphp/graphs/contributors"
+		}
+	],
+	"support": {
+		"issues": "https://github.com/sowerphp/sowerphp/issues",
+		"forum": "http://stackoverflow.com/tags/sowerphp",
+		"source": "https://github.com/sowerphp/sowerphp"
+	},
+	"require": {
+		"php": "~5.3"
+	},
+	"config": {
+		"vendor-dir": "extensions"
+	}
+}

@@ -1,0 +1,8 @@
+{
+	"config": {
+		"vendor-dir": "Vendor"
+	},
+	"require": {
+		"michelf/php-markdown": "1.4.0"
+	}
+}
