@@ -14,6 +14,7 @@
 	"support": {
 		"issues": "https://github.com/sowerphp/sowerphp/issues",
 		"forum": "http://stackoverflow.com/tags/sowerphp",
+		"irc": "irc://irc.freenode.org/#sowerphp",
 		"source": "https://github.com/sowerphp/sowerphp"
 	},
 	"require": {
