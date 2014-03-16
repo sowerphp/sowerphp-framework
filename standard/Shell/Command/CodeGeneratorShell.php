@@ -22,7 +22,7 @@
  */
 
 // autor y versión para el código que se está generando
-define('AUTHOR', 'MiPaGiNa Code Generator');
+define('AUTHOR', 'SowerPHP Code Generator');
 define('VERSION', date(Configure::read('time.format')));
 
 // clases utilizadas por esta shell

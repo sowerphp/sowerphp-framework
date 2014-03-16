@@ -1,8 +1,8 @@
 <?php
 
 /**
- * MiPaGiNa (MP)
- * Copyright (C) 2014 Esteban De La Fuente Rubio (esteban[at]delaf.cl)
+ * SowerPHP: Minimalist Framework for PHP
+ * Copyright (C) SowerPHP (http://sowerphp.org)
  * 
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General GNU
