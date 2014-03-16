@@ -15,31 +15,9 @@ buenas prácticas que el equipo de SowerPHP considera.
 Todo el código generado por el equipo de SowerPHP se encuentra liberado
 utilizando la licencia GPL v3 o superior.
 
-Directorios
------------
-
-*	**standard**: directorio con archivos estándares del framework. Proveen
-	las funcionalidades básicas (mínimas).
-	
-*	**extensions**: directorio para las extensiones desarrolladas
-	específicamente para el framework ya sean oficiales o desarrolladas por
-	la comunidad. Estas extensiones serán compartidas entre todos los que
-	usen el framework.
-
-	Este directorio lo crea *composer* de forma automática.
-
-*	**project**: directorio con el sitio o aplicación web que se está
-	desarrollando. Este directorio contiene los directorios:
-
-	*	**website**: sitio web o aplicación propiamente tal.
-
-	*	**extensions**: extensiones desarrolladas específicamente para
-		el framework, pero que están visibles solo para el proyecto.
-
-		Este directorio lo crea *composer* de forma automática.
-
 Enlaces de interés
 ------------------
 
 * Página del proyecto: <http://sowerphp.org>
+* Documentación: <http://sowerphp.org/doc>
 * Proyecto en GitHUB: <https://github.com/SowerPHP/sowerphp>
