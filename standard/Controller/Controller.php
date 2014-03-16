@@ -175,7 +175,7 @@ class Controller {
 		$this->beforeRender();
 		// Si la vista es nula se carga la vista según el controlador y accion solicitado
 		if(!$view) {
-			$view = Inflector::camelize($this->request->params['controller']).DS.$this->request->params['action'];
+			$view = Inflector::camelize($this->request->params['controller']).'/'.$this->request->params['action'];
 		}
 		// Crear vista para este controlador
 		if (!$this->View) {

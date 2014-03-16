@@ -32,7 +32,7 @@ App::uses('Database', 'Model/Datasource/Database');
 /**
  * Comando para generar código de forma automática
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-02-19
+ * @version 2014-03-16
  */
 class CodeGeneratorShell extends AppShell {
 	
@@ -46,7 +46,7 @@ class CodeGeneratorShell extends AppShell {
 	/**
 	 * Método principal del comando
 	 * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-	 * @version 2014-02-19
+	 * @version 2014-03-16
 	 */
 	public function main () {
 		// obtener nombre de la base de datos
@@ -90,9 +90,8 @@ class CodeGeneratorShell extends AppShell {
 		// obtener destino para los archivos
 		self::$destination = $this->selectDestination();
 		// crear directorios para archivos que se crearán
-		if(!file_exists(self::$destination.DS.'Model')) mkdir(self::$destination.DS.'Model');
-		//if(!file_exists(self::$destination.DS.'View')) mkdir(self::$destination.DS.'View');
-		if(!file_exists(self::$destination.DS.'Controller')) mkdir(self::$destination.DS.'Controller');
+		if(!file_exists(self::$destination.'/Model')) mkdir(self::$destination.'/Model');
+		if(!file_exists(self::$destination.'/Controller')) mkdir(self::$destination.'/Controller');
 		// generar archivos
 		$this->generateModelBase();
 		$this->generateModel($database);
@@ -165,19 +164,19 @@ class CodeGeneratorShell extends AppShell {
 		} else {
 			$modulo = $modulos[$opcion-2];
 			$this->setModuleUrl($modulo);
-			$modulo = str_replace('.', DS.'Module'.DS, $modulo);
-			return DIR_WEBSITE.DS.'Module'.DS.$modulo;
+			$modulo = str_replace('.', '/Module/', $modulo);
+			return DIR_WEBSITE.'/Module/'.$modulo;
 		}
 	}
 
 	/**
 	 * Buscar recursivamente todos los módulos de la aplicación
 	 * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-	 * @version 2013-06-25
+	 * @version 2014-03-16
 	 */
 	private function getModules ($dir = null, $parentModule = '') {
 		// si no se indicó directorio es el principal
-		if (!$dir) $dir = DIR_WEBSITE.DS.'Module';
+		if (!$dir) $dir = DIR_WEBSITE.'/Module';
 		// si no existe el directorio terminar de procesar
 		if(!is_dir($dir)) return array();
 		// buscar módulos en el directorio
@@ -198,7 +197,7 @@ class CodeGeneratorShell extends AppShell {
 			$modules = array_merge(
 				$modules,
 				$this->getModules(
-					$dir.DS.$module.DS.'Module',
+					$dir.'/'.$module.'/Module',
 					$padre
 				)
 			);
@@ -231,7 +230,7 @@ class CodeGeneratorShell extends AppShell {
 	/**
 	 * Método que genera el código para la clase base de modelos
 	 * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-	 * @version 2014-02-06
+	 * @version 2014-03-16
 	 */
 	private function generateModelBase () {
 		$this->out('<info>Generando base para modelos</info>');
@@ -346,7 +345,7 @@ class CodeGeneratorShell extends AppShell {
 				'columns_clear' => $columns_clear,
 			));
 			// guardar archivo en el directorio de modelos
-			file_put_contents(self::$destination.DS.'Model'.DS.$class.'Base.php', $file);
+			file_put_contents(self::$destination.'/Model/'.$class.'Base.php', $file);
 		}
 	}
 
@@ -354,7 +353,7 @@ class CodeGeneratorShell extends AppShell {
 	 * Método que genera el código para la clase final de modelos
 	 * @param database Nombre de la conexión a la base de datos
 	 * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-	 * @version 2014-02-06
+	 * @version 2014-03-16
 	 */
 	private function generateModel ($database) {
 		$this->out('<info>Generando modelos</info>');
@@ -384,7 +383,7 @@ class CodeGeneratorShell extends AppShell {
 				'fkModule' => $fkModule,
 			));
 			// guardar archivo en el directorio de clases (si no existe)
-			$filename = self::$destination.DS.'Model'.DS.$class.'.php';
+			$filename = self::$destination.'/Model/'.$class.'.php';
 			if(!file_exists($filename)) {
 				file_put_contents($filename, $file);
 			}
@@ -394,7 +393,7 @@ class CodeGeneratorShell extends AppShell {
 	/**
 	 * Método que genera el código para la clase base de controladores
 	 * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-	 * @version 2014-02-06
+	 * @version 2014-03-16
 	 */
 	private function generateControllerBase () {
 		$this->out('<info>Generando base para controladores</info>');
@@ -437,7 +436,7 @@ class CodeGeneratorShell extends AppShell {
 				'files' => $files,
 			));
 			// guardar archivo en el directorio de clases (si no existe)
-			$filename = self::$destination.DS.'Controller'.DS.$classs.'BaseController.php';
+			$filename = self::$destination.'/Controller/'.$classs.'BaseController.php';
 			file_put_contents($filename, $file);
 		}
 	}
@@ -445,7 +444,7 @@ class CodeGeneratorShell extends AppShell {
 	/**
 	 * Método que genera el código para la clase final del controlador
 	 * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-	 * @version 2014-02-06
+	 * @version 2014-03-16
 	 */
 	private function generateController () {
 		$this->out('<info>Generando controladores</info>');
@@ -464,7 +463,7 @@ class CodeGeneratorShell extends AppShell {
 				'module_url' => self::$module_url,
 			));
 			// guardar archivo en el directorio de clases (si no existe)
-			$filename = self::$destination.DS.'Controller'.DS.$classs.'Controller.php';
+			$filename = self::$destination.'/Controller/'.$classs.'Controller.php';
 			if(!file_exists($filename)) {
 				file_put_contents($filename, $file);
 			}
@@ -474,12 +473,12 @@ class CodeGeneratorShell extends AppShell {
 	/**
 	 * Método que genera el código para las vistas (para métodos CRUD de mantenedores)
 	 * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-	 * @version 2014-02-06
+	 * @version 2014-03-16
 	 */
 	private function generateView () {
 		$this->out('<info>Generando vistas (en directorio tmp/View)</info>');
-		if(!file_exists(self::$destination.DS.'tmp')) mkdir(self::$destination.DS.'tmp');
-		if(!file_exists(self::$destination.DS.'tmp'.DS.'View')) mkdir(self::$destination.DS.'tmp'.DS.'View');
+		if(!file_exists(self::$destination.'/tmp')) mkdir(self::$destination.'/tmp');
+		if(!file_exists(self::$destination.'/tmp/View')) mkdir(self::$destination.'/tmp/View');
 		foreach(self::$tables as $table => &$info) {
 			// buscar info de la tabla
 			$class = Inflector::camelize($table);
@@ -528,10 +527,10 @@ class CodeGeneratorShell extends AppShell {
 			$pkUrl = implode('.\'/\'.', $pkUrl);
 			$pkTupla = implode('.\',\'.', $pkTupla);
 			// crear directorio para vista de la tabla
-			if(!file_exists(self::$destination.DS.'tmp'.DS.'View'.DS.$classs)) mkdir(self::$destination.DS.'tmp'.DS.'View'.DS.$classs);
+			if(!file_exists(self::$destination.'/tmp/View/'.$classs)) mkdir(self::$destination.'/tmp/View/'.$classs);
 			// generar datos para archivos
 			foreach(array('listar', 'crear', 'editar') as $src) {
-				$file = $this->src('View'.DS.$src.'.phps', array(
+				$file = $this->src('View/'.$src.'.phps', array(
 					'comment' => $info['comment'],
 					'class' => $class,
 					'classs' => Inflector::camelize(Inflector::pluralize($table)),
@@ -540,7 +539,7 @@ class CodeGeneratorShell extends AppShell {
 					'pkTupla' => $pkTupla,
 				));
 				// guardar archivos en el directorio de clases (si no existe)
-				$filename = self::$destination.DS.'tmp'.DS.'View'.DS.$classs.DS.$src.'.php';
+				$filename = self::$destination.'/tmp/View/'.$classs.'/'.$src.'.php';
 				file_put_contents($filename, $file);
 			}
 		}
@@ -575,7 +574,7 @@ class CodeGeneratorShell extends AppShell {
 	 */
 	private function src ($plantilla, $variables = array()) {
 		// location
-		$archivo = App::location('Shell'.DS.'Command'.DS.'CodeGenerator'.DS.$plantilla);
+		$archivo = App::location('Shell/Command/CodeGenerator/'.$plantilla);
 		// cargar plantilla
 		if($archivo)
 			$plantilla = file_get_contents($archivo);
