@@ -147,17 +147,27 @@ function string2url ($string, $encoding = 'UTF-8') {
 /**
  * Función que genera un string de manera aleatoria
  * @param length Tamaño del string que se desea generar
- * @author http://www.lost-in-code.com/programming/php-code/php-random-string-with-numbers-and-letters
+ * @param uc Si se desea (=true) o no (=false) usar mayúsculas
+ * @param n Si se desea (=true) o no (=false) usar números
+ * @param sc Si se desea (=true) o no (=false) usar caracteres especiales
+ * @author http://phpes.wordpress.com/2007/06/12/generador-de-una-cadena-aleatoria/
  */
-function string_random ($length = 10) {
-	$characters = '0123456789';
-	$characters .= 'abcdefghijklmnopqrstuvwxyz';
-	$characters .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-	$string = '';
-	for ($p = 0; $p < $length; $p++) {
-		$string .= $characters[mt_rand(0, strlen($characters)-1)];
+function string_random ($length=10, $uc=true, $n=true, $sc=false) {
+	$source = 'abcdefghijklmnopqrstuvwxyz';
+	if($uc) $source .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	if($n) $source .= '0123456789';
+	if($sc) $source .= '|@#~$%()=^*+[]{}-_';
+	if($length>0){
+		$rstr = "";
+		$source = str_split($source,1);
+		for($i=1; $i<=$length; $i++){
+			mt_srand((double)microtime() * 1000000);
+			$num = mt_rand(1,count($source));
+			$rstr .= $source[$num-1];
+		}
+
 	}
-	return $string;
+	return $rstr;
 }
 
 /**
