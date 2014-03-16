@@ -4,7 +4,7 @@
 	"type": "library",
 	"keywords": ["framework"],
 	"homepage": "http://sowerphp.org",
-	"license": "GPL",
+	"license": "GPL-3.0+",
 	"authors": [
 		{
 			"name": "Equipo de SowerPHP",
