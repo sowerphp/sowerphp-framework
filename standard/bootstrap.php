@@ -50,6 +50,8 @@ include DIR_STANDARD.'/Core/App.php';
 $_DIRS = array(DIR_WEBSITE);
 foreach($_EXTENSIONS as &$_extension) {
 	if ($_extension[0]!='/') {
+		if (!strpos($_extension, '/'))
+			$_extension = 'sowerphp/'.$_extension;
 		if (is_dir(DIR_PROJECT.'/extensions/'.$_extension)) {
 			$_DIRS[] = DIR_PROJECT.'/extensions/'.$_extension;
 		} else {
