@@ -25,7 +25,7 @@
  * Clase para manejar bases de datos.
  * 
  * Capa de abstracción para base de datos, la clase puede ser fácilmente
- * utilizada fuera del framework MiPaGiNa sin mayores modificaciones.
+ * utilizada fuera del framework SowerPHP sin mayores modificaciones.
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2014-03-08
  */
@@ -149,7 +149,7 @@ final class Database {
 	
 }
 
-// si existe MiException estamos en el framework MiPaGiNa y se extiende
+// si existe MiException estamos en el framework SowerPHP y se extiende
 // dicha clase para generar la excepción
 if(class_exists('MiException')) {
 	class DatabaseException extends MiException {

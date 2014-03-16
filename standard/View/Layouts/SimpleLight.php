@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="es" lang="es">
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-		<meta name="generator" content="MiPaGiNa"/>
+		<meta name="generator" content="SowerPHP"/>
 		<title><?php echo $_header_title; ?></title>
 		<link rel="shortcut icon" href="<?php echo $_base; ?>/img/favicon.png" />
 		<link rel="stylesheet" media="screen" type="text/css" href="<?php echo $_base; ?>/layouts/<?php echo $_layout; ?>/css/screen.css" />
