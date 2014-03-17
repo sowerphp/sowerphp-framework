@@ -86,7 +86,7 @@ class Module {
 	 * Cargar módulo e inicializarlo
 	 * @param module Nombre del módulo que se desea cargar
 	 * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-	 * @version 2014-02-24
+	 * @version 2014-03-17
 	 */
 	public static function load ($module) {
 		// si el módulo ya está cargado se retorna
@@ -98,7 +98,8 @@ class Module {
 		// módulo pueda existir
 		if (!isset(self::$_modules[$module]['path'][0])) {
 			self::$_modules[$module]['path'] = array();
-			foreach (App::paths() as $path) {
+			$paths = App::paths();
+			foreach ($paths as &$path) {
 				// Verificar que el directorio exista (el
 				// reemplazo es para los submódulos)
 				$modulePath = $path.'/Module/'.str_replace('.', '/Module/', $module);
@@ -140,10 +141,11 @@ class Module {
 	 * @param file Ruta hacia el archivo, sin .php
 	 * @return Ruta completa para el archivo solicitado o null si no existe
 	 * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-	 * @version 2014-02-24
+	 * @version 2014-03-17
 	 */
 	public static function fileLocation ($module, $file) {
-		foreach (App::paths() as $path) {
+                $paths = App::paths();
+		foreach ($paths as &$path) {
 			$fileLocation = $path.'/Module/'.str_replace('.', '/Module/', $module).'/'.$file.'.php';
 			if(file_exists($fileLocation)) {
 				return $fileLocation;
