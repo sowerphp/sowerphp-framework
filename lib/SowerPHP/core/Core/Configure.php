@@ -54,8 +54,8 @@ class Configure {
 		// Definir la zona horaria
 		date_default_timezone_set(self::read('time.zone'));
 		// definir directorio temporal
-		if(is_writable(DIR_WEBSITE.'/tmp'))
-			define('TMP', DIR_WEBSITE.'/tmp');
+		if(is_writable(DIR_PROJECT.'/tmp'))
+			define('TMP', DIR_PROJECT.'/tmp');
 		else
 			define('TMP', sys_get_temp_dir());
 		// cargar reglas de Inflector para el idioma de la aplicación
