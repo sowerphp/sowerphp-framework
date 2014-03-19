@@ -24,7 +24,7 @@
 /**
  * @file bootstrap.php
  * Archivo de arranque de la aplicación
- * @version 2014-03-15
+ * @version 2014-03-20
  */
 
 // Asignar nivel de error máximo (para reportes previo a qugeneralese se asigne
@@ -35,35 +35,29 @@ error_reporting(E_ALL);
 // Definir el tiempo de inicio del script
 define('TIME_START', microtime(true));
 
-// Definir directorios DIR_STANDARD y DIR_WEBSITE
-define ('DIR_STANDARD', DIR_FRAMEWORK.'/standard');
+// Definir directorios DIR_CORE y DIR_WEBSITE
+define ('DIR_CORE', DIR_FRAMEWORK.'/lib/SowerPHP/core');
 define ('DIR_WEBSITE', DIR_PROJECT.'/website');
 
 // iniciar buffer
-ob_start();
+ob_start('ob_gzhandler');
 
-// Incluir archivos genéricos 
-include DIR_STANDARD.'/basics.php';
-include DIR_STANDARD.'/Core/App.php';
+// Incluir archivos genéricos
+include DIR_CORE.'/basics.php';
+include DIR_CORE.'/Core/App.php';
 
 // Asignar rutas/paths donde se buscarán las clases (en este mismo orden)
 $_DIRS = array(DIR_WEBSITE);
 foreach($_EXTENSIONS as &$_extension) {
-	if ($_extension[0]!='/') {
-		if (!strpos($_extension, '/'))
-			$_extension = 'sowerphp/'.$_extension;
-		if (is_dir(DIR_PROJECT.'/extensions/'.$_extension)) {
-			$_DIRS[] = DIR_PROJECT.'/extensions/'.$_extension;
-		} else {
-			$_DIRS[] = DIR_FRAMEWORK.'/extensions/'.$_extension;
-		}
-	} else {
-		$_DIRS[] = $_extension;
-	}
+    if (is_dir(DIR_PROJECT.'/extensions/'.$_extension)) {
+        $_DIRS[] = DIR_PROJECT.'/extensions/'.$_extension;
+    } else {
+        $_DIRS[] = DIR_FRAMEWORK.'/extensions/'.$_extension;
+    }
 }
-$_DIRS[] = DIR_STANDARD;
+$_DIRS[] = DIR_CORE;
 App::paths($_DIRS);
-unset($_EXTENSIONS, $_DIRS, $_EXTENSIONS_DIR, $_extension);
+unset($_EXTENSIONS, $_DIRS, $_extension);
 
 // Asociar App::load como la función que cargará todas las clases
 spl_autoload_register(__NAMESPACE__ .'\App::load');
@@ -80,7 +74,7 @@ App::uses('I18n', 'I18n');
 App::uses('MiException', 'Error');
 App::uses('ExceptionHandler', 'Error');
 App::uses('ErrorHandler', 'Error');
-include DIR_STANDARD.'/Error/exceptions.php';
+include DIR_CORE.'/Error/exceptions.php';
 
 // Iniciar sesión y configurar el sitio
 App::uses('Session', 'Model/Datasource');

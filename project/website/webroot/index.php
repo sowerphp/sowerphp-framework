@@ -24,7 +24,7 @@
 /**
  * @file index.php
  * Dispatcher para la página web
- * @version 2014-03-15
+ * @version 2014-03-19
  */
 
 // Directorio de instalación de SowerPHP, En caso de una instalación compartida
@@ -35,15 +35,13 @@ define ('DIR_FRAMEWORK', dirname(dirname(dirname(dirname(__FILE__)))));
 // Directorio que contiene el proyecto (directorio project) ¡no modificar!
 define ('DIR_PROJECT', dirname(dirname(dirname(__FILE__))));
 
-// Extensiones que se utilizarán. Por lo general será Vendor/Extensión dentro de
-// DIR_FRAMEWORK/extensions o bien dentro de DIR_WEBSITE/extensions, ejemplo:
-// $_EXTENSIONS = array('sowerphp/dev', 'sowerphp/general');
-// También puede ser una ruta absoluta a un directorio que contiene una
-// extensión, ejemplo: $_EXTENSIONS = array('/ruta/a/la/extension');
+// Extensiones que se utilizarán. Deberá ser Vendor/Extensión dentro de
+// DIR_FRAMEWORK/extensions o bien dentro de DIR_PROJECT/extensions, ejemplo:
+// $_EXTENSIONS = array('SowerPHP/dev', 'SowerPHP/general');
 $_EXTENSIONS = array();
 
 // Iniciar bootstrap (proceso que prepara e inicia el proyecto)
-if (!@include(DIR_FRAMEWORK.'/standard/bootstrap.php')) {
+if (!@include(DIR_FRAMEWORK.'/lib/SowerPHP/core/bootstrap.php')) {
 	echo 'Bootstrap no ha podido ser ejecutado, verificar DIR_FRAMEWORK ',
 		'en ',DIR_PROJECT,'/website/webroot/index.php'
 	;
