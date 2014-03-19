@@ -40,7 +40,7 @@ define ('DIR_CORE', DIR_FRAMEWORK.'/lib/SowerPHP/core');
 define ('DIR_WEBSITE', DIR_PROJECT.'/website');
 
 // iniciar buffer
-ob_start('ob_gzhandler');
+ob_start();
 
 // Incluir archivos genéricos
 include DIR_CORE.'/basics.php';
