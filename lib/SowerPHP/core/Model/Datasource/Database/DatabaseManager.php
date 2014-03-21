@@ -27,7 +27,7 @@
  * Define métodos que deberán ser implementados, clases específicas para
  * la conexión con X base de datos deberán extender esta clase
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2013-11-27
+ * @version 2014-03-20
  */
 abstract class DatabaseManager {
 	
@@ -57,10 +57,10 @@ abstract class DatabaseManager {
 	/**
 	 * Manejador de errores para la base de datos
 	 * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-	 * @version 2014-03-09
+	 * @version 2014-03-20
 	 */
 	final public function error ($msg) {
-		if ($this->link)
+		if ($this->link && get_class($this->link)!='SQLite3')
 			$this->rollback();
 		throw new DatabaseException(array(
 			'msg' => $msg
