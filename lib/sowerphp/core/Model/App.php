@@ -21,41 +21,13 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/gpl.html>.
  */
 
-namespace SowerPHP\core;
+namespace sowerphp\core;
 
 /**
- * @file core.php
- * Configuración propia de cada proyecto
- * @version 2014-04-03
+ * Clase abstracta para todos los modelos (clase sobreescribible)
+ * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+ * @version 2014-10-29
  */
-
-// Tema de la página (diseño)
-Configure::write('page.layout', 'SimpleLight');
-
-// Textos de la página
-Configure::write('page.header.title', 'SowerPHP');
-Configure::write('page.body.title', 'SowerPHP');
-
-// Menú principal del sitio web
-Configure::write('nav.website', array(
-    '/inicio'=>'Inicio',
-));
-
-// Configuración para la base de datos
-/*Configure::write('database.default', array(
-    'type' => 'PostgreSQL',
-    'user' => '',
-    'pass' => '',
-    'name' => '',
-));*/
-
-// Configuración para el correo electrónico
-/*Configure::write('email.default', array(
-    'type' => 'smtp',
-    'host' => 'ssl://smtp.gmail.com',
-    'port' => 465,
-    'user' => '',
-    'pass' => '',
-    'from' => array('email'=>'', 'name'=>''),
-    'to' => '',
-));*/
+abstract class Model_App extends Model
+{
+}

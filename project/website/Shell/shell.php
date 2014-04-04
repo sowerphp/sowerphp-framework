@@ -25,7 +25,7 @@
 /**
  * @file shell.php
  * Dispatcher para la shell
- * @version 2014-03-19
+ * @version 2014-04-02
  */
 
 // Directorio de instalación de SowerPHP, En caso de una instalación compartida
@@ -36,19 +36,18 @@ define ('DIR_FRAMEWORK', dirname(dirname(dirname(dirname(__FILE__)))));
 // Directorio que contiene el proyecto (directorio project) ¡no modificar!
 define ('DIR_PROJECT', dirname(dirname(dirname(__FILE__))));
 
-// Extensiones que se utilizarán. Deberá ser Vendor/Extensión dentro de
+// Extensiones que se utilizarán. Deberá ser vendor/extensión dentro de
 // DIR_FRAMEWORK/extensions o bien dentro de DIR_PROJECT/extensions, ejemplo:
-// $_EXTENSIONS = array('SowerPHP/dev', 'SowerPHP/general');
+// $_EXTENSIONS = array('sowerphp/dev', 'sowerphp/general');
 $_EXTENSIONS = array();
 
 // Iniciar bootstrap (proceso que prepara e inicia el proyecto)
-if (!@include(DIR_FRAMEWORK.'/lib/SowerPHP/core/bootstrap.php')) {
-	echo 'Bootstrap no ha podido ser ejecutado, verificar DIR_FRAMEWORK ',
-		'en ',DIR_PROJECT,'/website/Shell/shell.php',"\n"
-	;
-	exit;
+if (!@include(DIR_FRAMEWORK.'/lib/sowerphp/core/bootstrap.php')) {
+    echo 'Bootstrap no ha podido ser ejecutado, verificar DIR_FRAMEWORK ',
+        'en ',DIR_PROJECT,'/website/Shell/shell.php',"\n"
+    ;
+    exit(1);
 }
 
 // Despachar/ejecutar la shell
-App::uses('ShellDispatcher', 'Shell');
-return ShellDispatcher::run($argv);
+exit(\sowerphp\core\Shell_Exec::run($argv));

@@ -4,9 +4,8 @@ SowerPHP
 SowerPHP es un framework, o ambiente de desarrollo, para PHP.
 
 El framework es minimalista, entregando las herramientas básicas para el
-desarrollo, como por ejemplo MVC u ORM. Sin embargo, existen extensiones
-oficiales que entregan nuevas funcionalidades. Adicionalmente cualquier usuario
-puede desarrollar sus propias extensiones.
+desarrollo. Además existen extensiones oficiales que entregan nuevas
+funcionalidades y cualquier usuario puede desarrollar sus propias extensiones.
 
 El objetivo principal del framework es entregar una estructura estándar y mínima
 que cualquier aplicación en PHP debería considerar utilizando los patrones y

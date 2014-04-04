@@ -21,41 +21,23 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/gpl.html>.
  */
 
-namespace SowerPHP\core;
+// namespace del modelo
+namespace {namespace};
 
 /**
- * @file core.php
- * Configuración propia de cada proyecto
- * @version 2014-04-03
+ * Clase para mapear la tabla {table} de la base de datos
+ * Comentario de la tabla: {comment}
+ * Esta clase permite trabajar sobre un registro de la tabla {table}
+ * @author {author}
+ * @version {version}
  */
+class Model_{class} extends Model_Base_{class}
+{
 
-// Tema de la página (diseño)
-Configure::write('page.layout', 'SimpleLight');
+    // Datos para la conexión a la base de datos
+    protected $_database = '{database}'; ///< Base de datos del modelo
+    protected $_table = '{table}'; ///< Tabla del modelo
 
-// Textos de la página
-Configure::write('page.header.title', 'SowerPHP');
-Configure::write('page.body.title', 'SowerPHP');
+    public static $fkNamespace = array({fkNamespace}); ///< Módulos que utiliza esta clase
 
-// Menú principal del sitio web
-Configure::write('nav.website', array(
-    '/inicio'=>'Inicio',
-));
-
-// Configuración para la base de datos
-/*Configure::write('database.default', array(
-    'type' => 'PostgreSQL',
-    'user' => '',
-    'pass' => '',
-    'name' => '',
-));*/
-
-// Configuración para el correo electrónico
-/*Configure::write('email.default', array(
-    'type' => 'smtp',
-    'host' => 'ssl://smtp.gmail.com',
-    'port' => 465,
-    'user' => '',
-    'pass' => '',
-    'from' => array('email'=>'', 'name'=>''),
-    'to' => '',
-));*/
+}

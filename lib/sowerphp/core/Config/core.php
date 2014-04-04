@@ -21,41 +21,33 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/gpl.html>.
  */
 
-namespace SowerPHP\core;
+namespace sowerphp\core;
 
 /**
  * @file core.php
- * Configuración propia de cada proyecto
- * @version 2014-04-03
+ * Configuración estándar de las páginas o aplicaciones
+ * @version 2014-03-22
  */
 
-// Tema de la página (diseño)
-Configure::write('page.layout', 'SimpleLight');
+// Errores
+Configure::write('debug', true);
+Configure::write('error.level', E_ALL);
+
+// Tiempo
+Configure::write('time.zone', 'America/Santiago');
+Configure::write('time.format', 'Y-m-d H:i:s');
+
+// Lenguaje de la página
+Configure::write('language', 'es');
+
+// Extensiones para las páginas que se desean renderizar
+Configure::write('page.extensions', array('php', 'md'));
+
+// Página inicial
+Configure::write('homepage', 'inicio');
 
 // Textos de la página
-Configure::write('page.header.title', 'SowerPHP');
-Configure::write('page.body.title', 'SowerPHP');
-
-// Menú principal del sitio web
-Configure::write('nav.website', array(
-    '/inicio'=>'Inicio',
-));
-
-// Configuración para la base de datos
-/*Configure::write('database.default', array(
-    'type' => 'PostgreSQL',
-    'user' => '',
-    'pass' => '',
-    'name' => '',
-));*/
-
-// Configuración para el correo electrónico
-/*Configure::write('email.default', array(
-    'type' => 'smtp',
-    'host' => 'ssl://smtp.gmail.com',
-    'port' => 465,
-    'user' => '',
-    'pass' => '',
-    'from' => array('email'=>'', 'name'=>''),
-    'to' => '',
-));*/
+Configure::write(
+    'page.footer',
+    'Página web generada utilizando el framework <a href="http://sowerphp.org">SowerPHP</a>'
+);

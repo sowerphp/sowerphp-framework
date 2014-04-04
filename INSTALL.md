@@ -11,8 +11,7 @@ El framework asume el siguiente software instalado:
 
 *	Servidor web:
 	*	[Apache 2.x](http://httpd.apache.org)
-	*	[PHP 5.3](http://www.php.net/downloads.php) o superior
-		(recomendado PHP 5.5 para usar OPCache)
+	*	[PHP 5.5](http://www.php.net/downloads.php)
 
 *	Herramientas para repositorios:
 	*	[Composer](https://getcomposer.org/download)
@@ -98,12 +97,7 @@ Por ejemplo para instalar la extensión *sower/layouts* utilizar:
 Una vez instalada la extensión se debe agregar en el archivo
 *website/webroot/index.php* para que sea cargada:
 
-	$_EXTENSIONS = array('layouts');
-
-Lo anterior es para extensiones oficiales, en caso de ser extensiones de
-terceros se debe indicar el *vendor*, ejemplo:
-
-	$_EXTENSIONS = array('vendor/extension');
+	$_EXTENSIONS = array('sowerphp/layouts');
 
 **Importante**: en caso de existir extensiones que dependan de otras
 bibliotecas, como la extensión *general*, no podrán ser instaladas usando

@@ -21,41 +21,30 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/gpl.html>.
  */
 
-namespace SowerPHP\core;
+namespace sowerphp\core;
 
 /**
- * @file core.php
- * Configuración propia de cada proyecto
- * @version 2014-04-03
+ * Clase para cargar una página PHP
+ * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+ * @version 2014-03-22
  */
+class View_Helper_Pages_Php
+{
 
-// Tema de la página (diseño)
-Configure::write('page.layout', 'SimpleLight');
+    /**
+     * Método que evalua el archivo de la vista utilizando las variables
+     * indicadas en $__dataForView
+     * @param __viewFn Archivo con la página que se desea renderizar
+     * @param __dataForView Variables para la página a renderizar
+     * @return Buffer de la página renderizada
+     * @author CakePHP
+     */
+    public static function render ($__viewFn, $__dataForView=array())
+    {
+        extract ($__dataForView, EXTR_SKIP);
+        ob_start ();
+        include $__viewFn;
+        return ob_get_clean ();
+    }
 
-// Textos de la página
-Configure::write('page.header.title', 'SowerPHP');
-Configure::write('page.body.title', 'SowerPHP');
-
-// Menú principal del sitio web
-Configure::write('nav.website', array(
-    '/inicio'=>'Inicio',
-));
-
-// Configuración para la base de datos
-/*Configure::write('database.default', array(
-    'type' => 'PostgreSQL',
-    'user' => '',
-    'pass' => '',
-    'name' => '',
-));*/
-
-// Configuración para el correo electrónico
-/*Configure::write('email.default', array(
-    'type' => 'smtp',
-    'host' => 'ssl://smtp.gmail.com',
-    'port' => 465,
-    'user' => '',
-    'pass' => '',
-    'from' => array('email'=>'', 'name'=>''),
-    'to' => '',
-));*/
+}
