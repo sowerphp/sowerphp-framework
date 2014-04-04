@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para el envío de correo electrónico
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-26
+ * @version 2014-04-04
  */
 class Network_Email
 {
@@ -42,7 +42,7 @@ class Network_Email
      * Constructor de la clase
      * @param config Configuración del correo electrónico que se usará
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-26
+     * @version 2014-04-04
      */
     public function __construct($config = 'default')
     {
@@ -53,6 +53,24 @@ class Network_Email
         // Si no es arreglo, es el nombre de la configuración
         else {
             $this->_config = \SowerPHP\core\Configure::read('email.'.$config);
+        }
+        // si no están los campos mínimos necesarios error
+        if (empty($this->_config['type']) || empty($this->_config['host']) || empty($this->_config['port']) || empty($this->_config['user']) || empty($this->_config['pass'])) {
+             throw new Exception('Configuración del correo electrónico incompleta');
+        }
+        // si from no existe se asigna
+        if (!isset($this->_config['from'])) {
+            $this->_config['from'] = array (
+                'email' => $this->_config['user'],
+                'name' => $this->_config['user'],
+            );
+        }
+        // si from no es arreglo se asume que se indicó el nombre y se crea arreglo
+        else if (!is_array($this->_config['from'])) {
+            $this->_config['from'] = array (
+                'email' => $this->_config['user'],
+                'name' => $this->_config['from'],
+            );
         }
     }
 
