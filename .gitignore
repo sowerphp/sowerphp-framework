@@ -3,4 +3,5 @@ extensions
 
 # archivos generados por el sistema operativos o sus aplicaciones
 .directory
+.lastsync
 
