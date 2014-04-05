@@ -11,9 +11,9 @@ $columns = array(
 
 // preparar títulos de columnas (con link para ordenar por dicho campo)
 $titles = array();
-foreach($columns as $column => &$name) {
+foreach ($columns as $column => &$name) {
     // si es un arreglo se extrae el nombre
-    if(is_array($name)) {
+    if (is_array($name)) {
         $titles[] = $name['name'];
     }
     // si es un campo normal
@@ -33,19 +33,23 @@ $data = array($titles);
 $row = array();
 $form = new \sowerphp\general\View_Helper_Form ('normal');
 $optionsBoolean = array(array('', 'Seleccione una opción'), array('t', 'Si'), array('f', 'No'));
-foreach($columns as $column => &$name) {
+foreach ($columns as $column => &$name) {
     // si es un archivo
-    if(is_array($name) && $name['type']=='file') {
+    if (is_array($name) && $name['type']=='file') {
         $row[] = '';
     }
     // si es de tipo boolean se muestra lista desplegable
-    else if($columnsInfo[$column]['type']=='boolean') {
+    else if ($columnsInfo[$column]['type']=='boolean') {
         $row[] = $form->input(array('type'=>'select', 'name'=>$column, 'options' => $optionsBoolean, 'selected' => (isset($search[$column])?$search[$column]:'')));
     }
     // si es llave foránea
-    else if($columnsInfo[$column]['fk']) {
-        $classs = \sowerphp\core\Utility_Inflector::camelize(Inflector::pluralize($columnsInfo[$column]['fk']['table']));
-        $classs = $fkNamespace[$class].'\Model_'.$classs;
+    else if ($columnsInfo[$column]['fk']) {
+        $class = 'Model_'.\sowerphp\core\Utility_Inflector::camelize(
+            $columnsInfo[$column]['fk']['table']
+        );
+        $classs = $fkNamespace[$class].'\Model_'.\sowerphp\core\Utility_Inflector::camelize(
+            \sowerphp\core\Utility_Inflector::pluralize($columnsInfo[$column]['fk']['table'])
+        );
         $objs = new $classs();
         $options = $objs->getList();
         array_unshift($options, array('', 'Seleccione una opción'));
@@ -60,25 +64,25 @@ $row[] = '<input type="image" src="'.$_base.'/img/icons/16x16/actions/search.png
 $data[] = $row;
 
 // crear filas de la tabla
-foreach(${classs} as &$obj) {
+foreach (${classs} as &$obj) {
     $row = array();
-    foreach($columns as $column => &$name) {
+    foreach ($columns as $column => &$name) {
         // si es un archivo
-        if(is_array($name) && $name['type']=='file') {
-            if($obj->{$column.'_size'})
+        if (is_array($name) && $name['type']=='file') {
+            if ($obj->{$column.'_size'})
                 $row[] = '<a href="'.$_base.$module_url.$controller.'/d/'.$column.'/'.{pkUrl}.'"><img src="'.$_base.'/img/icons/16x16/actions/download.png" alt="" /></a>';
             else
                 $row[] = '';
         }
         // si es boolean se usa Si o No según corresponda
-        else if($columnsInfo[$column]['type']=='boolean') {
+        else if ($columnsInfo[$column]['type']=='boolean') {
             $row[] = $obj->{$column}=='t' ? 'Si' : 'No';
         }
         // si es llave foránea
-        else if($columnsInfo[$column]['fk']) {
+        else if ($columnsInfo[$column]['fk']) {
             // si no es vacía la columna
-            if(!empty($obj->{$column})) {
-                $method = 'get'.Inflector::camelize($column);
+            if (!empty($obj->{$column})) {
+                $method = 'get'.\sowerphp\core\Utility_Inflector::camelize($column);
                 $row[] = $obj->$method()->{$columnsInfo[$column]['fk']['table']};
             } else {
                 $row[] = '';
