@@ -31,6 +31,6 @@ namespace sowerphp\core;
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2014-03-28
  */
-class Shell_App extends Shell
+abstract class Shell_App extends Shell
 {
 }

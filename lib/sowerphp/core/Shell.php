@@ -28,7 +28,7 @@ namespace sowerphp\core;
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2014-03-22
  */
-class Shell
+abstract class Shell
 {
 
     public $stdout; ///< Atributo con el objeto para la salida de datos

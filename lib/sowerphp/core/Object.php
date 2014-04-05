@@ -28,7 +28,7 @@ namespace sowerphp\core;
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2012-10-29
  */
-class Object
+abstract class Object
 {
 
     /**
