@@ -27,7 +27,7 @@ namespace sowerphp\core;
  * Clase abstracta para todos los modelos
  * Permite trabajar con varios registros de una tabla
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-03
+ * @version 2014-04-05
  */
 abstract class Model_Plural
 {
@@ -400,11 +400,11 @@ abstract class Model_Plural
      * donde id es la PK. Si estos no son, el método deberá ser
      * reescrito en la clase final.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-19
+     * @version 2014-04-05
      */
     public function getList ()
     {
-        $class = Inflector::singularize (get_class($this));
+        $class = \sowerphp\core\Utility_Inflector::singularize (get_class($this));
         $cols = array_keys($class::$columnsInfo);
         $id = $cols[0];
         $glosa = in_array($this->_table, $cols) ? $this->_table : $cols[1];

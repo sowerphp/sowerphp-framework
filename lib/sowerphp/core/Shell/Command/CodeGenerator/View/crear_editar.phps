@@ -55,10 +55,12 @@ foreach ($columns as $column => &$name) {
         }
         // si es llave foránea
         else if ($columnsInfo[$column]['fk']) {
-            $classs = \sowerphp\core\Utility_Inflector::camelize(
-                Inflector::pluralize($columnsInfo[$column]['fk']['table'])
+            $class = 'Model_'.\sowerphp\core\Utility_Inflector::camelize(
+                $columnsInfo[$column]['fk']['table']
             );
-            $classs = $fkModule[$class].'\Model_'.$classs;
+            $classs = $fkNamespace[$class].'\Model_'.\sowerphp\core\Utility_Inflector::camelize(
+                \sowerphp\core\Utility_Inflector::pluralize($columnsInfo[$column]['fk']['table'])
+            );
             $options = (new $classs())->getList();
             array_unshift($options, array('', 'Seleccione una opción'));
             $input['type'] = 'select';

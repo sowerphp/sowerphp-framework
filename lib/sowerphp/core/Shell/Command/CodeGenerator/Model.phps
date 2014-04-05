@@ -38,6 +38,6 @@ class Model_{class} extends Model_Base_{class}
     protected $_database = '{database}'; ///< Base de datos del modelo
     protected $_table = '{table}'; ///< Tabla del modelo
 
-    public static $fkNamespace = array({fkNamespace}); ///< Módulos que utiliza esta clase
+    public static $fkNamespace = array({fkNamespace}); ///< Namespaces que utiliza esta clase
 
 }

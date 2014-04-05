@@ -30,7 +30,7 @@ define('VERSION', date(Configure::read('time.format')));
 /**
  * Comando para generar código de forma automática
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-03
+ * @version 2014-04-05
  */
 class Shell_Command_CodeGenerator extends Shell_App
 {
@@ -91,7 +91,7 @@ class Shell_Command_CodeGenerator extends Shell_App
         // obtener destino para los archivos
         self::$destination = $this->selectDestination();
         // determinar namespace
-        self::$namespace = 'website'.(!empty(self::$module)?'\\'.str_replace('.', '\\', substr(self::$module, 0, -1)):'');
+        self::$namespace = 'website'.(!empty(self::$module)?'\\'.str_replace('.', '\\', self::$module):'');
         // crear directorios para archivos que se crearán
         if (!file_exists(self::$destination.'/Model')) mkdir(self::$destination.'/Model');
         if (!file_exists(self::$destination.'/Model/Base')) mkdir(self::$destination.'/Model/Base');
@@ -227,7 +227,7 @@ class Shell_Command_CodeGenerator extends Shell_App
             self::$module = '';
             self::$module_url = '';
         } else {
-            self::$module = $modulo.'.';
+            self::$module = $modulo;
             $partes = explode('.', $modulo);
             $module_url = '';
             foreach ($partes as &$p) {
@@ -291,6 +291,7 @@ class Shell_Command_CodeGenerator extends Shell_App
                         'author' => AUTHOR,
                         'version' => VERSION,
                         'pk' => '$this->'.$column['name'],
+                        'module' => self::$module,
                     ));
                 }
                 // valor para la columna, ya sea al insertar o al actualizar
@@ -365,7 +366,7 @@ class Shell_Command_CodeGenerator extends Shell_App
      * Método que genera el código para la clase final de modelos
      * @param database Nombre de la conexión a la base de datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-03
+     * @version 2014-04-05
      */
     private function generateModel ($database)
     {
@@ -376,7 +377,7 @@ class Shell_Command_CodeGenerator extends Shell_App
                 // procesar si es FK
                 if (is_array($column['fk'])) {
                     $fk_class = \sowerphp\core\Utility_Inflector::camelize($column['fk']['table']);
-                    $fkNamespace[] = "'$fk_class' => '".self::$namespace."'";
+                    $fkNamespace[] = "'Model_$fk_class' => '".self::$namespace."'";
                 }
             }
             if (count($fkNamespace)) {
@@ -393,8 +394,6 @@ class Shell_Command_CodeGenerator extends Shell_App
                 'author' => AUTHOR,
                 'version' => VERSION,
                 'class' => $class,
-                'classs' => $classs,
-                'module' => self::$module,
                 'fkNamespace' => $fkNamespace,
                 'namespace' => self::$namespace,
             ));
@@ -409,10 +408,7 @@ class Shell_Command_CodeGenerator extends Shell_App
                 'comment' => $info['comment'],
                 'author' => AUTHOR,
                 'version' => VERSION,
-                'class' => $class,
                 'classs' => $classs,
-                'module' => self::$module,
-                'fkNamespace' => $fkNamespace,
                 'namespace' => self::$namespace,
             ));
             $filename = self::$destination.'/Model/'.$classs.'.php';
@@ -494,7 +490,6 @@ class Shell_Command_CodeGenerator extends Shell_App
                 'version' => VERSION,
                 'class' => $class,
                 'classs' => $classs,
-                'module' => self::$module,
                 'module_url' => self::$module_url,
                 'namespace' => self::$namespace,
             ));

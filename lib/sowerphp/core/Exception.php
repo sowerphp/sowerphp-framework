@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase base para todas las excepciones
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-22
+ * @version 2014-04-04
  */
 class Exception extends \RuntimeException
 {
@@ -54,7 +54,7 @@ class Exception extends \RuntimeException
      * Método para manejar las excepciones ocurridas en la aplicación
      * @param exception Excepción producida
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-22
+     * @version 2014-04-04
      */
     public static function handler (\Exception $exception) {
         ob_clean();
@@ -70,7 +70,7 @@ class Exception extends \RuntimeException
             $controller->error_reporting = Configure::read('debug');
             $controller->display($data);
         } else {
-            $stdout = new ConsoleOutput('php://stdout');
+            $stdout = new Shell_Output('php://stdout');
             $stdout->write("\n".'<error>'.$data['exception'].':</error>', 2);
             $stdout->write("\t".'<error>'.str_replace("\n", "\n\t", $data['message']).'</error>', 2);
             $stdout->write("\t".'<error>'.str_replace("\n", "\n\t", $data['trace']).'</error>', 2);

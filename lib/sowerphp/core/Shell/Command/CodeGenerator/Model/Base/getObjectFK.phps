@@ -6,8 +6,8 @@
      */
     public function get{fk_name} ()
     {
-        $fkClass = {class}::$fkNamespace['{fk_class}'].'\Model_{fk_class}';
-        ${fk_class} = new fkClass({pk});
+        $fkClass = Model_{class}::$fkNamespace['Model_{fk_class}'].'\Model_{fk_class}';
+        ${fk_class} = new $fkClass({pk});
         if (${fk_class}->exists()) {
             return ${fk_class};
         }

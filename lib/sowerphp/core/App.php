@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para cargar otras clases y/o archivos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-03
+ * @version 2014-04-04
  */
 class App
 {
@@ -36,8 +36,7 @@ class App
 
     /**
      * Método que agrega las capas de la aplicación
-     * @param layer Capa que se agrega (website, sowerphp/core o extensiones)
-     * @param location Directorio que contiene la capa (el dirname)
+     * @param extensions Arreglo con las capas de la aplicación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-03-22
      */
@@ -60,6 +59,8 @@ class App
 
     /**
      * Método que indica si una capa existe o no
+     * @param layer Capa que se busca
+     * @return =true si la capa existe
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-03-26
      */
@@ -70,7 +71,9 @@ class App
 
     /**
      * Método para autocarga de clases
-     * @warning Por ahora solo se procesan clases que se llamen con un namespace
+     * @param class Clase que se desea cargar
+     * @param loadAlias =true si no se encuentra la clase se buscará un alias para la misma
+     * @return =true si se encontró la clase
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-03-25
      */
@@ -94,14 +97,18 @@ class App
     }
 
     /**
-     * Método que carga clases buscandola en las layers y creando un alias
+     * Método que carga clases buscándola en las layers y creando un alias para
+     * el namespace donde se encuentra la clase
+     * @param class Clase que se quiere cargar a través de un alias
+     * @return =true si se encontró la clase
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-03-25
      */
     public static function loadClassAlias ($class)
     {
-        // si no se encontró o se solicito una clase de forma directa
-        // buscar si existe un alias para la clase
+        // si no se encontró o se solicitó una clase de forma directa (sin el
+        // namespace) buscar si existe en alguna capa y crear un alias para la
+        // clase
         $realClass = self::findClass ($class);
         if ($realClass) {
             if (self::loadClass ($realClass, false)) {
@@ -116,6 +123,9 @@ class App
     /**
      * Método que busca una clase en las posibles ubicaciones (capas y módulos)
      * y entrega el nombre de la clase con su namespace correspondiente
+     * @param class Clase que se está buscando
+     * @param module Módulo donde buscar la clase (si existe uno)
+     * @return Entrega el FQN de la clase (o sea con el namespace completo)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-03-23
      */
@@ -140,16 +150,13 @@ class App
     }
 
     /**
-     * Asigna las rutas donde se deberán buscar las clases
-     * @param paths Rutas que se cargarán
-     * @return Las rutas actualmente registradas
+     * Entrega las rutas registradas
+     * @return Las rutas registradas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-09-14
+     * @version 2014-04-04
      */
-    public static function paths ($paths = null)
+    public static function paths ()
     {
-        if ($paths != null)
-            self::$_paths = array_merge(self::$_paths, $paths);
         return self::$_paths;
     }
 
