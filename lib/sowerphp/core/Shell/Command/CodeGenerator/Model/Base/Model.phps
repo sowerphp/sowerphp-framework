@@ -43,7 +43,7 @@ abstract class Model_Base_{class} extends \Model_App
     );
 
     public static $fkModule; ///< Modelos utilizados (se asigna en {class})
-    
+
     /**
      * Constructor de la clase abstracta
      * @author {author}
@@ -109,7 +109,7 @@ abstract class Model_Base_{class} extends \Model_App
             unset($datos);
         }
     }
-    
+
     /**
      * Método para determinar si el objeto existe en la base de datos
      * @author {author}
