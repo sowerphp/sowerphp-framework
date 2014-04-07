@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase que renderizará las vistas de la aplicación
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-15
+ * @version 2014-04-07
  */
 class View
 {
@@ -60,7 +60,7 @@ class View
      * @param ext Extensión de la página que se está renderizando
      * @return Buffer de la página renderizada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-15
+     * @version 2014-04-07
      */
     public function render ($page, $ext = null)
     {
@@ -84,6 +84,22 @@ class View
             }
             return;
         }
+        // preparar _header_extra (se hace antes de renderizar la página para
+        // quitarlo de las variables por si existe
+        if (isset($this->viewVars['_header_extra'])) {
+            $_header_extra = '';
+            if (isset($this->viewVars['_header_extra']['css'])) {
+                foreach ($this->viewVars['_header_extra']['css'] as &$css) {
+                    $_header_extra .= '        <link type="text/css" href="'.$this->request->base.$css.'" rel="stylesheet" />'."\n";
+                }
+            }
+            if (isset($this->viewVars['_header_extra']['js'])) {
+                foreach ($this->viewVars['_header_extra']['js'] as &$js) {
+                    $_header_extra .= '        <script type="text/javascript" src="'.$this->request->base.$js.'"></script>'."\n";
+                }
+            }
+            unset ($this->viewVars['_header_extra']);
+        } else $_header_extra = '';
         // dependiendo de la extensión de la página se renderiza
         $ext = substr($location, strrpos($location, '.')+1);
         $class = App::findClass('View_Helper_Pages_'.ucfirst($ext));
@@ -107,7 +123,7 @@ class View
             '_header_title' => Configure::read('page.header.title').': '.$page,
             '_body_title' => Configure::read('page.body.title'),
             '_footer' => Configure::read('page.footer'),
-            '_header_extra' => '<!-- TODO: MODIFICAR EN '.DIR_FRAMEWORK.'/lib/sowerphp/core/View.php -->',
+            '_header_extra' => $_header_extra,
             '_page' => $page,
             '_nav_website' => Configure::read('nav.website'),
             '_nav_app' => Configure::read('nav.app'),
