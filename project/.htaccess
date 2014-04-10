@@ -9,7 +9,7 @@
 RewriteEngine On
 
 # Si se utiliza mod_userdir para este sitio indicar la url para accederlo
-#RewriteBase /~usuario/ruta/a/website/
+#RewriteBase /~usuario/ruta/al/proyecto/
 
 # Reglas para redireccionar las solicitudes al archivo index.php que despacha
 # la página
