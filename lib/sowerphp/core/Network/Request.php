@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase con la solicitud del cliente
  * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-22
+ * @version 2014-04-11
  */
 class Network_Request
 {
@@ -39,48 +39,32 @@ class Network_Request
     /**
      * Constructor de la clase
      * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-22
+     * @version 2014-04-11
      */
-    public function __construct ()
+    public function __construct ($setRequest = true)
     {
-        // asignar datos de la solicitud
-        $this->_request();
-        $this->_base();
-        $this->url = 'http'.(isset($_SERVER['HTTPS'])?'s':null).'://'.$_SERVER['HTTP_HOST'].$this->base;
-        if (!defined('_URL')) {
-            define ('_REQUEST', $this->request);
-            define ('_BASE', $this->base);
-            define ('_URL', $this->url);
+        if ($setRequest) {
+            // asignar datos de la solicitud
+            $this->request();
+            $this->base();
+            $this->url();
+            if (!defined('_URL')) {
+                define ('_REQUEST', $this->request);
+                define ('_BASE', $this->base);
+                define ('_URL', $this->url);
+            }
+            // Quitar de lo pasado por get lo que se está solicitando
+            unset($_GET[$this->request]);
         }
-        // Quitar de lo pasado por get lo que se está solicitando
-        unset($_GET[$this->request]);
     }
 
     /**
-     * Método que determina los campos base y webroot
-     * @return Base de la URL
+     * Método que determina la solicitud utilizada para acceder a la página
+     * @return Solicitud completa para la página consultada
      * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-07-31
+     * @version 2014-04-10
      */
-    protected function _base ()
-    {
-        $parts = explode('?', $_SERVER['REQUEST_URI']);
-        $last = strrpos($parts[0], $this->request);
-        $this->base = $last!==FALSE ? substr($parts[0], 0, $last) : $parts[0];
-        $pos = strlen($this->base)-1;
-        if($pos>=0 && $this->base[$pos] == '/')
-            $this->base = substr($this->base, 0, -1);
-        return $this->base;
-    }
-
-    /**
-     * Método que determina la uri utilizada para acceder a la página (a
-     * contar del webroot)
-     * @return URL completa para la página
-     * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-09-14
-     */
-    protected function _request ()
+    public function request ()
     {
         // Obtener ruta que se uso sin "/" (base) inicial
         $uri = substr($_SERVER['QUERY_STRING'], 1);
@@ -95,6 +79,39 @@ class Network_Request
         // Decodificar url
         $this->request = urldecode($this->request);
         return $this->request;
+    }
+
+    /**
+     * Método que determina los campos base y webroot
+     * @return Base de la URL
+     * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-10
+     */
+    public function base ()
+    {
+        $parts = explode('?', $_SERVER['REQUEST_URI']);
+        $last = strrpos($parts[0], $this->request);
+        $this->base = $last!==FALSE ? substr($parts[0], 0, $last) : $parts[0];
+        $pos = strlen($this->base)-1;
+        if($pos>=0 && $this->base[$pos] == '/')
+            $this->base = substr($this->base, 0, -1);
+        return $this->base;
+    }
+
+    /**
+     * Método que determina la URL utiliza para acceder a la aplicación, esto
+     * es: protocolo, dominio y path base
+     * contar del webroot)
+     * @return URL completa para acceder a la la página
+     * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-11
+     */
+    public function url ()
+    {
+        if (!$this->base)
+            $this->base();
+        $this->url = 'http'.(isset($_SERVER['HTTPS'])?'s':null).'://'.$_SERVER['HTTP_HOST'].$this->base;
+        return $this->url;
     }
 
 }
