@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase que renderizará las vistas de la aplicación
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-07
+ * @version 2014-04-13
  */
 class View
 {
@@ -156,12 +156,11 @@ class View
      * Método que busca la vista en las posibles rutas y para todas las posibles extensiones
      * @param view Nombre de la vista buscada (ejemplo: /inicio)
      * @param module Nombre del módulo en caso de pertenecer a uno
-     * @param ext Extensión de la vista buscada
      * @return Ubicación de la vista que se busca
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-22
+     * @version 2014-04-13
      */
-    public static function location ($view, $module = null, $ext = null)
+    public static function location ($view, $module = null)
     {
         // si la página está en cache se retorna
         if (isset(self::$_viewsLocation[$view]))

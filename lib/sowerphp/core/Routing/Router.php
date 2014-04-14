@@ -27,7 +27,7 @@ namespace sowerphp\core;
  * Clase para manejar rutas de la aplicación
  * Las rutas conectan URLs con controladores y acciones
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-02-09
+ * @version 2014-04-13
  */
 class Routing_Router
 {
@@ -38,8 +38,9 @@ class Routing_Router
     /**
      * Procesa la url indicando que es lo que se espera obtener según las
      * rutas que existen conectadas
+     * @todo Buscar forma de reducir este método pero manteniendo las mismas funcionalidades del parser
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-23
+     * @version 2014-04-13
      */
     public static function parse ($url)
     {
@@ -59,8 +60,22 @@ class Routing_Router
             return $params;
         }
         // Se revisa si es una página estática
+        $module = Module::find($url);
+        // Quitar el modulo de la url si existe
+        if ($module) {
+            $count = 1;
+            $url = substr(
+                    str_replace(
+                        str_replace('.', '/', Utility_Inflector::underscore($module))
+                        , '',
+                        $url,
+                        $count
+                    )
+                    , 1
+            );
+        }
         if (self::$autoStaticPages) {
-            $location = View::location('Pages'.$url);
+            $location = View::location('Pages'.$url, $module);
             if ($location) {
                 $params['controller'] = 'pages';
                 $params['action'] = 'display';
@@ -117,14 +132,8 @@ class Routing_Router
             }
         }
         // Arreglo por defecto para los datos de módulo, controlador, accion y parámetros pasados
-        $params = array('module'=>null, 'controller'=>null, 'action'=>'index', 'pass'=>null);
+        $params = array('module'=>$module, 'controller'=>null, 'action'=>'index', 'pass'=>null);
         // Procesar la URL recibida, en el formato /modulo(s)/controlador/accion/parámetro1/parámetro2/etc
-        // Buscar componente de la url que corresponde al modulo (de existir)
-        $params['module'] = Module::find($url);
-        // Quitar el modulo de la url
-        $count = 1;
-        $url = str_replace(str_replace('.', '/', Utility_Inflector::underscore($params['module'])), '', $url, $count);
-        $url = str_replace('//', '/', $url); // Parche, TODO: algo mejor?
         // Separar la url solicitada en partes separadas por los "/"
         $partes = explode('/', $url);
         // quitar primer elemento que es vacio, ya que el string parte con "/"
