@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase que renderizará las vistas de la aplicación
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-13
+ * @version 2014-04-14
  */
 class View
 {
@@ -57,18 +57,14 @@ class View
      * Método para renderizar una página
      * El como renderizará dependerá de la extensión de la página encontrada
      * @param page Ubicación relativa de la página
-     * @param ext Extensión de la página que se está renderizando
      * @return Buffer de la página renderizada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-07
+     * @version 2014-04-14
      */
-    public function render ($page, $ext = null)
+    public function render ($page)
     {
         // buscar página
-        $location = self::location(
-            $page, $this->request->params['module'],
-            $ext
-        );
+        $location = self::location($page, $this->request->params['module']);
         // si no se encontró error
         if (!$location) {
             if($this->request->params['controller']=='pages')
@@ -162,7 +158,7 @@ class View
      */
     public static function location ($view, $module = null)
     {
-        // si la página está en cache se retorna
+        // si la página está en caché se retorna
         if (isset(self::$_viewsLocation[$view]))
             return self::$_viewsLocation[$view];
         // obtener paths

@@ -27,7 +27,7 @@ namespace sowerphp\core;
  * Clase para manejar rutas de la aplicación
  * Las rutas conectan URLs con controladores y acciones
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-13
+ * @version 2014-04-14
  */
 class Routing_Router
 {
@@ -40,49 +40,26 @@ class Routing_Router
      * rutas que existen conectadas
      * @todo Buscar forma de reducir este método pero manteniendo las mismas funcionalidades del parser
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-13
+     * @version 2014-04-14
      */
     public static function parse ($url)
     {
         // La url requiere partir con "/", si no lo tiene se coloca
         if (empty($url) || $url[0]!='/')
             $url = '/'.$url;
-        // Arreglo por defecto para los datos de plugin, controlador, accion y parámetros pasados
-        $params = array('module'=>null, 'controller'=>null, 'action'=>'index', 'pass'=>null);
-        // Si existe una ruta para la url que se esta revisando se carga su configuración
+        // Si existe una ruta para la url que se está revisando se carga su configuración
         if (isset(self::$routes[$url])) {
-            $route = self::$routes[$url];
-            $params['module'] = !empty($route['module']) ? $route['module'] : $params['module'];
-            $params['controller'] = !empty($route['controller']) ? $route['controller'] : $params['controller'];
-            $params['action'] = !empty($route['action']) ? $route['action'] : $params['action'];
-            unset($route['module'], $route['controller'], $route['action']);
-            $params['pass'] = $route;
+            return self::routeNormalize(self::$routes[$url]);
+        }
+        // buscar página estática
+        if (self::$autoStaticPages && ($params = self::parseStaticPage ($url))!==false) {
             return $params;
         }
-        // Se revisa si es una página estática
         $module = Module::find($url);
-        // Quitar el modulo de la url si existe
-        if ($module) {
-            $count = 1;
-            $url = substr(
-                    str_replace(
-                        str_replace('.', '/', Utility_Inflector::underscore($module))
-                        , '',
-                        $url,
-                        $count
-                    )
-                    , 1
-            );
-        }
-        if (self::$autoStaticPages) {
-            $location = View::location('Pages'.$url, $module);
-            if ($location) {
-                $params['controller'] = 'pages';
-                $params['action'] = 'display';
-                $ext = substr($location, strrpos($location, '.')+1);
-                $params['pass'] = array($url, $ext, $location);
-                return $params;
-            }
+        $url = self::urlClean ($url, $module);
+        // buscar página estática nuevamente, pero esta vez dentro del módulo
+        if (self::$autoStaticPages && ($params = self::parseStaticPage ($url, $module))!==false) {
+            return $params;
         }
         // Buscar alguna que sea parcial (:controller, :action o *)
         foreach (self::$routes as $key=>$aux) {
@@ -138,13 +115,10 @@ class Routing_Router
         $partes = explode('/', $url);
         // quitar primer elemento que es vacio, ya que el string parte con "/"
         array_shift($partes);
-        // determinar si el primer elemento es módulo o controlador
         $params['controller'] = array_shift($partes);
-        // Segundo parámetro es la acción
         $params['action'] = count($partes) ? array_shift($partes) : 'index';
-        // Lo que queda son los argumentos pasados a al acción 
         $params['pass'] = $partes;
-        // Si no hay controlador y es un módulo se asigna un controlador estándar para cargar la página con el menu del modulo
+        // Si no hay controlador y es un módulo se asigna un controlador estándar para cargar la página con el menú del modulo
         if (empty($params['controller']) && !empty($params['module'])) {
             $params['controller'] = 'module';
             $params['action'] = 'display';
@@ -155,6 +129,8 @@ class Routing_Router
 
     /**
      * Método para conectar nuevas rutas
+     * @param from Ruta que se desea conectar (URL)
+     * @param to Hacia donde (módulo, controlador, acción y parámetros) se conectará la ruta
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2012-11-15
      */
@@ -162,6 +138,71 @@ class Routing_Router
     {
         self::$routes[$from] = $to;
         krsort(self::$routes);
+    }
+
+    /**
+     * Método para obtener una ruta normalizada (con todos sus campos obligatorios)
+     * @param route Arreglo con los datos de la ruta, índice 'controller' es obligatorio
+     * @return Arreglo con la ruta normalizada, incluyendo índices: 'module', 'controller', 'action' y 'pass'
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-14
+     */
+    private static function routeNormalize ($route)
+    {
+        $params = [
+            'module' => isset($route['module']) ? $route['module'] : null,
+            'controller' => $route['controller'],
+            'action' => isset($route['action']) ? $route['action'] : 'index'
+        ];
+        unset($route['module'], $route['controller'], $route['action']);
+        $params['pass'] = $route;
+        return $params;
+    }
+
+    /**
+     * Método que quita el módulo solicitado de la parte de la URL
+     * @param url URL
+     * @param module Nombre del módulo (ejemplo: Nombre.De.ModuloQueSeEjecuta)
+     * @return URL sin el módulo
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-14
+     */
+    private static function urlClean ($url, $module)
+    {
+        if ($module) {
+            $count = 1;
+            return substr(
+                    str_replace(
+                        str_replace('.', '/', Utility_Inflector::underscore($module))
+                        , '',
+                        $url,
+                        $count
+                    )
+                    , 1
+            );
+        }
+        return $url;
+    }
+
+    /**
+     * Método que busca si existe una página estática para la URL solicitada
+     * @param url URL
+     * @param module Nombre del módulo (ejemplo: Nombre.De.ModuloQueSeEjecuta)
+     * @return Parámetros para despachar la página estática o false si no se encontró una
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-14
+     */
+    private static function parseStaticPage ($url, $module = null) {
+        $location = View::location('Pages'.$url, $module);
+        if ($location) {
+            return [
+                'module' => $module,
+                'controller' => 'pages',
+                'action' => 'display',
+                'pass' => [$url]
+            ];
+        }
+        return false;
     }
 
 }
