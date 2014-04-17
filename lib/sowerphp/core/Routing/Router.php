@@ -57,7 +57,7 @@ class Routing_Router
         }
         // buscar página estática nuevamente, pero esta vez dentro del módulo (si existe)
         $module = Module::find($url);
-        if (($params = self::parseStaticPage (self::urlClean ($url, $module), $module))!==false) {
+        if (self::$autoStaticPages && ($params = self::parseStaticPage (self::urlClean ($url, $module), $module))!==false) {
             return $params;
         }
         // Buscar alguna que sea parcial (:controller, :action o *)
