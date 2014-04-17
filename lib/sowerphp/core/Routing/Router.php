@@ -27,7 +27,7 @@ namespace sowerphp\core;
  * Clase para manejar rutas de la aplicación
  * Las rutas conectan URLs con controladores y acciones
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-14
+ * @version 2014-04-17
  */
 class Routing_Router
 {
@@ -40,7 +40,7 @@ class Routing_Router
      * rutas que existen conectadas
      * @todo Buscar forma de reducir este método pero manteniendo las mismas funcionalidades del parser
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-14
+     * @version 2014-04-17
      */
     public static function parse ($url)
     {
@@ -55,10 +55,9 @@ class Routing_Router
         if (self::$autoStaticPages && ($params = self::parseStaticPage ($url))!==false) {
             return $params;
         }
+        // buscar página estática nuevamente, pero esta vez dentro del módulo (si existe)
         $module = Module::find($url);
-        $url = self::urlClean ($url, $module);
-        // buscar página estática nuevamente, pero esta vez dentro del módulo
-        if (self::$autoStaticPages && ($params = self::parseStaticPage ($url, $module))!==false) {
+        if (($params = self::parseStaticPage (self::urlClean ($url, $module), $module))!==false) {
             return $params;
         }
         // Buscar alguna que sea parcial (:controller, :action o *)
@@ -108,9 +107,10 @@ class Routing_Router
                 }
             }
         }
+        // Procesar la URL recibida, en el formato /modulo(s)/controlador/accion/parámetro1/parámetro2/etc
+        $url = self::urlClean ($url, $module);
         // Arreglo por defecto para los datos de módulo, controlador, accion y parámetros pasados
         $params = array('module'=>$module, 'controller'=>null, 'action'=>'index', 'pass'=>null);
-        // Procesar la URL recibida, en el formato /modulo(s)/controlador/accion/parámetro1/parámetro2/etc
         // Separar la url solicitada en partes separadas por los "/"
         $partes = explode('/', $url);
         // quitar primer elemento que es vacio, ya que el string parte con "/"
