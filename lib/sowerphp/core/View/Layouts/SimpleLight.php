@@ -7,6 +7,7 @@
         <title><?=$_header_title?></title>
         <link rel="shortcut icon" href="<?=$_base?>/img/favicon.png" />
         <link rel="stylesheet" media="screen" type="text/css" href="<?=$_base?>/layouts/<?=$_layout?>/css/screen.css" />
+<?=$_header_extra?>
     </head>
     <body>
         <div id="header_container">
