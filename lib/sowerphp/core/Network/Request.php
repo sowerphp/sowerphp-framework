@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase con la solicitud del cliente
  * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-11
+ * @version 2014-04-19
  */
 class Network_Request
 {
@@ -39,11 +39,11 @@ class Network_Request
     /**
      * Constructor de la clase
      * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-11
+     * @version 2014-04-19
      */
     public function __construct ($setRequest = true)
     {
-        if ($setRequest) {
+        if ($setRequest && isset($_SERVER['QUERY_STRING'])) {
             // asignar datos de la solicitud
             $this->request();
             $this->base();
@@ -85,10 +85,12 @@ class Network_Request
      * Método que determina los campos base y webroot
      * @return Base de la URL
      * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-10
+     * @version 2014-04-19
      */
     public function base ()
     {
+        if (!isset($_SERVER['REQUEST_URI']))
+            return null;
         $parts = explode('?', $_SERVER['REQUEST_URI']);
         $last = strrpos($parts[0], $this->request);
         $this->base = $last!==FALSE ? substr($parts[0], 0, $last) : $parts[0];
