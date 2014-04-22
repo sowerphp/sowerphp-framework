@@ -26,10 +26,21 @@ namespace sowerphp\core;
 /**
  * Clase genérica con método para trabajar con cualquier objeto
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2012-10-29
+ * @version 2014-04-19
  */
 abstract class Object
 {
+
+    /**
+     * Método para convertir el objeto a un string.
+     * @return Nombre de la clase con que se instancio el objeto
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-19
+     */
+    public function __toString ()
+    {
+        return get_class($this);
+    }
 
     /**
      * Método para obtener los atributos del objeto y sus valores como
