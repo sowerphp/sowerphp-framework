@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase con la solicitud del cliente
  * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-19
+ * @version 2014-04-22
  */
 class Network_Request
 {
@@ -114,6 +114,24 @@ class Network_Request
             $this->base();
         $this->url = 'http'.(isset($_SERVER['HTTPS'])?'s':null).'://'.$_SERVER['HTTP_HOST'].$this->base;
         return $this->url;
+    }
+
+    /**
+     * Método que entrega las cabeceras enviadas al servidor web por el cliente
+     * @param header Cabecera que se desea recuperar, o null si se quieren traer todas
+     * @return Arreglo si no se pidió por una específica o su valor si se pidió
+     * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-22
+     */
+    public function header ($header = null)
+    {
+        $headers = apache_request_headers();
+        if ($header) {
+            if (isset($headers[$header]))
+                return $headers[$header];
+            return false;
+        }
+        return $headers;
     }
 
 }

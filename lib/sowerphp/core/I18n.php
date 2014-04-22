@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para manejar la internacionalización
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-21
+ * @version 2014-04-22
  */
 class I18n
 {
@@ -93,6 +93,20 @@ class I18n
         textdomain($domain);
         bind_textdomain_codeset($domain, $encoding);
         return gettext($string);
+    }
+
+    /**
+     * Método que verifica si el lenguaje solicitado existe
+     * @param locale Locale que se está buscando si existe
+     * @return =true si la traducción está disponible (existe el directorio
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-22
+     */
+    public static function localeExists ($locale)
+    {
+        if (!strpos($locale, '_'))
+            $locale = self::$locale[$locale];
+        return is_dir(DIR_WEBSITE.'/Locale/'.$locale);
     }
 
 }

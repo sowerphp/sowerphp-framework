@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para escribir y recuperar datos desde una sesión
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-22
+ * @version 2014-04-22
  */
 class Model_Datasource_Session
 {
@@ -38,16 +38,19 @@ class Model_Datasource_Session
 
     /**
      * Método que inicia la sesión
+     * @param expires Indica el tiempo en segundos en que expirará la cookie de la sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-06-12
+     * @version 2014-04-10
      */
-    public static function start ()
+    public static function start ($expires = 3600)
     {
         // Prefijo para los datos en la sesión (esto permite múltiples sesiones
         // en una misma sesión (confuso, lo sé...)
         self::$_prefix = str_replace (
             array('/', '.'), array('_', '-'), DIR_WEBSITE
         ).'.';
+        // parámetros para la cookie de la sesión
+        session_set_cookie_params ($expires, (new Network_Request(false))->base());
         // Si ya estaba iniciada no se hace nada
         if (self::started())
             return true;
@@ -55,7 +58,7 @@ class Model_Datasource_Session
         self::$time = time();
         // Obtener ID de la sesión
         self::$id = self::id();
-        // Iniciar sesión    
+        // Iniciar sesión
         session_start();
         // Retornar si la sesión fue iniciada y es válida
         if(self::started() && self::valid())
@@ -66,13 +69,24 @@ class Model_Datasource_Session
     /**
      * Carga configuración del inicio de la sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-01
+     * @version 2014-04-22
      */
     public static function configure ()
     {
         // idioma
         if (!self::read('config.language')) {
-            self::write('config.language', Configure::read('language'));
+            $defaultLang = Configure::read('language');
+            $userLang = (new Network_Request(false))->header('Accept-Language');
+            if ($userLang) {
+                $userLang = explode(',', explode('-', $userLang)[0])[0];
+                if ($userLang === explode('_', $defaultLang)[0] || I18n::localeExists($userLang)) {
+                    self::write('config.language', $userLang);
+                } else {
+                    self::write('config.language', $defaultLang);
+                }
+            } else {
+                self::write('config.language', $defaultLang);
+            }
         }
         // layout
         if (!self::read('config.page.layout')) {
