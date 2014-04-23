@@ -31,10 +31,6 @@ namespace sowerphp\core;
 class Model_Datasource_Session
 {
 
-    public static $id = null; ///< Identificador de la sesión
-    public static $time = false; ///< Tiempo de inicio de la sesión
-    public static $config; ///< Configuración de la sesión del sitio
-
     /**
      * Método que inicia la sesión
      * @param expires Indica el tiempo en segundos en que expirará la cookie de la sesión
@@ -44,7 +40,6 @@ class Model_Datasource_Session
     public static function start ($expires = 3600)
     {
         session_set_cookie_params ($expires, (new Network_Request())->base());
-        self::$time = time();
         session_start();
     }
 
