@@ -34,36 +34,18 @@ class Model_Datasource_Session
     public static $id = null; ///< Identificador de la sesión
     public static $time = false; ///< Tiempo de inicio de la sesión
     public static $config; ///< Configuración de la sesión del sitio
-    private static $_prefix = null; ///< Prefijo para la sesión
 
     /**
      * Método que inicia la sesión
      * @param expires Indica el tiempo en segundos en que expirará la cookie de la sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-10
+     * @version 2014-04-22
      */
     public static function start ($expires = 3600)
     {
-        // Prefijo para los datos en la sesión (esto permite múltiples sesiones
-        // en una misma sesión (confuso, lo sé...)
-        self::$_prefix = str_replace (
-            array('/', '.'), array('_', '-'), DIR_WEBSITE
-        ).'.';
-        // parámetros para la cookie de la sesión
-        session_set_cookie_params ($expires, (new Network_Request(false))->base());
-        // Si ya estaba iniciada no se hace nada
-        if (self::started())
-            return true;
-        // Tiempo de inicio de la sesión
+        session_set_cookie_params ($expires, (new Network_Request())->base());
         self::$time = time();
-        // Obtener ID de la sesión
-        self::$id = self::id();
-        // Iniciar sesión
         session_start();
-        // Retornar si la sesión fue iniciada y es válida
-        if(self::started() && self::valid())
-            return true;
-        return false;
     }
 
     /**
@@ -95,67 +77,15 @@ class Model_Datasource_Session
     }
 
     /**
-     * Asigna u obtiene el valor de id de la sesión
-     * @param id Nuevo identificador para la sesión
-     * @return Identificador de la sesión
-     * @author CakePHP
-     */
-    public static function id ($id = null)
-    {
-        // Si se paso un id se utiliza como nuevo
-        if ($id) {
-            session_id(self::$id);
-            self::$id = $id;
-        }
-        // Si la sesión ya se inició se recupera su id
-        if (self::started()) {
-            self::$id = session_id();
-        }
-        // Devolver el id de la sesión
-        return self::$id;
-    }
-
-    /**
-     * Determinar si existe una sesión iniciada
-     * @return Verdadero si existe una sesión iniciada
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-08
-     */
-    public static function started()
-    {
-        return isset($_SESSION) && session_id();
-    }
-
-    /**
-     * Retorna si la sesión es o no válida
-     * @return Verdadero si la sesión es válida
-     * @todo Verificar que la sesión sea válida y no hayan "Session Highjacking Attempted!!!" (AHORA NO SE ESTA VALIDANDO NADA!!!)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-08
-     */
-    public static function valid()
-    {
-        return true;
-    }
-
-    /**
      * Entrega true si la variable esta creada en la sesión
      * @param name Nombre de la variable que se quiere buscar
      * @return Verdadero si la variable existe en la sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-06-12
+     * @version 2014-04-22
      */
     public static function check($name)
     {
-        // Verificar que la sesión este iniciada o se pueda iniciar si no lo esta
-        if (!self::started() && !self::start()) {
-            return false;
-        }
-        // Retornar si existe o no la variable
-        $result = Utility_Set::classicExtract(
-            $_SESSION,
-            self::$_prefix.$name
-        );
+        $result = Utility_Set::classicExtract($_SESSION, $name);
         return isset($result);
     }
 
@@ -164,31 +94,20 @@ class Model_Datasource_Session
      * @param name Nombre de la variable que se desea leer
      * @return Valor de la variable o falso en caso que no exista o la sesión no este iniciada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-06-12
+     * @version 2014-04-22
      */
     public static function read ($name = null)
     {
-        // Verificar que la sesión este iniciada o se pueda iniciar si no lo esta
-        if (!self::started() && !self::start()) {
-            return false;
-        }
         // Si no se indico un nombre, se entrega todo el arreglo de la sesión
         if ($name==null) {
-            if (self::$_prefix) {
-                return $_SESSION[substr(self::$_prefix, 0, -1)];
-            } else {
-                return $_SESSION;
-            }
+            return $_SESSION;
         }
         // Verificar que lo solicitado existe
         if(!self::check($name)) {
             return false;
         }
         // Extraer los datos que se están solicitando
-        $result = Utility_Set::classicExtract(
-            $_SESSION,
-            self::$_prefix.$name
-        );
+        $result = Utility_Set::classicExtract($_SESSION, $name);
         // Retornar lo solicitado (ya se reviso si existía, por lo cual si es null es válido el valor)
         return $result;
     }
@@ -204,10 +123,7 @@ class Model_Datasource_Session
     {
         // Si la variable existe se quita
         if (self::check($name)) {
-            self::_overwrite($_SESSION, Utility_Set::remove(
-                $_SESSION,
-                self::$_prefix.$name
-            ));
+            self::_overwrite($_SESSION, Utility_Set::remove($_SESSION, $name));
             return (self::check($name) == false);
         }
         // En caso que no se encontrara la variable se retornará falso
@@ -220,16 +136,11 @@ class Model_Datasource_Session
      * @param value Valor que se desea asignar a la variable
      * @return Verdadero si se logró escribir la variable de sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-06-12
+     * @version 2014-04-22
      */
     public static function write($name, $value = null)
     {
-        // Verificar que la sesión este iniciada o se pueda iniciar si no lo esta
-        if (!self::started() && !self::start()) {
-            return false;
-        }
         // Armar el arreglo necesario para realizar la escritura
-        $name = self::$_prefix.$name;
         $write = $name;
         if (!is_array($name)) {
             $write = array($name => $value);
@@ -267,16 +178,11 @@ class Model_Datasource_Session
     /**
      * Método para destruir e invalidar una sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-06-12
+     * @version 2014-04-22
      */
     public static function destroy()
     {
-        // Verificar que la sesión este iniciada o se pueda iniciar si no lo esta
-        if (!self::started() && !self::start()) {
-            return false;
-        }
-        // "destruir" la sesión
-        unset($_SESSION[substr(self::$_prefix, 0, -1)]);
+        session_destroy();
     }
 
     /**
