@@ -161,6 +161,20 @@ class App
     }
 
     /**
+     * Entrega la ruta a la capa solicitada
+     * @param layer Capa que se requiere su ruta
+     * @return Ruta hacia la capa
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-04
+     */
+    public static function layer ($layer)
+    {
+        if (isset(self::$_layers[$layer]))
+            return self::$_layers[$layer];
+        return false;
+    }
+
+    /**
      * Método para importar (usando include)
      * Si se pasa una ruta absoluta se incluirá solo ese archivo si
      * existe, si es relativa se buscará en los posibles paths

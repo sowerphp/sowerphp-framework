@@ -173,11 +173,12 @@ abstract class Controller
     /**
      * Método que renderiza la vista del controlador
      * @param view Vista que se desea renderizar
+     * @param location Ubicación de la vista
      * @return Objeto Response con la página ya renderizada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-24
+     * @version 2014-04-22
      */
-    public function render ($view = null)
+    public function render ($view = null, $location = null)
     {
         // Ejecutar eventos que se deben realizar antes de renderizar
         $this->beforeRender();
@@ -190,7 +191,7 @@ abstract class Controller
             $this->View = new View ($this);
         }
         // Renderizar vista y layout
-        $this->response->body($this->View->render($view));
+        $this->response->body($this->View->render($view, $location));
         // Entregar respuesta
         return $this->response;
     }

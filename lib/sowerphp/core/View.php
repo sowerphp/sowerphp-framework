@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase que renderizará las vistas de la aplicación
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-14
+ * @version 2014-04-22
  */
 class View
 {
@@ -57,14 +57,19 @@ class View
      * Método para renderizar una página
      * El como renderizará dependerá de la extensión de la página encontrada
      * @param page Ubicación relativa de la página
+     * @param location Ubicación de la vista
      * @return Buffer de la página renderizada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-14
+     * @version 2014-04-22
      */
-    public function render ($page)
+    public function render ($page, $location = null)
     {
         // buscar página
-        $location = self::location($page, $this->request->params['module']);
+        if ($location) {
+            $location = self::location(\sowerphp\core\App::layer($location).'/'.$location.'/View/'.$page);
+        } else {
+            $location = self::location($page, $this->request->params['module']);
+        }
         // si no se encontró error
         if (!$location) {
             if($this->request->params['controller']=='pages')
@@ -154,23 +159,33 @@ class View
      * @param module Nombre del módulo en caso de pertenecer a uno
      * @return Ubicación de la vista que se busca
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-13
+     * @version 2014-04-22
      */
     public static function location ($view, $module = null)
     {
         // si la página está en caché se retorna
         if (isset(self::$_viewsLocation[$view]))
             return self::$_viewsLocation[$view];
-        // obtener paths
-        $paths = App::paths();
         // extensiones
         if (!self::$extensions) {
             self::$extensions = Configure::read('page.extensions');
             if(!in_array('php', self::$extensions))
                 self::$extensions[] = 'php'; // php siempre debe estar
         }
+        // si la vista parte con / entonces se está pasando la ruta y solo falta su extension
+        if ($view[0]=='/') {
+            foreach(self::$extensions as $extension) {
+                if (file_exists($view.'.'.$extension)) {
+                    self::$_viewsLocation[$view] = $view.'.'.$extension;
+                    return $view.'.'.$extension;
+                }
+            }
+            return null;
+        }
         // Determinar de donde sacar la vista
         $location = $module ? '/Module/'.str_replace('.', '/Module/', $module) : '';
+        // obtener paths
+        $paths = App::paths();
         // buscar archivo en cada ruta
         foreach ($paths as $path) {
             foreach(self::$extensions as $extension) {
