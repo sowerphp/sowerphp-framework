@@ -3,19 +3,19 @@
 /**
  * SowerPHP: Minimalist Framework for PHP
  * Copyright (C) SowerPHP (http://sowerphp.org)
- * 
+ *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General GNU
  * publicada por la Fundación para el Software Libre, ya sea la versión
  * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
  * misma.
- * 
+ *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
  * Consulte los detalles de la Licencia Pública General GNU para obtener
  * una información más detallada.
- * 
+ *
  * Debería haber recibido una copia de la Licencia Pública General GNU
  * junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/gpl.html>.
@@ -40,7 +40,7 @@ class I18n
      * Función que realiza la traducción de un string a otro idioma.
      *
      * Plantilla para archivo master.po (para locale en_US.utf8):
-     * 
+     *
      *	msgid ""
      *	msgstr ""
      *	"Project-Id-Version: proyecto en_US master\n"
@@ -52,7 +52,7 @@ class I18n
      *	"Content-Type: text/plain; charset=UTF-8\n"
      *	"Content-Transfer-Encoding: 8bit\n"
      *	"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-     *	
+     *
      *	msgid "Buscar"
      *	msgstr "Search"
      *

@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Excepción cuando no se encuentra la vista de una acción de un controlador
  * que se está tratando de renderizar
- */ 
+ */
 class Exception_View_Missing extends Exception
 {
     protected $_messageTemplate = 'Vista %s para acción %s::%s() no ha sido encontrada';

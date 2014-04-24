@@ -25,7 +25,7 @@ namespace sowerphp\core;
 
 /**
  * Excepción cuando no se encuentra un componente que ha sido solicitado
- */ 
+ */
 class Exception_Controller_Component_Missing extends Exception
 {
     protected $_messageTemplate = 'Componente %s no fue encontrado';
