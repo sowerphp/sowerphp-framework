@@ -3,19 +3,19 @@
 /**
  * SowerPHP: Minimalist Framework for PHP
  * Copyright (C) SowerPHP (http://sowerphp.org)
- * 
+ *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General GNU
  * publicada por la Fundación para el Software Libre, ya sea la versión
  * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
  * misma.
- * 
+ *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
  * Consulte los detalles de la Licencia Pública General GNU para obtener
  * una información más detallada.
- * 
+ *
  * Debería haber recibido una copia de la Licencia Pública General GNU
  * junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/gpl.html>.
@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para configurar la aplicación
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-22
+ * @version 2014-04-21
  */
 class Configure
 {
@@ -35,9 +35,8 @@ class Configure
 
     /**
      * Realizar configuración al inicio de la aplicación
-     * @warning Error::handler no se está utilizando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-22
+     * @version 2014-04-24
      */
     public static function bootstrap()
     {
@@ -54,7 +53,6 @@ class Configure
         // Setear parámetros de errores
         ini_set('display_errors', self::$_values['debug'] ? true : false);
         error_reporting(self::$_values['debug'] ? self::$_values['error']['level'] : 0);
-//        set_error_handler('sowerphp\core\Error::handler', self::$_values['debug'] ? self::$_values['error']['level'] : 0);
         set_exception_handler('sowerphp\core\Exception::handler');
         // Definir la zona horaria
         date_default_timezone_set(self::$_values['time']['zone']);
@@ -102,7 +100,7 @@ class Configure
             if (strpos($name, '.') === false) {
                 self::$_values[$name] = $value;
             }
-            // En caso que tuviese punto se asume que se debe dividir en niveles			
+            // En caso que tuviese punto se asume que se debe dividir en niveles
             else {
                 $names = explode('.', $name, 4);
                 switch (count($names)) {
@@ -164,7 +162,7 @@ class Configure
                 break;
         }
         // Si no se encontró definida la variable
-        return null;		
+        return null;
     }
 
 }
