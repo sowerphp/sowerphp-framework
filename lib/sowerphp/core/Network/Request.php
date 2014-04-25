@@ -119,12 +119,14 @@ class Network_Request
     /**
      * Método que entrega las cabeceras enviadas al servidor web por el cliente
      * @param header Cabecera que se desea recuperar, o null si se quieren traer todas
-     * @return Arreglo si no se pidió por una específica o su valor si se pidió
+     * @return Arreglo si no se pidió por una específica o su valor si se pidió (=false si no existe cabecera, =null si no existe función apache_request_headers)
      * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-22
+     * @version 2014-04-25
      */
     public function header ($header = null)
     {
+        if (!function_exists('apache_request_headers'))
+            return null;
         $headers = apache_request_headers();
         if ($header) {
             if (isset($headers[$header]))
