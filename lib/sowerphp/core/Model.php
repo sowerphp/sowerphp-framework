@@ -3,19 +3,19 @@
 /**
  * SowerPHP: Minimalist Framework for PHP
  * Copyright (C) SowerPHP (http://sowerphp.org)
- * 
+ *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General GNU
  * publicada por la Fundación para el Software Libre, ya sea la versión
  * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
  * misma.
- * 
+ *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
  * Consulte los detalles de la Licencia Pública General GNU para obtener
  * una información más detallada.
- * 
+ *
  * Debería haber recibido una copia de la Licencia Pública General GNU
  * junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/gpl.html>.
@@ -27,7 +27,7 @@ namespace sowerphp\core;
  * Clase abstracta para todos los modelos
  * Permite trabajar con un registro de la tabla
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-02
+ * @version 2014-04-23
  */
 abstract class Model extends Object
 {
@@ -40,9 +40,9 @@ abstract class Model extends Object
     /**
      * Constructor de la clase abstracta
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-10-07
+     * @version 2014-04-19
      */
-    public function __construct ()
+    public function __construct ($pk=null)
     {
         // recuperar conexión a la base de datos
         $this->db = \sowerphp\core\Model_Datasource_Database::get($this->_database);
@@ -50,189 +50,314 @@ abstract class Model extends Object
         if (empty($this->_table)) {
             $this->_table = Utility_Inflector::underscore (explode('_', get_class($this))[1]);
         }
+        // setear atributos del objeto con lo que se haya pasado al
+        // constructor como parámetros
+        if (func_num_args()>0) {
+            $firstArg = func_get_arg(0);
+            if (is_array($firstArg)) {
+                $this->set(array_combine($this->getPk(), $firstArg));
+            } else {
+                $args = func_get_args();
+                foreach ($this::$columnsInfo as $col => &$info) {
+                    if ($info['pk']) {
+                        $this->$col = array_shift($args);
+                    }
+                }
+            }
+            // obtener otros atributos del objeto
+            $this->get();
+        }
     }
 
     /**
-     * Método para convertir el objeto a un string, usará el atributo
-     * que tenga el mismo nombre que la tabla a la que está asociada
-     * esta clase. Si no existe el atributo se devolverá el nombre de la
-     * clase (en dicho caso, se debe sobreescribir en el modelo final)
-     * @return Nombre de la tabla asociada al modelo o la clase misma
+     * Función que entrega un arreglo con la PK y los campos listos para ser
+     * utilizados en una consulta SQL
+     * @return Arreglo con los datos de la PK para la consulta y sus valores
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-02
+     * @version 2014-04-19
      */
-    public function __toString ()
+    protected function preparePk ()
     {
-        if(isset($this->{$this->_table}))
-            return $this->{$this->_table};
-        return get_class($this);
+        $pk = ['where'=>[], 'values'=>[]];
+        foreach ($this::$columnsInfo as $col => &$info) {
+            if ($info['pk']) {
+                if (empty($this->$col))
+                    return false;
+                $pk['where'][] = $col.' = :pk_'.$col;
+                $pk['values'][':pk_'.$col] = $this->$col;
+            }
+        }
+        $pk['where'] = implode(' AND ', $pk['where']);
+        return $pk;
     }
 
     /**
      * Método para setear los atributos de la clase
      * @param array Arreglo con los datos que se deben asignar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-05
+     * @version 2014-04-19
      */
     public function set ($array)
     {
-        $class = get_class($this);
-        foreach ($class::$columnsInfo as $a => $data) {
+        foreach ($this::$columnsInfo as $a => $data) {
             if (isset($array[$a]))
                 $this->$a = $array[$a];
         }
     }
 
     /**
-     * Método para guardar el objeto en la base de datos
-     * @return =true si todo fue ok, =false si se hizo algún rollback
+     * Método para obtener los atributos del objeto, esto es cada una
+     * de las columnas que representan al objeto en la base de datos
+     * @return =true si se logró obtener los datos desde la BD
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-10-07
+     * @version 2014-04-19
+     */
+    public function get ()
+    {
+        // preparar pk
+        $pk = $this->preparePk();
+        if (!$pk) return false;
+        // recuperar datos
+        $datos = $this->db->getRow(
+            'SELECT * FROM '.$this->_table.' WHERE '.$pk['where']
+            , $pk['values']
+        );
+        // si se encontraron datos asignar columnas a los atributos
+        // del objeto
+        if (count($datos)) {
+            foreach ($datos as $key => &$value) {
+                $this->{$key} = $value;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Método para determinar si el objeto existe en la base de datos
+     * @return =true si el registro existe en la base de datos, =false si no existe
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-19
+     */
+    public function exists ()
+    {
+        // preparar pk
+        $pk = $this->preparePk();
+        if (!$pk) return false;
+        // verificar si existe
+        return (boolean) $this->db->getValue(
+            'SELECT COUNT(*) FROM '.$this->_table.' WHERE '.$pk['where'],
+            $pk['values']
+        );
+    }
+
+    /**
+     * Método para borrar el objeto de la base de datos
+     * @return =true si se logró eliminar, =false en caso de algún problema
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-19
+     */
+    public function delete ()
+    {
+        // preparar pk
+        $pk = $this->preparePk();
+        if (!$pk) return false;
+        // eliminar registro
+        $this->db->beginTransaction();
+        $stmt = $this->db->query(
+            'DELETE FROM '.$this->_table.' WHERE '.$pk['where'],
+            $pk['values']
+        );
+        if ($stmt->errorCode()==='00000') {
+            $this->db->commit();
+            return true;
+        }
+        $this->db->rollBack();
+        return false;
+    }
+
+    /**
+     * Método para guardar el objeto en la base de datos
+     * @return =true si todo fue ok, =false si hubo algún problema
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-19
      */
     public function save ()
     {
-        $this->db->transaction();
-        if (!$this->beforeSave()) {
-            $this->db->rollback();
+        $op = $this->exists() ? 'update' : 'insert';
+        return $this->$op();
+    }
+
+    /**
+     * Método para insertar el objeto en la base de datos
+     * @return =true si se logró insertar, =false en caso de algún problema
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-24
+     */
+    protected function insert ()
+    {
+        // verificar que no exista
+        if ($this->exists())
             return false;
+        // preparar columnas y valores
+        $cols = [];
+        $alias = [];
+        $values = [];
+        foreach ($this::$columnsInfo as $col => &$info) {
+            debug($this->$col, true);
+            if ($info['auto'] || $this->$col===null || $this->$col==='')
+                continue;
+            $cols[] = $col;
+            $alias[] = ':'.$col;
+            $values[':'.$col] = $this->$col;
         }
-        if ($this->exists()) $status = $this->update();
-        else $status = $this->insert();
-        if (!$status || !$this->afterSave()) {
-            $this->db->rollback();
-            return false;
+        // insertar datos
+        $this->db->beginTransaction();
+        $stmt = $this->db->query('
+            INSERT INTO '.$this->_table.' (
+                '.implode(', ', $cols).'
+            ) VALUES (
+                '.implode(', ', $alias).'
+            )
+        ', $values);
+        if ($stmt->errorCode()==='00000') {
+            $this->db->commit();
+            return true;
         }
-        $this->db->commit();
-        return true;
+        $this->db->rollBack();
+        return false;
     }
 
     /**
      * Método que permite editar una fila de la base de datos de manera
      * simple desde desde fuera del modelo.
-     * @param columns Arreglo con las columnas a editar (como claves) y los nuevos valores
-     * @param pks Arreglo con las columnas PK (como claves) y los valores para decidir que actualizar
+     * @param columns Arreglo asociativo con las columnas a editar o NULL para editar todas las columnas
+     * @return =true si se logró actualizar, =false en caso de algún problema
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-07
+     * @version 2014-04-23
      */
-    public function edit ($columns, $pks = null)
+    public function update ($columns = null)
     {
+        // verificar que exista
+        if (!$this->exists())
+            return false;
+        // buscar columnas y valores si no se pasaron
+        if ($columns === null) {
+            foreach ($this::$columnsInfo as $col => &$info) {
+                $columns[$col] = $this->$col;
+            }
+        }
         // preparar set de la consulta
-        $querySet = array ();
+        $querySet = [];
         foreach ($columns as $col => &$val) {
-            if ($val===null) $val = 'NULL';
-            else if ($val===true) $val = 'true';
-            else if ($val===false) $val = 'false';
-            else $val = '\''.$this->db->sanitize($val).'\'';
-            $querySet[] = $col.' = '.$val;
+            $querySet[] = $col.' = :'.$col;
         }
-        // preparar PK de la consulta
-        $queryPk = array();
-        if ($pks===null) {
-            $class = get_class($this);
-            foreach ($class::$columnsInfo as $col => &$info) {
-                if ($info['pk']) {
-                    $queryPk[] = $col.' = \''.$this->db->sanitize($this->$col).'\'';
-                }
-            }
-        } else {
-            foreach ($pks as $pk => &$val) {
-                $queryPk[] = $pk.' = \''.$this->db->sanitize($val).'\'';
-            }
-        }
+        // preparar pk
+        $pk = $this->preparePk();
+        if (!$pk) return false;
         // realizar consulta
-        $this->db->query ('
+        $this->db->beginTransaction();
+        $stmt = $this->db->query ('
             UPDATE '.$this->_table.'
             SET '.implode(', ', $querySet).'
-            WHERE '.implode(' AND ', $queryPk)
+            WHERE '.$pk['where']
+        , array_merge($columns, $pk['values']));
+        if ($stmt->errorCode()==='00000') {
+            $this->db->commit();
+            return true;
+        }
+        $this->db->rollBack();
+        return false;
+    }
+
+    /**
+     * Método "mágico" para atrapar las llamadas a getFK(), en realidad
+     * atrapará las llamadas a cualquier método inexistente, pero solo
+     * se procesarán aquellos que sean getFK
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-21
+     */
+    public function __call($method, $args)
+    {
+        // asegurarse que sean métodos que inician con get
+        if (substr($method, 0, 3)=='get') {
+            $fk = substr($method, 3);
+            // asegurarse que sea un getFK (ya que debe existir en fkNamespace)
+            if (isset($this::$fkNamespace['Model_'.$fk])) {
+                $fkClass = $this::$fkNamespace['Model_'.$fk].'\Model_'.$fk;
+                $fkObj = new $fkClass($this->{Utility_Inflector::underscore($fk)});
+                if ($fkObj->exists()) {
+                    return $fkObj;
+                }
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Método que entrega un arreglo con las columnas que son la PK de la tabla
+     * @return Arreglo con las columnas que son la PK
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-22
+     */
+    public function getPk ()
+    {
+        $pk = [];
+        foreach ($this::$columnsInfo as $column => &$info) {
+            if ($info['pk'])
+                $pk[] = $column;
+        }
+        return $pk;
+    }
+
+    /**
+     * Método que entrega un arreglo con los valores de la PK de la tabla
+     * @return Arreglo con las columnas que son la PK
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-22
+     */
+    public function getPkValues ()
+    {
+        $pk = $this->getPk();
+        $values = [];
+        foreach ($pk as &$p) {
+            $values[$p] = $this->$p;
+        }
+        return $values;
+    }
+
+    /**
+     * Método que guarda un archivo en la base de datos
+     * @return =true si se logró guardar el archivo, =false en caso de algún problema
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-04-23
+     */
+    public function saveFile($name, $file)
+    {
+        // verificar que exista el campo en la bd
+        if (!isset($this::$columnsInfo[$name.'_data'])) {
+            return false;
+        }
+        // preparar pk
+        $pk = $this->preparePk();
+        if (!$pk) return false;
+        // guardar archivo
+        $this->db->beginTransaction();
+        $stmt = $this->db->query(
+            'UPDATE '.$this->_table.'
+            SET
+                '.$name.'_data = :data,
+                '.$name.'_name = :name,
+                '.$name.'_type = :type,
+                '.$name.'_size = :size
+            WHERE '.$pk['where'],
+            $file
         );
-    }
-
-    /**
-     * Se ejecuta automáticamente antes del save
-     * @return boolean Verdadero en caso de éxito
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-10-07
-     */
-    protected function beforeSave ()
-    {
-        return true;
-    }
-
-    /**
-     * Se ejecuta automáticamente después del save
-     * @return boolean Verdadero en caso de éxito
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-10-07
-     */
-    protected function afterSave ()
-    {
-        return true;
-    }
-
-    /**
-     * Se ejecuta automáticamente antes del insert
-     * @return boolean Verdadero en caso de éxito
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-10-07
-     */
-    protected function beforeInsert ()
-    {
-        return true;
-    }
-
-    /**
-     * Se ejecuta automáticamente después del insert
-     * @return boolean Verdadero en caso de éxito
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-10-07
-     */
-    protected function afterInsert ()
-    {
-        return true;
-    }
-
-    /**
-     * Se ejecuta automáticamente antes del update
-     * @return boolean Verdadero en caso de éxito
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-10-07
-     */
-    protected function beforeUpdate ()
-    {
-        return true;
-    }
-
-    /**
-     * Se ejecuta automáticamente después del update
-     * @return boolean Verdadero en caso de éxito
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-10-07
-     */
-    protected function afterUpdate ()
-    {
-        return true;
-    }
-
-    /**
-     * Se ejecuta automáticamente antes del delete
-     * @return boolean Verdadero en caso de éxito
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-10-07
-     */
-    protected function beforeDelete ()
-    {
-        return true;
-    }
-
-    /**
-     * Se ejecuta automáticamente después del delete
-     * @return boolean Verdadero en caso de éxito
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-10-07
-     */
-    protected function afterDelete ()
-    {
-        return true;
+        if ($stmt->errorCode()==='00000') {
+            $this->db->commit();
+            return true;
+        }
+        $this->db->rollBack();
+        return false;
     }
 
 }
