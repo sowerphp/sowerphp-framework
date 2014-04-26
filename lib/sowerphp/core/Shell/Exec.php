@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para despachar una Shell
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-22
+ * @version 2014-04-25
  */
 class Shell_Exec
 {
@@ -59,15 +59,21 @@ class Shell_Exec
      * @return Resultado de la ejecución del comando
      * @todo Utilizar shells que estén dentro de módulos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-22
+     * @version 2014-04-25
      */
     private static function dispatch ($command, $args)
     {
         // Si el comando fue vacío se retorna estado de error
-        if (empty($command))
+        if (empty($command)) {
+            echo 'SowerPHP shell: debe indicar una orden a ejecutar',"\n";
             return 1;
+        }
         // Crear objeto
-        $class = 'Shell_Command_'.$command;
+        $class = \sowerphp\core\App::findClass('Shell_Command_'.$command);
+        if (!class_exists($class)) {
+            echo 'SowerPHP shell: '.$command.': no se encontró la orden',"\n";
+            return 1;
+        }
         $shell = new $class();
         // Invocar mail
         $method = new \ReflectionMethod($shell, 'main');
