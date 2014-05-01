@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para trabajar con una base de datos MySQL
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-26
+ * @version 2014-04-30
  */
 class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
 {
@@ -38,7 +38,7 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      * conexión
      * @param config Arreglo con los parámetros de la conexión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-08
+     * @version 2014-04-30
      */
     public function __construct ($config)
     {
@@ -56,7 +56,12 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
                 ';dbname='.$this->config['name'].
                 ';charset='.$this->config['char'],
                 $this->config['user'],
-                $this->config['pass']
+                $this->config['pass'],
+                [
+                    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+                    \PDO::ATTR_PERSISTENT => true,
+                    \PDO::MYSQL_ATTR_COMPRESS => true
+                ]
             );
         } catch (\PDOException $e) {
         }
