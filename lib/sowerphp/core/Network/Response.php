@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para generar respuesta al cliente
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-21
+ * @version 2014-05-01
  */
 class Network_Response
 {
@@ -87,10 +87,8 @@ class Network_Response
      * Enviar un archivo (estático) al cliente
      * @param file Archivo que se desea enviar al cliente o bien un arreglo con los campos: name, type, size y data
      * @param options Arreglo de opciones (indices: name, charset, disposition y exit)
-     * @warning Archivos enviados con este método son siempre descargados, no se usa caché (¿?)
-     * @todo Corregir problema de caché
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-12
+     * @version 2014-05-01
      */
     public function sendFile ($file, $options = array())
     {
