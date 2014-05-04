@@ -272,9 +272,10 @@ abstract class Model extends Object
     /**
      * Método "mágico" para atrapar las llamadas a getFK(), en realidad
      * atrapará las llamadas a cualquier método inexistente, pero solo
-     * se procesarán aquellos que sean getFK
+     * se procesarán aquellos que sean getFK y en otros caso generará una
+     * excepción (ya que el método no existirá)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-21
+     * @version 2014-05-03
      */
     public function __call($method, $args)
     {
@@ -290,6 +291,10 @@ abstract class Model extends Object
                 }
                 return null;
             }
+        } else {
+            throw new Exception(array(
+                sprintf ('Método %s::%s() no existe', get_class($this), $method)
+            ));
         }
     }
 
