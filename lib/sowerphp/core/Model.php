@@ -27,7 +27,7 @@ namespace sowerphp\core;
  * Clase abstracta para todos los modelos
  * Permite trabajar con un registro de la tabla
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-23
+ * @version 2014-05-05
  */
 abstract class Model extends Object
 {
@@ -110,7 +110,7 @@ abstract class Model extends Object
      * de las columnas que representan al objeto en la base de datos
      * @return =true si se logró obtener los datos desde la BD
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
+     * @version 2014-05-04
      */
     public function get ()
     {
@@ -126,6 +126,9 @@ abstract class Model extends Object
         // del objeto
         if (count($datos)) {
             foreach ($datos as $key => &$value) {
+                if ($this::$columnsInfo[$key]['type']=='boolean') {
+                    $value = $value===true ? 1 : 0;
+                }
                 $this->{$key} = $value;
             }
         }
@@ -191,7 +194,7 @@ abstract class Model extends Object
      * Método para insertar el objeto en la base de datos
      * @return =true si se logró insertar, =false en caso de algún problema
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-24
+     * @version 2014-05-04
      */
     protected function insert ()
     {
@@ -203,7 +206,6 @@ abstract class Model extends Object
         $alias = [];
         $values = [];
         foreach ($this::$columnsInfo as $col => &$info) {
-            debug($this->$col, true);
             if ($info['auto'] || $this->$col===null || $this->$col==='')
                 continue;
             $cols[] = $col;
@@ -220,6 +222,9 @@ abstract class Model extends Object
             )
         ', $values);
         if ($stmt->errorCode()==='00000') {
+            if (isset($this->id)) {
+                $this->id = $this->db->getValue('SELECT MAX(id) FROM '.$this->_table);
+            }
             $this->db->commit();
             return true;
         }
@@ -275,7 +280,7 @@ abstract class Model extends Object
      * se procesarán aquellos que sean getFK y en otros caso generará una
      * excepción (ya que el método no existirá)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-05-03
+     * @version 2014-05-05
      */
     public function __call($method, $args)
     {
@@ -285,7 +290,11 @@ abstract class Model extends Object
             // asegurarse que sea un getFK (ya que debe existir en fkNamespace)
             if (isset($this::$fkNamespace['Model_'.$fk])) {
                 $fkClass = $this::$fkNamespace['Model_'.$fk].'\Model_'.$fk;
-                $fkObj = new $fkClass($this->{Utility_Inflector::underscore($fk)});
+                if (isset($args[0])) {
+                    $fkObj = new $fkClass($args[0]);
+                } else {
+                    $fkObj = new $fkClass($this->{Utility_Inflector::underscore($fk)});
+                }
                 if ($fkObj->exists()) {
                     return $fkObj;
                 }

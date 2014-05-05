@@ -169,7 +169,7 @@ class Module
     {
         // Si existe el nombre del modulo, se indica si esta o no cargado
         if ($module) {
-                return isset(self::$_modules[$module]);
+            return isset(self::$_modules[$module]);
         }
         // Se retornan todos los modules cargados
         $return = array_keys(self::$_modules);
