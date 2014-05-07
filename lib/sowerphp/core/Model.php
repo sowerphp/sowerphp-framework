@@ -194,7 +194,7 @@ abstract class Model extends Object
      * Método para insertar el objeto en la base de datos
      * @return =true si se logró insertar, =false en caso de algún problema
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-05-04
+     * @version 2014-05-06
      */
     protected function insert ()
     {
@@ -222,7 +222,7 @@ abstract class Model extends Object
             )
         ', $values);
         if ($stmt->errorCode()==='00000') {
-            if (isset($this->id)) {
+            if (property_exists($this, 'id')) {
                 $this->id = $this->db->getValue('SELECT MAX(id) FROM '.$this->_table);
             }
             $this->db->commit();
