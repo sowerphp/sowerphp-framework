@@ -27,7 +27,7 @@ namespace sowerphp\core;
  * Clase para manejar rutas de la aplicación
  * Las rutas conectan URLs con controladores y acciones
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-17
+ * @version 2014-05-06
  */
 class Routing_Router
 {
@@ -165,18 +165,16 @@ class Routing_Router
      * @param module Nombre del módulo (ejemplo: Nombre.De.ModuloQueSeEjecuta)
      * @return URL sin el módulo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-14
+     * @version 2014-05-06
      */
     private static function urlClean ($url, $module)
     {
         if ($module) {
-            $count = 1;
-            return substr(
-                    str_replace(
-                        str_replace('.', '/', Utility_Inflector::underscore($module))
-                        , '',
-                        $url,
-                        $count
+            $url = substr(
+                    str_replace_first(
+                        str_replace('.', '/', Utility_Inflector::underscore($module)),
+                        '',
+                        $url
                     )
                     , 1
             );

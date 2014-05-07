@@ -194,3 +194,21 @@ function string_random ($length=10, $uc=true, $n=true, $sc=false)
     }
     return $rstr;
 }
+
+/**
+ * Función para realizar reemplazo en un string solo en la primera ocurrencia
+ * @param search String que se busca
+ * @param replace String con que reemplazar lo buscado
+ * @param subject String donde se está buscando
+ * @return String nuevo con el reemplazo realizado
+ * @author http://stackoverflow.com/a/1252710
+ * @version 2011-09-06
+ */
+function str_replace_first ($search, $replace, $subject)
+{
+    $pos = strpos ($subject, $search);
+    if ($pos !== false) {
+        return substr_replace($subject, $replace, $pos, strlen($search));
+    }
+    return $subject;
+}
