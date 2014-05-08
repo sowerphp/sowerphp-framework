@@ -35,11 +35,12 @@ class Model_Datasource_Session
      * Método que inicia la sesión
      * @param expires Indica el tiempo en segundos en que expirará la cookie de la sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-22
+     * @version 2014-05-08
      */
     public static function start ($expires = 3600)
     {
-        session_set_cookie_params ($expires, (new Network_Request())->base());
+        $path = (new Network_Request())->base();
+        session_set_cookie_params ($expires, ($path!=''?$path:'/'));
         session_start();
     }
 
