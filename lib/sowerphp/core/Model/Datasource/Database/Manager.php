@@ -227,7 +227,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param table Tabla a buscar sus datos
      * @return Arreglo con los datos de la tabla
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-11-27
+     * @version 2014-05-10
      */
     public function getInfoFromTable ($tablename)
     {
@@ -253,7 +253,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
             // definir si es auto_increment (depende de la base de datos como se hace)
             if ($this->config['type']=='PostgreSQL') {
                 $column['auto'] = substr($column['default'], 0, 7)=='nextval' ? 1 : 0;
-            } else if ($this->config['type']=='MySQL') {
+            } else if ($this->config['type']=='MariaDB' || $this->config['type']=='MySQL') {
                 $column['auto'] = $column['extra']=='auto_increment' ? 1 : 0;
                 unset ($column['extra']);
             }
