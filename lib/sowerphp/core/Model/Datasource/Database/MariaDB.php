@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/gpl.html>.
  */
 
-namespace \sowerphp\core;
+namespace sowerphp\core;
 
 /**
  * Clase para trabajar con una base de datos MariaDB
