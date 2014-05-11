@@ -27,13 +27,14 @@ namespace sowerphp\core;
  * @file es.php
  * Reglas de español para clase Inflector
  * @author http://joecabezas.tumblr.com/post/572538183/espanolizando-cakephp-mediante-inflections-version
- * @version 2014-03-22
+ * @version 2014-05-10
  */
 
 // reglas para pasar de plural a singular
 Utility_Inflector::rules('singular', array(
     'rules' => array (
         '/bles$/i' => 'ble', // by DeLaF
+        '/ses$/i' => 's', // by DeLaF
         '/([r|d|j|n|l|m|y|z])es$/i' => '\1',
         '/as$/i' => 'a',
         '/([ti])a$/i' => '\1a'
@@ -48,6 +49,6 @@ Utility_Inflector::rules('plural', array(
         '/([r|d|j|n|l|m|y|z])$/i' => '\1es',
         '/a$/i' => '\1as'
     ),
-    'irregular' => array(),
+    'irregular' => array('pais'=>'paises'), // by DeLaF
     'uninflected' => array()
 ));
