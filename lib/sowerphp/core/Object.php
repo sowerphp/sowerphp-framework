@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase genérica con método para trabajar con cualquier objeto
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-19
+ * @version 2014-05-14
  */
 abstract class Object
 {
@@ -43,36 +43,20 @@ abstract class Object
     }
 
     /**
-     * Método para obtener los atributos del objeto y sus valores como
-     * un arreglo
-     * @return Arreglo asociativo con los atributos y valores del objeto
+     * Método para setear los atributos de la clase
+     * @param array Arreglo con los datos que se deben asignar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-10-07
+     * @version 2014-05-14
      */
-    public function toArray ()
+    public function set ($array)
     {
-        $array = array();
-        foreach ($this as $key => &$value) {
-            $array[$key] = $value;
-        }
-        return $array;
-    }
-
-    /**
-     * Método que asigna múltiples atributos de un objeto
-     * @param properties Arreglo asociativo con los atributos a asignar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-10-29
-     */
-    protected function _set ($properties = array())
-    {
-        if (is_array($properties) && !empty($properties)) {
-            $vars = get_object_vars($this);
-            foreach ($properties as $key => $val) {
-                if (array_key_exists($key, $vars)) {
-                    $this->{$key} = $val;
-                }
-            }
+        $props = (new \ReflectionClass($this))->getProperties(
+            \ReflectionProperty::IS_PUBLIC
+        );
+        foreach ($props as &$prop) {
+            $name = $prop->getName();
+            if (isset($array[$name]))
+                $this->$name = $array[$name];
         }
     }
 

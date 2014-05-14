@@ -27,7 +27,7 @@ namespace sowerphp\core;
  * Clase abstracta para todos los modelos
  * Permite trabajar con un registro de la tabla
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-05-05
+ * @version 2014-05-14
  */
 abstract class Model extends Object
 {
@@ -89,20 +89,6 @@ abstract class Model extends Object
         }
         $pk['where'] = implode(' AND ', $pk['where']);
         return $pk;
-    }
-
-    /**
-     * Método para setear los atributos de la clase
-     * @param array Arreglo con los datos que se deben asignar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
-     */
-    public function set ($array)
-    {
-        foreach ($this::$columnsInfo as $a => $data) {
-            if (isset($array[$a]))
-                $this->$a = $array[$a];
-        }
     }
 
     /**
