@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para el envío de correo electrónico
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-04
+ * @version 2014-06-03
  */
 class Network_Email
 {
@@ -83,6 +83,20 @@ class Network_Email
     public function setDebug ($debug = false)
     {
         $this->_debug = $debug;
+    }
+
+    /**
+     * Asignar desde que cuenta enviar el correo
+     * @param email Correo desde donde se envía supuestamente el email
+     * @param name Nombre de quien envía supuestamente el email
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-06-03
+     */
+    public function from ($email, $name = null) {
+        $this->_config['from'] = array (
+            'email' => $email,
+            'name' => $name?$name:$email,
+        );
     }
 
     /**
