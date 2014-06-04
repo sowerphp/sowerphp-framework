@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para manejar la internacionalización
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-22
+ * @version 2014-06-04
  */
 class I18n
 {
@@ -34,6 +34,7 @@ class I18n
     public static $locale = array ( ///< Mapeo de idioma a locale
         'es' => 'es_CL.utf8',
         'en' => 'en_US.utf8',
+        'it' => 'it_IT.utf8',
     );
 
     /**
@@ -77,7 +78,7 @@ class I18n
      * @param locale Localee (o idioma) al cual traducir el texto
      * @param encoding Tipo de codificación de las traducciones
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-21
+     * @version 2014-06-04
      */
     public static function translate ($string, $domain = 'master',
                                         $locale = null, $encoding = 'UTF-8')
@@ -85,8 +86,12 @@ class I18n
         if (!$locale) {
             $locale = Model_Datasource_Session::read('config.language');
         }
-        if (!strpos($locale, '_'))
+        if (!strpos($locale, '_')) {
+            if (!isset(self::$locale[$locale])) {
+                $locale = Configure::read('language');
+            }
             $locale = self::$locale[$locale];
+        }
         putenv("LANG=".$locale);
         setlocale(LC_MESSAGES, $locale);
         bindtextdomain($domain, DIR_WEBSITE.'/Locale');
