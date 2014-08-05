@@ -86,4 +86,21 @@ abstract class Shell
         file_put_contents ($filename, $data);
     }
 
+    /**
+     * Método para mostrar estadísticas finales de la ejecución del comando
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-08-05
+     */
+    public function showStats()
+    {
+        // tiempo que tomó la ejecución del comando
+        $time = microtime(true) - TIME_START;
+        if ($time<60)
+            $this->out('Proceso ejecutado en '.num($time,1).' segundos.');
+        else if ($time<3600)
+            $this->out('Proceso ejecutado en '.num($time/60,1).' minutos.');
+        else
+            $this->out('Proceso ejecutado en '.num($time/3600,1).' horas.');
+    }
+
 }
