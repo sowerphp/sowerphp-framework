@@ -59,7 +59,7 @@ class Shell_Exec
      * @return Resultado de la ejecución del comando
      * @todo Utilizar shells que estén dentro de módulos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-25
+     * @version 2014-08-05
      */
     private static function dispatch ($command, $args)
     {
@@ -71,12 +71,22 @@ class Shell_Exec
         // Crear objeto
         $class = \sowerphp\core\App::findClass('Shell_Command_'.$command);
         if (!class_exists($class)) {
-            echo 'SowerPHP shell: '.$command.': no se encontró la orden',"\n";
+            echo 'SowerPHP shell: ',$command,': no se encontró la orden',"\n";
             return 1;
         }
         $shell = new $class();
-        // Invocar mail
+        // Invocar main
         $method = new \ReflectionMethod($shell, 'main');
+        if (count($args)<$method->getNumberOfRequiredParameters()) {
+            echo 'SowerPHP shell: ',$command,': requiere al menos ',
+                $method->getNumberOfRequiredParameters(),' parámetro(s)',"\n";
+            echo '   Modo de uso: ',$command,' ';
+            foreach($method->getParameters() as &$p) {
+                echo ($p->isOptional() ? '['.$p->name.']' : $p->name),' ';
+            }
+            echo "\n";
+            return 1;
+        }
         $return = $method->invokeArgs($shell, $args);
         // Retornar estado
         return $return ? $return : 0;
