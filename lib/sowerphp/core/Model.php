@@ -113,7 +113,7 @@ abstract class Model extends Object
         if (count($datos)) {
             foreach ($datos as $key => &$value) {
                 if ($this::$columnsInfo[$key]['type']=='boolean') {
-                    $value = $value===true ? 1 : 0;
+                    $value = (int)$value;
                 }
                 $this->{$key} = $value;
             }
