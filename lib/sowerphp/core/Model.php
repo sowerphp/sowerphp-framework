@@ -266,7 +266,7 @@ abstract class Model extends Object
      * se procesarán aquellos que sean getFK y en otros caso generará una
      * excepción (ya que el método no existirá)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-05-05
+     * @version 2014-09-11
      */
     public function __call($method, $args)
     {
@@ -274,7 +274,7 @@ abstract class Model extends Object
         if (substr($method, 0, 3)=='get') {
             $fk = substr($method, 3);
             // asegurarse que sea un getFK (ya que debe existir en fkNamespace)
-            if (isset($this::$fkNamespace['Model_'.$fk])) {
+            if (isset($this::$fkNamespace) && isset($this::$fkNamespace['Model_'.$fk])) {
                 $fkClass = $this::$fkNamespace['Model_'.$fk].'\Model_'.$fk;
                 if (isset($args[0])) {
                     $fkObj = new $fkClass($args[0]);
@@ -286,11 +286,11 @@ abstract class Model extends Object
                 }
                 return null;
             }
-        } else {
-            throw new Exception(array(
-                sprintf ('Método %s::%s() no existe', get_class($this), $method)
-            ));
         }
+        // si el método no es getFK() se genera una excepción
+        throw new Exception(array(
+            sprintf ('Método %s::%s() no existe', get_class($this), $method)
+        ));
     }
 
     /**
