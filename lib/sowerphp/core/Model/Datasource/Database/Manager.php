@@ -170,14 +170,19 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param params Parámetros que se deben enlazar a la consulta
      * @return Array Arreglo unidimensional con los índices y sus datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
+     * @version 2014-09-13
      */
     public function getAssociativeArray ($sql, $params = array())
     {
         $table = $this->getTable($sql, $params);
         $array = array();
         foreach ($table as &$row) {
-            $array[array_shift($row)] = array_shift($row);
+            if (count($row)==2) {
+                $array[array_shift($row)] = array_shift($row);
+            } else {
+                $key = array_shift($row);
+                $array[$key] = $row;
+            }
         }
         return $array;
     }
