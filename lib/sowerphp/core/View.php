@@ -60,7 +60,7 @@ class View
      * @param location Ubicación de la vista
      * @return Buffer de la página renderizada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-22
+     * @version 2014-09-14
      */
     public function render ($page, $location = null)
     {
@@ -131,6 +131,7 @@ class View
             '_timestamp' => date(Configure::read('time.format'), filemtime($location)),
             '_layout' => $this->layout,
             '_content' => $page_content,
+            '_loadtime' => round(microtime(true)-TIME_START, 2),
         ), $this->viewVars));
     }
 
