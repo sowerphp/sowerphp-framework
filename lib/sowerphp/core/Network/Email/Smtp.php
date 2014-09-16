@@ -23,15 +23,12 @@
 
 namespace sowerphp\core;
 
-// desactivar errores (ya que Mail genera problemas al estar E_STRICT activo)
-ini_set('error_reporting', false);
-
 /**
  * Clase para enviar correo electrónico mediante SMTP
  * Requiere:
  *   # pear install Mail Mail_mime Net_SMTP
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-26
+ * @version 2014-09-16
  */
 class Network_Email_Smtp
 {
@@ -47,7 +44,7 @@ class Network_Email_Smtp
      * @param data Datos (cuerpo) de correo electrónico
      * @param debug =true se muestra debug, =false modo silencioso
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2010-10-09
+     * @version 2019-09-16
      */
     public function __construct ($config, $header, $data, $debug = false)
     {
@@ -67,13 +64,15 @@ class Network_Email_Smtp
         $this->_header = $header;
         // Datos
         $this->_data = $data;
+        // desactivar errores (ya que Mail no pasa validación E_STRICT)
+        ini_set('error_reporting', false);
     }
 
     /**
      * Método que envía el correo
      * @return Arreglo con los estados de retorno por cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-24
+     * @version 2014-09-16
      */
     public function send ()
     {
@@ -97,24 +96,20 @@ class Network_Email_Smtp
         }
         // cuerpo y cabecera
         $body = $mail->get(); // debe llamarse antes de headers
+        $to = implode(', ', $this->_header['to']);
         $headers = $mail->headers(array(
             'From' => "{$this->_header['from']['name']} <{$this->_header['from']['email']}>",
             'Reply-To' => $this->_header['replyTo'],
+            'To' => $to,
             'Return-Path' => $this->_header['replyTo'],
             'Subject' => $this->_header['subject'],
         ));
-        // Enviar correo a todos los destinatarios
-        $status = array();
-        foreach ($this->_header['to'] as &$to) {
-            // Enviar correo al destinatario
-            $mailer->send($mail->encodeRecipients($to), $headers, $body);
-            // Guardar estado de error en caso de que haya algún problema
-            if (\PEAR::isError($mailer)) {
-                $status[$to] = $mail->getMessage();
-            }
+        if(!empty($this->_header['bcc'])) {
+            $to .= ', '.implode(', ', $this->_header['bcc']);
         }
-        // Retornar estado del envío (arreglo asociativo) o true si todo fue ok
-        return count($status) ? $status : true;
+        // Enviar correo a todos los destinatarios
+        $mailer->send($to, $headers, $body);
+        return \PEAR::isError($mailer) ? $mail->getMessage() : true;
     }
 
 }

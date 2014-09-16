@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para el envío de correo electrónico
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-06-03
+ * @version 2014-09-16
  */
 class Network_Email
 {
@@ -34,6 +34,7 @@ class Network_Email
     protected $_config = null; ///< Arreglo con la configuración para el correo electrónico
     protected $_replyTo = null; ///< A quien se debe responder el correo enviado
     protected $_to = array(); ///< Listado de destinatarios
+    protected $_bcc = array(); ///< Listado de destinatarios BCC
     protected $_subject = null; ///< Asunto del correo que se enviará
     protected $_attach = array(); ///< Archivos adjuntos
     protected $_debug = false; ///< Si se debe mostrar datos de debug o no
@@ -126,10 +127,30 @@ class Network_Email
             // Poder eliminar los duplicados
             foreach ($email as &$e)
                 $this->to($e);
-            }
+        }
         // En caso que se haya pasado un solo correo
         else if (!in_array($email, $this->_to))
             $this->_to[] = $email;
+    }
+
+    /**
+     * Asigna la lista de destinatarios BCC
+     * @param email Email o arreglo con los emails que se desean agregar como destinatarios
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-09-16
+     */
+    public function bcc ($email)
+    {
+        // En caso que se haya pasado un arreglo con los correos
+        if (is_array($email)) {
+            // Asignar los correos, no se copia directamente el arreglo para
+            // Poder eliminar los duplicados
+            foreach ($email as &$e)
+                $this->bcc($e);
+        }
+        // En caso que se haya pasado un solo correo
+        else if (!in_array($email, $this->_bcc))
+            $this->_bcc[] = $email;
     }
 
     /**
@@ -179,6 +200,7 @@ class Network_Email
             'from'=>$this->_config['from'],
             'replyTo'=>$this->_replyTo,
             'to'=>$this->_to,
+            'bcc'=>$this->_bcc,
             'subject'=>$this->_subject
         );
         unset($this->_config['from']);
