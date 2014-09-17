@@ -36,10 +36,12 @@ class Shell_Exec
      * @param argv Argumentos pasados al script (incluye comando)
      * @return Resultado de la ejecición del comando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-09-14
+     * @version 2014-09-17
      */
     public static function run ($argv)
     {
+        // cambiar tiempo de ejecución a infinito
+        set_time_limit(0);
         // Determinar que ejecutar
         if (!empty($argv[1])) {
             $command = ucfirst($argv[1]);
