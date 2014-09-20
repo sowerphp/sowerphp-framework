@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase base para los controladores de la aplicación
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-22
+ * @version 2014-09-19
  */
 abstract class Controller
 {
@@ -39,6 +39,7 @@ abstract class Controller
     public $components = array(); ///< Nombre de componentes que este controlador utiliza
     public $layout; ///< Layout que se usará por defecto para renderizar
     public $View = null; ///< Objeto para la vista que utilizará el controlador
+    protected $redirect = null; ///< Donde redireccionar una vez que se ha terminado de ejecutar la acción (incluyendo renderizado de vista)
 
     /**
      * Constructor de la clase
@@ -105,10 +106,22 @@ abstract class Controller
     /**
      * Método que se ejecuta al terminar la ejecución del controlador
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-06
+     * @version 2014-09-19
      */
     public function afterFilter ()
     {
+        if ($this->redirect !== null) {
+            if (!is_array($this->redirect)) {
+                $this->redirect($this->redirect);
+            } else {
+                if (isset($this->redirect['msg'])) {
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        $this->redirect['msg']
+                    );
+                }
+                $this->redirect($this->redirect['page']);
+            }
+        }
         if ($this->Components) {
             $this->Components->trigger('afterFilter');
         }
