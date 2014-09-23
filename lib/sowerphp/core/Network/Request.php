@@ -85,13 +85,13 @@ class Network_Request
      * Método que determina los campos base y webroot
      * @return Base de la URL
      * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
+     * @version 2014-09-23
      */
     public function base ()
     {
         if (!isset($_SERVER['REQUEST_URI']))
             return null;
-        $parts = explode('?', $_SERVER['REQUEST_URI']);
+        $parts = explode('?', urldecode($_SERVER['REQUEST_URI']));
         $last = strrpos($parts[0], $this->request);
         $this->base = $last!==FALSE ? substr($parts[0], 0, $last) : $parts[0];
         $pos = strlen($this->base)-1;
