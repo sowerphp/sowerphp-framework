@@ -165,13 +165,13 @@ class Routing_Router
      * @param module Nombre del módulo (ejemplo: Nombre.De.ModuloQueSeEjecuta)
      * @return URL sin el módulo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-05-06
+     * @version 2014-10-01
      */
     private static function urlClean ($url, $module)
     {
         if ($module) {
             $url = substr(
-                    str_replace_first(
+                    Utility_String::replaceFirst(
                         str_replace('.', '/', Utility_Inflector::underscore($module)),
                         '',
                         $url
