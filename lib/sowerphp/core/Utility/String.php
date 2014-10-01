@@ -354,4 +354,78 @@ class Utility_String {
 		}
 		return $wrapped;
 	}
+
+
+    /**
+     * Método que genera un string de manera aleatoria
+     * @param length Tamaño del string que se desea generar
+     * @param uc Si se desea (=true) o no (=false) usar mayúsculas
+     * @param n Si se desea (=true) o no (=false) usar números
+     * @param sc Si se desea (=true) o no (=false) usar caracteres especiales
+     * @author http://phpes.wordpress.com/2007/06/12/generador-de-una-cadena-aleatoria/
+     */
+    public static function random ($length=10, $uc=true, $n=true, $sc=false)
+    {
+        $source = 'abcdefghijklmnopqrstuvwxyz';
+        if ($uc) $source .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        if ($n) $source .= '0123456789';
+        if ($sc) $source .= '|@#~$%()=^*+[]{}-_';
+        if ($length>0) {
+            $rstr = '';
+            $source = str_split($source,1);
+            for ($i=1; $i<=$length; $i++){
+                mt_srand((double)microtime() * 1000000);
+                $num = mt_rand(1,count($source));
+                $rstr .= $source[$num-1];
+            }
+        }
+        return $rstr;
+    }
+
+    /**
+     * Método para realizar reemplazo en un string solo en la primera ocurrencia
+     * @param search String que se busca
+     * @param replace String con que reemplazar lo buscado
+     * @param subject String donde se está buscando
+     * @return String nuevo con el reemplazo realizado
+     * @author http://stackoverflow.com/a/1252710
+     * @version 2011-09-06
+     */
+    public static function replaceFirst ($search, $replace, $subject)
+    {
+        $pos = strpos ($subject, $search);
+        if ($pos !== false) {
+            return substr_replace($subject, $replace, $pos, strlen($search));
+        }
+        return $subject;
+    }
+
+    /**
+     * Convierte una cadena de texto "normal" a una del tipo url, ejemplo:
+     *   Cadena normal: Esto es un texto
+     *   Cadena convertida: esto-es-un-texto
+     * @param string String a convertir
+     * @param encoding Codificación del string
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-02-17
+     */
+    public static function normalize($string, $encoding = 'UTF-8')
+    {
+        // tranformamos todo a minúsculas
+        $string = mb_strtolower($string, $encoding);
+        // rememplazamos carácteres especiales latinos
+        $find = array('á', 'é', 'í', 'ó', 'ú', 'ñ');
+        $repl = array('a', 'e', 'i', 'o', 'u', 'n');
+        $string = str_replace($find, $repl, $string);
+        // añadimos los guiones
+        $find = array(' ', '&', '\r\n', '\n', '+', '_');
+        $string = str_replace($find, '-', $string);
+        // eliminamos y reemplazamos otros caracteres especiales
+        $find = array('/[^a-z0-9\-<>]/', '/[\-]+/', '/<[^>]*>/');
+        $repl = array('', '-', '');
+        $string = preg_replace($find, $repl, $string);
+        unset($find, $repl);
+        return $string;
+    }
+
 }

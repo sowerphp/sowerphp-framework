@@ -42,12 +42,12 @@ abstract class Controller_Component
      * @param Components Colección de componentes
      * @param settings Opciones para la carga de componentes
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-06
+     * @version 2014-10-01
      */
     public function __construct(Controller_Component_Collection $Components, $settings = array())
     {
         $this->Components = $Components;
-        $this->settings = array_merge_recursive_distinct (
+        $this->settings = Utility_Array::mergeRecursiveDistinct (
             $this->settings, $settings
         );
     }
