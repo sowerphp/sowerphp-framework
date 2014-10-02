@@ -38,19 +38,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     protected $inTransaction = false; ///< Indica si nos encontramos en una transacción
 
     /**
-     * Método para sanitizar valores que se utilizarán en las consultas
-     * @deprecated Existe por compatibilidad hasta migrar código a consultas preparadas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-25
-     */
-    public function sanitize ($s)
-    {
-        $from = ['\'', '"', ';', '--', '='];
-        $to = ['\\\'', '\"', '\;', '\-\-', '\='];
-        return str_replace($from, $to, $s);
-    }
-
-    /**
      * Manejador de errores para la base de datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-21
