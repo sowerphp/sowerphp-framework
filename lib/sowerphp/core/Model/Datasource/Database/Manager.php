@@ -97,7 +97,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
         $stmt->execute();
         if(!$stmt || $stmt->errorCode()!=='00000') {
             $this->error(
-                $sql."\n\n".implode("\n", $this->errorInfo())
+                implode("\n", $stmt->errorInfo())."\n\n".$sql
             );
         }
         // retornar identificador de la consulta

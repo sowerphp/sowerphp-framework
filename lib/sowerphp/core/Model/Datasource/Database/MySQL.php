@@ -38,7 +38,7 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      * conexión
      * @param config Arreglo con los parámetros de la conexión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-30
+     * @version 2014-10-02
      */
     public function __construct ($config)
     {
@@ -58,7 +58,7 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
                 $this->config['user'],
                 $this->config['pass'],
                 [
-                    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+                    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_SILENT,
                     \PDO::ATTR_PERSISTENT => true,
                     \PDO::MYSQL_ATTR_COMPRESS => true
                 ]
