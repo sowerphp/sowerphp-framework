@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para trabajar con una base de datos PostgreSQL
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-25
+ * @version 2014-10-02
  */
 class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Manager
 {
@@ -81,19 +81,6 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
     public function setLimit ($sql, $records, $offset = 0)
     {
         return $sql.' LIMIT '.(int)$records.' OFFSET '.(int)$offset;
-    }
-
-    /**
-     * Genera filtro para utilizar like en la consulta SQL
-     * @param colum Columna por la que se filtrará (se sanitiza)
-     * @param value Valor a buscar mediante like (se sanitiza)
-     * @return String Filtro utilizando like
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-11
-     */
-    public function like ($column, $value)
-    {
-        return $column.' ILIKE \''.$value.'\'';
     }
 
     /**

@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para trabajar con una base de datos MySQL
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-30
+ * @version 2014-10-02
  */
 class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
 {
@@ -77,19 +77,6 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
     public function setLimit ($sql, $records, $offset = 0)
     {
         return $sql.' LIMIT '.(int)$offset.','.(int)$records;
-    }
-
-    /**
-     * Genera filtro para utilizar like en la consulta SQL
-     * @param colum Columna por la que se filtrará
-     * @param value Valor a buscar mediante like
-     * @return String Filtro utilizando like
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-26
-     */
-    public function like ($column, $value)
-    {
-        return $column.' LIKE \''.$value.'\'';
     }
 
     /**
