@@ -40,7 +40,7 @@ class Controller_Component_Collection extends Object_Collection
      * controlador con el nombre del componente
      * @param Controller Controlador para el que se usan los componentes
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-23
+     * @version 2014-10-14
      */
     public function init (Controller $Controller)
     {
@@ -52,6 +52,7 @@ class Controller_Component_Collection extends Object_Collection
             $Controller->{$name} = $this->load (
                 $properties['class'], $properties['settings']
             );
+            $Controller->{$name}->controller = &$Controller;
         }
     }
 
@@ -89,13 +90,10 @@ class Controller_Component_Collection extends Object_Collection
      * @param callback Función que se debe ejecutar (ej: beforeRender)
      * @param params Parámetros que se pasarán a la función callback
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-06
+     * @version 2014-10-14
      */
-    public function trigger($callback, $params = array())
+    public function trigger($callback, $params = [])
     {
-        // Agregar el controlador a los parámetros recibidos
-        array_unshift($params, $this->_Controller);
-        // Para cada componente ejecutar los métodos del evento
         foreach ($this->_loaded as $object) {
             call_user_func_array(array($object, $callback), $params);
         }

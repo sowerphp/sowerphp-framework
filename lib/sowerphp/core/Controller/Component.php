@@ -26,15 +26,15 @@ namespace sowerphp\core;
 /**
  * Clase base para todos los componentes
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-22
+ * @version 2014-10-14
  */
 abstract class Controller_Component
 {
 
-    public $request; ///< Objeto Request
-    public $settings = array(); ///< Opciones del componente
-    public $Components = null; ///< Colección de componentes que se cargarán
-    public $components = array(); ///< Nombre de componentes que este componente utiliza
+    public $settings = []; ///< Opciones del componente
+    public $controller; ///< Controlador que está cargando el componente
+    protected $components = []; ///< Nombre de componentes que este componente utiliza
+    protected $Components = null; ///< Colección de componentes que se cargarán
 
     /**
      * Constructor de la clase
@@ -42,7 +42,7 @@ abstract class Controller_Component
      * @param Components Colección de componentes
      * @param settings Opciones para la carga de componentes
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-01
+     * @version 2014-10-14
      */
     public function __construct(Controller_Component_Collection $Components, $settings = array())
     {
@@ -55,46 +55,42 @@ abstract class Controller_Component
     /**
      * Método llamado desde Controller::beforeFilter()
      * Deberá se sobreescrito en el componente si se quiere utilizar
-     * @param controller Controllador que está siendo usado en el momento
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-06
+     * @version 2014-10-14
      */
-    public function beforeFilter ($controller)
+    public function beforeFilter()
     {
     }
 
     /**
      * Método llamado desde Controller::afterFilter()
      * Deberá se sobreescrito en el componente si se quiere utilizar
-     * @param controller Controllador que está siendo usado en el momento
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-06
+     * @version 2014-10-14
      */
-    public function afterFilter ($controller)
+    public function afterFilter()
     {
     }
 
     /**
      * Método llamado desde Controller::beforeRender()
      * Deberá se sobreescrito en el componente si se quiere utilizar
-     * @param controller Controllador que está siendo usado en el momento
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-06
+     * @version 2014-10-14
      */
-    public function beforeRender ($controller)
+    public function beforeRender()
     {
     }
 
     /**
      * Método llamado desde Controller::beforeRedirect()
      * Deberá se sobreescrito en el componente si se quiere utilizar
-     * @param controller Controllador que está siendo usado en el momento
      * @param url Dirección hacia donde se está redirigiendo
      * @param status Estado de términi del script (0 es todo ok)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-06
+     * @version 2014-10-14
      */
-    public function beforeRedirect ($controller, $url = null, $status = null)
+    public function beforeRedirect($url = null, $status = null)
     {
     }
 
