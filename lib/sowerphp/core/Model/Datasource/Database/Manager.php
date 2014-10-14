@@ -29,13 +29,14 @@ namespace sowerphp\core;
  * Define métodos que deberán ser implementados, clases específicas para
  * la conexión con X base de datos deberán extender esta clase
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-25
+ * @version 2014-10-14
  */
 abstract class Model_Datasource_Database_Manager extends \PDO
 {
 
     public $config; ///< Configuración de la base de datos
     protected $inTransaction = false; ///< Indica si nos encontramos en una transacción
+    public static $querysCount = 0; ///< Indica la cantidad de consultas que se han realizado entre todas las BD
 
     /**
      * Manejador de errores para la base de datos
@@ -57,7 +58,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param params Parámetros que se deben enlazar a la consulta
      * @return PDOStatement
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-24
+     * @version 2014-10-14
      */
     public function query ($sql, $params = array())
     {
@@ -65,6 +66,8 @@ abstract class Model_Datasource_Database_Manager extends \PDO
         if(empty($sql)) {
             $this->error('¡Consulta no puede estar vacía!');
         }
+        // contabilizar consulta
+        self::$querysCount++;
         // preparar consulta
         $stmt = $this->prepare($sql);
         //asignar parámetros
