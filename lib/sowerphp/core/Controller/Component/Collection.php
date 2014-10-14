@@ -44,7 +44,7 @@ class Controller_Component_Collection extends Object_Collection
      */
     public function init (Controller $Controller)
     {
-        $this->_Controller = $Controller;
+        $this->_Controller = &$Controller;
         $components = self::normalizeObjectArray (
             $Controller->components
         );
@@ -52,7 +52,6 @@ class Controller_Component_Collection extends Object_Collection
             $Controller->{$name} = $this->load (
                 $properties['class'], $properties['settings']
             );
-            $Controller->{$name}->controller = &$Controller;
         }
     }
 
@@ -62,7 +61,7 @@ class Controller_Component_Collection extends Object_Collection
      * @param settins Opciones para el componente
      * @return Componente cargado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-23
+     * @version 2014-10-14
      */
     public function load ($component, $settings = array())
     {
@@ -79,7 +78,7 @@ class Controller_Component_Collection extends Object_Collection
         }
         // cargar componente
         $this->_loaded[$component] = new $componentClass($this, $settings);
-        $this->_loaded[$component]->request = $this->_Controller->request;
+        $this->_loaded[$component]->controller = &$this->_Controller;
         // retornar componente
         return $this->_loaded[$component];
     }
