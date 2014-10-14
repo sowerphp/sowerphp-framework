@@ -131,7 +131,6 @@ class View
             '_timestamp' => date(Configure::read('time.format'), filemtime($location)),
             '_layout' => $this->layout,
             '_content' => $page_content,
-            '_loadtime' => round(microtime(true)-TIME_START, 2),
         ), $this->viewVars));
     }
 
