@@ -266,7 +266,7 @@ abstract class Model extends Object
      * se procesarán aquellos que sean getFK y en otros caso generará una
      * excepción (ya que el método no existirá)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-11
+     * @version 2014-10-15
      */
     public function __call($method, $args)
     {
@@ -276,15 +276,14 @@ abstract class Model extends Object
             // asegurarse que sea un getFK (ya que debe existir en fkNamespace)
             if (isset($this::$fkNamespace) && isset($this::$fkNamespace['Model_'.$fk])) {
                 $fkClass = $this::$fkNamespace['Model_'.$fk].'\Model_'.$fk;
-                if (isset($args[0])) {
-                    $fkObj = new $fkClass($args[0]);
+                $fkClasss = \sowerphp\core\Utility_Inflector::pluralize($fkClass);
+                if (!class_exists($fkClasss)) {
+                    if (isset($args[0])) return new $fkClass($args[0]);
+                    else return new $fkClass($this->{Utility_Inflector::underscore($fk)});
                 } else {
-                    $fkObj = new $fkClass($this->{Utility_Inflector::underscore($fk)});
+                    if (isset($args[0])) return (new $fkClasss)->get($args[0]);
+                    else return (new $fkClasss)->get($this->{Utility_Inflector::underscore($fk)});
                 }
-                if ($fkObj->exists()) {
-                    return $fkObj;
-                }
-                return null;
             }
         }
         // si el método no es getFK() se genera una excepción
