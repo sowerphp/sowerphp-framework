@@ -389,4 +389,28 @@ abstract class Model extends Object
         $this->db->rollBack();
     }
 
+    /**
+     * Método que elimina la conexión a la base de datos antes de serializar
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-10-16
+     */
+    public function __sleep()
+    {
+        $this->db = null;
+        return array_keys(get_object_vars($this));
+    }
+
+    /**
+     * Método que recupera la conexión a la base de datos después de
+     * deserializar
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-10-16
+     */
+    public function __wakeup()
+    {
+        $this->db = \sowerphp\core\Model_Datasource_Database::get(
+            $this->_database
+        );
+    }
+
 }
