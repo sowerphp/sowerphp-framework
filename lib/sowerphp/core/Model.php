@@ -27,7 +27,7 @@ namespace sowerphp\core;
  * Clase abstracta para todos los modelos
  * Permite trabajar con un registro de la tabla
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-05-14
+ * @version 2014-09-25
  */
 abstract class Model extends Object
 {
@@ -358,6 +358,36 @@ abstract class Model extends Object
         }
         $this->db->rollBack();
         return false;
+    }
+
+    /**
+     * Wrapper para comenzar una transacción (permite usar fuera del modelo)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-09-25
+     */
+    public function beginTransaction()
+    {
+        $this->db->beginTransaction();
+    }
+
+    /**
+     * Wrapper para aceptar una transacción (permite usar fuera del modelo)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-09-25
+     */
+    public function commit()
+    {
+        $this->db->commit();
+    }
+
+    /**
+     * Wrapper para cancelar una transacción (permite usar fuera del modelo)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-09-25
+     */
+    public function rollBack()
+    {
+        $this->db->rollBack();
     }
 
 }
