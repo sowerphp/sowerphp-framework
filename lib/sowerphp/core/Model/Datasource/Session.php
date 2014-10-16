@@ -33,14 +33,20 @@ class Model_Datasource_Session
 
     /**
      * Método que inicia la sesión
-     * @param expires Indica el tiempo en segundos en que expirará la cookie de la sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-05-08
+     * @version 2014-10-16
      */
-    public static function start ($expires = 3600)
+    public static function start ()
     {
+        ini_set('session.use_only_cookies', true);
+        $session_name = 'sec_session_id';
         $path = (new Network_Request())->base();
-        session_set_cookie_params ($expires, ($path!=''?$path:'/'));
+        $path = $path!=''?$path:'/';
+        $domain = $_SERVER['HTTP_HOST'];
+        $secure = isset($_SERVER['HTTPS']) ? true : false;
+        $httponly = true;
+        session_set_cookie_params(0, $path, $domain, $secure, $httponly);
+        session_name($session_name);
         session_start();
     }
 
