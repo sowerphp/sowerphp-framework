@@ -47,7 +47,13 @@ class Cache
         if (class_exists('\Memcached')) {
             $this->_cache = new \Memcached();
             $this->_cache->addServer($host, $port);
-            $this->_prefix = $prefix ? $prefix : '';
+            if ($prefix) {
+                $this->_prefix = $prefix;
+            } else if (defined('DIR_PROJECT')) {
+                $this->_prefix = DIR_PROJECT.':';
+            } else {
+                $this->_prefix = '';
+            }
         }
     }
 
