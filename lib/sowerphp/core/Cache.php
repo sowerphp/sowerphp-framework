@@ -33,6 +33,8 @@ class Cache
 
     private $_cache = null; ///< Objeto Memcached
     private $_prefix; ///< Prefijo a utilizar en la clave del elemento en caché
+    public static $setCount = 0; ///< Contador para sets realizados
+    public static $getCount = 0; ///< Contador para gets realizados
 
     /**
      * Método que guarda en memoria un valor a ser cacheado
@@ -68,7 +70,9 @@ class Cache
     public function set($key, $value, $expires=600)
     {
         if (!$this->_cache) return false;
-        return $this->_cache->set($this->_prefix.$key, $value, $expires);
+        $result = $this->_cache->set($this->_prefix.$key, $value, $expires);
+        if ($result) self::$setCount++;
+        return $result;
     }
 
     /**
@@ -79,7 +83,9 @@ class Cache
     public function get($key)
     {
         if (!$this->_cache) return false;
-        return $this->_cache->get($this->_prefix.$key);
+        $result = $this->_cache->get($this->_prefix.$key);
+        if ($result) self::$getCount++;
+        return $result;
     }
 
     /**
