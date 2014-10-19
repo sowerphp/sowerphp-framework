@@ -34,7 +34,7 @@ class Model_Datasource_Session
     /**
      * Método que inicia la sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-16
+     * @version 2014-10-19
      */
     public static function start ()
     {
@@ -42,10 +42,10 @@ class Model_Datasource_Session
         $session_name = 'sec_session_id';
         $path = (new Network_Request())->base();
         $path = $path!=''?$path:'/';
-        $domain = $_SERVER['HTTP_HOST'];
+        $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
         $secure = isset($_SERVER['HTTPS']) ? true : false;
         $httponly = true;
-        session_set_cookie_params(0, $path, $domain, $secure, $httponly);
+        session_set_cookie_params(31536000, $path, $domain, $secure, $httponly);
         session_name($session_name);
         session_start();
     }
