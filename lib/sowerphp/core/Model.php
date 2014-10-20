@@ -325,38 +325,22 @@ abstract class Model extends Object
     }
 
     /**
-     * Método que guarda un archivo en la base de datos
-     * @return =true si se logró guardar el archivo, =false en caso de algún problema
+     * Método que asigna un archivo a los campos que corresponden en la clase
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-23
+     * @version 2014-10-19
      */
-    public function saveFile($name, $file)
+    public function setFile($name, $file)
     {
-        // verificar que exista el campo en la bd
-        if (!isset($this::$columnsInfo[$name.'_data'])) {
-            return false;
+        if (!isset($file['data'])) {
+            $file['data'] = fread(
+                fopen($file['tmp_name'], 'rb'),
+                filesize($file['tmp_name'])
+            );
         }
-        // preparar pk
-        $pk = $this->preparePk();
-        if (!$pk) return false;
-        // guardar archivo
-        $this->db->beginTransaction();
-        $stmt = $this->db->query(
-            'UPDATE '.$this->_table.'
-            SET
-                '.$name.'_data = :data,
-                '.$name.'_name = :name,
-                '.$name.'_type = :type,
-                '.$name.'_size = :size
-            WHERE '.$pk['where'],
-            $file
-        );
-        if ($stmt->errorCode()==='00000') {
-            $this->db->commit();
-            return true;
-        }
-        $this->db->rollBack();
-        return false;
+        $this->{$name.'_name'} = $file['name'];
+        $this->{$name.'_type'} = $file['type'];
+        $this->{$name.'_size'} = $file['size'];
+        $this->{$name.'_data'} = $file['data'];
     }
 
     /**
