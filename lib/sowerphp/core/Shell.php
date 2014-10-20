@@ -26,12 +26,13 @@ namespace sowerphp\core;
 /**
  * Clase base para todo comando de la Shell
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-22
+ * @version 2014-10-20
  */
 abstract class Shell
 {
 
     public $stdout; ///< Atributo con el objeto para la salida de datos
+    public $verbose = 0; ///< Nivel de "verbose" (cuanto "dice" el comando)
 
     /**
      * Constructor de la clase, asigna salida estándar a stdout

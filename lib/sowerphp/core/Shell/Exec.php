@@ -61,7 +61,7 @@ class Shell_Exec
      * @return Resultado de la ejecución del comando
      * @todo Utilizar shells que estén dentro de módulos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-08-05
+     * @version 2014-10-20
      */
     private static function dispatch ($command, $args)
     {
@@ -77,6 +77,14 @@ class Shell_Exec
             return 1;
         }
         $shell = new $class();
+        // poner modo verbose que corresponda (de 1 a 5)
+        $argc = count($args);
+        for ($i=0; $i<$argc; $i++) {
+            if (in_array($args[$i], ['-v', '-vv', '-vvv', '-vvvv', '-vvvvv'])) {
+                $shell->verbose = strlen($args[$i]) - 1;
+                unset($args[$i]);
+            }
+        }
         // Invocar main
         $method = new \ReflectionMethod($shell, 'main');
         if (count($args)<$method->getNumberOfRequiredParameters()) {
