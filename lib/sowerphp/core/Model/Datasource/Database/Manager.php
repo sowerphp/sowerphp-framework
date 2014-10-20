@@ -180,40 +180,43 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     /**
      * Wrapper para comenzar una transacción (evita iniciar más de una transacción)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
+     * @version 2014-10-20
      */
     public function beginTransaction ()
     {
-        if (!$this->inTransaction) {
+        if (!$this->inTransaction and parent::beginTransaction()) {
             $this->inTransaction = true;
-            parent::beginTransaction();
+            return true;
         }
+        return false;
     }
 
     /**
      * Wrapper para aceptar una transacción (evita aceptar más de una transacción)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
+     * @version 2014-10-20
      */
     public function commit ()
     {
-        if ($this->inTransaction) {
-            parent::commit();
+        if ($this->inTransaction and parent::commit()) {
             $this->inTransaction = false;
+            return true;
         }
+        return false;
     }
 
     /**
      * Wrapper para cancelar una transacción (evita cancelar más de una transacción)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
+     * @version 2014-10-20
      */
     public function rollBack ()
     {
-        if ($this->inTransaction) {
-            parent::rollBack();
+        if ($this->inTransaction and parent::rollBack()) {
             $this->inTransaction = false;
+            return true;
         }
+        return false;
     }
 
     /**
