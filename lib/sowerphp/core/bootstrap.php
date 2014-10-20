@@ -52,6 +52,19 @@ spl_autoload_register ('\sowerphp\core\App::loadClass');
 \sowerphp\core\App::createLayers ($_EXTENSIONS);
 unset ($_EXTENSIONS);
 
+// Definir si la aplicación se ejecuta en ambiente de desarrollo
+// Si estamos en Apache se debe definir en /etc/httpd/conf/httpd.conf:
+//   SetEnv APPLICATION_ENV "dev".
+// Si estamos en una terminal se debe pasar el flas: --dev
+global $argv;
+if ((isset($_SERVER['APPLICATION_ENV']) and $_SERVER['APPLICATION_ENV']=='dev')) {
+    define('ENVIRONMENT_DEV', true);
+} else if ((is_array($argv) and in_array('--dev', $argv))) {
+    define('ENVIRONMENT_DEV', true);
+    // se quita flasg --dev de los argumentos
+    unset($argv[array_search('--dev', $argv)]);
+}
+
 // Iniciar sesión y configurar el sitio
 \sowerphp\core\Model_Datasource_Session::start ();
 \sowerphp\core\Configure::bootstrap ();
