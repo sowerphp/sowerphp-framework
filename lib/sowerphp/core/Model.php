@@ -344,36 +344,6 @@ abstract class Model extends Object
     }
 
     /**
-     * Wrapper para comenzar una transacción (permite usar fuera del modelo)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-25
-     */
-    public function beginTransaction()
-    {
-        $this->db->beginTransaction();
-    }
-
-    /**
-     * Wrapper para aceptar una transacción (permite usar fuera del modelo)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-25
-     */
-    public function commit()
-    {
-        $this->db->commit();
-    }
-
-    /**
-     * Wrapper para cancelar una transacción (permite usar fuera del modelo)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-25
-     */
-    public function rollBack()
-    {
-        $this->db->rollBack();
-    }
-
-    /**
      * Método que elimina la conexión a la base de datos antes de serializar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-10-16
