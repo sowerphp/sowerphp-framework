@@ -56,11 +56,11 @@ function debug ($var, $withtype = false)
  * @param d Cantidad de decimales
  * @return String Número formateado
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2012-10-19
+ * @version 2014-10-23
  */
 function num ($n, $d=0)
 {
-    return number_format($n, $d, ',', '.');
+    return number_format((float)$n, $d, ',', '.');
 }
 
 /**
