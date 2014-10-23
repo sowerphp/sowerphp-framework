@@ -143,14 +143,14 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      * @param table Tabla a la que se quiere buscar las columnas
      * @return Array Arreglo con la información de las columnas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-26
+     * @version 2014-10-22
      */
     public function getColsFromTable ($table)
     {
         return $this->getTable ('
             SELECT
                 column_name AS name
-                , column_type AS type
+                , SUBSTRING_INDEX(column_type, \'(\', 1) AS type
                 , IFNULL(character_maximum_length, numeric_precision) AS length
                 , IF(STRCMP(is_nullable,"NO"),"YES","NO") AS `null`
                 , column_default AS `default`
