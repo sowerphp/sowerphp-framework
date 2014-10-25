@@ -105,11 +105,12 @@ class I18n
      * @param locale Locale que se está buscando si existe
      * @return =true si la traducción está disponible (existe el directorio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-22
+     * @version 2014-10-24
      */
     public static function localeExists ($locale)
     {
-        if (!strpos($locale, '_'))
+        if (!isset($locale[0])) return false;
+        if (!strpos($locale, '_') and isset(self::$locale[$locale]))
             $locale = self::$locale[$locale];
         return is_dir(DIR_WEBSITE.'/Locale/'.$locale);
     }
