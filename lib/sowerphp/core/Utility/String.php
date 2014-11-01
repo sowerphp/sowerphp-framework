@@ -428,4 +428,24 @@ class Utility_String {
         return $string;
     }
 
+    /**
+     * Extrae un string dentro de dos delimitadores
+     * @param text Texto completo
+     * @param begindelimiter String que inicia la delimitación de lo que se extraerá
+     * @param enddelimiter String que termina la delimitación de lo que se extraerá
+     * @param offset Corrimiento desde $begindelimiter
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-11-01
+     */
+    function extract($text, $begindelimiter, $enddelimiter, $offset = 0)
+    {
+        $start = strpos($text, $begindelimiter, $offset) + strlen($begindelimiter);
+        $end = strpos($text, $enddelimiter, $start);
+        return [
+            'string'=>trim(substr($text, $start, $end-$start)),
+            'start'=>$start,
+            'end'=>$end
+        ];
+    }
+
 }
