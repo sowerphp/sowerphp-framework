@@ -146,7 +146,7 @@ class View
         $paths = App::paths();
         foreach($paths as $path) {
             $file = $path.'/View/Layouts/'.$layout.'.php';
-            if (file_exists($file)) {
+            if (is_readable($file)) {
                 return $file;
             }
         }
@@ -175,7 +175,7 @@ class View
         // si la vista parte con / entonces se está pasando la ruta y solo falta su extension
         if ($view[0]=='/') {
             foreach(self::$extensions as $extension) {
-                if (file_exists($view.'.'.$extension)) {
+                if (is_readable($view.'.'.$extension)) {
                     self::$_viewsLocation[$view] = $view.'.'.$extension;
                     return $view.'.'.$extension;
                 }
@@ -190,7 +190,7 @@ class View
         foreach ($paths as $path) {
             foreach(self::$extensions as $extension) {
                 $file = $path.$location.'/View/'.$view.'.'.$extension;
-                if (file_exists($file)) {
+                if (is_readable($file)) {
                     self::$_viewsLocation[$view] = $file;
                     return $file;
                 }
@@ -201,7 +201,7 @@ class View
             // Buscar el archivo de la vista en las posibles rutas
             foreach ($paths as $path) {
                 $file = $path . '/View/Module/index.php';
-                    if (file_exists($file)) {
+                    if (is_readable($file)) {
                         return $file;
                     }
             }
