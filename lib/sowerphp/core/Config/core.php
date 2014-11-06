@@ -26,12 +26,17 @@ namespace sowerphp\core;
 /**
  * @file core.php
  * Configuración estándar de las páginas o aplicaciones
- * @version 2014-03-22
+ * @version 2014-11-06
  */
 
 // Errores
-Configure::write('debug', true);
-Configure::write('error.level', E_ALL);
+if (defined('ENVIRONMENT_DEV')) {
+    Configure::write('debug', true);
+    Configure::write('error.level', E_ALL);
+} else {
+    Configure::write('debug', false);
+    Configure::write('error.level', false);
+}
 
 // Tiempo
 Configure::write('time.zone', 'America/Santiago');
