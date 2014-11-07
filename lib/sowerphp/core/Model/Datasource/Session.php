@@ -190,15 +190,18 @@ class Model_Datasource_Session
     /**
      * Método para escribir un mensaje de sesión y recuperarlo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-08
+     * @version 2014-11-07
      */
-    public static function message ($message = null)
+    public static function message ($message = null, $type = 'info')
     {
         // si se indicó un mensaje se asigna
         if($message) {
-            self::write('session.message', $message);
+            self::write('session.message', [
+                'text' => $message,
+                'type' => $type,
+            ]);
         }
-        // si no se indico un mensaje se recupera y limpia
+        // si no se indicó un mensaje se recupera y limpia
         else {
             $message = self::read('session.message');
             self::delete('session.message');
