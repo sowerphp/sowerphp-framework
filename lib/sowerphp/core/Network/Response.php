@@ -88,7 +88,7 @@ class Network_Response
      * @param file Archivo que se desea enviar al cliente o bien un arreglo con los campos: name, type, size y data
      * @param options Arreglo de opciones (indices: name, charset, disposition y exit)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-05-01
+     * @version 2014-11-09
      */
     public function sendFile ($file, $options = array())
     {
@@ -120,7 +120,8 @@ class Network_Response
         header('Content-Length: '.$file['size']);
         header('Content-Disposition: '.$options['disposition'].'; filename="'.$file['name'].'"');
         // Enviar cuerpo para el archivo
-        print $file['data'];
+        if (is_resource($file['data'])) fpassthru($file['data']);
+        else print $file['data'];
         // Terminar script
         if($options['exit']!==false) exit((integer)$options['exit']);
     }
