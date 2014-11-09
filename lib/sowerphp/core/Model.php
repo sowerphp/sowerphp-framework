@@ -266,7 +266,7 @@ abstract class Model extends Object
      * se procesarán aquellos que sean getFK y en otros caso generará una
      * excepción (ya que el método no existirá)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-15
+     * @version 2014-11-08
      */
     public function __call($method, $args)
     {
@@ -276,13 +276,23 @@ abstract class Model extends Object
             // asegurarse que sea un getFK (ya que debe existir en fkNamespace)
             if (isset($this::$fkNamespace) && isset($this::$fkNamespace['Model_'.$fk])) {
                 $fkClass = $this::$fkNamespace['Model_'.$fk].'\Model_'.$fk;
+                // si la clase no existe error
+                if (!class_exists($fkClass)) {
+                    throw new Exception(array(
+                        sprintf ('Modelo %s no existe', $fkClass)
+                    ));
+                }
                 $fkClasss = \sowerphp\core\Utility_Inflector::pluralize($fkClass);
-                if (!class_exists($fkClasss)) {
-                    if (isset($args[0])) return new $fkClass($args[0]);
-                    else return new $fkClass($this->{Utility_Inflector::underscore($fk)});
-                } else {
+                // tratar de recuperar con la clase plural (para usar caché)
+                // clase plural sólo existe al tener la extesión sowerphp\app
+                if (class_exists($fkClasss)) {
                     if (isset($args[0])) return (new $fkClasss)->get($args[0]);
                     else return (new $fkClasss)->get($this->{Utility_Inflector::underscore($fk)});
+                }
+                // recuperar directamente con la clase singular
+                else {
+                    if (isset($args[0])) return new $fkClass($args[0]);
+                    else return new $fkClass($this->{Utility_Inflector::underscore($fk)});
                 }
             }
         }
