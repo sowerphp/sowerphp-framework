@@ -72,7 +72,7 @@ class Network_Email_Smtp
      * Método que envía el correo
      * @return Arreglo con los estados de retorno por cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-16
+     * @version 2014-11-11
      */
     public function send ()
     {
@@ -108,8 +108,15 @@ class Network_Email_Smtp
             $to .= ', '.implode(', ', $this->_header['bcc']);
         }
         // Enviar correo a todos los destinatarios
-        $mailer->send($to, $headers, $body);
-        return \PEAR::isError($mailer) ? $mail->getMessage() : true;
+        $result = $mailer->send($to, $headers, $body);
+        // retornar estado del envío del mensaje
+        if (is_a($result, 'PEAR_Error')) {
+            return [
+                'type' => $result->getType(),
+                'code' => $result->getCode(),
+                'message' => $result->getMessage(),
+            ];
+        } else return true;
     }
 
 }
