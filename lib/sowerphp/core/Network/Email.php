@@ -180,7 +180,7 @@ class Network_Email
      * @param msg Cuerpo del mensaje que se desea enviar (arreglo o string)
      * @return Arreglo asociativo con los estados de cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-26
+     * @version 2014-11-11
      */
     public function send ($msg)
     {
@@ -194,6 +194,15 @@ class Network_Email
                 $this->_replyTo = array($this->_config['from']['name'].' <'.$this->_config['from']['email'].'>');
             else
                 $this->_replyTo = array($this->_config['from'].' <'.$this->_config['from'].'>');
+        }
+        // Si no se ha indicado a quién enviar el correo se utilizará el de la
+        // configuración
+        if (!isset($this->_to[0])) {
+            if (isset($this->_config['to'])) {
+                $this->to($this->_config['to']);
+            } else {
+                throw new Exception('No existe destinatario del correo electrónico');
+            }
         }
         // Crear header
         $header = array(
