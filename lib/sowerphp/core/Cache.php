@@ -25,8 +25,13 @@ namespace sowerphp\core;
 
 /**
  * Clase para sistema de caché utilizando Memcached
+ *
+ * Funciona como wrapper de la API de PHP permitiendo el uso de un prefijo para
+ * las claves de Memcached y de esta forma poder compartir fácilmente un mismo
+ * servidor Memcached entre varias aplicaciones.
+ *
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-10-16
+ * @version 2014-11-18
  */
 class Cache
 {
@@ -42,14 +47,14 @@ class Cache
      * @param port Puerto donde Memcached está escuchando
      * @param prefix Prefijo que se utilizará en las claves de los elementos del caché
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-16
+     * @version 2014-11-18
      */
     public function __construct($host = '127.0.0.1', $port = 11211, $prefix = false)
     {
         if (class_exists('\Memcached')) {
             $this->_cache = new \Memcached();
             $this->_cache->addServer($host, $port);
-            if ($prefix) {
+            if ($prefix!==false) {
                 $this->_prefix = $prefix;
             } else if (defined('DIR_PROJECT')) {
                 $this->_prefix = DIR_PROJECT.':';
@@ -64,6 +69,7 @@ class Cache
      * @param key Clave que tendrá el elemento en la caché
      * @param value Valor del elemento en la caché
      * @param expires Tiempo en segundos que se debe almacenar en memoria
+     * @return =true si se pudo asignar el elemento en la caché
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-10-16
      */
@@ -77,6 +83,8 @@ class Cache
 
     /**
      * Método para recuperar un elemento desde la caché
+     * @param key clave del elemento que se desea recuperar desde la caché
+     * @return elemento solicitado o =false si no se pudo recuperar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-10-16
      */
@@ -89,7 +97,9 @@ class Cache
     }
 
     /**
-     * Método para eliminar
+     * Método para eliminar un elemento de la caché
+     * @param key clave del elemento que se desea eliminar de la caché
+     * @return =true en caso que se haya podido eliminar el elemento de la caché
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-10-16
      */
@@ -97,6 +107,80 @@ class Cache
     {
         if (!$this->_cache) return false;
         return $this->_cache->delete($this->_prefix.$key);
+    }
+
+    /**
+     * Método que obtiene todas las claves de elementos almacenados en la caché
+     * @return Arreglo con las claves que están actualmente almacenadas
+     * @author Esteban De sLa Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-11-18
+     */
+    public function getAllKeys()
+    {
+        if (!$this->_cache) return false;
+        $allKeys = $this->_cache->getAllKeys();
+        if (!$allKeys) return false;
+        $keys = [];
+        $start = strlen($this->_prefix);
+        foreach ($allKeys as &$key) {
+            if (strpos($key, $this->_prefix)===0) {
+                $keys[] = substr($key, $start);
+            }
+        }
+        return $keys;
+    }
+
+    /**
+     * Método que obtiene los elementos de las claves indicadas en la caché
+     * @param keys Arreglo con las claves que se desen obtener
+     * @return Arreglo con las claves como índices y los elementos como valores
+     * @author Esteban De sLa Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-11-18
+     */
+    public function getMulti($keys)
+    {
+        if (!$this->_cache) return false;
+        foreach ($keys as &$key) {
+            $key = $this->_prefix.$key;
+        }
+        $vals = $this->_cache->getMulti($keys);
+        if (!$vals) return false;
+        $start = strlen($this->_prefix);
+        foreach ($vals as $key => &$val) {
+            $vals[substr($key, $start)] = $val;
+            unset($vals[$key]);
+        }
+        return $vals;
+    }
+
+    /**
+     * Método que elimina todos los elementos de la caché
+     * @return =true si fue posible hacer el flush
+     * @author Esteban De sLa Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-11-18
+     */
+    public function flush()
+    {
+        if (!$this->_cache) return false;
+        $keys = $this->getAllKeys();
+        foreach ($keys as &$key) {
+            $key = $this->_prefix.$key;
+        }
+        return $this->_cache->deleteMulti($keys);
+    }
+
+    /**
+     * Método que ejecutará un método del objeto de Memcached al no existir el
+     * método en la clase Cache
+     * @return Valor de retorno original del método que se estpa ejecutando
+     * @author Esteban De sLa Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-11-18
+     */
+    public function __call($method, $args)
+    {
+        if (method_exists($this->_cache, $method)) {
+            return call_user_func_array([$this->_cache, $method], $args);
+        } else return false;
     }
 
 }
