@@ -58,7 +58,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param params Parámetros que se deben enlazar a la consulta
      * @return PDOStatement
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-23
+     * @version 2014-11-19
      */
     public function query ($sql, $params = array())
     {
@@ -75,7 +75,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
             if (is_array($param)) {
                 $stmt->bindParam($key, $param[0], $param[1]);
             } else if ($param===null || $param==='') {
-                $stmt->bindValue($key, null);
+                $stmt->bindValue($key, null, \PDO::PARAM_NULL);
             } else {
                 $stmt->bindParam($key, $param);
             }
