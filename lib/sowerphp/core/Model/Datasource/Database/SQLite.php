@@ -56,4 +56,16 @@ class Model_Datasource_Database_SQLite extends Model_Datasource_Database_Manager
         }
     }
 
+    /**
+     * Asigna un límite para la obtención de filas en la consulta SQL
+     * @param sql Consulta SQL a la que se le agrega el límite
+     * @return String Consulta con el límite agregado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-11-23
+     */
+    public function setLimit ($sql, $records, $offset = 0)
+    {
+        return $sql.' LIMIT '.(int)$offset.','.(int)$records;
+    }
+
 }
