@@ -58,7 +58,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param params Parámetros que se deben enlazar a la consulta
      * @return PDOStatement
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-19
+     * @version 2014-11-23
      */
     public function query ($sql, $params = array())
     {
@@ -70,6 +70,9 @@ abstract class Model_Datasource_Database_Manager extends \PDO
         self::$querysCount++;
         // preparar consulta
         $stmt = $this->prepare($sql);
+        if ($stmt===false) {
+            $this->error('No fue posible preparar la consulta:'."\n\n".$sql);
+        }
         //asignar parámetros
         foreach ($params as $key => &$param) {
             if (is_array($param)) {
