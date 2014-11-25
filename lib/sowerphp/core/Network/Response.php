@@ -100,7 +100,7 @@ class Network_Response
             'cache' => 86400,
         ), $options);
         // si no es un arreglo se genera
-        if(!is_array($file)) {
+        if (!is_array($file)) {
             $location = $file;
             $file = array();
             $file['name'] = isset($options['name']) ? $options['name'] : basename($location);
@@ -108,6 +108,11 @@ class Network_Response
             $file['type'] = (isset(self::$_mimeTypes[$ext])?self::$_mimeTypes[$ext]:'application/octet-stream');
             $file['size'] = filesize($location);
             $file['data'] = fread(fopen($location, 'rb'), $file['size']);
+        }
+        // si los datos son un recurso se obtiene su contenido
+        if (is_resource($file['data'])) {
+            rewind($file['data']);
+            $file['data'] = stream_get_contents($file['data']);
         }
         // limpiar buffer salida
         ob_end_clean();
@@ -120,8 +125,7 @@ class Network_Response
         header('Content-Length: '.$file['size']);
         header('Content-Disposition: '.$options['disposition'].'; filename="'.$file['name'].'"');
         // Enviar cuerpo para el archivo
-        if (is_resource($file['data'])) fpassthru($file['data']);
-        else print $file['data'];
+        print $file['data'];
         // Terminar script
         if($options['exit']!==false) exit((integer)$options['exit']);
     }
