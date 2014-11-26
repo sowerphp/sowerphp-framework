@@ -60,7 +60,7 @@ class View
      * @param location Ubicación de la vista
      * @return Buffer de la página renderizada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-14
+     * @version 2014-11-26
      */
     public function render ($page, $location = null)
     {
@@ -121,7 +121,7 @@ class View
         } else $page = '/'.Configure::read('homepage');
         // renderizar layout de la página (con su contenido)
         return View_Helper_Pages_Php::render($layout, array_merge(array(
-            '_header_title' => Configure::read('page.header.title').': '.$page,
+            '_header_title' => Configure::read('page.header.title').': '.(isset($this->viewVars['header_title'])?$this->viewVars['header_title']:$page),
             '_body_title' => Configure::read('page.body.title'),
             '_footer' => Configure::read('page.footer'),
             '_header_extra' => $_header_extra,
