@@ -435,12 +435,15 @@ class Utility_String {
      * @param enddelimiter String que termina la delimitación de lo que se extraerá
      * @param offset Corrimiento desde $begindelimiter
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-01
+     * @version 2014-11-30
      */
-    function extract($text, $begindelimiter, $enddelimiter, $offset = 0)
+    public static function extract($text, $begindelimiter, $enddelimiter, $offset = 0)
     {
-        $start = strpos($text, $begindelimiter, $offset) + strlen($begindelimiter);
+        $pos = strpos($text, $begindelimiter, $offset);
+        if ($pos===false) return false;
+        $start = $pos + strlen($begindelimiter);
         $end = strpos($text, $enddelimiter, $start);
+        if ($end===false) return false;
         return [
             'string'=>trim(substr($text, $start, $end-$start)),
             'start'=>$start,
