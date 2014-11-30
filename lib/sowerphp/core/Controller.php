@@ -156,7 +156,7 @@ abstract class Controller
      * controlador
      * @param return Valor de retorno de la acción ejecutada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-24
+     * @version 2014-11-30
      */
     public function invokeAction ()
     {
@@ -171,8 +171,24 @@ abstract class Controller
                     'action' => $this->request->params['action']
                 ));
             }
+            // Verificar la cantidad de parámetros que se están pasando
+            $n_args = count($this->request->params['pass']);
+            if ($n_args<$method->getNumberOfRequiredParameters()) {
+                $args = [];
+                foreach($method->getParameters() as &$p) {
+                    $args[] = $p->isOptional() ? '['.$p->name.']' : $p->name;
+                }
+                throw new Exception_Controller_Action_Args_Missing([
+                    'controller' => get_class($this),
+                    'action' => $this->request->params['action'],
+                    'args' => implode(', ', $args)
+                ]);
+            }
             // Invocar el método con los argumentos de $request->params['pass']
-            return $method->invokeArgs($this, $this->request->params['pass']);
+            if ($n_args)
+                return $method->invokeArgs($this, $this->request->params['pass']);
+            else
+                return $method->invoke($this);
         // Si el método no se encuentra
         } catch (\ReflectionException $e) {
             // Generar excepción
