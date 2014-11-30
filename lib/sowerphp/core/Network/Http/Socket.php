@@ -37,7 +37,7 @@ class Network_Http_Socket
      * @param data Datos que se enviarán
      * @param header Cabecera que se enviará
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-24
+     * @version 2014-11-30
      */
     public static function post ($url, $data = array(),
                 $header = "Content-Type: application/x-www-form-urlencoded\n")
@@ -57,12 +57,13 @@ class Network_Http_Socket
             )
         );
         // Enviar datos por post
-        $response['body'] = file_get_contents (
+        $body = @file_get_contents (
             $url,
             false,
             stream_context_create($params)
         );
-        return $response;
+        if ($body===false) return false;
+        return ['body'=>$body];
     }
 
 }
