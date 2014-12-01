@@ -60,6 +60,19 @@ class Network_Response
     }
 
     /**
+     * Método que permite asignar el tipo de archivo al que corresponde la
+     * respuesta
+     * @param type Tipo de dato (mimetype)
+     * @param charset Juego de caracteres o codificación
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-11-30
+     */
+    public function type($type, $charset = 'utf-8')
+    {
+        header('Content-Type: '.$type.'; charset='.$charset);
+    }
+
+    /**
      * Método que envía cabeceras al cliente
      * @param header Cabecera
      * @param value Valor
