@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para generar respuesta al cliente
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-05-01
+ * @version 2014-11-30
  */
 class Network_Response
 {
@@ -49,6 +49,17 @@ class Network_Response
     );
 
     /**
+     * Asigna código de estado de la respuesta HTTP
+     * @param status Estado que se desea asignar
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-11-30
+     */
+    public function status($status)
+    {
+        http_response_code($status);
+    }
+
+    /**
      * Método que envía cabeceras al cliente
      * @param header Cabecera
      * @param value Valor
@@ -65,22 +76,25 @@ class Network_Response
      * @param content Contenito a asignar
      * @return Contenido de la respuesta
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-09-14
+     * @version 2014-11-30
      */
     public function body ($content = null)
     {
-        if (is_null($content)) return $this->_body;
-            return $this->_body = $content;
+        if ($content===null) return $this->_body;
+        return $this->_body = $content;
     }
 
     /**
      * Enviar cuerpo al cliente (lo escribe)
+     * @param body Contenido que se enviará, si no se asigna se enviará el atributo _body
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-24
+     * @version 2014-11-30
      */
-    public function send ()
+    public function send ($body = null)
     {
-        echo $this->body();
+        if ($body!==null) echo $body;
+        else echo $this->_body;
+        exit;
     }
 
     /**
