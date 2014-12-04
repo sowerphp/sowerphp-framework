@@ -26,44 +26,127 @@ namespace sowerphp\core;
 /**
  * Clase para manejar conexiones HTTP
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-26
+ * @version 2014-12-03
  */
 class Network_Http_Socket
 {
 
+    protected static $methods = ['get', 'put', 'patch', 'delete', 'post']; ///< Métodos HTTP soportados
+    protected static $header = [
+        'User-Agent' => 'SowerPHP Network_Http_Socket',
+        //'Content-Type' => 'application/x-www-form-urlencoded',
+    ]; ///< Cabeceras por defecto
+
     /**
-     * Método para enviar datos mediante POST a una URL
+     * Método para ejecutar una solicitud a una URL, es la función que realmente
+     * contiene las implementaciones para ejecutar GET, POST, PUT, DELETE, etc
+     * @param method Método HTTP que se requiere ejecutar sobre la URL
      * @param url URL donde se enviarán los datos
      * @param data Datos que se enviarán
      * @param header Cabecera que se enviará
+     * @return Respusta HTTP (cabecera y cuerpo)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-30
+     * @version 2014-12-04
      */
-    public static function post ($url, $data = array(),
-                $header = "Content-Type: application/x-www-form-urlencoded\n")
+    public static function __callStatic($method, $args)
     {
-        // Generar contenido (variables) a enviar
-        $content = array();
-        foreach ($data as $key=>&$value) {
-            $content[] = $key.'='.$value;
+        if (!isset($args[0]) or !in_array($method, self::$methods))
+            return false;
+        $method = strtoupper($method);
+        $url = $args[0];
+        $data = isset($args[1]) ? $args[1] : [];
+        $header = isset($args[2]) ? $args[2] : [];
+        // inicializar curl
+        $curl = curl_init();
+        // asignar método y datos dependiendo de si es GET u otro método
+        if (is_array($data))
+            $data = http_build_query($data);
+        if ($method=='GET') {
+            if ($data) $url = sprintf("%s?%s", $url, $data);
+        } else {
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
+            if ($data) curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
         }
-        $content = implode('&', $content);
-        // Crear parametros para la conexion
-        $params = array(
-            'http' => array(
-                'method' => 'POST',
-                'header' => $header,
-                'content' => $content
-            )
-        );
-        // Enviar datos por post
-        $body = @file_get_contents (
-            $url,
-            false,
-            stream_context_create($params)
-        );
-        if ($body===false) return false;
-        return ['body'=>$body];
+        // asignar cabecera
+        $header = array_merge(self::$header, $header);
+        foreach ($header as $key => &$value) {
+            $value = $key.': '.$value;
+        }
+        // asignar cabecera
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+        // realizar consulta a curl recuperando cabecera y cuerpo
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_HEADER, 1);
+        $response = curl_exec($curl);
+        $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+        // cerrar conexión de curl y entregar respuesta de la solicitud
+        $header = self::parseHeader(substr($response, 0, $header_size));
+        curl_close($curl);
+        return [
+            'status' => self::parseStatus($header[0]),
+            'header' => $header,
+            'body' => substr($response, $header_size),
+        ];
+    }
+
+    /**
+     * Método que procesa la cabecera en texto plano y la convierte a un arreglo
+     * con los nombres de la cabecera como índices y sus valores.
+     * Si una cabecera aparece más de una vez, por tener varios valores,
+     * entonces dicha cabecerá tendrá como valor un arreglo con todos sus
+     * valores.
+     * @param header Cabecera HTTP en texto plano
+     * @return Arreglo asociativo con la cabecera
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-12-03
+     */
+    private static function parseHeader($header)
+    {
+        $headers = [];
+        $lineas = explode("\n", $header);
+        foreach ($lineas as &$linea) {
+            $linea = trim($linea);
+            if (!isset($linea[0])) continue;
+            if (strpos($linea, ':')) {
+                list($key, $value) = explode(':', $linea, 2);
+            } else {
+                $key = 0;
+                $value = $linea;
+            }
+            $key = trim($key);
+            $value = trim($value);
+            if (!isset($headers[$key])) {
+                $headers[$key] = $value;
+            } else if (!is_array($headers[$key])) {
+                $aux = $headers[$key];
+                $headers[$key] = [$aux, $value];
+            } else {
+                $headers[$key][] = $value;
+            }
+        }
+        return $headers;
+    }
+
+    /**
+     * Método que procesa la línea de respuesta y extrae el protocolo, código de
+     * estado y el mensaje del estado
+     * @param response_line
+     * @return Arreglo con índices: protocol, code, message
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2014-12-03
+     */
+    private static function parseStatus($response_line)
+    {
+        if (is_array($response_line)) {
+            $response_line = $response_line[count($response_line)-1];
+        }
+        list($protocol, $status, $message) = explode(' ', $response_line, 3);
+        return [
+            'protocol' => $protocol,
+            'code' => $status,
+            'message' => $message,
+        ];
     }
 
 }
