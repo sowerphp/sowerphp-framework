@@ -79,6 +79,7 @@ class Network_Http_Socket
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_HEADER, 1);
         $response = curl_exec($curl);
+        if (!$response) return false;
         $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
         // cerrar conexión de curl y entregar respuesta de la solicitud
         $header = self::parseHeader(substr($response, 0, $header_size));
