@@ -181,11 +181,12 @@ class Model_Datasource_Session
     /**
      * Método para destruir e invalidar una sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-22
+     * @version 2014-12-06
      */
     public static function destroy()
     {
-        session_destroy();
+        if (session_status() == PHP_SESSION_ACTIVE)
+            session_destroy();
     }
 
     /**
