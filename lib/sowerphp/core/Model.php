@@ -224,7 +224,7 @@ abstract class Model extends Object
      * @param columns Arreglo asociativo con las columnas a editar o NULL para editar todas las columnas
      * @return =true si se logró actualizar, =false en caso de algún problema
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-23
+     * @version 2014-12-06
      */
     public function update ($columns = null)
     {
@@ -235,6 +235,12 @@ abstract class Model extends Object
         if ($columns === null) {
             foreach ($this::$columnsInfo as $col => &$info) {
                 $columns[$col] = $this->$col;
+            }
+        }
+        // actualizar en el objeto las columnas que se pasaron
+        else {
+            foreach ($columns as $col => &$value) {
+                $this->$col = $value;
             }
         }
         // preparar set de la consulta
