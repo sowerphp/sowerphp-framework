@@ -191,13 +191,17 @@ class Model_Datasource_Session
 
     /**
      * Método para escribir un mensaje de sesión y recuperarlo
+     * @param message Mensaje que se desea mostrar
+     * @param type Tipo de mensaje: primary, success, info, warning o danger
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-07
+     * @version 2014-12-09
      */
-    public static function message ($message = null, $type = 'info')
+    public static function message ($message = null, $type = 'primary')
     {
         // si se indicó un mensaje se asigna
-        if($message) {
+        if ($message) {
+            if ($type=='ok') $type = 'success';
+            else if ($type=='error') $type = 'danger';
             self::write('session.message', [
                 'text' => $message,
                 'type' => $type,
