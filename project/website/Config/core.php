@@ -24,36 +24,40 @@
 /**
  * @file core.php
  * Configuración propia de cada proyecto
- * @version 2014-05-01
+ * @version 2014-12-10
  */
 
 // Tema de la página (diseño)
-\sowerphp\core\Configure::write('page.layout', 'SimpleLight');
+\sowerphp\core\Configure::write('page.layout', 'Bootstrap');
 
 // Textos de la página
-\sowerphp\core\Configure::write('page.header.title', 'SowerPHP');
-\sowerphp\core\Configure::write('page.body.title', 'SowerPHP');
+\sowerphp\core\Configure::write('page.header.title', 'Proyecto web');
+\sowerphp\core\Configure::write('page.body.title', 'Proyecto web');
+Configure::write(
+    'page.footer',
+    '<span>Página web generada utilizando el framework <a href="http://sowerphp.org">SowerPHP</a></span>'
+);
 
 // Menú principal del sitio web
-\sowerphp\core\Configure::write('nav.website', array(
-    '/inicio'=>'Inicio',
-));
-
-// Configuración para la base de datos
-/*\sowerphp\core\Configure::write('database.default', array(
-    'type' => 'PostgreSQL',
-    'user' => '',
-    'pass' => '',
-    'name' => '',
-));*/
+\sowerphp\core\Configure::write('nav.website', [
+    //'/contacto'=>'Contacto',
+]);
 
 // Configuración para el correo electrónico
-/*\sowerphp\core\Configure::write('email.default', array(
+/*\sowerphp\core\Configure::write('email.default', [
     'type' => 'smtp',
     'host' => 'ssl://smtp.gmail.com',
     'port' => 465,
     'user' => '',
     'pass' => '',
-    'from' => array('email'=>'', 'name'=>''),
+    'from' => ['email'=>'', 'name'=>''],
     'to' => '',
-));*/
+]);*/
+
+// Configuración para la base de datos
+/*\sowerphp\core\Configure::write('database.default', [
+    'type' => 'PostgreSQL',
+    'user' => '',
+    'pass' => '',
+    'name' => '',
+]);*/
