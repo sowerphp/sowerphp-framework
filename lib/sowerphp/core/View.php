@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase que renderizará las vistas de la aplicación
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-22
+ * @version 2014-12-10
  */
 class View
 {
@@ -35,7 +35,7 @@ class View
     protected $response; ///< Objeto Response
     public $viewVars = array(); ///< Variables que se pasarán al renderizar la vista
     private $layout; ///< Tema que se debe usar para renderizar la página
-    private $defaultLayout = 'SimpleLight'; ///< Layout por defecto
+    private $defaultLayout = 'Bootstrap'; ///< Layout por defecto
     protected static $_viewsLocation; ///< Listado de vistas que se han buscado
     protected static $extensions = null; ///< Listado de extensiones
 
