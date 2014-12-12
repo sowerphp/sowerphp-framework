@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * @file core.php
  * Configuración estándar de las páginas o aplicaciones
- * @version 2014-11-06
+ * @version 2014-12-11
  */
 
 // Errores
@@ -50,9 +50,3 @@ Configure::write('page.extensions', array('php', 'md'));
 
 // Página inicial
 Configure::write('homepage', 'inicio');
-
-// Textos de la página
-Configure::write(
-    'page.footer',
-    'Página web generada utilizando el framework <a href="http://sowerphp.org">SowerPHP</a>'
-);
