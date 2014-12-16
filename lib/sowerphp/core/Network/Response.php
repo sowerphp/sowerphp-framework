@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para generar respuesta al cliente
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-11-30
+ * @version 2014-12-16
  */
 class Network_Response
 {
@@ -46,6 +46,11 @@ class Network_Response
         'jpeg' => 'image/jpeg',
         'jpg' => 'image/jpeg',
         'png' => 'image/png',
+        'csv' => 'text/plain',
+        'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
+        'xls' => 'application/vnd.ms-office',
+        'xlsx' => 'application/octet-stream',
+        'txt' => 'text/plain',
     );
 
     /**
