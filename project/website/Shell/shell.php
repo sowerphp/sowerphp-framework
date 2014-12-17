@@ -25,7 +25,7 @@
 /**
  * @file shell.php
  * Dispatcher para la shell
- * @version 2014-04-02
+ * @version 2014-12-17
  */
 
 // Directorio de instalación de SowerPHP, En caso de una instalación compartida
@@ -38,8 +38,8 @@ define ('DIR_PROJECT', dirname(dirname(dirname(__FILE__))));
 
 // Extensiones que se utilizarán. Deberá ser vendor/extensión dentro de
 // DIR_FRAMEWORK/extensions o bien dentro de DIR_PROJECT/extensions, ejemplo:
-// $_EXTENSIONS = array('sowerphp/dev', 'sowerphp/general');
-$_EXTENSIONS = array();
+// $_EXTENSIONS = ['sowerphp/app', 'sowerphp/general'];
+$_EXTENSIONS = [];
 
 // Iniciar bootstrap (proceso que prepara e inicia el proyecto)
 if (!@include(DIR_FRAMEWORK.'/lib/sowerphp/core/bootstrap.php')) {
