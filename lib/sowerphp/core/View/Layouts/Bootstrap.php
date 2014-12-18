@@ -98,6 +98,21 @@ foreach ($_nav_app as $link=>&$info) {
         <div class="container main-container">
 <!-- BEGIN MAIN CONTENT -->
 <?php
+// menú de módulos si hay sesión iniciada
+if (\sowerphp\core\App::layerExists('sowerphp/app') and $_Auth->logged() and $_module_breadcrumb) {
+    echo '<ol class="breadcrumb">',"\n";
+    $url = '/';
+    foreach ($_module_breadcrumb as $link => &$name) {
+        if (is_string($link)) {
+            echo '    <li><a href="',$_base,$url,$link,'">',$name,'</a></li>',"\n";
+            $url .= $link.'/';
+        } else {
+            echo '    <li class="active">',$name,'</li>';
+        }
+    }
+    echo '</ol>',"\n";
+}
+// mensaje de sesión
 $message = \sowerphp\core\Model_Datasource_Session::message();
 if ($message) {
     $icons = [
@@ -111,6 +126,7 @@ if ($message) {
     echo '    <span class="sr-only">',$message['type'],': </span>',$message['text'],"\n";
     echo '</div>'."\n";
 }
+// contenido de la página
 echo $_content;
 ?>
 <!-- END MAIN CONTENT -->

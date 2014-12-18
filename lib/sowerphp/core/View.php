@@ -60,7 +60,7 @@ class View
      * @param location Ubicación de la vista
      * @return Buffer de la página renderizada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-26
+     * @version 2014-12-18
      */
     public function render ($page, $location = null)
     {
@@ -119,9 +119,23 @@ class View
             $slash = strpos($this->request->request, '/', 1);
             $page = $slash===false ? $this->request->request : substr($this->request->request, 0, $slash);
         } else $page = '/'.Configure::read('homepage');
+        // determinar module breadcrumb
+        $module_breadcrumb = [];
+        if ($this->request->params['module']) {
+            $modulos = explode('.', $this->request->params['module']);
+            $url = '';
+            foreach ($modulos as &$m) {
+                $link = Utility_Inflector::underscore($m);
+                $module_breadcrumb[$link] = $m;
+                $url .= '/'.$link;
+            }
+            $module_breadcrumb += explode('/', substr(str_replace($url, '', $this->request->request), 1));
+        }
+        // determinar titulo
+        $titulo_pagina = isset($this->viewVars['header_title']) ? $this->viewVars['header_title'] : $this->request->request;
         // renderizar layout de la página (con su contenido)
         return View_Helper_Pages_Php::render($layout, array_merge(array(
-            '_header_title' => Configure::read('page.header.title').': '.(isset($this->viewVars['header_title'])?$this->viewVars['header_title']:$page),
+            '_header_title' => Configure::read('page.header.title').($titulo_pagina?': '.$titulo_pagina:''),
             '_body_title' => Configure::read('page.body.title'),
             '_footer' => Configure::read('page.footer'),
             '_header_extra' => $_header_extra,
@@ -131,6 +145,7 @@ class View
             '_timestamp' => date(Configure::read('time.format'), filemtime($location)),
             '_layout' => $this->layout,
             '_content' => $page_content,
+            '_module_breadcrumb' => $module_breadcrumb,
         ), $this->viewVars));
     }
 
