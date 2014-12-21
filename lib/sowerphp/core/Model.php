@@ -74,14 +74,14 @@ abstract class Model extends Object
      * utilizados en una consulta SQL
      * @return Arreglo con los datos de la PK para la consulta y sus valores
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
+     * @version 2014-12-21
      */
     protected function preparePk ()
     {
         $pk = ['where'=>[], 'values'=>[]];
         foreach ($this::$columnsInfo as $col => &$info) {
             if ($info['pk']) {
-                if (empty($this->$col))
+                if (empty($this->$col) and $this->$col!=0)
                     return false;
                 $pk['where'][] = $col.' = :pk_'.$col;
                 $pk['values'][':pk_'.$col] = $this->$col;
