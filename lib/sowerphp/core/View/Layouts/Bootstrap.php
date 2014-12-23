@@ -54,9 +54,20 @@
                     <ul class="nav navbar-nav">
 <?php
 foreach ($_nav_website as $link=>&$name) {
-    $active = $_page == $link ? ' class="active"' : '';
+    $active = $_page == $link ? ' active' : '';
     if ($link[0]=='/') $link = $_base.$link;
-    echo '                        <li'.$active.'><a href="',$link,'">',$name,'</a></li>',"\n";
+    if (isset($name['nav'])) {
+        echo '                        <li class="dropdown',$active,'">',"\n";
+        echo '                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">',$name['name'],' <span class="caret"></span></a>',"\n";
+        echo '                            <ul class="dropdown-menu" role="menu">',"\n";
+        foreach($name['nav'] as $l=>$n) {
+            echo '                                <li><a href="',$link,$l,'">',$n,'</a></li>',"\n";
+        }
+        echo '                            </ul>',"\n";
+        echo '                        </li>',"\n";
+    } else {
+        echo '                        <li class="'.$active.'"><a href="',$link,'">',$name,'</a></li>',"\n";
+    }
 }
 ?>
                     </ul>
