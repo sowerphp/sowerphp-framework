@@ -40,6 +40,10 @@ td span {
   text-align: center;
 }
 
+img.center {
+  margin: 0 auto;
+}
+
 .margin-top-05 { margin-top: 0.5em; }
 .margin-top-10 { margin-top: 1.0em; }
 .margin-top-15 { margin-top: 1.5em; }
