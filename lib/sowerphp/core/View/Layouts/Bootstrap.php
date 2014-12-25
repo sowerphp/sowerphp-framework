@@ -154,7 +154,6 @@ if (isset($_Auth) and $_Auth->logged()) {
     echo '                    <span>';
     echo '[stats] time: ',round(microtime(true)-TIME_START, 2),' [s] - ';
     echo 'memory: ',round(memory_get_usage()/1024/1024,2),' [MiB] - ';
-    echo 'session: ',round(strlen(serialize($_SESSION))/1024,2),' [KiB] - ';
     echo 'querys: ',\sowerphp\core\Model_Datasource_Database_Manager::$querysCount,' - ';
     echo 'cache: ',\sowerphp\core\Cache::$setCount,'/',\sowerphp\core\Cache::$getCount,'</span>',"\n";
 }
