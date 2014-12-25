@@ -47,20 +47,14 @@ class Cache
      * @param port Puerto donde Memcached está escuchando
      * @param prefix Prefijo que se utilizará en las claves de los elementos del caché
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-18
+     * @version 2014-12-25
      */
     public function __construct($host = '127.0.0.1', $port = 11211, $prefix = false)
     {
         if (class_exists('\Memcached')) {
             $this->_cache = new \Memcached();
             $this->_cache->addServer($host, $port);
-            if ($prefix!==false) {
-                $this->_prefix = $prefix;
-            } else if (defined('DIR_PROJECT')) {
-                $this->_prefix = DIR_PROJECT.':';
-            } else {
-                $this->_prefix = '';
-            }
+            $this->_prefix = $prefix ? $prefix : defined('DIR_PROJECT') ? DIR_PROJECT.':' : '';
         }
     }
 
