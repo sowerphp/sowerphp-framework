@@ -29,12 +29,10 @@ namespace sowerphp\core;
  * Capa de abstracción para base de datos, la clase puede ser fácilmente
  * utilizada fuera del framework SowerPHP sin mayores modificaciones.
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-21
+ * @version 2014-12-29
  */
-class Model_Datasource_Database
+class Model_Datasource_Database extends Model_Datasource
 {
-
-    private static $_databases; ///< Arreglo con las bases de datos que se han cargado
 
     /**
      * Método para cargar una base de datos
@@ -49,65 +47,20 @@ class Model_Datasource_Database
      * @param config Configuración de la base de datos
      * @return Objeto con la base de datos seleccionada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-21
+     * @version 2014-12-29
      */
-    public static function &get ($database = 'default', $config = array())
+    public static function &get($name = 'default', $config = [])
     {
-        // si $database es un string entonces se podría estar solicitando una
-        // base de datos que ya ha sido cargada, por lo cual se revisa si
-        // existe dicho indice, si existe se retorna
-        if (is_string($database) && isset(self::$_databases[$database])) {
-            return self::$_databases[$database];
-        }
-        // si es un arreglo lo que se pasó como $database, es la configuración
-        // que se debe utilizar en la configuración si no existe se busca si
-        // hay configuración para la base de datos
-        else if (is_array($database)) {
-            $config = $database;
-            if (isset($config['conf']))
-                $database = $config['conf'];
-            else
-                $database = 'default';
-        }
-        // si no se pasó configuración se trata de cargar con Configure
-        if (!is_array($config) || !isset($config['name'])) {
-            // si la clase Configure existe se carga la configuración
-            if (is_string($database) && class_exists('Configure')) {
-                // se carga
-                $config = Configure::read('database.'.$database);
-                // si Configure no encontró la configuración se genera
-                // excepción ya que no se logró obtener una configuración
-                // válida para la base de datos
-                if (!is_array($config)) {
-                    throw new Exception_Model_Datasource_Database (array(
-                        'msg' => 'No se encontró configuración database.'.$database
-                    ));
-                }
-            }
-            // si la clase Configure no existe se genera excepción ya que no se
-            // logró obtener una configuración válida para la base de datos
-            else {
-                throw new Exception_Model_Datasource_Database(array(
-                    'msg' => 'No se encontró configuración database.'.$database
-                ));
-            }
-        }
-        // cargar la clase para la base de datos si no esta cargada
-        $model = '\Model_Datasource_Database_'.$config['type'];
-        if (!class_exists($model)) {
-            require dirname(__FILE__).'/Database/Manager.php';
-            require dirname(__FILE__).'/Database/'.$config['type'].'.php';
-        }
-        // crear objeto de la base de datos
-        self::$_databases[$database] = new $model($config);
-        // si hubo algún error mostrar mensaje y terminar script
-        if (!is_object(self::$_databases[$database])) {
+        $config = parent::getDatasource('database', $name, $config);
+        if (is_object($config)) return $config;
+        $class = '\Model_Datasource_Database_'.$config['type'];
+        self::$datasources['database'][$config['conf']] = new $class($config);
+        if (!is_object(self::$datasources['database'][$config['conf']])) {
             throw new Exception_Model_Datasource_Database(array(
-                'msg' =>'¡Conexión a database.'.$database.' ('.$config['type'].') falló!'
+                'msg' =>'¡Conexión a database.'.$config['conf'].' ('.$config['type'].') falló!'
             ));
         }
-        // retornar objeto creado si la conexión fue ok
-        return self::$_databases[$database];
+        return self::$datasources['database'][$config['conf']];
     }
 
     /**
@@ -120,38 +73,21 @@ class Model_Datasource_Database
      * de datos serán cerradas al finalizar el script.
      * @param database La base de datos que se desea cerrar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-09-09
+     * @version 2014-12-29
      */
-    public static function close ($database = '')
+    public static function close($database = '')
     {
         // si se especificó una base de datos se cierra solo esa
         if (!empty($database)) {
-            self::$_databases[$database] = null;
-            unset(self::$_databases[$database]);
+            unset(self::$datasources['database'][$database]);
         }
         // si no se especificó se cierran todas
         else {
-            $databases = array_keys(self::$_databases);
+            $databases = array_keys(self::$datasources['database']);
             foreach ($databases as &$database) {
-                self::$_databases[$database] = null;
-                unset(self::$_databases[$database]);
+                self::close($database);
             }
         }
     }
 
-}
-
-// si la clase no existe se debe definir
-if(!class_exists('Exception_Model_Datasource_Database')) {
-    class Exception_Model_Datasource_Database extends \RuntimeException
-    {
-        protected $_messageTemplate = '%s';
-        public function __construct($message, $code = 500)
-        {
-            if (is_array($message)) {
-                $message = vsprintf($this->_messageTemplate, $message);
-            }
-            parent::__construct($message, $code);
-        }
-    }
 }
