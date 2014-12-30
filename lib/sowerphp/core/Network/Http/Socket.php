@@ -47,7 +47,7 @@ class Network_Http_Socket
      * @param sslv3 =true se fuerza sslv3, por defecto es false
      * @return Respusta HTTP (cabecera y cuerpo)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-17
+     * @version 2014-12-29
      */
     public static function __callStatic($method, $args)
     {
@@ -58,6 +58,7 @@ class Network_Http_Socket
         $data = isset($args[1]) ? $args[1] : [];
         $header = isset($args[2]) ? $args[2] : [];
         $sslv3 = isset($args[3]) ? $args[3] : false;
+        $sslcheck = isset($args[4]) ? $args[4] : true;
         // inicializar curl
         $curl = curl_init();
         // asignar método y datos dependiendo de si es GET u otro método
@@ -80,6 +81,7 @@ class Network_Http_Socket
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_HEADER, 1);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $sslcheck);
         if ($sslv3) {
             curl_setopt($curl, CURLOPT_SSLVERSION, 3);
         }

@@ -80,11 +80,11 @@ class Network_Http_Rest
 
     /**
      * Método para realizar solicitud al recurso de la API
-     * @param resource Recurso donde se hará la solicitud
-     * @param data Datos que se enviarán
+     * @param method Nombre del método que se está ejecutando
+     * @param args Argumentos para el métood de Network_Http_Socket
      * @return Arreglo con la respuesta HTTP (índices: status, header y body)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-03
+     * @version 2014-12-29
      */
     public function __call($method, $args)
     {
@@ -92,14 +92,19 @@ class Network_Http_Rest
             return false;
         $resource = $args[0];
         $data = isset($args[1]) ? $args[1] : [];
-        if ($data) {
+        $header = isset($args[2]) ? $args[2] : [];
+        $sslv3 = isset($args[3]) ? $args[3] : false;
+        $sslcheck = isset($args[4]) ? $args[4] : true;
+        if ($data and $method!='get') {
             $data = json_encode($data);
             $this->header['Content-Length'] = strlen($data);
         }
         $response = Network_Http_Socket::$method(
             $this->config['base'].$resource,
             $data,
-            $this->header
+            array_merge($this->header, $header),
+            $sslv3,
+            $sslcheck
         );
         $body = json_decode($response['body'], true);
         return [
