@@ -76,6 +76,13 @@ foreach ($_nav_website as $link=>&$name) {
 <?php if (!$_Auth->logged()) : ?>
                         <li><a href="<?=$_base?>/usuarios/ingresar"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> Iniciar sesión</a></li>
 <?php else : ?>
+<?php
+$Account = $_Auth->User->getEmailAccount();
+if ($Account) {
+    $emails = $Account->countUnreadMessages();
+    echo '                        <li><a href="'.$Account->getUserUrl().'" target="_blank">Email'.($emails?' <span class="badge">'.$emails.'</span>':'').'</a></li>',"\n";
+}
+?>
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><strong>Aplicación <span class="caret"></span></strong></a>
                             <ul class="dropdown-menu" role="menu">
