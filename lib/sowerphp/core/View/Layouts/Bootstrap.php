@@ -53,7 +53,7 @@
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav">
 <?php
-foreach ($_nav_website as $link=>&$name) {
+foreach ($_nav_website as $link=>$name) {
     $active = $_page == $link ? ' active' : '';
     if ($link[0]=='/') $link = $_base.$link;
     if (isset($name['nav'])) {
@@ -66,7 +66,11 @@ foreach ($_nav_website as $link=>&$name) {
         echo '                            </ul>',"\n";
         echo '                        </li>',"\n";
     } else {
-        echo '                        <li class="'.$active.'"><a href="',$link,'">',$name,'</a></li>',"\n";
+        if (is_array($name)) {
+            $title = isset($name['desc']) ? $name['desc'] : (isset($name['title']) ? $name['title'] : '');
+            $name = $name['name'];
+        } else $title = '';
+        echo '                        <li class="'.$active.'"><a href="',$link,'" title="',$title,'">',$name,'</a></li>',"\n";
     }
 }
 ?>
