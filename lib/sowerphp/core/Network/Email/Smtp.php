@@ -44,7 +44,7 @@ class Network_Email_Smtp
      * @param data Datos (cuerpo) de correo electrónico
      * @param debug =true se muestra debug, =false modo silencioso
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-09-16
+     * @version 2014-09-16
      */
     public function __construct ($config, $header, $data, $debug = false)
     {
