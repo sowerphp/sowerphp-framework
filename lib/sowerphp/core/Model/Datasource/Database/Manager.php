@@ -160,18 +160,30 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param params Parámetros que se deben enlazar a la consulta
      * @return Array Arreglo unidimensional con los índices y sus datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-13
+     * @version 2015-01-07
      */
-    public function getAssociativeArray ($sql, $params = array())
+    public function getAssociativeArray($sql, $params = [])
     {
         $table = $this->getTable($sql, $params);
-        $array = array();
+        $array = [];
+        $keys = [];
         foreach ($table as &$row) {
-            if (count($row)==2) {
-                $array[array_shift($row)] = array_shift($row);
+            $key = array_shift($row);
+            if (!isset($array[$key]))
+                $array[$key] = [];
+            if (!isset($keys[$key])) {
+                $array[$key] = count($row)==1 ? array_shift($row) : $row;
+                // indica que no es un arreglo de datos (hay que hacerlo así
+                // porque los datos en si pueden ser un arreglo, entonces no
+                // bastaría solamente verificar si $array[$key]  es ya un
+                // arreglo)
+                $keys[$key] = false;
             } else {
-                $key = array_shift($row);
-                $array[$key] = $row;
+                if (!$keys[$key]) {
+                    $array[$key] = [$array[$key]];
+                    $keys[$key] = true;
+                }
+                $array[$key][] = count($row)==1 ? array_shift($row) : $row;
             }
         }
         return $array;
