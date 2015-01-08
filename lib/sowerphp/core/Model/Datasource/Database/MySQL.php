@@ -87,14 +87,15 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      * @param par1 Parámetro 1 que se quiere concatenar
      * @param par2 Parámetro 2 que se quiere concatenar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-10-22
+     * @version 2015-01-07
      */
     public function concat ($par1, $par2)
     {
+        $separators = array(' ', ',', ', ', '-', ' - ', '|', ':', ': ');
         $concat = array();
         $parameters = func_get_args();
         foreach($parameters as &$parameter) {
-            if($parameter==' ' || $parameter==',' || $parameter==', ' || $parameter=='-' || $parameter==' - ')
+            if(in_array($parameter, $separators))
                 $parameter = "'".$parameter."'";
             array_push($concat, $parameter);
         }

@@ -91,11 +91,11 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
      * @param par1 Parámetro 1 que se quiere concatenar
      * @param par2 Parámetro 2 que se quiere concatenar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-09-09
+     * @version 2015-01-07
      */
     public function concat ($par1, $par2)
     {
-        $separators = array(' ', ',', ', ', '-', ' - ', '|');
+        $separators = array(' ', ',', ', ', '-', ' - ', '|', ':', ': ');
         $concat = array();
         $parameters = func_get_args();
         foreach($parameters as &$parameter) {

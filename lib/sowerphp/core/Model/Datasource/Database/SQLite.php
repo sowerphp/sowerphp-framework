@@ -68,4 +68,27 @@ class Model_Datasource_Database_SQLite extends Model_Datasource_Database_Manager
         return $sql.' LIMIT '.(int)$offset.','.(int)$records;
     }
 
+    /**
+     * Concatena los parámetros pasados al método
+     *
+     * El método acepta n parámetros, pero dos como mínimo deben ser
+     * pasados.
+     * @param par1 Parámetro 1 que se quiere concatenar
+     * @param par2 Parámetro 2 que se quiere concatenar
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2015-01-07
+     */
+    public function concat($par1, $par2)
+    {
+        $separators = array(' ', ',', ', ', '-', ' - ', '|', ':', ': ');
+        $concat = array();
+        $parameters = func_get_args();
+        foreach($parameters as &$parameter) {
+            if(in_array($parameter, $separators))
+                $parameter = "'".$parameter."'";
+            array_push($concat, $parameter);
+        }
+        return implode(' || ', $concat);
+    }
+
 }
