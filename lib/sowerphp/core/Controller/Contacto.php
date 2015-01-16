@@ -45,7 +45,7 @@ class Controller_Contacto extends \Controller_App
     /**
      * Método que desplegará y procesará el formulario de contacto
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-10
+     * @version 2015-01-16
      */
     public function index()
     {
@@ -68,12 +68,12 @@ class Controller_Contacto extends \Controller_App
                 Model_Datasource_Session::message(
                     'Su mensaje ha sido enviado, se responderá a la brevedad.', 'ok'
                 );
+                $this->redirect('/contacto');
             } else {
                 Model_Datasource_Session::message(
                     'Ha ocurrido un error al intentar enviar su mensaje, por favor intente nuevamente.', 'error'
                 );
             }
-            $this->redirect('/contacto');
         }
     }
 
