@@ -127,13 +127,13 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param params Parámetros que se deben enlazar a la consulta
      * @return Array Arreglo unidimensional con la columna
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-25
+     * @version 2015-01-17
      */
     public function getCol ($sql, $params = array())
     {
         $stmt = $this->query($sql, $params);
         $cols = [];
-        while ($col = $stmt->fetchColumn()) {
+        while (($col = $stmt->fetchColumn())!==false) {
             $cols[] = $col;
         }
         return $cols;
