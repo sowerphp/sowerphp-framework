@@ -29,6 +29,7 @@
         <script type="text/javascript" src="<?=$_base?>/js/datepicker/bootstrap-datepicker.js"></script>
         <script type="text/javascript" src="<?=$_base?>/js/datepicker/bootstrap-datepicker.es.js"></script>
         <link rel="stylesheet" href="<?=$_base?>/js/datepicker/datepicker3.css" />
+        <link rel="stylesheet" href="<?=$_base?>/css/font-awesome.min.css" />
 <?php endif; ?>
 <?php if (\sowerphp\core\App::layerExists('sowerphp/app')) : ?>
         <script type="text/javascript" src="<?=$_base?>/js/app.js"></script>
@@ -103,7 +104,7 @@ foreach ($_nav_app as $link=>&$info) {
                                 <li><a href="<?=$_base?>/enlaces"><span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> Enlaces</a></li>
 <?php endif; ?>
 <?php if (\sowerphp\core\Module::loaded('Rrhh')) : ?>
-                                <li><a href="<?=$_base?>/rrhh/empleados/cumpleanios"><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> Cumpleaños</a></li>
+                                <li><a href="<?=$_base?>/rrhh/empleados/cumpleanios"><span class="fa fa-birthday-cake" aria-hidden="true"></span> Cumpleaños</a></li>
 <?php endif; ?>
                                 <li><a href="<?=$_base?>/documentacion"><span class="glyphicon glyphicon-book" aria-hidden="true"></span> Documentación</a></li>
                                 <li class="divider"></li>
