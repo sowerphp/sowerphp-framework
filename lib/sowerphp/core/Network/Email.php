@@ -87,13 +87,10 @@ class Network_Email
      * @param email Correo desde donde se envía supuestamente el email
      * @param name Nombre de quien envía supuestamente el email
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-06-03
+     * @version 2015-01-19
      */
     public function from ($email, $name = null) {
-        $this->_config['from'] = array (
-            'email' => $email,
-            'name' => $name?$name:$email,
-        );
+        $this->_config['from'] = ($name?$name:$email).' <'.$email.'>';
     }
 
     /**
