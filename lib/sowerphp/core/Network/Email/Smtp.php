@@ -72,7 +72,7 @@ class Network_Email_Smtp
      * Método que envía el correo
      * @return Arreglo con los estados de retorno por cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-11
+     * @version 2015-01-19
      */
     public function send ()
     {
@@ -98,7 +98,7 @@ class Network_Email_Smtp
         $body = $mail->get(); // debe llamarse antes de headers
         $to = implode(', ', $this->_header['to']);
         $headers = $mail->headers(array(
-            'From' => "{$this->_header['from']['name']} <{$this->_header['from']['email']}>",
+            'From' => $this->_header['from'],
             'Reply-To' => $this->_header['replyTo'],
             'To' => $to,
             'Return-Path' => $this->_header['replyTo'],

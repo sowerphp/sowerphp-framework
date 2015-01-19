@@ -45,7 +45,7 @@ class Controller_Contacto extends \Controller_App
     /**
      * Método que desplegará y procesará el formulario de contacto
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-16
+     * @version 2015-01-19
      */
     public function index()
     {
@@ -64,14 +64,15 @@ class Controller_Contacto extends \Controller_App
             $email->to(Configure::read('email.default.to'));
             $email->subject('Contacto desde la web #'.date('YmdHis'));
             $msg = $_POST['mensaje']."\n\n".'-- '."\n".$_POST['nombre']."\n".$_POST['correo'];
-            if (!is_array($email->send($msg))) {
+            $status = $email->send($msg);
+            if ($status===true) {
                 Model_Datasource_Session::message(
                     'Su mensaje ha sido enviado, se responderá a la brevedad.', 'ok'
                 );
                 $this->redirect('/contacto');
             } else {
                 Model_Datasource_Session::message(
-                    'Ha ocurrido un error al intentar enviar su mensaje, por favor intente nuevamente.', 'error'
+                    'Ha ocurrido un error al intentar enviar su mensaje, por favor intente nuevamente.<br /><em>'.$status['message'].'</em>', 'error'
                 );
             }
         }

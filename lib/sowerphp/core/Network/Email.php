@@ -43,7 +43,7 @@ class Network_Email
      * Constructor de la clase
      * @param config Configuración del correo electrónico que se usará
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-04
+     * @version 2015-01-19
      */
     public function __construct($config = 'default')
     {
@@ -59,19 +59,15 @@ class Network_Email
         if (empty($this->_config['type']) || empty($this->_config['host']) || empty($this->_config['port']) || empty($this->_config['user']) || empty($this->_config['pass'])) {
              throw new Exception('Configuración del correo electrónico incompleta');
         }
-        // si from no existe se asigna
-        if (!isset($this->_config['from'])) {
-            $this->_config['from'] = array (
-                'email' => $this->_config['user'],
-                'name' => $this->_config['user'],
-            );
-        }
-        // si from no es arreglo se asume que se indicó el nombre y se crea arreglo
-        else if (!is_array($this->_config['from'])) {
-            $this->_config['from'] = array (
-                'email' => $this->_config['user'],
-                'name' => $this->_config['from'],
-            );
+        // determinar from
+        if (isset($this->_config['from'])) {
+            if (is_array($this->_config['from'])) {
+                $this->_config['from'] = $this->_config['from']['name'].' <'.$this->_config['from']['email'].'>';
+            } else if (strpos($this->_config['from'], '<')===false) {
+                $this->_config['from'] = $this->_config['from'].' <'.$this->_config['user'].'>';
+            }
+        } else {
+            $this->_config['from'] = $this->_config['user'].' <'.$this->_config['user'].'>';
         }
     }
 
@@ -180,7 +176,7 @@ class Network_Email
      * @param msg Cuerpo del mensaje que se desea enviar (arreglo o string)
      * @return Arreglo asociativo con los estados de cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-16
+     * @version 2015-01-19
      */
     public function send ($msg)
     {
@@ -190,10 +186,7 @@ class Network_Email
         }
         // Si no se ha indicado a quién responder usar el usuario que envía
         if (!$this->_replyTo) {
-            if (is_array($this->_config['from']))
-                $this->_replyTo = $this->_config['from']['name'].' <'.$this->_config['from']['email'].'>';
-            else
-                $this->_replyTo = $this->_config['from'].' <'.$this->_config['from'].'>';
+            $this->_replyTo = [$this->_config['from']];
         }
         // Si no se ha indicado a quién enviar el correo se utilizará el de la
         // configuración
