@@ -89,19 +89,21 @@ abstract class Shell
 
     /**
      * Método para mostrar estadísticas finales de la ejecución del comando
+     * @param stream Se permite elegir a través de que stream se enviarán las estadísticas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-08-05
+     * @version 2015-02-03
      */
-    public function showStats()
+    public function showStats($stream = 'php://stderr')
     {
+        $out = new Shell_Output($stream);
         // tiempo que tomó la ejecución del comando
         $time = microtime(true) - TIME_START;
         if ($time<60)
-            $this->out('Proceso ejecutado en '.num($time,1).' segundos.');
+            $out->write('Proceso ejecutado en '.num($time,1).' segundos.'."\n");
         else if ($time<3600)
-            $this->out('Proceso ejecutado en '.num($time/60,1).' minutos.');
+            $out->write('Proceso ejecutado en '.num($time/60,1).' minutos.'."\n");
         else
-            $this->out('Proceso ejecutado en '.num($time/3600,1).' horas.');
+            $out->write('Proceso ejecutado en '.num($time/3600,1).' horas.'."\n");
     }
 
 }
