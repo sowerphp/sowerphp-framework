@@ -442,4 +442,15 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     public function getFksFromTable ($table) {
     }
 
+    /**
+     * Método que entrega el tipo de base de datos instanciada
+     * @return Tipo de la BD instanciada
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2015-02-04
+     */
+    public function __toString()
+    {
+        return $this->config['type'];
+    }
+
 }
