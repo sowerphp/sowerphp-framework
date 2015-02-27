@@ -113,11 +113,13 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param params Parámetros que se deben enlazar a la consulta
      * @return Array Arreglo unidimensional con la fila
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-25
+     * @version 2015-02-27
      */
     public function getRow ($sql, $params = array())
     {
-        $data = $this->query($sql, $params)->fetch(\PDO::FETCH_ASSOC);
+        $stmt = $this->query($sql, $params);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
         return !empty($data) ? $data : [];
     }
 
@@ -145,11 +147,13 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param params Parámetros que se deben enlazar a la consulta
      * @return Mixed Valor devuelto
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-25
+     * @version 2015-02-27
      */
     public function getValue ($sql, $params = array())
     {
-        $data = $this->query($sql, $params)->fetchColumn();
+        $stmt = $this->query($sql, $params);
+        $data = $stmt->fetchColumn();
+        $stmt->closeCursor();
         return !empty($data) ? $data : '';
     }
 
