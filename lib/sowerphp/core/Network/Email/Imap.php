@@ -147,19 +147,14 @@ class Network_Email_Imap
     /**
      * Método que realiza una búsqueda sobre los mensajes de la casilla de correo
      * @param filter Criterios de búsqueda para la casilla
-     * @return Arreglo con los mensajes que coincidían con el filtro
+     * @return Arreglo con UIDs de los mensajes que coincidían con el filtro
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-05
+     * @version 2015-03-14
      */
     public function search($filter = 'UNSEEN')
     {
         $uids = imap_search($this->link, $filter, SE_UID);
-        if ($uids===false) return [];
-        $messages = [];
-        foreach ($uids as &$uid) {
-            $messages[$uid] = $this->getMessage($uid);
-        }
-        return $messages;
+        return $uids===false  ? [] : $uids;
     }
 
     /**
