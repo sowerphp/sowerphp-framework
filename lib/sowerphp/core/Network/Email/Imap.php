@@ -258,4 +258,16 @@ class Network_Email_Imap
 
     }
 
+    /**
+     * Método que elimina un mensaje del buzón IMAP
+     * @param uid UID del mensaje que se desea eliminar
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2015-03-14
+     */
+    public function delete($uid)
+    {
+        imap_delete($this->link, $uid, FT_UID);
+        imap_expunge($this->link);
+    }
+
 }
