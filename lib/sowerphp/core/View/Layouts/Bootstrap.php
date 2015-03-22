@@ -85,7 +85,7 @@ foreach ($_nav_website as $link=>$name) {
 $Account = $_Auth->User->getEmailAccount();
 if ($Account) {
     $emails = $Account->countUnreadMessages();
-    echo '                        <li><a href="'.$Account->getUserUrl().'" target="_blank">Email'.($emails?' <span class="badge">'.$emails.'</span>':'').'</a></li>',"\n";
+    echo '                        <li class="notification"><a href="'.$Account->getUserUrl().'" target="_blank"><i class="fa fa-envelope-o"></i> '.($emails?' <span class="badge">'.$emails.'</span>':'').'</a></li>',"\n";
 }
 ?>
                         <li class="dropdown">
