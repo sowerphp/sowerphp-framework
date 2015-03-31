@@ -229,4 +229,39 @@ class Utility_Array
         return $items;
     }
 
+    /**
+     * Método que toma la primera columna de una tabla y la convierte en el
+     * índice de un arreglo asociativo, donde las otras columnas o columna son
+     * los valores que tiene dicho índice
+     * @param table Tabla que se desea convertir
+     * @return Arreglo asociativo
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2015-03-31
+     */
+    public static function tableToAssociativeArray($table)
+    {
+        $array = [];
+        $keys = [];
+        foreach ($table as &$row) {
+            $key = array_shift($row);
+            if (!isset($array[$key]))
+                $array[$key] = [];
+            if (!isset($keys[$key])) {
+                $array[$key] = count($row)==1 ? array_shift($row) : $row;
+                // indica que no es un arreglo de datos (hay que hacerlo así
+                // porque los datos en si pueden ser un arreglo, entonces no
+                // bastaría solamente verificar si $array[$key]  es ya un
+                // arreglo)
+                $keys[$key] = false;
+            } else {
+                if (!$keys[$key]) {
+                    $array[$key] = [$array[$key]];
+                    $keys[$key] = true;
+                }
+                $array[$key][] = count($row)==1 ? array_shift($row) : $row;
+            }
+        }
+        return $array;
+    }
+
 }
