@@ -72,7 +72,7 @@ class Network_Email_Smtp
      * Método que envía el correo
      * @return Arreglo con los estados de retorno por cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-19
+     * @version 2015-04-03
      */
     public function send ()
     {
@@ -101,9 +101,13 @@ class Network_Email_Smtp
             'From' => $this->_header['from'],
             'Reply-To' => $this->_header['replyTo'],
             'To' => $to,
+            'Cc' => implode(', ', $this->_header['cc']),
             'Return-Path' => $this->_header['replyTo'],
             'Subject' => $this->_header['subject'],
         ));
+        if(!empty($this->_header['cc'])) {
+            $to .= ', '.implode(', ', $this->_header['cc']);
+        }
         if(!empty($this->_header['bcc'])) {
             $to .= ', '.implode(', ', $this->_header['bcc']);
         }

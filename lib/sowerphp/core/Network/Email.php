@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para el envío de correo electrónico
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-09-16
+ * @version 2015-04-03
  */
 class Network_Email
 {
@@ -34,6 +34,7 @@ class Network_Email
     protected $_config = null; ///< Arreglo con la configuración para el correo electrónico
     protected $_replyTo = null; ///< A quien se debe responder el correo enviado
     protected $_to = array(); ///< Listado de destinatarios
+    protected $_cc = array(); ///< Listado de destinatarios CC
     protected $_bcc = array(); ///< Listado de destinatarios BCC
     protected $_subject = null; ///< Asunto del correo que se enviará
     protected $_attach = array(); ///< Archivos adjuntos
@@ -127,6 +128,26 @@ class Network_Email
     }
 
     /**
+     * Asigna la lista de destinatarios CC
+     * @param email Email o arreglo con los emails que se desean agregar como destinatarios
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2015-04-03
+     */
+    public function cc($email)
+    {
+        // En caso que se haya pasado un arreglo con los correos
+        if (is_array($email)) {
+            // Asignar los correos, no se copia directamente el arreglo para
+            // Poder eliminar los duplicados
+            foreach ($email as &$e)
+                $this->cc($e);
+        }
+        // En caso que se haya pasado un solo correo
+        else if (!in_array($email, $this->_cc))
+            $this->_cc[] = $email;
+    }
+
+    /**
      * Asigna la lista de destinatarios BCC
      * @param email Email o arreglo con los emails que se desean agregar como destinatarios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
@@ -173,7 +194,7 @@ class Network_Email
      * @param msg Cuerpo del mensaje que se desea enviar (arreglo o string)
      * @return Arreglo asociativo con los estados de cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-19
+     * @version 2015-04-03
      */
     public function send ($msg)
     {
@@ -199,6 +220,7 @@ class Network_Email
             'from'=>$this->_config['from'],
             'replyTo'=>$this->_replyTo,
             'to'=>$this->_to,
+            'cc'=>$this->_cc,
             'bcc'=>$this->_bcc,
             'subject'=>$this->_subject
         );
