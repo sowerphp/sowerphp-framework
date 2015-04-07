@@ -38,7 +38,7 @@ class Controller_Error extends \Controller_App
      * Renderizar error
      * @param data Datos qye se deben pasar a la vista del error
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-01
+     * @version 2015-04-07
      */
     public function display ($data)
     {
@@ -55,6 +55,7 @@ class Controller_Error extends \Controller_App
         // mostrar error "genérico"
         else $this->render('Error/silence');
         // enviar al cliente
+        $this->response->status($data['code']);
         $this->response->send();
     }
 
