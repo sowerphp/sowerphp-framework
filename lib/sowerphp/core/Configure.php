@@ -36,7 +36,7 @@ class Configure
     /**
      * Realizar configuración al inicio de la aplicación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-24
+     * @version 2015-04-09
      */
     public static function bootstrap()
     {
@@ -51,8 +51,8 @@ class Configure
             App::import($path.'/Config/routes');
         }
         // Setear parámetros de errores
-        ini_set('display_errors', self::$_values['debug'] ? true : false);
-        error_reporting(self::$_values['debug'] ? self::$_values['error']['level'] : 0);
+        ini_set('display_errors', self::$_values['debug']);
+        error_reporting(self::$_values['error']['level']);
         set_exception_handler('sowerphp\core\Exception::handler');
         // Definir la zona horaria
         date_default_timezone_set(self::$_values['time']['zone']);
