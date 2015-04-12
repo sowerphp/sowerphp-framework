@@ -45,7 +45,7 @@ class Controller_Contacto extends \Controller_App
     /**
      * Método que desplegará y procesará el formulario de contacto
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-19
+     * @version 2015-04-12
      */
     public function index()
     {
@@ -58,21 +58,30 @@ class Controller_Contacto extends \Controller_App
             $this->redirect('/');
         }
         // si se envió el formulario se procesa
-        if (!empty($_POST['nombre']) and !empty($_POST['correo']) and !empty($_POST['mensaje'])) {
-            $email = new Network_Email();
-            $email->replyTo($_POST['correo'], $_POST['nombre']);
-            $email->to(Configure::read('email.default.to'));
-            $email->subject('Contacto desde la web #'.date('YmdHis'));
-            $msg = $_POST['mensaje']."\n\n".'-- '."\n".$_POST['nombre']."\n".$_POST['correo'];
-            $status = $email->send($msg);
-            if ($status===true) {
-                Model_Datasource_Session::message(
-                    'Su mensaje ha sido enviado, se responderá a la brevedad.', 'ok'
-                );
-                $this->redirect('/contacto');
+        if (isset($_POST['submit'])) {
+            $_POST['nombre'] = strip_tags(trim($_POST['nombre']));
+            $_POST['correo'] = strip_tags(trim($_POST['correo']));
+            $_POST['mensaje'] = strip_tags(trim($_POST['mensaje']));
+            if (!empty($_POST['nombre']) and !empty($_POST['correo']) and !empty($_POST['mensaje'])) {
+                $email = new Network_Email();
+                $email->replyTo($_POST['correo'], $_POST['nombre']);
+                $email->to(Configure::read('email.default.to'));
+                $email->subject('Contacto desde la web #'.date('YmdHis'));
+                $msg = $_POST['mensaje']."\n\n".'-- '."\n".$_POST['nombre']."\n".$_POST['correo'];
+                $status = $email->send($msg);
+                if ($status===true) {
+                    Model_Datasource_Session::message(
+                        'Su mensaje ha sido enviado, se responderá a la brevedad.', 'ok'
+                    );
+                    $this->redirect('/contacto');
+                } else {
+                    Model_Datasource_Session::message(
+                        'Ha ocurrido un error al intentar enviar su mensaje, por favor intente nuevamente.<br /><em>'.$status['message'].'</em>', 'error'
+                    );
+                }
             } else {
                 Model_Datasource_Session::message(
-                    'Ha ocurrido un error al intentar enviar su mensaje, por favor intente nuevamente.<br /><em>'.$status['message'].'</em>', 'error'
+                    'Debe completar todos los campos del formulario', 'error'
                 );
             }
         }
