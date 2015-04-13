@@ -59,9 +59,9 @@ class Controller_Contacto extends \Controller_App
         }
         // si se envió el formulario se procesa
         if (isset($_POST['submit'])) {
-            $_POST['nombre'] = strip_tags(trim($_POST['nombre']));
-            $_POST['correo'] = strip_tags(trim($_POST['correo']));
-            $_POST['mensaje'] = strip_tags(trim($_POST['mensaje']));
+            $_POST['nombre'] = trim(strip_tags($_POST['nombre']));
+            $_POST['correo'] = trim(strip_tags($_POST['correo']));
+            $_POST['mensaje'] = trim(strip_tags($_POST['mensaje']));
             if (!empty($_POST['nombre']) and !empty($_POST['correo']) and !empty($_POST['mensaje'])) {
                 $email = new Network_Email();
                 $email->replyTo($_POST['correo'], $_POST['nombre']);
