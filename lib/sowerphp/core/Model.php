@@ -267,45 +267,104 @@ abstract class Model extends Object
     }
 
     /**
-     * Método "mágico" para atrapar las llamadas a getFK(), en realidad
-     * atrapará las llamadas a cualquier método inexistente, pero solo
-     * se procesarán aquellos que sean getFK y en otros caso generará una
-     * excepción (ya que el método no existirá)
+     * Método "mágico" para atrapar las llamadas a getFK(), setAttribute() o
+     * getAttribute(). En realidad atrapará las llamadas a cualquier método
+     * inexistente, pero solo se procesarán aquellos mencionados y en otros
+     * casos se generará una excepción (ya que el método no existirá)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-08
+     * @version 2015-04-16
      */
     public function __call($method, $args)
     {
         // asegurarse que sean métodos que inician con get
-        if (substr($method, 0, 3)=='get') {
+        $request = substr($method, 0, 3);
+        // si la solicitud es un getFK() o un getAttribute()
+        if ($request=='get') {
             $fk = substr($method, 3);
-            // asegurarse que sea un getFK (ya que debe existir en fkNamespace)
+            // es un getFK() -> debe existir en fkNamespace
             if (isset($this::$fkNamespace) && isset($this::$fkNamespace['Model_'.$fk])) {
-                $fkClass = $this::$fkNamespace['Model_'.$fk].'\Model_'.$fk;
-                // si la clase no existe error
-                if (!class_exists($fkClass)) {
-                    throw new Exception(array(
-                        sprintf ('Modelo %s no existe', $fkClass)
-                    ));
-                }
-                $fkClasss = \sowerphp\core\Utility_Inflector::pluralize($fkClass);
-                // tratar de recuperar con la clase plural (para usar caché)
-                // clase plural sólo existe al tener la extesión sowerphp\app
-                if (class_exists($fkClasss)) {
-                    if (isset($args[0])) return (new $fkClasss)->get($args[0]);
-                    else return (new $fkClasss)->get($this->{Utility_Inflector::underscore($fk)});
-                }
-                // recuperar directamente con la clase singular
-                else {
-                    if (isset($args[0])) return new $fkClass($args[0]);
-                    else return new $fkClass($this->{Utility_Inflector::underscore($fk)});
+                return $this->getFK($fk, $args);
+            }
+            // es un getAttribute()
+            else {
+                $attribute = \sowerphp\core\Utility_Inflector::underscore(substr($method, 3));
+                if (isset($this::$columnsInfo[$attribute])) {
+                    return $this->$attribute;
                 }
             }
         }
-        // si el método no es getFK() se genera una excepción
+        // si la solicitud es un setAttribute()
+        else if ($request=='set') {
+            $attribute = \sowerphp\core\Utility_Inflector::underscore(substr($method, 3));
+            if (isset($this::$columnsInfo[$attribute])) {
+                return call_user_func_array([$this, 'setAttribute'], array_merge([$attribute], $args));
+            }
+        }
+        // si el método no existe se genera una excepción
         throw new Exception(array(
             sprintf ('Método %s::%s() no existe', get_class($this), $method)
         ));
+    }
+
+    /**
+     * Método que obtiene un objeto que es FK de este
+     * @param fk Nombre de la clase que es la FK (sin Model_)
+     * @param args Argunentos con la PK del objeto que es FK
+     * @return Model_FK
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2015-04-16
+     */
+    private function getFK($fk, $args)
+    {
+        $fkClass = $this::$fkNamespace['Model_'.$fk].'\Model_'.$fk;
+        // si la clase no existe error
+        if (!class_exists($fkClass)) {
+            throw new Exception(array(
+                sprintf ('Modelo %s no existe', $fkClass)
+            ));
+        }
+        $fkClasss = \sowerphp\core\Utility_Inflector::pluralize($fkClass);
+        // tratar de recuperar con la clase plural (para usar caché)
+        // clase plural sólo existe al tener la extesión sowerphp\app
+        if (class_exists($fkClasss)) {
+            if (isset($args[0])) return (new $fkClasss)->get($args[0]);
+            else return (new $fkClasss)->get($this->{Utility_Inflector::underscore($fk)});
+        }
+        // recuperar directamente con la clase singular
+        else {
+            if (isset($args[0])) return new $fkClass($args[0]);
+            else return new $fkClass($this->{Utility_Inflector::underscore($fk)});
+        }
+    }
+
+    /**
+     * Método que permite asignar el valor de un atributo
+     * @param attribute Atributo del objeto que se desea asignar
+     * @param value Valor que se desea asignar al objeto
+     * @param check Si se debe validar por algún tipo de dato en particular
+     * @param trim Si se debe aplicar la función trim() al valor
+     * @param strip_tags Si se debe aplicar la función strip_tags() al valor
+     * @return =true si pasó la validación y se pudo asignar el valor
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2015-04-16
+     */
+    private function setAttribute($attribute, $value, $check = true, $trim = true, $strip_tags = true)
+    {
+        if ($strip_tags) $value = strip_tags($value);
+        if ($trim) $value = trim($value);
+        if ($check===true or is_array($check)) {
+            if (!is_array($check) and isset($this::$columnsInfo[$attribute]['check'])) {
+                $check = $this::$columnsInfo[$attribute]['check'];
+            }
+            if (is_array($check)) {
+                $status = \sowerphp\core\Utility_Data_Validation::check($value, $check);
+                if ($status!==true) {
+                    return false;
+                }
+            }
+        }
+        $this->$attribute = $value;
+        return true;
     }
 
     /**
