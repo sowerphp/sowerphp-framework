@@ -26,12 +26,13 @@ namespace sowerphp\core;
 /**
  * Clase base para todas las excepciones
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-04
+ * @version 2015-04-24
  */
 class Exception extends \RuntimeException
 {
 
     protected $_messageTemplate = '%s'; ///< Mensaje que se utilizará al renderizar el error
+    protected $severity = 3; // Error conditions (http://en.wikipedia.org/wiki/Syslog#Severity_levels)
 
     /**
      * Constructor para la excepción
@@ -54,7 +55,7 @@ class Exception extends \RuntimeException
      * Método para manejar las excepciones ocurridas en la aplicación
      * @param exception Excepción producida
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-07
+     * @version 2015-04-24
      */
     public static function handler (\Exception $exception) {
         ob_clean();
@@ -64,6 +65,7 @@ class Exception extends \RuntimeException
             'message' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),
             'code' => $exception->getCode(),
+            'severity' => $exception->severity,
         );
         // renderizar dependiendo de si es una web o es una shell
         if (isset($_SERVER['REQUEST_URI'])) {
