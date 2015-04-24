@@ -29,6 +29,7 @@ namespace sowerphp\core;
 class Exception_Controller_Missing extends Exception
 {
     protected $_messageTemplate = 'Controlador %s no fue encontrado';
+    protected $severity = 5;
     public function __construct($message, $code = 404)
     {
         parent::__construct($message, $code);

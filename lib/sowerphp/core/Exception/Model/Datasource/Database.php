@@ -29,4 +29,5 @@ namespace sowerphp\core;
 class Exception_Model_Datasource_Database extends Exception
 {
     protected $_messageTemplate = '%s';
+    protected $severity = 2;
 }

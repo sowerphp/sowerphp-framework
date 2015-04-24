@@ -29,6 +29,7 @@ namespace sowerphp\core;
 class Exception_Controller_Action_Args_Missing extends Exception
 {
     protected $_messageTemplate = 'Argumentos insuficientes para la acción %s::%s(%s)';
+    protected $severity = 5;
     public function __construct($message, $code = 404)
     {
         parent::__construct($message, $code);
