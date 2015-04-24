@@ -29,7 +29,7 @@ namespace sowerphp\core;
 class Exception_Controller_Action_Private extends Exception
 {
     protected $_messageTemplate = 'Acción %s::%s() es privada y no puede ser accedida mediante la URL';
-    protected $severity = 5;
+    protected $severity = LOG_NOTICE;
     public function __construct($message, $code = 401)
     {
         parent::__construct($message, $code);

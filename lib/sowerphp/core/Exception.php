@@ -32,7 +32,7 @@ class Exception extends \RuntimeException
 {
 
     protected $_messageTemplate = '%s'; ///< Mensaje que se utilizará al renderizar el error
-    protected $severity = 3; // Error conditions (http://en.wikipedia.org/wiki/Syslog#Severity_levels)
+    protected $severity = LOG_ERR; // Error conditions (http://en.wikipedia.org/wiki/Syslog#Severity_levels)
 
     /**
      * Constructor para la excepción

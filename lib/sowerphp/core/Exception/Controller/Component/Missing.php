@@ -29,5 +29,5 @@ namespace sowerphp\core;
 class Exception_Controller_Component_Missing extends Exception
 {
     protected $_messageTemplate = 'Componente %s no fue encontrado';
-    protected $severity = 7;
+    protected $severity = LOG_DEBUG;
 }

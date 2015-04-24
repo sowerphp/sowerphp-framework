@@ -29,7 +29,7 @@ namespace sowerphp\core;
 class Exception_Component_Missing extends Exception
 {
     protected $_messageTemplate = 'Componente %s no fue encontrado';
-    protected $severity = 5;
+    protected $severity = LOG_NOTICE;
     public function __construct($message, $code = 404)
     {
         parent::__construct($message, $code);
