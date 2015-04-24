@@ -33,20 +33,22 @@ class Model_Datasource_Session
 
     /**
      * Método que inicia la sesión
+     * @param expires Minutos en que expirará la sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-20
+     * @version 2015-04-23
      */
-    public static function start ()
+    public static function start($expires = 240)
     {
-        ini_set('session.use_only_cookies', true);
+        $expires *= 60;
         $session_name = 'sec_session_id';
         $path = (new Network_Request())->base();
         $path = $path!=''?$path:'/';
-        //$domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+        $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
         $secure = isset($_SERVER['HTTPS']) ? true : false;
         $httponly = true;
-        //session_set_cookie_params(31536000, $path, $domain, $secure, $httponly);
-        session_set_cookie_params(31536000, $path, null, $secure, $httponly);
+        ini_set('session.use_only_cookies', true);
+        ini_set('session.gc_maxlifetime', $expires);
+        session_set_cookie_params($expires, $path, $domain, $secure, $httponly);
         session_name($session_name);
         session_start();
     }
