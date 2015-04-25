@@ -272,7 +272,7 @@ abstract class Model extends Object
      * inexistente, pero solo se procesarán aquellos mencionados y en otros
      * casos se generará una excepción (ya que el método no existirá)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-16
+     * @version 2015-04-24
      */
     public function __call($method, $args)
     {
@@ -301,8 +301,9 @@ abstract class Model extends Object
             }
         }
         // si el método no existe se genera una excepción
-        throw new Exception(array(
-            sprintf ('Método %s::%s() no existe', get_class($this), $method)
+        throw new Exception_Object_Method_Missing(array(
+            'class' => get_class($this),
+            'method' => $method,
         ));
     }
 
@@ -312,15 +313,15 @@ abstract class Model extends Object
      * @param args Argunentos con la PK del objeto que es FK
      * @return Model_FK
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-16
+     * @version 2015-04-24
      */
     private function getFK($fk, $args)
     {
         $fkClass = $this::$fkNamespace['Model_'.$fk].'\Model_'.$fk;
         // si la clase no existe error
         if (!class_exists($fkClass)) {
-            throw new Exception(array(
-                sprintf ('Modelo %s no existe', $fkClass)
+            throw new Exception_Model_Missing(array(
+                'model' => $fkClass,
             ));
         }
         $fkClasss = \sowerphp\core\Utility_Inflector::pluralize($fkClass);
