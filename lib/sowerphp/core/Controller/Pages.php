@@ -31,8 +31,16 @@ namespace sowerphp\core;
 class Controller_Pages extends \Controller_App
 {
 
-    public function beforeFilter ()
+    /**
+     * Método que se ejecuta antes de ejecutar la acción del controlador
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2015-04-28
+     */
+    public function beforeFilter()
     {
+        if (isset($this->Auth))
+            $this->Auth->allow('display');
+        parent::beforeFilter();
     }
 
     /**
