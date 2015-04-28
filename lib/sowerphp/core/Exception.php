@@ -55,7 +55,7 @@ class Exception extends \RuntimeException
      * Método para manejar las excepciones ocurridas en la aplicación
      * @param exception Excepción producida
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-24
+     * @version 2015-04-28
      */
     public static function handler (\Exception $exception) {
         ob_clean();
@@ -72,6 +72,9 @@ class Exception extends \RuntimeException
             $controller = new Controller_Error (new Network_Request(), new Network_Response());
             $controller->error_reporting = Configure::read('debug');
             $controller->display($data);
+            $controller->shutdownProcess();
+            $controller->response->status($data['code']);
+            $controller->response->send();
         } else {
             $stdout = new Shell_Output('php://stdout');
             $stdout->write("\n".'<error>'.$data['exception'].':</error>', 2);
