@@ -61,7 +61,7 @@ class Controller_Component_Collection extends Object_Collection
      * @param settins Opciones para el componente
      * @return Componente cargado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-14
+     * @version 2015-05-04
      */
     public function load ($component, $settings = array())
     {
@@ -72,7 +72,7 @@ class Controller_Component_Collection extends Object_Collection
         // cargar clase para el componente, si no existe error
         $componentClass = App::findClass('Controller_Component_'.$component);
         if (!class_exists($componentClass)) {
-            throw new Exception_Component_Missing(array(
+            throw new Exception_Controller_Component_Missing(array(
                 'class' => $componentClass
             ));
         }

@@ -24,7 +24,7 @@
 namespace sowerphp\core;
 
 /**
- * Excepción cuando no se encuentra un controlador (página no existe)
+ * Excepción cuando no se encuentra un modelo que ha sido solicitado
  */
 class Exception_Model_Missing extends Exception
 {

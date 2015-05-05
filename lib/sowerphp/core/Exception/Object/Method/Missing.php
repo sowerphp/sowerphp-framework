@@ -24,7 +24,7 @@
 namespace sowerphp\core;
 
 /**
- * Excepción cuando no se encuentra un controlador (página no existe)
+ * Excepción cuando no se encuentra un método de un objeto
  */
 class Exception_Object_Method_Missing extends Exception
 {
