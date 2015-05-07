@@ -26,9 +26,9 @@ namespace sowerphp\core;
 /**
  * Clase genérica con método para trabajar con cualquier objeto
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-05-14
+ * @version 2015-05-06
  */
-abstract class Object
+trait Object
 {
 
     /**
@@ -37,7 +37,7 @@ abstract class Object
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function __toString ()
+    public function __toString()
     {
         return get_class($this);
     }
@@ -48,7 +48,7 @@ abstract class Object
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-05-14
      */
-    public function set ($array)
+    public function set($array)
     {
         $props = (new \ReflectionClass($this))->getProperties(
             \ReflectionProperty::IS_PUBLIC
