@@ -55,7 +55,7 @@ class Exception extends \RuntimeException
      * Método para manejar las excepciones ocurridas en la aplicación
      * @param exception Excepción producida
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-28
+     * @version 2015-05-06
      */
     public static function handler (\Exception $exception) {
         ob_clean();
@@ -65,7 +65,7 @@ class Exception extends \RuntimeException
             'message' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),
             'code' => $exception->getCode(),
-            'severity' => $exception->severity,
+            'severity' => isset($exception->severity) ? $exception->severity : LOG_ERR,
         );
         // renderizar dependiendo de si es una web o es una shell
         if (isset($_SERVER['REQUEST_URI'])) {
