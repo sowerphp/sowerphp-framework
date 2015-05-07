@@ -162,7 +162,7 @@ class Network_Email_Imap
      * @param uid UID del mensaje que se desea obtener
      * @return Arreglo con los datos del mensaje, índices: header, body, charset y attachments
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-05
+     * @version 2015-05-07
      */
     public function getMessage($uid)
     {
@@ -173,6 +173,8 @@ class Network_Email_Imap
             'attachments' => [],
         ];
         $s = imap_fetchstructure($this->link, $uid, FT_UID);
+        if (!is_object($s))
+            return false;
         // el correo es simple y no tiene múltiples partes
         if (!$s->parts) {
             $this->getMessagePart($this->link, $uid, $s, 0);
