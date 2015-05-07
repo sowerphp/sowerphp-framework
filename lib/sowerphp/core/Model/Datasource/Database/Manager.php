@@ -129,7 +129,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param params Parámetros que se deben enlazar a la consulta
      * @return Array Arreglo unidimensional con la columna
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-17
+     * @version 2015-05-06
      */
     public function getCol ($sql, $params = array())
     {
@@ -138,6 +138,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
         while (($col = $stmt->fetchColumn())!==false) {
             $cols[] = $col;
         }
+        $stmt->closeCursor();
         return $cols;
     }
 
@@ -155,6 +156,40 @@ abstract class Model_Datasource_Database_Manager extends \PDO
         $data = $stmt->fetchColumn();
         $stmt->closeCursor();
         return !empty($data) ? $data : '';
+    }
+
+    /**
+     * Obtener un generador para una tabla desde la base de datos
+     * @param sql Consulta SQL que se desea realizar
+     * @param params Parámetros que se deben enlazar a la consulta
+     * @return Generator Object
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2015-05-06
+     */
+    public function getTableGenerator($sql, $params = [])
+    {
+        $stmt = $this->query($sql, $params);
+        while (($row = $stmt->fetch(\PDO::FETCH_ASSOC))!==false) {
+            yield $row;
+        }
+        $stmt->closeCursor();
+    }
+
+    /**
+     * Obtener un generador para una sola columna desde la base de datos
+     * @param sql Consulta SQL que se desea realizar
+     * @param params Parámetros que se deben enlazar a la consulta
+     * @return Generator Object
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2015-05-06
+     */
+    public function getColGenerator($sql, $params = [])
+    {
+        $stmt = $this->query($sql, $params);
+        while (($col = $stmt->fetchColumn())!==false) {
+            yield $col;
+        }
+        $stmt->closeCursor();
     }
 
     /**
