@@ -180,12 +180,19 @@ class Network_Email
 
     /**
      * Agregar un archivo para enviar en el correo
-     * @param src Arreglo (formato de $_FILES) con el archivo a adjuntar
+     * @param src Arreglo (formato de $_FILES) con el archivo a adjuntar o ruta al archivo a adjuntar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2010-10-09
+     * @version 2015-05-08
      */
-    public function attach ($src)
+    public function attach($src)
     {
+        if (!is_array($src)) {
+            $src = [
+                'tmp_name' => $src,
+                'name' => basename($src),
+                'type' => (new \finfo(FILEINFO_MIME_TYPE))->file($src),
+            ];
+        }
         $this->_attach[] = $src;
     }
 
