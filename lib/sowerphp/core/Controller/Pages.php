@@ -47,12 +47,14 @@ class Controller_Pages extends \Controller_App
      * Renderizar página
      * @page page Página que se desea renderizar ubicada en View/Pages
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-24
+     * @version 2015-05-18
      */
     public function display ($page)
     {
-        $this->autoRender = false;
-        $this->render ('Pages'.$page);
+        if ($this->autoRender) {
+            $this->autoRender = false;
+            $this->render ('Pages'.$page);
+        }
     }
 
 }
