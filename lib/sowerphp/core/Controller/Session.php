@@ -33,6 +33,9 @@ class Controller_Session extends \Controller_App
 
     public function beforeFilter()
     {
+        if (isset($this->Auth))
+            $this->Auth->allow('config');
+        parent::beforeFilter();
     }
 
     /**
