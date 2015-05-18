@@ -34,12 +34,13 @@ class Controller_Contacto extends \Controller_App
     /**
      * Método para autorizar la carga de index en caso que hay autenticación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-10
+     * @version 2015-03-18
      */
     public function beforeFilter()
     {
         if (isset($this->Auth))
             $this->Auth->allow('index');
+        parent::beforeFilter();
     }
 
     /**
