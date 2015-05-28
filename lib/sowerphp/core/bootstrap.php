@@ -66,6 +66,6 @@ if ((isset($_SERVER['APPLICATION_ENV']) and $_SERVER['APPLICATION_ENV']=='dev'))
 }
 
 // Iniciar sesión y configurar el sitio
-\sowerphp\core\Model_Datasource_Session::start ();
-\sowerphp\core\Configure::bootstrap ();
-\sowerphp\core\Model_Datasource_Session::configure ();
+\sowerphp\core\Configure::bootstrap();
+\sowerphp\core\Model_Datasource_Session::start(\sowerphp\core\Configure::read('session.expires'));
+\sowerphp\core\Model_Datasource_Session::configure();

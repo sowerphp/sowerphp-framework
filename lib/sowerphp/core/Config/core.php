@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * @file core.php
  * Configuración estándar de las páginas o aplicaciones
- * @version 2015-04-09
+ * @version 2015-05-28
  */
 
 // Errores
@@ -50,3 +50,6 @@ Configure::write('page.extensions', array('php', 'md'));
 
 // Página inicial
 Configure::write('homepage', 'inicio');
+
+// tiempo de expiración de la sesión en minutos
+Configure::write('session.expires', 30);

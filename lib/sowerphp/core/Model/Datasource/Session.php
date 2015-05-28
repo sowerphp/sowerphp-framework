@@ -35,9 +35,9 @@ class Model_Datasource_Session
      * Método que inicia la sesión
      * @param expires Minutos en que expirará la sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-23
+     * @version 2015-05-28
      */
-    public static function start($expires = 240)
+    public static function start($expires = 30)
     {
         $expires *= 60;
         $session_name = 'sec_session_id';
