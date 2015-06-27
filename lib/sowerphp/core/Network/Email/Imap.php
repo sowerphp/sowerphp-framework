@@ -162,7 +162,7 @@ class Network_Email_Imap
      * @param uid UID del mensaje que se desea obtener
      * @return Arreglo con los datos del mensaje, índices: header, body, charset y attachments
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-07
+     * @version 2015-06-27
      */
     public function getMessage($uid)
     {
@@ -185,6 +185,9 @@ class Network_Email_Imap
                 $this->getMessagePart($uid, $p, $partno0+1, $message);
             }
         }
+        // decodificar
+        $message['header']->subject = utf8_encode(imap_mime_header_decode($message['header']->subject)[0]->text);
+        // entregar mensaje
         return $message;
     }
 
