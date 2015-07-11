@@ -47,7 +47,7 @@ class Network_Http_Socket
      * @param sslv3 =true se fuerza sslv3, por defecto es false
      * @return Respusta HTTP (cabecera y cuerpo)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-29
+     * @version 2015-07-11
      */
     public static function __callStatic($method, $args)
     {
@@ -62,11 +62,12 @@ class Network_Http_Socket
         // inicializar curl
         $curl = curl_init();
         // asignar método y datos dependiendo de si es GET u otro método
-        if (is_array($data))
-            $data = http_build_query($data);
         if ($method=='GET') {
+            if (is_array($data))
+                $data = http_build_query($data);
             if ($data) $url = sprintf("%s?%s", $url, $data);
         } else {
+            curl_setopt($curl, CURLOPT_POST, 1);
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
             if ($data) curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
         }
