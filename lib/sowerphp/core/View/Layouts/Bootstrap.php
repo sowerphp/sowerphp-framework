@@ -34,6 +34,10 @@
 <?php if (\sowerphp\core\App::layerExists('sowerphp/app')) : ?>
         <script type="text/javascript" src="<?=$_base?>/js/app.js"></script>
 <?php endif; ?>
+<?php if (\sowerphp\core\Module::loaded('Sistema.Notificaciones')) : ?>
+        <link rel="stylesheet" href="<?=$_base?>/sistema/notificaciones/css/style.css" />
+        <script type="text/javascript" src="<?=$_base?>/sistema/notificaciones/js/js.js"></script>
+<?php endif; ?>
 <?php if (file_exists(DIR_PROJECT.'/website/webroot/css/custom.css')) : ?>
         <link rel="stylesheet" href="<?=$_base?>/css/custom.css" />
 <?php endif; ?>
@@ -81,6 +85,40 @@ foreach ($_nav_website as $link=>$name) {
 <?php if (!$_Auth->logged()) : ?>
                         <li><a href="<?=$_base?>/usuarios/ingresar"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> Iniciar sesión</a></li>
 <?php else : ?>
+<?php if (\sowerphp\core\Module::loaded('Sistema.Notificaciones')) : ?>
+<?php
+$Notficaciones = new \sowerphp\app\Sistema\Notificaciones\Model_Notificaciones();
+$notificaciones = $Notficaciones->getUnreadByUser($_Auth->User->id);
+$n_notificaciones = $Notficaciones->getCountUnreadByUser($_Auth->User->id);;
+?>
+                        <li class="nav-icon-btn nav-icon-btn-danger dropdown">
+                            <a href="#notifications" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-bell-o"></i><?=($n_notificaciones?' <span class="badge" id="n_notifications">'.$n_notificaciones.'</span>':'')?>
+                            </a>
+                            <div class="dropdown-menu widget-notifications no-padding" style="width: 300px">
+                                <div class="notifications-list" id="main-navbar-notifications">
+<?php foreach ($notificaciones as $n) : ?>
+                                    <div class="notification" id="notification_<?=$n['id']?>">
+                                        <div class="notification-title text-<?=$n['tipo']?>">
+                                            <?=$n['usuario']?>
+                                            <a href="#" onclick="notificacion_leida(<?=$n['id']?>); return false" title="Marcar como leída"><i class="fa fa-check-circle"></i></a>
+                                        </div>
+                                        <div class="notification-description">
+                                            <?=$n['descripcion']?>
+<?php if ($n['enlace']) : ?>
+                                            <br />
+                                            <a href="#" onclick="notificacion_abrir(<?=$n['id']?>); return false" title="Se abrirá y marcará como leída la notificación">Abrir la notificación</a>
+<?php endif; ?>
+                                        </div>
+                                        <div class="notification-ago"><?=\sowerphp\general\Utility_Date::ago($n['fechahora'])?></div>
+                                        <div class="notification-icon <?=$n['icono']?> bg-<?=$n['tipo']?>"></div>
+                                    </div>
+<?php endforeach; ?>
+                                </div>
+                                <a href="<?=$_base?>/sistema/notificaciones/notificaciones" class="notifications-link">Ver todas las notificaciones</a>
+                            </div>
+                        </li>
+<?php endif; ?>
 <?php
 $Account = $_Auth->User->getEmailAccount();
 if ($Account) {
