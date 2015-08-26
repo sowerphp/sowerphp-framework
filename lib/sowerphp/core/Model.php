@@ -145,7 +145,7 @@ abstract class Model
      * Método para borrar el objeto de la base de datos
      * @return =true si se logró eliminar, =false en caso de algún problema
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
+     * @version 2015-05-26
      */
     public function delete ()
     {
@@ -153,16 +153,18 @@ abstract class Model
         $pk = $this->preparePk();
         if (!$pk) return false;
         // eliminar registro
-        $this->db->beginTransaction();
+        $beginTransaction = $this->db->beginTransaction();
         $stmt = $this->db->query(
             'DELETE FROM '.$this->_table.' WHERE '.$pk['where'],
             $pk['values']
         );
         if ($stmt->errorCode()==='00000') {
-            $this->db->commit();
+            if ($beginTransaction)
+                $this->db->commit();
             return true;
         }
-        $this->db->rollBack();
+        if ($beginTransaction)
+            $this->db->rollBack();
         return false;
     }
 
@@ -182,7 +184,7 @@ abstract class Model
      * Método para insertar el objeto en la base de datos
      * @return =true si se logró insertar, =false en caso de algún problema
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-05-06
+     * @version 2015-08-26
      */
     protected function insert ()
     {
@@ -201,7 +203,7 @@ abstract class Model
             $values[':'.$col] = $this->$col;
         }
         // insertar datos
-        $this->db->beginTransaction();
+        $beginTransaction = $this->db->beginTransaction();
         $stmt = $this->db->query('
             INSERT INTO '.$this->_table.' (
                 '.implode(', ', $cols).'
@@ -213,10 +215,12 @@ abstract class Model
             if (property_exists($this, 'id')) {
                 $this->id = $this->db->getValue('SELECT MAX(id) FROM '.$this->_table);
             }
-            $this->db->commit();
+            if ($beginTransaction)
+                $this->db->commit();
             return true;
         }
-        $this->db->rollBack();
+        if ($beginTransaction)
+            $this->db->rollBack();
         return false;
     }
 
@@ -226,7 +230,7 @@ abstract class Model
      * @param columns Arreglo asociativo con las columnas a editar o NULL para editar todas las columnas
      * @return =true si se logró actualizar, =false en caso de algún problema
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-06
+     * @version 2015-08-26
      */
     public function update ($columns = null)
     {
@@ -254,17 +258,19 @@ abstract class Model
         $pk = $this->preparePk();
         if (!$pk) return false;
         // realizar consulta
-        $this->db->beginTransaction();
+        $beginTransaction = $this->db->beginTransaction();
         $stmt = $this->db->query ('
             UPDATE '.$this->_table.'
             SET '.implode(', ', $querySet).'
             WHERE '.$pk['where']
         , array_merge($columns, $pk['values']));
         if ($stmt->errorCode()==='00000') {
-            $this->db->commit();
+            if ($beginTransaction)
+                $this->db->commit();
             return true;
         }
-        $this->db->rollBack();
+        if ($beginTransaction)
+            $this->db->rollBack();
         return false;
     }
 
