@@ -66,7 +66,8 @@ foreach ($_nav_website as $link=>$name) {
         echo '                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">',$name['name'],' <span class="caret"></span></a>',"\n";
         echo '                            <ul class="dropdown-menu" role="menu">',"\n";
         foreach($name['nav'] as $l=>$n) {
-            echo '                                <li><a href="',$link,$l,'">',$n,'</a></li>',"\n";
+            if ($l[0]=='/') $l = $link.$l;
+            echo '                                <li><a href="',$l,'">',$n,'</a></li>',"\n";
         }
         echo '                            </ul>',"\n";
         echo '                        </li>',"\n";
