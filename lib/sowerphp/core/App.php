@@ -75,7 +75,7 @@ class App
      * @param loadAlias =true si no se encuentra la clase se buscará un alias para la misma
      * @return =true si se encontró la clase
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-25
+     * @version 2015-09-20
      */
     public static function loadClass ($class, $loadAlias = true)
     {
@@ -85,12 +85,13 @@ class App
             $file = str_replace('_', '/', array_pop($ns)).'.php';
             $layer = $ns[0]!='website' ? array_shift($ns).'/'.array_shift($ns) : array_shift($ns);
             $subns = isset($ns[0]) ? '/Module/'.implode('/Module/', $ns) : '';
-            $fileLocation = self::$_layers[$layer].'/'.$layer.$subns.'/'.$file;
-            if (isset(self::$_layers[$layer]) && file_exists($fileLocation)) {
-                return include_once $fileLocation;
+            if (isset(self::$_layers[$layer])) {
+                $fileLocation = self::$_layers[$layer].'/'.$layer.$subns.'/'.$file;
+                if (is_readable($fileLocation))
+                    return include_once $fileLocation;
             }
         }
-        if($loadAlias && self::loadClassAlias ($class)) {
+        if ($loadAlias && self::loadClassAlias($class)) {
             return true;
         }
         return false;
