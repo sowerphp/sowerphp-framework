@@ -208,14 +208,28 @@ abstract class Model_Datasource_Database_Manager extends \PDO
 
     /**
      * Wrapper para comenzar una transacción (evita iniciar más de una transacción)
+     * @param serializable =true ejecutará la transacción de forma SERIALIZABLE (sólo MariaDB/MySQL y PostgreSQL)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-20
+     * @version 2015-09-22
      */
-    public function beginTransaction ()
+    public function beginTransaction($serializable = false)
     {
-        if (!$this->inTransaction and parent::beginTransaction()) {
-            $this->inTransaction = true;
-            return true;
+        if (!$this->inTransaction) {
+            // serializar transacción en MariaDB y MySQL
+            if ($serializable and in_array($this->config['type'], ['MariaDB', 'MySQL'])) {
+                $this->query('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
+            }
+            // iniciar transacción
+            if (parent::beginTransaction()) {
+                // serializar transacción en PostgreSQL
+                if ($serializable and $this->config['type']=='PostgreSQL') {
+                    $this->query('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
+                    $this->query('SET TRANSACTION READ WRITE');
+                }
+                // marcar transacción como iniciada
+                $this->inTransaction = true;
+                return true;
+            }
         }
         return false;
     }
