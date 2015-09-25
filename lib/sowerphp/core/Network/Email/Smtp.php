@@ -72,7 +72,7 @@ class Network_Email_Smtp
      * Método que envía el correo
      * @return Arreglo con los estados de retorno por cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-03
+     * @version 2015-09-25
      */
     public function send ()
     {
@@ -91,7 +91,19 @@ class Network_Email_Smtp
         // Si existen archivos adjuntos agregarlos
         if (!empty($this->_data['attach'])) {
             foreach ($this->_data['attach'] as &$file) {
-                $mail->addAttachment($file['tmp_name'], $file['type'], $file['name']);
+                $result = $mail->addAttachment(
+                    isset($file['tmp_name']) ? $file['tmp_name'] : $file['data'],
+                    $file['type'],
+                    $file['name'],
+                    isset($file['tmp_name']) ? true : false
+                );
+                if (is_a($result, 'PEAR_Error')) {
+                    return [
+                        'type' => $result->getType(),
+                        'code' => $result->getCode(),
+                        'message' => $result->getMessage(),
+                    ];
+                }
             }
         }
         // cuerpo y cabecera
