@@ -290,4 +290,15 @@ class Network_Email_Imap
         imap_expunge($this->link);
     }
 
+    /**
+     * Método que marca un mensaje como leído
+     * @param uid UID del mensaje que se desea marcar como leído
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2015-09-25
+     */
+    public function setSeen($uid, $flag = '\Seen')
+    {
+        return imap_setflag_full($this->link, $uid, $flag, ST_UID);
+    }
+
 }
