@@ -212,7 +212,7 @@ class Network_Email_Imap
      * @param partno '1', '2', '2.1', '2.1.3', etc for multipart, 0 if simple
      * @param message Arreglo con el mensaje, se agregan partes por referencia
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-05
+     * @version 2015-09-25
      */
     private function getMessagePart($uid, $p, $partno, &$message)
     {
@@ -237,14 +237,14 @@ class Network_Email_Imap
                 $params[strtolower($x->attribute)] = $x->value;
 
         // ATTACHMENT
-        if ($p->ifdisposition and $p->disposition=='attachment') {
+        if ($p->ifdisposition and strtolower($p->disposition)=='attachment') {
             // filename may be given as 'Filename' or 'Name' or both
             $filename = isset($params['filename']) ? $params['filename'] : $params['name'];
             // filename may be encoded, so see imap_mime_header_decode()
             $message['attachments'][] = [
                 'name' => $filename,
                 'data' => $data,
-                'size' => null,
+                'size' => $p->bytes,
                 'type' => (new \finfo(FILEINFO_MIME_TYPE))->buffer($data),
             ];
         }
@@ -257,7 +257,8 @@ class Network_Email_Imap
                 $message['body']['plain'] .= trim($data) ."\n\n";
             else
                 $message['body']['html'] .= $data.'<br/><br/>';
-            $message['charset'] = $params['charset'];  // assume all parts are same charset
+            if (isset($params['charset']))
+                $message['charset'] = $params['charset'];  // assume all parts are same charset
         }
 
         // EMBEDDED MESSAGE
