@@ -44,7 +44,7 @@ class Network_Email
      * Constructor de la clase
      * @param config Configuración del correo electrónico que se usará
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-19
+     * @version 2015-09-24
      */
     public function __construct($config = 'default')
     {
@@ -55,6 +55,18 @@ class Network_Email
         // Si no es arreglo, es el nombre de la configuración
         else {
             $this->_config = \SowerPHP\core\Configure::read('email.'.$config);
+        }
+        // se ponen valores por defecto
+        $this->_config = array_merge([
+            'type' => 'smtp',
+            'host' => 'localhost',
+            'port' => 25,
+        ], $this->_config);
+        // extraer puerto si se pasó en el host
+        $url = parse_url($this->_config['host']);
+        if (isset($url['port'])) {
+            $this->_config['host'] = str_replace(':'.$url['port'], '', $this->_config['host']);
+            $this->_config['port'] = $url['port'];
         }
         // si no están los campos mínimos necesarios error
         if (empty($this->_config['type']) || empty($this->_config['host']) || empty($this->_config['port']) || empty($this->_config['user']) || empty($this->_config['pass'])) {
