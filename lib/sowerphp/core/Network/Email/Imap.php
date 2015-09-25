@@ -44,13 +44,21 @@ class Network_Email_Imap
      * Constructor de la clase
      * @param config Arreglo con la configuración del servidor IMAP
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-05
+     * @version 2015-09-25
      */
     public function __construct($config)
     {
+        // definir puerto si no se pasó
         if (!isset($config['port']) and isset($config['ssl']) and !$config['ssl'])
             $config['port'] = 143;
         $this->config = array_merge($this->config, $config);
+        // extraer puerto si se pasó en el host
+        $url = parse_url($this->config['host']);
+        if (isset($url['port'])) {
+            $this->config['host'] = str_replace(':'.$url['port'], '', $this->config['host']);
+            $this->config['port'] = $url['port'];
+        }
+        // conectar
         $this->link = @imap_open(
             $this->createMailbox(),
             $this->config['user'],
