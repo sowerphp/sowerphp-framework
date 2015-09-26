@@ -174,11 +174,12 @@ class Network_Email_Imap
     /**
      * Método que entrega rescata un mensaje desde la casilla de correo
      * @param uid UID del mensaje que se desea obtener
+     * @param subtype Si es de múltiples partes el mensaje permite definir que parte será la que se extraerá (arreglo con las partes, ej: ['PLAIN', 'XML'])
      * @return Arreglo con los datos del mensaje, índices: header, body, charset y attachments
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-06-27
+     * @version 2015-09-26
      */
-    public function getMessage($uid)
+    public function getMessage($uid, $subtype = null)
     {
         $message = [
             'header' => imap_rfc822_parse_headers(imap_fetchheader($this->link, $uid, FT_UID)),
@@ -190,13 +191,21 @@ class Network_Email_Imap
         if (!is_object($s))
             return false;
         // el correo es simple y no tiene múltiples partes
-        if (!$s->parts) {
-            $this->getMessagePart($this->link, $uid, $s, 0);
+        if (empty($s->parts)) {
+            $this->getMessagePart($uid, $s, 0, $message);
         }
         // correo tiene múltiples partes, entonces se itera cada una de las partes
         else {
             foreach ($s->parts as $partno0 => $p) {
-                $this->getMessagePart($uid, $p, $partno0+1, $message);
+                if (!$subtype) {
+                    $this->getMessagePart($uid, $p, $partno0+1, $message);
+                } else {
+                    if (!is_array($subtype))
+                        $subtype = [$subtype];
+                    $subtype = array_map('strtolower', $subtype);
+                    if (in_array(strtolower($p->subtype), $subtype))
+                        $this->getMessagePart($uid, $p, $partno0+1, $message);
+                }
             }
         }
         // decodificar
