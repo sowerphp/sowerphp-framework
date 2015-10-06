@@ -174,12 +174,12 @@ class Network_Email_Imap
     /**
      * Método que entrega rescata un mensaje desde la casilla de correo
      * @param uid UID del mensaje que se desea obtener
-     * @param subtype Si es de múltiples partes el mensaje permite definir que parte será la que se extraerá (arreglo con las partes, ej: ['PLAIN', 'XML'])
+     * @param filter Arreglo con filtros a usar para las partes del mensaje. Ej: ['subtype'=>['PLAIN', 'XML'], 'extension'=>['xml']]
      * @return Arreglo con los datos del mensaje, índices: header, body, charset y attachments
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-09-26
+     * @version 2015-10-05
      */
-    public function getMessage($uid, $subtype = null)
+    public function getMessage($uid, $filter = [])
     {
         $message = [
             'header' => imap_rfc822_parse_headers(imap_fetchheader($this->link, $uid, FT_UID)),
@@ -197,14 +197,28 @@ class Network_Email_Imap
         // correo tiene múltiples partes, entonces se itera cada una de las partes
         else {
             foreach ($s->parts as $partno0 => $p) {
-                if (!$subtype) {
+                if (!$filter) {
                     $this->getMessagePart($uid, $p, $partno0+1, $message);
                 } else {
-                    if (!is_array($subtype))
-                        $subtype = [$subtype];
-                    $subtype = array_map('strtolower', $subtype);
-                    if (in_array(strtolower($p->subtype), $subtype))
+                    // si es del subtipo de agrega
+                    $subtype = isset($filter['subtype']) ? array_map('strtoupper', $filter['subtype']) : [];
+                    if (in_array(strtoupper($p->subtype), $subtype)) {
                         $this->getMessagePart($uid, $p, $partno0+1, $message);
+                    }
+                    // buscar por extensión del archivo adjunto (si lo es)
+                    else if ($p->ifdisposition and strtoupper($p->disposition)=='ATTACHMENT' and isset($filter['extension'])) {
+                        $extension = array_map('strtolower', $filter['extension']);
+                        $add = false;
+                        foreach ($p->parameters as $parameter) {
+                            if (in_array(strtolower(substr($parameter->value, -3)), $extension)) {
+                                $add = true;
+                                break;
+                            }
+                        }
+                        if ($add) {
+                            $this->getMessagePart($uid, $p, $partno0+1, $message);
+                        }
+                    }
                 }
             }
         }
