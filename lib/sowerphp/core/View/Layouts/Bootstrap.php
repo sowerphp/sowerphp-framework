@@ -162,7 +162,7 @@ foreach ($_nav_app as $link=>&$info) {
 <?php
 // menú de módulos si hay sesión iniciada
 if (\sowerphp\core\App::layerExists('sowerphp/app') and $_Auth->logged() and $_module_breadcrumb) {
-    echo '<ol class="breadcrumb">',"\n";
+    echo '<ol class="breadcrumb hidden-print">',"\n";
     $url = '/';
     foreach ($_module_breadcrumb as $link => &$name) {
         if (is_string($link)) {
@@ -193,7 +193,7 @@ echo $_content;
 ?>
 <!-- END MAIN CONTENT -->
         </div>
-         <footer class="footer">
+         <footer class="footer hidden-print">
             <div class="container">
                 <div class="text-muted pull-left">
                     <?=(is_array($_footer)?$_footer['left']:$_footer)."\n"?>
