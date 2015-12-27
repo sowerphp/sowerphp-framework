@@ -47,7 +47,7 @@ class Network_Http_Socket
      * @param sslv3 =true se fuerza sslv3, por defecto es false
      * @return Respusta HTTP (cabecera y cuerpo)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-07-11
+     * @version 2015-12-18
      */
     public static function __callStatic($method, $args)
     {
@@ -87,7 +87,10 @@ class Network_Http_Socket
             curl_setopt($curl, CURLOPT_SSLVERSION, 3);
         }
         $response = curl_exec($curl);
-        if (!$response) return false;
+        if (!$response) {
+            //echo curl_error($curl);
+            return false;
+        }
         $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
         // cerrar conexión de curl y entregar respuesta de la solicitud
         $header = self::parseHeader(substr($response, 0, $header_size));
