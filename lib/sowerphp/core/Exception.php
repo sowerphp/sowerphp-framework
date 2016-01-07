@@ -41,7 +41,7 @@ class Exception extends \RuntimeException
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2012-10-27
      */
-    public function __construct ($message, $code = 500)
+    public function __construct($message, $code = 500)
     {
         // si es un arreglo se utilizará junto a sprintf
         if (is_array($message)) {
@@ -53,11 +53,12 @@ class Exception extends \RuntimeException
 
     /**
      * Método para manejar las excepciones ocurridas en la aplicación
-     * @param exception Excepción producida
+     * @param exception Excepción producida (\Exception  o \Error)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-06
+     * @version 2016-01-07
      */
-    public static function handler (\Exception $exception) {
+    public static function handler($exception)
+    {
         ob_clean();
         // Generar arreglo
         $data = array(
