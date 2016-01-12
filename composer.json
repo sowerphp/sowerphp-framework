@@ -18,7 +18,7 @@
         "source": "https://github.com/sowerphp/sowerphp"
     },
     "require": {
-        "php": "~5.5"
+        "php": ">=5.5"
     },
     "config": {
         "vendor-dir": "extensions"
