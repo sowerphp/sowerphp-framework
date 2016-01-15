@@ -27,7 +27,7 @@ namespace sowerphp\core;
  * Clase para un cliente de APIs REST
  * Permite manejar solicitudes y respuestas
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-12-03
+ * @version 2016-01-15
  */
 class Network_Http_Rest
 {
@@ -35,6 +35,7 @@ class Network_Http_Rest
     protected $methods = ['get', 'put', 'patch', 'delete', 'post']; ///< Métodos HTTP soportados
     protected $config; ///< Configuración para el cliente REST
     protected $header; ///< Cabecerá que se enviará
+    protected $errors = []; ///< Errores de la consulta REST
 
     /**
      * Constructor del cliente REST
@@ -84,7 +85,7 @@ class Network_Http_Rest
      * @param args Argumentos para el métood de Network_Http_Socket
      * @return Arreglo con la respuesta HTTP (índices: status, header y body)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-09-10
+     * @version 2016-01-15
      */
     public function __call($method, $args)
     {
@@ -114,12 +115,27 @@ class Network_Http_Rest
             $sslv3,
             $sslcheck
         );
+        if ($response === false) {
+            $this->errors[] = Network_Http_Socket::getLastError();
+            return false;
+        }
         $body = json_decode($response['body'], true);
         return [
             'status' => $response['status'],
             'header' => $response['header'],
             'body' => $body!==null ? $body : $response['body'],
         ];
+    }
+
+    /**
+     * Método que entrega los errores ocurridos al ejecutar la consulta a REST
+     * @return Arreglo con los errores
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2016-01-15
+     */
+    public function getErrors()
+    {
+        return $this->errors;
     }
 
 }

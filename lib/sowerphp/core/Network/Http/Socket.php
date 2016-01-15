@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para manejar conexiones HTTP
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-12-03
+ * @version 2016-01-15
  */
 class Network_Http_Socket
 {
@@ -36,6 +36,7 @@ class Network_Http_Socket
         'User-Agent' => 'SowerPHP Network_Http_Socket',
         //'Content-Type' => 'application/x-www-form-urlencoded',
     ]; ///< Cabeceras por defecto
+    protected static $errors = []; ///< Arrglo para errores de cURL
 
     /**
      * Método para ejecutar una solicitud a una URL, es la función que realmente
@@ -88,7 +89,7 @@ class Network_Http_Socket
         }
         $response = curl_exec($curl);
         if (!$response) {
-            //echo curl_error($curl);
+            self::$errors[] = curl_error($curl);
             return false;
         }
         $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
@@ -159,6 +160,28 @@ class Network_Http_Socket
             'code' => $status,
             'message' => $message,
         ];
+    }
+
+    /**
+     * Método que entrega los errores ocurridos
+     * @return Arreglo con los strings de los errores de cURL
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2016-01-15
+     */
+    public static function getErrors()
+    {
+        return self::$errors;
+    }
+
+    /**
+     * Método que entrega el último error de cURL
+     * @return Arreglo con los strings de los errores de cURL
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2016-01-15
+     */
+    public static function getLastError()
+    {
+        return self::$errors[count(self::$errors)-1];
     }
 
 }
