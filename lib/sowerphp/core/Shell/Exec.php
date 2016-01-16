@@ -59,9 +59,8 @@ class Shell_Exec
      * @param command Comando a ejecutar
      * @param args Argumentos que se pasarán al comando
      * @return Resultado de la ejecución del comando
-     * @todo Utilizar shells que estén dentro de módulos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-20
+     * @version 2016-01-16
      */
     private static function dispatch ($command, $args)
     {
@@ -71,7 +70,14 @@ class Shell_Exec
             return 1;
         }
         // Crear objeto
-        $class = \sowerphp\core\App::findClass('Shell_Command_'.$command);
+        $dot = strrpos($command, '.');
+        if ($dot) {
+            $module = substr($command, 0, $dot);
+            $command_real = substr($command, $dot+1);
+            $class = \sowerphp\core\App::findClass('Shell_Command_'.$command_real, $module);
+        } else {
+            $class = \sowerphp\core\App::findClass('Shell_Command_'.$command);
+        }
         if (!class_exists($class)) {
             echo 'SowerPHP shell: ',$command,': no se encontró la orden',"\n";
             return 1;
