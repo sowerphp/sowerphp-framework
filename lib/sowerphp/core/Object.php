@@ -46,7 +46,7 @@ trait Object
      * Método para setear los atributos de la clase
      * @param array Arreglo con los datos que se deben asignar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-05-14
+     * @version 2016-01-29
      */
     public function set($array)
     {
@@ -58,6 +58,7 @@ trait Object
             if (isset($array[$name]))
                 $this->$name = $array[$name];
         }
+        return $this;
     }
 
 }
