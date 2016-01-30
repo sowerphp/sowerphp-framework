@@ -27,7 +27,7 @@ namespace sowerphp\core;
  * Clase para un cliente de APIs REST
  * Permite manejar solicitudes y respuestas
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2016-01-15
+ * @version 2016-01-29
  */
 class Network_Http_Rest
 {
@@ -36,6 +36,7 @@ class Network_Http_Rest
     protected $config; ///< Configuración para el cliente REST
     protected $header; ///< Cabecerá que se enviará
     protected $errors = []; ///< Errores de la consulta REST
+    protected $assoc = true; ///< Indica si los object de JSON se deben entregar como arreglos asociativos o no
 
     /**
      * Constructor del cliente REST
@@ -80,12 +81,24 @@ class Network_Http_Rest
     }
 
     /**
+     * Método que indica si las respuestas JSON se deben entregar como arreglos
+     * asociativos o no
+     * @param assoc =true respuestas serán arreglos asociativos, =fale serán objetos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2016-01-29
+     */
+    public function setAssoc($assoc = true)
+    {
+        $this->assoc = $assoc;
+    }
+
+    /**
      * Método para realizar solicitud al recurso de la API
      * @param method Nombre del método que se está ejecutando
      * @param args Argumentos para el métood de Network_Http_Socket
      * @return Arreglo con la respuesta HTTP (índices: status, header y body)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-01-15
+     * @version 2016-01-29
      */
     public function __call($method, $args)
     {
@@ -119,7 +132,7 @@ class Network_Http_Rest
             $this->errors[] = Network_Http_Socket::getLastError();
             return false;
         }
-        $body = json_decode($response['body'], true);
+        $body = json_decode($response['body'], $this->assoc);
         return [
             'status' => $response['status'],
             'header' => $response['header'],
