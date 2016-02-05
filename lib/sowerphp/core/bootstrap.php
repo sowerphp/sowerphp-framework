@@ -24,7 +24,7 @@
 /**
  * @file bootstrap.php
  * Archivo de arranque de la aplicación
- * @version 2014-03-22
+ * @version 2016-02-05
  */
 
 // Asignar nivel de error máximo (para reportes previo a que se asigne el valor
@@ -69,3 +69,6 @@ if ((isset($_SERVER['APPLICATION_ENV']) and $_SERVER['APPLICATION_ENV']=='dev'))
 \sowerphp\core\Configure::bootstrap();
 \sowerphp\core\Model_Datasource_Session::start(\sowerphp\core\Configure::read('session.expires'));
 \sowerphp\core\Model_Datasource_Session::configure();
+
+// autocarga de composer
+require('Vendor/autoload.php');

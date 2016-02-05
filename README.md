@@ -1,6 +1,9 @@
 SowerPHP
 ========
 
+[![Dependency Status](https://www.versioneye.com/user/projects/56b439920a0ff5002c85ef1a/badge.svg)](https://www.versioneye.com/user/projects/56b439920a0ff5002c85ef1a)
+[![License](https://poser.pugx.org/sowerphp/sowerphp/license)](https://packagist.org/packages/sowerphp/sowerphp)
+
 SowerPHP es un framework, o ambiente de desarrollo, para PHP.
 
 El framework es minimalista, entregando las herramientas básicas para el

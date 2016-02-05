@@ -3,6 +3,6 @@
         "vendor-dir": "Vendor"
     },
     "require": {
-        "michelf/php-markdown": "1.4.1"
+        "michelf/php-markdown": "1.6.0"
     }
 }
