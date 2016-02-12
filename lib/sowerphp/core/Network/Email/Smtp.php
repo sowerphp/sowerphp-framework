@@ -72,19 +72,13 @@ class Network_Email_Smtp
      * Método que envía el correo
      * @return Arreglo con los estados de retorno por cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-09-25
+     * @version 2016-02-12
      */
     public function send ()
     {
         // Crear correo
         $mailer = \Mail::factory('smtp', $this->_config);
         $mail = new \Mail_mime();
-        // codificacion
-        $mail->_build_params['text_encoding'] = '8bit';
-        $mail->_build_params['text_charset'] = 'UTF-8';
-        $mail->_build_params['html_charset'] = 'UTF-8';
-        $mail->_build_params['head_charset'] = 'UTF-8';
-        $mail->_build_params['head_encoding'] = '8bit';
         // Asignar mensaje
         $mail->setTXTBody($this->_data['text']);
         $mail->setHTMLBody($this->_data['html']);
@@ -106,8 +100,14 @@ class Network_Email_Smtp
                 }
             }
         }
-        // cuerpo y cabecera
-        $body = $mail->get(); // debe llamarse antes de headers
+        // cuerpo y cabecera con codificación en UTF-8
+        $body = $mail->get([
+            'text_encoding' => '8bit',
+            'text_charset'  => 'UTF-8',
+            'html_charset'  => 'UTF-8',
+            'head_charset'  => 'UTF-8',
+            'head_encoding' => '8bit',
+        ]); // debe llamarse antes de headers
         $to = implode(', ', $this->_header['to']);
         $headers = $mail->headers(array(
             'From' => $this->_header['from'],
