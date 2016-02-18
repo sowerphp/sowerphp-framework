@@ -62,8 +62,10 @@ foreach ($_nav_website as $link=>$name) {
     $active = $_page == $link ? ' active' : '';
     if ($link[0]=='/') $link = $_base.$link;
     if (isset($name['nav'])) {
+        $title = isset($name['desc']) ? $name['desc'] : (isset($name['title']) ? $name['title'] : '');
+        $icon = isset($name['icon']) ? '<span class="'.$name['icon'].'"></span> ' : '';
         echo '                        <li class="dropdown',$active,'">',"\n";
-        echo '                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">',$name['name'],' <span class="caret"></span></a>',"\n";
+        echo '                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" title="',$title,'">',$icon,$name['name'],' <span class="caret"></span></a>',"\n";
         echo '                            <ul class="dropdown-menu" role="menu">',"\n";
         foreach($name['nav'] as $l=>$n) {
             if ($l[0]=='/') $l = $link.$l;
@@ -74,9 +76,10 @@ foreach ($_nav_website as $link=>$name) {
     } else {
         if (is_array($name)) {
             $title = isset($name['desc']) ? $name['desc'] : (isset($name['title']) ? $name['title'] : '');
+            $icon = isset($name['icon']) ? '<span class="'.$name['icon'].'"></span> ' : '';
             $name = $name['name'];
-        } else $title = '';
-        echo '                        <li class="'.$active.'"><a href="',$link,'" title="',$title,'">',$name,'</a></li>',"\n";
+        } else $title = $icon = '';
+        echo '                        <li class="'.$active.'"><a href="',$link,'" title="',$title,'">',$icon,$name,'</a></li>',"\n";
     }
 }
 ?>
