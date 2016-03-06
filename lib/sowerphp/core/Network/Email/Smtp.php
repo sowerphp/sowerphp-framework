@@ -23,6 +23,10 @@
 
 namespace sowerphp\core;
 
+// clases PEAR
+require_once('Mail.php');
+require_once('Mail/mime.php');
+
 /**
  * Clase para enviar correo electrónico mediante SMTP
  * Requiere:
@@ -44,13 +48,10 @@ class Network_Email_Smtp
      * @param data Datos (cuerpo) de correo electrónico
      * @param debug =true se muestra debug, =false modo silencioso
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-16
+     * @version 2016-03-05
      */
     public function __construct ($config, $header, $data, $debug = false)
     {
-        // clases PEAR
-        require 'Mail.php';
-        require 'Mail/mime.php';
         // Configuración para la conexión al servidor
         $this->_config = array(
             'host' => $config['host'],
