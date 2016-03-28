@@ -29,13 +29,13 @@ namespace sowerphp\core;
  * Define métodos que deberán ser implementados, clases específicas para
  * la conexión con X base de datos deberán extender esta clase
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-10-14
+ * @version 2016-03-28
  */
 abstract class Model_Datasource_Database_Manager extends \PDO
 {
 
     public $config; ///< Configuración de la base de datos
-    protected $inTransaction = false; ///< Indica si nos encontramos en una transacción
+    protected $inTransaction = 0; ///< Contador de solicitudes de transacciones en curso
     public static $querysCount = 0; ///< Indica la cantidad de consultas que se han realizado entre todas las BD
 
     /**
@@ -210,7 +210,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * Wrapper para comenzar una transacción (evita iniciar más de una transacción)
      * @param serializable =true ejecutará la transacción de forma SERIALIZABLE (sólo MariaDB/MySQL y PostgreSQL)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-09-22
+     * @version 2016-03-28
      */
     public function beginTransaction($serializable = false)
     {
@@ -226,23 +226,30 @@ abstract class Model_Datasource_Database_Manager extends \PDO
                     $this->query('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
                     $this->query('SET TRANSACTION READ WRITE');
                 }
-                // marcar transacción como iniciada
-                $this->inTransaction = true;
+                // contabilizar la transacción
+                $this->inTransaction++;
                 return true;
+            } else {
+                return false;
             }
+        } else {
+            $this->inTransaction++;
+            return true;
         }
-        return false;
     }
 
     /**
-     * Wrapper para aceptar una transacción (evita aceptar más de una transacción)
+     * Wrapper para aceptar una transacción (evita hacer commit cuando no es la
+     * primera transacción)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-20
+     * @version 2015-03-28
      */
-    public function commit ()
+    public function commit()
     {
-        if ($this->inTransaction and parent::commit()) {
-            $this->inTransaction = false;
+        if ($this->inTransaction) {
+            if ($this->inTransaction==1)
+                parent::commit();
+            $this->inTransaction--;
             return true;
         }
         return false;
@@ -251,12 +258,12 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     /**
      * Wrapper para cancelar una transacción (evita cancelar más de una transacción)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-20
+     * @version 2015-03-28
      */
-    public function rollBack ()
+    public function rollBack()
     {
         if ($this->inTransaction and parent::rollBack()) {
-            $this->inTransaction = false;
+            $this->inTransaction = 0;
             return true;
         }
         return false;
