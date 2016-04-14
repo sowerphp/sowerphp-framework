@@ -23,9 +23,69 @@ El framework asume el siguiente software instalado:
 		(versión recomendada: >=9.1)
 	*	[MariaDB](https://downloads.mariadb.org)
 
-Puede consultar la información sobre la
-[configuración del servidor web](http://sowerphp.org/doc/general/servidor_web)
-para más detalles.
+### Instalación requerimientos
+
+1.      Instalación de paquetes mínimos:
+
+                # apt-get install git apache2-mpm-prefork php5 php-pear php5-gd mercurial curl php5-curl php5-imap
+
+        En estricto rigor php-pear y php5-gd también son opcionales, solo son
+        requeridos para la instalación de otras librerías (en el caso de
+        php-pear para instalar Net_SMTP y php5-gd para generar los gráficos
+        mediante libchart).
+
+2.      Instalación de soporte para PostgreSQL (opcional):
+
+                # apt-get install php5-pgsql postgresql
+
+### Configuración de Apache
+
+Habilitación de módulos
+
+        # a2enmod rewrite
+        # a2enmod ssl
+        # a2enmod php5
+        # service apache2 restart
+
+#### Easy Virtual Hosts (EasyVHosts)
+
+Se hace uso de esta herramienta para una configuración más simple y rápida
+del servidor web. Descargar desde: <https://github.com/sascocl/easyvhosts>
+
+Configurar archivo etc/easyvhosts/easyvhosts.conf de acuerdo a las necesidades.
+
+Ejecutar con:
+
+        # bin/easyvhosts
+
+### Configuración de PHP
+
+Instalar bibliotecas para envío de correo electrónico:
+
+        # pear install Mail Mail_mime Net_SMTP
+
+### Configuración de PostgreSQL
+
+Crear usuario para la BD:
+
+        # su - postgres
+        $ createuser --createdb --no-createrole --no-superuser --password <usuario>
+
+En caso que se quiera cambiar la clave de un usuario:
+
+        $ psql -d template1 -U postgres
+        $ alter user <usuario> with password '<clave>';
+
+**Nota**: si la asignación de la clave al momento de crear el usuario no
+funciona, probar cambiando la clave luego de haberlo creado.
+
+Crear base de datos (con el usuario asociado al que se creo):
+
+        $ createdb <base de datos>
+
+Probar conexión (con el usuario asociado al que se creo):
+
+        $ psql -h 127.0.0.1 -U <usuario> -W <base de datos>
 
 Instalación del framework
 -------------------------
@@ -52,5 +112,23 @@ cambiar el layout ingresando a la url:
 Crear Hola Mundo
 ----------------
 
-Revisar documentación para creación de
-[Hola Mundo](http://sowerphp.org/doc/paso_a_paso/hola_mundo)
+1.      Crear directorio View/Pages dentro de *project/website*.
+
+                $ mkdir -p View/Pages
+
+2.      Crear archivo View/Pages/inicio.php con el siguiente contenido:
+
+                <h1>Hola mundo</h1>
+                <p>Ejemplo de Hola Mundo</p>
+
+        También se puede haber creado un archivo View/Pages/inicio.md y utilizar
+        la sintaxis de Markdown para el contenido:
+
+                Hola mundo
+                ==========
+
+                Ejemplo de Hola Mundo
+
+        Por defecto se procesan archivos .php y .md como vistas.
+
+3.      Abrir página http://example.com o http://example.com/inicio
