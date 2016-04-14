@@ -1,10 +1,10 @@
 {
     "name": "sowerphp/sowerphp",
-    "description": "SowerPHP: Minimalist Framework for PHP",
+    "description": "SowerPHP: PHP framework made in Chile",
     "type": "library",
     "keywords": ["framework"],
     "homepage": "http://sowerphp.org",
-    "license": "GPL-3.0+",
+    "license": "AGPL-3.0+",
     "authors": [
         {
             "name": "Equipo de SowerPHP",

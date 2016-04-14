@@ -17,11 +17,6 @@ que cualquier aplicación en PHP debería considerar utilizando los patrones y
 buenas prácticas que el equipo de SowerPHP considera.
 
 Todo el código generado por el equipo de SowerPHP se encuentra liberado
-utilizando la licencia GPL v3 o superior.
+utilizando la licencia AGPL v3 o superior.
 
-Enlaces de interés
-------------------
-
-* Página del proyecto: <http://sowerphp.org>
-* Documentación: <http://sowerphp.org/doc>
-* Proyecto en GitHUB: <https://github.com/SowerPHP/sowerphp>
+Más información en el [Wiki de SowerPHP](http://wiki.sowerphp.org)
