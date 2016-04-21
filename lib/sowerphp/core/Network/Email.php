@@ -44,7 +44,7 @@ class Network_Email
      * Constructor de la clase
      * @param config Configuración del correo electrónico que se usará
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-09-24
+     * @version 2016-04-20
      */
     public function __construct($config = 'default')
     {
@@ -76,11 +76,11 @@ class Network_Email
         if (isset($this->_config['from'])) {
             if (is_array($this->_config['from'])) {
                 $this->_config['from'] = $this->_config['from']['name'].' <'.$this->_config['from']['email'].'>';
-            } else if (strpos($this->_config['from'], '<')===false) {
-                $this->_config['from'] = $this->_config['from'].' <'.$this->_config['user'].'>';
+            } else {
+                $this->_config['from'] = $this->_config['from'];
             }
         } else {
-            $this->_config['from'] = $this->_config['user'].' <'.$this->_config['user'].'>';
+            $this->_config['from'] = $this->_config['user'];
         }
     }
 
@@ -111,12 +111,11 @@ class Network_Email
      * @param email Correo electrónico a quien responder
      * @param name Nombre a quien responder
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2010-10-09
+     * @version 2016-04-20
      */
-    public function replyTo ($email, $name = null)
+    public function replyTo($email, $name = null)
     {
-        if ($name==null) $name = $email;
-            $this->_replyTo = array($name.' <'.$email.'>');
+        $this->_replyTo = $name===null ? $email : ($name.' <'.$email.'>');
     }
 
     /**
@@ -213,17 +212,13 @@ class Network_Email
      * @param msg Cuerpo del mensaje que se desea enviar (arreglo o string)
      * @return Arreglo asociativo con los estados de cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-03
+     * @version 2016-04-20
      */
     public function send ($msg)
     {
         // Si el mensaje no es un arreglo se crea, asumiendo que se paso en formato texto
         if (!is_array($msg)) {
             $msg = array('text'=>$msg);
-        }
-        // Si no se ha indicado a quién responder usar el usuario que envía
-        if (!$this->_replyTo) {
-            $this->_replyTo = [$this->_config['from']];
         }
         // Si no se ha indicado a quién enviar el correo se utilizará el de la
         // configuración

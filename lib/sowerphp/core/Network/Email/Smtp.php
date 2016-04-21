@@ -73,9 +73,9 @@ class Network_Email_Smtp
      * Método que envía el correo
      * @return Arreglo con los estados de retorno por cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-02-12
+     * @version 2016-04-20
      */
-    public function send ()
+    public function send()
     {
         // Crear correo
         $mailer = \Mail::factory('smtp', $this->_config);
@@ -110,14 +110,18 @@ class Network_Email_Smtp
             'head_encoding' => '8bit',
         ]); // debe llamarse antes de headers
         $to = implode(', ', $this->_header['to']);
-        $headers = $mail->headers(array(
+        $headers_data = [
             'From' => $this->_header['from'],
-            'Reply-To' => $this->_header['replyTo'],
             'To' => $to,
-            'Cc' => implode(', ', $this->_header['cc']),
-            'Return-Path' => $this->_header['replyTo'],
             'Subject' => $this->_header['subject'],
-        ));
+        ];
+        if (!empty($this->_header['cc'])) {
+            $headers_data['Cc'] = implode(', ', $this->_header['cc']);
+        }
+        if (!empty($this->_header['replyTo'])) {
+            $headers_data['Reply-To'] = $headers_data['Return-Path'] = $this->_header['replyTo'];
+        }
+        $headers = $mail->headers($headers_data);
         if(!empty($this->_header['cc'])) {
             $to .= ', '.implode(', ', $this->_header['cc']);
         }
