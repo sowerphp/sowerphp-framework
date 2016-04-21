@@ -42,7 +42,7 @@ abstract class Model_Datasource
      * @param name Nombre de la configuración o arreglo con la configuración
      * @param config Arreglo con la configuración
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-29
+     * @version 2016-04-21
      */
     public static function getDatasource($datasource, $name = 'default', $config = [])
     {
@@ -51,8 +51,10 @@ abstract class Model_Datasource
             return self::$datasources[$datasource][$name];
         }
         // si $name es un arreglo entonces es la configuración lo que se pasó
-        if (is_array($name))
+        if (is_array($name)) {
             $config = $name;
+            $name = 'default';
+        }
         // se crea configuración
         $config = array_merge((array)Configure::read($datasource.'.'.$name), $config);
         if (empty($config)) {
