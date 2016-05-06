@@ -39,21 +39,18 @@ class Model_Datasource_Database_SQLite extends Model_Datasource_Database_Manager
      * conexión
      * @param config Arreglo con los parámetros de la conexión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-20
+     * @version 2016-05-06
      */
-    public function __construct ($config)
+    public function __construct($config)
     {
         // verificar que existe el soporte para SQLite en PHP
         if (!class_exists('\SQLite3')) {
-            $this->error ('No se encontró la extensión de PHP para SQLite3');
+            $this->error('No se encontró la extensión de PHP para SQLite3');
         }
         // definir configuración para el acceso a la base de datos
         $this->config = $config;
         // abrir conexión a la base de datos
-        try {
-            parent::__construct('sqlite:'.$this->config['file']);
-        } catch (\PDOException $e) {
-        }
+        parent::__construct('sqlite:'.$this->config['file']);
     }
 
     /**
@@ -63,7 +60,7 @@ class Model_Datasource_Database_SQLite extends Model_Datasource_Database_Manager
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-11-23
      */
-    public function setLimit ($sql, $records, $offset = 0)
+    public function setLimit($sql, $records, $offset = 0)
     {
         return $sql.' LIMIT '.(int)$offset.','.(int)$records;
     }

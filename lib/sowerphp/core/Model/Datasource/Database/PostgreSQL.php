@@ -38,7 +38,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
      * conexión
      * @param config Arreglo con los parámetros de la conexión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-20
+     * @version 2016-05-06
      */
     public function __construct ($config)
     {
@@ -50,17 +50,13 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
             'sche' => 'public',
         ), $config);
         // abrir conexión a la base de datos
-        try {
-            parent::__construct(
-                'pgsql:host='.$this->config['host'].
-                ';port='.$this->config['port'].
-                ';dbname='.$this->config['name'],
-                $this->config['user'],
-                $this->config['pass']
-            );
-        } catch (\PDOException $e) {
-            return;
-        }
+        parent::__construct(
+            'pgsql:host='.$this->config['host'].
+            ';port='.$this->config['port'].
+            ';dbname='.$this->config['name'],
+            $this->config['user'],
+            $this->config['pass']
+        );
         // definir encoding a utilizar con la base de datos
         $this->query('SET CLIENT_ENCODING TO \''.$this->config['char'].'\'');
         // definir esquema que se utilizará (solo si es diferente a public)

@@ -47,17 +47,19 @@ class Model_Datasource_Database extends Model_Datasource
      * @param config Configuración de la base de datos
      * @return Objeto con la base de datos seleccionada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-29
+     * @version 2016-05-06
      */
     public static function &get($name = 'default', $config = [])
     {
         $config = parent::getDatasource('database', $name, $config);
-        if (is_object($config)) return $config;
+        if (is_object($config))
+            return $config;
         $class = '\Model_Datasource_Database_'.$config['type'];
-        self::$datasources['database'][$config['conf']] = new $class($config);
-        if (!is_object(self::$datasources['database'][$config['conf']])) {
+        try {
+            self::$datasources['database'][$config['conf']] = new $class($config);
+        } catch (\PDOException $e) {
             throw new Exception_Model_Datasource_Database(array(
-                'msg' =>'¡Conexión a database.'.$config['conf'].' ('.$config['type'].') falló!'
+                'msg' =>'¡Conexión a database.'.$config['conf'].' ('.$config['type'].') falló!<br/><br/>'.$e->getMessage()
             ));
         }
         return self::$datasources['database'][$config['conf']];

@@ -38,7 +38,7 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      * conexión
      * @param config Arreglo con los parámetros de la conexión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-02
+     * @version 2016-05-06
      */
     public function __construct ($config)
     {
@@ -49,22 +49,19 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
             'char' => 'utf8',
         ), $config);
         // realizar conexión a la base de datos
-        try {
-            parent::__construct(
-                'mysql:host='.$this->config['host'].
-                ';port='.$this->config['port'].
-                ';dbname='.$this->config['name'].
-                ';charset='.$this->config['char'],
-                $this->config['user'],
-                $this->config['pass'],
-                [
-                    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_SILENT,
-                    \PDO::ATTR_PERSISTENT => true,
-                    \PDO::MYSQL_ATTR_COMPRESS => true
-                ]
-            );
-        } catch (\PDOException $e) {
-        }
+        parent::__construct(
+            'mysql:host='.$this->config['host'].
+            ';port='.$this->config['port'].
+            ';dbname='.$this->config['name'].
+            ';charset='.$this->config['char'],
+            $this->config['user'],
+            $this->config['pass'],
+            [
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_SILENT,
+                \PDO::ATTR_PERSISTENT => true,
+                \PDO::MYSQL_ATTR_COMPRESS => true
+            ]
+        );
     }
 
     /**
