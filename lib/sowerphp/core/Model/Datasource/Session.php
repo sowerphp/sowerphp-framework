@@ -35,7 +35,7 @@ class Model_Datasource_Session
      * Método que inicia la sesión
      * @param expires Minutos en que expirará la sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-28
+     * @version 2016-05-11
      */
     public static function start($expires = 30)
     {
@@ -44,6 +44,9 @@ class Model_Datasource_Session
         $path = (new Network_Request())->base();
         $path = $path!=''?$path:'/';
         $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+        if (strpos($domain, ':')) {
+            list($domain, $port) = explode(':', $domain);
+        }
         $secure = isset($_SERVER['HTTPS']) ? true : false;
         $httponly = true;
         ini_set('session.use_only_cookies', true);
