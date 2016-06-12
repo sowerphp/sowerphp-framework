@@ -119,11 +119,11 @@ valores por defecto. Si no se define ninguno se utilizarán dichos valores.
 Crear Hola Mundo
 ----------------
 
-1.      Crear directorio View/Pages dentro de *project/website*.
+1.	Crear directorio View/Pages dentro de *project/website*.
 
 		$ mkdir -p View/Pages
 
-2.      Crear archivo View/Pages/inicio.php con el siguiente contenido:
+2.	Crear archivo View/Pages/inicio.php con el siguiente contenido:
 
 		<h1>Hola mundo</h1>
 		<p>Ejemplo de Hola Mundo</p>
@@ -138,4 +138,4 @@ Crear Hola Mundo
 
 	Por defecto se procesan archivos .php y .md como vistas.
 
-3.      Abrir página http://example.com o http://example.com/inicio
+3.	Abrir página http://example.com o http://example.com/inicio
