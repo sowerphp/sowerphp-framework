@@ -177,7 +177,7 @@ class Network_Email_Imap
      * @param filter Arreglo con filtros a usar para las partes del mensaje. Ej: ['subtype'=>['PLAIN', 'XML'], 'extension'=>['xml']]
      * @return Arreglo con los datos del mensaje, índices: header, body, charset y attachments
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-06-03
+     * @version 2016-08-18
      */
     public function getMessage($uid, $filter = [])
     {
@@ -206,7 +206,7 @@ class Network_Email_Imap
                         $this->getMessagePart($uid, $p, $partno0+1, $message);
                     }
                     // buscar por extensión del archivo adjunto (si lo es)
-                    else if ($p->ifdisposition and strtoupper($p->disposition)=='ATTACHMENT' and isset($filter['extension'])) {
+                    else if (isset($filter['extension']) and (($p->ifdisposition and strtoupper($p->disposition)=='ATTACHMENT') or ($p->subtype=='OCTET-STREAM' and ($p->ifparameters or $p->ifdparameters)))) {
                         $extension = array_map('strtolower', $filter['extension']);
                         $add = false;
                         $params = $p->ifparameters ? $p->parameters : ( $p->ifdparameters ? $p->dparameters : [] );
@@ -217,7 +217,7 @@ class Network_Email_Imap
                             }
                         }
                         if ($add) {
-                            $this->getMessagePart($uid, $p, $partno0+1, $message);
+                            $this->getMessagePart($uid, $p, $partno0+1, $message, true);
                         }
                     }
                 }
@@ -238,7 +238,7 @@ class Network_Email_Imap
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2016-08-18
      */
-    private function getMessagePart($uid, $p, $partno, &$message)
+    private function getMessagePart($uid, $p, $partno, &$message, $attachment = false)
     {
         // DECODE DATA
         $data = $partno ?
@@ -261,7 +261,7 @@ class Network_Email_Imap
                 $params[strtolower($x->attribute)] = $x->value;
 
         // ATTACHMENT
-        if (($p->ifdisposition and strtolower($p->disposition)=='attachment') or isset($params['filename'])) {
+        if ($attachment or ($p->ifdisposition and strtolower($p->disposition)=='attachment') or isset($params['filename'])) {
             // filename may be given as 'Filename' or 'Name' or both
             $filename = isset($params['filename']) ? $params['filename'] : $params['name'];
             // filename may be encoded, so see imap_mime_header_decode()
