@@ -236,7 +236,7 @@ class Network_Email_Imap
      * @param partno '1', '2', '2.1', '2.1.3', etc for multipart, 0 if simple
      * @param message Arreglo con el mensaje, se agregan partes por referencia
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-09-25
+     * @version 2016-08-18
      */
     private function getMessagePart($uid, $p, $partno, &$message)
     {
@@ -261,7 +261,7 @@ class Network_Email_Imap
                 $params[strtolower($x->attribute)] = $x->value;
 
         // ATTACHMENT
-        if ($p->ifdisposition and strtolower($p->disposition)=='attachment') {
+        if (($p->ifdisposition and strtolower($p->disposition)=='attachment') or isset($params['filename'])) {
             // filename may be given as 'Filename' or 'Name' or both
             $filename = isset($params['filename']) ? $params['filename'] : $params['name'];
             // filename may be encoded, so see imap_mime_header_decode()
