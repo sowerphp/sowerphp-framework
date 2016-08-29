@@ -44,10 +44,12 @@ class Utility_Data_Validation
      * @param rules Reglas que se revisarán para validar el dato
      * @return =true si todo va ok, =false o =string si hubo un error al validar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-16
+     * @version 2016-08-23
      */
     public static function check($data, $rules)
     {
+        if (!is_array($rules))
+            $rules = [$rules];
         // probar cada una de las reglas
         foreach ($rules as &$rule) {
             // si existe una expresión regular para la regla se usa
@@ -80,7 +82,7 @@ class Utility_Data_Validation
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2015-04-16
      */
-    public function check_notempty($data)
+    public static function check_notempty($data)
     {
         return !empty($data);
     }
@@ -92,9 +94,23 @@ class Utility_Data_Validation
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2015-04-16
      */
-    public function check_integer($data)
+    public static function check_integer($data)
     {
         return ctype_digit(strval($data));
+    }
+
+    /**
+     * Método que valida que el dato sea un RUT válido
+     * @param data Dato que se quiere validar
+     * @return =true si es un RUT válido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2016-08-28
+     */
+    public static function check_rut($data)
+    {
+        if (!class_exists('\sowerphp\app\Utility_Rut'))
+            return false;
+        return \sowerphp\app\Utility_Rut::check($data);
     }
 
 }
