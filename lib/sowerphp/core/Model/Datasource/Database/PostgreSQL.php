@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para trabajar con una base de datos PostgreSQL
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-10-02
+ * @version 2014-09-24
  */
 class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Manager
 {
@@ -40,7 +40,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2016-05-06
      */
-    public function __construct ($config)
+    public function __construct($config)
     {
         // definir configuración para el acceso a la base de datos
         $this->config = array_merge(array(
@@ -74,7 +74,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2012-09-09
      */
-    public function setLimit ($sql, $records, $offset = 0)
+    public function setLimit($sql, $records, $offset = 0)
     {
         return $sql.' LIMIT '.(int)$records.' OFFSET '.(int)$offset;
     }
@@ -89,7 +89,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2015-01-07
      */
-    public function concat ($par1, $par2)
+    public function concat($par1, $par2)
     {
         $separators = array(' ', ',', ', ', '-', ' - ', '|', ':', ': ');
         $concat = array();
@@ -103,12 +103,34 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
     }
 
     /**
+     * Extrae un valor desde un nodo de un XML almacenado en una columna de la
+     * base de datos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2016-09-24
+     */
+    public function xml($column, $path, $namespace = null, $data_format = null)
+    {
+        if (!is_array($path))
+            $path = [$path];
+        $select = [];
+        $column = 'CONVERT_FROM(decode('.$column.', \'base64\'), \'ISO8859-1\')::XML';
+        foreach ($path as $k => $p) {
+            if ($namespace) {
+                $select[$k] = 'BTRIM(XPATH(\''.str_replace('/', '/n:', $p).'/text()\', '.$column.', \'{{n,'.$namespace.'}}\')::TEXT, \'{"}\')';
+            } else {
+                $select[$k] = 'BTRIM(XPATH(\''.$p.'/text()\', '.$column.')::TEXT, \'{}\')';
+            }
+        }
+        return count($select)>1 ? $select : array_shift($select);
+    }
+
+    /**
      * Listado de tablas de la base de datos
      * @return Array Arreglo con las tablas (nombre y comentario)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-26
      */
-    public function getTables ()
+    public function getTables()
     {
         // obtener solo tablas del esquema indicado de la base de datos
         $tables = $this->getTable("
@@ -135,7 +157,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-26
      */
-    public function getCommentFromTable ($table)
+    public function getCommentFromTable($table)
     {
         return $this->getValue("
             SELECT d.description
@@ -157,7 +179,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-26
      */
-    public function getColsFromTable ($table)
+    public function getColsFromTable($table)
     {
         // buscar columnas
         $cols = $this->getTable("
@@ -215,7 +237,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-26
      */
-    public function getPksFromTable ($table)
+    public function getPksFromTable($table)
     {
         return $this->getCol("
             SELECT column_name
@@ -245,7 +267,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-26
      */
-    public function getFksFromTable ($table)
+    public function getFksFromTable($table)
     {
         $fks = $this->getTable("
             SELECT

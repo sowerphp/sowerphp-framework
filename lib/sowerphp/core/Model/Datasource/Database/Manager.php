@@ -29,7 +29,7 @@ namespace sowerphp\core;
  * Define métodos que deberán ser implementados, clases específicas para
  * la conexión con X base de datos deberán extender esta clase
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2016-03-28
+ * @version 2016-09-24
  */
 abstract class Model_Datasource_Database_Manager extends \PDO
 {
@@ -43,7 +43,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-21
      */
-    public function error ($msg)
+    public function error($msg)
     {
         if ($this->inTransaction)
             $this->rollBack();
@@ -60,7 +60,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-11-23
      */
-    public function query ($sql, $params = array())
+    public function query($sql, $params = array())
     {
         // verificar que exista una consulta
         if(empty($sql)) {
@@ -102,7 +102,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getTable ($sql, $params = array())
+    public function getTable($sql, $params = array())
     {
         return $this->query($sql, $params)->fetchAll(\PDO::FETCH_ASSOC);
     }
@@ -115,7 +115,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2015-02-27
      */
-    public function getRow ($sql, $params = array())
+    public function getRow($sql, $params = array())
     {
         $stmt = $this->query($sql, $params);
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -131,7 +131,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2015-05-06
      */
-    public function getCol ($sql, $params = array())
+    public function getCol($sql, $params = array())
     {
         $stmt = $this->query($sql, $params);
         $cols = [];
@@ -150,7 +150,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2015-02-27
      */
-    public function getValue ($sql, $params = array())
+    public function getValue($sql, $params = array())
     {
         $stmt = $this->query($sql, $params);
         $data = $stmt->fetchColumn();
@@ -277,7 +277,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-05-10
      */
-    public function getInfoFromTable ($tablename)
+    public function getInfoFromTable($tablename)
     {
         // nombre de la tabla
         $table['name'] = $tablename;
@@ -326,7 +326,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-25
      */
-    public function getTableWithColsNames ($sql, $params = array())
+    public function getTableWithColsNames($sql, $params = array())
     {
         $omitir = ['blob'];
         // variables para datos y claves
@@ -362,7 +362,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getTableFromSP ($procedure) {
+    public function getTableFromSP($procedure) {
     }
 
     /**
@@ -372,7 +372,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getRowFromSP ($procedure) {
+    public function getRowFromSP($procedure) {
     }
 
     /**
@@ -382,7 +382,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getColFromSP ($procedure) {
+    public function getColFromSP($procedure) {
     }
 
     /**
@@ -403,7 +403,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function setLimit ($sql, $records, $offset = 0) {
+    public function setLimit($sql, $records, $offset = 0) {
     }
 
     /**
@@ -414,7 +414,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function like ($column, $value) {
+    public function like($column, $value) {
     }
 
     /**
@@ -427,7 +427,18 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function concat ($par1, $par2) {
+    public function concat($par1, $par2) {
+    }
+
+    /**
+     * Extrae un valor desde un nodo de un XML almacenado en una columna de la
+     * base de datos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2016-09-24
+     */
+    public function xml($column, $path, $namespace = null, $data_format = null)
+    {
+        return 'NULL';
     }
 
     /**
@@ -436,7 +447,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getTables () {
+    public function getTables() {
     }
 
     /**
@@ -446,7 +457,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getCommentFromTable ($table) {
+    public function getCommentFromTable($table) {
     }
 
     /**
@@ -457,7 +468,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getColsFromTable ($table) {
+    public function getColsFromTable($table) {
     }
 
     /**
@@ -467,7 +478,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getPksFromTable ($table) {
+    public function getPksFromTable($table) {
     }
 
     /**
@@ -477,7 +488,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getFksFromTable ($table) {
+    public function getFksFromTable($table) {
     }
 
     /**
