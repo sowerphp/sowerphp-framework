@@ -106,7 +106,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
      * Extrae un valor desde un nodo de un XML almacenado en una columna de la
      * base de datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-09-24
+     * @version 2016-10-12
      */
     public function xml($column, $path, $namespace = null, $data_format = null)
     {
@@ -116,9 +116,11 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
         $column = 'CONVERT_FROM(decode('.$column.', \'base64\'), \'ISO8859-1\')::XML';
         foreach ($path as $k => $p) {
             if ($namespace) {
-                $select[$k] = 'BTRIM(XPATH(\''.str_replace('/', '/n:', $p).'/text()\', '.$column.', \'{{n,'.$namespace.'}}\')::TEXT, \'{"}\')';
+                $p = str_replace('|', '/text()|', str_replace('/', '/n:', $p)).'/text()';
+                $select[$k] = 'BTRIM(XPATH(\''.$p.'\', '.$column.', \'{{n,'.$namespace.'}}\')::TEXT, \'{"}\')';
             } else {
-                $select[$k] = 'BTRIM(XPATH(\''.$p.'/text()\', '.$column.')::TEXT, \'{}\')';
+                $p = str_replace('|', '/text()|', $p).'/text()';
+                $select[$k] = 'BTRIM(XPATH(\''.$p.'\', '.$column.')::TEXT, \'{}\')';
             }
         }
         return count($select)>1 ? $select : array_shift($select);
