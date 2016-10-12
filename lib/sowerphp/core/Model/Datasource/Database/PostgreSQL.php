@@ -103,6 +103,23 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
     }
 
     /**
+     * Entrega una fecha en cierto formato, se puede entregar a partir de cierta
+     * fecha y hora o bien con la fecha y hora actual
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2016-10-12
+     */
+    public function date($format, $datetime = null, $cast = null)
+    {
+        if (!$datetime)
+            $datetime = 'NOW()';
+        $formats = [
+            'Ym' => 'YYYYmm',
+            'd' => 'DD',
+        ];
+        return 'TO_CHAR('.$datetime.', \''.$formats[$format].'\')'.($cast?('::'.$cast):'');
+    }
+
+    /**
      * Extrae un valor desde un nodo de un XML almacenado en una columna de la
      * base de datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)

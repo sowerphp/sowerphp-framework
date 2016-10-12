@@ -362,7 +362,8 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getTableFromSP($procedure) {
+    public function getTableFromSP($procedure)
+    {
     }
 
     /**
@@ -372,7 +373,8 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getRowFromSP($procedure) {
+    public function getRowFromSP($procedure)
+    {
     }
 
     /**
@@ -382,7 +384,8 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getColFromSP($procedure) {
+    public function getColFromSP($procedure)
+    {
     }
 
     /**
@@ -403,7 +406,8 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function setLimit($sql, $records, $offset = 0) {
+    public function setLimit($sql, $records, $offset = 0)
+    {
     }
 
     /**
@@ -414,7 +418,8 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function like($column, $value) {
+    public function like($column, $value)
+    {
     }
 
     /**
@@ -427,7 +432,18 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function concat($par1, $par2) {
+    public function concat($par1, $par2)
+    {
+    }
+
+    /**
+     * Entrega una fecha en cierto formato, se puede entregar a partir de cierta
+     * fecha y hora o bien con la fecha y hora actual
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2016-10-12
+     */
+    public function date($format, $datetime = null, $cast = null)
+    {
     }
 
     /**
@@ -447,7 +463,8 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getTables() {
+    public function getTables()
+    {
     }
 
     /**
@@ -457,7 +474,8 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getCommentFromTable($table) {
+    public function getCommentFromTable($table)
+    {
     }
 
     /**
@@ -468,7 +486,8 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getColsFromTable($table) {
+    public function getColsFromTable($table)
+    {
     }
 
     /**
@@ -478,7 +497,8 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getPksFromTable($table) {
+    public function getPksFromTable($table)
+    {
     }
 
     /**
@@ -488,7 +508,8 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function getFksFromTable($table) {
+    public function getFksFromTable($table)
+    {
     }
 
     /**

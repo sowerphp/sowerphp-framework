@@ -100,6 +100,23 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
     }
 
     /**
+     * Entrega una fecha en cierto formato, se puede entregar a partir de cierta
+     * fecha y hora o bien con la fecha y hora actual
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2016-10-12
+     */
+    public function date($format, $datetime = null, $cast = null)
+    {
+        if (!$datetime)
+            $datetime = 'NOW()';
+        $formats = [
+            'Ym' => '%Y%m',
+            'd' => '%e',
+        ];
+        return 'DATE_FORMAT('.$datetime.', "'.$formats[$format].'")';
+    }
+
+    /**
      * Listado de tablas de la base de datos
      * @return Array Arreglo con las tablas (nombre y comentario)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
