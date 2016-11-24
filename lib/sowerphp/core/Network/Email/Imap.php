@@ -177,7 +177,7 @@ class Network_Email_Imap
      * @param filter Arreglo con filtros a usar para las partes del mensaje. Ej: ['subtype'=>['PLAIN', 'XML'], 'extension'=>['xml']]
      * @return Arreglo con los datos del mensaje, índices: header, body, charset y attachments
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-08-18
+     * @version 2016-11-24
      */
     public function getMessage($uid, $filter = [])
     {
@@ -211,7 +211,8 @@ class Network_Email_Imap
                         $add = false;
                         $params = $p->ifparameters ? $p->parameters : ( $p->ifdparameters ? $p->dparameters : [] );
                         foreach ($params as $parameter) {
-                            if (in_array(strtolower(substr($parameter->value, -3)), $extension)) {
+                            $value = strpos($parameter->value, '=?UTF-8?Q?')===0 ? imap_utf8($parameter->value) : $parameter->value;
+                            if (in_array(strtolower(substr($value, -3)), $extension)) {
                                 $add = true;
                                 break;
                             }
