@@ -206,7 +206,7 @@ class Network_Email_Imap
                         $this->getMessagePart($uid, $p, $partno0+1, $message);
                     }
                     // buscar por extensión del archivo adjunto (si lo es)
-                    else if (isset($filter['extension']) and (($p->ifdisposition and strtoupper($p->disposition)=='ATTACHMENT') or ($p->subtype=='OCTET-STREAM' and ($p->ifparameters or $p->ifdparameters)))) {
+                    else if (isset($filter['extension']) and (($p->ifdisposition and strtoupper($p->disposition)=='ATTACHMENT') or (in_array($p->subtype, ['OCTET-STREAM', '*']) and ($p->ifparameters or $p->ifdparameters)))) {
                         $extension = array_map('strtolower', $filter['extension']);
                         $add = false;
                         $params = $p->ifparameters ? $p->parameters : ( $p->ifdparameters ? $p->dparameters : [] );
