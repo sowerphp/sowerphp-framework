@@ -177,7 +177,7 @@ class Network_Email_Imap
      * @param filter Arreglo con filtros a usar para las partes del mensaje. Ej: ['subtype'=>['PLAIN', 'XML'], 'extension'=>['xml']]
      * @return Arreglo con los datos del mensaje, índices: header, body, charset y attachments
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-11-24
+     * @version 2016-12-07
      */
     public function getMessage($uid, $filter = [])
     {
@@ -225,7 +225,9 @@ class Network_Email_Imap
             }
         }
         // decodificar
-        $message['header']->subject = utf8_encode(imap_mime_header_decode($message['header']->subject)[0]->text);
+        if (!empty($message['header']->subject)) {
+            $message['header']->subject = utf8_encode(imap_mime_header_decode($message['header']->subject)[0]->text);
+        }
         // entregar mensaje
         return $message;
     }
