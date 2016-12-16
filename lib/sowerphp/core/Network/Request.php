@@ -39,11 +39,11 @@ class Network_Request
     /**
      * Constructor de la clase
      * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
+     * @version 2016-12-16
      */
-    public function __construct ($setRequest = true)
+    public function __construct($setRequest = true)
     {
-        if ($setRequest && isset($_SERVER['QUERY_STRING'])) {
+        if ($setRequest) {
             // asignar datos de la solicitud
             $this->request();
             $this->base();
@@ -62,10 +62,12 @@ class Network_Request
      * Método que determina la solicitud utilizada para acceder a la página
      * @return Solicitud completa para la página consultada
      * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-10
+     * @version 2016-12-16
      */
-    public function request ()
+    public function request()
     {
+        if (!isset($_SERVER['QUERY_STRING']))
+            return null;
         // Obtener ruta que se uso sin "/" (base) inicial
         $uri = substr($_SERVER['QUERY_STRING'], 1);
         // verificar si se pasaron variables GET
@@ -85,9 +87,9 @@ class Network_Request
      * Método que determina los campos base y webroot
      * @return Base de la URL
      * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-23
+     * @version 2016-12-16
      */
-    public function base ()
+    public function base()
     {
         if (!isset($_SERVER['REQUEST_URI']))
             return null;
@@ -106,13 +108,19 @@ class Network_Request
      * contar del webroot)
      * @return URL completa para acceder a la la página
      * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-11
+     * @version 2016-12-16
      */
-    public function url ()
+    public function url()
     {
-        if (!$this->base)
-            $this->base();
-        $this->url = 'http'.(isset($_SERVER['HTTPS'])?'s':null).'://'.$_SERVER['HTTP_HOST'].$this->base;
+        if (!isset($this->url)) {
+            if (!empty($_SERVER['HTTP_HOST'])) {
+                if (!$this->base)
+                    $this->base();
+                $this->url = 'http'.(isset($_SERVER['HTTPS'])?'s':null).'://'.$_SERVER['HTTP_HOST'].$this->base;
+            } else if (Configure::read('app.url')) {
+                $this->url = Configure::read('app.url');
+            }
+        }
         return $this->url;
     }
 
@@ -123,7 +131,7 @@ class Network_Request
      * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-25
      */
-    public function header ($header = null)
+    public function header($header = null)
     {
         if (!function_exists('apache_request_headers'))
             return null;
