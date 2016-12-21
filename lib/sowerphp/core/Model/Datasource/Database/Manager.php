@@ -449,12 +449,20 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     /**
      * Extrae un valor desde un nodo de un XML almacenado en una columna de la
      * base de datos
+     * Este método es por compatibilidad, aquellas BD que no soportan este método
+     * entregarán NULL para cada PATH solicitado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-09-24
+     * @version 2016-12-21
      */
     public function xml($column, $path, $namespace = null, $data_format = null)
     {
-        return 'NULL';
+        if (!is_array($path))
+            $path = [$path];
+        $select = [];
+        foreach ($path as $p) {
+            $select[] = 'NULL';
+        }
+        return count($select)>1 ? $select : array_shift($select);
     }
 
     /**
