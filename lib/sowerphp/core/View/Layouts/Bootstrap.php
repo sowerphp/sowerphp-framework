@@ -189,6 +189,7 @@ if ($message) {
     echo '<div class="alert alert-',$message['type'],'" role="alert">',"\n";
     echo '    <span class="glyphicon glyphicon-',$icons[$message['type']],'" aria-hidden="true"></span>',"\n";
     echo '    <span class="sr-only">',$message['type'],': </span>',$message['text'],"\n";
+    echo '    <a href="#" class="close" data-dismiss="alert" aria-label="close" title="Cerrar">&times;</a>',"\n";
     echo '</div>'."\n";
 }
 // contenido de la página
@@ -196,7 +197,7 @@ echo $_content;
 ?>
 <!-- END MAIN CONTENT -->
         </div>
-         <footer class="footer hidden-print">
+        <footer class="footer hidden-print">
             <div class="container">
                 <div class="text-muted pull-left">
                     <?=(is_array($_footer)?$_footer['left']:$_footer)."\n"?>
