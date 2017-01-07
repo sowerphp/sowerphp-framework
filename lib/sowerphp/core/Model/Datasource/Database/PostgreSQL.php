@@ -134,9 +134,15 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
         foreach ($path as $k => $p) {
             if ($namespace) {
                 $p = str_replace('|', '/text()|', str_replace('/', '/n:', $p)).'/text()';
+                if (strpos($p, '/n:@')) {
+                    $p = str_replace(['/n:@', '/text()'], ['/@', ''], $p);
+                }
                 $select[$k] = 'BTRIM(XPATH(\''.$p.'\', '.$column.', \'{{n,'.$namespace.'}}\')::TEXT, \'{"}\')';
             } else {
                 $p = str_replace('|', '/text()|', $p).'/text()';
+                if (strpos($p, '/@')) {
+                    $p = str_replace('/text()', '', $p);
+                }
                 $select[$k] = 'BTRIM(XPATH(\''.$p.'\', '.$column.')::TEXT, \'{}\')';
             }
         }
