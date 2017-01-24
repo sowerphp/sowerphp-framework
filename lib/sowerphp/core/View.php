@@ -141,7 +141,7 @@ class View
             '_header_extra' => $_header_extra,
             '_page' => $page,
             '_nav_website' => Configure::read('nav.website'),
-            '_nav_app' => Configure::read('nav.app'),
+            '_nav_app' => (array)Configure::read('nav.app'),
             '_timestamp' => date(Configure::read('time.format'), filemtime($location)),
             '_layout' => $this->layout,
             '_content' => $page_content,
