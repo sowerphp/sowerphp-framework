@@ -26,9 +26,10 @@ namespace sowerphp\core;
 /**
  * Utilidad para realizar operaciones sobre datos:
  *  - Encriptar y desencriptar: requiere php5-mcrypt
+ *  - Sanitizar/limpiar datos
  *
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2016-01-25
+ * @version 2017-02-28
  */
 class Utility_Data
 {
@@ -71,6 +72,25 @@ class Utility_Data
         $ciphertext_dec = substr($ciphertext_dec, $iv_size);
         $plaintext_dec = mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $ciphertext_dec, MCRYPT_MODE_CBC, $iv_dec);
         return $plaintext_dec;
+    }
+
+    /**
+     * Método que limpia un texto
+     * @param string Texto que se desea limpiar
+     * @param options Opciones para la limpieza del texto
+     * @return Texto limpio
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2017-02-28
+     */
+    public static function sanitize(&$string, array $options = [])
+    {
+        if (!$string)
+            return false;
+        $string = trim(strip_tags($string));
+        if (!empty($options['l'])) {
+            $string = substr($string, 0, $options['l']);
+        }
+        return true;
     }
 
 }
