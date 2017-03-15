@@ -55,7 +55,7 @@ class Exception extends \RuntimeException
      * Método para manejar las excepciones ocurridas en la aplicación
      * @param exception Excepción producida (\Exception  o \Error)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-01-07
+     * @version 2017-03-15
      */
     public static function handler($exception)
     {
@@ -81,6 +81,7 @@ class Exception extends \RuntimeException
             $stdout->write("\n".'<error>'.$data['exception'].':</error>', 2);
             $stdout->write("\t".'<error>'.str_replace("\n", "\n\t", $data['message']).'</error>', 2);
             $stdout->write("\t".'<error>'.str_replace("\n", "\n\t", $data['trace']).'</error>', 2);
+            exit($data['code']);
         }
     }
 
