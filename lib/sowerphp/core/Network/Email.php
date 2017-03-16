@@ -213,7 +213,7 @@ class Network_Email
      * @param msg Cuerpo del mensaje que se desea enviar (arreglo o string)
      * @return Arreglo asociativo con los estados de cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-04-20
+     * @version 2017-03-15
      */
     public function send ($msg)
     {
@@ -242,7 +242,7 @@ class Network_Email
         unset($this->_config['from']);
         // Crear datos (incluyendo adjuntos)
         $data = array(
-            'text'=>$msg['text'],
+            'text'=>isset($msg['text'])?$msg['text']:null,
             'html'=>isset($msg['html'])?$msg['html']:null,
             'attach'=>$this->_attach
         );
