@@ -80,13 +80,17 @@ class Utility_Data
      * @param options Opciones para la limpieza del texto
      * @return Texto limpio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-02-28
+     * @version 2017-03-15
      */
     public static function sanitize(&$string, array $options = [])
     {
         if (!$string)
             return false;
-        $string = trim(strip_tags($string));
+        if (!empty($options['tags'])) {
+            $string = trim(strip_tags($string, $options['tags']));
+        } else {
+            $string = trim(strip_tags($string));
+        }
         if (!empty($options['l'])) {
             $string = substr($string, 0, $options['l']);
         }
