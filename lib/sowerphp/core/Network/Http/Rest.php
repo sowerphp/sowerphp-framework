@@ -98,7 +98,7 @@ class Network_Http_Rest
      * @param args Argumentos para el métood de Network_Http_Socket
      * @return Arreglo con la respuesta HTTP (índices: status, header y body)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-12-28
+     * @version 2017-04-02
      */
     public function __call($method, $args)
     {
@@ -109,7 +109,6 @@ class Network_Http_Rest
         $header = isset($args[2]) ? $args[2] : [];
         $sslv3 = isset($args[3]) ? $args[3] : false;
         $sslcheck = isset($args[4]) ? $args[4] : true;
-        unset($this->header['Content-Length']);
         if ($data and $method!='get') {
             if (isset($data['@files'])) {
                 $files = $data['@files'];
@@ -119,7 +118,7 @@ class Network_Http_Rest
                     $data[$key] = $file;
             } else {
                 $data = json_encode($data);
-                $this->header['Content-Length'] = strlen($data);
+                $header['Content-Length'] = strlen($data);
             }
         }
         $response = Network_Http_Socket::$method(
