@@ -172,6 +172,26 @@ class Network_Email_Imap
     }
 
     /**
+     * Método que entrega el número de mensaje a partir del UID
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2017-04-07
+     */
+    public function getMsgNumber($uid)
+    {
+        return imap_msgno($this->link, $uid);
+    }
+
+    /**
+     * Método que entrega la información de la cabecera del mensaje
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2017-04-07
+     */
+    public function getHeaderInfo($uid)
+    {
+        return imap_headerinfo($this->link, $this->getMsgNumber($uid));
+    }
+
+    /**
      * Método que entrega rescata un mensaje desde la casilla de correo
      * @param uid UID del mensaje que se desea obtener
      * @param filter Arreglo con filtros a usar para las partes del mensaje. Ej: ['subtype'=>['PLAIN', 'XML'], 'extension'=>['xml']]
