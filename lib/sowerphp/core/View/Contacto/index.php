@@ -16,7 +16,7 @@
     <div class="form-group required">
         <label for="mensaje" class="col-sm-2 control-label">Mensaje</label>
         <div class="col-sm-10">
-            <textarea name="mensaje" class="form-control check notempty" id="mensaje"></textarea>
+            <textarea name="mensaje" class="form-control check notempty" id="mensaje" rows="5"></textarea>
         </div>
     </div>
     <div class="form-group">
