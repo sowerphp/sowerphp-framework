@@ -73,7 +73,7 @@ class Network_Email_Smtp
      * Método que envía el correo
      * @return Arreglo con los estados de retorno por cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-05-12
+     * @version 2017-07-12
      */
     public function send()
     {
@@ -109,26 +109,28 @@ class Network_Email_Smtp
             'head_charset'  => 'UTF-8',
             'head_encoding' => '8bit',
         ]); // debe llamarse antes de headers
-        $to = implode(', ', $this->_header['to']);
         $headers_data = [
             'From' => $this->_header['from'],
-            'To' => $to,
             'Subject' => $this->_header['subject'],
         ];
+        $to = [];
+        if (!empty($this->_header['to'])) {
+            $to = array_merge($to, $this->_header['to']);
+            $headers_data['To'] = implode(', ', $this->_header['to']);
+        }
         if (!empty($this->_header['cc'])) {
+            $to = array_merge($to, $this->_header['cc']);
             $headers_data['Cc'] = implode(', ', $this->_header['cc']);
         }
         if (!empty($this->_header['replyTo'])) {
             //$headers_data['Reply-To'] = $headers_data['Return-Path'] = $this->_header['replyTo'];
             $headers_data['Reply-To'] = $this->_header['replyTo'];
         }
+        if (!empty($this->_header['bcc'])) {
+            $to = array_merge($to, $this->_header['bcc']);
+        }
         $headers = $mail->headers($headers_data);
-        if(!empty($this->_header['cc'])) {
-            $to .= ', '.implode(', ', $this->_header['cc']);
-        }
-        if(!empty($this->_header['bcc'])) {
-            $to .= ', '.implode(', ', $this->_header['bcc']);
-        }
+        $to = implode(', ', $to);
         // Enviar correo a todos los destinatarios
         $result = $mailer->send($to, $headers, $body);
         // retornar estado del envío del mensaje
