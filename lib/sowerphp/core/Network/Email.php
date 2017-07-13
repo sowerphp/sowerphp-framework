@@ -213,7 +213,7 @@ class Network_Email
      * @param msg Cuerpo del mensaje que se desea enviar (arreglo o string)
      * @return Arreglo asociativo con los estados de cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-03-15
+     * @version 2017-07-12
      */
     public function send ($msg)
     {
@@ -226,7 +226,8 @@ class Network_Email
         if (!isset($this->_to[0])) {
             if (isset($this->_config['to'])) {
                 $this->to($this->_config['to']);
-            } else {
+            }
+            else if (empty($this->_cc) and empty($this->_bcc)) {
                 throw new Exception('No existe destinatario del correo electrónico');
             }
         }
