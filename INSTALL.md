@@ -139,3 +139,36 @@ Crear Hola Mundo
 	Por defecto se procesan archivos .php y .md como vistas.
 
 3.	Abrir página http://example.com o http://example.com/inicio
+
+Instalación del framework con composer
+-------------------------
+
+```
+$ composer create-project sowerphp/sowerphp sowerphp dev-master
+```
+
+Ir a la ruta del directorio instalado y actualizar las dependencias.
+
+```
+cd sowerphp/lib/sowerphp/core/ && composer install
+```
+
+### Instalación de extensiones con composer
+
+En el directorio de instalación del framework /sowerphp agregar a composer.json "minimum-stability": "dev" para no tener problemas con las subdependencias.
+
+```
+"minimum-stability": "dev"
+```
+
+Instalar y actualizar las depedencias general y app
+
+```
+composer require --dev sowerphp/app dev-master && cd extensions/sowerphp/app && composer install && cd ../../..
+composer require --dev sowerphp/general dev-master && cd extensions/sowerphp/general && composer install && cd ../../..
+```
+Configurar archivo project/website/webroot/index.php y activar extensiones
+
+```
+$_EXTENSIONS = ['sowerphp/app', 'sowerphp/general'];
+```
