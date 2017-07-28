@@ -154,10 +154,15 @@ class View
      * @param layout Tema que se quiere buscar su ubicación
      * @return Ubicación del tema (o falso si no se encontró)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-09-14
+     * @version 2017-07-28
      */
-    private function getLayoutLocation ($layout)
+    private function getLayoutLocation($layout)
     {
+        // si el layout es una ruta absoluta se entrega directamente
+        if ($layout[0]=='/') {
+            return $layout;
+        }
+        // buscar en las rutas de Layouts
         $paths = App::paths();
         foreach($paths as $path) {
             $file = $path.'/View/Layouts/'.$layout.'.php';
