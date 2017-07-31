@@ -77,11 +77,13 @@ class Routing_Router
                         }
                         // si es un parámetro se copia a donde corresponda (controlador, acción o variable acción)
                         else if ($key_partes[$i][0]==':') {
+                            // verificar formato del parámetro contra expresión regular
                             /*$regexp = '/'.$info['params'][$key_partes[$i]].'/';
                             if (!preg_match($regexp, $url_partes[$i])) {
                                 $match = false;
                                 break;
                             }*/
+                            // asignar parte a donde corresponda
                             if ($key_partes[$i]==':controller') {
                                 $params['controller'] = $url_partes[$i];
                             }
@@ -144,7 +146,7 @@ class Routing_Router
      * Método para conectar nuevas rutas
      * @param from Ruta que se desea conectar (URL)
      * @param to Hacia donde (módulo, controlador, acción y parámetros) se conectará la ruta
-     * @param params Nombre de parámetros que están presenten en la rurta (para ayudar a hacer el match)
+     * @param regexp Expresiones regulares para hacer match con los parámetros que se pasan con nombre (defecto: .*)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2017-07-31
      */
