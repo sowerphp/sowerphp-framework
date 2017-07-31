@@ -38,18 +38,17 @@ class Routing_Router
     /**
      * Procesa la url indicando que es lo que se espera obtener según las
      * rutas que existen conectadas
-     * @todo Buscar forma de reducir este método pero manteniendo las mismas funcionalidades del parser
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-17
+     * @version 2017-07-31
      */
-    public static function parse ($url)
+    public static function parse($url)
     {
         // La url requiere partir con "/", si no lo tiene se coloca
         if (empty($url) || $url[0]!='/')
             $url = '/'.$url;
         // Si existe una ruta para la url que se está revisando se carga su configuración
         if (isset(self::$routes[$url])) {
-            return self::routeNormalize(self::$routes[$url]);
+            return self::routeNormalize(self::$routes[$url]['to']);
         }
         // buscar página estática
         if (self::$autoStaticPages && ($params = self::parseStaticPage ($url))!==false) {
@@ -60,44 +59,58 @@ class Routing_Router
         if (self::$autoStaticPages && ($params = self::parseStaticPage (self::urlClean ($url, $module), $module))!==false) {
             return $params;
         }
-        // Buscar alguna que sea parcial (:controller, :action o *)
-        foreach (self::$routes as $key=>$aux) {
-            $params = array_merge(array('module'=>null, 'controller'=>null, 'action'=>null, 'pass'=>null), $aux);
-            // Tiene :controller
-            $controller = strpos($key, ':controller');
-            if ($controller) {
-                $inicioKey = rtrim(substr($key, 0, $controller), '/');
-                // Si la URL parte con lo que está antes de :controler
-                if (strpos($url, $inicioKey)===0) {
-                    $ruta = ltrim(str_replace($inicioKey, '', $url), '/');
-                    $partes = explode('/', $ruta);
-                    $params['controller'] = array_shift($partes);
-                    if (empty($params['action']))
-                        $params['action'] = count($partes) ? array_shift($partes) : 'index';
-                    $params['pass'] = $partes;
-                    return $params;
-                } else continue;
-            }
-            // No tiene :controller, pero si :action
-            $action = strpos($key, ':action');
-            if ($action) {
-                $inicioKey = rtrim(substr($key, 0, $action), '/');
-                // Si la URL parte con lo que está antes de :action
-                if (strpos($url, $inicioKey)===0) {
-                    $ruta = ltrim(str_replace($inicioKey, '', $url), '/');
-                    if (strlen($ruta)) {
-                        $partes = explode('/', $ruta);
-                        if (empty($params['action']))
-                            $params['action'] = count($partes) ? array_shift($partes) : 'index';
-                        $params['pass'] = $partes;
-                    } else {
-                        $params['action'] = 'index';
-                        $params['pass'] = array();
+        // Buscar alguna que sea parcial (:controller, :action, :passX o *)
+        foreach (self::$routes as $key=>$info) {
+            $params = array_merge(['module'=>null, 'controller'=>null, 'action'=>null, 'pass'=>null], $info['to']);
+            // buscar parametros con nombre si existen
+            if ($info['params']) {
+                $url_partes = explode('/', $url);
+                $key_partes = explode('/', $key);
+                $n_url_partes = count($url_partes);
+                $n_key_partes = count($key_partes);
+                if ($n_url_partes >= $n_key_partes) {
+                    $match = true;
+                    for ($i=0; $i<$n_key_partes; $i++) {
+                        // si son iguales las partes se deja pasar
+                        if ($key_partes[$i]==$url_partes[$i]) {
+                            continue;
+                        }
+                        // si es un parámetro se copia a donde corresponda (controlador, acción o variable acción)
+                        else if ($key_partes[$i][0]==':') {
+                            /*$regexp = '/'.$info['params'][$key_partes[$i]].'/';
+                            if (!preg_match($regexp, $url_partes[$i])) {
+                                $match = false;
+                                break;
+                            }*/
+                            if ($key_partes[$i]==':controller') {
+                                $params['controller'] = $url_partes[$i];
+                            }
+                            else if ($key_partes[$i]==':action') {
+                                $params['action'] = $url_partes[$i];
+                            }
+                            else {
+                                $params['pass'][] = $url_partes[$i];
+                            }
+                            continue;
+                        }
+                        // si es asterisco se pasa todo como parámetro de la acción
+                        else if ($key_partes[$i]=='*') {
+                            if (isset($url_partes[$i])) {
+                                $params['pass'] = array_merge((array)$params['pass'], array_slice($url_partes, $i));
+                            }
+                            break;
+                        }
+                        // no hizo match
+                        $match = false;
+                        break;
                     }
-                    return $params;
-                } else continue;
+                    // si calza se entrega ruta
+                    if ($match) {
+                        return $params;
+                    }
+                }
             }
-            // Si no esta el tag :controler ni el de :action se busca si termina en *
+            // Si no es una ruta con parámetros entonces se busca si la ruta tiene al final un *
             if ($key[strlen($key)-1]=='*') {
                 $ruta = substr($key, 0, -1);
                 // Si se encuentra la ruta al inicio de la url
@@ -131,12 +144,20 @@ class Routing_Router
      * Método para conectar nuevas rutas
      * @param from Ruta que se desea conectar (URL)
      * @param to Hacia donde (módulo, controlador, acción y parámetros) se conectará la ruta
+     * @param params Nombre de parámetros que están presenten en la rurta (para ayudar a hacer el match)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-15
+     * @version 2017-07-31
      */
-    public static function connect ($from, $to = array())
+    public static function connect($from, array $to = [], array $regexp = [])
     {
-        self::$routes[$from] = $to;
+        $params = [];
+        $partes = explode('/', $from);
+        foreach($partes as $p) {
+            if (isset($p[0]) and $p[0]==':') {
+                $params[$p] = isset($regexp[$p]) ? $regexp[$p] : '.*';
+            }
+        }
+        self::$routes[$from] = ['to'=>$to, 'params'=>$params];
         krsort(self::$routes);
     }
 
