@@ -60,7 +60,7 @@ class Shell_Exec
      * @param args Argumentos que se pasarán al comando
      * @return Resultado de la ejecución del comando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-01-16
+     * @version 2017-08-12
      */
     private static function dispatch ($command, $args)
     {
@@ -86,7 +86,7 @@ class Shell_Exec
         // poner modo verbose que corresponda (de 1 a 5)
         $argc = count($args);
         for ($i=0; $i<$argc; $i++) {
-            if (in_array($args[$i], ['-v', '-vv', '-vvv', '-vvvv', '-vvvvv'])) {
+            if (preg_match('/^\-v+$/', $args[$i])) {
                 $shell->verbose = strlen($args[$i]) - 1;
                 unset($args[$i]);
             }
