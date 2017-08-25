@@ -48,7 +48,7 @@ class Network_Email_Smtp
      * @param data Datos (cuerpo) de correo electrónico
      * @param debug =true se muestra debug, =false modo silencioso
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-03-05
+     * @version 2017-08-25
      */
     public function __construct ($config, $header, $data, $debug = false)
     {
@@ -56,7 +56,7 @@ class Network_Email_Smtp
         $this->_config = array(
             'host' => $config['host'],
             'port' => $config['port'],
-            'auth' => true,
+            'auth' => isset($config['auth']) ? (bool)$config['auth'] : true,
             'username' => $config['user'],
             'password' => $config['pass'],
             'debug' => $debug
