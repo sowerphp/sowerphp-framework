@@ -60,7 +60,7 @@ class Trigger
             return null;
         }
         // lanzar handler para el trigger
-        call_user_func_array(self::$handler, func_get_args());
+        return call_user_func_array(self::$handler, func_get_args());
     }
 
 }
