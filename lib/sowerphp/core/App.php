@@ -38,21 +38,39 @@ class App
      * Método que agrega las capas de la aplicación
      * @param extensions Arreglo con las capas de la aplicación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-22
+     * @version 2017-10-10
      */
     public static function createLayers ($extensions)
     {
-        self::$_layers['website'] = DIR_PROJECT;
-        self::$_paths[] = DIR_PROJECT.'/website';
+        // si no se indicó website, se añade a las extensiones
+        // de esta forma se controla el orden en que se procesa website y
+        // permite que una extensión esté "sobre" website si es que se indica
+        // en un orden diferente (explícitamente colocando website en index.php)
+        if (!in_array('website', $extensions)) {
+            array_unshift($extensions, 'website');
+        }
+        // procesar cada extensión para ir colocandolas y su path
         foreach ($extensions as &$extension) {
-            if (is_dir(DIR_PROJECT.'/extensions/'.$extension)) {
+            // si es website se coloca el directorio del proyecto
+            if ($extension == 'website') {
+                self::$_layers['website'] = DIR_PROJECT;
+                self::$_paths[] = DIR_PROJECT.'/website';
+            }
+            // si la extensión existe en el directorio del proyecto se usa esa
+            else if (is_dir(DIR_PROJECT.'/extensions/'.$extension)) {
                 self::$_layers[$extension] = DIR_PROJECT.'/extensions';
                 self::$_paths[] = DIR_PROJECT.'/extensions/'.$extension;
-            } else {
+            }
+            // si no existe en el directorio del proyecto se asume que existe
+            // en el directorio del framework (si no existe aquí no se valida,
+            // ya que como muchas cosas en el framework, se asume está bien
+            // configurado)
+            else {
                 self::$_layers[$extension] = DIR_FRAMEWORK.'/extensions';
                 self::$_paths[] = DIR_FRAMEWORK.'/extensions/'.$extension;
             }
         }
+        // agregar al final la ruta del core del framework
         self::$_layers['sowerphp/core'] = DIR_FRAMEWORK.'/lib';
         self::$_paths[] = DIR_FRAMEWORK.'/lib/sowerphp/core';
     }
