@@ -77,6 +77,8 @@ class Configure
             }
         }
         unset($paths, $path);
+        // asignar handler para triggers de la app
+        Trigger::setHandler(self::read('app.trigger_handler'));
     }
 
     /**
