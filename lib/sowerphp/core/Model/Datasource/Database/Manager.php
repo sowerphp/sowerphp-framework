@@ -45,11 +45,12 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      */
     public function error($msg)
     {
-        if ($this->inTransaction)
+        if ($this->inTransaction) {
             $this->rollBack();
-        throw new Exception_Model_Datasource_Database(array(
+        }
+        throw new Exception_Model_Datasource_Database([
             'msg' => $msg
-        ));
+        ]);
     }
 
     /**
@@ -73,7 +74,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
         if ($stmt===false) {
             $this->error('No fue posible preparar la consulta:'."\n\n".$sql);
         }
-        //asignar parámetros
+        // asignar parámetros
         foreach ($params as $key => &$param) {
             if (is_array($param)) {
                 $stmt->bindParam($key, $param[0], $param[1]);
