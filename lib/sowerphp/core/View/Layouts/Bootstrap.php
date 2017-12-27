@@ -87,7 +87,7 @@ foreach ($_nav_website as $link=>$name) {
 <?php if (\sowerphp\core\App::layerExists('sowerphp/app')) : ?>
                     <ul class="nav navbar-nav navbar-right">
 <?php if (!$_Auth->logged()) : ?>
-                        <li><a href="<?=$_base?>/usuarios/ingresar"><span class="fa fa-sign-in" aria-hidden="true"></span> Iniciar sesión</a></li>
+                        <li><a href="<?=$_base?>/usuarios/ingresar"><span class="fas fa-sign-in-alt" aria-hidden="true"></span> Iniciar sesión</a></li>
 <?php else : ?>
 <?php if (\sowerphp\core\Module::loaded('Sistema.Notificaciones')) : ?>
 <?php
@@ -97,7 +97,7 @@ $n_notificaciones = $Notficaciones->getCountUnreadByUser($_Auth->User->id);;
 ?>
                         <li class="nav-icon-btn nav-icon-btn-danger dropdown">
                             <a href="#notifications" class="dropdown-toggle" data-toggle="dropdown">
-                                <i class="fa fa-bell-o"></i><?=($n_notificaciones?' <span class="badge" id="n_notifications">'.$n_notificaciones.'</span>':'')?>
+                                <i class="far fa-bell"></i><?=($n_notificaciones?' <span class="badge" id="n_notifications">'.$n_notificaciones.'</span>':'')?>
                             </a>
                             <div class="dropdown-menu widget-notifications no-padding" style="width: 300px">
                                 <div class="notifications-list" id="main-navbar-notifications">
@@ -127,7 +127,7 @@ $n_notificaciones = $Notficaciones->getCountUnreadByUser($_Auth->User->id);;
 $Account = $_Auth->User->getEmailAccount();
 if ($Account) {
     $emails = $Account->countUnreadMessages();
-    echo '                        <li class="notification"><a href="'.$Account->getUserUrl().'" target="_blank"><i class="fa fa-envelope-o"></i> '.($emails?' <span class="badge">'.$emails.'</span>':'').'</a></li>',"\n";
+    echo '                        <li class="notification"><a href="'.$Account->getUserUrl().'" target="_blank"><i class="far fa-envelope"></i> '.($emails?' <span class="badge">'.$emails.'</span>':'').'</a></li>',"\n";
 }
 ?>
                         <li class="dropdown">
@@ -151,7 +151,7 @@ foreach ($_nav_app as $link=>&$info) {
                                 <li><a href="<?=$_base?>/documentacion"><span class="fa fa-book" aria-hidden="true"></span> Documentación</a></li>
                                 <li class="divider"></li>
                                 <li><a href="<?=$_base?>/usuarios/perfil"><span class="fa fa-user" aria-hidden="true"></span> Perfil de usuario</a></li>
-                                <li><a href="<?=$_base?>/usuarios/salir"><span class="fa fa-sign-out" aria-hidden="true"></span> Cerrar sesión</a></li>
+                                <li><a href="<?=$_base?>/usuarios/salir"><span class="fas fa-sign-out-alt" aria-hidden="true"></span> Cerrar sesión</a></li>
                             </ul>
                         </li>
 <?php endif; ?>
