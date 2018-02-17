@@ -14,7 +14,7 @@ El framework asume el siguiente software instalado:
 *	Servidor web:
 	* [Debian GNU/Linux](https://www.debian.org)
 	* [Apache 2.x](http://httpd.apache.org)
-	* [PHP 5.5](http://www.php.net/downloads.php)
+	* [PHP 5.5](http://www.php.net/downloads.php) (se recomienda PHP 7)
 
 *	Herramientas para repositorios:
 	* [Composer](https://getcomposer.org/download)
@@ -94,27 +94,27 @@ Desde cualquier cuenta:
 
 	$ psql -h 127.0.0.1 -U <usuario> -W <base de datos>
 
-Instalación del framework
--------------------------
+Instalación del framework usando SowerPKG
+-----------------------------------------
 
 Se recomienda realizar instalación del framework utilizando
-[SowerPKG](https://github.com/SowerPHP/sowerpkg)
+[SowerPKG](https://github.com/SowerPHP/sowerpkg).
+
+Es posible instalar todo manualmente (framework, extensiones y dependencias de
+composer) pero son varios pasos y SowerPKG los ejecuta todos automáticamente.
 
 Configuración del framework
 ---------------------------
 
 1.	Definir parámetros de configuración por defecto en el archivo *Config/core.php*.
 
-2.	Revisar archivos de configuración en directorio *standard* (o extensiones que
-se hayan instalado) para ver que opciones de configuración existen y sus
+2.	Revisar archivos de configuración en directorio *project* (o extensiones que
+se hayan instalado) para ver que opciones de configuración existentes y sus
 valores por defecto. Si no se define ninguno se utilizarán dichos valores.
 
 3.	Notar que si se cambia el Layout, este es asignado mediante la sesión
 	por lo cual la sesión debe ser destruída para que el cambio surta efecto
-	(por ejemplo borrando las cookies para el sitio en el navegador). La
-	otra alternativa es cambiar el layout ingresando a la url:
-
-		http://example.com/session/config/page.layout/NuevoLayout
+	(por ejemplo borrando las cookies para el sitio en el navegador).
 
 Crear Hola Mundo
 ----------------
@@ -139,36 +139,3 @@ Crear Hola Mundo
 	Por defecto se procesan archivos .php y .md como vistas.
 
 3.	Abrir página http://example.com o http://example.com/inicio
-
-Instalación del framework con composer
--------------------------
-
-```
-$ composer create-project sowerphp/sowerphp sowerphp dev-master
-```
-
-Ir a la ruta del directorio instalado y actualizar las dependencias.
-
-```
-cd sowerphp/lib/sowerphp/core/ && composer install
-```
-
-### Instalación de extensiones con composer
-
-En el directorio de instalación del framework /sowerphp agregar a composer.json "minimum-stability": "dev" para no tener problemas con las subdependencias.
-
-```
-"minimum-stability": "dev"
-```
-
-Instalar y actualizar las depedencias general y app
-
-```
-composer require --dev sowerphp/app dev-master && cd extensions/sowerphp/app && composer install && cd ../../..
-composer require --dev sowerphp/general dev-master && cd extensions/sowerphp/general && composer install && cd ../../..
-```
-Configurar archivo project/website/webroot/index.php y activar extensiones
-
-```
-$_EXTENSIONS = ['sowerphp/app', 'sowerphp/general'];
-```
