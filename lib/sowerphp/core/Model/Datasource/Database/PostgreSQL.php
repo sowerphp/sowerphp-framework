@@ -106,7 +106,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
      * Entrega una fecha en cierto formato, se puede entregar a partir de cierta
      * fecha y hora o bien con la fecha y hora actual
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-10-12
+     * @version 2018-03-19
      */
     public function date($format, $datetime = null, $cast = null)
     {
@@ -114,6 +114,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
             $datetime = 'NOW()';
         $formats = [
             'Ym' => 'YYYYmm',
+            'm' => 'mm',
             'd' => 'DD',
         ];
         return 'TO_CHAR('.$datetime.', \''.$formats[$format].'\')'.($cast?('::'.$cast):'');
