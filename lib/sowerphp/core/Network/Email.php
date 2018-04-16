@@ -213,7 +213,7 @@ class Network_Email
      * @param msg Cuerpo del mensaje que se desea enviar (arreglo o string)
      * @return Arreglo asociativo con los estados de cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-07-12
+     * @version 2018-04-16
      */
     public function send ($msg)
     {
@@ -248,7 +248,7 @@ class Network_Email
             'attach'=>$this->_attach
         );
         // Crear correo
-        $class = '\Network_Email_'.ucfirst($this->_config['type']);
+        $class = __NAMESPACE__.'\Network_Email_'.ucfirst($this->_config['type']);
         $email = new $class($this->_config, $header, $data, $this->_debug);
         // Enviar mensaje a todos los destinatarios
         return $email->send();
