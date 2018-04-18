@@ -37,9 +37,9 @@ class View_Helper_Pages_Md
      * @param vars Arreglo con variables que se desean pasar
      * @return Buffer de la página renderizada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-29
+     * @version 2018-04-18
      */
-    public static function render ($file, $variables = array())
+    public static function render($file, array $variables = [])
     {
         $data = file_get_contents($file);
         foreach ($variables as $key => $valor) {
@@ -47,7 +47,11 @@ class View_Helper_Pages_Md
                 $data = str_replace('{'.$key.'}', $valor, $data);
             }
         }
-        return \Michelf\Markdown::defaultTransform ($data);
+        return str_replace(
+            ['<h1>', '</h1>'],
+            ['<div class="page-header"><h1>', '</h1></div>'],
+            \Michelf\Markdown::defaultTransform($data)
+        );
     }
 
 }
