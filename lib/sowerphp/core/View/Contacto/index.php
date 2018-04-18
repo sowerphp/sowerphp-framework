@@ -1,4 +1,4 @@
-<h1>Contacto</h1>
+<div class="page-header"><h1>Contacto</h1></div>
 <p>Por favor enviar su mensaje a través del siguiente formulario, será contactado a la brevedad.</p>
 <form method="post" class="form-horizontal" role="form" onsubmit="return Form.check()">
     <div class="form-group required">
