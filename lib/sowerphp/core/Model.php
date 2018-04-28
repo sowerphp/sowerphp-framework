@@ -77,13 +77,10 @@ abstract class Model
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2018-04-27
      */
-    public function getDB($database = null)
+    public function getDB()
     {
-        if (!isset($this->db) or $database) {
-            if (!$database) {
-                $database = $this->_database;
-            }
-            $this->db = \sowerphp\core\Model_Datasource_Database::get($database);
+        if (!isset($this->db)) {
+            $this->db = \sowerphp\core\Model_Datasource_Database::get($this->_database);
         }
         return $this->db;
     }
