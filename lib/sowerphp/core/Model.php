@@ -77,7 +77,7 @@ abstract class Model
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2018-04-27
      */
-    public function getDB()
+    protected function getDB()
     {
         if (!isset($this->db)) {
             $this->db = \sowerphp\core\Model_Datasource_Database::get($this->_database);
