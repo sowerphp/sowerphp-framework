@@ -42,12 +42,12 @@ abstract class Model
     /**
      * Constructor de la clase abstracta
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
+     * @version 2018-04-27
      */
     public function __construct ($pk=null)
     {
         // recuperar conexión a la base de datos
-        $this->db = \sowerphp\core\Model_Datasource_Database::get($this->_database);
+        $this->getDB();
         // setear nombre de la tabla según la clase que se está usando
         if (empty($this->_table)) {
             $this->_table = Utility_Inflector::underscore (explode('_', get_class($this))[1]);
@@ -69,6 +69,23 @@ abstract class Model
             // obtener otros atributos del objeto
             $this->get();
         }
+    }
+
+    /**
+     * Método que recupera la conexión a la base de datos del objeto
+     * Si la conexión no existe se conecta
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2018-04-27
+     */
+    public function getDB($database = null)
+    {
+        if (!isset($this->db) or $database) {
+            if (!$database) {
+                $database = $this->_database;
+            }
+            $this->db = \sowerphp\core\Model_Datasource_Database::get($database);
+        }
+        return $this->db;
     }
 
     /**
