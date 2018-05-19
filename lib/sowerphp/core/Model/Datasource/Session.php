@@ -35,7 +35,7 @@ class Model_Datasource_Session
      * Método que inicia la sesión
      * @param expires Minutos en que expirará la sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-05-11
+     * @version 2018-05-19
      */
     public static function start($expires = 30)
     {
@@ -54,7 +54,7 @@ class Model_Datasource_Session
         session_set_cookie_params($lifetime, $path, $domain, $secure, $httponly);
         session_name($session_name);
         session_start();
-        setcookie($session_name, session_id(), time()+$lifetime);
+        setcookie(session_name(), session_id(), time()+$lifetime);
     }
 
     /**
