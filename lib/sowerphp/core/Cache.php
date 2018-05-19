@@ -55,10 +55,12 @@ class Cache
             // definir host y puerto
             if (!$host or !$port) {
                 $cache = \sowerphp\core\Configure::read('cache.default');
-                if (!$host)
+                if (!$host) {
                     $host = isset($cache['host']) ? $cache['host'] : '127.0.0.1';
-                if (!$port)
+                }
+                if (!$port) {
                     $port = isset($cache['port']) ? $cache['port'] : 11211;
+                }
             }
             // conectar a Memcached
             $this->_cache = new \Memcached();
@@ -78,9 +80,13 @@ class Cache
      */
     public function set($key, $value, $expires=600)
     {
-        if (!$this->_cache) return false;
+        if (!$this->_cache) {
+            return false;
+        }
         $result = $this->_cache->set($this->_prefix.$key, $value, $expires);
-        if ($result) self::$setCount++;
+        if ($result) {
+            self::$setCount++;
+        }
         return $result;
     }
 
@@ -93,9 +99,13 @@ class Cache
      */
     public function get($key)
     {
-        if (!$this->_cache) return false;
+        if (!$this->_cache) {
+            return false;
+        }
         $result = $this->_cache->get($this->_prefix.$key);
-        if ($result) self::$getCount++;
+        if ($result) {
+            self::$getCount++;
+        }
         return $result;
     }
 
@@ -108,7 +118,9 @@ class Cache
      */
     public function delete($key)
     {
-        if (!$this->_cache) return false;
+        if (!$this->_cache) {
+            return false;
+        }
         return $this->_cache->delete($this->_prefix.$key);
     }
 
@@ -120,9 +132,13 @@ class Cache
      */
     public function getAllKeys()
     {
-        if (!$this->_cache) return false;
+        if (!$this->_cache) {
+            return false;
+        }
         $allKeys = $this->_cache->getAllKeys();
-        if (!$allKeys) return false;
+        if (!$allKeys) {
+            return false;
+        }
         $keys = [];
         $start = strlen($this->_prefix);
         foreach ($allKeys as &$key) {
@@ -142,12 +158,16 @@ class Cache
      */
     public function getMulti($keys)
     {
-        if (!$this->_cache) return false;
+        if (!$this->_cache) {
+            return false;
+        }
         foreach ($keys as &$key) {
             $key = $this->_prefix.$key;
         }
         $vals = $this->_cache->getMulti($keys);
-        if (!$vals) return false;
+        if (!$vals) {
+            return false;
+        }
         $start = strlen($this->_prefix);
         foreach ($vals as $key => &$val) {
             $vals[substr($key, $start)] = $val;
@@ -164,7 +184,9 @@ class Cache
      */
     public function flush()
     {
-        if (!$this->_cache) return false;
+        if (!$this->_cache) {
+            return false;
+        }
         $keys = $this->getAllKeys();
         foreach ($keys as &$key) {
             $key = $this->_prefix.$key;

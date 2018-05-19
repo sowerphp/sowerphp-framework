@@ -39,7 +39,7 @@ class Model_Datasource_Session
      */
     public static function start($expires = 30)
     {
-        $expires *= 60;
+        $lifetime = $expires * 60;
         $session_name = 'sec_session_id';
         $path = (new Network_Request())->base();
         $path = $path!=''?$path:'/';
@@ -50,10 +50,11 @@ class Model_Datasource_Session
         $secure = isset($_SERVER['HTTPS']) ? true : false;
         $httponly = true;
         ini_set('session.use_only_cookies', true);
-        ini_set('session.gc_maxlifetime', $expires);
-        session_set_cookie_params($expires, $path, $domain, $secure, $httponly);
+        ini_set('session.gc_maxlifetime', $lifetime <= 65535 ? $lifetime : 65535);
+        session_set_cookie_params($lifetime, $path, $domain, $secure, $httponly);
         session_name($session_name);
         session_start();
+        setcookie($session_name, session_id(), time()+$lifetime);
     }
 
     /**
@@ -61,7 +62,7 @@ class Model_Datasource_Session
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-22
      */
-    public static function configure ()
+    public static function configure()
     {
         // idioma
         if (!self::read('config.language')) {
@@ -104,7 +105,7 @@ class Model_Datasource_Session
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-22
      */
-    public static function read ($name = null)
+    public static function read($name = null)
     {
         // Si no se indico un nombre, se entrega todo el arreglo de la sesión
         if ($name==null) {
@@ -190,8 +191,9 @@ class Model_Datasource_Session
      */
     public static function destroy()
     {
-        if (session_status() == PHP_SESSION_ACTIVE)
+        if (session_status() == PHP_SESSION_ACTIVE) {
             session_destroy();
+        }
     }
 
     /**
@@ -205,8 +207,12 @@ class Model_Datasource_Session
     {
         // si se indicó un mensaje se asigna
         if ($message) {
-            if ($type=='ok') $type = 'success';
-            else if ($type=='error') $type = 'danger';
+            if ($type=='ok') {
+                $type = 'success';
+            }
+            else if ($type=='error') {
+                $type = 'danger';
+            }
             self::write('session.message', [
                 'text' => $message,
                 'type' => $type,
