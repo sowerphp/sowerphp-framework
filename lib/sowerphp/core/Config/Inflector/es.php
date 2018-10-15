@@ -31,24 +31,24 @@ namespace sowerphp\core;
  */
 
 // reglas para pasar de plural a singular
-Utility_Inflector::rules('singular', array(
-    'rules' => array (
+Utility_Inflector::rules('singular', [
+    'rules' => [
         '/bles$/i' => 'ble', // by DeLaF
         '/ses$/i' => 's', // by DeLaF
         '/([r|d|j|n|l|m|y|z])es$/i' => '\1',
         '/as$/i' => 'a',
         '/([ti])a$/i' => '\1a'
-    ),
-    'irregular' => array(),
-    'uninflected' => array()
-));
+    ],
+    'irregular' => [],
+    'uninflected' => [],
+]);
 
 // reglas para pasar de singular a plural
-Utility_Inflector::rules('plural', array(
-    'rules' => array (
+Utility_Inflector::rules('plural', [
+    'rules' => [
         '/([r|d|j|n|l|m|y|z])$/i' => '\1es',
         '/a$/i' => '\1as'
-    ),
-    'irregular' => array('pais'=>'paises'), // by DeLaF
-    'uninflected' => array()
-));
+    ],
+    'irregular' => ['pais'=>'paises'], // by DeLaF
+    'uninflected' => [],
+]);

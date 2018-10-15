@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * @file core.php
  * Configuración estándar de las páginas o aplicaciones
- * @version 2015-05-28
+ * @version 2018-10-15
  */
 
 // Errores
@@ -46,7 +46,7 @@ Configure::write('time.format', 'Y-m-d H:i:s');
 Configure::write('language', 'es');
 
 // Extensiones para las páginas que se desean renderizar
-Configure::write('page.extensions', array('php', 'md'));
+Configure::write('page.extensions', ['php', 'md']);
 
 // Página inicial
 Configure::write('homepage', 'inicio');

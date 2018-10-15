@@ -24,23 +24,23 @@
 /**
  * @file core.php
  * Configuración propia de cada proyecto
- * @version 2014-12-11
+ * @version 2018-10-15
  */
 
 // Tema de la página (diseño)
-\sowerphp\core\Configure::write('page.layout', 'Bootstrap');
+\sowerphp\core\Configure::write('page.layout', 'harbor');
 
 // Textos de la página
-\sowerphp\core\Configure::write('page.header.title', 'Proyecto web');
+\sowerphp\core\Configure::write('page.header.title', 'Proyecto con SowerPHP');
 \sowerphp\core\Configure::write('page.body.title', 'Proyecto web');
 \sowerphp\core\Configure::write('page.footer', [
-    'left' => '<span>Página web generada utilizando el framework <a href="http://sowerphp.org">SowerPHP</a></span>',
-    'right' => ''
+    'left' => '&copy; <a href="http://sowerphp.org">SowerPHP</a> 2014 - '.date('Y').'<br/><span class="small">Framework PHP hecho en Chile</span>',
+    'right' => 'Un proyecto apoyado por <a href="https://sasco.cl">SASCO SpA</a>'
 ]);
 
 // Menú principal del sitio web
 \sowerphp\core\Configure::write('nav.website', [
-    //'/contacto'=>'Contacto',
+    //'/contacto' => 'Contacto', // (extensión: sowerphp/general)
 ]);
 
 // Configuración para el correo electrónico

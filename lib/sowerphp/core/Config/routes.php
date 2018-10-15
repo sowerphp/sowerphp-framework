@@ -30,8 +30,8 @@ namespace sowerphp\core;
  */
 
 // Definir la página de inicio
-Routing_Router::connect('/', array(
+Routing_Router::connect('/', [
     'controller' => 'pages',
     'action' => 'display',
     '/'.Configure::read('homepage')
-));
+]);
