@@ -182,6 +182,8 @@ if ($message) {
 echo $_content;
 ?>
 <!-- END MAIN CONTENT -->
+            <div class="clearfix"></div>
+            <br/>
         </div>
         <footer class="footer d-print-none">
             <div class="container">
