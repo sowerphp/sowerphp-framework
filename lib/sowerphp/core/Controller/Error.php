@@ -38,7 +38,7 @@ class Controller_Error extends \Controller_App
      * Renderizar error
      * @param data Datos qye se deben pasar a la vista del error
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-28
+     * @version 2018-10-17
      */
     public function display ($data)
     {
@@ -48,13 +48,17 @@ class Controller_Error extends \Controller_App
             ['DIR_FRAMEWORK', 'DIR_WEBSITE'],
             $data['trace']
         );
+        $this->layout = 'minimal';
         $this->set($data);
+        $this->set('soporte', \sowerphp\core\Configure::read('email.default')!==NULL);
         // mostrar error exacto solo si se debe
-        if ($this->error_reporting)
+        if ($this->error_reporting) {
             $this->render('Error/error_reporting');
+        }
         // mostrar error "genérico"
-        else
+        else {
             $this->render('Error/silence');
+        }
     }
 
 }
