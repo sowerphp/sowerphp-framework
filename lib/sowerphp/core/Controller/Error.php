@@ -48,7 +48,7 @@ class Controller_Error extends \Controller_App
             ['DIR_FRAMEWORK', 'DIR_WEBSITE'],
             $data['trace']
         );
-        $this->layout = 'minimal';
+        $this->layout .= '.min';
         $this->set($data);
         $this->set('soporte', \sowerphp\core\Configure::read('email.default')!==NULL);
         // mostrar error exacto solo si se debe

@@ -18,7 +18,7 @@
                 </div>
                 <p class="lead">Por favor, verifique que la dirección web que lo trajo a esta página o los datos ingresados sean válidos.</p>
                 <div class="mt-4">
-                    <a href="<?=$_url.$_base?>" data-toggle="ht-special-modal" data-target="#theme-download-modal" class="btn btn-success btn-pill btn-wide btn-lg mr-2 my-2 btn-ht-dl-message">
+                    <a href="<?=$_base?>/" data-toggle="ht-special-modal" data-target="#theme-download-modal" class="btn btn-success btn-pill btn-wide btn-lg mr-2 my-2 btn-ht-dl-message">
                         <span>Volver a la página principal</span>
                     </a>
 <?php if ($soporte) : ?>
