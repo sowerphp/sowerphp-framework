@@ -12,21 +12,32 @@ Layout: harbor (https://hackerthemes.com)
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
         <link href="https://fonts.googleapis.com/css?family=Oswald|Raleway" rel="stylesheet">
         <link rel="stylesheet" href="<?=$_base?>/layouts/harbor/bootstrap4-harbor.min.css">
-        <style>
-            html { position: relative; min-height: 100%; }
-            body { margin-bottom: 60px;}
-            .footer { position: absolute; bottom: 0; width: 100%; height: 60px; background-color: #f5f5f5; font-size: 0.8em; padding-top: 1em; }
-            .page-header { padding-bottom: 9px; margin:40px 0 20px; border-bottom: 1px solid #eee; }
-        </style>
+        <link rel="stylesheet" href="<?=$_base?>/css/style.css">
         <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-        <script type="text/javascript">
+        <script>
             var _url = "<?=$_url?>",
                 _base = "<?=$_base?>",
                 _request = "<?=$_request?>"
             ;
         </script>
+        <script src="<?=$_base?>/js/__.js"></script>
+        <script src="<?=$_base?>/js/form.js"></script>
+<?php if (\sowerphp\core\App::layerExists('sowerphp/general')) : ?>
+        <script src="<?=$_base?>/js/datepicker/bootstrap-datepicker.js"></script>
+        <script src="<?=$_base?>/js/datepicker/bootstrap-datepicker.es.js"></script>
+        <link rel="stylesheet" href="<?=$_base?>/js/datepicker/datepicker3.css" />
+<?php endif; ?>
+<?php if (\sowerphp\core\App::layerExists('sowerphp/app')) : ?>
+        <script src="<?=$_base?>/js/app.js"></script>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css" />
+        <script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+<?php endif; ?>
 <?php if (\sowerphp\core\Module::loaded('Sistema.Notificaciones')) : ?>
         <link rel="stylesheet" href="<?=$_base?>/sistema/notificaciones/css/style.css">
         <script src="<?=$_base?>/sistema/notificaciones/js/js.js"></script>
@@ -70,7 +81,7 @@ foreach ($_nav_website as $link=>$name) {
 }
 ?>
                 </ul>
-                <?php if (\sowerphp\core\App::layerExists('sowerphp/app')) : ?>
+<?php if (\sowerphp\core\App::layerExists('sowerphp/app')) : ?>
                     <ul class="nav navbar-nav navbar-right">
 <?php if (!$_Auth->logged()) : ?>
                         <li class="nav-item"><a href="<?=$_base?>/usuarios/ingresar" class="nav-link"><span class="fas fa-sign-in-alt" aria-hidden="true"></span> Iniciar sesión</a></li>
