@@ -60,7 +60,7 @@ class View
      * @param location Ubicación de la vista
      * @return Buffer de la página renderizada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-18
+     * @version 2018-10-23
      */
     public function render ($page, $location = null)
     {
@@ -142,6 +142,7 @@ class View
             '_page' => $page,
             '_nav_website' => Configure::read('nav.website'),
             '_nav_app' => (array)Configure::read('nav.app'),
+            '_nav_module' => \sowerphp\core\Configure::read('nav.module'),
             '_timestamp' => date(Configure::read('time.format'), filemtime($location)),
             '_layout' => $this->layout,
             '_content' => $page_content,
