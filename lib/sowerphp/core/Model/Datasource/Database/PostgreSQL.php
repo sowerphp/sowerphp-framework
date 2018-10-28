@@ -124,27 +124,42 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
      * Extrae un valor desde un nodo de un XML almacenado en una columna de la
      * base de datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-10-12
+     * @version 2018-10-28
      */
-    public function xml($column, $path, $namespace = null, $data_format = null)
+    public function xml($column, $path, $namespace = null, $trim = true, $data_format = 'base64_ISO8859-1')
     {
-        if (!is_array($path))
+        if (!is_array($path)) {
             $path = [$path];
+        }
         $select = [];
-        $column = 'CONVERT_FROM(decode('.$column.', \'base64\'), \'ISO8859-1\')::XML';
+        if ($data_format=='base64_ISO8859-1') {
+            $column = 'CONVERT_FROM(DECODE('.$column.', \'base64\'), \'ISO8859-1\')::XML';
+        } if ($data_format=='ISO8859-1') {
+            $column = 'CONVERT_FROM('.$column.', \'ISO8859-1\')::XML';
+        } if ($data_format=='base64') {
+            $column = 'DECODE('.$column.', \'base64\')::XML';
+        } else {
+            $column = $column.'::XML';
+        }
         foreach ($path as $k => $p) {
             if ($namespace) {
                 $p = str_replace('|', '/text()|', str_replace('/', '/n:', $p)).'/text()';
                 if (strpos($p, '/n:@')) {
                     $p = str_replace(['/n:@', '/text()'], ['/@', ''], $p);
                 }
-                $select[$k] = 'BTRIM(XPATH(\''.$p.'\', '.$column.', \'{{n,'.$namespace.'}}\')::TEXT, \'{"}\')';
+                $select[$k] = 'XPATH(\''.$p.'\', '.$column.', \'{{n,'.$namespace.'}}\')::TEXT';
+                if ($trim) {
+                    $select[$k] = 'BTRIM('.$select[$k].', \'{"}\')';
+                }
             } else {
                 $p = str_replace('|', '/text()|', $p).'/text()';
                 if (strpos($p, '/@')) {
                     $p = str_replace('/text()', '', $p);
                 }
-                $select[$k] = 'BTRIM(XPATH(\''.$p.'\', '.$column.')::TEXT, \'{}\')';
+                $select[$k] = 'XPATH(\''.$p.'\', '.$column.')::TEXT';
+                if ($trim) {
+                    $select[$k] = 'BTRIM('.$select[$k].', \'{}\')';
+                }
             }
         }
         return count($select)>1 ? $select : array_shift($select);
