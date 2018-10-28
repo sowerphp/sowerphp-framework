@@ -134,11 +134,14 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
         $select = [];
         if ($data_format=='base64_ISO8859-1') {
             $column = 'CONVERT_FROM(DECODE('.$column.', \'base64\'), \'ISO8859-1\')::XML';
-        } if ($data_format=='ISO8859-1') {
+        }
+        else if ($data_format=='ISO8859-1') {
             $column = 'CONVERT_FROM('.$column.', \'ISO8859-1\')::XML';
-        } if ($data_format=='base64') {
+        }
+        else if ($data_format=='base64') {
             $column = 'DECODE('.$column.', \'base64\')::XML';
-        } else {
+        }
+        else {
             $column = $column.'::XML';
         }
         foreach ($path as $k => $p) {
