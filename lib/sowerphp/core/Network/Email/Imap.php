@@ -79,8 +79,9 @@ class Network_Email_Imap
      */
     public function __destruct()
     {
-        if (is_resource($this->link))
+        if (is_resource($this->link)) {
             imap_close($this->link);
+        }
     }
 
     /**
@@ -197,12 +198,18 @@ class Network_Email_Imap
      * @param filter Arreglo con filtros a usar para las partes del mensaje. Ej: ['subtype'=>['PLAIN', 'XML'], 'extension'=>['xml']]
      * @return Arreglo con los datos del mensaje, índices: header, body, charset y attachments
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-12-07
+     * @version 2019-03-13
      */
     public function getMessage($uid, $filter = [])
     {
+        imap_errors();
+        $header_string = imap_fetchheader($this->link, $uid, FT_UID);
+        $errors = imap_errors();
+        if ($errors) {
+            throw new \Exception(implode("\n", $errors));
+        }
         $message = [
-            'header' => imap_rfc822_parse_headers(imap_fetchheader($this->link, $uid, FT_UID)),
+            'header' => imap_rfc822_parse_headers($header_string),
             'body' => ['plain'=>'', 'html'=>''],
             'charset' => '',
             'attachments' => [],
