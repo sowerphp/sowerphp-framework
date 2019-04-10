@@ -279,10 +279,16 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
      * @param table Tabla a buscar su o sus claves primarias
      * @return Arreglo con la o las claves primarias
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-26
+     * @version 2019-04-10
      */
-    public function getPksFromTable($table)
+    public function getPksFromTable($table, $database = null, $schema = null)
     {
+        if (!$database) {
+            $database = $this->config['name'];
+        }
+        if (!$schema) {
+            $schema = $this->config['sche'];
+        }
         return $this->getCol('
             SELECT column_name
             FROM information_schema.constraint_column_usage
@@ -300,7 +306,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
                         AND indisprimary = \'t\'
                 )
             ) AND table_catalog = :database AND table_name = :table
-        ', [':database'=>$this->config['name'], ':schema'=>$this->config['sche'], ':table'=>$table]);
+        ', [':database'=>$database, ':schema'=>$schema, ':table'=>$table]);
     }
 
     /**
