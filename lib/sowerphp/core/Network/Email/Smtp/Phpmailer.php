@@ -51,10 +51,21 @@ class Network_Email_Smtp_Phpmailer
         if (!class_exists('\PHPMailer\PHPMailer\PHPMailer')) {
             throw new \Exception('No hay soporte para PHPMailer');
         }
-        // Configuración para la conexión al servidor
+        // determinar host y seguridad si existe
         if (strpos($config['host'], '://')) {
             list($config['secure'], $config['host']) = explode('://', $config['host']);
         }
+        // determinar opciones extras si existen
+        if (strpos($config['host'], '/')) {
+            $aux = explode('/', $config['host']);
+            $config['host'] = array_shift($aux);
+            foreach ($aux as $option) {
+                if ($option=='novalidate-cert') {
+                    $config['verify_ssl'] = false;
+                }
+            }
+        }
+        // Configuración para la conexión al servidor
         $this->_config = array(
             'host' => $config['host'],
             'port' => $config['port'],
