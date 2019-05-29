@@ -110,7 +110,7 @@ class Network_Email_Smtp_Pear
             'head_encoding' => '8bit',
         ]); // debe llamarse antes de headers
         $headers_data = [
-            'From' => $this->_header['from'],
+            'From' => is_array($this->_header['from']) ? ($this->_header['from']['name'].' <'.$this->_header['from']['email'].'>') : $this->_header['from'],
             'Subject' => $this->_header['subject'],
         ];
         $to = [];

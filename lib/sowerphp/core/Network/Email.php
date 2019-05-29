@@ -77,11 +77,7 @@ class Network_Email
         }
         // determinar from
         if (isset($this->_config['from'])) {
-            if (is_array($this->_config['from'])) {
-                $this->_config['from'] = $this->_config['from']['name'].' <'.$this->_config['from']['email'].'>';
-            } else {
-                $this->_config['from'] = $this->_config['from'];
-            }
+            $this->_config['from'] = $this->_config['from'];
         } else {
             $this->_config['from'] = $this->_config['user'];
         }
@@ -103,10 +99,17 @@ class Network_Email
      * @param email Correo desde donde se envía supuestamente el email
      * @param name Nombre de quien envía supuestamente el email
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-19
+     * @version 2019-05-29
      */
     public function from ($email, $name = null) {
-        $this->_config['from'] = ($name?$name:$email).' <'.$email.'>';
+        if ($name) {
+            $this->_config['from'] = [
+                'name' => $name,
+                'email' => $email,
+            ];
+        } else {
+            $this->_config['from'] = $email;
+        }
     }
 
     /**
