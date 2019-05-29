@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para el envío de correo electrónico
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2015-04-03
+ * @version 2019-05-29
  */
 class Network_Email
 {
@@ -39,6 +39,9 @@ class Network_Email
     protected $_subject = null; ///< Asunto del correo que se enviará
     protected $_attach = array(); ///< Archivos adjuntos
     protected $_debug = false; ///< Si se debe mostrar datos de debug o no
+    private $default_methods = [
+        'smtp' => 'pear',
+    ]; ///< Método por defecto a usar si no se indicó uno
 
     /**
      * Constructor de la clase
@@ -213,7 +216,7 @@ class Network_Email
      * @param msg Cuerpo del mensaje que se desea enviar (arreglo o string)
      * @return Arreglo asociativo con los estados de cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-04-16
+     * @version 2019-05-29
      */
     public function send ($msg)
     {
@@ -247,8 +250,19 @@ class Network_Email
             'html'=>isset($msg['html'])?$msg['html']:null,
             'attach'=>$this->_attach
         );
-        // Crear correo
-        $class = __NAMESPACE__.'\Network_Email_'.ucfirst($this->_config['type']);
+        // determinar método a usar para enviar correo
+        if (strpos($this->_config['type'], '-')) {
+            list($protocol, $method) = explode('-', $this->_config['type']);
+        } else {
+            $protocol = $this->_config['type'];
+            if (!empty($this->default_methods[$protocol])) {
+                $method = $this->default_methods[$protocol];
+            } else {
+                throw new Exception('No existe un método por defecto para el protocolo '.$protocol);
+            }
+        }
+        $class = __NAMESPACE__.'\Network_Email_'.ucfirst($protocol).'_'.ucfirst($method);
+        // crear correo
         $email = new $class($this->_config, $header, $data, $this->_debug);
         // Enviar mensaje a todos los destinatarios
         return $email->send();

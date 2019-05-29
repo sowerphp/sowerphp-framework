@@ -32,9 +32,9 @@ require_once('Mail/mime.php');
  * Requiere:
  *   # pear install Mail Mail_mime Net_SMTP
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-09-16
+ * @version 2016-09-16
  */
-class Network_Email_Smtp
+class Network_Email_Smtp_Pear
 {
 
     protected $_config = null; ///< Configuración para SMTP
