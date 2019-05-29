@@ -73,7 +73,7 @@ class Network_Email_Smtp_Pear
      * Método que envía el correo
      * @return Arreglo con los estados de retorno por cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-07-12
+     * @version 2019-05-29
      */
     public function send()
     {
@@ -123,8 +123,9 @@ class Network_Email_Smtp_Pear
             $headers_data['Cc'] = implode(', ', $this->_header['cc']);
         }
         if (!empty($this->_header['replyTo'])) {
-            //$headers_data['Reply-To'] = $headers_data['Return-Path'] = $this->_header['replyTo'];
-            $headers_data['Reply-To'] = $this->_header['replyTo'];
+            $headers_data['Reply-To'] = is_array($this->_header['replyTo']) ? ($this->_header['replyTo']['name'].' <'.$this->_header['replyTo']['email'].'>') : $this->_header['replyTo'];
+            // WARNING Gmail requiere que se pase como arreglo pero amazon requiere sólo el email (?)
+            $headers_data['Reply-To'] = [$headers_data['Reply-To']]; // Esto se debería corregir de alguna forma para que sea compatible con ambos (por ahora, sólo gmail o similares)
         }
         if (!empty($this->_header['bcc'])) {
             $to = array_merge($to, $this->_header['bcc']);

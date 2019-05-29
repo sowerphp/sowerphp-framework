@@ -116,13 +116,19 @@ class Network_Email
      * Define a quién se debe responder el correo
      * @param email Correo electrónico a quien responder
      * @param name Nombre a quien responder
-     * @warning Gmail requiere que se pase como arreglo pero amazon requiere sólo el email (?)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-04-20
+     * @version 2019-05-29
      */
     public function replyTo($email, $name = null)
     {
-        $this->_replyTo = $name===null ? $email : [$name.' <'.$email.'>']; // TODO: corregir esta asignación
+        if ($name) {
+            $this->_replyTo = [
+                'email' => $email,
+                'name' => $name,
+            ];
+        } else {
+            $this->_replyTo = $email;
+        }
     }
 
     /**
