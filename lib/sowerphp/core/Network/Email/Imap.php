@@ -198,7 +198,7 @@ class Network_Email_Imap
      * @param filter Arreglo con filtros a usar para las partes del mensaje. Ej: ['subtype'=>['PLAIN', 'XML'], 'extension'=>['xml']]
      * @return Arreglo con los datos del mensaje, índices: header, body, charset y attachments
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-03-13
+     * @version 2019-06-11
      */
     public function getMessage($uid, $filter = [])
     {
@@ -209,14 +209,18 @@ class Network_Email_Imap
             throw new \Exception(implode("\n", $errors));
         }
         $message = [
+            'uid' => $uid,
+            'date' => null,
+            'charset' => '',
             'header' => imap_rfc822_parse_headers($header_string),
             'body' => ['plain'=>'', 'html'=>''],
-            'charset' => '',
             'attachments' => [],
         ];
+        $message['date'] = $this->getMessageDate($message);
         $s = imap_fetchstructure($this->link, $uid, FT_UID);
-        if (!is_object($s))
+        if (!is_object($s)) {
             return false;
+        }
         // el correo es simple y no tiene múltiples partes
         if (empty($s->parts)) {
             $this->getMessagePart($uid, $s, 0, $message);
@@ -330,6 +334,30 @@ class Network_Email_Imap
                 $this->getMessagePart($uid, $p2, $partno.'.'.($partno0+1), $message);
         }
 
+    }
+
+    /**
+     * Método que entrega la fecha de recepción del mensaje
+     * @param uid UID del mensaje que se desea conocer la fecha
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2019-06-11
+     */
+    private function getMessageDate($m)
+    {
+        // opción 1: consultar datos existentes
+        if (!empty($m['header']->date)) {
+            $time = strtotime($m['header']->date);
+            if ($time) {
+                return date('Y-m-d H:i:s', strtotime($m['header']->date));
+            }
+        }
+        // opción 2: consultar cabecera a través del uid
+        $header_info = $this->getHeaderInfo($m['uid']);
+        if (!empty($header_info->udate)) {
+            return date('Y-m-d H:i:s', $header_info->udate);
+        }
+        // no se determinó la fecha
+        return false;
     }
 
     /**
