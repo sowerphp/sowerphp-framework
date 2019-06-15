@@ -201,7 +201,7 @@ class Model_Datasource_Session
      * @param message Mensaje que se desea mostrar
      * @param type Tipo de mensaje: success, info, warning o danger
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-09
+     * @version 2019-06-14
      */
     public static function message($message = null, $type = 'info')
     {
@@ -213,16 +213,18 @@ class Model_Datasource_Session
             else if ($type=='error') {
                 $type = 'danger';
             }
-            self::write('session.message', [
+            $messages = self::message();
+            $messages[] =  [
                 'text' => $message,
                 'type' => $type,
-            ]);
+            ];
+            self::write('session.messages', $messages);
         }
         // si no se indicó un mensaje se recupera y limpia
         else {
-            $message = self::read('session.message');
-            self::delete('session.message');
-            return $message;
+            $message = self::read('session.messages');
+            self::delete('session.messages');
+            return $message ? (array)$message : [];
         }
     }
 
