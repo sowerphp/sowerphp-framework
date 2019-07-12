@@ -27,12 +27,12 @@ namespace sowerphp\core;
  * Clase abstracta para todos los modelos
  * Permite trabajar con un registro de la tabla
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2015-05-06
+ * @version 2019-07-12
  */
 abstract class Model
 {
 
-    use Object;
+    use Trait_Object;
 
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo

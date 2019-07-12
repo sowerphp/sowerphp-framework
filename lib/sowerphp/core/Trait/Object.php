@@ -26,9 +26,9 @@ namespace sowerphp\core;
 /**
  * Clase genérica con método para trabajar con cualquier objeto
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2015-05-06
+ * @version 2019-07-12
  */
-trait Object
+trait Trait_Object
 {
 
     /**
