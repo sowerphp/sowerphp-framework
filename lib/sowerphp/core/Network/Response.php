@@ -26,12 +26,11 @@ namespace sowerphp\core;
 /**
  * Clase para generar respuesta al cliente
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-12-16
+ * @version 2019-07-15
  */
 class Network_Response
 {
 
-    protected $_body = null; ///< Datos que se enviarán al cliente
     protected static $_mimeTypes = array( ///< Tipos de datos mime
         'tar' => 'application/x-tar',
         'gz' => 'application/x-gzip',
@@ -53,40 +52,58 @@ class Network_Response
         'txt' => 'text/plain',
     );
 
+    // datos a enviar en la respuesta
+    protected $_status = null;
+    protected $_type = [];
+    protected $_headers = [];
+    protected $_body = null; ///< Datos que se enviarán al cliente
+
     /**
      * Asigna código de estado de la respuesta HTTP
      * @param status Estado que se desea asignar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-30
+     * @version 2019-07-15
      */
-    public function status($status)
+    public function status($status = null)
     {
-        http_response_code($status);
+        if ($status !== null) {
+            $this->_status = $status;
+        }
+        return $this->_status;
     }
 
     /**
      * Método que permite asignar el tipo de archivo al que corresponde la
      * respuesta
-     * @param type Tipo de dato (mimetype)
+     * @param mimetype Tipo de dato (mimetype)
      * @param charset Juego de caracteres o codificación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-30
+     * @version 2019-07-15
      */
-    public function type($type, $charset = 'utf-8')
+    public function type($mimetype = null, $charset = 'utf-8')
     {
-        header('Content-Type: '.$type.'; charset='.$charset);
+        if ($mimetype !== null) {
+            $this->_type = [
+                'mimetype' => $mimetype,
+                'charset' => $charset,
+            ];
+        }
+        return $this->_type;
     }
 
     /**
-     * Método que envía cabeceras al cliente
+     * Método que permite asignar cabeceras al cliente
      * @param header Cabecera
      * @param value Valor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-09-14
+     * @version 2019-07-15
      */
-    public function header ($header, $value)
+    public function header($header = null, $value = null)
     {
-        header($header.': '.$value);
+        if ($header !== null && $value !== null) {
+            $this->_headers[] = $header.': '.$value;
+        }
+        return $this->_headers;
     }
 
     /**
@@ -94,25 +111,56 @@ class Network_Response
      * @param content Contenito a asignar
      * @return Contenido de la respuesta
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-30
+     * @version 2019-07-15
      */
-    public function body ($content = null)
+    public function body($body = null)
     {
-        if ($content===null) return $this->_body;
-        return $this->_body = $content;
+        if ($body !== null) {
+            $this->_body = $body;
+        }
+        return $this->_body;
     }
 
     /**
-     * Enviar cuerpo al cliente (lo escribe)
-     * @param body Contenido que se enviará, si no se asigna se enviará el atributo _body
+     * Método que entrega el tamaño de los datos que se entregarán como respuesta
+     * @return Tamaño de los datos del cuerpo que se entregarán o -1
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-30
+     * @version 2019-07-15
      */
-    public function send ($body = null)
+    public function length()
     {
-        if ($body!==null) echo $body;
-        else echo $this->_body;
-        exit;
+        return $this->_body !== null ? strlen($this->_body) : -1;
+    }
+
+    /**
+     * Enviar respuesta al cliente (escribe estado HTTP, cabecera y cuerpo de la respuesta)
+     * @warning El método sigue permitiendo el parámetro body pero debe dejar de ser usado, ya que se eliminará en el futuro
+     * @param body Contenido que se enviará, si no se asigna se enviará el atributo $_body (deprecated)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2019-07-15
+     */
+    public function send($body = null)
+    {
+        // enviar estado HTTP
+        if ($this->_status !== null) {
+            http_response_code($this->_status);
+        }
+        // agregar tipo de respuesta a las cabeceras
+        if (!empty($this->_type['mimetype'])) {
+            $this->header('Content-Type', $this->_type['mimetype'].'; charset='.$this->_type['charset']);
+        }
+        // enviar cabeceras de la respuesta
+        foreach ($this->_headers as $header) {
+            header($header);
+        }
+        // enviar cuerpo de la respuesta
+        if ($body !== null) {
+            echo $body;
+        } else {
+            echo $this->_body;
+        }
+        // terminar el script
+        exit(0);
     }
 
     /**
@@ -122,7 +170,7 @@ class Network_Response
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-11-09
      */
-    public function sendFile ($file, $options = array())
+    public function sendFile($file, $options = array())
     {
         // opciones
         $options = array_merge(array(
@@ -148,7 +196,7 @@ class Network_Response
         }
         // limpiar buffer salida
         ob_end_clean();
-        // Enviar cabeceras para el archivo
+        // enviar cabeceras para el archivo
         header('Cache-Control: max-age='.$options['cache']);
         header('Date: '.gmdate('D, d M Y H:i:s', time()).' GMT');
         header('Expires: '.gmdate('D, d M Y H:i:s', time()+$options['cache']).' GMT');
@@ -157,9 +205,11 @@ class Network_Response
         header('Content-Length: '.$file['size']);
         header('Content-Disposition: '.$options['disposition'].'; filename="'.$file['name'].'"');
         // Enviar cuerpo para el archivo
-        print $file['data'];
-        // Terminar script
-        if($options['exit']!==false) exit((integer)$options['exit']);
+        echo $file['data'];
+        // terminar script
+        if ($options['exit'] !== false) {
+            exit((integer)$options['exit']);
+        }
     }
 
     /**
@@ -169,7 +219,7 @@ class Network_Response
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2012-09-23
      */
-    public static function setMimetype ($ext, $type)
+    public static function setMimetype($ext, $type)
     {
         self::$_mimeTypes[$ext] = $type;
     }
@@ -181,7 +231,7 @@ class Network_Response
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2012-09-23
      */
-    public static function getMimetype ($ext)
+    public static function getMimetype($ext)
     {
         return self::$_mimeTypes[$ext];
     }
