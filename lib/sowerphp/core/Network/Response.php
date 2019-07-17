@@ -134,7 +134,6 @@ class Network_Response
 
     /**
      * Enviar respuesta al cliente (escribe estado HTTP, cabecera y cuerpo de la respuesta)
-     * @warning El método sigue permitiendo el parámetro body pero debe dejar de ser usado, ya que se eliminará en el futuro
      * @param body Contenido que se enviará, si no se asigna se enviará el atributo $_body (deprecated)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2019-07-17
