@@ -262,4 +262,25 @@ abstract class Controller
         exit($status);
     }
 
+    /**
+     * Método que entrega los valores de los parámetros solicitados
+     * Siempre y cuando estén presentes en la query de la URL (GET)
+     * @param params Arreglo con los parámetros, si se manda param => value, value será el valor por defecto (sino será null)
+     * @return Arreglo con los parámetros y sus valores
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2019-07-17
+     */
+    public function getQuery(array $params)
+    {
+        $vars = [];
+        foreach ($params as $param => $default) {
+            if (is_int($param)) {
+                $param = $default;
+                $default = null;
+            }
+            $vars[$param] = isset($_GET[$param]) ? $_GET[$param] : $default;
+        }
+        return $vars;
+    }
+
 }
