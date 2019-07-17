@@ -251,14 +251,19 @@ abstract class Controller
      * @param url Dirección web a donde se debe redireccionar
      * @param status Estado de término del script PHP
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-23
+     * @version 2019-07-17
      */
-    public function redirect ($url = null, $status = 0)
+    public function redirect($url = null, $status = 0)
     {
         $this->beforeRedirect(array($url, $status));
-        if (!$url)
+        if (!$url) {
             $url = $this->request->request;
-        header('location: '.$this->request->base.$url);
+        }
+        if ($url[0]=='/') {
+            header('location: '.$this->request->base.$url);
+        } else {
+            header('location: '.$url);
+        }
         exit($status);
     }
 
