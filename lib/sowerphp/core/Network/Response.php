@@ -78,9 +78,9 @@ class Network_Response
      * @param mimetype Tipo de dato (mimetype)
      * @param charset Juego de caracteres o codificación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-15
+     * @version 2019-07-17
      */
-    public function type($mimetype = null, $charset = 'utf-8')
+    public function type($mimetype = null, $charset = null)
     {
         if ($mimetype !== null) {
             $this->_type = [
@@ -137,7 +137,7 @@ class Network_Response
      * @warning El método sigue permitiendo el parámetro body pero debe dejar de ser usado, ya que se eliminará en el futuro
      * @param body Contenido que se enviará, si no se asigna se enviará el atributo $_body (deprecated)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-15
+     * @version 2019-07-17
      */
     public function send($body = null)
     {
@@ -147,7 +147,11 @@ class Network_Response
         }
         // agregar tipo de respuesta a las cabeceras
         if (!empty($this->_type['mimetype'])) {
-            $this->header('Content-Type', $this->_type['mimetype'].'; charset='.$this->_type['charset']);
+            if (!empty($this->_type['charset'])) {
+                $this->header('Content-Type', $this->_type['mimetype'].'; charset='.$this->_type['charset']);
+            } else {
+                $this->header('Content-Type', $this->_type['mimetype']);
+            }
         }
         // enviar cabeceras de la respuesta
         foreach ($this->_headers as $header) {
