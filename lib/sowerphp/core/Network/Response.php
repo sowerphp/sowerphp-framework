@@ -45,7 +45,6 @@ class Network_Response
         'jpeg' => 'image/jpeg',
         'jpg' => 'image/jpeg',
         'png' => 'image/png',
-        'csv' => 'text/plain',
         'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
         'xls' => 'application/vnd.ms-office',
         'xlsx' => 'application/octet-stream',
@@ -242,6 +241,9 @@ class Network_Response
             'disposition' => 'attachement', // inline o attachement
             'exit' => 0,
         ], $options);
+        if (empty($options['mimetype'])) {
+            $options['mimetype'] = self::getMimetype(substr($filename, strrpos($filename, '.')+1));
+        }
         if ($options['mimetype']) {
             $this->type($options['mimetype'], $options['charset']);
         }
@@ -268,11 +270,11 @@ class Network_Response
      * @param ext Extensión
      * @return Mimetype correspondiente a la extensión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-09-23
+     * @version 2019-07-18
      */
     public static function getMimetype($ext)
     {
-        return self::$_mimeTypes[$ext];
+        return !empty(self::$_mimeTypes[$ext]) ? self::$_mimeTypes[$ext] : null;
     }
 
 }
