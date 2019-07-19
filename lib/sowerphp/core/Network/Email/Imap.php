@@ -302,7 +302,7 @@ class Network_Email_Imap
             $message['attachments'][] = [
                 'name' => $filename,
                 'data' => $data,
-                'size' => !empty($p->bytes) ? $p->bytes : null, // a veces genera PHP Notice:  Undefined property: stdClass::$bytes
+                'size' => !empty($p->bytes) ? $p->bytes : null, // WARNING a veces genera PHP Notice:  Undefined property: stdClass::$bytes
                 'type' => (new \finfo(FILEINFO_MIME_TYPE))->buffer($data),
             ];
         }
