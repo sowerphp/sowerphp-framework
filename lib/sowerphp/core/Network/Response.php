@@ -134,11 +134,12 @@ class Network_Response
 
     /**
      * Enviar respuesta al cliente (escribe estado HTTP, cabecera y cuerpo de la respuesta)
-     * @param body Contenido que se enviará, si no se asigna se enviará el atributo $_body (deprecated)
+     * @param body Contenido que se enviará, si no se asigna se enviará el atributo $_body
+     * @param exit Estado de salida del envío de datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-17
+     * @version 2019-07-18
      */
-    public function send($body = null)
+    public function send($body = null, $exit = 0)
     {
         // enviar estado HTTP
         if ($this->_status !== null) {
@@ -163,7 +164,9 @@ class Network_Response
             echo $this->_body;
         }
         // terminar el script
-        exit(0);
+        if ($exit !== false) {
+            exit((integer)$exit); // este debería ser el único exit en la app
+        }
     }
 
     /**
@@ -171,17 +174,17 @@ class Network_Response
      * @param file Archivo que se desea enviar al cliente o bien un arreglo con los campos: name, type, size y data
      * @param options Arreglo de opciones (indices: name, charset, disposition y exit)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-09
+     * @version 2019-07-18
      */
-    public function sendFile($file, $options = array())
+    public function sendFile($file, $options = [])
     {
         // opciones
-        $options = array_merge(array(
+        $options = array_merge([
             'charset' => 'utf-8',
             'disposition' => 'inline', // inline o attachement
             'exit' => 0,
             'cache' => 86400,
-        ), $options);
+        ], $options);
         // si no es un arreglo se genera
         if (!is_array($file)) {
             $location = $file;
@@ -194,25 +197,23 @@ class Network_Response
         }
         // si los datos son un recurso se obtiene su contenido
         if (is_resource($file['data'])) {
-            rewind($file['data']);
-            $file['data'] = stream_get_contents($file['data']);
+            $resource = $file['data'];
+            rewind($resource);
+            $file['data'] = stream_get_contents($resource);
+            fclose($resource);
         }
         // limpiar buffer salida
         ob_end_clean();
-        // enviar cabeceras para el archivo
-        header('Cache-Control: max-age='.$options['cache']);
-        header('Date: '.gmdate('D, d M Y H:i:s', time()).' GMT');
-        header('Expires: '.gmdate('D, d M Y H:i:s', time()+$options['cache']).' GMT');
-        header('Pragma: cache');
-        header('Content-Type: '.$file['type'].'; charset='.$options['charset']);
-        header('Content-Length: '.$file['size']);
-        header('Content-Disposition: '.$options['disposition'].'; filename="'.$file['name'].'"');
-        // Enviar cuerpo para el archivo
-        echo $file['data'];
-        // terminar script
-        if ($options['exit'] !== false) {
-            exit((integer)$options['exit']);
-        }
+        // crear cabeceras para el archivo
+        $this->type($file['type'], $options['charset']);
+        $this->header('Content-Length', $file['size']);
+        $this->header('Content-Disposition', $options['disposition'].'; filename="'.$file['name'].'"');
+        $this->header('Cache-Control', 'max-age='.$options['cache']);
+        $this->header('Date', gmdate('D, d M Y H:i:s', time()).' GMT');
+        $this->header('Expires', gmdate('D, d M Y H:i:s', time()+$options['cache']).' GMT');
+        $this->header('Pragma', 'cache');
+        // enviar archivo
+        $this->send($file['data'], $options['exit']);
     }
 
     /**
