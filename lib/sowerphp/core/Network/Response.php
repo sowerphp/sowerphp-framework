@@ -171,6 +171,8 @@ class Network_Response
 
     /**
      * Enviar un archivo (estático) al cliente
+     * Envía un archivo existente en el sistema de archivos o bien desde un
+     * recurso abierto. Se envía informando que se debe usar caché para este archivo
      * @param file Archivo que se desea enviar al cliente o bien un arreglo con los campos: name, type, size y data
      * @param options Arreglo de opciones (indices: name, charset, disposition y exit)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
@@ -183,7 +185,7 @@ class Network_Response
             'charset' => 'utf-8',
             'disposition' => 'inline', // inline o attachement
             'exit' => 0,
-            'cache' => 86400,
+            'cache' => 86400, // segundos que el archivo se recomienda tener en caché
         ], $options);
         // si no es un arreglo se genera
         if (!is_array($file)) {
@@ -214,6 +216,39 @@ class Network_Response
         $this->header('Pragma', 'cache');
         // enviar archivo
         $this->send($file['data'], $options['exit']);
+    }
+
+    /**
+     * Método que envía un contenido al navegador, la ventaja es que está diseñado
+     * para enviar archivos en memoria e informando que no se use caché
+     * @param content Contenido en memoria del archivo que se enviará
+     * @param options Arreglo de opciones (indices: mimetype, charset, disposition y exit)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2019-07-18
+     */
+    public function sendContent($content, $filename, $options = [])
+    {
+        // opciones
+        if (is_string($options)) {
+            $aux = explode(';', $options);
+            $options = ['mimetype' => $aux[0]];
+            if (!empty($aux[1])) {
+                $options['charset'] = $aux[1];
+            }
+        }
+        $options = array_merge([
+            'mimetype' => null,
+            'charset' => null,
+            'disposition' => 'attachement', // inline o attachement
+            'exit' => 0,
+        ], $options);
+        if ($options['mimetype']) {
+            $this->type($options['mimetype'], $options['charset']);
+        }
+        $this->header('Content-Disposition', $options['disposition'].'; filename='.$filename);
+        $this->header('Pragma', 'no-cache');
+        $this->header('Expires', 0);
+        $this->send($content, $options['exit']);
     }
 
     /**
