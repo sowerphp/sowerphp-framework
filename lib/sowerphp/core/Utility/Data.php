@@ -25,7 +25,7 @@ namespace sowerphp\core;
 
 /**
  * Utilidad para realizar operaciones sobre datos:
- *  - Encriptar y desencriptar: requiere php5-mcrypt
+ *  - Encriptar y desencriptar
  *  - Sanitizar/limpiar datos
  *
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
@@ -40,16 +40,27 @@ class Utility_Data
      * @param key Clave a usar para encriptar
      * @return Texto encriptado en base64
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-01-25
+     * @version 2019-07-12
      */
     public static function encrypt($plaintext, $key = null)
     {
-        if (!$key)
+        if (!$key) {
             return base64_encode($plaintext);
-        $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
-        $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
-        $ciphertext = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $key, $plaintext, MCRYPT_MODE_CBC, $iv);
-        return base64_encode($iv.$ciphertext);
+        }
+        if (mb_strlen($key, '8bit') !== 32) {
+            throw new Exception('Se requiere una llave de 256 bits (32 caracteres si es llave ASCII)');
+        }
+        // usar mcrypt si está disponible
+        if (function_exists('mcrypt_encrypt')) {
+            $iv_size = @mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
+            $iv = @mcrypt_create_iv($iv_size, MCRYPT_RAND);
+            $ciphertext = @mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $key, $plaintext, MCRYPT_MODE_CBC, $iv);
+            return base64_encode($iv.$ciphertext);
+        }
+        // mcrypt no está disponible
+        else {
+            throw new Exception('La extensión mcrypt de PHP no está disponible');
+        }
     }
 
     /**
@@ -58,20 +69,32 @@ class Utility_Data
      * @param key Clave a uar para desencriptar
      * @return Texto plano
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-01-25
+     * @version 2019-07-12
      */
     public static function decrypt($ciphertext_base64, $key = null)
     {
-        if (empty($ciphertext_base64))
+        if (empty($ciphertext_base64)) {
             return $ciphertext_base64;
+        }
         $ciphertext_dec = base64_decode($ciphertext_base64);
-        if (!$key)
+        if (!$key) {
             return $ciphertext_dec;
-        $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
-        $iv_dec = substr($ciphertext_dec, 0, $iv_size);
-        $ciphertext_dec = substr($ciphertext_dec, $iv_size);
-        $plaintext_dec = mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $ciphertext_dec, MCRYPT_MODE_CBC, $iv_dec);
-        return $plaintext_dec;
+        }
+        if (mb_strlen($key, '8bit') !== 32) {
+            throw new Exception('Se requiere una llave de 256 bits (32 caracteres si es llave ASCII)');
+        }
+        // usar mcrypt si está disponible
+        if (function_exists('mcrypt_decrypt')) {
+            $iv_size = @mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
+            $iv_dec = substr($ciphertext_dec, 0, $iv_size);
+            $ciphertext_dec = substr($ciphertext_dec, $iv_size);
+            $plaintext_dec = @mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $ciphertext_dec, MCRYPT_MODE_CBC, $iv_dec);
+            return $plaintext_dec;
+        }
+        // mcrypt no está disponible
+        else {
+            throw new Exception('La extensión mcrypt de PHP no está disponible');
+        }
     }
 
     /**
@@ -84,8 +107,9 @@ class Utility_Data
      */
     public static function sanitize(&$string, array $options = [])
     {
-        if (!$string)
+        if (!$string) {
             return false;
+        }
         if (!empty($options['tags'])) {
             $string = trim(strip_tags($string, $options['tags']));
         } else {
