@@ -186,46 +186,78 @@ class Utility_Array
      * @param detalle Nombre del índice (key) que se utilizará para agrupar los detalles
      * @return Arreglo con el formato de un encabezado y detalle
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-19
+     * @version 2019-07-25
      */
-    public static function fromTableWithHeaderAndBody ($data, $camposEncabezado, $detalle = 'detalle')
+    public static function fromTableWithHeaderAndBody($data, $camposEncabezado, $detalle = 'detalle')
     {
-        if (!isset($data[0]))
-            return array();
-        $id = array_keys ($data[0])[0];
-        $item = null;
-        $items = array();
-        foreach ($data as &$d) {
-            if ($item === null) {
-                $item = array();
-                $i = 0;
-                foreach ($d as $key => &$value) {
-                    $item[$key] = array_shift($d);
-                    if (++$i==$camposEncabezado)
-                        break;
-                }
-                $item[$detalle] = array ();
-                $item[$detalle][] = $d;
-            } else if ($item[$id] == $d[$id]) {
-                $item[$detalle][] = array_slice (
-                    $d,
-                    $camposEncabezado
-                );
-            } else {
-                $items[] = $item;
-                $item = array();
-                $i = 0;
-                foreach ($d as $key => &$value) {
-                    $item[$key] = array_shift($d);
-                    if (++$i==$camposEncabezado)
-                        break;
-                }
-                $item[$detalle] = array ();
-                $item[$detalle][] = $d;
-            }
-            unset ($d);
+        if (!isset($data[0])) {
+            return [];
         }
+        $id = array_keys($data[0])[0];
+        $item = null;
+        $items = [];
+        foreach ($data as &$d) {
+            // primer item de datos
+            if ($item === null) {
+                $item = [];
+                // armar cabecera del item, se van sacando los elementos de la
+                // cabecera del item, al final quedará en los datos del item
+                // original sólo el detalle
+                $i = 0;
+                foreach ($d as $key => $value) {
+                    $item[$key] = array_shift($d);
+                    if (++$i==$camposEncabezado) {
+                        break;
+                    }
+                }
+                // agregar primer detalle del item
+                $item[$detalle] = [];
+                $hayDatos = false;
+                foreach ($d as $key => $value) {
+                    if (isset($value)) {
+                        $hayDatos = true;
+                        break;
+                    }
+                }
+                if ($hayDatos) {
+                    $item[$detalle][] = $d;
+                }
+            }
+            // el item es igual a uno previamente guardado
+            // en este caso se extrae sólo el detalle
+            else if ($item[$id] == $d[$id]) {
+                $item[$detalle][] = array_slice ($d, $camposEncabezado);
+            }
+            // es un nuevo item
+            else {
+                // se agrega último item calculado al listado de items
+                $items[] = $item;
+                // se repite lo del primer item de datos (FIXME código duplicado)
+                $item = [];
+                $i = 0;
+                foreach ($d as $key => $value) {
+                    $item[$key] = array_shift($d);
+                    if (++$i==$camposEncabezado) {
+                        break;
+                    }
+                }
+                $item[$detalle] = [];
+                $hayDatos = false;
+                foreach ($d as $key => $value) {
+                    if (isset($value)) {
+                        $hayDatos = true;
+                        break;
+                    }
+                }
+                if ($hayDatos) {
+                    $item[$detalle][] = $d;
+                }
+            }
+            unset($d);
+        }
+        // se agrega el último item encontrado
         $items[] = $item;
+        // se entregan los items
         return $items;
     }
 
