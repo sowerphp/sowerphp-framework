@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Utilidad para trabajar con arreglos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-10-01
+ * @version 2019-07-25
  */
 class Utility_Array
 {
@@ -294,6 +294,58 @@ class Utility_Array
             }
         }
         return $array;
+    }
+
+    /**
+     * Método que toma un arreglo asociativo de items, donde cada item contiene
+     * un campo que hace referencia a otro item. De esta forma crea un árbol
+     * jerárquico con los items
+     * @param items Listado de items que se deben buscar y procesar
+     * @param field_parent Nombre del campo en el item que tiene el "enlace" al item padre
+     * @param field_childs Nombre del campo en el item donde se deben colocar los hijos del item
+     * @param parent Índice del item padre (primer nivel es =null)
+     * @return Arreglo asociativo con el árbol
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2019-07-25
+     */
+    public static function toTree($items, $field_parent, $field_childs, $parent = null)
+    {
+        // agregar items del nivel parent al árbol
+        $tree_level = [];
+        foreach ($items as $key => $item) {
+            if ($item[$field_parent] == $parent) {
+                unset($item[$field_parent]);
+                $tree_level[$key] = $item;
+                unset($items[$key]);
+            }
+        }
+        // agregar subitems
+        foreach ($tree_level as $key => &$item) {
+            $item[$field_childs] = self::toTree($items, $field_parent, $field_childs, $key);
+        }
+        // entregar nivel
+        return $tree_level;
+    }
+
+    /**
+     * Método que convierte un árbol a un listado jerárquico
+     * Listo para usar en un campo select y con la jerarquía del árbol
+     * @param tree Árbol
+     * @param field_name Nombre del campo que contiene el nombre/glosa del item del árbol
+     * @param field_childs Nombre del campo en el item de donde se deben extraer los hijos del item
+     * @return Arreglo asociativo con el árbol
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2019-07-25
+     */
+    public static function treeToList($tree, $field_name, $field_childs, $level = 0, $spaces = 3, array &$list = [])
+    {
+        foreach ($tree as $key => $item) {
+            $name = str_repeat('&nbsp;',$level*$spaces).$item[$field_name];
+            $list[$key] = $name;
+            self::treeToList($item[$field_childs], $field_name, $field_childs, $level+1, $spaces, $list);
+            unset($tree[$key]);
+        }
+        return $list;
     }
 
 }
