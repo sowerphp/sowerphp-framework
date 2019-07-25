@@ -342,7 +342,36 @@ class Utility_Array
         foreach ($tree as $key => $item) {
             $name = str_repeat('&nbsp;',$level*$spaces).$item[$field_name];
             $list[$key] = $name;
-            self::treeToList($item[$field_childs], $field_name, $field_childs, $level+1, $spaces, $list);
+            if (!empty($item[$field_childs])) {
+                self::treeToList($item[$field_childs], $field_name, $field_childs, $level+1, $spaces, $list);
+            }
+            unset($tree[$key]);
+        }
+        return $list;
+    }
+
+    /**
+     * Método que convierte un árbol a arreglo asociativo con la glosa con los espacios del nivel
+     * Listo para usar en un campo select y con la jerarquía del árbol pero con todos los datos
+     * @param tree Árbol
+     * @param field_name Nombre del campo que contiene el nombre/glosa del item del árbol
+     * @param field_childs Nombre del campo en el item de donde se deben extraer los hijos del item
+     * @return Arreglo asociativo con el árbol y todos sus datos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2019-07-25
+     */
+    public static function treeToAssociativeArray($tree, $field_name, $field_childs, $level = 0, array &$list = [])
+    {
+        foreach ($tree as $key => $item) {
+            if (!empty($item[$field_childs])) {
+                $childs = $item[$field_childs];
+            }
+            unset($item[$field_childs]);
+            $item['level'] = $level;
+            $list[$key] = $item;
+            if (!empty($childs)) {
+                self::treeToAssociativeArray($childs, $field_name, $field_childs, $level+1, $list);
+            }
             unset($tree[$key]);
         }
         return $list;
