@@ -35,17 +35,22 @@
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2014-04-03
  */
-function debug ($var, $withtype = false)
+function debug($var, $withtype = false)
 {
-    // solo si es página web se usa TAG pre
     if (isset($_SERVER['REQUEST_URI'])) {
         echo '<pre>';
-        if ($withtype) var_dump($var);
-        else print_r($var);
+        if ($withtype) {
+            var_dump($var);
+        } else {
+            print_r($var);
+        }
         echo '</pre>',"\n";
     } else {
-        if ($withtype) var_dump($var);
-        else print_r($var);
+        if ($withtype) {
+            var_dump($var);
+        } else {
+            print_r($var);
+        }
         echo "\n";
     }
 }
@@ -58,7 +63,7 @@ function debug ($var, $withtype = false)
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2014-10-23
  */
-function num ($n, $d=0)
+function num($n, $d=0)
 {
     return number_format((float)$n, $d, ',', '.');
 }
@@ -71,12 +76,12 @@ function num ($n, $d=0)
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2014-03-16
  */
-function __ ($string, $args = null)
+function __($string, $args = null)
 {
     if (!is_array($args)) {
         $args = array_slice(func_get_args(), 1);
     }
-    return __d ('master', $string, $args);
+    return __d('master', $string, $args);
 }
 
 /**
@@ -87,7 +92,7 @@ function __ ($string, $args = null)
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2014-03-03
  */
-function __d ($dominio, $string, $args = null)
+function __d($dominio, $string, $args = null)
 {
     // si no hay argumentos solo se retorna el texto traducido
     if (!$args) {
