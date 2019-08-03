@@ -23,7 +23,7 @@ body {
     border-bottom: 1px solid #eee;
 }
 
-td span {
+td > span {
     display: block;
     font-size: 0.8em;
 }
