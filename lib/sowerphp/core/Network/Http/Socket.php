@@ -48,7 +48,7 @@ class Network_Http_Socket
      * @param sslv3 =true se fuerza sslv3, por defecto es false
      * @return Respusta HTTP (cabecera y cuerpo)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-12-18
+     * @version 2019-08-04
      */
     public static function __callStatic($method, $args)
     {
@@ -72,13 +72,18 @@ class Network_Http_Socket
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
             if ($data) curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
         }
-        // asignar cabecera
+        // asignar cabeceras de la solicitud HTTP
+        $headers = [];
         $header = array_merge(self::$header, $header);
-        foreach ($header as $key => &$value) {
-            $value = $key.': '.$value;
+        foreach ($header as $key => $values) {
+            if (!is_array($values)) {
+                $values = [$values];
+            }
+            foreach ($values as $value) {
+                $headers[] = $key.': '.$value;
+            }
         }
-        // asignar cabecera
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         // realizar consulta a curl recuperando cabecera y cuerpo
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
