@@ -273,7 +273,7 @@ abstract class Controller
      * @param params Arreglo con los parámetros, si se manda param => value, value será el valor por defecto (sino será null)
      * @return Arreglo con los parámetros y sus valores
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-17
+     * @version 2019-08-04
      */
     public function getQuery(array $params)
     {
@@ -283,7 +283,7 @@ abstract class Controller
                 $param = $default;
                 $default = null;
             }
-            $vars[$param] = isset($_GET[$param]) ? $_GET[$param] : $default;
+            $vars[$param] = isset($_GET[$param]) ? urldecode($_GET[$param]) : $default;
         }
         return $vars;
     }
