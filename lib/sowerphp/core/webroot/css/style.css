@@ -27,3 +27,7 @@ td > span {
     display: block;
     font-size: 0.8em;
 }
+
+.select2-container { width: 100% !important; }
+.select2 { background-color: #fff; }
+.select2-selection__rendered { margin-left: 0.45em; color: #495057; }

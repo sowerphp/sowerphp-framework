@@ -38,6 +38,9 @@ Layout: harbor (https://hackerthemes.com)
         <script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootbox@5.1.3/dist/bootbox.all.min.js"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.8/css/select2.min.css" rel="stylesheet" />
+        <link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.2.3/dist/select2-bootstrap4.min.css" rel="stylesheet" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.8/js/select2.min.js"></script>
 <?php endif; ?>
 <?php if (\sowerphp\core\Module::loaded('Sistema.Notificaciones')) : ?>
         <link rel="stylesheet" href="<?=$_base?>/sistema/notificaciones/css/style.css">
