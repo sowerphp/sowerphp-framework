@@ -188,7 +188,7 @@ abstract class Model
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function save ()
+    public function save()
     {
         $op = $this->exists() ? 'update' : 'insert';
         return $this->$op();
@@ -198,20 +198,18 @@ abstract class Model
      * Método para insertar el objeto en la base de datos
      * @return =true si se logró insertar, =false en caso de algún problema
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-08-26
+     * @version 2019-08-11
      */
-    protected function insert ()
+    protected function insert()
     {
-        // verificar que no exista
-        if ($this->exists())
-            return false;
         // preparar columnas y valores
         $cols = [];
         $alias = [];
         $values = [];
         foreach ($this::$columnsInfo as $col => &$info) {
-            if ($info['auto'] || $this->$col===null || $this->$col==='')
+            if ($info['auto'] || $this->$col===null || $this->$col==='') {
                 continue;
+            }
             $cols[] = $col;
             $alias[] = ':'.$col;
             $values[':'.$col] = $this->$col;
@@ -229,12 +227,14 @@ abstract class Model
             if (property_exists($this, 'id')) {
                 $this->id = $this->db->getValue('SELECT MAX(id) FROM '.$this->_table);
             }
-            if ($beginTransaction)
+            if ($beginTransaction) {
                 $this->db->commit();
+            }
             return true;
         }
-        if ($beginTransaction)
+        if ($beginTransaction) {
             $this->db->rollBack();
+        }
         return false;
     }
 
@@ -244,13 +244,10 @@ abstract class Model
      * @param columns Arreglo asociativo con las columnas a editar o NULL para editar todas las columnas
      * @return =true si se logró actualizar, =false en caso de algún problema
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-08-26
+     * @version 2019-08-11
      */
-    public function update ($columns = null)
+    protected function update($columns = null)
     {
-        // verificar que exista
-        if (!$this->exists())
-            return false;
         // buscar columnas y valores si no se pasaron
         if ($columns === null) {
             foreach ($this::$columnsInfo as $col => &$info) {
@@ -270,7 +267,9 @@ abstract class Model
         }
         // preparar pk
         $pk = $this->preparePk();
-        if (!$pk) return false;
+        if (!$pk) {
+            return false;
+        }
         // realizar consulta
         $beginTransaction = $this->db->beginTransaction();
         $stmt = $this->db->query ('
@@ -279,12 +278,14 @@ abstract class Model
             WHERE '.$pk['where']
         , array_merge($columns, $pk['values']));
         if ($stmt->errorCode()==='00000') {
-            if ($beginTransaction)
+            if ($beginTransaction) {
                 $this->db->commit();
+            }
             return true;
         }
-        if ($beginTransaction)
+        if ($beginTransaction) {
             $this->db->rollBack();
+        }
         return false;
     }
 
