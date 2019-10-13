@@ -75,9 +75,9 @@ abstract class Model
      * Método que recupera la conexión a la base de datos del objeto
      * Si la conexión no existe se conecta
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-04-27
+     * @version 2019-10-13
      */
-    protected function getDB()
+    public function getDB()
     {
         if (!isset($this->db)) {
             $this->db = \sowerphp\core\Model_Datasource_Database::get($this->_database);
