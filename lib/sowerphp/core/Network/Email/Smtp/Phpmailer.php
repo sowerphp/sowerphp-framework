@@ -43,7 +43,7 @@ class Network_Email_Smtp_Phpmailer
      * @param data Datos (cuerpo) de correo electrónico
      * @param debug =true se muestra debug, =false modo silencioso
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-05-29
+     * @version 2019-11-18
      */
     public function __construct($config, $header, $data, $debug = false)
     {
@@ -65,6 +65,9 @@ class Network_Email_Smtp_Phpmailer
                 }
             }
         }
+        if (!isset($config['secure'])) {
+            $config['secure'] = $config['port'] == 25 ? false : null;
+        }
         // Configuración para la conexión al servidor
         $this->_config = array(
             'host' => $config['host'],
@@ -72,7 +75,7 @@ class Network_Email_Smtp_Phpmailer
             'auth' => isset($config['auth']) ? (bool)$config['auth'] : true,
             'username' => $config['user'],
             'password' => $config['pass'],
-            'secure' => !empty($config['secure']) ? $config['secure'] : 'ssl', // ssl o tls
+            'secure' => $config['secure'] === false ? null : (!empty($config['secure']) ? $config['secure'] : 'ssl'), // ssl o tls
             'debug' => (int)$debug,
             'verify_ssl' => isset($config['verify_ssl']) ? (bool)$config['verify_ssl'] : true,
         );
@@ -86,7 +89,7 @@ class Network_Email_Smtp_Phpmailer
      * Método que envía el correo
      * @return Arreglo con los estados de retorno por cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-07-12
+     * @version 2019-11-18
      */
     public function send()
     {
@@ -97,7 +100,9 @@ class Network_Email_Smtp_Phpmailer
         $mail->SMTPAuth = $this->_config['auth'];
         $mail->Username = $this->_config['username'];
         $mail->Password = $this->_config['password'];
-        $mail->SMTPSecure = $this->_config['secure'];
+        if (!empty($this->_config['secure'])) {
+            $mail->SMTPSecure = $this->_config['secure'];
+        }
         $mail->Port = $this->_config['port'];
         $mail->SMTPDebug = $this->_config['debug'];
         $mail->CharSet = 'UTF-8';
