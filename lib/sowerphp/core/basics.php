@@ -111,7 +111,7 @@ function __d($dominio, $string, $args = null)
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
  * @version 2019-11-28
  */
-function shell($cmd, $log = false, &$output = [])
+function shell_exec_async($cmd, $log = false, &$output = [])
 {
     $cmd = trim($cmd);
     if (empty($cmd)) {
