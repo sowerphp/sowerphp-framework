@@ -24,7 +24,7 @@
 /**
  * @file basics.php
  * Archivo de funciones básicas para la aplicación
- * @version 2014-10-01
+ * @version 2019-11-28
  */
 
 /**
@@ -104,4 +104,43 @@ function __d($dominio, $string, $args = null)
         $args = array_slice(func_get_args(), 2);
     }
     return vsprintf(\sowerphp\core\I18n::translate($string, $dominio), $args);
+}
+
+/**
+ * Función que permite ejecutar un comando en la terminal
+ * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+ * @version 2019-11-28
+ */
+function shell($cmd, $log = false, &$output = [])
+{
+    $cmd = trim($cmd);
+    if (empty($cmd)) {
+        return 255;
+    }
+    if ($cmd[0]!='/') {
+        $cmd = DIR_PROJECT.'/website/Shell/shell.php '.$cmd;
+        if (defined('ENVIRONMENT_DEV') and ENVIRONMENT_DEV) {
+            $cmd .= ' --dev';
+        }
+    }
+    $screen_cmd = 'screen -dm';
+    if ($log) {
+        if (!is_string($log)) {
+            $log = TMP.'/screen_'.microtime(true).'.log';
+        } else {
+            $log = trim($log);
+        }
+        exec('screen --version', $screen_version);
+        $version = explode(' ', $screen_version[0])[2];
+        if ($version >= '4.06.00') {
+            $screen_cmd .= ' -L -Logfile '.escapeshellarg($log);
+        } else {
+            $screen_cmd .= ' -L '.escapeshellarg($log);
+        }
+    }
+    $screen_cmd .= ' '.$cmd;
+    $rc = 0;
+    exec($screen_cmd, $output, $rc);
+    $output = implode("\n", $output);
+    return $rc;
 }
