@@ -469,4 +469,28 @@ class Utility_String {
         return $before . $str . $after;
     }
 
+    /**
+     * @link https://www.brainbell.com/tutorials/php/search-and-replace.html
+     */
+    public static function replaceSpecialChars($string)
+    {
+        $from = [
+            'á','À','Á','Â','Ã','Ä','Å',
+            'é','È','É','Ê','Ë',
+            'í','Ì','Í','Î','Ï',
+            'ó','Ò','Ó','Ô','Õ','Ö',
+            'ú','Ù','Ú','Û','Ü',
+            'ß','Ç','ñ','Ñ',
+        ];
+        $to = [
+            'a','A','A','A','A','A','A',
+            'e','E','E','E','E',
+            'i','I','I','I','I',
+            'o','O','O','O','O','O',
+            'u','U','U','U','U',
+            'B','C','n','N',
+        ];
+        return str_replace($from, $to, $string);
+    }
+
 }
