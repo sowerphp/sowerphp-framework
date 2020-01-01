@@ -52,14 +52,16 @@ class Network_Http_Socket
      */
     public static function __callStatic($method, $args)
     {
-        if (!isset($args[0]) or !in_array($method, self::$methods))
+        if (!isset($args[0]) or !in_array($method, self::$methods)) {
             return false;
+        }
         $method = strtoupper($method);
         $url = $args[0];
         $data = isset($args[1]) ? $args[1] : [];
         $header = isset($args[2]) ? $args[2] : [];
         $sslv3 = isset($args[3]) ? $args[3] : false;
         $sslcheck = isset($args[4]) ? $args[4] : true;
+        $debug = isset($args[5]) ? $args[5] : false;
         // inicializar curl
         $curl = curl_init();
         // asignar método y datos dependiendo de si es GET u otro método
@@ -92,7 +94,16 @@ class Network_Http_Socket
         if ($sslv3) {
             curl_setopt($curl, CURLOPT_SSLVERSION, 3);
         }
+        if ($debug) {
+            curl_setopt($curl, CURLOPT_VERBOSE, 1);
+            curl_setopt($curl, CURLOPT_STDERR, $debug_fd = tmpfile());
+        }
         $response = curl_exec($curl);
+        if ($debug) {
+            fseek($debug_fd, 0);
+            error_log('Verbose de Socket::'.$method.'(): '.stream_get_contents($debug_fd));
+            fclose($debug_fd);
+        }
         if (!$response) {
             self::$errors[] = curl_error($curl);
             return false;
