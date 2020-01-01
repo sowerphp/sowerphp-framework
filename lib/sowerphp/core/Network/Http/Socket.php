@@ -101,7 +101,7 @@ class Network_Http_Socket
         $response = curl_exec($curl);
         if ($debug) {
             fseek($debug_fd, 0);
-            error_log('Verbose de Socket::'.$method.'(): '.stream_get_contents($debug_fd));
+            self::$errors[] = 'Verbose de cURL en Socket::'.$method.'():'."\n".stream_get_contents($debug_fd);
             fclose($debug_fd);
         }
         if (!$response) {
