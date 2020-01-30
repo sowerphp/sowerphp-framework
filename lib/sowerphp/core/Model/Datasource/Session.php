@@ -35,15 +35,19 @@ class Model_Datasource_Session
      * Método que inicia la sesión
      * @param expires Minutos en que expirará la sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-11-04
+     * @version 2020-01-30
      */
     public static function start($expires = 30)
     {
+        $Request = new Network_Request();
         $lifetime = $expires * 60;
         $session_name = 'sec_session_id';
-        $path = (new Network_Request())->base();
+        $path = $Request->base();
         $path = $path!=''?$path:'/';
-        $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+        $domain = $Request->header('X-Forwarded-Host');
+        if (!$domain) {
+            $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+        }
         if (strpos($domain, ':')) {
             list($domain, $port) = explode(':', $domain);
         }
