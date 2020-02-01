@@ -62,18 +62,22 @@ class Network_Request
      * Método que determina la solicitud utilizada para acceder a la página
      * @return Solicitud completa para la página consultada
      * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-12-16
+     * @version 2020-02-01
      */
     public function request()
     {
-        if (!isset($_SERVER['QUERY_STRING']))
+        if (!isset($_SERVER['QUERY_STRING'])) {
             return null;
+        }
         // Obtener ruta que se uso sin "/" (base) inicial
-        $uri = substr($_SERVER['QUERY_STRING'], 1);
+        $uri = (isset($_SERVER['QUERY_STRING'][0]) and $_SERVER['QUERY_STRING'][0]=='/') ? substr($_SERVER['QUERY_STRING'], 1) : $_SERVER['QUERY_STRING'];
+        if (strpos($_SERVER['REQUEST_URI'], '/?'.$uri)!==false) {
+            $uri = '';
+        }
         // verificar si se pasaron variables GET
-        $pregunta = strpos($uri, '&');
+        $inicio_variables_get = strpos($uri, '&');
         // Asignar uri
-        $this->request = $pregunta===false ? $uri : substr($uri, 0, $pregunta);
+        $this->request = $inicio_variables_get===false ? $uri : substr($uri, 0, $inicio_variables_get);
         // Agregar slash inicial de la uri
         if(!isset($this->request) || (isset($this->request[0])&&$this->request[0]!='/')) {
             $this->request = '/'.$this->request;
