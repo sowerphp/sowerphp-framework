@@ -27,29 +27,41 @@ namespace sowerphp\core;
  * Clase para enviar correo electrónico mediante SMTP
  * Requiere: PHPMailer
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-05-29
+ * @version 2020-02-09
  */
 class Network_Email_Smtp_Phpmailer
 {
 
-    protected $_config = null; ///< Configuración para SMTP
-    protected $_header = null; ///< Datos de la cabecera del mensaje
-    protected $_data = null; ///< Datos del mensaje (incluyendo adjuntos)
+    protected $config = null; ///< Configuración para SMTP usando PHPMailer
 
     /**
      * Constructor de la clase
-     * @param config Arreglo con la configuración del correo a enviar
-     * @param header Cabecerá del correo electrónico
-     * @param data Datos (cuerpo) de correo electrónico
-     * @param debug =true se muestra debug, =false modo silencioso
+     * @param config Arreglo con la configuración de PHPMailer
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-11-18
+     * @version 2020-02-09
      */
-    public function __construct($config, $header, $data, $debug = false)
+    public function __construct($config)
     {
         // verificar soporte PHPMailer
         if (!class_exists('\PHPMailer\PHPMailer\PHPMailer')) {
             throw new \Exception('No hay soporte para PHPMailer');
+        }
+        // valores por defecto para conexión vía SMTP usando Pear
+        $config = array_merge([
+            'host' => 'localhost',
+            'port' => 25,
+            'user' => null,
+            'pass' => null,
+        ], $config);
+        // extraer puerto si se pasó en el host
+        $url = parse_url($config['host']);
+        if (isset($url['port'])) {
+            $config['host'] = str_replace(':'.$url['port'], '', $config['host']);
+            $config['port'] = $url['port'];
+        }
+        // si no están los campos mínimos necesarios error
+        if (empty($config['host']) || empty($config['port']) || empty($config['user']) || empty($config['pass'])) {
+             throw new Exception('Configuración del correo electrónico incompleta');
         }
         // determinar host y seguridad si existe
         if (strpos($config['host'], '://')) {
@@ -69,45 +81,43 @@ class Network_Email_Smtp_Phpmailer
             $config['secure'] = $config['port'] == 25 ? false : null;
         }
         // Configuración para la conexión al servidor
-        $this->_config = array(
+        $this->config = array(
             'host' => $config['host'],
             'port' => $config['port'],
             'auth' => isset($config['auth']) ? (bool)$config['auth'] : true,
             'username' => $config['user'],
             'password' => $config['pass'],
             'secure' => $config['secure'] === false ? null : (!empty($config['secure']) ? $config['secure'] : 'ssl'), // ssl o tls
-            'debug' => (int)$debug,
+            'debug' => (int)$config['debug'],
             'verify_ssl' => isset($config['verify_ssl']) ? (bool)$config['verify_ssl'] : true,
         );
-        // Cabecera
-        $this->_header = $header;
-        // Datos
-        $this->_data = $data;
     }
 
     /**
      * Método que envía el correo
+     * @param data Arrelgo con los datos que se enviarán (texto y adjuntos)
+     * @param header Cabeceras del correo
      * @return Arreglo con los estados de retorno por cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-11-18
+     * @version 2020-02-09
      */
-    public function send()
+    public function send($data, $header)
     {
         // crear correo con su configuración
         $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
         $mail->isSMTP();
-        $mail->Host = $this->_config['host'];
-        $mail->SMTPAuth = $this->_config['auth'];
-        $mail->Username = $this->_config['username'];
-        $mail->Password = $this->_config['password'];
-        if (!empty($this->_config['secure'])) {
-            $mail->SMTPSecure = $this->_config['secure'];
+        $mail->Host = $this->config['host'];
+        $mail->SMTPAuth = $this->config['auth'];
+        $mail->Username = $this->config['username'];
+        $mail->Password = $this->config['password'];
+        if (!empty($this->config['secure'])) {
+            $mail->SMTPSecure = $this->config['secure'];
         }
-        $mail->Port = $this->_config['port'];
-        $mail->SMTPDebug = $this->_config['debug'];
+        $mail->Port = $this->config['port'];
+        $mail->SMTPDebug = $this->config['debug'];
         $mail->CharSet = 'UTF-8';
         // no validar SSL
-        if (!$this->_config['verify_ssl']) {
+        if (!$this->config['verify_ssl']) {
             $mail->SMTPOptions = [
                 'ssl' => [
                     'verify_peer' => false,
@@ -117,24 +127,24 @@ class Network_Email_Smtp_Phpmailer
             ];
         }
         // agregar quien envía el correo
-        if (!empty($this->_header['from'])) {
-            if (is_array($this->_header['from'])) {
-                $mail->setFrom($this->_header['from']['email'], $this->_header['from']['name']);
+        if (!empty($header['from'])) {
+            if (is_array($header['from'])) {
+                $mail->setFrom($header['from']['email'], $header['from']['name']);
             } else {
-                $mail->setFrom($this->_header['from']);
+                $mail->setFrom($header['from']);
             }
         }
         // agregar a quien responder el correo
-        if (!empty($this->_header['replyTo'])) {
-            if (is_array($this->_header['replyTo'])) {
-                $mail->addReplyTo($this->_header['replyTo']['email'], $this->_header['replyTo']['name']);
+        if (!empty($header['replyTo'])) {
+            if (is_array($header['replyTo'])) {
+                $mail->addReplyTo($header['replyTo']['email'], $header['replyTo']['name']);
             } else {
-                $mail->addReplyTo($this->_header['replyTo']);
+                $mail->addReplyTo($header['replyTo']);
             }
         }
         // agregar destinatarios
-        if (!empty($this->_header['to'])) {
-            foreach ($this->_header['to'] as $to) {
+        if (!empty($header['to'])) {
+            foreach ($header['to'] as $to) {
                 if (is_array($to)) {
                     $mail->addAddress($to['email'], $to['name']);
                 } else {
@@ -143,8 +153,8 @@ class Network_Email_Smtp_Phpmailer
             }
         }
         // agregar destinatarios en copia
-        if (!empty($this->_header['cc'])) {
-            foreach ($this->_header['cc'] as $cc) {
+        if (!empty($header['cc'])) {
+            foreach ($header['cc'] as $cc) {
                 if (is_array($cc)) {
                     $mail->addCC($cc['email'], $cc['name']);
                 } else {
@@ -153,8 +163,8 @@ class Network_Email_Smtp_Phpmailer
             }
         }
         // agregar destinatarios en copia oculta
-        if (!empty($this->_header['bcc'])) {
-            foreach ($this->_header['bcc'] as $bcc) {
+        if (!empty($header['bcc'])) {
+            foreach ($header['bcc'] as $bcc) {
                 if (is_array($bcc)) {
                     $mail->addBCC($bcc['email'], $bcc['name']);
                 } else {
@@ -163,18 +173,18 @@ class Network_Email_Smtp_Phpmailer
             }
         }
         // asignar asunto
-        $mail->Subject = $this->_header['subject'];
+        $mail->Subject = $header['subject'];
         // agregar mensaje
-        if (!empty($this->_data['html'])) {
+        if (!empty($data['html'])) {
             $mail->isHTML(true);
-            $mail->Body = $this->_data['html'];
-            $mail->AltBody = $this->_data['text'];
+            $mail->Body = $data['html'];
+            $mail->AltBody = $data['text'];
         } else {
-            $mail->Body = $this->_data['text'];
+            $mail->Body = $data['text'];
         }
         // agregar adjuntos
-        if (!empty($this->_data['attach'])) {
-            foreach ($this->_data['attach'] as $file) {
+        if (!empty($data['attach'])) {
+            foreach ($data['attach'] as $file) {
                 // leer desde archivo
                 if (!empty($file['tmp_name'])) {
                     $mail->addAttachment($file['tmp_name'], $file['name']);

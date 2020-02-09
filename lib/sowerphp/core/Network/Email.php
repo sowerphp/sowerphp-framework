@@ -26,72 +26,83 @@ namespace sowerphp\core;
 /**
  * Clase para el envío de correo electrónico
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-05-29
+ * @version 2020-02-09
  */
 class Network_Email
 {
 
-    protected $_config = null; ///< Arreglo con la configuración para el correo electrónico
-    protected $_replyTo = null; ///< A quien se debe responder el correo enviado
-    protected $_to = array(); ///< Listado de destinatarios
-    protected $_cc = array(); ///< Listado de destinatarios CC
-    protected $_bcc = array(); ///< Listado de destinatarios BCC
-    protected $_subject = null; ///< Asunto del correo que se enviará
-    protected $_attach = array(); ///< Archivos adjuntos
-    protected $_debug = false; ///< Si se debe mostrar datos de debug o no
-    private $default_methods = [
+    protected $Sender; ///< Objeto que hará el envío del correo electrónico
+    protected $default_methods = [
         'smtp' => 'pear',
     ]; ///< Método por defecto a usar si no se indicó uno
+
+    // datos del correo que se enviará
+    protected $from = null; ///< Quién envía el correo
+    protected $replyTo = null; ///< A quien se debe responder el correo enviado
+    protected $to_default = null; ///< A quien se debe enviar el correo por defecto (si no se indican destinatarios)
+    protected $to = []; ///< Listado de destinatarios
+    protected $cc = []; ///< Listado de destinatarios CC
+    protected $bcc = []; ///< Listado de destinatarios BCC
+    protected $subject = null; ///< Asunto del correo que se enviará
+    protected $attach = []; ///< Archivos adjuntos
 
     /**
      * Constructor de la clase
      * @param config Configuración del correo electrónico que se usará
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-04-20
+     * @version 2020-02-09
      */
     public function __construct($config = 'default')
     {
-        // Si es un arreglo, se asume es la configuración directamente
-        if (is_array($config)) {
-            $this->_config = $config;
-        }
         // Si no es arreglo, es el nombre de la configuración
-        else {
-            $this->_config = \SowerPHP\core\Configure::read('email.'.$config);
+        if (!is_array($config)) {
+            $config = \SowerPHP\core\Configure::read('email.'.$config);
         }
-        // se ponen valores por defecto
-        $this->_config = array_merge([
-            'type' => 'smtp',
-            'host' => 'localhost',
-            'port' => 25,
-        ], $this->_config);
-        // extraer puerto si se pasó en el host
-        $url = parse_url($this->_config['host']);
-        if (isset($url['port'])) {
-            $this->_config['host'] = str_replace(':'.$url['port'], '', $this->_config['host']);
-            $this->_config['port'] = $url['port'];
+        // determinar "from" por defecto
+        if (isset($config['from']) or isset($config['user'])) {
+            if (isset($config['from'])) {
+                $this->from($config['from']);
+                unset($config['from']);
+            } else {
+                $this->from($config['user']);
+            }
         }
-        // si no están los campos mínimos necesarios error
-        if (empty($this->_config['type']) || empty($this->_config['host']) || empty($this->_config['port']) || empty($this->_config['user']) || empty($this->_config['pass'])) {
-             throw new Exception('Configuración del correo electrónico incompleta');
+        // determinar "to" por defecto
+        if (!empty($config['to'])) {
+            $this->to_default = $config['to'];
+            unset($config['to']);
         }
-        // determinar from
-        if (isset($this->_config['from'])) {
-            $this->_config['from'] = $this->_config['from'];
-        } else {
-            $this->_config['from'] = $this->_config['user'];
-        }
+        // crear objeto que enviará el correo
+        $this->Sender = $this->getSender($config);
     }
 
     /**
-     * Método para asignar si hay o no (por defecto) debug
-     * @param debug =true hay debug, =false no hay debug
+     * Método que obtiene el objeto que se usará para el envío de los correos
+     * @param config Configuración del correo electrónico que se usará
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-22
+     * @version 2020-02-09
      */
-    public function setDebug ($debug = false)
+    private function getSender(array $config)
     {
-        $this->_debug = $debug;
+        // se ponen valores por defecto
+        $config = array_merge([
+            'type' => 'smtp',
+            'debug' => false,
+        ], $config);
+        // determinar método a usar para enviar correo
+        if (strpos($config['type'], '-')) {
+            list($protocol, $method) = explode('-', $config['type']);
+        } else {
+            $protocol = $config['type'];
+            if (!empty($this->default_methods[$protocol])) {
+                $method = $this->default_methods[$protocol];
+            } else {
+                throw new Exception('No existe un método por defecto para el protocolo '.$protocol);
+            }
+        }
+        $class = __NAMESPACE__.'\Network_Email_'.ucfirst($protocol).'_'.ucfirst($method);
+        // crear objeto que enviará los correos
+        return new $class($config);
     }
 
     /**
@@ -101,14 +112,18 @@ class Network_Email
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2019-05-29
      */
-    public function from ($email, $name = null) {
+    public function from($email, $name = null) {
+        if (is_array($email)) {
+            $name = $email['name'];
+            $email = $email['email'];
+        }
         if ($name) {
-            $this->_config['from'] = [
+            $this->from = [
                 'name' => $name,
                 'email' => $email,
             ];
         } else {
-            $this->_config['from'] = $email;
+            $this->from = $email;
         }
     }
 
@@ -122,12 +137,12 @@ class Network_Email
     public function replyTo($email, $name = null)
     {
         if ($name) {
-            $this->_replyTo = [
+            $this->replyTo = [
                 'email' => $email,
                 'name' => $name,
             ];
         } else {
-            $this->_replyTo = $email;
+            $this->replyTo = $email;
         }
     }
 
@@ -137,18 +152,20 @@ class Network_Email
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-03-26
      */
-    public function to ($email)
+    public function to($email)
     {
         // En caso que se haya pasado un arreglo con los correos
         if (is_array($email)) {
             // Asignar los correos, no se copia directamente el arreglo para
             // Poder eliminar los duplicados
-            foreach ($email as &$e)
+            foreach ($email as &$e) {
                 $this->to($e);
+            }
         }
         // En caso que se haya pasado un solo correo
-        else if (!in_array($email, $this->_to))
-            $this->_to[] = $email;
+        else if (!in_array($email, $this->to)) {
+            $this->to[] = $email;
+        }
     }
 
     /**
@@ -163,12 +180,14 @@ class Network_Email
         if (is_array($email)) {
             // Asignar los correos, no se copia directamente el arreglo para
             // Poder eliminar los duplicados
-            foreach ($email as &$e)
+            foreach ($email as &$e) {
                 $this->cc($e);
+            }
         }
         // En caso que se haya pasado un solo correo
-        else if (!in_array($email, $this->_cc))
-            $this->_cc[] = $email;
+        else if (!in_array($email, $this->cc)) {
+            $this->cc[] = $email;
+        }
     }
 
     /**
@@ -177,18 +196,20 @@ class Network_Email
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-09-16
      */
-    public function bcc ($email)
+    public function bcc($email)
     {
         // En caso que se haya pasado un arreglo con los correos
         if (is_array($email)) {
             // Asignar los correos, no se copia directamente el arreglo para
             // Poder eliminar los duplicados
-            foreach ($email as &$e)
+            foreach ($email as &$e) {
                 $this->bcc($e);
+            }
         }
         // En caso que se haya pasado un solo correo
-        else if (!in_array($email, $this->_bcc))
-            $this->_bcc[] = $email;
+        else if (!in_array($email, $this->bcc)) {
+            $this->bcc[] = $email;
+        }
     }
 
     /**
@@ -197,9 +218,9 @@ class Network_Email
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2010-10-09
      */
-    public function subject ($subject)
+    public function subject($subject)
     {
-        $this->_subject = $subject;
+        $this->subject = $subject;
     }
 
     /**
@@ -217,7 +238,7 @@ class Network_Email
                 'type' => (new \finfo(FILEINFO_MIME_TYPE))->file($src),
             ];
         }
-        $this->_attach[] = $src;
+        $this->attach[] = $src;
     }
 
     /**
@@ -225,56 +246,42 @@ class Network_Email
      * @param msg Cuerpo del mensaje que se desea enviar (arreglo o string)
      * @return Arreglo asociativo con los estados de cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-05-29
+     * @version 2020-02-09
      */
-    public function send ($msg)
+    public function send($msg)
     {
-        // Si el mensaje no es un arreglo se crea, asumiendo que se paso en formato texto
+        // Si el mensaje no es un arreglo se crea, asumiendo que se paso en
+        // formato texto
         if (!is_array($msg)) {
-            $msg = array('text'=>$msg);
+            $msg = ['text' => $msg];
         }
-        // Si no se ha indicado a quién enviar el correo se utilizará el de la
-        // configuración
-        if (!isset($this->_to[0])) {
-            if (isset($this->_config['to'])) {
-                $this->to($this->_config['to']);
+        // Si no se ha indicado a quién enviar el correo se utilizará el por
+        // defecto indicado en la configuración (si existiese)
+        if (empty($this->to[0])) {
+            if (!empty($this->to_default)) {
+                $this->to($this->to_default);
             }
-            else if (empty($this->_cc) and empty($this->_bcc)) {
+            else if (empty($this->cc) and empty($this->bcc)) {
                 throw new Exception('No existe destinatario del correo electrónico');
             }
         }
-        // Crear header
-        $header = array(
-            'from'=>$this->_config['from'],
-            'replyTo'=>$this->_replyTo,
-            'to'=>$this->_to,
-            'cc'=>$this->_cc,
-            'bcc'=>$this->_bcc,
-            'subject'=>$this->_subject
-        );
-        unset($this->_config['from']);
         // Crear datos (incluyendo adjuntos)
-        $data = array(
-            'text'=>isset($msg['text'])?$msg['text']:null,
-            'html'=>isset($msg['html'])?$msg['html']:null,
-            'attach'=>$this->_attach
-        );
-        // determinar método a usar para enviar correo
-        if (strpos($this->_config['type'], '-')) {
-            list($protocol, $method) = explode('-', $this->_config['type']);
-        } else {
-            $protocol = $this->_config['type'];
-            if (!empty($this->default_methods[$protocol])) {
-                $method = $this->default_methods[$protocol];
-            } else {
-                throw new Exception('No existe un método por defecto para el protocolo '.$protocol);
-            }
-        }
-        $class = __NAMESPACE__.'\Network_Email_'.ucfirst($protocol).'_'.ucfirst($method);
-        // crear correo
-        $email = new $class($this->_config, $header, $data, $this->_debug);
+        $data = [
+            'text'      => !empty($msg['text']) ? $msg['text'] : null,
+            'html'      => !empty($msg['html']) ? $msg['html'] : null,
+            'attach'    => $this->attach
+        ];
+        // Crear header
+        $header = [
+            'from'      => $this->from,
+            'replyTo'   => $this->replyTo,
+            'to'        => $this->to,
+            'cc'        => $this->cc,
+            'bcc'       => $this->bcc,
+            'subject'   => $this->subject
+        ];
         // Enviar mensaje a todos los destinatarios
-        return $email->send();
+        return $this->Sender->send($data, $header);
     }
 
 }

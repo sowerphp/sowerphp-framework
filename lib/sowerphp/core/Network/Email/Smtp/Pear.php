@@ -32,60 +32,70 @@ require_once('Mail/mime.php');
  * Requiere:
  *   # pear install Mail Mail_mime Net_SMTP
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2016-09-16
+ * @version 2020-02-09
  */
 class Network_Email_Smtp_Pear
 {
 
-    protected $_config = null; ///< Configuración para SMTP
-    protected $_header = null; ///< Datos de la cabecera del mensaje
-    protected $_data = null; ///< Datos del mensaje (incluyendo adjuntos)
+    protected $config = null; ///< Configuración para SMTP
 
     /**
      * Constructor de la clase
-     * @param config Arreglo con la configuración del correo a enviar
-     * @param header Cabecerá del correo electrónico
-     * @param data Datos (cuerpo) de correo electrónico
-     * @param debug =true se muestra debug, =false modo silencioso
+     * @param config Arreglo con la configuración de Pear/Mail
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-08-25
+     * @version 2020-02-09
      */
-    public function __construct ($config, $header, $data, $debug = false)
+    public function __construct($config)
     {
+        // valores por defecto para conexión vía SMTP usando Pear
+        $config = array_merge([
+            'host' => 'localhost',
+            'port' => 25,
+            'user' => null,
+            'pass' => null,
+        ], $config);
+        // extraer puerto si se pasó en el host
+        $url = parse_url($config['host']);
+        if (isset($url['port'])) {
+            $config['host'] = str_replace(':'.$url['port'], '', $config['host']);
+            $config['port'] = $url['port'];
+        }
+        // si no están los campos mínimos necesarios error
+        if (empty($config['host']) || empty($config['port']) || empty($config['user']) || empty($config['pass'])) {
+             throw new Exception('Configuración del correo electrónico incompleta');
+        }
         // Configuración para la conexión al servidor
-        $this->_config = array(
+        $this->config = [
             'host' => $config['host'],
             'port' => $config['port'],
             'auth' => isset($config['auth']) ? (bool)$config['auth'] : true,
             'username' => $config['user'],
             'password' => $config['pass'],
-            'debug' => $debug
-        );
-        // Cabecera
-        $this->_header = $header;
-        // Datos
-        $this->_data = $data;
+            'debug' => $config['debug'],
+        ];
         // desactivar errores (ya que Mail no pasa validación E_STRICT)
         ini_set('error_reporting', false);
     }
 
     /**
      * Método que envía el correo
+     * @param data Arrelgo con los datos que se enviarán (texto y adjuntos)
+     * @param header Cabeceras del correo
      * @return Arreglo con los estados de retorno por cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2019-05-29
      */
-    public function send()
+    public function send($data, $header)
     {
         // Crear correo
-        $mailer = \Mail::factory('smtp', $this->_config);
+        $mailer = \Mail::factory('smtp', $this->config);
         $mail = new \Mail_mime();
         // Asignar mensaje
-        $mail->setTXTBody($this->_data['text']);
-        $mail->setHTMLBody($this->_data['html']);
+        $mail->setTXTBody($data['text']);
+        $mail->setHTMLBody($data['html']);
         // Si existen archivos adjuntos agregarlos
-        if (!empty($this->_data['attach'])) {
-            foreach ($this->_data['attach'] as &$file) {
+        if (!empty($data['attach'])) {
+            foreach ($data['attach'] as &$file) {
                 $result = $mail->addAttachment(
                     isset($file['tmp_name']) ? $file['tmp_name'] : $file['data'],
                     $file['type'],
@@ -110,25 +120,25 @@ class Network_Email_Smtp_Pear
             'head_encoding' => '8bit',
         ]); // debe llamarse antes de headers
         $headers_data = [
-            'From' => is_array($this->_header['from']) ? ($this->_header['from']['name'].' <'.$this->_header['from']['email'].'>') : $this->_header['from'],
-            'Subject' => $this->_header['subject'],
+            'From' => is_array($header['from']) ? ($header['from']['name'].' <'.$header['from']['email'].'>') : $header['from'],
+            'Subject' => $header['subject'],
         ];
         $to = [];
-        if (!empty($this->_header['to'])) {
-            $to = array_merge($to, $this->_header['to']);
-            $headers_data['To'] = implode(', ', $this->_header['to']);
+        if (!empty($header['to'])) {
+            $to = array_merge($to, $header['to']);
+            $headers_data['To'] = implode(', ', $header['to']);
         }
-        if (!empty($this->_header['cc'])) {
-            $to = array_merge($to, $this->_header['cc']);
-            $headers_data['Cc'] = implode(', ', $this->_header['cc']);
+        if (!empty($header['cc'])) {
+            $to = array_merge($to, $header['cc']);
+            $headers_data['Cc'] = implode(', ', $header['cc']);
         }
-        if (!empty($this->_header['replyTo'])) {
-            $headers_data['Reply-To'] = is_array($this->_header['replyTo']) ? ($this->_header['replyTo']['name'].' <'.$this->_header['replyTo']['email'].'>') : $this->_header['replyTo'];
+        if (!empty($header['replyTo'])) {
+            $headers_data['Reply-To'] = is_array($header['replyTo']) ? ($header['replyTo']['name'].' <'.$header['replyTo']['email'].'>') : $header['replyTo'];
             // WARNING Gmail requiere que se pase como arreglo pero amazon requiere sólo el email (?)
             $headers_data['Reply-To'] = [$headers_data['Reply-To']]; // Esto se debería corregir de alguna forma para que sea compatible con ambos (por ahora, sólo gmail o similares)
         }
-        if (!empty($this->_header['bcc'])) {
-            $to = array_merge($to, $this->_header['bcc']);
+        if (!empty($header['bcc'])) {
+            $to = array_merge($to, $header['bcc']);
         }
         $headers = $mail->headers($headers_data);
         $to = implode(', ', $to);
