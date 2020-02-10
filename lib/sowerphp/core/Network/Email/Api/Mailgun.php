@@ -42,11 +42,11 @@ class Network_Email_Api_Mailgun
      */
     public function __construct($config)
     {
-        // verificar soporte PHPMailer
+        // verificar soporte Mailgun
         if (!class_exists('\Mailgun\Mailgun')) {
             throw new \Exception('No hay soporte para Mailgun');
         }
-        // valores por defecto para conexión vía SMTP usando Pear
+        // valores por defecto para conexión vía Mailgun
         $this->config = array_merge([
             'endpoint' => 'api.mailgun.net',
         ], $config);

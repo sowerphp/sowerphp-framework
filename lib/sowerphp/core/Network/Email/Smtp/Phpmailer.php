@@ -95,7 +95,7 @@ class Network_Email_Smtp_Phpmailer
 
     /**
      * Método que envía el correo
-     * @param data Arrelgo con los datos que se enviarán (texto y adjuntos)
+     * @param data Arreglo con los datos que se enviarán (texto y adjuntos)
      * @param header Cabeceras del correo
      * @return Arreglo con los estados de retorno por cada correo enviado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
@@ -103,8 +103,9 @@ class Network_Email_Smtp_Phpmailer
      */
     public function send($data, $header)
     {
-        // crear correo con su configuración
-        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+        // crear correo
+        $mail = self::createEmail($data, $header);
+        // agregar opciones al correo
         $mail->isSMTP();
         $mail->Host = $this->config['host'];
         $mail->SMTPAuth = $this->config['auth'];
@@ -115,7 +116,6 @@ class Network_Email_Smtp_Phpmailer
         }
         $mail->Port = $this->config['port'];
         $mail->SMTPDebug = $this->config['debug'];
-        $mail->CharSet = 'UTF-8';
         // no validar SSL
         if (!$this->config['verify_ssl']) {
             $mail->SMTPOptions = [
@@ -126,6 +126,31 @@ class Network_Email_Smtp_Phpmailer
                 ]
             ];
         }
+        // enviar mensaje
+        try {
+            $mail->send();
+            return true;
+        } catch (\PHPMailer\PHPMailer\Exception $e) {
+            return [
+                'type' => 'error',
+                'code' => $e->getCode(),
+                'message' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Método que crea el correo con PHPMailer (pero no lo envía)
+     * @param data Arreglo con los datos que se enviarán (texto y adjuntos)
+     * @param header Cabeceras del correo
+     * @return Arreglo con los estados de retorno por cada correo enviado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2020-02-09
+     */
+    public static function createEmail($data, $header)
+    {
+        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+        $mail->CharSet = 'UTF-8';
         // agregar quien envía el correo
         if (!empty($header['from'])) {
             if (is_array($header['from'])) {
@@ -195,17 +220,8 @@ class Network_Email_Smtp_Phpmailer
                 }
             }
         }
-        // enviar mensaje
-        try {
-            $mail->send();
-            return true;
-        } catch (\PHPMailer\PHPMailer\Exception $e) {
-            return [
-                'type' => 'error',
-                'code' => $e->getCode(),
-                'message' => $e->getMessage(),
-            ];
-        }
+        // entregar objeto del correo
+        return $mail;
     }
 
 }
