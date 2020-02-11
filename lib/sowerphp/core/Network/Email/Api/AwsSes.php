@@ -149,7 +149,7 @@ class Network_Email_Api_AwsSes
      * @link https://stackoverflow.com/questions/45791673/how-to-send-file-as-attachment-using-aws-ses-latest-sdk-3-33-and-php7
      * @todo Crear mensaje "a mano" con archivos adjuntos para no depender de PHPMailer
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-09
+     * @version 2020-02-11
      */
     private function createEmailData($data, $header)
     {
@@ -165,9 +165,9 @@ class Network_Email_Api_AwsSes
         // agregar a quien responder el correo
         if (!empty($header['replyTo'])) {
             if (is_array($header['replyTo'])) {
-                $email['ReplyToAddresses'] = $header['replyTo']['name'].' <'.$header['replyTo']['email'].'>';
+                $email['ReplyToAddresses'] = [$header['replyTo']['name'].' <'.$header['replyTo']['email'].'>'];
             } else {
-                $email['ReplyToAddresses'] = $header['replyTo'];
+                $email['ReplyToAddresses'] = [$header['replyTo']];
             }
         }
         // agregar destinatarios
