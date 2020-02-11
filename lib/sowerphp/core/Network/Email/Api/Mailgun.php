@@ -25,6 +25,8 @@ namespace sowerphp\core;
 
 /**
  * Clase para enviar correo electrónico mediante Mailgun
+ * Requiere:
+ *   $ composer require mailgun/mailgun-php kriswallsmith/buzz nyholm/psr7
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2020-02-09
  */

@@ -25,6 +25,8 @@ namespace sowerphp\core;
 
 /**
  * Clase para enviar correo electrónico mediante Postmark
+ * Requiere:
+ *   $ composer require wildbit/postmark-php
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2020-02-09
  */

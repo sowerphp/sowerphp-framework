@@ -25,6 +25,8 @@ namespace sowerphp\core;
 
 /**
  * Clase para enviar correo electrónico mediante AWS SES
+ * Requiere:
+ *   $ composer require aws/aws-sdk-php
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2020-02-11
  */
