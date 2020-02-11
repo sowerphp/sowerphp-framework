@@ -80,7 +80,7 @@ class Network_Email
      * Método que obtiene el objeto que se usará para el envío de los correos
      * @param config Configuración del correo electrónico que se usará
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-09
+     * @version 2020-02-11
      */
     private function getSender(array $config)
     {
@@ -100,7 +100,9 @@ class Network_Email
                 throw new Exception('No existe un método por defecto para el protocolo '.$protocol);
             }
         }
-        $class = __NAMESPACE__.'\Network_Email_'.ucfirst($protocol).'_'.ucfirst($method);
+        $protocol = \sowerphp\core\Utility_Inflector::camelize($protocol);
+        $method = \sowerphp\core\Utility_Inflector::camelize($method);
+        $class = __NAMESPACE__.'\Network_Email_'.$protocol.'_'.$method;
         // crear objeto que enviará los correos
         return new $class($config);
     }

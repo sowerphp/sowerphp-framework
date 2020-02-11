@@ -26,9 +26,9 @@ namespace sowerphp\core;
 /**
  * Clase para enviar correo electrónico mediante AWS SES
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2020-02-09
+ * @version 2020-02-11
  */
-class Network_Email_Api_Aws
+class Network_Email_Api_AwsSes
 {
 
     protected $config = null; ///< Configuración para envíos usando AWS SES
