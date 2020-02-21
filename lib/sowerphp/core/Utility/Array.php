@@ -377,4 +377,26 @@ class Utility_Array
         return $list;
     }
 
+    /**
+     * Método que entrega todos los sub conjuntos de un arreglo
+     * @link https://stackoverflow.com/a/6092999/3333009
+     * @version 2011-05-23
+     */
+    public static function subsets($in, $minLength = 1) {
+        $count = count($in);
+        $members = pow(2,$count);
+        $return = [];
+        for ($i = 0; $i < $members; $i++) {
+            $b = sprintf('%0'.$count.'b',$i);
+            $out = [];
+            for ($j = 0; $j < $count; $j++) {
+                if ($b{$j} == '1') $out[] = $in[$j];
+            }
+            if (count($out) >= $minLength) {
+                $return[] = $out;
+            }
+        }
+        return $return;
+    }
+
 }
