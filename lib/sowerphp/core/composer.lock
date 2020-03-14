@@ -1,11 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "hash": "17b2d989c60a8db6ae40cd9eaffd8048",
-    "content-hash": "fda6195c8b05e58b62f94311d55f0912",
+    "content-hash": "e46867f041c6345a4703c1d2e3cbaf47",
     "packages": [
         {
             "name": "michelf/php-markdown",
@@ -56,7 +55,7 @@
             "keywords": [
                 "markdown"
             ],
-            "time": "2016-10-29 18:58:20"
+            "time": "2016-10-29T18:58:20+00:00"
         }
     ],
     "packages-dev": [],
@@ -65,6 +64,8 @@
     "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": ">=7.3"
+    },
     "platform-dev": []
 }
