@@ -44,7 +44,7 @@ class Network_Email_Imap
      * Constructor de la clase
      * @param config Arreglo con la configuración del servidor IMAP
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-09-25
+     * @version 2020-07-06
      */
     public function __construct(array $config)
     {
@@ -70,6 +70,9 @@ class Network_Email_Imap
             $this->config['user'],
             $this->config['pass']
         );
+        if (!$this->isConnected()) {
+            throw new \Exception(implode(' / ', imap_errors()));
+        }
     }
 
     /**
