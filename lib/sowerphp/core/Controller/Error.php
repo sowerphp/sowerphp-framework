@@ -38,9 +38,9 @@ class Controller_Error extends \Controller_App
      * Renderizar error
      * @param data Datos qye se deben pasar a la vista del error
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-10-17
+     * @version 2020-07-15
      */
-    public function display ($data)
+    public function display($data)
     {
         // agregar datos para la vista
         $data['trace'] = str_replace(
@@ -48,6 +48,7 @@ class Controller_Error extends \Controller_App
             ['DIR_FRAMEWORK', 'DIR_WEBSITE'],
             $data['trace']
         );
+        $data['message'] = htmlspecialchars($data['message']);
         $this->layout .= '.min';
         $this->set($data);
         $this->set('soporte', \sowerphp\core\Configure::read('email.default')!==NULL);
