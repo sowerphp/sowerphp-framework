@@ -222,4 +222,29 @@ class Utility_Data
         return true;
     }
 
+    /**
+     * Método que obtiene los correos electrónicos desde un string
+     * @param string String con el listado de correos
+     * @return array Listado de correos que hay en el string
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2020-07-18
+     */
+    public static function emails($listado)
+    {
+        if (!is_array($listado)) {
+            $listado = array_filter(
+                array_unique(
+                    array_map('trim', explode(';', str_replace("\n", ';', $listado)))
+                )
+            );
+        }
+        $emails = [];
+        foreach ($listado as $e) {
+            if (\sowerphp\core\Utility_Data_Validation::check($e, ['notempty', 'email'])) {
+                $emails[] = $e;
+            }
+        }
+        return $emails;
+    }
+
 }
