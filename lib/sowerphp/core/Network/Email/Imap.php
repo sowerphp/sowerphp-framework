@@ -201,7 +201,7 @@ class Network_Email_Imap
      * @param filter Arreglo con filtros a usar para las partes del mensaje. Ej: ['subtype'=>['PLAIN', 'XML'], 'extension'=>['xml']]
      * @return Arreglo con los datos del mensaje, índices: header, body, charset y attachments
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-06-11
+     * @version 2020-08-28
      */
     public function getMessage($uid, $filter = [])
     {
@@ -230,33 +230,7 @@ class Network_Email_Imap
         }
         // correo tiene múltiples partes, entonces se itera cada una de las partes
         else {
-            foreach ($s->parts as $partno0 => $p) {
-                if (!$filter) {
-                    $this->getMessagePart($uid, $p, $partno0+1, $message);
-                } else {
-                    // si es del subtipo de agrega
-                    $subtype = isset($filter['subtype']) ? array_map('strtoupper', $filter['subtype']) : [];
-                    if (in_array(strtoupper($p->subtype), $subtype)) {
-                        $this->getMessagePart($uid, $p, $partno0+1, $message);
-                    }
-                    // buscar por extensión del archivo adjunto (si lo es)
-                    else if (isset($filter['extension']) and (($p->ifdisposition and strtoupper($p->disposition)=='ATTACHMENT') or (in_array($p->subtype, ['OCTET-STREAM', '*']) and ($p->ifparameters or $p->ifdparameters)))) {
-                        $extension = array_map('strtolower', $filter['extension']);
-                        $add = false;
-                        $params = $p->ifparameters ? $p->parameters : ( $p->ifdparameters ? $p->dparameters : [] );
-                        foreach ($params as $parameter) {
-                            $value = strpos($parameter->value, '=?UTF-8?Q?')===0 ? imap_utf8($parameter->value) : $parameter->value;
-                            if (in_array(strtolower(substr($value, -3)), $extension)) {
-                                $add = true;
-                                break;
-                            }
-                        }
-                        if ($add) {
-                            $this->getMessagePart($uid, $p, $partno0+1, $message, true);
-                        }
-                    }
-                }
-            }
+            $this->iterateParts($uid, $s->parts, $filter, $message);
         }
         // decodificar
         if (!empty($message['header']->subject)) {
@@ -264,6 +238,63 @@ class Network_Email_Imap
         }
         // entregar mensaje
         return $message;
+    }
+
+    /**
+     * Método que itera las parte de un mensaje de correo
+     * @param uid UID del mensaje que se desea obtener
+     * @param parts Partes del mensaje que se está iterando
+     * @param filter Arreglo con filtros a usar para las partes del mensaje. Ej: ['subtype'=>['PLAIN', 'XML'], 'extension'=>['xml']]
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2020-08-28
+     */
+    private function iterateParts($uid, $parts, $filter, &$message, $partno0 = '0')
+    {
+        foreach ($parts as $p) {
+            if (!$filter) {
+                $this->getMessagePart($uid, $p, $this->messagePartNext($partno0), $message);
+            } else {
+                // si es del subtipo de agrega
+                $subtype = isset($filter['subtype']) ? array_map('strtoupper', $filter['subtype']) : [];
+                if (in_array(strtoupper($p->subtype), $subtype)) {
+                    $this->getMessagePart($uid, $p, $this->messagePartNext($partno0), $message);
+                }
+                // buscar por extensión del archivo adjunto (si lo es)
+                else if (isset($filter['extension']) and (($p->ifdisposition and strtoupper($p->disposition)=='ATTACHMENT') or (in_array($p->subtype, ['OCTET-STREAM', '*']) and ($p->ifparameters or $p->ifdparameters)))) {
+                    $extension = array_map('strtolower', $filter['extension']);
+                    $add = false;
+                    $params = $p->ifparameters ? $p->parameters : ( $p->ifdparameters ? $p->dparameters : [] );
+                    foreach ($params as $parameter) {
+                        $value = strpos($parameter->value, '=?UTF-8?Q?')===0 ? imap_utf8($parameter->value) : $parameter->value;
+                        if (in_array(strtolower(substr($value, -3)), $extension)) {
+                            $add = true;
+                            break;
+                        }
+                    }
+                    if ($add) {
+                        $this->getMessagePart($uid, $p, $this->messagePartNext($partno0), $message, true);
+                    }
+                }
+            }
+            if (!empty($filter) and !empty($p->parts)) {
+                $this->iterateParts($uid, $p->parts, $filter, $message, $this->messagePartNext($partno0).'.0');
+            }
+            $partno0 = $this->messagePartNext($partno0);
+        }
+    }
+
+    /**
+     * Método que incrementa la sección (parte) del mensaje en 1
+     * @param partno Parte del mensaje actual
+     * @return string Parte del mensaje nueva (siguiente a la original)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2020-08-28
+     */
+    private function messagePartNext($partno)
+    {
+        $parts = explode('.', $partno);
+        $parts[count($parts) - 1]++;
+        return implode('.', $parts);
     }
 
     /**
