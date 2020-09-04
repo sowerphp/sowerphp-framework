@@ -306,14 +306,14 @@ class Utility_Array
      * @param parent Índice del item padre (primer nivel es =null)
      * @return Arreglo asociativo con el árbol
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-25
+     * @version 2020-09-04
      */
     public static function toTree($items, $field_parent, $field_childs, $parent = null)
     {
         // agregar items del nivel parent al árbol
         $tree_level = [];
         foreach ($items as $key => $item) {
-            if ($item[$field_parent] == $parent) {
+            if (array_key_exists($field_parent, $item) and $item[$field_parent] == $parent) {
                 unset($item[$field_parent]);
                 $tree_level[$key] = $item;
                 unset($items[$key]);
