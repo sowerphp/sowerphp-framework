@@ -60,9 +60,9 @@ class View
      * @param location Ubicación de la vista
      * @return Buffer de la página renderizada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-10-23
+     * @version 2020-11-15
      */
-    public function render ($page, $location = null)
+    public function render($page, $location = null)
     {
         // buscar página
         if ($location) {
@@ -72,9 +72,9 @@ class View
         }
         // si no se encontró error
         if (!$location) {
-            if($this->request->params['controller']=='pages')
+            if ($this->request->params['controller']=='pages') {
                 $this->render('/error/404');
-            else {
+            } else {
                 throw new Exception_View_Missing(array(
                     'view' => $page,
                     'controller' => Utility_Inflector::camelize(
@@ -105,20 +105,26 @@ class View
         $ext = substr($location, strrpos($location, '.')+1);
         $class = App::findClass('View_Helper_Pages_'.ucfirst($ext));
         $page_content = $class::render($location, $this->viewVars);
-        if ($this->layout === null)
+        if ($this->layout === null) {
             return $page_content;
+        }
         // buscar archivo del tema que está seleccionado, si no existe
         // se utilizará el tema por defecto
         $layout = $this->getLayoutLocation($this->layout);
         if (!$layout) {
             $this->layout = $this->defaultLayout;
             $layout = $this->getLayoutLocation($this->layout);
+            if (!$layout) {
+                throw new Exception('No se encontró layout '.$this->layout);
+            }
         }
         // página que se está viendo
-        if(!empty($this->request->request)) {
+        if (!empty($this->request->request)) {
             $slash = strpos($this->request->request, '/', 1);
             $page = $slash===false ? $this->request->request : substr($this->request->request, 0, $slash);
-        } else $page = '/'.Configure::read('homepage');
+        } else {
+            $page = '/'.Configure::read('homepage');
+        }
         // determinar module breadcrumb
         $module_breadcrumb = [];
         if ($this->request->params['module']) {
