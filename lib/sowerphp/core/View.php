@@ -35,7 +35,7 @@ class View
     protected $response; ///< Objeto Response
     public $viewVars = array(); ///< Variables que se pasarán al renderizar la vista
     private $layout; ///< Tema que se debe usar para renderizar la página
-    private $defaultLayout = 'Bootstrap'; ///< Layout por defecto
+    private $defaultLayout = 'harbor'; ///< Layout por defecto
     protected static $_viewsLocation; ///< Listado de vistas que se han buscado
     protected static $extensions = null; ///< Listado de extensiones
 
