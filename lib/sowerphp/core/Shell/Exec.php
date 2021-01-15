@@ -60,7 +60,7 @@ class Shell_Exec
      * @param args Argumentos que se pasarán al comando
      * @return Resultado de la ejecución del comando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-08-12
+     * @version 2021-01-15
      */
     private static function dispatch ($command, $args)
     {
@@ -83,12 +83,23 @@ class Shell_Exec
             return 1;
         }
         $shell = new $class();
-        // poner modo verbose que corresponda (de 1 a 5)
+        // revisar posibles flags especiales
         $argc = count($args);
         for ($i=0; $i<$argc; $i++) {
+            // poner modo verbose que corresponda (de 1 a 5)
             if (preg_match('/^\-v+$/', $args[$i])) {
                 $shell->verbose = strlen($args[$i]) - 1;
                 unset($args[$i]);
+            }
+            // mostrar ayuda (y no ejecutar comando)
+            else if ($args[$i] == '-h') {
+                $method = new \ReflectionMethod($shell, 'main');
+                echo '   Modo de uso: ',$command,' ';
+                foreach($method->getParameters() as &$p) {
+                    echo ($p->isOptional() ? '['.$p->name.' = '.$p->getDefaultValue().']' : $p->name),' ';
+                }
+                echo "\n";
+                exit;
             }
         }
         // Invocar main
@@ -98,7 +109,7 @@ class Shell_Exec
                 $method->getNumberOfRequiredParameters(),' parámetro(s)',"\n";
             echo '   Modo de uso: ',$command,' ';
             foreach($method->getParameters() as &$p) {
-                echo ($p->isOptional() ? '['.$p->name.']' : $p->name),' ';
+                echo ($p->isOptional() ? '['.$p->name.' = '.$p->getDefaultValue().']' : $p->name),' ';
             }
             echo "\n";
             return 1;
