@@ -61,7 +61,7 @@ class Routing_Router
         }
         // Buscar alguna que sea parcial (:controller, :action, :passX o *)
         foreach (self::$routes as $key=>$info) {
-            $params = array_merge(['module'=>null, 'controller'=>null, 'action'=>null, 'pass'=>null], $info['to']);
+            $params = array_merge(['module'=>null, 'controller'=>null, 'action'=>null, 'pass'=>[]], $info['to']);
             // buscar parametros con nombre si existen
             if ($info['params']) {
                 $url_partes = explode('/', $url);
@@ -125,7 +125,7 @@ class Routing_Router
         // Procesar la URL recibida, en el formato /modulo(s)/controlador/accion/parámetro1/parámetro2/etc
         $url = self::urlClean ($url, $module);
         // Arreglo por defecto para los datos de módulo, controlador, accion y parámetros pasados
-        $params = array('module'=>$module, 'controller'=>null, 'action'=>'index', 'pass'=>null);
+        $params = array('module'=>$module, 'controller'=>null, 'action'=>'index', 'pass'=>[]);
         // Separar la url solicitada en partes separadas por los "/"
         $partes = explode('/', $url);
         // quitar primer elemento que es vacio, ya que el string parte con "/"
