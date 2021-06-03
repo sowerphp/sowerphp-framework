@@ -26,20 +26,21 @@ namespace sowerphp\core;
 /**
  * Clase base para todo comando de la Shell
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-10-20
+ * @version 2021-06-03
  */
 abstract class Shell
 {
 
     public $stdout; ///< Atributo con el objeto para la salida de datos
     public $verbose = 0; ///< Nivel de "verbose" (cuanto "dice" el comando)
+    protected $allow_multiple_instances = false; ///< Indica si el proceso permite o no múltiples instancias idénticas al mismo tiempo
 
     /**
      * Constructor de la clase, asigna salida estándar a stdout
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-03-22
      */
-    public function __construct ()
+    public function __construct()
     {
         $this->stdout = new Shell_Output('php://stdout');
     }
@@ -52,7 +53,7 @@ abstract class Shell
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2012-09-14
      */
-    public function out ($message = null, $newlines = 1)
+    public function out($message = null, $newlines = 1)
     {
         return $this->stdout->write($message, $newlines);
     }
@@ -66,10 +67,10 @@ abstract class Shell
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2012-09-14
      */
-    public function in ($message = null, $newlines = 0, $trim = true)
+    public function in($message = null, $newlines = 0, $trim = true)
     {
         $this->out($message, $newlines);
-        $handle = fopen ('php://stdin', 'r');
+        $handle = fopen('php://stdin', 'r');
         $line = fgets($handle);
         fclose($handle);
         return $trim ? trim($line) : $line;
@@ -82,9 +83,9 @@ abstract class Shell
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2012-09-14
      */
-    public function createFile ($filename, $data)
+    public function createFile($filename, $data)
     {
-        file_put_contents ($filename, $data);
+        file_put_contents($filename, $data);
     }
 
     /**
@@ -98,12 +99,23 @@ abstract class Shell
         $out = new Shell_Output($stream);
         // tiempo que tomó la ejecución del comando
         $time = microtime(true) - TIME_START;
-        if ($time<60)
+        if ($time < 60) {
             $out->write('Proceso ejecutado en '.num($time,1).' segundos.'."\n");
-        else if ($time<3600)
+        } else if ($time < 3600) {
             $out->write('Proceso ejecutado en '.num($time/60,1).' minutos.'."\n");
-        else
+        } else {
             $out->write('Proceso ejecutado en '.num($time/3600,1).' horas.'."\n");
+        }
+    }
+
+    /**
+     * Método que indica si este comando ("shell script") puede ejecutar múltiples instancias
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2021-06-03
+     */
+    public function canHaveMultipleInstances()
+    {
+        return $this->allow_multiple_instances;
     }
 
 }

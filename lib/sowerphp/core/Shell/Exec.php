@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para despachar una Shell
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-25
+ * @version 2021-06-03
  */
 class Shell_Exec
 {
@@ -38,7 +38,7 @@ class Shell_Exec
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-09-17
      */
-    public static function run ($argv)
+    public static function run($argv)
     {
         // cambiar tiempo de ejecución a infinito
         set_time_limit(0);
@@ -60,9 +60,9 @@ class Shell_Exec
      * @param args Argumentos que se pasarán al comando
      * @return Resultado de la ejecución del comando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-01-15
+     * @version 2021-06-03
      */
-    private static function dispatch ($command, $args)
+    private static function dispatch($command, $args)
     {
         // Si el comando fue vacío se retorna estado de error
         if (empty($command)) {
@@ -95,16 +95,16 @@ class Shell_Exec
             else if ($args[$i] == '-h') {
                 $method = new \ReflectionMethod($shell, 'main');
                 echo '   Modo de uso: ',$command,' ';
-                foreach($method->getParameters() as &$p) {
+                foreach ($method->getParameters() as &$p) {
                     echo ($p->isOptional() ? '['.$p->name.' = '.$p->getDefaultValue().']' : $p->name),' ';
                 }
                 echo "\n";
                 exit;
             }
         }
-        // Invocar main
+        // validar parámetros que se están pasando
         $method = new \ReflectionMethod($shell, 'main');
-        if (count($args)<$method->getNumberOfRequiredParameters()) {
+        if (count($args) < $method->getNumberOfRequiredParameters()) {
             echo 'SowerPHP shell: ',$command,': requiere al menos ',
                 $method->getNumberOfRequiredParameters(),' parámetro(s)',"\n";
             echo '   Modo de uso: ',$command,' ';
@@ -114,9 +114,70 @@ class Shell_Exec
             echo "\n";
             return 1;
         }
+        // validar que el proceso pueda ser ejecutado
+        if (!$shell->canHaveMultipleInstances()) {
+            // obtener procesos que tienen "/shell.php " en su comando
+            $procesos = self::getCurrentProcesses('/shell.php ');
+            if (is_numeric($procesos)) {
+                echo 'SowerPHP shell: no fue posible obtener los procesos en ejecución',"\n";
+                return $procesos;
+            }
+            // buscar otros procesos que existan en ejecución con los mismos argumentos
+            global $argv;
+            $cmd_actual = implode(' ', $argv);
+            $cmd_actual = trim(mb_substr($cmd_actual, strpos($cmd_actual, '/shell.php ') + 1));
+            $pid_actual = getmypid();
+            $otros_procesos = [];
+            foreach ($procesos as $p) {
+                $cmd = str_replace(' --dev', '', $p['cmd']);
+                $cmd = trim(mb_substr($cmd, strpos($cmd, '/shell.php ') + 1));
+                if ($p['pid'] != $pid_actual and $cmd == $cmd_actual) {
+                    $otros_procesos[] = $p;
+                }
+            }
+            unset($procesos);
+            // mostrar error en caso de existir otros procesos en ejecución
+            if (!empty($otros_procesos)) {
+                echo 'SowerPHP shell: no es posible ejecutar el comando, existen otras instancias en',"\n";
+                echo 'ejecución que coinciden con: ',$cmd_actual,"\n";
+                foreach ($otros_procesos as $p) {
+                    echo ' - PID ',$p['pid'],' ejecutándose desde ',$p['start_time'],"\n";
+                }
+                return 1;
+            }
+        }
+        // invocar main
         $return = $method->invokeArgs($shell, $args);
         // Retornar estado
         return $return ? $return : 0;
+    }
+
+    /**
+     * Método que entrega el listado de procesos en ejecución en el sistema
+     * con sus argumentos y otros datos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2021-06-03
+     */
+    private static function getCurrentProcesses($filter = null)
+    {
+        $cols = ['pid', 'start_time', 'etimes', 'user', 'stat', 'psr', 'sgi_p', 'cputimes', 'pcpu', 'pmem', 'rsz', 'vsz', 'cmd'];
+        $cmd = 'ps -eo '.implode(',',$cols).' --sort -etimes --no-headers';
+        if ($filter !== null) {
+            $cmd .= ' | grep "'.$filter.'"';
+        }
+        exec($cmd, $lines, $rc);
+        if ($rc) {
+            return $rc;
+        }
+        $processes = [];
+        foreach ($lines as $line) {
+            $line = preg_replace('!\s+!', ' ', $line);
+            $processes[] = array_combine(
+                $cols,
+                explode(' ', $line, 13),
+            );
+        }
+        return $processes;
     }
 
 }
