@@ -171,7 +171,7 @@ class Shell_Exec
         }
         $processes = [];
         foreach ($lines as $line) {
-            $line = preg_replace('!\s+!', ' ', $line);
+            $line = preg_replace('!\s+!', ' ', trim($line));
             $processes[] = array_combine(
                 $cols,
                 explode(' ', $line, 13),
