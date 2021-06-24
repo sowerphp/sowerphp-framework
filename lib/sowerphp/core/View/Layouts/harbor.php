@@ -22,8 +22,8 @@ Layout: harbor (https://hackerthemes.com)
                 _request = "<?=$_request?>"
             ;
         </script>
-        <script src="<?=$_base?>/js/__.js"></script>
-        <script src="<?=$_base?>/js/form.js"></script>
+        <script src="https://cdn.sasco.cl/js/__.min.js"></script>
+        <script src="https://cdn.sasco.cl/js/form.min.js"></script>
 <?php if (\sowerphp\core\App::layerExists('sowerphp/general')) : ?>
         <script src="<?=$_base?>/js/datepicker/bootstrap-datepicker.js"></script>
         <script src="<?=$_base?>/js/datepicker/bootstrap-datepicker.es.js"></script>
