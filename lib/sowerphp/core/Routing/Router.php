@@ -168,10 +168,17 @@ class Routing_Router
      * @param route Arreglo con los datos de la ruta, índice 'controller' es obligatorio
      * @return Arreglo con la ruta normalizada, incluyendo índices: 'module', 'controller', 'action' y 'pass'
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-14
+     * @version 2021-07-15
      */
-    private static function routeNormalize ($route)
+    private static function routeNormalize($route)
     {
+        if (!empty($route['redirect'])) {
+            header('location: '.$route['redirect']);
+            exit;
+        }
+        if (empty($route['controller'])) {
+            throw new \sowerphp\core\Exception_Controller_Missing(__('Debe indicar el controlador en la ruta'));
+        }
         $params = [
             'module' => isset($route['module']) ? $route['module'] : null,
             'controller' => $route['controller'],
