@@ -199,27 +199,32 @@ class Utility_Data
     }
 
     /**
-     * Método que limpia un texto
-     * @param string Texto que se desea limpiar
-     * @param options Opciones para la limpieza del texto
-     * @return Texto limpio
+     * Método que limpia datos de tipo texto (string)
+     * @param data Datos que se desean limpiar, puede ser un arreglo con los datos
+     * @param options Opciones para la limpieza de los datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-03-15
+     * @version 2021-07-16
      */
-    public static function sanitize(&$string, array $options = [])
+    public static function sanitize(&$data, array $options = [])
     {
-        if (!$string) {
-            return false;
+        if (is_array($data)) {
+            foreach ($data as &$d) {
+                $d = self::sanitize($d);
+            }
+            return $data;
+        }
+        if (!$data || !is_string($data) || is_numeric($data)) {
+            return $data;
         }
         if (!empty($options['tags'])) {
-            $string = trim(strip_tags($string, $options['tags']));
+            $data = trim(strip_tags($data, $options['tags']));
         } else {
-            $string = trim(strip_tags($string));
+            $data = trim(strip_tags($data));
         }
         if (!empty($options['l'])) {
-            $string = substr($string, 0, $options['l']);
+            $data = substr($data, 0, $options['l']);
         }
-        return true;
+        return $data;
     }
 
     /**
