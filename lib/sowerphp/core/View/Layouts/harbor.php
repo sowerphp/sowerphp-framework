@@ -143,14 +143,9 @@ foreach ($_nav_app as $link=>&$info) {
 }
 ?>
                                 <div class="dropdown-divider"></div>
-<?php if (\sowerphp\core\Module::loaded('Sistema.Enlaces')) : ?>
-                                <a href="<?=$_base?>/enlaces" class="dropdown-item"><span class="fa fa-bookmark" aria-hidden="true"></span> Enlaces</a>
-<?php endif; ?>
-<?php if (\sowerphp\core\Module::loaded('Rrhh')) : ?>
-                                <a href="<?=$_base?>/rrhh/empleados/cumpleanios" class="dropdown-item"><span class="fa fa-birthday-cake" aria-hidden="true"></span> Cumpleaños</a>
-<?php endif; ?>
+                                <?php /*<a href="<?=$_base?>/enlaces" class="dropdown-item"><span class="fa fa-bookmark" aria-hidden="true"></span> Enlaces</a>
                                 <a href="<?=$_base?>/documentacion" class="dropdown-item"><span class="fa fa-book" aria-hidden="true"></span> Documentación</a>
-                                <div class="dropdown-divider"></div>
+                                <div class="dropdown-divider"></div>*/ ?>
                                 <a href="<?=$_base?>/usuarios/perfil" class="dropdown-item"><span class="fa fa-user fa-fw" aria-hidden="true"></span> Perfil de usuario</a>
                                 <a href="<?=$_base?>/usuarios/salir" class="dropdown-item"><span class="fas fa-sign-out-alt fa-fw" aria-hidden="true"></span> Cerrar sesión</a>
                             </div>

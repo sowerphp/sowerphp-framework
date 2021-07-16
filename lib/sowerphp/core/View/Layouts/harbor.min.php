@@ -1,3 +1,7 @@
+<!--
+Framework: SowerPHP (https://sowerphp.org)
+Layout: harbor (https://hackerthemes.com)
+-->
 <!DOCTYPE html>
 <html lang="en">
     <head>
