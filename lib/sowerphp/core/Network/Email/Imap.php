@@ -98,6 +98,7 @@ class Network_Email_Imap
      */
     private function createMailbox($folder = null)
     {
+        $default_folder = !empty($this->config['folder']) ? $this->config['folder'] : 'INBOX';
         // si el mailbox no está asignado en la configuración se asigna con estándar INBOX como carpeta
         if (empty($this->config['mailbox'])) {
             $options = ['imap'];
@@ -107,12 +108,12 @@ class Network_Email_Imap
                     $options[] = 'novalidate-cert';
                 }
             }
-            $this->config['mailbox'] = '{'.$this->config['host'].':'.$this->config['port'].'/'.implode('/',$options).'}INBOX';
+            $this->config['mailbox'] = '{'.$this->config['host'].':'.$this->config['port'].'/'.implode('/',$options).'}'.$default_folder;
         }
         // se separa la carpeta del mailbox y se agrega la carpeta real que se busca
         $aux = explode('}', $this->config['mailbox']);
         if ($folder === null) {
-            $folder = !empty($this->config['folder']) ? $this->config['folder'] : (!empty($aux[1]) ? $aux[1] : 'INBOX');
+            $folder = !empty($aux[1]) ? $aux[1] : $default_folder;
         }
         return $aux[0].'}'.$folder;
     }
