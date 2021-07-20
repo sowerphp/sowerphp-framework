@@ -50,8 +50,9 @@ class Network_Email_Imap
     {
         if (!isset($config['mailbox'])) {
             // definir puerto si no se pasó
-            if (!isset($config['port']) and isset($config['ssl']) and !$config['ssl'])
+            if (!isset($config['port']) and isset($config['ssl']) and !$config['ssl']) {
                 $config['port'] = 143;
+            }
             $this->config = array_merge($this->config, $config);
             // extraer puerto si se pasó en el host
             $url = parse_url($this->config['host']);
@@ -93,18 +94,27 @@ class Network_Email_Imap
      * @param folder Carpeta en caso que se quira usar una diferente a la configuración de la conexión
      * @return Dirección completa para acceder al Mailbox en IMAP
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-05
+     * @version 2021-07-20
      */
     private function createMailbox($folder = null)
     {
-        if ($folder === null) $folder = $this->config['folder'];
-        $options = ['imap'];
-        if ($this->config['ssl']) {
-            $options[] = 'ssl';
-            if (!$this->config['sslcheck'])
-                $options[] = 'novalidate-cert';
+        // si el mailbox no está asignado en la configuración se asigna con estándar INBOX como carpeta
+        if (empty($this->config['mailbox'])) {
+            $options = ['imap'];
+            if ($this->config['ssl']) {
+                $options[] = 'ssl';
+                if (!$this->config['sslcheck']) {
+                    $options[] = 'novalidate-cert';
+                }
+            }
+            $this->config['mailbox'] = '{'.$this->config['host'].':'.$this->config['port'].'/'.implode('/',$options).'}INBOX';
         }
-        return '{'.$this->config['host'].':'.$this->config['port'].'/'.implode('/',$options).'}'.$folder;
+        // se separa la carpeta del mailbox y se agrega la carpeta real que se busca
+        $aux = explode('}', $this->config['mailbox']);
+        if ($folder === null) {
+            $folder = !empty($this->config['folder']) ? $this->config['folder'] : (!empty($aux[1]) ? $aux[1] : 'INBOX');
+        }
+        return $aux[0].'}'.$folder;
     }
 
     /**
@@ -172,7 +182,7 @@ class Network_Email_Imap
     public function search($filter = 'UNSEEN')
     {
         $uids = imap_search($this->link, $filter, SE_UID);
-        return $uids===false  ? [] : $uids;
+        return $uids===false ? [] : $uids;
     }
 
     /**
@@ -313,20 +323,25 @@ class Network_Email_Imap
                 imap_fetchbody($this->link, $uid, $partno, FT_UID | FT_PEEK) :  // multipart
                 imap_body($this->link, $uid, FT_UID | FT_PEEK); // simple
         // Any part may be encoded, even plain text messages, so check everything.
-        if ($p->encoding==4)
+        if ($p->encoding==4) {
             $data = quoted_printable_decode($data);
-        elseif ($p->encoding==3)
+        } else if ($p->encoding==3) {
             $data = base64_decode($data);
+        }
 
         // PARAMETERS
         // get all parameters, like charset, filenames of attachments, etc.
         $params = [];
-        if ($p->ifparameters)
-            foreach ($p->parameters as $x)
+        if ($p->ifparameters) {
+            foreach ($p->parameters as $x) {
                 $params[strtolower($x->attribute)] = $x->value;
-        if ($p->ifdparameters)
-            foreach ($p->dparameters as $x)
+            }
+        }
+        if ($p->ifdparameters) {
+            foreach ($p->dparameters as $x) {
                 $params[strtolower($x->attribute)] = $x->value;
+            }
+        }
 
         // ATTACHMENT
         if ($attachment or ($p->ifdisposition and strtolower($p->disposition)=='attachment') or isset($params['filename'])) {
@@ -345,12 +360,14 @@ class Network_Email_Imap
         if ($p->type==0 && $data) {
             // Messages may be split in different parts because of inline attachments,
             // so append parts together with blank row.
-            if (strtolower($p->subtype)=='plain')
+            if (strtolower($p->subtype)=='plain') {
                 $message['body']['plain'] .= trim($data) ."\n\n";
-            else
+            } else {
                 $message['body']['html'] .= $data.'<br/><br/>';
-            if (isset($params['charset']))
+            }
+            if (isset($params['charset'])) {
                 $message['charset'] = $params['charset'];  // assume all parts are same charset
+            }
         }
 
         // EMBEDDED MESSAGE
