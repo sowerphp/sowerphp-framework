@@ -60,7 +60,7 @@ class View
      * @param location Ubicación de la vista
      * @return Buffer de la página renderizada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-11-15
+     * @version 2021-07-26
      */
     public function render($page, $location = null)
     {
@@ -139,9 +139,12 @@ class View
         }
         // determinar titulo
         $titulo_pagina = isset($this->viewVars['header_title']) ? $this->viewVars['header_title'] : $this->request->request;
+        $_header_title = isset($this->viewVars['__block_title'])
+                            ? $this->viewVars['__block_title']
+                            : Configure::read('page.header.title').($titulo_pagina?(': '.$titulo_pagina):'');
         // renderizar layout de la página (con su contenido)
-        return View_Helper_Pages_Php::render($layout, array_merge(array(
-            '_header_title' => Configure::read('page.header.title').($titulo_pagina?': '.$titulo_pagina:''),
+        $viewVars = array_merge([
+            '_header_title' => $_header_title,
             '_body_title' => Configure::read('page.body.title'),
             '_footer' => Configure::read('page.footer'),
             '_header_extra' => $_header_extra,
@@ -153,7 +156,8 @@ class View
             '_layout' => $this->layout,
             '_content' => $page_content,
             '_module_breadcrumb' => $module_breadcrumb,
-        ), $this->viewVars));
+        ], $this->viewVars);
+        return View_Helper_Pages_Php::render($layout, $viewVars);
     }
 
     /**

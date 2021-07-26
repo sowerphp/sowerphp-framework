@@ -37,14 +37,21 @@ class View_Helper_Pages_Php
      * @param __viewFn Archivo con la página que se desea renderizar
      * @param __dataForView Variables para la página a renderizar
      * @return Buffer de la página renderizada
-     * @author CakePHP
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2021-07-26
      */
-    public static function render ($__viewFn, $__dataForView=array())
+    public static function render ($__viewFn, &$__dataForView = [])
     {
-        extract ($__dataForView, EXTR_SKIP);
-        ob_start ();
+        extract($__dataForView, EXTR_SKIP);
+        ob_start();
         include $__viewFn;
-        return ob_get_clean ();
+        $vars = get_defined_vars();
+        foreach ($vars as $var => $val) {
+            if (substr($var,0,8)==='__block_') {
+                $__dataForView[$var] = $val;
+            }
+        }
+        return ob_get_clean();
     }
 
 }
