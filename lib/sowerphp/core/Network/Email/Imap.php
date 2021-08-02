@@ -155,22 +155,29 @@ class Network_Email_Imap
      * Método que entrega la cantidad de mensajes sin leer de la casilla de correo
      * @return Cantidad de mensajes sin leer
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-05
+     * @version 2021-08-02
      */
-    public function countUnreadMessages()
+    public function countUnreadMessages($folder = null)
     {
-        return imap_status($this->link, $this->createMailbox(), SA_ALL)->unseen;
+        $status = $this->status($folder);
+        if (isset($status['unseen'])) {
+            return (int)$status['unseen'];
+        }
+        if ($folder !== null) {
+            throw new \Exception('No fue posible obtener la cantidad de correos sin leer al especificar la carpeta '.$folder);
+        }
+        return count($this->search('UNSEEN'));
     }
 
     /**
      * Método que entrega la información de estado de una casilla de correo
      * @return Arreglo con el estado de la casilla de correo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-05
+     * @version 2021-08-02
      */
-    public function status()
+    public function status($folder = null)
     {
-        return (array)imap_status($this->link, $this->createMailbox(), SA_ALL);
+        return (array)imap_status($this->link, $this->createMailbox($folder), SA_ALL);
     }
 
     /**
