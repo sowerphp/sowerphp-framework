@@ -1,9 +1,0 @@
-{
-    "config": {
-        "vendor-dir": "Vendor"
-    },
-    "require": {
-        "php": ">=7.3",
-        "michelf/php-markdown": "1.7.0"
-    }
-}

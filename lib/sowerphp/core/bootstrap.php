@@ -24,7 +24,7 @@
 /**
  * @file bootstrap.php
  * Archivo de arranque de la aplicación
- * @version 2016-02-05
+ * @version 2021-10-18
  */
 
 // Asignar nivel de error máximo (para reportes previo a que se asigne el valor
@@ -70,5 +70,9 @@ if ((isset($_SERVER['APPLICATION_ENV']) and $_SERVER['APPLICATION_ENV']=='dev'))
 \sowerphp\core\Model_Datasource_Session::start(\sowerphp\core\Configure::read('session.expires'));
 \sowerphp\core\Model_Datasource_Session::configure();
 
-// autocarga de composer
-require('Vendor/autoload.php');
+// autocarga de composer del framework
+$autoload = DIR_FRAMEWORK.'/vendor/autoload.php';
+if (!file_exists($autoload)) {
+    die('No se encontró autoload de composer en '.$autoload.'. Quizás falta ejecutar: composer install');
+}
+require($autoload);

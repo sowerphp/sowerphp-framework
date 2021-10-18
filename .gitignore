@@ -1,5 +1,5 @@
-# archivos del framework que no se deben subir
-extensions
+# vendors
+vendor
 
 # archivos generados por el sistema operativos o sus aplicaciones
 .lastsync
