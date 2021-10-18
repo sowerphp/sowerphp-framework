@@ -84,7 +84,7 @@ Instalación
 
 	$ sudo mkdir /usr/share/sowerphp
 	$ sudo chown $(whoami): /usr/share/sowerphp
-	$ git clone git@github.com:SowerPHP/sowerphp.git /usr/share/sowerphp
+	$ git clone https://github.com/SowerPHP/sowerphp.git /usr/share/sowerphp
 	$ cd /usr/share/sowerphp
 	$ composer install
 
