@@ -25,9 +25,9 @@ Layout: harbor (https://hackerthemes.com)
         <script src="https://cdn.sasco.cl/js/__.min.js"></script>
         <script src="https://cdn.sasco.cl/js/form.min.js"></script>
 <?php if (\sowerphp\core\App::layerExists('sowerphp/general')) : ?>
-        <script src="<?=$_base?>/js/datepicker/bootstrap-datepicker.js"></script>
-        <script src="<?=$_base?>/js/datepicker/bootstrap-datepicker.es.js"></script>
-        <link rel="stylesheet" href="<?=$_base?>/js/datepicker/datepicker3.css" />
+        <script src="https://cdn.sasco.cl/js/datepicker/bootstrap-datepicker.js"></script>
+        <script src="https://cdn.sasco.cl/js/datepicker/bootstrap-datepicker.es.js"></script>
+        <link rel="stylesheet" href="https://cdn.sasco.cl/js/datepicker/datepicker3.css" />
 <?php endif; ?>
     </head>
     <body>
