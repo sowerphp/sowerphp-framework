@@ -85,16 +85,19 @@ Instalación
 ```shell
 $ sudo mkdir /usr/share/sowerphp
 $ sudo chown $(whoami): /usr/share/sowerphp
-$ git clone https://github.com/SowerPHP/sowerphp.git /usr/share/sowerphp
+$ git clone -b 21.10.0 https://github.com/SowerPHP/sowerphp.git /usr/share/sowerphp
 $ cd /usr/share/sowerphp
 $ composer install
 ```
+
+Donde `21.10.0` es la última versión disponible o bien la que se desea instalar.
 
 Actualización
 -------------
 
 ```shell
 $ cd /usr/share/sowerphp
-$ git pull
+$ git pull https://github.com/SowerPHP/sowerphp.git 21.10.0
 $ composer install
 ```
+Donde `21.10.0` es la última versión disponible o bien a la que se desea actualizar.
