@@ -26,7 +26,6 @@ Siempre, teniendo como principal uso LibreDTE.
 Todo el código fuente de SowerPHP se encuentra liberado utilizando la
 [licencia AGPL v3 o superior](https://github.com/SowerPHP/sowerphp/blob/master/COPYING).
 
-
 Más información en el [Wiki de SowerPHP](http://wiki.sowerphp.org)
 
 Extensiones
@@ -55,11 +54,12 @@ La extensión requiere que previamente se haya cargado la extensión general, ya
 que es utilizada por esta. Por lo cual verificar que el archivo
 *webroot/index.php* al menos contenga en la definición de extensiones:
 
-	$_EXTENSIONS = ['sowerphp/app', 'sowerphp/general'];
+```
+$_EXTENSIONS = ['sowerphp/app', 'sowerphp/general'];
+```
 
 Puedes ver la documentación de la extensión en el
-[Wiki de SowerPHP](http://wiki.sowerphp.org/doku.php/extensions/app)
-
+[Wiki de SowerPHP](http://wiki.sowerphp.org/doku.php/extensions/app).
 
 Instalación
 -----------
@@ -82,15 +82,19 @@ Instalación
 
 ### Clonado framework e instalación de dependencias
 
-	$ sudo mkdir /usr/share/sowerphp
-	$ sudo chown $(whoami): /usr/share/sowerphp
-	$ git clone https://github.com/SowerPHP/sowerphp.git /usr/share/sowerphp
-	$ cd /usr/share/sowerphp
-	$ composer install
+```shell
+$ sudo mkdir /usr/share/sowerphp
+$ sudo chown $(whoami): /usr/share/sowerphp
+$ git clone https://github.com/SowerPHP/sowerphp.git /usr/share/sowerphp
+$ cd /usr/share/sowerphp
+$ composer install
+```
 
 Actualización
 -------------
 
-	$ cd /usr/share/sowerphp
-	$ git pull
-	$ composer install
+```shell
+$ cd /usr/share/sowerphp
+$ git pull
+$ composer install
+```
