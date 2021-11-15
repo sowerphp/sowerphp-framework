@@ -48,7 +48,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
                 'auth-miss' => 'Cabecera Authorization no fue recibida',
                 'auth-bad' => 'Cabecera Authorization es incorrecta',
                 'not-auth' => 'No está autorizado a acceder al recurso %s a través del método %s en la API %s',
-                'input-invalid' => 'Los datos enviados a la API no son son válidos (no es un JSON válido)',
+                'input-invalid' => 'Los datos enviados a la API no son válidos (no es un JSON válido)',
             ]
         ],
         'localhost' => ['::1', '127.0.0.1'],
