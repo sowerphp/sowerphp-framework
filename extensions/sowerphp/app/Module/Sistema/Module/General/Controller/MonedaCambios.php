@@ -38,4 +38,25 @@ class Controller_MonedaCambios extends \Controller_Maintainer
 
     protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
 
+    /**
+     * Recurso que entrega el tipo de cambio para cierta moneda en cierto día
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2022-06-20
+     */
+    public function _api_tasa_GET($from, $to, $fecha = null)
+    {
+        if (empty($fecha)) {
+            $fecha = date('Y-m-d');
+        }
+        $from = strtoupper($from);
+        $to = strtoupper($to);
+        return [
+            $from => [
+                $to => [
+                    $fecha => (float)(new Model_MonedaCambio($from, $to, $fecha))->valor,
+                ]
+            ]
+        ];
+    }
+
 }
