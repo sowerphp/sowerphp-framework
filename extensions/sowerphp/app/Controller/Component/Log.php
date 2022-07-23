@@ -189,7 +189,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      * @param facility Origen del envío
      * @param severity Gravedad del registro
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-06-15
+     * @version 2022-07-23
      */
     private function reportEmail($message, $facility, $severity)
     {
@@ -199,7 +199,11 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
             return false;
         }
         // crear reporte
-        $email = new \sowerphp\core\Network_Email($config);
+        try {
+            $email = new \sowerphp\core\Network_Email($config);
+        } catch (\sowerphp\core\Exception $e) {
+            return false;
+        }
         if ($this->getUser()) {
             $email->replyTo($this->getUser()->email, $this->getUser()->nombre);
         }
@@ -299,10 +303,12 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         // enviar el mensaje
         $email->send($msg);
         // eliminar archivo POST y/o FILES si existen
-        if (isset($_POST_file))
+        if (isset($_POST_file)) {
             unlink($_POST_file);
-        if (isset($_FILES_file))
+        }
+        if (isset($_FILES_file)) {
             unlink($_FILES_file);
+        }
     }
 
     /**

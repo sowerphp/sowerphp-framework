@@ -97,7 +97,7 @@ class Network_Email
             if (!empty($this->default_methods[$protocol])) {
                 $method = $this->default_methods[$protocol];
             } else {
-                throw new Exception('No existe un método por defecto para el protocolo '.$protocol);
+                throw new \sowerphp\core\Exception('No existe un método por defecto para el protocolo '.$protocol);
             }
         }
         $protocol = \sowerphp\core\Utility_Inflector::camelize($protocol);
@@ -264,7 +264,7 @@ class Network_Email
                 $this->to($this->to_default);
             }
             else if (empty($this->cc) and empty($this->bcc)) {
-                throw new Exception('No existe destinatario del correo electrónico');
+                throw new \sowerphp\core\Exception('No existe destinatario del correo electrónico');
             }
         }
         // Crear datos (incluyendo adjuntos)

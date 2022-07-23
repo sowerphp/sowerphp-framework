@@ -65,7 +65,7 @@ class Cache
             // conectar a Memcached
             $this->_cache = new \Memcached();
             $this->_cache->addServer($host, $port);
-            $this->_prefix = $prefix ? $prefix : defined('DIR_PROJECT') ? DIR_PROJECT.':' : '';
+            $this->_prefix = $prefix ? $prefix : (defined('DIR_PROJECT') ? DIR_PROJECT.':' : '');
         }
     }
 

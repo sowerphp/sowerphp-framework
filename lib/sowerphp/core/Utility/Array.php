@@ -390,7 +390,7 @@ class Utility_Array
             $b = sprintf('%0'.$count.'b',$i);
             $out = [];
             for ($j = 0; $j < $count; $j++) {
-                if ($b{$j} == '1') $out[] = $in[$j];
+                if ($b[$j] == '1') $out[] = $in[$j];
             }
             if (count($out) >= $minLength) {
                 $return[] = $out;

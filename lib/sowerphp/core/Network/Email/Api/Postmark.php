@@ -46,11 +46,11 @@ class Network_Email_Api_Postmark
     {
         // verificar soporte Postmark
         if (!class_exists('\Postmark\PostmarkClient')) {
-            throw new \Exception('No hay soporte para Postmark');
+            throw new \sowerphp\core\Exception('No hay soporte para Postmark');
         }
         // si no están los campos mínimos necesarios error
         if (empty($config['token'])) {
-             throw new Exception('Configuración del correo electrónico incompleta');
+             throw new \sowerphp\core\Exception('Configuración del correo electrónico incompleta');
         }
         $this->config = $config;
         // crear objeto pm

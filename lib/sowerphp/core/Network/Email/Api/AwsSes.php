@@ -46,7 +46,7 @@ class Network_Email_Api_AwsSes
     {
         // verificar soporte AWS SES
         if (!class_exists('\Aws\Ses\SesClient')) {
-            throw new \Exception('No hay soporte para AWS SES');
+            throw new \sowerphp\core\Exception('No hay soporte para AWS SES');
         }
         // valores por defecto para conexión vía AWS SES
         $config = array_merge([
@@ -56,7 +56,7 @@ class Network_Email_Api_AwsSes
         ], $config);
         // si no están los campos mínimos necesarios error
         if (empty($config['version']) || empty($config['region']) || (empty($config['profile']) and empty($config['credentials']))) {
-             throw new Exception('Configuración del correo electrónico incompleta');
+             throw new \sowerphp\core\Exception('Configuración del correo electrónico incompleta');
         }
         $this->config = [
             'version' => $config['version'],

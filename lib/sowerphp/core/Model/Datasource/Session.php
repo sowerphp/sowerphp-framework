@@ -43,7 +43,7 @@ class Model_Datasource_Session
         $lifetime = $expires * 60;
         $session_name = 'sec_session_id';
         $path = $Request->base();
-        $path = $path!=''?$path:'/';
+        $path = $path != '' ? $path : '/';
         $domain = $Request->header('X-Forwarded-Host');
         if (!$domain) {
             $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
@@ -56,7 +56,6 @@ class Model_Datasource_Session
         ini_set('session.use_only_cookies', true);
         ini_set('session.gc_maxlifetime', $lifetime <= 65535 ? $lifetime : 65535);
         session_name($session_name);
-        //session_set_cookie_params($lifetime, $path, $domain, $secure, $httponly);
         session_start();
         setcookie(session_name(), session_id(), time()+$lifetime, $path, $domain, $secure, $httponly);
     }
@@ -94,10 +93,13 @@ class Model_Datasource_Session
      * @param name Nombre de la variable que se quiere buscar
      * @return Verdadero si la variable existe en la sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-22
+     * @version 2022-07-23
      */
     public static function check($name)
     {
+        if (!isset($_SESSION)) {
+            return false;
+        }
         $result = Utility_Set::classicExtract($_SESSION, $name);
         return isset($result);
     }
@@ -107,20 +109,23 @@ class Model_Datasource_Session
      * @param name Nombre de la variable que se desea leer
      * @return Valor de la variable o falso en caso que no exista o la sesión no este iniciada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-22
+     * @version 2022-07-23
      */
     public static function read($name = null)
     {
-        // Si no se indico un nombre, se entrega todo el arreglo de la sesión
-        if ($name==null) {
-            return $_SESSION;
-        }
-        // Verificar que lo solicitado existe
-        if(!self::check($name)) {
+        if (!isset($_SESSION)) {
             return false;
+        }
+        // Si no se indico un nombre, se entrega todo el arreglo de la sesión
+        if ($name === null) {
+            return $_SESSION;
         }
         // Extraer los datos que se están solicitando
         $result = Utility_Set::classicExtract($_SESSION, $name);
+        // Verificar que lo solicitado existe
+        if (!isset($result)) {
+            return false;
+        }
         // Retornar lo solicitado (ya se reviso si existía, por lo cual si es null es válido el valor)
         return $result;
     }
@@ -130,14 +135,14 @@ class Model_Datasource_Session
      * @param name Nombre de la variable que se desea eliminar
      * @return Verdadero si se logro eliminar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-06-12
+     * @version 2022-07-23
      */
     public static function delete($name)
     {
         // Si la variable existe se quita
         if (self::check($name)) {
             self::_overwrite($_SESSION, Utility_Set::remove($_SESSION, $name));
-            return (self::check($name) == false);
+            return (self::check($name) === false);
         }
         // En caso que no se encontrara la variable se retornará falso
         return false;
@@ -149,10 +154,13 @@ class Model_Datasource_Session
      * @param value Valor que se desea asignar a la variable
      * @return Verdadero si se logró escribir la variable de sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-22
+     * @version 2022-07-23
      */
     public static function write($name, $value = null)
     {
+        if (!isset($_SESSION)) {
+            return false;
+        }
         // Armar el arreglo necesario para realizar la escritura
         $write = $name;
         if (!is_array($name)) {

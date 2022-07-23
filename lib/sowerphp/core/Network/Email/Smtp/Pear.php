@@ -43,7 +43,7 @@ class Network_Email_Smtp_Pear
      * Constructor de la clase
      * @param config Arreglo con la configuración de Pear/Mail
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-09
+     * @version 2022-07-23
      */
     public function __construct($config)
     {
@@ -62,7 +62,7 @@ class Network_Email_Smtp_Pear
         }
         // si no están los campos mínimos necesarios error
         if (empty($config['host']) || empty($config['port']) || empty($config['user']) || empty($config['pass'])) {
-             throw new Exception('Configuración del correo electrónico incompleta');
+             throw new \sowerphp\core\Exception('Configuración del correo electrónico incompleta');
         }
         // Configuración para la conexión al servidor
         $this->config = [

@@ -69,6 +69,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     private $allowedActionsWithLogin = array(); ///< Acciones con login
     private $session = null; ///< Información de la sesión del usuario
     public $User = false; ///< Usuario que se ha identificado en la sesión
+    private $__logged = null;
     private $Cache; ///< Objeto para el caché
 
     /**
@@ -80,10 +81,11 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     {
         // ejecutar el constructor padre
         parent::__construct($Components, $settings);
-        // Recuperar sesión
+        // recuperar sesión
         $this->session = \sowerphp\core\Model_Datasource_Session::read(
             $this->settings['session']['key']
         );
+        // si hay sesión se obtiene el objeto del usuario
         if ($this->session) {
             $this->Cache = new \sowerphp\core\Cache();
             $this->User = $this->Cache->get($this->settings['session']['key'].$this->session['id']);
@@ -197,20 +199,19 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-03-29
      */
-    public function isAuthorized ()
+    public function isAuthorized()
     {
         // Si la acción se encuentra dentro de las permitidas dejar pasar
-        if (in_array($this->controller->request->params['action'], $this->allowedActions))
+        if (in_array($this->controller->request->params['action'], $this->allowedActions)) {
             return true;
+        }
         // si el usuario no existe en la sesión se retorna falso
-        if (!$this->logged())
+        if (!$this->logged()) {
             return false;
+        }
         // si la acción se encuentra dentro de las que solo requieren un
         // usuario logueado se acepta
-        if (in_array(
-                $this->controller->request->params['action'],
-                $this->allowedActionsWithLogin
-        )) {
+        if (in_array($this->controller->request->params['action'], $this->allowedActionsWithLogin)) {
             return true;
         }
         // Chequear permisos
@@ -220,27 +221,30 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     /**
      * Indica si existe una sesión de un usuario creada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-01
+     * @version 2022-07-23
      */
-    public function logged ()
+    public function logged()
     {
-        // si se creó el objeto usuario se verifica el hash
-        if ($this->session and $this->User) {
-            if (!$this->User->checkLastLoginHash($this->session['hash'])) {
-                (new \sowerphp\core\Cache())->delete($this->settings['session']['key'].$this->session['id']);
-                \sowerphp\core\Model_Datasource_Session::destroy();
-                \sowerphp\core\Model_Datasource_Session::message(
-                    sprintf(
-                        $this->settings['messages']['error']['newlogin'],
-                        $this->User->usuario
-                    ), 'error'
-                );
-                return false;
+        if ($this->__logged === null) {
+            if ($this->session and $this->User) {
+                if (!$this->User->checkLastLoginHash($this->session['hash'])) {
+                    (new \sowerphp\core\Cache())->delete($this->settings['session']['key'].$this->session['id']);
+                    \sowerphp\core\Model_Datasource_Session::destroy();
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        sprintf(
+                            $this->settings['messages']['error']['newlogin'],
+                            $this->User->usuario
+                        ), 'error'
+                    );
+                    $this->__logged = false;
+                } else {
+                    $this->__logged = true;
+                }
+            } else {
+                $this->__logged = false;
             }
-            return true;
         }
-        // si se llegó acá entonces no se está logueado
-        return false;
+        return $this->__logged;
     }
 
     /**
@@ -360,7 +364,9 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         $this->log($msg);
         // si el usuario tiene layout personalizado se asigna
         if ($this->User->config_page_layout) {
-            \sowerphp\core\Model_Datasource_Session::write('config.page.layout', $this->User->config_page_layout);
+            \sowerphp\core\Model_Datasource_Session::write(
+                'config.page.layout', $this->User->config_page_layout
+            );
         }
         // redireccionar
         if (isset($_POST['redirect'][0])) {
@@ -381,7 +387,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         if ($this->settings['maxLoginAttempts']) {
             $this->User->savePasswordRetry($this->settings['maxLoginAttempts']);
         }
-        $this->session =  [
+        $this->session = [
             'id' => $this->User->id,
             'hash' => $hash,
         ];

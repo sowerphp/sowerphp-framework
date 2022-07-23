@@ -87,7 +87,7 @@ class Network_Ftp
     {
         // método sólo funciona con FTP en sistemas like Unix
         if ($this->systype()!='UNIX') {
-            throw new Exception(
+            throw new \sowerphp\core\Exception(
                 'Método '.__CLASS__.'::scandir() sólo funciona con sistemas like Unix'
             );
         }

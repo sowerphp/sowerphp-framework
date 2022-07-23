@@ -68,7 +68,7 @@ class View
         if ($location) {
             $location = self::location(\sowerphp\core\App::layer($location).'/'.$location.'/View/'.$page);
         } else {
-            $location = self::location($page, $this->request->params['module']);
+            $location = self::location($page, is_array($this->request->params) ? $this->request->params['module'] : null);
         }
         // si no se encontró error
         if (!$location) {
@@ -115,7 +115,7 @@ class View
             $this->layout = $this->defaultLayout;
             $layout = $this->getLayoutLocation($this->layout);
             if (!$layout) {
-                throw new Exception('No se encontró layout '.$this->layout);
+                throw new \sowerphp\core\Exception('No se encontró layout '.$this->layout);
             }
         }
         // página que se está viendo
@@ -127,7 +127,7 @@ class View
         }
         // determinar module breadcrumb
         $module_breadcrumb = [];
-        if ($this->request->params['module']) {
+        if (is_array($this->request->params) && $this->request->params['module']) {
             $modulos = explode('.', $this->request->params['module']);
             $url = '';
             foreach ($modulos as &$m) {
