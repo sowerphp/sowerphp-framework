@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Pluralize and singularize English words.
  *
