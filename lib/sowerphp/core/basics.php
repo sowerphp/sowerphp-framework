@@ -24,8 +24,21 @@
 /**
  * @file basics.php
  * Archivo de funciones básicas para la aplicación
- * @version 2019-11-28
+ * @version 2022-07-24
  */
+
+/**
+ * Función que carga una variable de entorno o su valor por defecto
+ * @param varname Variable que se desea consultar
+ * @param default Valor por defecto de la variable
+ * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+ * @version 2022-07-24
+ */
+function env($varname, $default = null)
+{
+    $value = getenv($varname);
+    return $value === false ? $default : $value;
+}
 
 /**
  * Función para mostrar el valor de una variable (y su tipo) o un objeto (y su
