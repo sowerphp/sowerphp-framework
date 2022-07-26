@@ -32,6 +32,7 @@ class Configure
 {
 
     protected static $_values = array(); ///< Valores de la configuración
+    public static $env; ///< Configuración de las variables de entorno
 
     /**
      * Realizar configuración al inicio de la aplicación
@@ -51,6 +52,9 @@ class Configure
         foreach ($paths as &$path) {
             App::import($path.'/Vendor/autoload');
         }
+        // cargar variables de entorno
+        self::$env = \Dotenv\Dotenv::createImmutable(DIR_PROJECT, 'env');
+        self::$env->safeLoad();
         // Incluir configuraciones de la aplicación web
         foreach ($paths as &$path) {
             App::import($path.'/Config/core');
