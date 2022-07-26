@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Clase para manejar modulos: cargarlos, rutas y bootstrap
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-22
+ * @version 2022-07-26
  */
 class Module
 {
@@ -48,7 +48,7 @@ class Module
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-02-24
      */
-    public static function uses ($module, $config = array())
+    public static function uses($module, $config = array())
     {
         // Si se paso un arreglo se procesa cada uno por separado
         if (is_array($module)) {
@@ -64,7 +64,7 @@ class Module
                 self::uses($name, $conf);
             }
             // Una vez procesados todos los modulos pasados terminar el uses
-                return;
+            return;
         }
         // Asignar opciones por defecto
         $config = array_merge(
@@ -85,12 +85,28 @@ class Module
     }
 
     /**
+     * Método para indicar que se debe descartar un módulo previamente cargado
+     * @param module Nombre del módulo a descartar
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2022-07-26
+     */
+    public static function drop($module)
+    {
+        if (!is_array($module)) {
+            $module = [$module];
+        }
+        foreach ($module as $name) {
+            unset(self::$_modules[$name]);
+        }
+    }
+
+    /**
      * Cargar módulo e inicializarlo
      * @param module Nombre del módulo que se desea cargar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-03-22
      */
-    public static function load ($module)
+    public static function load($module)
     {
         // si el módulo ya está cargado se retorna
         if (self::$_modules[$module]['loaded']) {
@@ -146,7 +162,7 @@ class Module
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-03-17
      */
-    public static function fileLocation ($module, $file)
+    public static function fileLocation($module, $file)
     {
         $paths = App::paths();
         foreach ($paths as &$path) {
@@ -165,7 +181,7 @@ class Module
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-02-24
      */
-    public static function loaded ($module = null)
+    public static function loaded($module = null)
     {
         // Si existe el nombre del modulo, se indica si esta o no cargado
         if ($module) {
@@ -186,13 +202,14 @@ class Module
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-03-22
      */
-    public static function find ($url)
+    public static function find($url)
     {
         // Separar por "/"
         $partes = explode('/', $url);
         // Quitar primer elemento, ya que si parte con / entonces será vacío
-        if (!strlen($partes[0]))
+        if (!strlen($partes[0])) {
             array_shift($partes);
+        }
         // Determinar hasta que elemento de la url corresponde a parte de un modulo
         $npartes = count($partes);
         $hasta = -1;
@@ -231,12 +248,13 @@ class Module
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2013-06-10
      */
-    public static function paths ($module)
+    public static function paths($module)
     {
-        if(isset(self::$_modules[$module]))
+        if(isset(self::$_modules[$module])) {
             return self::$_modules[$module]['path'];
-        else
+        } else {
             return null;
+        }
     }
 
     /**
@@ -246,7 +264,7 @@ class Module
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2012-11-20
      */
-    public static function split ($name)
+    public static function split($name)
     {
         $lastdot = strrpos($name, '.');
         if ($lastdot!==false) {
