@@ -32,12 +32,11 @@
  * @param varname Variable que se desea consultar
  * @param default Valor por defecto de la variable
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2022-07-24
+ * @version 2022-07-25
  */
 function env($varname, $default = null)
 {
-    $value = getenv($varname);
-    return $value === false ? $default : $value;
+    return isset($_ENV[$varname]) ? $_ENV[$varname] : $default;
 }
 
 /**
