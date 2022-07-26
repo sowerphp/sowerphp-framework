@@ -36,17 +36,26 @@ class Configure
     /**
      * Realizar configuración al inicio de la aplicación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-09
+     * @version 2022-07-25
      */
     public static function bootstrap()
     {
-        // Incluir configuraciones para el sitio web
+        // autocarga de composer del framework
+        $autoload = DIR_FRAMEWORK.'/vendor/autoload.php';
+        if (!file_exists($autoload)) {
+            die('No se encontró autoload de composer en '.$autoload.'. Quizás falta ejecutar: composer install');
+        }
+        require($autoload);
+        // Incluir autocargas de composer de la aplicación web
         $paths = array_reverse(App::paths());
+        foreach ($paths as &$path) {
+            App::import($path.'/Vendor/autoload');
+        }
+        // Incluir configuraciones de la aplicación web
         foreach ($paths as &$path) {
             App::import($path.'/Config/core');
         }
-        // Incluir rutas (se debe hacer por separado, primero la
-        // configuración y luego rutas)
+        // Incluir rutas de la aplicación web
         foreach ($paths as &$path) {
             App::import($path.'/Config/routes');
         }
@@ -57,10 +66,11 @@ class Configure
         // Definir la zona horaria
         date_default_timezone_set(self::$_values['time']['zone']);
         // definir directorio temporal
-        if (is_writable(DIR_PROJECT.'/tmp'))
+        if (is_writable(DIR_PROJECT.'/tmp')) {
             define('TMP', DIR_PROJECT.'/tmp');
-        else
+        } else {
             define('TMP', sys_get_temp_dir());
+        }
         // cargar reglas de Inflector para el idioma de la aplicación
         App::import ('Config/Inflector/'.self::$_values['language']);
         // procesar cada capa (excepto SowerPHP/core) buscando funciones y bootstrap
