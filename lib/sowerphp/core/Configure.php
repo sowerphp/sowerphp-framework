@@ -54,7 +54,11 @@ class Configure
         }
         // cargar variables de entorno
         self::$env = \Dotenv\Dotenv::createImmutable(DIR_PROJECT, 'env');
-        self::$env->safeLoad();
+        try {
+            self::$env->safeLoad();
+        } catch (\Dotenv\Exception\InvalidFileException $e) {
+            die($e->getMessage());
+        }
         // Incluir configuraciones de la aplicación web
         foreach ($paths as &$path) {
             App::import($path.'/Config/core');
