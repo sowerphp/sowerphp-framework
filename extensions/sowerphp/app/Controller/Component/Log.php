@@ -78,15 +78,10 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      * Se registran automáticamente eventos que ocurrieron durante la ejecución
      * del controlador (incluyendo la renderización de la vista)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-28
+     * @version 2022-07-28
      */
     public function afterFilter($url = null, $status = null)
     {
-        // si se está en el entorno de desarrollo no se registran eventos de
-        // forma automática
-        if (defined('ENVIRONMENT_DEV'))
-            return;
-        // registrar eventos de errores generados en la aplicación
         if (get_class($this->controller)=='sowerphp\core\Controller_Error') {
             $message = [
                 'exception' => $this->controller->viewVars['exception'],
@@ -107,8 +102,9 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      */
     public function write($message, $severity = LOG_INFO, $facility = null)
     {
-        if (!$facility)
+        if (!$facility) {
             $facility = $this->controller->log_facility;
+        }
         $priority = $facility * 8 + $severity;
         $this->report($message, $priority);
     }
@@ -170,8 +166,9 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         }
         // agregar datos de URL, usuario e IP
         $message .= ' in '.$this->getURL().'';
-        if ($this->getUser())
+        if ($this->getUser()) {
             $message .= ' by '.$this->getUser()->usuario;
+        }
         $message .= ' from '.$this->controller->Auth->ip(true);
         // enviar mensaje a syslog
         openlog(
@@ -320,8 +317,9 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
     private function openlog()
     {
         if (\sowerphp\core\Module::loaded('Sistema.Logs')) {
-            if (!$this->Log)
+            if (!$this->Log) {
                 $this->Log = new \sowerphp\app\Sistema\Logs\Model_Log();
+            }
             return true;
         }
         return false;
@@ -337,8 +335,9 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      */
     private function reportDb($message, $facility, $severity)
     {
-        if (!$this->openlog())
+        if (!$this->openlog()) {
             return;
+        }
         $this->Log->fechahora = date('Y-m-d H:i:s');
         $this->Log->identificador = get_class($this->controller);
         $this->Log->origen = $facility;
@@ -351,8 +350,9 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
             foreach ($message as $key => $value) {
                 $this->Log->mensaje .= $key.":\n".$value."\n\n";
             }
-        } else
+        } else {
             $this->Log->mensaje = $message;
+        }
         $this->Log->save();
     }
 
@@ -383,8 +383,9 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      */
     private function getFacility($facility)
     {
-        if (!$this->openlog())
+        if (!$this->openlog()) {
             return $facility;
+        }
         return $this->Log->getFacility($facility)->glosa;
     }
 
@@ -397,8 +398,9 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      */
     private function getSeverity($severity)
     {
-        if (!$this->openlog())
+        if (!$this->openlog()) {
             return $severity;
+        }
         return $this->Log->getSeverity($severity)->glosa;
     }
 

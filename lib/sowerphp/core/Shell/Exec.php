@@ -130,7 +130,7 @@ class Shell_Exec
             $ppid_actual = posix_getppid();
             $otros_procesos = [];
             foreach ($procesos as $p) {
-                $cmd = str_replace(' --dev', '', $p['cmd']);
+                $cmd = $p['cmd'];
                 $cmd = trim(mb_substr($cmd, strpos($cmd, '/shell.php ') + 1));
                 if (!in_array($p['pid'], [$pid_actual, $ppid_actual]) and $cmd == $cmd_actual) {
                     $otros_procesos[] = $p;

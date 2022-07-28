@@ -121,7 +121,7 @@ function __d($dominio, $string, $args = null)
 /**
  * Función que permite ejecutar un comando en la terminal
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2019-11-28
+ * @version 2022-07-28
  */
 function shell_exec_async($cmd, $log = false, &$output = [])
 {
@@ -131,9 +131,6 @@ function shell_exec_async($cmd, $log = false, &$output = [])
     }
     if ($cmd[0]!='/') {
         $cmd = DIR_PROJECT.'/website/Shell/shell.php '.$cmd;
-        if (defined('ENVIRONMENT_DEV') and ENVIRONMENT_DEV) {
-            $cmd .= ' --dev';
-        }
     }
     $screen_cmd = 'screen -dm';
     if ($log) {

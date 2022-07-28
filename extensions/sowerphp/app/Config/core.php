@@ -21,10 +21,6 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// Si es ambiente de desarrollo se carga módulo de desarrollo
-if (defined('ENVIRONMENT_DEV'))
-    \sowerphp\core\Module::uses('Dev');
-
 // Módulos que usará esta aplicación
 \sowerphp\core\Module::uses(array(
     'Sistema',
