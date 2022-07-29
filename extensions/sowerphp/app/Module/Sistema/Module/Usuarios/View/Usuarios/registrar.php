@@ -23,7 +23,7 @@ foreach ($messages as $message) {
 ?>
             <div class="card">
                 <div class="card-body">
-                    <h1 class="text-center mb-4">Crear cuenta</h1>
+                    <h1 class="text-center mb-4">Crear cuenta de usuario</h1>
                     <form action="<?=$_base?>/usuarios/registrar" method="post" onsubmit="return Form.check()" class="mb-4">
                         <div class="form-group">
                             <label for="name" class="sr-only">Nombre</label>
@@ -38,8 +38,8 @@ foreach ($messages as $message) {
                             <input type="email" name="email" id="email" class="form-control form-control-lg" required="required" placeholder="Correo electrónico" maxlength="50" />
                         </div>
 <?php if (!empty($terms)) : ?>
-                        <label>
-                            <input type="checkbox" name="terms_ok" required="required" onclick="this.value = this.checked ? 1 : 0" /> Acepto los <a href="<?=$terms?>" target="_blank">términos y condiciones de uso</a> del servicio
+                        <label class="lead mb-4">
+                            <input type="checkbox" name="terms_ok" required="required" onclick="this.value = this.checked ? 1 : 0" /> Acepto los <a href="<?=$terms?>" target="_blank">términos y condiciones de uso</a> del servicio.
                         </label>
 <?php endif; ?>
 <?php if (!empty($public_key)) : ?>
@@ -48,10 +48,14 @@ foreach ($messages as $message) {
 <?php endif; ?>
                         <button type="submit" class="btn btn-primary btn-block btn-lg">Registrar usuario</button>
                     </form>
-                    <p class="text-center small">(la contraseña será enviada a su email)</p>
+                    <p class="text-center lead">
+                        <i class="fas fa-exclamation-circle text-muted"></i>
+                        La contraseña para acceder será enviada a su correo
+                        <i class="fas fa-exclamation-circle text-muted"></i>
+                    </p>
                 </div>
             </div>
-            <p class="text-center small mt-4">¿ya tiene una cuenta? <a href="<?=$_base?>/usuarios/ingresar">¡inicie sesión!</a></p>
+            <p class="text-center mt-4"><a href="<?=$_base?>/usuarios/ingresar">Ingresar con una cuenta de usuario existente</a></p>
         </div>
     </div>
     <script> $(function() { $("#name").focus(); }); </script>

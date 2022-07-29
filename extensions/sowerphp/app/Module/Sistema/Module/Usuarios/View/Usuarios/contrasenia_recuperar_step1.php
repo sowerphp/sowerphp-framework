@@ -23,16 +23,17 @@ foreach ($messages as $message) {
 ?>
             <div class="card">
                 <div class="card-body">
-                    <h1 class="text-center mb-4">Reiniciar contraseña</h1>
+                    <h1 class="text-center mb-4">Recuperar contraseña</h1>
                     <form action="<?=$_base?>/usuarios/contrasenia/recuperar" method="post" onsubmit="return Form.check()" class="mb-4">
                         <div class="form-group">
                             <label for="user" class="sr-only">Usuario</label>
                             <input type="text" name="id" id="user" class="form-control form-control-lg" required="required" placeholder="Usuario o correo electrónico">
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block btn-lg">Solicitar email nueva contraseña</button>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">Solicitar email para recuperar la contraseña</button>
                     </form>
                 </div>
             </div>
+            <p class="text-center mt-4">Si la cuenta se encuentra bloqueada, esta opción permite desbloquear la cuenta.</p>
         </div>
     </div>
     <script> $(function() { $("#user").focus(); }); </script>
