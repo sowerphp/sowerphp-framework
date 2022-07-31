@@ -37,7 +37,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         'model' => '\sowerphp\app\Sistema\Usuarios\Model_Usuario',
         'session' => [
             'key' => 'session.auth',
-            'cache' => 1800,
+            //'cache' => 1800, // 1800 segundos o 30 minutos (se saca de la configuración)
         ],
         'redirect' => [
             'login' => '/',
@@ -75,10 +75,12 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     /**
      * Método que inicializa el componente y carga la sesión activa
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-11-06
+     * @version 2022-07-31
      */
     public function __construct(\sowerphp\core\Controller_Component_Collection $Components, $settings = [])
     {
+        // asignar configuración de duración de la sesión (session.expires está en minutos)
+        $this->settings['session']['cache'] = \sowerphp\core\Configure::read('session.expires') * 60;
         // ejecutar el constructor padre
         parent::__construct($Components, $settings);
         // recuperar sesión
