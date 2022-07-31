@@ -109,7 +109,7 @@ class Controller_Maintainer extends \Controller_App
      * esto permite a cierto usuario mostrar sólo cierto listado de registros
      * y no todos, esto evita tener que reprogramar la acción listar :-)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-02-09
+     * @version 2022-07-31
      */
     protected function forceSearch(array $data)
     {
@@ -123,9 +123,12 @@ class Controller_Maintainer extends \Controller_App
             $vars = array_keys($data);
             $filters = explode(',', $_GET['search']);
             foreach ($filters as &$filter) {
-                list($var, $val) = explode(':', $filter);
-                if (!in_array($var, $vars))
-                    $search[] = $var.':'.$val;
+                if (strpos($filter, ':')) {
+                    list($var, $val) = explode(':', $filter);
+                    if (!in_array($var, $vars)) {
+                        $search[] = $var.':'.$val;
+                    }
+                }
             }
         }
         // se vuelve a armar la búsqueda
@@ -135,7 +138,7 @@ class Controller_Maintainer extends \Controller_App
     /**
      * Acción para listar los registros de la tabla
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-08-20
+     * @version 2022-07-31
      */
     public function listar($page = 1, $orderby = null, $order = 'A')
     {
@@ -152,6 +155,10 @@ class Controller_Maintainer extends \Controller_App
             $vars = [];
             foreach ($filters as &$filter) {
                 list($var, $val) = explode(':', $filter);
+                // sólo procesar filtros donde el campo por el que se filtra esté en el modelo
+                if (empty($model::$columnsInfo[$var])) {
+                    continue;
+                }
                 $search[$var] = $val;
                 // si el valor es '!null' se compara contra IS NOT NULL
                 if ($val == '!null') {
@@ -240,9 +247,9 @@ class Controller_Maintainer extends \Controller_App
     /**
      * Acción para crear un registro en la tabla
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-24
+     * @version 2022-07-31
      */
-    public function crear ()
+    public function crear()
     {
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         // si se envió el formulario se procesa
@@ -255,11 +262,19 @@ class Controller_Maintainer extends \Controller_App
                         $Obj->setFile($name, $file);
                     }
                 }
-                $msg = $Obj->save() ? 'Registro creado' : 'Registro no creado';
-                \sowerphp\core\Model_Datasource_Session::message($msg, 'ok');
-                $this->redirect(
-                    $this->module_url.$this->request->params['controller'].'/listar'.$filterListar
-                );
+                try {
+                    $Obj->checkAttributes();
+                    if ($Obj->save()) {
+                        \sowerphp\core\Model_Datasource_Session::message('Registro creado', 'ok');
+                    } else {
+                        \sowerphp\core\Model_Datasource_Session::message('Registro no creado', 'error');
+                    }
+                    $this->redirect(
+                        $this->module_url.$this->request->params['controller'].'/listar'.$filterListar
+                    );
+                } catch (\Exception $e) {
+                    \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+                }
             } else {
                 \sowerphp\core\Model_Datasource_Session::message('Registro ya existe', 'error');
             }
@@ -282,9 +297,9 @@ class Controller_Maintainer extends \Controller_App
      * Acción para editar un registro de la tabla
      * @param pk Parámetro que representa la PK, pueden ser varios parámetros los pasados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-03-04
+     * @version 2022-07-31
      */
-    public function editar ($pk)
+    public function editar($pk)
     {
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         $Obj = new $this->model(array_map('urldecode', func_get_args()));
@@ -300,20 +315,7 @@ class Controller_Maintainer extends \Controller_App
         }
         // si no se ha enviado el formulario se mostrará
         $model = $this->model;
-        if(!isset($_POST['submit'])) {
-            $this->set(array(
-                'Obj' => $Obj,
-                'columns' => $model::$columnsInfo,
-                'contraseniaNames' => $this->contraseniaNames,
-                'fkNamespace' => $model::$fkNamespace,
-                'accion' => 'Editar',
-                'listarUrl' => $this->module_url.$this->request->params['controller'].'/listar'.$filterListar,
-            ));
-            // renderizar
-            $this->renderView('crear_editar');
-        }
-        // si se envió el formulario se procesa
-        else {
+        if (isset($_POST['submit'])) {
             foreach ($model::$columnsInfo as $col => &$info) {
                 if (in_array($col, $this->contraseniaNames) and empty($_POST[$col])) {
                     $_POST[$col] = $Obj->$col;
@@ -325,12 +327,31 @@ class Controller_Maintainer extends \Controller_App
                     $Obj->setFile($name, $file);
                 }
             }
-            $msg = $Obj->save() ? 'Registro ('.implode(', ', func_get_args()).') editado' : 'Registro ('.implode(', ', func_get_args()).') no editado';
-            \sowerphp\core\Model_Datasource_Session::message($msg, 'ok');
-            $this->redirect(
-                $this->module_url.$this->request->params['controller'].'/listar'.$filterListar
-            );
+            try {
+                $Obj->checkAttributes();
+                if ($Obj->save()) {
+                    \sowerphp\core\Model_Datasource_Session::message('Registro ('.implode(', ', func_get_args()).') editado', 'ok');
+                } else {
+                    \sowerphp\core\Model_Datasource_Session::message('Registro ('.implode(', ', func_get_args()).') no editado', 'error');
+                }
+                $this->redirect(
+                    $this->module_url.$this->request->params['controller'].'/listar'.$filterListar
+                );
+            } catch (\Exception $e) {
+                \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+            }
         }
+        // renderizar la vista
+        $this->set(array(
+            'Obj' => $Obj,
+            'columns' => $model::$columnsInfo,
+            'contraseniaNames' => $this->contraseniaNames,
+            'fkNamespace' => $model::$fkNamespace,
+            'accion' => 'Editar',
+            'listarUrl' => $this->module_url.$this->request->params['controller'].'/listar'.$filterListar,
+        ));
+        // renderizar
+        $this->renderView('crear_editar');
     }
 
     /**

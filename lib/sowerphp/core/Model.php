@@ -44,7 +44,7 @@ abstract class Model
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2018-04-27
      */
-    public function __construct ($pk=null)
+    public function __construct($pk=null)
     {
         // recuperar conexión a la base de datos
         $this->getDB();
@@ -92,13 +92,14 @@ abstract class Model
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-12-21
      */
-    protected function preparePk ()
+    protected function preparePk()
     {
         $pk = ['where'=>[], 'values'=>[]];
         foreach ($this::$columnsInfo as $col => &$info) {
             if ($info['pk']) {
-                if (empty($this->$col) and $this->$col!=0)
+                if (empty($this->$col) and $this->$col!=0) {
                     return false;
+                }
                 $pk['where'][] = $col.' = :pk_'.$col;
                 $pk['values'][':pk_'.$col] = $this->$col;
             }
@@ -114,7 +115,7 @@ abstract class Model
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-05-04
      */
-    public function get ()
+    public function get()
     {
         // preparar pk
         $pk = $this->preparePk();
@@ -143,7 +144,7 @@ abstract class Model
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
-    public function exists ()
+    public function exists()
     {
         // preparar pk
         $pk = $this->preparePk();
@@ -161,11 +162,13 @@ abstract class Model
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2015-05-26
      */
-    public function delete ()
+    public function delete()
     {
         // preparar pk
         $pk = $this->preparePk();
-        if (!$pk) return false;
+        if (!$pk) {
+            return false;
+        }
         // eliminar registro
         $beginTransaction = $this->db->beginTransaction();
         $stmt = $this->db->query(
@@ -173,12 +176,14 @@ abstract class Model
             $pk['values']
         );
         if ($stmt->errorCode()==='00000') {
-            if ($beginTransaction)
+            if ($beginTransaction) {
                 $this->db->commit();
+            }
             return true;
         }
-        if ($beginTransaction)
+        if ($beginTransaction) {
             $this->db->rollBack();
+        }
         return false;
     }
 
@@ -392,17 +397,58 @@ abstract class Model
     }
 
     /**
+     * Método que valida los valores asignados a los atributos del objeto
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2022-07-31
+     */
+    public function checkAttributes()
+    {
+        foreach ($this::$columnsInfo as $attribute => $info) {
+            // verificar que el campo tenga una valor si no puede ser NULL
+            // "0" es un valor aceptado como válido.
+            if (empty($info['null']) and ($this->{$attribute} === null or $this->{$attribute} === '')) {
+                throw new \Exception(__(
+                    'El campo "%s" debe tener un valor.',
+                    $info['name'],
+                ));
+            }
+            // verificar largo del campo
+            if (in_array($info['type'], ['char', 'character varying', 'varchar', 'text'])) {
+                $attribute_len = mb_strlen($this->{$attribute});
+                if ($attribute_len > $info['length']) {
+                    throw new \Exception(__(
+                        'El campo "%s" debe tener un largo máximo de %d caracteres. Se ingresaron %d caracteres.',
+                        $info['name'],
+                        $info['length'],
+                        $attribute_len
+                    ));
+                }
+            }
+            // validaciones del modelo estándares
+            if (isset($this::$columnsInfo[$attribute]['check'])) {
+                $status = \sowerphp\core\Utility_Data_Validation::check(
+                    $this->{$attribute}, $this::$columnsInfo[$attribute]['check']
+                );
+                if ($status !== true) {
+                    throw new \Exception($status);
+                }
+            }
+        }
+    }
+
+    /**
      * Método que entrega un arreglo con las columnas que son la PK de la tabla
      * @return Arreglo con las columnas que son la PK
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-22
      */
-    public function getPk ()
+    public function getPk()
     {
         $pk = [];
         foreach ($this::$columnsInfo as $column => &$info) {
-            if ($info['pk'])
+            if ($info['pk']) {
                 $pk[] = $column;
+            }
         }
         return $pk;
     }
@@ -413,7 +459,7 @@ abstract class Model
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-22
      */
-    public function getPkValues ()
+    public function getPkValues()
     {
         $pk = $this->getPk();
         $values = [];

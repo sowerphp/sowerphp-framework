@@ -20,6 +20,7 @@ echo $form->input([
     'value' => isset($Obj) ? $Obj->nombre : '',
     'help'  => $columns['nombre']['comment'],
     'check' => (!$columns['nombre']['null']?['notempty']:[]),
+    'attr' => 'maxlength="'.$columns['nombre']['length'].'"',
 ]);
 echo $form->input([
     'name' => 'usuario',
@@ -27,6 +28,7 @@ echo $form->input([
     'value' => isset($Obj) ? $Obj->usuario : '',
     'help'  => $columns['usuario']['comment'],
     'check' => (!$columns['usuario']['null']?['notempty']:[]),
+    'attr' => 'maxlength="'.$columns['usuario']['length'].'"',
 ]);
 if (is_array($ldap) and isset($ldap['person_uid']) and $ldap['person_uid']=='usuario_ldap') {
     echo $form->input([
@@ -34,6 +36,7 @@ if (is_array($ldap) and isset($ldap['person_uid']) and $ldap['person_uid']=='usu
         'label' => $columns['usuario_ldap']['name'],
         'value' => isset($Obj) ? $Obj->usuario_ldap : '',
         'help'  => $columns['usuario_ldap']['comment'],
+        'attr' => 'maxlength="'.$columns['usuario_ldap']['length'].'"',
     ]);
 } else {
     echo $form->input([
@@ -47,6 +50,7 @@ echo $form->input([
     'value' => isset($Obj) ? $Obj->email : '',
     'help'  => $columns['email']['comment'],
     'check' => 'notempty email',
+    'attr' => 'maxlength="'.$columns['email']['length'].'"',
 ]);
 echo $form->input([
     'type' => 'password',
