@@ -24,7 +24,7 @@
 /**
  * @file bootstrap.php
  * Archivo de arranque de la aplicación
- * @version 2022-07-28
+ * @version 2022-07-30
  */
 
 // Asignar nivel de error máximo (para reportes previo a que se asigne el valor
@@ -51,6 +51,9 @@ spl_autoload_register ('\sowerphp\core\App::loadClass');
 // Crear capas de la aplicación (se registrarán extensiones)
 \sowerphp\core\App::createLayers($_EXTENSIONS);
 unset ($_EXTENSIONS);
+
+// autocarga de composer del framework
+App::import(DIR_FRAMEWORK.'/vendor/autoload');
 
 // configurar la aplicación e iniciar la sesión del usuario
 \sowerphp\core\Configure::bootstrap();

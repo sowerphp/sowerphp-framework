@@ -37,16 +37,10 @@ class Configure
     /**
      * Realizar configuración al inicio de la aplicación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-25
+     * @version 2022-07-30
      */
     public static function bootstrap()
     {
-        // autocarga de composer del framework
-        $autoload = DIR_FRAMEWORK.'/vendor/autoload.php';
-        if (!file_exists($autoload)) {
-            die('No se encontró autoload de composer en '.$autoload.'. Quizás falta ejecutar: composer install');
-        }
-        require($autoload);
         // Incluir autocargas de composer de la aplicación web
         $paths = array_reverse(App::paths());
         foreach ($paths as &$path) {
