@@ -60,7 +60,7 @@ class View
      * @param location Ubicación de la vista
      * @return Buffer de la página renderizada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-07-26
+     * @version 2022-08-04
      */
     public function render($page, $location = null)
     {
@@ -105,16 +105,22 @@ class View
         $ext = substr($location, strrpos($location, '.')+1);
         $class = App::findClass('View_Helper_Pages_'.ucfirst($ext));
         $page_content = $class::render($location, $this->viewVars);
+        // determinar si se usa el layout por defecto de la app
+        // o se usa uno personalizado de la vista que se renderiza
+        if (!empty($this->viewVars['__block_layout'])) {
+            $this->layout = $this->viewVars['__block_layout'];
+        }
+        // si no hay layout se debe entregar sólo el contenido
         if ($this->layout === null) {
             return $page_content;
         }
         // buscar archivo del tema que está seleccionado, si no existe
-        // se utilizará el tema por defecto
-        $layout = $this->getLayoutLocation($this->layout);
-        if (!$layout) {
+        // se utilizará el tema por defecto definido en $this->defaultLayout
+        $layout_location = $this->getLayoutLocation($this->layout);
+        if (!$layout_location) {
             $this->layout = $this->defaultLayout;
-            $layout = $this->getLayoutLocation($this->layout);
-            if (!$layout) {
+            $layout_location = $this->getLayoutLocation($this->layout);
+            if (!$layout_location) {
                 throw new \sowerphp\core\Exception('No se encontró layout '.$this->layout);
             }
         }
@@ -137,7 +143,7 @@ class View
             }
             $module_breadcrumb += explode('/', substr(str_replace($url, '', $this->request->request), 1));
         }
-        // determinar titulo
+        // determinar título
         $titulo_pagina = isset($this->viewVars['header_title']) ? $this->viewVars['header_title'] : $this->request->request;
         $_header_title = isset($this->viewVars['__block_title'])
                             ? $this->viewVars['__block_title']
@@ -157,7 +163,7 @@ class View
             '_content' => $page_content,
             '_module_breadcrumb' => $module_breadcrumb,
         ], $this->viewVars);
-        return View_Helper_Pages_Php::render($layout, $viewVars);
+        return View_Helper_Pages_Php::render($layout_location, $viewVars);
     }
 
     /**
