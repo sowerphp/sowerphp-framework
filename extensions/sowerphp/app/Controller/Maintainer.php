@@ -138,7 +138,7 @@ class Controller_Maintainer extends \Controller_App
     /**
      * Acción para listar los registros de la tabla
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-31
+     * @version 2022-08-04
      */
     public function listar($page = 1, $orderby = null, $order = 'A')
     {
@@ -182,6 +182,16 @@ class Controller_Maintainer extends \Controller_App
                 else if (in_array($model::$columnsInfo[$var]['type'], ['timestamp', 'timestamp without time zone'])) {
                     $where[] = 'CAST('.$var.' AS TEXT) LIKE :'.$var;
                     $vars[':'.$var] = $val.' %';
+                }
+                // si es un campo número entero se castea
+                else if (in_array($model::$columnsInfo[$var]['type'], ['smallint', 'integer', 'bigint', 'smallserial', 'serial', 'bigserial'])) {
+                    $where[] = $var.' = :'.$var;
+                    $vars[':'.$var] = (int)$val;
+                }
+                // si es un campo número decimal se castea
+                else if (in_array($model::$columnsInfo[$var]['type'], ['decimal', 'numeric', 'real', 'double precision'])) {
+                    $where[] = $var.' = :'.$var;
+                    $vars[':'.$var] = (float)$val;
                 }
                 // si es cualquier otro caso se comparará con una igualdad
                 else {
