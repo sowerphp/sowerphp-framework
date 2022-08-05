@@ -157,7 +157,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
      * Acción para recuperar la contraseña
      * @param usuario Usuario al que se desea recuperar su contraseña
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-06-20
+     * @version 2022-08-05
      */
     public function contrasenia_recuperar($usuario = null, $codigo = null)
     {
@@ -169,7 +169,11 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             if (!isset($_POST['id'])) {
                 $this->render('Usuarios/contrasenia_recuperar_step1');
             } else {
-                $Usuario = new $class($_POST['id']);
+                try {
+                    $Usuario = new $class($_POST['id']);
+                } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+                    $Usuario = new $class();
+                }
                 if (!$Usuario->exists()) {
                     \sowerphp\core\Model_Datasource_Session::message (
                         'Usuario no válido', 'error'

@@ -146,7 +146,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2013-06-30
      */
-    public function allow ($action = null)
+    public function allow($action = null)
     {
         $this->allowedActions = array_merge(
             $this->allowedActions, func_get_args()
@@ -159,7 +159,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-03-22
      */
-    public function allowWithLogin ($action = null)
+    public function allowWithLogin($action = null)
     {
         $this->allowedActionsWithLogin = array_merge(
             $this->allowedActionsWithLogin, func_get_args()
@@ -258,32 +258,39 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
      */
     public function check($recurso = false, $usuario = false)
     {
-        if (!$recurso)
+        if (!$recurso) {
             $recurso = str_replace(__BASE, '', $_SERVER['REQUEST_URI']);
-        if ($usuario)
+        }
+        if ($usuario) {
             return (new $this->settings['model']($usuario))->auth($recurso);
-        else
+        } else {
             return $this->User ? $this->User->auth($recurso) : false;
+        }
     }
 
     /**
      * Método que realiza el login del usuario
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-15
+     * @version 2022-08-05
      */
     public function login($usuario, $contrasenia, $auth2_token = null)
     {
         // crear objeto del usuario con el nombre de usuario entregado
-        $this->User = new $this->settings['model']($usuario);
+        try {
+            $this->User = new $this->settings['model']($usuario);
+        } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+            $this->User = new $this->settings['model']();
+        }
         // si el usuario no existe -> error
         if (!$this->User->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 sprintf($this->settings['messages']['error']['notexist'], $usuario), 'error'
             );
-            if (isset($this->settings['redirect']['notexist']))
+            if (isset($this->settings['redirect']['notexist'])) {
                 $this->controller->redirect($this->settings['redirect']['notexist']);
-            else
+            } else {
                 return;
+            }
         }
         // si el usuario no está activo -> error
         if (!$this->User->isActive()) {

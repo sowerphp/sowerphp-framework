@@ -224,7 +224,7 @@ class Model_Usuario extends \Model_App
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2017-10-16
      */
-    public function __construct ($id = null)
+    public function __construct($id = null)
     {
         if ($id!==null and !is_array($id) && !is_numeric($id)) {
             $this->db = \sowerphp\core\Model_Datasource_Database::get($this->_database);
@@ -253,7 +253,7 @@ class Model_Usuario extends \Model_App
                 ', [':hash'=>$id]);
             }
         }
-        parent::__construct($id);
+        parent::__construct((int)$id);
         $this->getConfig();
     }
 

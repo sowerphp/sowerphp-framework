@@ -138,7 +138,7 @@ class Controller_Maintainer extends \Controller_App
     /**
      * Acción para listar los registros de la tabla
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-08-04
+     * @version 2022-08-05
      */
     public function listar($page = 1, $orderby = null, $order = 'A')
     {
@@ -154,6 +154,9 @@ class Controller_Maintainer extends \Controller_App
             $where = [];
             $vars = [];
             foreach ($filters as &$filter) {
+                if (!strpos($filter, ':')) {
+                    continue;
+                }
                 list($var, $val) = explode(':', $filter);
                 // sólo procesar filtros donde el campo por el que se filtra esté en el modelo
                 if (empty($model::$columnsInfo[$var])) {
@@ -206,7 +209,15 @@ class Controller_Maintainer extends \Controller_App
             $Objs->setOrderByStatement([$orderby=>($order=='D'?'DESC':'ASC')]);
         }
         // total de registros
-        $registers_total = $Objs->count();
+        try {
+            $registers_total = $Objs->count();
+        } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+            // si hay algún error en la base de datos es porque los filtros están mal armados
+            // si se llegó acá con el error, para que no falle la app se redirecciona al listado
+            // con el error. Lo ideal es controlar esto antes con un "error más lindo".
+            \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+            $this->redirect($this->request->request);
+        }
         // paginar si es necesario
         if ((integer)$page>0) {
             $registers_per_page = \sowerphp\core\Configure::read('app.registers_per_page');
