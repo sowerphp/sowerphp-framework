@@ -60,16 +60,16 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
      * Acción para que un usuario ingrese al sistema (inicie sesión)
      * @param redirect Ruta (en base64) de hacia donde hay que redireccionar una vez se autentica el usuario
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-10-16
+     * @version 2022-08-13
      */
     public function ingresar($redirect = null)
     {
         // si ya está logueado se redirecciona
         if ($this->Auth->logged()) {
-            \sowerphp\core\Model_Datasource_Session::message(sprintf(
-                'Usuario <em>%s</em> tiene su sesión iniciada. Para ingresar con un nuevo usuaro primero debe cerrar esta sesión.',
+            /*\sowerphp\core\Model_Datasource_Session::message(sprintf(
+                'Usuario <em>%s</em> tiene su sesión iniciada. Para ingresar con un nuevo usuario primero debe cerrar esta sesión.',
                 $this->Auth->User->usuario
-            ), 'info');
+            ), 'info');*/
             $this->redirect(
                 $this->Auth->settings['redirect']['login']
             );
