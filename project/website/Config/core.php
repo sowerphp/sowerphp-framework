@@ -81,7 +81,7 @@
     'default' => false,
 ]);*/
 
-// Configuración para reCAPTCHA (extensión: sowerphp/app)
+// Configuración para reCAPTCHA (extensión: sowerphp/general)
 /*\sowerphp\core\Configure::write('recaptcha', [
     'public_key' => '',
     'private_key' => '',
