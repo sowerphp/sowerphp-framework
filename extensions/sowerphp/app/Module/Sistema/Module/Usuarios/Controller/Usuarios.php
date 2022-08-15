@@ -153,7 +153,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
      * Acción para recuperar la contraseña
      * @param usuario Usuario al que se desea recuperar su contraseña
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-08-05
+     * @version 2022-08-14
      */
     public function contrasenia_recuperar($usuario = null, $codigo = null)
     {
@@ -165,6 +165,16 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             if (!isset($_POST['id'])) {
                 $this->render('Usuarios/contrasenia_recuperar_step1');
             } else {
+                // validar captcha
+                try {
+                    \sowerphp\general\Utility_Google_Recaptcha::check();
+                } catch (\Exception $e) {
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        __('Falló validación captcha: '.$e->getMessage()), 'error'
+                    );
+                    $this->redirect($this->request->request);
+                }
+                // buscar usuario y solicitar correo de recuperación
                 try {
                     $Usuario = new $class($_POST['id']);
                 } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
@@ -213,6 +223,16 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 ]);
                 $this->render('Usuarios/contrasenia_recuperar_step2');
             } else {
+                // validar captcha
+                try {
+                    \sowerphp\general\Utility_Google_Recaptcha::check();
+                } catch (\Exception $e) {
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        __('Falló validación captcha: '.$e->getMessage()), 'error'
+                    );
+                    $this->redirect($this->request->request);
+                }
+                // cambiar la contraseña al usuario
                 if ($_POST['codigo']!=md5(hash('sha256', $Usuario->contrasenia))) {
                     \sowerphp\core\Model_Datasource_Session::message (
                         'El enlace para recuperar su contraseña no es válido, solicite uno nuevo por favor', 'error'

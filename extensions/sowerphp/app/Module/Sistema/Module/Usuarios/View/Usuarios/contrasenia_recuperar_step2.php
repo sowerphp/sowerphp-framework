@@ -24,7 +24,7 @@ foreach ($messages as $message) {
             <div class="card">
                 <div class="card-body">
                     <h1 class="text-center mb-4">Reiniciar contraseña</h1>
-                    <form action="<?=$_base.$_request?>" method="post" onsubmit="return Form.check()" class="mb-4">
+                    <form action="<?=$_base.$_request?>" method="post" onsubmit="return Form.check()" class="mb-4" id="recuperarForm">
                         <div class="form-group">
                             <label for="pass1" class="sr-only">Contraseña</label>
                             <input type="password" name="contrasenia1" id="pass1" class="form-control form-control-lg" required="required" placeholder="Nueva contraseña">
@@ -34,6 +34,7 @@ foreach ($messages as $message) {
                             <input type="password" name="contrasenia2" id="pass2" class="form-control form-control-lg" required="required" placeholder="Repetir contraseña">
                         </div>
                         <input type="hidden" name="codigo" value="<?=$codigo?>" />
+                        <?=\sowerphp\general\Utility_Google_Recaptcha::form('recuperarForm')?>
                         <button type="submit" class="btn btn-primary btn-block btn-lg">Cambiar contraseña</button>
                     </form>
                 </div>
