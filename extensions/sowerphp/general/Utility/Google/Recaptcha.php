@@ -34,6 +34,42 @@ class Utility_Google_Recaptcha
     private static $jsAlreadyIncluded = false;
 
     /**
+     * Método que genera genera el código javascript general a todos los formularios
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2022-08-14
+     */
+    public static function js()
+    {
+        if (self::$jsAlreadyIncluded) {
+            return '';
+        }
+        self::$jsAlreadyIncluded = true;
+        $captcha_public_key = \sowerphp\core\Configure::read('recaptcha.public_key');
+        if (empty($captcha_public_key)) {
+            return '';
+        }
+        $buffer = '<script src="https://www.google.com/recaptcha/api.js?render='.$captcha_public_key.'"></script>';
+        $buffer .= '<script> function google_recaptcha_v3_form(form, action) {'."\n";
+        $buffer .= '    const onsubmit = document.getElementById(form).onsubmit;'."\n";
+        $buffer .= '    if (onsubmit !== null) { $("#" + form).attr("onsubmit", ""); }'."\n";
+        $buffer .= '    $("#" + form).submit(function(event) {'."\n";
+        $buffer .= '        event.preventDefault();'."\n";
+        $buffer .= '        form_onsubmit = true; if (onsubmit !== null) { form_onsubmit = onsubmit(); }'."\n";
+        $buffer .= '        if (form_onsubmit) {'."\n";
+        $buffer .= '            grecaptcha.ready(function() {'."\n";
+        $buffer .= '                grecaptcha.execute("'.$captcha_public_key.'", {action: action}).then(function(token) {'."\n";
+        $buffer .= '                    $("#" + form).prepend(\'<input type="hidden" name="recaptcha-token" value="\' + token + \'">\');'."\n";
+        $buffer .= '                    $("#" + form).prepend(\'<input type="hidden" name="recaptcha-action" value="\' + action + \'">\');'."\n";
+        $buffer .= '                    $("#" + form).unbind("submit").submit();'."\n";
+        $buffer .= '                });'."\n";
+        $buffer .= '            });'."\n";
+        $buffer .= '        }'."\n";
+        $buffer .= '    });'."\n";
+        $buffer .= '} </script>'."\n";
+        return $buffer;
+    }
+
+    /**
      * Método que genera genera el código javascript que va en el formulario
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2022-08-14
@@ -47,23 +83,8 @@ class Utility_Google_Recaptcha
         if ($action === null) {
             $action = $form.'_action';
         }
-        $buffer = '';
-        if (!self::$jsAlreadyIncluded) {
-            $buffer .= '<script src="https://www.google.com/recaptcha/api.js?render='.$captcha_public_key.'"></script>';
-            self::$jsAlreadyIncluded = true;
-        }
-        $buffer .= '<script> $(function() {'."\n";
-        $buffer .= '    $("#suscribirForm").submit(function(event) {'."\n";
-        $buffer .= '        event.preventDefault();'."\n";
-        $buffer .= '        grecaptcha.ready(function() {'."\n";
-        $buffer .= '            grecaptcha.execute("'.$captcha_public_key.'", {action: "'.$action.'"}).then(function(token) {'."\n";
-        $buffer .= '                $("#suscribirForm").prepend(\'<input type="hidden" name="recaptcha-token" value="\' + token + \'">\');'."\n";
-        $buffer .= '                $("#suscribirForm").prepend(\'<input type="hidden" name="recaptcha-action" value="'.$action.'">\');'."\n";
-        $buffer .= '                $("#suscribirForm").unbind("submit").submit();'."\n";
-        $buffer .= '            });'."\n";
-        $buffer .= '        });'."\n";
-        $buffer .= '    });'."\n";
-        $buffer .= '}); </script>'."\n";
+        $buffer = self::js();
+        $buffer .= '<script> $(function() { google_recaptcha_v3_form("'.$form.'", "'.$action.'"); }); </script>'."\n";
         return $buffer;
     }
 
