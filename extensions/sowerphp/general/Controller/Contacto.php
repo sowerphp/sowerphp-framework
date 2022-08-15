@@ -47,7 +47,7 @@ class Controller_Contacto extends \Controller_App
     /**
      * Método que desplegará y procesará el formulario de contacto
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-06-20
+     * @version 2022-08-14
      */
     public function index()
     {
@@ -59,35 +59,16 @@ class Controller_Contacto extends \Controller_App
             );
             $this->redirect('/');
         }
-        // colocar variable para captcha (si está configurado)
-        $captcha_public_key = \sowerphp\core\Configure::read('recaptcha.public_key');
-        if ($captcha_public_key) {
-            $this->set([
-                'captcha_public_key' => $captcha_public_key,
-                'language' => \sowerphp\core\Configure::read('language'),
-            ]);
-        }
         // si se envió el formulario se procesa
         if (isset($_POST['submit'])) {
-            // si existe la configuración para recaptcha se debe validar
-            $captcha_private_key = \sowerphp\core\Configure::read('recaptcha.private_key');
-            if ($captcha_private_key) {
-                if (empty($_POST['g-recaptcha-response'])) {
-                    \sowerphp\core\Model_Datasource_Session::message(
-                        __('Debe completar el captcha para enviar su mensaje'), 'warning'
-                    );
-                    $this->response->status(412);
-                    return;
-                }
-                $recaptcha = new \ReCaptcha\ReCaptcha($captcha_private_key);
-                $resp = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
-                if (!$resp->isSuccess()) {
-                    \sowerphp\core\Model_Datasource_Session::message(
-                        __('El captcha enviado es incorrecto'), 'error'
-                    );
-                    $this->response->status(412);
-                    return;
-                }
+            // validar captcha
+            try {
+                \sowerphp\general\Utility_Google_Recaptcha::check();
+            } catch (\Exception $e) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    __('Falló validación captcha: '.$e->getMessage()), 'error'
+                );
+                return;
             }
             // enviar email
             $_POST['nombre'] = trim(strip_tags($_POST['nombre']));

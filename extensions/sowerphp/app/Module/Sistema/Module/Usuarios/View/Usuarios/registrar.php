@@ -24,7 +24,7 @@ foreach ($messages as $message) {
             <div class="card">
                 <div class="card-body">
                     <h1 class="text-center mb-4">Crear cuenta de usuario</h1>
-                    <form action="<?=$_base?>/usuarios/registrar" method="post" onsubmit="return Form.check()" class="mb-4">
+                    <form action="<?=$_base?>/usuarios/registrar" method="post" onsubmit="return Form.check()" class="mb-4" id="registrarForm">
                         <div class="form-group">
                             <label for="name" class="sr-only">Nombre</label>
                             <input type="text" name="nombre" id="name" class="form-control form-control-lg" required="required" placeholder="Nombre completo" maxlength="50" />
@@ -42,10 +42,7 @@ foreach ($messages as $message) {
                             <input type="checkbox" name="terms_ok" required="required" onclick="this.value = this.checked ? 1 : 0" /> Acepto los <a href="<?=$terms?>" target="_blank">términos y condiciones de uso</a> del servicio.
                         </label>
 <?php endif; ?>
-<?php if (!empty($public_key)) : ?>
-                        <div class="g-recaptcha mb-3" data-sitekey="<?=$public_key?>" style="width:304px;margin:0 auto"></div>
-                        <script type="text/javascript" src="https://www.google.com/recaptcha/api.js?hl=<?=$language?>"></script>
-<?php endif; ?>
+                        <?=\sowerphp\general\Utility_Google_Recaptcha::form('registrarForm')?>
                         <button type="submit" class="btn btn-primary btn-block btn-lg">Registrar usuario</button>
                     </form>
                     <p class="text-center lead">

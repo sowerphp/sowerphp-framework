@@ -24,7 +24,7 @@ foreach ($messages as $message) {
             <div class="card">
                 <div class="card-body">
                     <h1 class="text-center mb-4">Ingresar</h1>
-                    <form action="<?=$_base?>/usuarios/ingresar" method="post" onsubmit="return Form.check()" class="mb-4">
+                    <form action="<?=$_base?>/usuarios/ingresar" method="post" onsubmit="return Form.check()" class="mb-4" id="ingresarForm">
                         <div class="form-group">
                             <label for="user" class="sr-only">Usuario</label>
                             <input type="text" name="usuario" id="user" class="form-control form-control-lg" required="required" placeholder="Usuario o correo electrónico" />
@@ -39,10 +39,7 @@ foreach ($messages as $message) {
                             <input type="text" name="auth2_token" id="auth2" class="form-control form-control-lg" placeholder="Token 2FA si es necesario" autocomplete="off" />
                         </div>
 <?php endif; ?>
-<?php if (!empty($public_key)) : ?>
-                        <div class="g-recaptcha mb-3" data-sitekey="<?=$public_key?>" style="width:304px;margin:0 auto"></div>
-                        <script type="text/javascript" src="https://www.google.com/recaptcha/api.js?hl=<?=$language?>"></script>
-<?php endif; ?>
+                        <?=\sowerphp\general\Utility_Google_Recaptcha::form('ingresarForm')?>
                         <input type="hidden" name="redirect" value="<?=$redirect?>" />
                         <button type="submit" class="btn btn-primary btn-block btn-lg">Iniciar sesión</button>
                     </form>

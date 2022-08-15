@@ -60,7 +60,6 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
                 'newlogin' => 'Sesión cerrada. Usuario %s inició sesión en otro dispositivo.',
                 'login_attempts_exceeded' => 'Cuenta de usuario %s fue bloqueada por exceder intentos de sesión, debe recuperar su contraseña.',
                 'auth2' => 'Autenticación secundaria del usuario %s falló: %s',
-                'recaptcha_required' => 'Se detectaron intentos previos fallidos para el usuario %s. Se requiere Captcha',
                 'recaptcha_invalid' => 'Captcha incorrecto para el usuario %s',
             ],
         ],
@@ -271,7 +270,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     /**
      * Método que realiza el login del usuario
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-08-05
+     * @version 2022-08-14
      */
     public function login($usuario, $contrasenia, $auth2_token = null)
     {
@@ -308,21 +307,12 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
             return;
         }
         // si ya hubo un intento de login fallido entonces se pedirá captcha
-        $private_key = \sowerphp\core\Configure::read('recaptcha.private_key');
-        if ($this->settings['maxLoginAttempts'] and $this->User->contrasenia_intentos<$this->settings['maxLoginAttempts'] and $private_key!==null) {
-            if (empty($_POST['g-recaptcha-response'])) {
+        if ($this->settings['maxLoginAttempts'] and $this->User->contrasenia_intentos<$this->settings['maxLoginAttempts']) {
+            try {
+                \sowerphp\general\Utility_Google_Recaptcha::check();
+            } catch (\Exception $e) {
                 \sowerphp\core\Model_Datasource_Session::message(
-                    sprintf($this->settings['messages']['error']['recaptcha_required'], $usuario),
-                    'warning'
-                );
-                return;
-            }
-            $recaptcha = new \ReCaptcha\ReCaptcha($private_key);
-            $resp = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
-            if (!$resp->isSuccess()) {
-                \sowerphp\core\Model_Datasource_Session::message(
-                    sprintf($this->settings['messages']['error']['recaptcha_invalid'], $usuario),
-                    'error'
+                    sprintf($this->settings['messages']['error']['recaptcha_invalid'], $usuario).': '.$e->getMessage(), 'error'
                 );
                 return;
             }

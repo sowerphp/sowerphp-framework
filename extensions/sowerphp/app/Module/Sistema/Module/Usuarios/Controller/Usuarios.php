@@ -60,7 +60,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
      * Acción para que un usuario ingrese al sistema (inicie sesión)
      * @param redirect Ruta (en base64) de hacia donde hay que redireccionar una vez se autentica el usuario
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-08-13
+     * @version 2022-08-14
      */
     public function ingresar($redirect = null)
     {
@@ -92,12 +92,8 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             }
             // realizar proceso de validación de datos
             else {
-                $public_key = \sowerphp\core\Configure::read('recaptcha.public_key');
                 $auth2_token = !empty($_POST['auth2_token']) ? $_POST['auth2_token'] : null;
                 $this->Auth->login($_POST['usuario'], $_POST['contrasenia'], $auth2_token);
-                if ($this->Auth->User->contrasenia_intentos and $this->Auth->User->contrasenia_intentos<$this->Auth->settings['maxLoginAttempts']) {
-                    $this->set('public_key', $public_key);
-                }
             }
         }
     }
@@ -672,7 +668,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
     /**
      * Acción que permite registrar un nuevo usuario en la aplicación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-10-16
+     * @version 2022-08-14
      */
     public function registrar()
     {
@@ -696,14 +692,6 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 $this->Auth->settings['redirect']['login']
             );
         }
-        // colocar variable para captcha (si está configurado)
-        $public_key = \sowerphp\core\Configure::read('recaptcha.public_key');
-        if ($public_key) {
-            $this->set([
-                'public_key' => $public_key,
-                'language' => \sowerphp\core\Configure::read('language'),
-            ]);
-        }
         // colocar variable para terminos si está configurado
         if (!empty($config['terms'])) {
             $this->set('terms', $config['terms']);
@@ -718,24 +706,14 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 );
                 return;
             }
-            // si existe la configuración para recaptcha se debe validar
-            $private_key = \sowerphp\core\Configure::read('recaptcha.private_key');
-            if ($private_key) {
-                if (empty($_POST['g-recaptcha-response'])) {
-                    \sowerphp\core\Model_Datasource_Session::message(
-                        'Se requiere Captcha para poder registrar un nuevo usuario',
-                        'warning'
-                    );
-                    return;
-                }
-                $recaptcha = new \ReCaptcha\ReCaptcha($private_key);
-                $resp = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
-                if (!$resp->isSuccess()) {
-                    \sowerphp\core\Model_Datasource_Session::message(
-                        'Captcha incorrecto', 'error'
-                    );
-                    return;
-                }
+            // validar captcha
+            try {
+                \sowerphp\general\Utility_Google_Recaptcha::check();
+            } catch (\Exception $e) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    __('Falló validación captcha: '.$e->getMessage()), 'error'
+                );
+                return;
             }
             // si existen términos y no se aceptaron se redirecciona
             if (!empty($config['terms']) and empty($_POST['terms_ok'])) {
