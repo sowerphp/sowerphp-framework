@@ -634,7 +634,7 @@ class Model_Usuario extends \Model_App
 
     /**
      * Método que entrega el listado de grupos a los que pertenece el usuario
-     * @return Arreglo asociativo con el GID como clave y el nombre del grupo como valor
+     * @return array Arreglo asociativo con el GID como clave y el nombre del grupo como valor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2016-12-16
      */
@@ -664,9 +664,9 @@ class Model_Usuario extends \Model_App
     /**
      * Método que permite determinar si un usuario pertenece a cierto grupo.
      * Además se revisará si pertenece al grupo sysadmin, en cuyo caso también
-     * entregará true
+     * entregará la cantidad de grupos
      * @param grupos Arreglo con los grupos que se desean revisar
-     * @return La cantidad de grupos a los que el usuario pertenece
+     * @return int La cantidad de grupos a los que el usuario pertenece
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2019-08-01
      */
