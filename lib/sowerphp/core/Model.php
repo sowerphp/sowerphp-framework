@@ -399,7 +399,7 @@ abstract class Model
     /**
      * Método que valida los valores asignados a los atributos del objeto
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-31
+     * @version 2022-10-04
      */
     public function checkAttributes()
     {
@@ -413,7 +413,7 @@ abstract class Model
                 ));
             }
             // verificar largo del campo
-            if (in_array($info['type'], ['char', 'character varying', 'varchar', 'text'])) {
+            if (!empty($info['length']) and in_array($info['type'], ['char', 'character varying', 'varchar', 'text'])) {
                 $attribute_len = mb_strlen($this->{$attribute});
                 if ($attribute_len > $info['length']) {
                     throw new \Exception(__(
