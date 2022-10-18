@@ -86,6 +86,35 @@ class Model_Datasource_Session
         if (!self::read('config.page.layout')) {
             self::write('config.page.layout', Configure::read('page.layout'));
         }
+        // parámetros de rastro mediante la URL (ej: parámetros UTM)
+        self::saveUrlTracking();
+    }
+
+    /**
+     * Método que guarda parámetros de rastreo (ej: UTM) para seguimiento de
+     * campañas en la sesión. Así no se tienen que arrastrar por las URLs y se
+     * puede saber estos datos para usar en otros lados (ej: formularios).
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2022-10-18
+     */
+    private static function saveUrlTracking()
+    {
+        $url_tracking_keys = [
+            'utm_source',
+            'utm_medium',
+            'utm_campaign',
+            'utm_content',
+            'utm_term',
+        ];
+        $url_tracking = [];
+        foreach ($url_tracking_keys as $key) {
+            if (!empty($_GET[$key])) {
+                $url_tracking[$key] = trim($_GET[$key]);
+            }
+        }
+        if (!empty($url_tracking)) {
+            self::write('url_tracking', $url_tracking);
+        }
     }
 
     /**
