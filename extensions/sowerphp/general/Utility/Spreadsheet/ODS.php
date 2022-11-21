@@ -40,7 +40,7 @@ final class Utility_Spreadsheet_ODS
      */
     public static function read ($archivo = null, $hoja = 0)
     {
-        return Utility_Spreadsheet_XLS::read($archivo, $hoja, 'OOCalc');
+        return Utility_Spreadsheet_XLS::read($archivo, $hoja, 'Ods');
     }
 
     /**
@@ -99,7 +99,7 @@ final class Utility_Spreadsheet_ODS
      */
     public static function sheets ($archivo)
     {
-        return Utility_Spreadsheet_XLS::sheets($archivo, 'OOCalc');
+        return Utility_Spreadsheet_XLS::sheets($archivo, 'Ods');
     }
 
 }
