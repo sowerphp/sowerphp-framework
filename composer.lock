@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "78473777e7a2429e5ebe3fd8ef4bb5eb",
+    "content-hash": "e3bee2e81859f75defecafc088978ad7",
     "packages": [
         {
             "name": "clue/graph",
@@ -754,49 +754,6 @@
                 }
             ],
             "time": "2022-06-20T21:43:03+00:00"
-        },
-        {
-            "name": "lapinator.net/ods-php-generator",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/sascocl/odsPhpGenerator.git",
-                "reference": "2eae349d24622f3d36e9ae12edad9e1d4932a82c"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/sascocl/odsPhpGenerator/zipball/2eae349d24622f3d36e9ae12edad9e1d4932a82c",
-                "reference": "2eae349d24622f3d36e9ae12edad9e1d4932a82c",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.0"
-            },
-            "default-branch": true,
-            "type": "library",
-            "autoload": {
-                "classmap": [
-                    "class/",
-                    "ods.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "LGPL-3.0"
-            ],
-            "authors": [
-                {
-                    "name": "Laurent VUIBERT",
-                    "homepage": "http://odsphpgenerator.lapinator.net/",
-                    "role": "Developer"
-                }
-            ],
-            "description": "The ods file generator in php",
-            "support": {
-                "issues": "https://github.com/sascocl/odsPhpGenerator/issues",
-                "source": "https://github.com/sascocl/odsPhpGenerator/tree/master"
-            },
-            "time": "2016-01-18T01:58:09+00:00"
         },
         {
             "name": "libchart/libchart",
@@ -2348,7 +2305,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "lapinator.net/ods-php-generator": 20,
         "elevenpaths/latch-sdk-php": 20
     },
     "prefer-stable": false,
