@@ -40,14 +40,14 @@ final class Utility_Spreadsheet_XLS
      * @author DeLaF, esteban[at]delaf.cl
      * @version 2014-02-23
      */
-    public static function read ($archivo = null, $hoja = 0, $type = 'Excel5')
+    public static function read ($archivo = null, $hoja = 0, $type = 'Xls')
     {
         // Crear objeto para leer archivo
-        $objReader = \PHPExcel_IOFactory::createReader($type);
+        $objReader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($type);
         $objReader->setReadDataOnly(true);
-        $objPHPExcel = $objReader->load($archivo);
+        $objPHPOffice = $objReader->load($archivo);
         // Seleccionar hoja a leer
-        $objWorksheet = $objPHPExcel->getSheet($hoja);
+        $objWorksheet = $objPHPOffice->getSheet($hoja);
         // Recuperar celdas
         $data = array();
         foreach ($objWorksheet->getRowIterator() as $row) {
@@ -71,10 +71,10 @@ final class Utility_Spreadsheet_XLS
      * @author DeLaF, esteban[at]delaf.cl
      * @version 2014-07-10
      */
-    public static function generate ($tabla, $id, $type = 'Excel5')
+    public static function generate ($tabla, $id, $type = 'Xls')
     {
-        // Crear objeto PHPExcel
-        $objPHPExcel = new \PHPExcel();
+        // Crear objeto PHPOffice
+        $objPHPOffice = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         // si las llaves de $table no son strings, entonces es solo una hoja
         if (!is_string(array_keys($tabla)[0])) {
             $tabla = array($id=>$tabla);
@@ -84,7 +84,7 @@ final class Utility_Spreadsheet_XLS
         $n_hojas = count ($tabla);
         foreach ($tabla as $name => &$sheet) {
             // agregar hoja
-            $objWorkSheet = $objPHPExcel->setActiveSheetIndex($hoja);
+            $objWorkSheet = $objPHPOffice->setActiveSheetIndex($hoja);
             // Colocar título a la hoja
             $objWorkSheet->setTitle(substr($name, 0, 30));
             // Colocar datos
@@ -92,21 +92,18 @@ final class Utility_Spreadsheet_XLS
             $x=0; // columna
             foreach ($sheet as &$fila) {
                 foreach ($fila as &$celda) {
-                    $objWorkSheet->setCellValue(
-                        \PHPExcel_Cell::stringFromColumnIndex($x++).$y,
-                        rtrim(str_replace('<br />', "\n", strip_tags($celda, '<br>')))
-                    );
+                    $objWorkSheet->getCell(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($x++).$y)->setValue(rtrim(str_replace('<br />', "\n", strip_tags($celda, '<br>'))));
                 }
                 $x=0;
                 ++$y;
             }
             ++$hoja;
             if ($hoja<$n_hojas)
-                $objPHPExcel->createSheet($hoja);
+                $objPHPOffice->createSheet($hoja);
         }
-        $objPHPExcel->setActiveSheetIndex(0);
+        $objPHPOffice->setActiveSheetIndex(0);
         // Generar archivo excel
-        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, $type);
+        $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($objPHPOffice, $type);
         ob_end_clean();
         header('Content-type: application/vnd.ms-excel');
         header('Content-Disposition: attachment; filename="'.$id.'.xls"');
@@ -121,16 +118,18 @@ final class Utility_Spreadsheet_XLS
      * @author DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-27
      */
-    public static function sheets ($archivo, $type = 'Excel5')
+    public static function sheets ($archivo, $type = 'Xls')
     {
         // Crear objeto para leer archivo
-        $objReader = \PHPExcel_IOFactory::createReader($type);
+        // echo $type;
+        // exit;
+        $objReader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($type);
         $objReader->setReadDataOnly(true);
-        $objPHPExcel = $objReader->load($archivo);
+        $objPHPOffice = $objReader->load($archivo);
         // Retornar hojas
-        if ($type=='OOCalc')
-            return array_slice($objPHPExcel->getSheetNames(), 0, -1);
-        return $objPHPExcel->getSheetNames();
+        if ($type=='Ods')
+            return array_slice($objPHPOffice->getSheetNames(), 0, -1);
+        return $objPHPOffice->getSheetNames();
     }
 
 }

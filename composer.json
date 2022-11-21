@@ -4,7 +4,7 @@
         "michelf/php-markdown": "1.7.0",
         "libchart/libchart": "1.5.0",
         "lapinator.net/ods-php-generator": "dev-master",
-        "phpoffice/phpexcel": "1.8.2",
+        "phpoffice/phpspreadsheet": "^1.23",
         "tecnickcom/tcpdf": "6.2.26",
         "clue/graph": "~0.9.0",
         "graphp/graphviz": "~0.2.0",

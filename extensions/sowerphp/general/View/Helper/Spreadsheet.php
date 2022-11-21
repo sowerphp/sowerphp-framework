@@ -28,7 +28,7 @@ namespace sowerphp\general;
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2015-04-19
  */
-class View_Helper_Spreadsheet extends \PHPExcel
+class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
 {
 
     protected $y; ///< Para la fila actual (parte en 1)
@@ -41,9 +41,9 @@ class View_Helper_Spreadsheet extends \PHPExcel
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2015-04-19
      */
-    public function save($file, $type = 'Excel5')
+    public function save($file, $type = 'Xls')
     {
-        $objWriter = \PHPExcel_IOFactory::createWriter($this, $type);
+        $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($this, $type);
         $objWriter->save($file);
     }
 
@@ -54,9 +54,9 @@ class View_Helper_Spreadsheet extends \PHPExcel
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2015-04-19
      */
-    public function download($file, $type = 'Excel5')
+    public function download($file, $type = 'Xls')
     {
-        $objWriter = \PHPExcel_IOFactory::createWriter($this, $type);
+        $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($this, $type);
         ob_end_clean();
         header('Content-type: application/vnd.ms-excel');
         header('Content-Disposition: attachment; filename="'.$file.'"');
@@ -88,7 +88,7 @@ class View_Helper_Spreadsheet extends \PHPExcel
 
     /**
      * Método que traduce un índice de columna a su representación en letra(s).
-     * Este método es un wrapper de \PHPExcel_Cell::stringFromColumnIndex()
+     * Este método es un wrapper de \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex()
      * @param col Índice de la columna que se desea obtener
      * @return Letra(s) de la columna
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
@@ -96,7 +96,7 @@ class View_Helper_Spreadsheet extends \PHPExcel
      */
     public function getCol($col)
     {
-        return \PHPExcel_Cell::stringFromColumnIndex($col);
+        return \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
     }
 
     /**
@@ -112,7 +112,7 @@ class View_Helper_Spreadsheet extends \PHPExcel
             $sheet = $this->getActiveSheetIndex();
         $this->setActiveSheetIndex($sheet)->getStyle($cell)->applyFromArray([
             'alignment' => [
-                'horizontal' => \PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
             ],
             'font' => [
                 'bold' => true,
@@ -134,7 +134,7 @@ class View_Helper_Spreadsheet extends \PHPExcel
         $this->setActiveSheetIndex($sheet)->getStyle($cell)->applyFromArray([
             'borders' => [
                 'allborders' => [
-                    'style' => \PHPExcel_Style_Border::BORDER_THIN
+                    'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
                 ]
             ]
         ]);
@@ -164,7 +164,8 @@ class View_Helper_Spreadsheet extends \PHPExcel
     {
         $this->getActiveSheet()->mergeCells($start.$this->y.':'.$end.$this->y);
         $this->setFormatCenterBold($start.$this->y);
-        $this->getActiveSheet()->setCellValue($start.$this->y, $value);
+        $this->getActiveSheet()->getCell($start.$this->y)->setValue($value);
+
     }
 
     /**
@@ -177,8 +178,8 @@ class View_Helper_Spreadsheet extends \PHPExcel
         $this->getActiveSheet()->mergeCells($col.$this->y.':'.$col.($this->y+$end));
         $this->getActiveSheet()->getStyle($col.$this->y)->getAlignment()->setTextRotation(90);
         $this->setFormatCenterBold($col.$this->y);
-        $this->getActiveSheet()->getStyle($col.$this->y)->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
-        $this->getActiveSheet()->setCellValue($col.$this->y, $value);
+        $this->getActiveSheet()->getStyle($col.$this->y)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $this->getActiveSheet()->getCell($col.$this->y)->setValue($value);
     }
 
     /**
