@@ -51,11 +51,11 @@ Layout: harbor (https://hackerthemes.com)
     <body>
         <nav class="container navbar navbar-expand-lg navbar-light bg-light">
             <a class="navbar-brand" href="<?=$_base?>/"><?=$_body_title?></a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
+                <ul class="navbar-nav me-auto">
 <?php
 $dropdown_id_count = 1;
 foreach ($_nav_website as $link=>$name) {
@@ -66,7 +66,7 @@ foreach ($_nav_website as $link=>$name) {
         $title = isset($name['desc']) ? $name['desc'] : (isset($name['title']) ? $name['title'] : '');
         $icon = isset($name['icon']) ? '<span class="'.$name['icon'].'"></span> ' : '';
         echo '                        <li class="nav-item dropdown',$active,'">',"\n";
-        echo '                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" id="',$dropdown_id,'" title="',$title,'">',$icon,$name['name'],' <span class="caret"></span></a>',"\n";
+        echo '                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" id="',$dropdown_id,'" title="',$title,'">',$icon,$name['name'],' <span class="caret"></span></a>',"\n";
         echo '                            <div class="dropdown-menu" aria-labelledby="',$dropdown_id,'">',"\n";
         foreach($name['nav'] as $l=>$n) {
             if ($l[0]=='/') $l = $link.$l;
@@ -86,7 +86,7 @@ foreach ($_nav_website as $link=>$name) {
 ?>
                 </ul>
 <?php if (\sowerphp\core\App::layerExists('sowerphp/app')) : ?>
-                    <ul class="nav navbar-nav navbar-right">
+                    <ul class="nav navbar-nav navbar-end">
 <?php if (!$_Auth->logged()) : ?>
                         <li class="nav-item"><a href="<?=$_base?>/usuarios/ingresar" class="nav-link"><span class="fas fa-sign-in-alt" aria-hidden="true"></span> Iniciar sesión</a></li>
 <?php else : ?>
@@ -97,10 +97,10 @@ $notificaciones = $Notficaciones->getUnreadByUser($_Auth->User->id);
 $n_notificaciones = $Notficaciones->getCountUnreadByUser($_Auth->User->id);;
 ?>
                         <li class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" id="dropdown_notifications">
-                                <i class="far fa-bell"></i><?=($n_notificaciones?' <span class="badge badge-info" id="n_notifications">'.num($n_notificaciones).'</span>':'')?>
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" id="dropdown_notifications">
+                                <i class="far fa-bell"></i><?=($n_notificaciones?' <span class="badge bg-info" id="n_notifications">'.num($n_notificaciones).'</span>':'')?>
                             </a>
-                            <div class="dropdown-menu dropdown-menu-right widget-notifications no-padding" aria-labelledby="dropdown_notifications" style="width: 300px">
+                            <div class="dropdown-menu dropdown-menu-end widget-notifications no-padding" aria-labelledby="dropdown_notifications" style="width: 300px">
                                 <div class="notifications-list" id="main-navbar-notifications">
 <?php foreach ($notificaciones as $n) : ?>
                                     <div class="notification" id="notification_<?=$n['id']?>">
@@ -128,12 +128,12 @@ $n_notificaciones = $Notficaciones->getCountUnreadByUser($_Auth->User->id);;
 $Account = $_Auth->User->getEmailAccount();
 if ($Account) {
     $emails = $Account->countUnreadMessages();
-    echo '                        <li class="nav-item"><a href="'.$Account->getUserUrl().'" class="nav-link"><i class="far fa-envelope"></i> '.($emails?' <span class="badge badge-primary">'.num($emails).'</span>':'').'</a></li>',"\n";
+    echo '                        <li class="nav-item"><a href="'.$Account->getUserUrl().'" class="nav-link"><i class="far fa-envelope"></i> '.($emails?' <span class="badge bg-primary">'.num($emails).'</span>':'').'</a></li>',"\n";
 }
 ?>
                         <li class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" id="dropdown_menu"><strong>Menú <span class="caret"></span></strong></a>
-                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_menu">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" id="dropdown_menu"><strong>Menú <span class="caret"></span></strong></a>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown_menu">
 <?php
 foreach ($_nav_app as $link=>&$info) {
     if ($_Auth->check($link)) {
@@ -185,7 +185,7 @@ foreach ($messages as $message) {
     echo '<div class="alert alert-',$message['type'],'" role="alert">',"\n";
     echo '    <span class="glyphicon glyphicon-',$icons[$message['type']],'" aria-hidden="true"></span>',"\n";
     echo '    <span class="sr-only">',$message['type'],': </span>',$message['text'],"\n";
-    echo '    <a href="#" class="close" data-dismiss="alert" aria-label="close" title="Cerrar">&times;</a>',"\n";
+    echo '    <a href="#" class="btn-close" data-bs-dismiss="alert" aria-label="close" title="Cerrar">&times;</a>',"\n";
     echo '</div>'."\n";
 }
 // contenido de la página
@@ -197,10 +197,10 @@ echo $_content;
         </div>
         <footer class="footer d-print-none">
             <div class="container">
-                <div class="float-left">
+                <div class="float-start">
                     <?=(is_array($_footer)?$_footer['left']:$_footer)."\n"?>
                 </div>
-                <div class="float-right text-right">
+                <div class="float-end text-end">
 <?=!empty($_footer['right'])?'                    '.$_footer['right'].'<br/>'."\n":''?>
 <?php
 if (isset($_Auth) and $_Auth->logged()) {

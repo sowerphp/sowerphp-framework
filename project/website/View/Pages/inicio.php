@@ -1,10 +1,10 @@
-<div class="jumbotron bg-info text-white mb-0 radius-0">
+<div class="bg-info text-white mb-0 radius-0">
     <div class="container">
-        <img src="<?=$_base?>/img/logo.png" alt="Logo SowerPHP" class="float-right" />
+        <img src="<?=$_base?>/img/logo.png" alt="Logo SowerPHP" class="float-end" />
         <h1 class="display-1 text-light">SowerPHP</h1>
         <span class="lead">Framework PHP hecho en Chile</span>
         <div class="mt-4">
-            <a href="https://sowerphp.org" class="btn btn-success btn-pill btn-wide btn-lg my-2 mr-2">
+            <a href="https://sowerphp.org" class="btn btn-success btn-pill btn-wide btn-lg my-2 me-2">
                 <span>Sitio web proyecto SowerPHP</span>
             </a>
             <a href="https://github.com/SowerPHP" class="btn btn-primary btn-pill btn-wide btn-lg my-2">
