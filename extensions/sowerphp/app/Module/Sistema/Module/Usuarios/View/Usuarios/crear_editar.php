@@ -1,7 +1,7 @@
 <?php if (isset($Obj)) : ?>
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/sistema/usuarios/usuarios/salir_forzar/<?=$Obj->id?>" title="Forzar el cierre de la sesión del usuario">
+<ul class="nav nav-pills pull-end">
+    <li class="nav-item">
+        <a href="<?=$_base?>/sistema/usuarios/usuarios/salir_forzar/<?=$Obj->id?>" title="Forzar el cierre de la sesión del usuario" class="nav-link">
             <span class="fas fa-sign-out-alt"></span> Cerrar sesión
         </a>
     </li>

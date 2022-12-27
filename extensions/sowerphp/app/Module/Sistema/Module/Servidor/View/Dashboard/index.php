@@ -37,32 +37,30 @@ echo View_Helper_Dashboard::cards([
     <!-- PANEL IZQUIERDA -->
     <div class="col-md-3">
         <div class="card mb-4">
-            <div class="card-header">CPU</div>
-            <div class="card-body">
-                <ul class="list-group">
-                    <li class="list-group-item">CPUs: <?=$cpu_count?></li>
-                    <li class="list-group-item">Tipo: <?=$cpu_type[0]?></li>
-                </ul>
+            <div class="card-header">
+                CPU
             </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">CPUs: <?=$cpu_count?></li>
+                <li class="list-group-item">Tipo: <?=$cpu_type[0]?></li>
+            </ul>
         </div>
         <div class="card mb-4">
             <div class="card-header">Memoria</div>
-            <div class="card-body">
-                <ul class="list-group">
-                    <li class="list-group-item">Total: <?=$memory_total?> [MiB]</li>
-                    <li class="list-group-item">Usada: <?=$memory_free?> [MiB]</li>
-                    <li class="list-group-item">Libre: <?=$memory_free?> [MiB]</li>
-                    <li class="list-group-item">Compartida: <?=$memory_shared?> [MiB]</li>
-                    <li class="list-group-item">Buff/cache: <?=$memory_buff_cache?> [MiB]</li>
-                    <li class="list-group-item">Disponible: <?=$memory_available?> [MiB]</li>
-                </ul>
-            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Total: <?=$memory_total?> [MiB]</li>
+                <li class="list-group-item">Usada: <?=$memory_free?> [MiB]</li>
+                <li class="list-group-item">Libre: <?=$memory_free?> [MiB]</li>
+                <li class="list-group-item">Compartida: <?=$memory_shared?> [MiB]</li>
+                <li class="list-group-item">Buff/cache: <?=$memory_buff_cache?> [MiB]</li>
+                <li class="list-group-item">Disponible: <?=$memory_available?> [MiB]</li>
+            </ul>
         </div>
         <div class="card mb-4">
             <div class="card-header">Sistemas de archivos</div>
             <div class="card-body">
 <?php foreach ($disks as $disk) : ?>
-                <span><?=$disk['mount']?></span> <span class="float-right"><?=$disk['size']?></span>
+                <span><?=$disk['mount']?></span> <span class="float-end"><?=$disk['size']?></span>
                 <div class="progress mb-3">
                     <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="<?=$disk['usage']?>" aria-valuemin="0" aria-valuemax="100" style="width: <?=$disk['usage']?>%;">
                         <?=$disk['usage']?>%
@@ -79,8 +77,8 @@ echo View_Helper_Dashboard::cards([
             <div class="card-header">
                 <i class="far fa-chart-bar fa-fw"></i> Tasas de transferencia de la red (RX y TX)
             </div>
-            <div class="card-body">
-                <div id="grafico-network_average"></div>
+            <div class="card-body" id="chartdiv">
+                <canvas id="network_average_grafico"></canvas>
             </div>
         </div>
     </div>
@@ -103,27 +101,25 @@ echo View_Helper_Dashboard::cards([
 <?php foreach($memcached as $server => $info) : ?>
         <div class="card mb-4">
             <div class="card-header">Memcached</div>
-            <div class="card-body">
-                <ul class="list-group">
-                    <li class="list-group-item">Servidor: <?=$server?></li>
-                    <li class="list-group-item">PID: <?=$info['pid']?></li>
-                    <li class="list-group-item">Uptime: <?=$info['uptime']?> [s]</li>
-                    <li class="list-group-item">Versión: <?=$info['version']?></li>
-                    <li class="list-group-item">Conexiones: <?=$info['curr_connections']?> de <?=$info['max_connections']?></li>
-                    <li class="list-group-item">Sets / Gets: <?=$info['cmd_set']?> / <?=$info['cmd_get']?></li>
-                    <li class="list-group-item">Hits: <?=round(($info['get_hits']/$info['cmd_get'])*100, 2)?>%</li>
-                    <li class="list-group-item">Bytes escritos: <?=round($info['bytes_written']/1024/1024,1)?> [MiB]</li>
-                    <li class="list-group-item">Bytes leídos: <?=round($info['bytes_read']/1024/1024,1)?> [MiB]</li>
-                    <li class="list-group-item">Items actuales: <?=$info['curr_items']?></li>
-                    <li class="list-group-item">Items totales: <?=$info['total_items']?></li>
-                    <li class="list-group-item">Expirados sin uso: <?=$info['expired_unfetched']?></li>
-                </ul>
-            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Servidor: <?=$server?></li>
+                <li class="list-group-item">PID: <?=$info['pid']?></li>
+                <li class="list-group-item">Uptime: <?=$info['uptime']?> [s]</li>
+                <li class="list-group-item">Versión: <?=$info['version']?></li>
+                <li class="list-group-item">Conexiones: <?=$info['curr_connections']?> de <?=$info['max_connections']?></li>
+                <li class="list-group-item">Sets / Gets: <?=$info['cmd_set']?> / <?=$info['cmd_get']?></li>
+                <li class="list-group-item">Hits: <?=round(($info['get_hits']/$info['cmd_get'])*100, 2)?>%</li>
+                <li class="list-group-item">Bytes escritos: <?=round($info['bytes_written']/1024/1024,1)?> [MiB]</li>
+                <li class="list-group-item">Bytes leídos: <?=round($info['bytes_read']/1024/1024,1)?> [MiB]</li>
+                <li class="list-group-item">Items actuales: <?=$info['curr_items']?></li>
+                <li class="list-group-item">Items totales: <?=$info['total_items']?></li>
+                <li class="list-group-item">Expirados sin uso: <?=$info['expired_unfetched']?></li>
+            </ul>
         </div>
 <?php endforeach; ?>
 <?php endif; ?>
-        <a class="btn btn-success btn-lg btn-block" href="php/info" role="button">
-            <span class="fab fa-php"> Información de PHP
+        <a class="btn btn-success btn-lg col-12" href="php/info" role="button">
+            <span class="fab fa-php"> Informacion de PHP
         </a>
     </div>
     <!-- FIN PANEL DERECHA -->
@@ -131,31 +127,105 @@ echo View_Helper_Dashboard::cards([
 
 <script>
 $(function() {
-    var networkGraph;
     $.getJSON(
         '<?=$_base?>/api/sistema/servidor/network/average',
         function(results) {
-            networkGraph = Morris.Line({
-                element: 'grafico-network_average',
-                data: results,
-                xkey: 'time',
-                ykeys: ['rx', 'tx'],
-                labels: ['RX', 'TX'],
-                postUnits: ' KB',
-                xLabels: 'Fecha y hora',
-                resize: true,
-                xLabelAngle: 45
-            });
-            setInterval(function() { updateNetworkGraph(networkGraph); }, 5000);
+            const getDataColors = opacity => {
+                const colors = ['#7448c2', '#21c0d7', '#d99e2b', '#cd3a81', '#9c99cc', '#e14eca', '#a1a1a1', '#ff0000', '#d6ff00', '#0038ff']
+                return colors.map(color => opacity ? `${color + opacity}` : color)
+            }
+            const networkAverage = results => {
+
+                const data = {
+
+                    labels: results.map(result => result.time),
+                    datasets: [
+                        {
+                            data: results.map(result => result.rx),
+                            label: 'RX',
+                            tension: .5,
+                            borderColor: getDataColors()[2],
+                            backgroundColor: getDataColors(20)[2],
+                            fill: true,
+                            pointBorderWidth: 5
+                        },
+                        {
+                            data: results.map(result => result.tx),
+                            label: 'TX',
+                            tension: .5,
+                            borderColor: getDataColors()[3],
+                            backgroundColor: getDataColors(20)[3],
+                            fill: true,
+                            pointBorderWidth: 5
+                        },
+                    ]
+                }
+
+                const options = {
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    },
+                    plugins: {
+                    legend: { display: false }
+                    }
+                }
+                new Chart('network_average_grafico', { type: 'line', data, options})
+            }
+            networkAverage(results)
+            setInterval(function () {
+                $("canvas#network_average_grafico").remove();
+                $("#chartdiv").append('<canvas id="network_average_grafico"></canvas>');
+                $.getJSON(
+                    '<?=$_base?>/api/sistema/servidor/network/average',
+                    function(results) {
+                        const getDataColors = opacity => {
+                            const colors = ['#7448c2', '#21c0d7', '#d99e2b', '#cd3a81', '#9c99cc', '#e14eca', '#a1a1a1', '#ff0000', '#d6ff00', '#0038ff']
+                            return colors.map(color => opacity ? `${color + opacity}` : color)
+                        }
+                        const networkAverage = results => {
+
+                            const data = {
+
+                                labels: results.map(result => result.time),
+                                datasets: [
+                                    {
+                                        data: results.map(result => result.rx),
+                                        label: 'RX',
+                                        tension: .5,
+                                        borderColor: getDataColors()[2],
+                                        backgroundColor: getDataColors(20)[2],
+                                        fill: true,
+                                        pointBorderWidth: 5
+                                    },
+                                    {
+                                        data: results.map(result => result.tx),
+                                        label: 'TX',
+                                        tension: .5,
+                                        borderColor: getDataColors()[3],
+                                        backgroundColor: getDataColors(20)[3],
+                                        fill: true,
+                                        pointBorderWidth: 5
+                                    },
+                                ]
+                            }
+
+                            const options = {
+                                interaction: {
+                                    intersect: false,
+                                    mode: 'index',
+                                },
+                                plugins: {
+                                legend: { display: false }
+                                }
+                            }
+                            new Chart('network_average_grafico', { type: 'line', data, options})
+                        }
+                        networkAverage(results)
+                    }
+                )
+            }, 8000);
         }
-    );
-});
-function updateNetworkGraph(graph) {
-    $.getJSON(
-        '<?=$_base?>/api/sistema/servidor/network/average',
-        function(results) {
-            graph.setData(results);
-        }
-    );
-}
+    )
+})
 </script>

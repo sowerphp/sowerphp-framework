@@ -17,7 +17,7 @@ foreach ($messages as $message) {
     echo '<div class="alert alert-',$message['type'],'" role="alert">',"\n";
     echo '    <span class="glyphicon glyphicon-',$icons[$message['type']],'" aria-hidden="true"></span>',"\n";
     echo '    <span class="sr-only">',$message['type'],': </span>',$message['text'],"\n";
-    echo '    <a href="#" class="close" data-dismiss="alert" aria-label="close" title="Cerrar">&times;</a>',"\n";
+    echo '    <a href="#" class="btn-close" data-bs-dismiss="alert" aria-label="close" title="Cerrar">&times;</a>',"\n";
     echo '</div>'."\n";
 }
 ?>
@@ -30,7 +30,7 @@ foreach ($messages as $message) {
                             <input type="text" name="id" id="user" class="form-control form-control-lg" required="required" placeholder="Usuario o correo electrónico">
                         </div>
                         <?=\sowerphp\general\Utility_Google_Recaptcha::form('recuperarForm')?>
-                        <button type="submit" class="btn btn-primary btn-block btn-lg">Solicitar email para recuperar la contraseña</button>
+                        <button type="submit" class="btn btn-primary btn-lg col-12">Solicitar email para recuperar la contraseña</button>
                     </form>
                 </div>
             </div>

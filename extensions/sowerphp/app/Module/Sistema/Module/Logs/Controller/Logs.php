@@ -85,7 +85,7 @@ class Controller_Logs extends \Controller_Maintainer
                     $Log->getFacility()->glosa.'.'.$Log->getSeverity()->glosa,
                     $Log->usuario ? ($Log->getUsuario()->usuario.'<br/><span>'.$Log->ip.'</span>') : $Log->ip,
                     strlen($Log->mensaje)>100 ? substr($Log->mensaje, 0, 100).'...': $Log->mensaje,
-                    '<button type="button" class="btn btn-'.$Log->getSeverity()->style.'" data-toggle="modal" data-target="#modal-log" data-log_id="'.$Log->id.'" title="Ver detalle del evento"><span class="fa fa-search" aria-hidden="true"></span></button>',
+                    '<button type="button" class="btn btn-'.$Log->getSeverity()->style.'" data-bs-toggle="modal" data-bs-target="#modal-log" data-log_id="'.$Log->id.'" title="Ver detalle del evento"><span class="fa fa-search" aria-hidden="true"></span></button>',
                 ];
             }
             $this->set([
@@ -123,7 +123,7 @@ class Controller_Logs extends \Controller_Maintainer
                     $Log->getFacility()->glosa.'.'.$Log->getSeverity()->glosa,
                     $Log->usuario ? ($Log->getUsuario()->usuario.'<br/><span>'.$Log->ip.'</span>') : $Log->ip,
                     strlen($Log->mensaje)>100 ? substr($Log->mensaje, 0, 100).'...': $Log->mensaje,
-                    '<button type="button" class="btn btn-'.$Log->getSeverity()->style.'" data-toggle="modal" data-target="#modal-log" data-log_id="'.$Log->id.'" title="Ver detalle del evento"><span class="fa fa-search" aria-hidden="true"></span></button>',
+                    '<button type="button" class="btn btn-'.$Log->getSeverity()->style.'" data-bs-toggle="modal" data-bs-target="#modal-log" data-log_id="'.$Log->id.'" title="Ver detalle del evento"><span class="fa fa-search" aria-hidden="true"></span></button>',
                 ];
             }
             return $eventos;

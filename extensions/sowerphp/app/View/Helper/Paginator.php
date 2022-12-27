@@ -76,7 +76,7 @@ class View_Helper_Paginator extends \sowerphp\general\View_Helper_Table
         $buffer .= parent::generate($data, $this->options['thead']);
         $buffer .= $this->form->end(false)."\n";
         if ($pages) {
-            $buffer .= '<div class="text-right mb-2 small">'."\n";
+            $buffer .= '<div class="text-end mb-2 small">'."\n";
             if ($page) {
                 $buffer .= '<a href="'.$this->options['link'].'/0'.$this->options['linkEnd'].'">Mostrar todos los registros (sin paginar)</a>'."\n";
             } else {
@@ -105,7 +105,7 @@ class View_Helper_Paginator extends \sowerphp\general\View_Helper_Table
         $from = ($group-1)*$groupOfPages + 1;
         $to = min($from+$groupOfPages-1, $pages);
         // crear enlaces para paginador
-        $buffer = '<div class="float-left w-50" style="margin-left:20%"><nav><ul class="pagination">'."\n";
+        $buffer = '<div class="float-start w-50 d-flex justify-content-center" style="margin-left:20%"><nav><ul class="pagination">'."\n";
         $buffer .= '<li class="page-item'.($page==1?' disabled':'').'"><a href="'.$this->options['link'].'/1'.$this->options['linkEnd'].'" title="Ir a la primera página" class="page-link"><i class="fa fa-fast-backward fa-fw" aria-hidden="true"></i></a></li>';
         $buffer .= '<li class="page-item'.($group==1?' disabled':'').'"><a href="'.$this->options['link'].'/'.($from-1).$this->options['linkEnd'].'" title="Ir al grupo de páginas anterior (página '.($from-1).')" class="page-link"><i class="fa fa-backward fa-fw" aria-hidden="true"></i></a></li>';
         for ($i=$from; $i<=$to; $i++) {

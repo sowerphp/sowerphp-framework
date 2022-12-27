@@ -44,7 +44,7 @@ class View_Helper_Maintainer extends View_Helper_Paginator
     {
         $buffer = $this->form->begin(array('onsubmit'=>'buscar(this)'))."\n";
         if ($create) {
-            $buffer .= '<div class="float-left"><a href="'.$this->options['link'].'/crear'.$this->options['listarFilterUrl'].'" title="Crear nuevo registro" class="btn btn-primary"><i class="fa fa-plus fa-fw" aria-hidden="true"></i></a></div>'."\n";
+            $buffer .= '<div class="float-start col-4"><a href="'.$this->options['link'].'/crear'.$this->options['listarFilterUrl'].'" title="Crear nuevo registro" class="btn btn-primary"><i class="fa fa-plus fa-fw" aria-hidden="true"></i></a></div>'."\n";
         }
         $this->options['link'] .= '/listar';
         if ($page) {
@@ -52,7 +52,7 @@ class View_Helper_Maintainer extends View_Helper_Paginator
         }
         $buffer .= \sowerphp\general\View_Helper_Table::generate ($data, $this->options['thead']);
         $buffer .= $this->form->end(false)."\n";
-        $buffer .= '<div class="text-right mb-2 small">'."\n";
+        $buffer .= '<div class="text-end mb-2 small">'."\n";
         if ($page) {
             $buffer .= '<a href="'.$this->options['link'].'/0'.$this->options['linkEnd'].'">Mostrar todos los registros (sin paginar)</a>'."\n";
         } else {

@@ -57,12 +57,12 @@ class View_Helper_AppsConfig
         $buffer = '';
         $buffer .= '<div class="card mb-4">'."\n";
         $buffer .= '    <div class="card-body">'."\n";
-        $buffer .= '        <div class="float-right">'."\n";
-        $buffer .= '            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#app-'.$App->getCodigo().'">'."\n";
+        $buffer .= '        <div class="float-end">'."\n";
+        $buffer .= '            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#app-'.$App->getCodigo().'">'."\n";
         $buffer .= '                <i class="fas fa-cogs fa-fw"></i>'."\n";
         $buffer .= '            </button>'."\n";
         $buffer .= '        </div>'."\n";
-        $buffer .= '        <img src="'.$App->getLogo().'" alt="Logo '.$App->getNombre().'" class="float-left mr-4" style="max-width:32px" />'."\n";
+        $buffer .= '        <img src="'.$App->getLogo().'" alt="Logo '.$App->getNombre().'" class="float-start me-4" style="max-width:32px" />'."\n";
         $buffer .= '        <h5 class="card-title">'.$App->getNombre().'</h5>'."\n";
         $buffer .= '        <p class="small text-muted">'.$App->getDescripcion().'</p>'."\n";
         $buffer .= '    </div>'."\n";
@@ -72,11 +72,11 @@ class View_Helper_AppsConfig
         $buffer .= '        <div class="modal-content">'."\n";
         $buffer .= '            <div class="modal-header">'."\n";
         $buffer .= '                <h5 class="modal-title" id="'.$App->getCodigo().'Label">'."\n";
-        $buffer .= '                    <img src="'.$App->getLogo().'" alt="Logo '.$App->getNombre().'" class="float-left mr-4" style="max-width:32px" />'."\n";
+        $buffer .= '                    <img src="'.$App->getLogo().'" alt="Logo '.$App->getNombre().'" class="float-start me-4" style="max-width:32px" />'."\n";
         $buffer .= '                    '.$App->getNombre().''."\n";
         $buffer .= '                </h5>'."\n";
-        $buffer .= '                <button type="button" class="close" data-dismiss="modal" aria-label="Close">'."\n";
-        $buffer .= '                    <span aria-hidden="true">&times;</span>'."\n";
+        $buffer .= '                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">'."\n";
+
         $buffer .= '                </button>'."\n";
         $buffer .= '            </div>'."\n";
         $buffer .= '            <div class="modal-body">'."\n";

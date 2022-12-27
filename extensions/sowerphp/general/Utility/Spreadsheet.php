@@ -198,7 +198,7 @@ class Utility_Spreadsheet
         $buffer .= '<ul class="nav nav-tabs" role="tablist">'."\n";
         foreach ($sheets as $id => &$name) {
             $id = $options['id'].'_'.\sowerphp\core\Utility_String::normalize($name);
-            $buffer .= '<li role="presentation"><a href="#'.$id.'" aria-controls="'.$id.'" role="tab" data-toggle="tab">'.$name.'</a></li>'."\n";
+            $buffer .= '<li role="presentation"><a href="#'.$id.'" aria-controls="'.$id.'" role="tab" data-bs-toggle="tab">'.$name.'</a></li>'."\n";
         }
         $buffer .= '</ul>'."\n";
         // agregar hojas

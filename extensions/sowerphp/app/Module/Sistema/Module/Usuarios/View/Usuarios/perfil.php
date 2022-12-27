@@ -10,9 +10,9 @@ $(function() {
 <div class="page-header"><h1>Mi perfil de usuario (<?=$_Auth->User->usuario?>)</h1></div>
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
-        <li class="nav-item"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab" id="datos-tab" class="nav-link active" aria-selected="true">Datos básicos</a></li>
-        <li class="nav-item"><a href="#contrasenia" aria-controls="contrasenia" role="tab" data-toggle="tab" id="contrasenia-tab" class="nav-link">Contraseña</a></li>
-        <li class="nav-item"><a href="#auth" aria-controls="auth" role="tab" data-toggle="tab" id="auth-tab" class="nav-link">Auth</a></li>
+        <li class="nav-item"><a href="#datos" aria-controls="datos" role="tab" data-bs-toggle="tab" id="datos-tab" class="nav-link active" aria-selected="true">Datos básicos</a></li>
+        <li class="nav-item"><a href="#contrasenia" aria-controls="contrasenia" role="tab" data-bs-toggle="tab" id="contrasenia-tab" class="nav-link">Contraseña</a></li>
+        <li class="nav-item"><a href="#auth" aria-controls="auth" role="tab" data-bs-toggle="tab" id="auth-tab" class="nav-link">Auth</a></li>
     </ul>
     <div class="tab-content pt-4">
         <div role="tabpanel" class="tab-pane active" id="datos" aria-labelledby="datos-tab">
