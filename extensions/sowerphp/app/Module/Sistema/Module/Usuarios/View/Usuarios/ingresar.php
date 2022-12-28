@@ -16,7 +16,7 @@ foreach ($messages as $message) {
     ];
     echo '<div class="alert alert-',$message['type'],'" role="alert">',"\n";
     echo '    <span class="glyphicon glyphicon-',$icons[$message['type']],'" aria-hidden="true"></span>',"\n";
-    echo '    <span class="sr-only">',$message['type'],': </span>',$message['text'],"\n";
+    echo '    <span class="visually-hidden">',$message['type'],': </span>',$message['text'],"\n";
     echo '    <a href="#" class="btn-close" data-bs-dismiss="alert" aria-label="close" title="Cerrar">&times;</a>',"\n";
     echo '</div>'."\n";
 }
@@ -26,16 +26,16 @@ foreach ($messages as $message) {
                     <h1 class="text-center mb-4">Ingresar</h1>
                     <form action="<?=$_base?>/usuarios/ingresar" method="post" onsubmit="return Form.check()" class="mb-4" id="ingresarForm">
                         <div class="form-group">
-                            <label for="user" class="sr-only">Usuario</label>
+                            <label for="user" class="visually-hidden">Usuario</label>
                             <input type="text" name="usuario" id="user" class="form-control form-control-lg" required="required" placeholder="Usuario o correo electrónico" />
                         </div>
                         <div class="form-group">
-                            <label for="pass" class="sr-only">Contraseña</label>
-                            <input type="password" name="contrasenia" id="pass" class="form-control form-control-lg" required="required" placeholder="Contraseña" />
+                            <label for="pass" class="visually-hidden">Contraseña</label>
+                            <input type="password" name="contrasenia" id="pass" class="form-control form-control-lg mt-3 mb-3" required="required" placeholder="Contraseña" />
                         </div>
 <?php if ($auth2_token_enabled) : ?>
                         <div class="form-group">
-                            <label for="auth2" class="sr-only">Token 2FA</label>
+                            <label for="auth2" class="visually-hidden">Token 2FA</label>
                             <input type="text" name="auth2_token" id="auth2" class="form-control form-control-lg" placeholder="Token 2FA si es necesario" autocomplete="off" />
                         </div>
 <?php endif; ?>

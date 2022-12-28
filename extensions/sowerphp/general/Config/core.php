@@ -33,6 +33,6 @@
 
 // Configuración select2
 \sowerphp\core\Configure::write('select2', [
-    'theme' => 'bootstrap4',
+    'theme' => 'bootstrap-5',
     'width' => '100%'
 ]);

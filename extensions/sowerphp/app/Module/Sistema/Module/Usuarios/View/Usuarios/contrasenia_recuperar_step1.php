@@ -16,7 +16,7 @@ foreach ($messages as $message) {
     ];
     echo '<div class="alert alert-',$message['type'],'" role="alert">',"\n";
     echo '    <span class="glyphicon glyphicon-',$icons[$message['type']],'" aria-hidden="true"></span>',"\n";
-    echo '    <span class="sr-only">',$message['type'],': </span>',$message['text'],"\n";
+    echo '    <span class="visually-hidden">',$message['type'],': </span>',$message['text'],"\n";
     echo '    <a href="#" class="btn-close" data-bs-dismiss="alert" aria-label="close" title="Cerrar">&times;</a>',"\n";
     echo '</div>'."\n";
 }
@@ -26,8 +26,8 @@ foreach ($messages as $message) {
                     <h1 class="text-center mb-4">Recuperar contraseña</h1>
                     <form action="<?=$_base?>/usuarios/contrasenia/recuperar" method="post" onsubmit="return Form.check()" class="mb-4" id="recuperarForm">
                         <div class="form-group">
-                            <label for="user" class="sr-only">Usuario</label>
-                            <input type="text" name="id" id="user" class="form-control form-control-lg" required="required" placeholder="Usuario o correo electrónico">
+                            <label for="user" class="visually-hidden">Usuario</label>
+                            <input type="text" name="id" id="user" class="form-control form-control-lg mb-3" required="required" placeholder="Usuario o correo electrónico">
                         </div>
                         <?=\sowerphp\general\Utility_Google_Recaptcha::form('recuperarForm')?>
                         <button type="submit" class="btn btn-primary btn-lg col-12">Solicitar email para recuperar la contraseña</button>
