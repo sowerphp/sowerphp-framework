@@ -10,11 +10,11 @@
                 <p class="lead">Encontramos un problema y la aplicación dejó de ejecutarse.</p>
                 <div class="card mb-4">
                     <div class="card-header text-muted"><?=$exception?></div>
-                    <div class="card-body"><pre><?=$message?></pre></div>
+                    <div class="card-body"><pre class="text-dark"><?=$message?></pre></div>
                 </div>
                 <div class="card mb-4">
                     <div class="card-header text-muted">Traza del error</div>
-                    <div class="card-body"><pre><?=$trace?></pre></div>
+                    <div class="card-body"><pre class="text-dark"><?=$trace?></pre></div>
                 </div>
                 <p class="lead">Por favor, verifique que la dirección web que lo trajo a esta página o los datos ingresados sean válidos.</p>
                 <div class="mt-4">
