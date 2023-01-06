@@ -154,6 +154,7 @@ class View
             '_body_title' => Configure::read('page.body.title'),
             '_footer' => Configure::read('page.footer'),
             '_header_extra' => $_header_extra,
+            '_request' => $this->request->request,
             '_page' => $page,
             '_nav_website' => Configure::read('nav.website'),
             '_nav_app' => (array)Configure::read('nav.app'),
