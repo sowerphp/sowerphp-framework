@@ -96,7 +96,7 @@ class Utility_Data
         }
         $ciphertext_dec = base64_decode($ciphertext_base64);
         if ($ciphertext_dec === false) {
-            throw new \Exception(__('Error al usar base64_decode() en el mensaje cifrado'));
+            throw new \Exception(__('Error al usar base64_decode() en el mensaje cifrado.'));
         }
         if (!$key) {
             return $ciphertext_dec;
@@ -115,7 +115,7 @@ class Utility_Data
     {
         // verificar que exista la función de mcrypt
         if (!function_exists('sodium_crypto_secretbox')) {
-            throw new \Exception(__('La extensión %s de PHP no está disponible', 'sodium'));
+            throw new \Exception(__('La extensión %s de PHP no está disponible.', 'sodium'));
         }
         // encriptar
         $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
@@ -135,7 +135,7 @@ class Utility_Data
     {
         // verificar que exista la función de mcrypt
         if (!function_exists('sodium_crypto_secretbox_open')) {
-            throw new \Exception(__('La extensión %s de PHP no está disponible', 'sodium'));
+            throw new \Exception(__('La extensión %s de PHP no está disponible.', 'sodium'));
         }
         // desencriptar
         if (mb_strlen($ciphertext_dec, '8bit') < (SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES)) {
@@ -145,7 +145,7 @@ class Utility_Data
         $ciphertext = mb_substr($ciphertext_dec, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit');
         $plaintext = sodium_crypto_secretbox_open($ciphertext, $nonce, $key);
         if ($plaintext === false) {
-            throw new \Exception('El mensaje fue manipulado después de ser encriptado, no es válido');
+            throw new \Exception('El mensaje fue manipulado después de ser encriptado, no es válido.');
         }
         sodium_memzero($ciphertext);
         sodium_memzero($key);
@@ -161,11 +161,11 @@ class Utility_Data
     private static function mcrypt_encrypt($plaintext, $key)
     {
         if (mb_strlen($key, '8bit') !== 32) {
-            throw new \Exception(__('Se requiere una llave de 256 bits (32 caracteres si es llave ASCII)'));
+            throw new \Exception(__('Se requiere una llave de 256 bits (32 caracteres si es llave ASCII).'));
         }
         // verificar que exista la función de mcrypt
         if (!function_exists('mcrypt_encrypt')) {
-            throw new \Exception(__('La extensión %s de PHP no está disponible', 'mcrypt'));
+            throw new \Exception(__('La extensión %s de PHP no está disponible.', 'mcrypt'));
         }
         // encriptar
         $iv_size = @mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
@@ -184,11 +184,11 @@ class Utility_Data
     private static function mcrypt_decrypt($ciphertext_dec, $key)
     {
         if (mb_strlen($key, '8bit') !== 32) {
-            throw new \Exception(__('Se requiere una llave de 256 bits (32 caracteres si es llave ASCII)'));
+            throw new \Exception(__('Se requiere una llave de 256 bits (32 caracteres si es llave ASCII).'));
         }
         // verificar que exista la función de mcrypt
         if (!function_exists('mcrypt_decrypt')) {
-            throw new \Exception(__('La extensión %s de PHP no está disponible', 'mcrypt'));
+            throw new \Exception(__('La extensión %s de PHP no está disponible.', 'mcrypt'));
         }
         // desencriptar
         $iv_size = @mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
