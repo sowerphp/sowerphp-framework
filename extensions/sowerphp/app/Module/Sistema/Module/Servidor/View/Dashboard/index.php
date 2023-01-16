@@ -119,7 +119,7 @@ echo View_Helper_Dashboard::cards([
 <?php endforeach; ?>
 <?php endif; ?>
         <a class="btn btn-success btn-lg col-12" href="php/info" role="button">
-            <span class="fab fa-php"> Informacion de PHP
+            <i class="fab fa-php me-2"></i> Informacion de PHP
         </a>
     </div>
     <!-- FIN PANEL DERECHA -->
