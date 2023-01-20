@@ -399,14 +399,14 @@ abstract class Model
     /**
      * Método que valida los valores asignados a los atributos del objeto
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-10-04
+     * @version 2023-01-20
      */
     public function checkAttributes()
     {
         foreach ($this::$columnsInfo as $attribute => $info) {
             // verificar que el campo tenga una valor si no puede ser NULL
             // "0" es un valor aceptado como válido.
-            if (empty($info['null']) and ($this->{$attribute} === null or $this->{$attribute} === '')) {
+            if (empty($info['auto']) and empty($info['null']) and ($this->{$attribute} === null or $this->{$attribute} === '')) {
                 throw new \Exception(__(
                     'El campo "%s" debe tener un valor.',
                     $info['name'],
