@@ -143,6 +143,16 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
+     * Método que entrega el icono de la APP
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2023-01-21
+     */
+    public function getIcon()
+    {
+        return !empty($this->icon) ? $this->icon : 'fas fa-cubes';
+    }
+
+    /**
      * Método que entrega el código HTML de la página de configuración de la aplicación
      * @param form Objeto con el formulario que se está usando para construir la página de configuración
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
