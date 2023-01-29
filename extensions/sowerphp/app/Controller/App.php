@@ -55,10 +55,16 @@ class Controller_App extends \sowerphp\core\Controller
      * del controlador que se está ejecutando. Aquí no se validan permisos para
      * la funcionalidad, estos deberán ser validados en cada función
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-01
+     * @version 2023-01-29
      */
     public function beforeFilter()
     {
+        if (!empty($this->allowedActions)) {
+            call_user_func_array([$this->Auth, 'allow'], $this->allowedActions);
+        }
+        if (!empty($this->allowedActionsWithLogin)) {
+            call_user_func_array([$this->Auth, 'allowWithLogin'], $this->allowedActions);
+        }
         $this->Auth->allow('api');
         parent::beforeFilter();
     }
