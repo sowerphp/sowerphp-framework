@@ -46,7 +46,7 @@ class Model_MonedaCambios extends \Model_Plural_App
     ];
 
     /**
-     * Método que busca los valores de varios monedas al mismo tiempo para un
+     * Método que busca los valores de varias monedas al mismo tiempo para un
      * día determinado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2018-10-29
@@ -77,6 +77,42 @@ class Model_MonedaCambios extends \Model_Plural_App
             FROM moneda_cambio
             WHERE '.implode(' AND ', $where).'
             ORDER BY desde
+        ', $vars);
+    }
+
+    /**
+     * Método que busca los valores de varias monedas al mismo tiempo para un
+     * rango de días determinados
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2023-02-28
+     */
+    public function getValores($monedas, $fecha_desde = null, $fecha_hasta)
+    {
+        if (!$monedas) {
+            return [];
+        }
+        if (!is_array($monedas)) {
+            $monedas = [$monedas];
+        }
+        if (!$fecha_hasta) {
+            $fecha_hasta = date('Y-m-d');
+        }
+        $fecha_desde = \sowerphp\general\Utility_Date::getPrevious($fecha_hasta);
+        $where = ['fecha BETWEEN :fecha_desde AND :fecha_hasta'];
+        $vars = [':fecha_desde' => $fecha_desde, ':fecha_hasta' => $fecha_hasta];
+        $i = 1;
+        $in = [];
+        foreach ($monedas as $m) {
+            $in[] = ':moneda'.$i;
+            $vars[':moneda'.$i] = $m;
+            $i++;
+        }
+        $where[] = 'desde IN ('.implode(', ', $in).')';
+        return $this->db->getAssociativeArray('
+            SELECT desde AS moneda, fecha, valor
+            FROM moneda_cambio
+            WHERE '.implode(' AND ', $where).'
+            ORDER BY desde, fecha
         ', $vars);
     }
 
