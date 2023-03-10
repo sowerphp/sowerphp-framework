@@ -3,8 +3,8 @@
     <h1><?=$title?></h1>
 </div>
 <div class="container">
-    <div class="mb-4 text-center">
-        <div class="row row-cols<?php if (count($nav)>=4) : ?>-4<?php endif; ?> justify-content-center" style="margin-top: -20px;">
+    <div class="text-center">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md<?php if (count($nav)>=4) : ?>-4<?php endif; ?> row-cols-lg<?php if (count($nav)>=4) : ?>-4<?php endif; ?> justify-content-center" style="margin-top: -20px;">
             <?php foreach ($nav as $link=>&$info): ?>
                 <div class="col mt-4">
                     <div class="card">
