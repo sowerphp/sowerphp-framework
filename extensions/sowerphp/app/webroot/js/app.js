@@ -5,7 +5,7 @@
  * Envía un formulario para filtrar por diferentes parámetros
  * @param formulario Formulario genérico que se utilizará para enviar elementos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-13
+ * @version 2023-03-10
  */
 function buscar(formulario) {
     'use strict';
@@ -13,7 +13,7 @@ function buscar(formulario) {
     for (i = 0; i < total; i += 1) {
         campo = formulario.elements[i].name;
         valor = formulario.elements[i].value;
-        if (!__.empty(valor)) {
+        if (!__.empty(campo) && !__.empty(valor)) {
             search.push(campo + ':' + valor);
         }
     }
