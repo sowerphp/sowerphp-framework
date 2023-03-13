@@ -38,7 +38,7 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      * conexión
      * @param config Arreglo con los parámetros de la conexión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-05-06
+     * @version 2023-03-13
      */
     public function __construct ($config)
     {
@@ -47,6 +47,7 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
             'host' => 'localhost',
             'port' => '3306',
             'char' => 'utf8',
+            'pers' => false,
         ), $config);
         // realizar conexión a la base de datos
         parent::__construct(
@@ -58,7 +59,7 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
             $this->config['pass'],
             [
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_SILENT,
-                \PDO::ATTR_PERSISTENT => true,
+                \PDO::ATTR_PERSISTENT => (bool)$this->config['pers'],
                 \PDO::MYSQL_ATTR_COMPRESS => true
             ]
         );

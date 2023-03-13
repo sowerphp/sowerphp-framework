@@ -38,7 +38,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
      * conexión
      * @param config Arreglo con los parámetros de la conexión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-05-06
+     * @version 2023-03-13
      */
     public function __construct($config)
     {
@@ -48,6 +48,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
             'port' => '5432',
             'char' => 'utf8',
             'sche' => 'public',
+            'pers' => false,
         ), $config);
         // abrir conexión a la base de datos
         parent::__construct(
@@ -55,7 +56,10 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
             ';port='.$this->config['port'].
             ';dbname='.$this->config['name'],
             $this->config['user'],
-            $this->config['pass']
+            $this->config['pass'],
+            [
+                \PDO::ATTR_PERSISTENT => (bool)$this->config['pers'],
+            ]
         );
         // definir encoding a utilizar con la base de datos
         $this->query('SET CLIENT_ENCODING TO \''.$this->config['char'].'\'');
