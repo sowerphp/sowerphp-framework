@@ -91,12 +91,12 @@ class Controller_Maintainer extends \Controller_App
      * @param view Vista que se desea renderizar
      * @param location No se utiliza, esta por compatibilidad con método padre
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-02-09
+     * @version 2023-03-16
      */
     protected function renderView($view = null, $location = null)
     {
         $this->autoRender = false;
-        $ControllerName = str_replace($this->namespace.'\Controller_', '', get_class($this));
+        list($namespace, $ControllerName) = explode('\Controller_', get_class($this));
         if (\sowerphp\core\View::location($ControllerName.'/'.$view, $this->request->params['module'])) {
             return parent::render($ControllerName.'/'.$view, $location);
         } else {
