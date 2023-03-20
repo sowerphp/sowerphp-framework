@@ -38,7 +38,7 @@ class View_Helper_Paginator extends \sowerphp\general\View_Helper_Table
      * Constructor de la clase
      * @param options Arreglo con las opciones para el mantenedor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-04-05
+     * @version 2023-03-20
      */
     public function __construct(array $options = [], $filter = true)
     {
@@ -54,9 +54,15 @@ class View_Helper_Paginator extends \sowerphp\general\View_Helper_Table
                 'link'=>'', 'linkEnd'=>'', 'listarFilterUrl'=>'', 'thead'=>1, 'remove'=>[],
             ], $options);
         }
+        if (!isset($this->options['remove_cols'])) {
+            $this->options['remove_cols'] = [-1];
+        }
         $this->form = new \sowerphp\general\View_Helper_Form('normal');
         $this->setExport(true);
-        $this->setExportRemove(['rows'=>$this->options['remove'], 'cols'=>[-1]]);
+        $this->setExportRemove([
+            'rows' => $this->options['remove'],
+            'cols' => $this->options['remove_cols'],
+        ]);
     }
 
     /**
