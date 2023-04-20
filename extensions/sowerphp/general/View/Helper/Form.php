@@ -551,7 +551,7 @@ class View_Helper_Form
             $col_i++;
         }
         // botón de borrado de la fila
-        $delete = '<td><a href="" onclick="Form.delJS(this); return false" title="Eliminar" id="eliminar"><i class="fas fa-times fa-fw mt-2" aria-hidden="true"></i></a></td>';
+        $delete = '<td><a class="'.$config['id'].'_eliminar" href="" onclick="Form.delJS(this); return false" title="Eliminar"><i class="fas fa-times fa-fw mt-2" aria-hidden="true"></i></a></td>';
         // determinar inputs
         $inputs = '<tr>';
         $col_i = 0;
