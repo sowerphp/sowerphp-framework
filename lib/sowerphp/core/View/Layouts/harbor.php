@@ -9,13 +9,13 @@ Layout: harbor (https://hackerthemes.com)
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title><?=$_header_title?></title>
         <link rel="shortcut icon" href="<?=$_base?>/img/favicon.png" />
-        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css"/>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.2.0/css/all.css">
         <link href="https://fonts.googleapis.com/css?family=Oswald|Raleway" rel="stylesheet">
-        <link rel="stylesheet" href="<?=$_base?>/layouts/harbor/bootstrap4-harbor.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
         <link rel="stylesheet" href="<?=$_base?>/css/style.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
         <script>
             var _url = "<?=$_url?>",
                 _base = "<?=$_base?>",
@@ -38,9 +38,9 @@ Layout: harbor (https://hackerthemes.com)
         <script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootbox@5.1.3/dist/bootbox.all.min.js"></script>
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.8/css/select2.min.css" rel="stylesheet" />
-        <link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.2.3/dist/select2-bootstrap4.min.css" rel="stylesheet" />
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.8/js/select2.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <?php endif; ?>
 <?php if (\sowerphp\core\Module::loaded('Sistema.Notificaciones')) : ?>
         <link rel="stylesheet" href="<?=$_base?>/sistema/notificaciones/css/style.css">
@@ -49,7 +49,8 @@ Layout: harbor (https://hackerthemes.com)
 <?=$_header_extra?>
     </head>
     <body>
-        <nav class="container navbar navbar-expand-lg navbar-light bg-light">
+        <div class="bg-light">
+        <nav class="container navbar navbar-expand-lg navbar-light">
             <a class="navbar-brand" href="<?=$_base?>/"><?=$_body_title?></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -155,6 +156,7 @@ foreach ($_nav_app as $link=>&$info) {
 <?php endif; ?>
             </div>
         </nav>
+        </div>
 
         <div class="container main-container">
 <!-- BEGIN MAIN CONTENT -->
@@ -182,10 +184,10 @@ foreach ($messages as $message) {
         'warning' => 'warning-sign',
         'danger' => 'exclamation-sign',
     ];
-    echo '<div class="alert alert-',$message['type'],'" role="alert">',"\n";
+    echo '<div class="alert alert-',$message['type'],' alert-dismissible fade show mt-4" role="alert">',"\n";
     echo '    <span class="glyphicon glyphicon-',$icons[$message['type']],'" aria-hidden="true"></span>',"\n";
     echo '    <span class="sr-only">',$message['type'],': </span>',$message['text'],"\n";
-    echo '    <a href="#" class="btn-close" data-bs-dismiss="alert" aria-label="close" title="Cerrar">&times;</a>',"\n";
+    echo '    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',"\n";
     echo '</div>'."\n";
 }
 // contenido de la página
