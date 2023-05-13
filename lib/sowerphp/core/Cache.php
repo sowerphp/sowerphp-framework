@@ -56,10 +56,10 @@ class Cache
             if (!$host or !$port) {
                 $cache = \sowerphp\core\Configure::read('cache.default');
                 if (!$host) {
-                    $host = isset($cache['host']) ? $cache['host'] : '127.0.0.1';
+                    $host = isset($cache['host']) ? $cache['host'] : env('SOWERPHP_MEMCACHED_HOST', '127.0.0.1');
                 }
                 if (!$port) {
-                    $port = isset($cache['port']) ? $cache['port'] : 11211;
+                    $port = isset($cache['port']) ? $cache['port'] : env('SOWERPHP_MEMCACHED_PORT', 11211);
                 }
             }
             // conectar a Memcached
