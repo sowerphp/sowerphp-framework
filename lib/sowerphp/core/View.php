@@ -172,12 +172,15 @@ class View
      * @param layout Tema que se quiere buscar su ubicación
      * @return Ubicación del tema (o falso si no se encontró)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-07-28
+     * @version 2023-05-13
      */
     private function getLayoutLocation($layout)
     {
+        if (!is_string($layout) or empty($layout)) {
+            return false;
+        }
         // si el layout es una ruta absoluta se entrega directamente
-        if ($layout[0]=='/') {
+        if (isset($layout[0]) && $layout[0]=='/') {
             return $layout;
         }
         // buscar en las rutas de Layouts
