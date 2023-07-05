@@ -102,8 +102,9 @@ class Network_Http_Rest
      */
     public function __call($method, $args)
     {
-        if (!isset($args[0]) or !in_array($method, $this->methods))
+        if (!isset($args[0]) or !in_array($method, $this->methods)) {
             return false;
+        }
         $resource = $args[0];
         $data = isset($args[1]) ? $args[1] : [];
         $header = isset($args[2]) ? $args[2] : [];

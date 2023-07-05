@@ -82,7 +82,7 @@ class Controller_App extends \sowerphp\core\Controller
     /**
      * Método que permite consumir por POST o GET un recurso de la misma aplicación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-04
+     * @version 2023-07-03
      */
     protected function consume($recurso, $datos = [], $assoc = true)
     {
@@ -90,10 +90,14 @@ class Controller_App extends \sowerphp\core\Controller
         $rest->setAuth($this->Auth->User ? $this->Auth->User->hash : \sowerphp\core\Configure::read('api.default.token'));
         $rest->setAssoc($assoc);
         if ($datos) {
-            return $rest->post($this->request->url.$recurso, $datos);
+            $response = $rest->post($this->request->url.$recurso, $datos);
         } else {
-            return $rest->get($this->request->url.$recurso);
+            $response = $rest->get($this->request->url.$recurso);
         }
+        if ($response === false) {
+            throw new \Exception('Error al consumir internamente el recurso ' . $recurso . ': ' . implode(' / ', $rest->getErrors()));
+        }
+        return $response;
     }
 
     /**
