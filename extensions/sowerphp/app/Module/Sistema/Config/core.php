@@ -28,9 +28,4 @@
         'desc' => 'Mantenedor de usuarios y grupos del sistema',
         'icon' => 'fa fa-users',
     ],
-    '/servidor/dashboard' => [
-        'name' => 'Servidor',
-        'desc' => 'Estadísticas y administración del servidor',
-        'icon' => 'fas fa-server',
-    ],
 ]);
