@@ -21,6 +21,8 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
+// IMPORTANTE: ¡¡¡ESTO SE DEBE MODIFICAR EN LA CONFIGURACIÓN DEL PROYECTO!!! (NO ACÁ)
+
 // Configuración datepicker
 \sowerphp\core\Configure::write('datepicker', [
     'format' => 'yyyy-mm-dd',

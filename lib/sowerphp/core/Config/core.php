@@ -26,11 +26,13 @@ namespace sowerphp\core;
 /**
  * @file core.php
  * Configuración estándar de las páginas o aplicaciones
- * @version 2022-07-28
+ * @version 2023-09-16
  */
 
+// IMPORTANTE: ¡¡¡ESTO SE DEBE MODIFICAR EN LA CONFIGURACIÓN DEL PROYECTO!!! (NO ACÁ)
+
 // Errores
-Configure::write('debug', false);
+Configure::write('debug', true);
 Configure::write('error.level', E_ALL & ~E_DEPRECATED & ~E_STRICT);
 
 // Tiempo
@@ -44,7 +46,7 @@ Configure::write('language', 'es');
 Configure::write('page.extensions', ['php', 'md']);
 
 // Página inicial
-Configure::write('homepage', 'inicio');
+Configure::write('homepage', '/inicio');
 
 // tiempo de expiración de la sesión en minutos
 Configure::write('session.expires', 30);

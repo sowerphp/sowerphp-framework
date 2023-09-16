@@ -1,20 +1,13 @@
-<div class="bg-info text-white mb-0 radius-0">
-    <div class="container">
+<div class="bg-body-tertiary rounded-3 p-5 mb-4">
+    <div class="container-fluid py-5">
         <img src="<?=$_base?>/img/logo.png" alt="Logo SowerPHP" class="float-end" />
-        <h1 class="display-1 text-light">SowerPHP</h1>
-        <span class="lead">Framework PHP hecho en Chile</span>
-        <div class="mt-4">
-            <a href="https://sowerphp.org" class="btn btn-success btn-pill btn-wide btn-lg my-2 me-2">
-                <span>Sitio web proyecto SowerPHP</span>
-            </a>
-            <a href="https://github.com/SowerPHP" class="btn btn-primary btn-pill btn-wide btn-lg my-2">
-                <span>Código Fuente en GitHub</span>
-            </a>
-        </div>
+        <h1 class="display-5 fw-bold">SowerPHP</h1>
+        <p class="col-md-8 fs-4">Framework PHP hecho en Chile.</p>
+        <a href="https://github.com/sascocl/sowerphp" class="btn btn-primary btn-lg" type="button">Código fuente en GitHub</a>
     </div>
 </div>
-<div class="container py-5">
-    <h1>¡Listo para programar!</h1>
-    <p>Ya tienes instalado SowerPHP, es hora de empezar a programar. Primero cambia esta página de inicio, hazlo modificando el archivo <strong>View/Pages/inicio.php</strong> en <em><?=DIR_PROJECT?>/website</em></p>
-    <p>Aprende más sobre el framework en <a href="https://wiki.sowerphp.org">wiki.sowerphp.org</a></p>
+<div class="bg-body-tertiary rounded-3 border h-100 p-5 mb-4">
+    <h2 class="mb-4">¡Listo para programar!</h2>
+    <p>Ya tienes instalado SowerPHP, es hora de empezar a programar.</p>
+    <p>Primero modifica esta página de inicio en <code><?=DIR_PROJECT?>/website/View/Pages/inicio.php</code></p>
 </div>

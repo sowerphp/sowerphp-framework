@@ -47,7 +47,7 @@ class Cache
      * @param port Puerto donde Memcached está escuchando
      * @param prefix Prefijo que se utilizará en las claves de los elementos del caché
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-04-13
+     * @version 2023-09-16
      */
     public function __construct($host = null, $port = null, $prefix = false)
     {
@@ -56,10 +56,10 @@ class Cache
             if (!$host or !$port) {
                 $cache = \sowerphp\core\Configure::read('cache.default');
                 if (!$host) {
-                    $host = isset($cache['host']) ? $cache['host'] : env('SOWERPHP_MEMCACHED_HOST', '127.0.0.1');
+                    $host = !empty($cache['host']) ? $cache['host'] : env('SOWERPHP_MEMCACHED_HOST', '127.0.0.1');
                 }
                 if (!$port) {
-                    $port = isset($cache['port']) ? $cache['port'] : env('SOWERPHP_MEMCACHED_PORT', 11211);
+                    $port = !empty($cache['port']) ? $cache['port'] : env('SOWERPHP_MEMCACHED_PORT', 11211);
                 }
             }
             // conectar a Memcached

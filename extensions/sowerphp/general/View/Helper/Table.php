@@ -308,7 +308,8 @@ class View_Helper_Table
         // escribir datos para la exportación y colocar iconos si se logró
         // guardar en la caché
         $buffer = '';
-        if ((new \sowerphp\core\Cache())->set('session.'.session_id().'.export.'.$this->_id, $data)) {
+        $data_saved = (new \sowerphp\core\Cache())->set('session.'.session_id().'.export.'.$this->_id, $data);
+        if ($data_saved) {
             $buffer = '<button type="button" class="btn btn-primary dropdown-toggle mb-2" data-bs-toggle="dropdown" role="button" aria-expanded="false" id="dropdown_'.$this->_id.'" title="Guardar como..."><i class="fas fa-download fa-fw"></i> Guardar como...</button>';
             $buffer .= '<div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown_'.$this->_id.'">';
             $extensions = \sowerphp\core\Configure::read('app.tables.extensions') ? \sowerphp\core\Configure::read('app.tables.extensions') : $this->extensions;

@@ -35,7 +35,7 @@ class Model_Datasource_Session
      * Método que inicia la sesión
      * @param expires Minutos en que expirará la sesión
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-01-30
+     * @version 2023-09-16
      */
     public static function start($expires = 30)
     {
@@ -56,7 +56,9 @@ class Model_Datasource_Session
         ini_set('session.use_only_cookies', true);
         ini_set('session.gc_maxlifetime', $lifetime <= 65535 ? $lifetime : 65535);
         session_name($session_name);
-        session_start();
+        if (@session_start() === false) {
+            die('Model_Datasource_Session::start() No fue posible iniciar la sesión de PHP "'.$session_name.'" usando '.ini_get('session.save_handler').'.');
+        }
         setcookie(session_name(), session_id(), time()+$lifetime, $path, $domain, $secure, $httponly);
     }
 

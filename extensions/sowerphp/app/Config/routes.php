@@ -21,11 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// ruta para documentación
-\sowerphp\core\Routing_Router::connect('/documentacion/*', [
-    'controller' => 'documentacion',
-    'action' => 'index',
-]);
+// IMPORTANTE: ¡¡¡ESTO SE DEBE MODIFICAR EN LA CONFIGURACIÓN DEL PROYECTO!!! (NO ACÁ)
 
 // rutas para servicios web
 \sowerphp\core\Routing_Router::connect('/api/:controller/*', [

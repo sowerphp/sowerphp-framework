@@ -28,6 +28,6 @@ namespace sowerphp\general;
  */
 class Exception_Data_Missing extends \sowerphp\core\Exception
 {
-    protected $_messageTemplate = 'No hay datos que exportar con el id <em>%s</em>';
+    protected $_messageTemplate = 'No hay datos que exportar con el id <code>%s</code>';
     protected $severity = LOG_DEBUG;
 }

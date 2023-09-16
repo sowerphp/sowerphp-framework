@@ -35,7 +35,7 @@ class View
     protected $response; ///< Objeto Response
     public $viewVars = array(); ///< Variables que se pasarán al renderizar la vista
     private $layout; ///< Tema que se debe usar para renderizar la página
-    private $defaultLayout = 'harbor'; ///< Layout por defecto
+    private $defaultLayout = 'bootstrap'; ///< Layout por defecto
     protected static $_viewsLocation; ///< Listado de vistas que se han buscado
     protected static $extensions = null; ///< Listado de extensiones
 
@@ -72,15 +72,23 @@ class View
         }
         // si no se encontró error
         if (!$location) {
-            if ($this->request->params['controller']=='pages') {
-                $this->render('/error/404');
+            if (!empty($this->request->params)) {
+                if ($this->request->params['controller']=='pages') {
+                    $this->render('/error/404');
+                } else {
+                    throw new Exception_View_Missing(array(
+                        'view' => $page,
+                        'controller' => Utility_Inflector::camelize(
+                            $this->request->params['controller']
+                        ),
+                        'action' => $this->request->params['action'],
+                    ));
+                }
             } else {
                 throw new Exception_View_Missing(array(
                     'view' => $page,
-                    'controller' => Utility_Inflector::camelize(
-                        $this->request->params['controller']
-                    ),
-                    'action' => $this->request->params['action'],
+                    'controller' => 'Controller',
+                    'action' => 'action',
                 ));
             }
             return;

@@ -26,72 +26,92 @@ namespace sowerphp\general;
 class Controller_Exportar extends \Controller_App
 {
 
-    public function beforeFilter ()
+    public function beforeFilter()
     {
     }
 
-    public function ods ($id)
+    public function ods($id)
     {
-        $this->_exportTable($id);
+        $data = $this->_getData($id);
+        \sowerphp\general\Utility_Spreadsheet_ODS::generate($data, $id);
     }
 
-    public function xls ($id)
+    public function xls($id)
     {
-        $this->_exportTable($id);
+        $data = $this->_getData($id);
+        \sowerphp\general\Utility_Spreadsheet_XLS::generate($data, $id);
     }
 
-    public function csv ($id)
+    public function csv($id)
     {
-        $this->_exportTable($id);
+        $data = $this->_getData($id);
+        \sowerphp\general\Utility_Spreadsheet_CSV::generate($data, $id);
     }
 
-    public function pdf ($id)
+    public function pdf($id)
     {
-        $this->_exportTable($id);
+        $data = $this->_getData($id);
+        error_reporting(false);
+        $title = \sowerphp\core\Configure::read('page.body.title');
+        if (empty($title)) {
+            $title = 'Listado en PDF';
+        }
+        $pdf = new \sowerphp\general\View_Helper_PDF();
+        $pdf->setInfo (
+            $title,
+            'Tabla: '.$id
+        );
+        $pdf->setStandardHeaderFooter (
+            DIR_WEBSITE.'/webroot/img/logo.png',
+            $title,
+            'Tabla: '.$id
+        );
+        $pdf->AddPage();
+        $pdf->addTable (array_shift($data), $data, array(), true);
+        $pdf->Output($id.'.pdf', 'D');
+        exit(0);
     }
 
-    public function xml ($id)
+    public function xml($id)
     {
-        $this->_exportTable($id);
+        $data = $this->_getData($id);
+        \sowerphp\general\Utility_Spreadsheet_XML::generate($data, $id);
     }
 
-    public function json ($id)
+    public function json($id)
     {
-        $this->_exportTable($id);
+        $data = $this->_getData($id);
+        \sowerphp\general\Utility_Spreadsheet_JSON::generate($data, $id);
     }
 
-    private function _exportTable ($id)
+    private function _getData($id)
     {
         $data = (new \sowerphp\core\Cache())->get('session.'.session_id().'.export.'.$id);
         if (!$data) {
             throw new Exception_Data_Missing(['id'=>$id]);
         }
-        $this->set(array(
-            'id' => $id,
-            'data' => $data,
-        ));
+        return $data;
     }
 
-    public function barcode ($string, $type = 'C128')
+    public function barcode($string, $type = 'C128')
     {
-        $this->set(array(
-            'string' => base64_decode($string),
-            'type' => $type,
-        ));
+        $barcodeobj = new TCPDFBarcode(base64_decode($string), $type);
+        $barcodeobj->getBarcodePNG();
+        exit(0);
     }
 
-    public function qrcode ($string, $size = 3, $color = '0,0,0')
+    public function qrcode($string, $size = 3, $color = '0,0,0')
     {
-        $this->set([
-            'string' => base64_decode($string),
-            'size' => $size,
-            'color' => explode(',', $color),
-        ]);
+        $barcodeobj = new TCPDF2DBarcode(base64_decode($string), 'QRCode');
+        $barcodeobj->getBarcodePNG($size, $size, explode(',', $color));
+        exit(0);
     }
 
-    public function pdf417 ($string)
+    public function pdf417($string)
     {
-        $this->set('string', base64_decode($string));
+        $barcodeobj = new TCPDF2DBarcode(base64_decode($string), 'PDF417');
+        $barcodeobj->getBarcodePNG();
+        exit(0);
     }
 
 }

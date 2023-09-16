@@ -26,12 +26,14 @@ namespace sowerphp\core;
 /**
  * @file core.php
  * Rutas estándares de las páginas o aplicaciones
- * @version 2014-03-22
+ * @version 2023-09-16
  */
+
+// IMPORTANTE: ¡¡¡ESTO SE DEBE MODIFICAR EN LA CONFIGURACIÓN DEL PROYECTO!!! (NO ACÁ)
 
 // Definir la página de inicio
 Routing_Router::connect('/', [
     'controller' => 'pages',
     'action' => 'display',
-    '/'.Configure::read('homepage')
+    Configure::read('homepage')
 ]);
