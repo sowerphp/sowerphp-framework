@@ -186,10 +186,12 @@ if (!$_Auth->User->{'config_auth2_'.$method}) {
         'name' => 'auth2',
         'value' => $Auth2->getName(),
     ));
-    echo $form->end([
+    echo $form->input(array(
+        'type' => 'hidden',
         'name' => 'destruirAuth2',
-        'value' => 'Eliminar protección con '.$Auth2->getName(),
-    ]);
+        'value' => 1,
+    ));
+    echo $form->end('Eliminar protección con '.$Auth2->getName());
 }
 ?>
                 </div>

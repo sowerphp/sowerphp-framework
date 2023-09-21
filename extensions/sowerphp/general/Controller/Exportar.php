@@ -95,21 +95,21 @@ class Controller_Exportar extends \Controller_App
 
     public function barcode($string, $type = 'C128')
     {
-        $barcodeobj = new TCPDFBarcode(base64_decode($string), $type);
+        $barcodeobj = new \TCPDFBarcode(base64_decode($string), $type);
         $barcodeobj->getBarcodePNG();
         exit(0);
     }
 
     public function qrcode($string, $size = 3, $color = '0,0,0')
     {
-        $barcodeobj = new TCPDF2DBarcode(base64_decode($string), 'QRCode');
+        $barcodeobj = new \TCPDF2DBarcode(base64_decode($string), 'QRCode');
         $barcodeobj->getBarcodePNG($size, $size, explode(',', $color));
         exit(0);
     }
 
     public function pdf417($string)
     {
-        $barcodeobj = new TCPDF2DBarcode(base64_decode($string), 'PDF417');
+        $barcodeobj = new \TCPDF2DBarcode(base64_decode($string), 'PDF417');
         $barcodeobj->getBarcodePNG();
         exit(0);
     }
