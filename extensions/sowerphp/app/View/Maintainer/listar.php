@@ -59,7 +59,7 @@ foreach ($columns as $column => &$info) {
         ]);
     }
 }
-$row[] = '<button type="submit" class="btn btn-primary" onclick="return Form.check()"><i class="fas fa-search"></i></button>';
+$row[] = '<button type="submit" class="btn btn-primary" onclick="return Form.check()"><i class="fas fa-search fa-fw"></i></button>';
 $data[] = $row;
 
 // crear filas de la tabla

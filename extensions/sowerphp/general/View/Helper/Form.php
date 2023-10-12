@@ -148,19 +148,19 @@ class View_Helper_Form
      * @param config Arreglo con la configuración para el elemento
      * @return String Código HTML de lo solicitado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-08-06
+     * @version 2023-10-09
      */
     private function _formatear($field, $config)
     {
+        if ($config['help']!='') {
+            $config['help'] = ' <div class="form-text text-muted"'.(isset($config['id'])?' id="'.$config['id'].'Help"':'').'>'.$config['help'].'</div>';
+        }
         // si es campo oculto no se aplica ningún estilo
         if ($config['type'] == 'hidden') {
             $buffer = '    '.$field."\n";
         }
         // si se debe aplicar estilo horizontal
         else if ($config['style']=='horizontal') {
-            if ($config['help']!='') {
-                $config['help'] = ' <p class="form-text text-muted"'.(isset($config['id'])?' id="'.$config['id'].'Help"':'').'>'.$config['help'].'</p>';
-            }
             $buffer = '    <div class="mb-3 row'.($config['notempty']?' required':'').'">'."\n";
             if (!empty($config['label'])) {
                 $required = $config['notempty'] ? '<span style="color:red"><strong>*</strong></span> ' : '';
@@ -188,22 +188,23 @@ class View_Helper_Form
             if ($config['type']=='checkbox') {
                 $buffer .= ' <label '.(isset($config['id'])?' for="'.$config['id'].'"':'').' style="fw-:normal"'.$config['popover'].'>'.$config['label'].'</label>'."\n";
             }
+            $buffer .= $config['help'];
             $buffer .= '</div>'."\n";
         }
         // si se debe alinear
         else if (isset($config['align'])) {
             $width = !empty($config['width']) ? (';width:'.$config['width']) : '';
-            $buffer = '<div style="text-align:'.$config['align'].$width.'">'.$field.'</div>'."\n";
+            $buffer = '<div style="text-align:'.$config['align'].$width.'">'.$field.$config['help'].'</div>'."\n";
         }
         // si se debe colocar un label
         else if (!empty($config['id']) and !empty($config['label'])) {
             $width = !empty($config['width']) ? (' style="width:'.$config['width'].'"') : '';
-            $buffer = '<div'.$width.'><label class="visually-hidden" for="'.$config['id'].'">'.$config['label'].'</label>'.$field.'</div>'."\n";
+            $buffer = '<div'.$width.'><label class="visually-hidden" for="'.$config['id'].'">'.$config['label'].'</label>'.$field.$config['help'].'</div>'."\n";
         }
         // si no se debe aplicar ningún formato solo agregar el campo dentro de un div y el EOL
         else {
             $width = !empty($config['width']) ? (' style="width:'.$config['width'].'"') : '';
-            $buffer = '<div'.$width.'>'.$field.'</div>'."\n";
+            $buffer = '<div'.$width.'>'.$field.$config['help'].'</div>'."\n";
         }
         // retornar código formateado
         return $buffer;
@@ -645,10 +646,11 @@ class View_Helper_Form
         return $buffer;
     }
 
-    private function _tablecheck ($config)
+    private function _tablecheck($config)
     {
-        if(!isset($config['table'][0]))
+        if(!isset($config['table'][0])) {
             return '-';
+        }
         // configuración por defecto
         $config = array_merge([
             'id'=>$config['name'],
@@ -658,10 +660,12 @@ class View_Helper_Form
             'checked'=>(isset($_POST[$config['name']])?$_POST[$config['name']]:[]),
             'display-key'=>true,
         ], $config);
-        if (!isset($config['key']))
+        if (!isset($config['key'])) {
             $config['key'] = array_keys($config['table'][0])[0];
-        if (!is_array($config['key']))
+        }
+        if (!is_array($config['key'])) {
             $config['key'] = array($config['key']);
+        }
         $buffer = '<table id="'.$config['id'].'" class="table table-striped" style="width:'.$config['width'].'">';
         $buffer .= '<thead><tr>';
         foreach ($config['titles'] as &$title) {
@@ -682,12 +686,13 @@ class View_Helper_Form
             $buffer .= '<tr>';
             $count = 0;
             foreach ($row as &$col) {
-                if ($config['display-key'] or $count>=$n_keys)
+                if ($config['display-key'] or $count>=$n_keys) {
                     $buffer .= '<td>'.$col.'</td>';
+                }
                 $count++;
             }
             $checked = (in_array($key, $config['checked']) or $config['mastercheck']) ? ' checked="checked"' : '' ;
-            $buffer .= '<td><input type="checkbox" name="'.$config['name'].'[]" value="'.$key.'"'.$checked.' /></td>';
+            $buffer .= '<td style="width:1px"><input type="checkbox" name="'.$config['name'].'[]" value="'.$key.'"'.$checked.' /></td>';
             $buffer .= '</tr>';
         }
         $buffer .= '</tbody></table>';

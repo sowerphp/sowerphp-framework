@@ -73,7 +73,7 @@ class Model_Datasource_Auth2_2FA extends Model_Datasource_Auth2_Base
     public function create(array $data = [])
     {
         if (!$this->Auth2->verifyCode($data['secret'], $data['verification'])) {
-            throw new \Exception('Token de pareo no válido');
+            throw new \Exception('Token de pareo no válido.');
         }
         return [
             'secret' => $data['secret'],
@@ -98,7 +98,7 @@ class Model_Datasource_Auth2_2FA extends Model_Datasource_Auth2_Base
     public function check(array $data = [])
     {
         if (empty($data['token']) || !$this->Auth2->verifyCode((string)$data['secret'], (string)$data['token'])) {
-            throw new \Exception('Token de 2FA no es válido');
+            throw new \Exception('Token de 2FA no es válido.');
         }
         return true;
     }
