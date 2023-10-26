@@ -319,7 +319,7 @@ class View_Helper_Form
             $config['showPassword'] = true;
         }
         if ($config['showPassword']) {
-            return '<div class="input-group"><input type="password" name="'.$config['name'].'" value="'.$config['value'].'" class="'.$config['class'].'" placeholder="'.$config['placeholder'].'" '.$config['attr'].' '.$config['popover'].' '.(!empty($config['id']) ? 'id="'.$config['id'].'"' : '').' '.(empty($config['autocomplete']) ? 'autocomplete="off"' : '').' /><a class="input-group-text" style="cursor: pointer" onclick="Form.showPassword(this)"><i class="fa-regular fa-eye fa-fw"></i></a></div>';
+            return '<div class="input-group"><input type="password" name="'.$config['name'].'" value="'.$config['value'].'" class="'.$config['class'].'" placeholder="'.$config['placeholder'].'" '.$config['attr'].' '.$config['popover'].' '.(!empty($config['id']) ? 'id="'.$config['id'].'"' : '').' '.(empty($config['autocomplete']) ? 'autocomplete="off"' : '').' /><a class="input-group-text" style="cursor:pointer;text-decoration:none" onclick="Form.showPassword(this)"><i class="fa-regular fa-eye fa-fw"></i></a></div>';
         } else {
             return '<input type="password" name="'.$config['name'].'" value="'.$config['value'].'" class="'.$config['class'].'" placeholder="'.$config['placeholder'].'" '.$config['attr'].' '.$config['popover'].' '.(!empty($config['id']) ? 'id="'.$config['id'].'"' : '').' '.(empty($config['autocomplete']) ? 'autocomplete="off"' : '').' />';
         }
