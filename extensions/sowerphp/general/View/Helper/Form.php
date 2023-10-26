@@ -26,7 +26,7 @@ namespace sowerphp\general;
 /**
  * Helper para la creación de formularios en HTML
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-08-06
+ * @version 2023-10-25
  */
 class View_Helper_Form
 {
@@ -123,8 +123,9 @@ class View_Helper_Form
         // solo se procesa la configuración si no es falsa
         if ($config!==false) {
             // transformar a arreglo en caso que no lo sea
-            if (!is_array($config))
+            if (!is_array($config)) {
                 $config = ['value'=>$config];
+            }
             // asignar configuración
             $config['type'] = 'submit';
             $config = array_merge(
@@ -143,6 +144,83 @@ class View_Helper_Form
     }
 
     /**
+     * Método para crear una nuevo campo para que un usuario ingrese
+     * datos a través del formulario, ya sea un tag: input, select, etc
+     * @param config Arreglo con la configuración para el elemento
+     * @return String Código HTML de lo solicitado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2016-02-10
+     */
+    public function input($config)
+    {
+        // transformar a arreglo en caso que no lo sea
+        if (!is_array($config)) {
+            $config = array('name'=>$config, 'label'=>$config);
+        }
+        // asignar configuración
+        $config = array_merge(
+            array(
+                'type'=>'text',
+                'value'=>'',
+                'autoValue'=>false,
+                'class' => '',
+                'attr' => '',
+                'check' => null,
+                'help' => '',
+                'popover' => '',
+                'notempty' =>false,
+                'style'=>$this->_style,
+                'placeholder' => '',
+                'sanitize' => true,
+            ), $config
+        );
+        if (!isset($config['name']) && isset($config['id'])) {
+            $config['name'] = $config['id'];
+        }
+        // si no se indicó un valor y existe uno por POST se usa
+        if (!isset($config['value'][0]) && isset($config['name']) && isset($_POST[$config['name']])) {
+            $config['value'] = $_POST[$config['name']];
+        }
+        // si label no existe se usa el nombre de la variable
+        if (!isset($config['label'])) {
+            $config['label'] = isset($config['placeholder'][0]) ? $config['placeholder'] : $config['name'];
+        }
+        // si se paso check se usa
+        if ($config['check']) {
+            // si no es arreglo se convierte
+            if (!is_array($config['check'])) {
+                $config['check'] = explode(' ',$config['check']);
+            }
+            // hacer implode, agregar check y meter al class
+            $config['class'] = $config['class'].' check '.implode(' ', $config['check']);
+            if (in_array('notempty', $config['check'])) {
+                $config['notempty'] = true;
+            }
+        }
+        // asignar class
+        if (!in_array($config['type'], ['submit', 'checkbox', 'file', 'div'])) {
+            $config['class'] = (!empty($config['class']) ? $config['class'] : '').' form-control';
+        }
+        // asignar id si no se asignó
+        if (!isset($config['id']) and !empty($config['name']) and substr($config['name'], -2)!='[]') {
+            $config['id'] = $config['name'].'Field';
+        }
+        // determinar popover
+        if ($config['popover']!='') {
+            $config['popover'] = ' data-bs-toggle="popover" data-bs-trigger="focus" title="'.$config['label'].'" data-bs-placement="top" data-bs-content="'.$config['popover'].'" onmouseover="$(this).popover(\'show\')" onmouseout="$(this).popover(\'hide\')"';
+        }
+        // limpiar valor del campo
+        if ($config['type']!='div' and $config['sanitize'] and isset($config['value'][0]) and !is_array($config['value'])) {
+            $config['value'] = trim(strip_tags($config['value']));
+            if (!in_array($config['type'], ['submit', 'button'])) {
+                $config['value'] = htmlentities($config['value']);
+            }
+        }
+        // generar campo, formatear y entregar
+        return $this->_format($this->{'_input_'.$config['type']}($config), $config);
+    }
+
+    /**
      * Método que aplica o no un diseño al campo
      * @param field Campo que se desea formatear
      * @param config Arreglo con la configuración para el elemento
@@ -150,7 +228,7 @@ class View_Helper_Form
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2023-10-09
      */
-    private function _formatear($field, $config)
+    private function _format($field, $config)
     {
         if ($config['help']!='') {
             $config['help'] = ' <div class="form-text text-muted"'.(isset($config['id'])?' id="'.$config['id'].'Help"':'').'>'.$config['help'].'</div>';
@@ -210,99 +288,24 @@ class View_Helper_Form
         return $buffer;
     }
 
-    /**
-     * Método para crear una nuevo campo para que un usuario ingrese
-     * datos a través del formulario, ya sea un tag: input, select, etc
-     * @param config Arreglo con la configuración para el elemento
-     * @return String Código HTML de lo solicitado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-02-10
-     */
-    public function input($config)
+    private function _input_submit($config)
     {
-        // transformar a arreglo en caso que no lo sea
-        if (!is_array($config)) {
-            $config = array('name'=>$config, 'label'=>$config);
-        }
-        // asignar configuración
-        $config = array_merge(
-            array(
-                'type'=>'text',
-                'value'=>'',
-                'autoValue'=>false,
-                'class' => '',
-                'attr' => '',
-                'check' => null,
-                'help' => '',
-                'popover' => '',
-                'notempty' =>false,
-                'style'=>$this->_style,
-                'placeholder' => '',
-                'sanitize' => true,
-            ), $config
-        );
-        if (!isset($config['name']) && isset($config['id'])) {
-            $config['name'] = $config['id'];
-        }
-        // si no se indicó un valor y existe uno por POST se usa
-        if (!isset($config['value'][0]) && isset($config['name']) && isset($_POST[$config['name']])) {
-            $config['value'] = $_POST[$config['name']];
-        }
-        // si label no existe se usa el nombre de la variable
-        if (!isset($config['label'])) {
-            $config['label'] = isset($config['placeholder'][0]) ? $config['placeholder'] : $config['name'];
-        }
-        // si se paso check se usa
-        if ($config['check']) {
-            // si no es arreglo se convierte
-            if (!is_array($config['check'])) $config['check'] = explode(' ',$config['check']);
-            // hacer implode, agregar check y meter al class
-            $config['class'] = $config['class'].' check '.implode(' ', $config['check']);
-            if (in_array('notempty', $config['check'])) {
-                $config['notempty'] = true;
-            }
-        }
-        // asignar class
-        if (!in_array($config['type'], ['submit', 'checkbox', 'file', 'div'])) {
-            $config['class'] = (!empty($config['class']) ? $config['class'] : '').' form-control';
-        }
-        // asignar id si no se asignó
-        if (!isset($config['id']) and !empty($config['name']) and substr($config['name'], -2)!='[]') {
-            $config['id'] = $config['name'].'Field';
-        }
-        // determinar popover
-        if ($config['popover']!='') {
-            $config['popover'] = ' data-bs-toggle="popover" data-bs-trigger="focus" title="'.$config['label'].'" data-bs-placement="top" data-bs-content="'.$config['popover'].'" onmouseover="$(this).popover(\'show\')" onmouseout="$(this).popover(\'hide\')"';
-        }
-        // limpiar valor del campo
-        if ($config['type']!='div' and $config['sanitize'] and isset($config['value'][0]) and !is_array($config['value'])) {
-            $config['value'] = trim(strip_tags($config['value']));
-            if (!in_array($config['type'], ['submit', 'button'])) {
-                $config['value'] = htmlentities($config['value']);
-            }
-        }
-        // generar campo, formatear y entregar
-        return $this->_formatear($this->{'_'.$config['type']}($config), $config);
+        return $this->_input_button($config);
     }
 
-    private function _submit($config)
-    {
-        return $this->_button($config);
-    }
-
-    private function _button($config)
+    private function _input_button($config)
     {
         $id = isset($config['id']) ? ' id="'.$config['id'].'"' : '';
         return '<button type="'.$config['type'].'" name="'.$config['name'].'"'.$id.' class="'.$config['class'].' btn btn-primary" '.$config['attr'].'>'.$config['value'].'</button>';
     }
 
-    private function _hidden ($config)
+    private function _input_hidden($config)
     {
         $id = isset($config['id']) ? ' id="'.$config['id'].'"' : '';
         return '<input type="hidden" name="'.$config['name'].'" value="'.$config['value'].'"'.$id.' />';
     }
 
-    private function _text ($config)
+    private function _input_text($config)
     {
         $id = isset($config['id']) ? ' id="'.$config['id'].'"' : '';
         $growup = !empty($config['growup']) ? 'ondblclick="Form.growup(this)"' : '';
@@ -310,22 +313,19 @@ class View_Helper_Form
         return '<input type="text" name="'.$config['name'].'" value="'.$config['value'].'"'.$id.' class="'.$config['class'].'" placeholder="'.$config['placeholder'].'" '.$config['attr'].$config['popover'].' '.$growup.' '.$autocomplete.' />';
     }
 
-    private function _password($config)
+    private function _input_password($config)
     {
-        $id = isset($config['id']) ? ' id="'.$config['id'].'"' : '';
-        $autocomplete = empty($config['autocomplete']) ? 'autocomplete="off"' : '';
-        return '<input type="password" name="'.$config['name'].'"'.$id.' class="'.$config['class'].'" '.$config['attr'].$config['popover'].' '.$autocomplete.' />';
+        if (!isset($config['showPassword'])) {
+            $config['showPassword'] = true;
+        }
+        if ($config['showPassword']) {
+            return '<div class="input-group"><input type="password" name="'.$config['name'].'" value="'.$config['value'].'" class="'.$config['class'].'" placeholder="'.$config['placeholder'].'" '.$config['attr'].' '.$config['popover'].' '.(!empty($config['id']) ? 'id="'.$config['id'].'"' : '').' '.(empty($config['autocomplete']) ? 'autocomplete="off"' : '').' /><a class="input-group-text" style="cursor: pointer" onclick="Form.showPassword(this)"><i class="fa-regular fa-eye fa-fw"></i></a></div>';
+        } else {
+            return '<input type="password" name="'.$config['name'].'" value="'.$config['value'].'" class="'.$config['class'].'" placeholder="'.$config['placeholder'].'" '.$config['attr'].' '.$config['popover'].' '.(!empty($config['id']) ? 'id="'.$config['id'].'"' : '').' '.(empty($config['autocomplete']) ? 'autocomplete="off"' : '').' />';
+        }
     }
 
-    private function _textpass($config)
-    {
-        $id = isset($config['id']) ? ' id="'.$config['id'].'"' : '';
-        $mousechange = 'onmouseover="this.type=\'text\'" onmouseout="this.type=\'password\'"';
-        $script = isset($config['id']) ? '<script>$(\'#'.$config['id'].'\').attr(\'type\', \'password\');</script>' : '';
-        return '<input type="text" name="'.$config['name'].'" value="'.$config['value'].'"'.$id.' class="'.$config['class'].'" placeholder="'.$config['placeholder'].'" '.$config['attr'].$config['popover'].' autocomplete="off" '.$mousechange.' />'.$script;
-    }
-
-    private function _textarea ($config)
+    private function _input_textarea($config)
     {
         $config = array_merge(
             array(
@@ -338,9 +338,8 @@ class View_Helper_Form
         return '<textarea name="'.$config['name'].'" rows="'.$config['rows'].'" cols="'.$config['cols'].'"'.$id.' class="'.$config['class'].'" placeholder="'.$config['placeholder'].'" '.$config['attr'].$config['popover'].' '.$growup.'>'.$config['value'].'</textarea>';
     }
 
-    private function _checkbox ($config)
+    private function _input_checkbox($config)
     {
-        // determinar si está o no chequeado
         if (!isset($config['checked']) and isset($_POST[$config['name']])) {
             $config['checked'] = true;
         }
@@ -353,7 +352,7 @@ class View_Helper_Form
      * @todo No se está utilizando checked
      * @warning icono para ayuda queda abajo (por los <br/>)
      */
-    private function _checkboxes ($config)
+    private function _input_checkboxes($config)
     {
         $buffer = '';
         foreach ($config['options'] as $key => &$value) {
@@ -366,7 +365,7 @@ class View_Helper_Form
         return $buffer;
     }
 
-    private function _date ($config)
+    private function _input_date($config)
     {
         $config['datepicker'] = array_merge(
             (array)\sowerphp\core\Configure::read('datepicker'),
@@ -384,15 +383,15 @@ class View_Helper_Form
         return $buffer;
     }
 
-    private function _file ($config)
+    private function _input_file($config)
     {
         $id = isset($config['id']) ? ' id="'.$config['id'].'"' : '';
         return '<input type="file" name="'.$config['name'].'"'.$id.' class="form-control" '.$config['attr'].'/>';
     }
 
-    private function _files($config)
+    private function _input_files($config)
     {
-        return $this->_js([
+        return $this->_input_js([
             'id' => $config['id'],
             'label' => $config['label'],
             'titles' => [$config['title']],
@@ -402,7 +401,7 @@ class View_Helper_Form
         ]);
     }
 
-    private function _select($config)
+    private function _input_select($config)
     {
         $form_select_wrapper = \sowerphp\core\Configure::read('form.select.wrapper');
         if ($form_select_wrapper === null) {
@@ -495,7 +494,7 @@ class View_Helper_Form
         return $buffer;
     }
 
-    private function _radios ($config)
+    private function _input_radios($config)
     {
         // si el valor por defecto se pasó en value se copia donde corresponde
         if (isset($config['value'][0])) {
@@ -513,7 +512,7 @@ class View_Helper_Form
         return $buffer;
     }
 
-    private function _js ($config, $js = true)
+    private function _input_js($config, $js = true)
     {
         // configuración por defecto
         $config = array_merge(['titles'=>[], 'width'=>'100%', 'accesskey'=>'+', 'callback'=>'undefined'], $config);
@@ -646,7 +645,7 @@ class View_Helper_Form
         return $buffer;
     }
 
-    private function _tablecheck($config)
+    private function _input_tablecheck($config)
     {
         if(!isset($config['table'][0])) {
             return '-';
@@ -699,7 +698,7 @@ class View_Helper_Form
         return $buffer;
     }
 
-    private function _tableradios ($config)
+    private function _input_tableradios($config)
     {
         // configuración por defecto
         $config = array_merge(array('id'=>$config['name'], 'titles'=>array(), 'width'=>'100%'), $config);
@@ -721,9 +720,11 @@ class View_Helper_Form
                 $buffer .= '<td>'.$col.'</td>';
             }
             foreach ($options as &$value) {
-                if (isset($_POST[$config['name'].'_'.$key]) && $_POST[$config['name'].'_'.$key]==$value)
+                if (isset($_POST[$config['name'].'_'.$key]) && $_POST[$config['name'].'_'.$key]==$value) {
                     $checked = 'checked="checked" ';
-                else $checked = '';
+                } else {
+                    $checked = '';
+                }
                 $buffer .= '<td><input type="radio" name="'.$config['name'].'_'.$key.'" value="'.$value.'" '.$checked.'/></td>';
             }
             $buffer .= '</tr>';
@@ -732,22 +733,22 @@ class View_Helper_Form
         return $buffer;
     }
 
-    private function _div ($config)
+    private function _input_div($config)
     {
         return '<div'.(!empty($config['attr'])?(' '.$config['attr']):'').(!empty($config['id'])?(' id="'.$config['id'].'"'):'').' class="'.$config['class'].'">'.$config['value'].'</div>';
     }
 
-    private function _table($config)
+    private function _input_table($config)
     {
-        return $this->_js($config, false);
+        return $this->_input_js($config, false);
     }
 
-    private function _boolean($config)
+    private function _input_boolean($config)
     {
         if (empty($config['options'])) {
             $config['options'] = ['No', 'Si'];
         }
-        return $this->_select($config);
+        return $this->_input_select($config);
     }
 
 }

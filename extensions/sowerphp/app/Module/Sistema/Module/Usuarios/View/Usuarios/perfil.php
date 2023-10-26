@@ -52,7 +52,7 @@ echo $form->input(array(
     'attr' => 'maxlength="50"',
 ));
 echo $form->input(array(
-    'type' => 'textpass',
+    'type' => 'password',
     'name' => 'hash',
     'label' => 'Hash',
     'value' => $_Auth->User->hash,
@@ -60,7 +60,7 @@ echo $form->input(array(
     'attr' => 'maxlength="32" autocomplete="off" onclick="this.select()"',
 ));
 echo $form->input(array(
-    'type' => 'textpass',
+    'type' => 'password',
     'name' => 'api_key',
     'label' => 'API key',
     'value' => base64_encode($_Auth->User->hash.':X'),
