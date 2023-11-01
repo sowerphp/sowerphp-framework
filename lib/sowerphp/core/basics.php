@@ -83,7 +83,7 @@ function debug($var, $withtype = false)
  * Función para formatear números
  * @param n Número a formatear
  * @param d Cantidad de decimales
- * @return String Número formateado
+ * @return string Número formateado
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2014-10-23
  */
@@ -96,7 +96,7 @@ function num($n, $d=0)
  * Función para traducción de string singulares, en dominio master.
  * @param string Texto que se desea traducir
  * @param args Argumentos para reemplazar en el string, puede ser un arreglo o bien n argumentos a la función
- * @return Texto traducido
+ * @return string Texto traducido
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2014-03-16
  */
@@ -112,7 +112,7 @@ function __($string, $args = null)
  * Función para traducción de string singulares, eligiendo dominio.
  * @param string Texto que se desea traducir
  * @param args Argumentos para reemplazar en el string, puede ser un arreglo o bien n argumentos a la función
- * @return Texto traducido
+ * @return string Texto traducido
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2014-03-03
  */
@@ -168,9 +168,9 @@ function shell_exec_async($cmd, $log = false, &$output = [])
 
 /**
  * Función para dar formato a los mensajes de la aplicación
- * @param string String al que se desea dar el formato (contiene marcadores especiales)
+ * @param string Mensaje al que se desea dar el formato (contiene marcadores especiales)
  * @param html Indica si el formato debe ser HTML o texto plano
- * @return string String formateado en HTML o texto plano según se solicitó
+ * @return string Mensaje formateado en HTML o texto plano según se solicitó
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
  * @version 2023-11-01
  */
@@ -194,9 +194,12 @@ function message_format($string, $html = true) {
             $string = preg_replace('/\[(faq):([\w\d]+)\]/i', '', $string);
         }
     }
-    // enlaces en formato markdown
+    // cambios cuando es HTML (se pasa texto a HTML)
     if ($html) {
+        // enlaces en formato markdown
         $string = preg_replace('/\[(.*?)\]\((.*?)\)/', '<a href="$2" target="_blank" class="alert-link">$1</a>', $string);
+        // flechas para instrucciones (tipo "siguiente")
+        $string = str_replace('>>', '&raquo;', $string);
     }
     // entregar string modificado con los enlaces correspondientes
     return $string;
