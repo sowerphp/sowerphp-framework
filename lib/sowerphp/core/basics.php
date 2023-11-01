@@ -40,6 +40,18 @@ function env($varname, $default = null)
 }
 
 /**
+ * Función que entrega la ruta completa (URL) de un recurso (path) de la aplicación
+ * @param resource Recurso (path) que se desea resolver
+ * @return string URL completa que resuelve el recurso (path)
+ * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+ * @version 2023-11-01
+ */
+function url($resource = '/') {
+    $url = (new \sowerphp\core\Network_Request())->url;
+    return $resource == '/' ? $url : $url.$resource;
+}
+
+/**
  * Función para mostrar el valor de una variable (y su tipo) o un objeto (y su
  * clase)
  * @param var Variable que se desea mostrar
@@ -152,4 +164,40 @@ function shell_exec_async($cmd, $log = false, &$output = [])
     exec($screen_cmd, $output, $rc);
     $output = implode("\n", $output);
     return $rc;
+}
+
+/**
+ * Función para dar formato a los mensajes de la aplicación
+ * @param string String al que se desea dar el formato (contiene marcadores especiales)
+ * @param html Indica si el formato debe ser HTML o texto plano
+ * @return string String formateado en HTML o texto plano según se solicitó
+ * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+ * @version 2023-11-01
+ */
+function message_format($string, $html = true) {
+    // preguntas frecuentes de la aplicación
+    if (strpos($string, '[faq:') !== false) {
+        $faq = (array)\sowerphp\core\Configure::read('faq');
+        // hay config de faqs -> se agrega enlace
+        if (!empty($faq['url']) and !empty($faq['text'])) {
+            $replace = $html
+                        ? '<a href="'.$faq['url'].'$2" target="_blank" class="alert-link">'.$faq['text'].'</a>'
+                        : $faq['text'].': '.$faq['url'].'$2';
+            $string = preg_replace(
+                '/\[(faq):([\w\d]+)\]/i',
+                $replace,
+                $string
+            );
+        }
+        // no hay config de faqs -> se quita FAQ del mensaje
+        else {
+            $string = preg_replace('/\[(faq):([\w\d]+)\]/i', '', $string);
+        }
+    }
+    // enlaces en formato markdown
+    if ($html) {
+        $string = preg_replace('/\[(.*?)\]\((.*?)\)/', '<a href="$2" target="_blank" class="alert-link">$1</a>', $string);
+    }
+    // entregar string modificado con los enlaces correspondientes
+    return $string;
 }
