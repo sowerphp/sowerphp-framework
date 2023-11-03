@@ -551,7 +551,7 @@ class View_Helper_Form
             $col_i++;
         }
         // botón de borrado de la fila
-        $delete = '<td><a class="'.$config['id'].'_eliminar" href="" onclick="Form.delJS(this); return false" title="Eliminar"><i class="fas fa-times fa-fw mt-2" aria-hidden="true"></i></a></td>';
+        $delete = '<td><a class="'.$config['id'].'_eliminar btn btn-danger btn-sm" href="" onclick="Form.delJS(this); return false" title="Eliminar fila"><i class="fa-solid fa-times fa-fw"></i></a></td>';
         // determinar inputs
         $inputs = '<tr>';
         $col_i = 0;
@@ -637,7 +637,7 @@ class View_Helper_Form
             $buffer .= '<th>'.$title.'</th>';
         }
         if ($js) {
-            $buffer .= '<th style="width:1px;"><a href="javascript:Form.addJS(\''.$config['id'].'\', undefined, '.$config['callback'].')" title="Agregar ['.$config['accesskey'].']" accesskey="'.$config['accesskey'].'"><i class="fa fa-plus fa-fw" aria-hidden="true"></i></a></th>';
+            $buffer .= '<th style="width:1px;"><a href="javascript:Form.addJS(\''.$config['id'].'\', undefined, '.$config['callback'].')" title="Agregar fila ['.$config['accesskey'].']" accesskey="'.$config['accesskey'].'" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus fa-fw"></i></a></th>';
         }
         $buffer .= '</tr></thead>';
         $buffer .= '<tbody>'.$values.'</tbody>';
