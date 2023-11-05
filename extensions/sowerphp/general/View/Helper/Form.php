@@ -464,7 +464,13 @@ class View_Helper_Form
         if (!is_array($config['value'])) {
             $config['value'] = ($config['value'] or (string)$config['value']=='0') ? [$config['value']] : [];
         }
-        $config['value'] = array_map('strval', $config['value']);
+        if (!empty($config['value'])) {
+            $any_option_selected = true;
+            $config['value'] = array_map('strval', $config['value']);
+            $keys_not_in_options = $config['value'];
+        } else {
+            $selected = '';
+        }
         $buffer .= '<select name="'.$config['name'].'"'.$attr.' class="'.$config['class'].'"'.$multiple.' '.$config['attr'].'>';
         foreach ($config['options'] as $key => $value) {
             // los options no están agrupados
@@ -473,7 +479,14 @@ class View_Helper_Form
                     $key = array_shift($value);
                     $value = array_shift($value);
                 }
-                $selected = (in_array((string)$key, $config['value'], true)?' selected="selected"':'');
+                if (!empty($any_option_selected)) {
+                    $selected = (in_array((string)$key, $config['value'], true)?' selected="selected"':'');
+                    if (!empty($selected)) {
+                        $keys_not_in_options = array_filter($keys_not_in_options, function ($k) use ($key) {
+                            return (string)$k != (string)$key;
+                        });
+                    }
+                }
                 $buffer .= '<option value="'.$key.'"'.$selected.'>'.$value.'</option>';
             }
             // los options están agrupados usando optgroup
@@ -484,8 +497,29 @@ class View_Helper_Form
                         $key2 = array_shift($value2);
                         $value2 = array_shift($value2);
                     }
-                    $selected = (in_array((string)$key2, $config['value'], true)?' selected="selected"':'');
+                    if (!empty($any_option_selected)) {
+                        $selected = (in_array((string)$key2, $config['value'], true)?' selected="selected"':'');
+                    }
                     $buffer .= '<option value="'.$key2.'"'.$selected.'>'.$value2.'</option>';
+                }
+                $buffer .= '</optgroup>';
+            }
+        }
+        // si al final tenemos elementos en los valores del select
+        // significa que venía alguno que no estaba en las opciones
+        // se agrega como option para poder ser mostrado en el select
+        // no se agregan llaves vacias o numéricos menores a 0
+        if (!empty($keys_not_in_options)) {
+            $keys_not_in_options = array_filter($keys_not_in_options, function ($k) {
+                if (empty($k) or (is_numeric($k) and $k < 0)) {
+                    return false;
+                }
+                return true;
+            });
+            if (!empty($keys_not_in_options)) {
+                $buffer .= '<optgroup label="Valores temporales">';
+                foreach($keys_not_in_options as $k) {
+                    $buffer .= '<option value="'.$k.'" selected="selected">'.$k.'</option>';
                 }
                 $buffer .= '</optgroup>';
             }

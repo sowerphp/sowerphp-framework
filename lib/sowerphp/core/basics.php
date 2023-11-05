@@ -172,7 +172,7 @@ function shell_exec_async($cmd, $log = false, &$output = [])
  * @param html Indica si el formato debe ser HTML o texto plano
  * @return string Mensaje formateado en HTML o texto plano según se solicitó
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2023-11-01
+ * @version 2023-11-04
  */
 function message_format($string, $html = true) {
     // preguntas frecuentes de la aplicación
@@ -197,7 +197,11 @@ function message_format($string, $html = true) {
     // cambios cuando es HTML (se pasa texto a HTML)
     if ($html) {
         // enlaces en formato markdown
-        $string = preg_replace('/\[(.*?)\]\((.*?)\)/', '<a href="$2" target="_blank" class="alert-link">$1</a>', $string);
+        $string = preg_replace(
+            '/\[([^\]]+)\]\((https?:\/\/[^\s]+)\)/',
+            '<a href="$2" target="_blank" class="alert-link">$1</a>',
+            $string
+        );
         // flechas para instrucciones (tipo "siguiente")
         $string = str_replace('>>', '&raquo;', $string);
     }
