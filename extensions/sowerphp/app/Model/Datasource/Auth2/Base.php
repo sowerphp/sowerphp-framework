@@ -37,6 +37,16 @@ abstract class Model_Datasource_Auth2_Base
     protected $need_token = false; ///< Por defecto los métodos no requieren token, se debe indicar en cada clase
 
     /**
+     * Método que entrega el código del método de autenticación secundaria
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2023-11-06
+     */
+    public function getCode()
+    {
+        return \sowerphp\core\Utility_String::normalize($this->getName());
+    }
+
+    /**
      * Método que entrega todas las autenticaciones secundarias disponibles en la aplicación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2017-12-23
