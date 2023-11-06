@@ -67,7 +67,7 @@ class View_Helper_Table
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2013-12-02
      */
-    public function setId ($id)
+    public function setId($id)
     {
         $this->_id = $id;
     }
@@ -78,7 +78,7 @@ class View_Helper_Table
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2013-12-02
      */
-    public function setClass ($class)
+    public function setClass($class)
     {
         $this->_class = $class;
     }
@@ -89,7 +89,7 @@ class View_Helper_Table
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2013-12-02
      */
-    public function setExport ($export = true)
+    public function setExport($export = true)
     {
         $this->_export = $export;
     }
@@ -100,7 +100,7 @@ class View_Helper_Table
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2013-12-02
      */
-    public function setExportRemove ($remove)
+    public function setExportRemove($remove)
     {
         $this->_exportRemove = $remove;
     }
@@ -111,7 +111,7 @@ class View_Helper_Table
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2013-12-02
      */
-    public function setDisplay ($display = true)
+    public function setDisplay($display = true)
     {
         $this->_display = $display;
     }
@@ -122,7 +122,7 @@ class View_Helper_Table
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-05-14
      */
-    public function setHeight ($height = null)
+    public function setHeight($height = null)
     {
         $this->_height = $height;
     }
@@ -133,7 +133,7 @@ class View_Helper_Table
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-07-09
      */
-    public function setColsWidth ($width = [])
+    public function setColsWidth($width = [])
     {
         $this->_colsWidth = $width;
     }
@@ -156,7 +156,7 @@ class View_Helper_Table
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2019-07-17
      */
-    public function generate ($table, $thead = 1)
+    public function generate($table, $thead = 1)
     {
         // si el arreglo esta vacio o no es arreglo retornar nada
         if (!is_array($table) || !count($table)) {
@@ -214,7 +214,7 @@ class View_Helper_Table
             $buffer .= '</div>'."\n";
         }
         // Iniciar tabla
-        $buffer .= '<div style="width:100%;overflow:auto">'."\n";
+        $buffer .= '<div class="table-responsive-md">'."\n";
         $buffer .= '<table style="width:100%" class="'.$this->_class.'"'.($this->_id?' id="'.$this->_id.'"':'').'>'."\n";
         // Definir cabecera de la tabla
         // títulos de columnas
@@ -225,7 +225,9 @@ class View_Helper_Table
         foreach ($titles as &$col) {
             if (isset($colsWidth[$i]) && $colsWidth[$i]!=null) {
                 $w = ' style="width:'.$colsWidth[$i].'px"';
-            } else $w = '';
+            } else {
+                $w = '';
+            }
             $buffer .= "\t\t\t".'<th'.$w.'>'.$col.'</th>'."\n";
             $i++;
         }
@@ -281,10 +283,7 @@ class View_Helper_Table
         foreach ($table as &$row) {
             $nRow++;
             if (isset($this->_exportRemove['rows'])) {
-                if (
-                    in_array($nRow, $this->_exportRemove['rows']) ||
-                    in_array($nRow-$nRows-1, $this->_exportRemove['rows'])
-                ) {
+                if (in_array($nRow, $this->_exportRemove['rows']) || in_array($nRow-$nRows-1, $this->_exportRemove['rows'])) {
                     continue;
                 }
             }
@@ -294,10 +293,7 @@ class View_Helper_Table
             foreach ($row as &$col) {
                 $nCol++;
                 if (isset($this->_exportRemove['cols'])) {
-                    if (
-                        in_array($nCol, $this->_exportRemove['cols']) ||
-                        in_array($nCol-$nCols-1, $this->_exportRemove['cols'])
-                    ) {
+                    if (in_array($nCol, $this->_exportRemove['cols']) || in_array($nCol-$nCols-1, $this->_exportRemove['cols'])) {
                         continue;
                     }
                 }

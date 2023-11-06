@@ -37,6 +37,7 @@ class Utility_File
 {
 
     // constantes para errores de la subida de archivos
+    // errores propios de sowerphp no compatibles con los estándares de PHP
     const UPLOAD_ERROR = 1;
     const UPLOAD_ERROR_EXTENSION = 2;
     const UPLOAD_ERROR_MIMETYPE = 3;
@@ -50,9 +51,9 @@ class Utility_File
      *   - UPLOAD_ERROR_EXTENSION: extensión no válida
      *   - UPLOAD_ERROR_MIMETYPE: mimetype no válido
      *   - UPLOAD_ERROR_SIZE: se excede tamaño
-     * @param src Arreglo de $_FILES o bien el índice de $_FILES
-     * @param filters Filtros que se deben validar al subir la imagen (extensions, mimetypes, size, width y height)
-     * @return Arreglo con los datos del archivo (índices: data, name, type y size) o error en caso de falló
+     * @param array|string $src Arreglo de $_FILES o bien el índice de $_FILES
+     * @param array $filters Filtros que se deben validar al subir la imagen (extensions, mimetypes, size, width y height)
+     * @return array|int Arreglo con los datos del archivo (índices: data, name, type y size) o código de error en caso de fallo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2015-04-21
      */
@@ -60,8 +61,9 @@ class Utility_File
     {
         // si es string se debe recuperar el valor desde variables $_FILES
         if (is_string($src)) {
-            if (!isset($_FILES[$src]))
+            if (!isset($_FILES[$src])) {
                 return self::UPLOAD_ERROR;
+            }
             $src = &$_FILES[$src];
         }
         // verificar que exista el archivo y haya sido subido
@@ -78,17 +80,21 @@ class Utility_File
         ], $filters);
         // verificar extensión
         if (!empty($filters['extensions'])) {
-            if (is_string($filters['extensions']))
+            if (is_string($filters['extensions'])) {
                 $filters['extensions'] = [$filters['extensions']];
-            if (!in_array(self::extension($src['name']), $filters['extensions']))
+            }
+            if (!in_array(self::extension($src['name']), $filters['extensions'])) {
                 return self::UPLOAD_ERROR_EXTENSION;
+            }
         }
         // verificar mimetype
         if (!empty($filters['mimetypes'][0])) {
-            if (is_string($filters['mimetypes']))
+            if (is_string($filters['mimetypes'])) {
                 $filters['mimetypes'] = [$filters['mimetypes']];
-            if (!in_array($src['type'], $filters['mimetypes']))
+            }
+            if (!in_array($src['type'], $filters['mimetypes'])) {
                 return self::UPLOAD_ERROR_MIMETYPE;
+            }
         }
         // verificar tamaño
         if ($filters['size'] and $src['size']>($filters['size']*1024)) {
@@ -112,8 +118,8 @@ class Utility_File
 
     /**
      * Recupera los archivos/directorios desde una carpeta
-     * @param dir Nombre del directorio a examinar
-     * @return Arreglo con los nombres de los archivos y/o directorios
+     * @param string $dir Nombre del directorio a examinar
+     * @return array Arreglo con los nombres de los archivos y/o directorios
      * @todo Selección de sólo algunos archivos de la carpeta
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2017-03-15
@@ -123,61 +129,83 @@ class Utility_File
         $filesAux = scandir($dir);
         $files = [];
         foreach($filesAux as &$file) {
-            if($file[0]!='.') $files[] = $file;
+            if ($file[0] != '.') {
+                $files[] = $file;
+            }
         }
         return $files;
     }
 
     /**
-     * Obtiene el tamaño de un fichero o directorio (método basado en función encontrada en Internet)
-     * @param filepath Nombre del archivo/directorio a consultar tamaño
-     * @param mostrarUnidad =true mostrara la unidad (KB, MB, etc)
-     * @return Tamaño del archivo/directorio o bien descripción del error ocurrido
-     * @author Desconocido, http://www.blasten.com/contenidos/?id=Tama?o_de_archivo_en_byte,_Kb,_Mb,_y_Gb
-     * @version 2015-04-24
+     * Obtiene el tamaño de un fichero o directorio (método basado en función encontrada en Internet con enlace roto)
+     * @param string $filepath Nombre del archivo/directorio a consultar tamaño
+     * @param bool $mostrarUnidad =true mostrará la unidad (B, KiB, MiB, etc), =false entregará el resultado en bytes (B)
+     * @return float|string Tamaño del archivo/directorio, ya sea con o sin unidad
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
+     * @version 2023-11-06
      */
     public static function getSize($filepath, $mostrarUnidad = true)
     {
-        $method = array('B','KiB','MiB','GiB', 'TiB');
+        // verificar que el archivo exista
+        if (!file_exists($filepath)) {
+            throw new \Exception(__('El archivo "%s" no existe.', $filepath));
+        }
+        // verificar que sea un fichero o directorio
+        if (!is_file($filepath) && !is_dir($filepath)) {
+            throw new \Exception(__('El archivo "%s" no es válido, debe ser un fichero o un directorio.', $filepath));
+        }
+        // calcular tamaño
         $size = 0;
-        if (!file_exists($filepath)) { // verificar que el archivo exista
-            return 'Archivo no existe';
-        } else if (!is_file($filepath) && !is_dir($filepath)) { // verificar que sea un fichero o directorio
-            return '"'.$file.'" no válido';
-        } else {
-            if (is_dir($filepath) and $dir = opendir($filepath)) { // abrir el directorio
-                while ($file = readdir($dir)) {
-                    if (is_dir($filepath.DIRECTORY_SEPARATOR.$file)) { // si el archivo es un directorio lo recorre recursivamente
-                        if ($file != '.' && $file != '..') { // no recorre el dir padre ni el mismo recursivamente
-                            $size += self::getSize($filepath.DIRECTORY_SEPARATOR.$file, false); // llamada recursiva sin unidad
-                        }
-                    } else {
-                        $size += filesize ($filepath.DIRECTORY_SEPARATOR.$file); // si no es directorio se retorna el tamaño del archivo
+        if (is_dir($filepath)) {
+            $dir = opendir($filepath);
+            if (!$dir) {
+                throw new \Exception(__('No fue posible abrir el directorio "%s" para calcular su tamaño.', $filepath));
+            }
+            while ($file = readdir($dir)) {
+                // si el archivo es un directorio lo recorre recursivamente
+                if (is_dir($filepath . DIRECTORY_SEPARATOR . $file)) {
+                    // no recorre el dir padre ni el mismo recursivamente
+                    if ($file != '.' && $file != '..') {
+                        // llamada recursiva sin unidad (ahora sólo sumando, unidad al finalizar recursividad)
+                        $size += self::getSize($filepath . DIRECTORY_SEPARATOR . $file, false);
                     }
                 }
-                closedir($dir);
-            } else { // si no es directorio se retorna el tamaño del archivo
-                $size += filesize($filepath);
+                // si no es directorio se retorna el tamaño del archivo
+                else {
+                    $size += filesize($filepath . DIRECTORY_SEPARATOR . $file);
+                }
             }
+            closedir($dir);
+        }
+        // si no es directorio es fichero, se obtiene el tamaño del archivo
+        else {
+            $size += filesize($filepath);
         }
         clearstatcache();
+        // si no se requiere la inidad, se retorna el tamaño en bruto
+        if (!$mostrarUnidad) {
+            return $size;
+        }
         // dependiendo del tamaño del archivo se le coloca la unidad
-        if (!$mostrarUnidad) return $size;
-        if ($size <= 1024) // B
-            return $size.' '.$method[0];
-        else if ($size >= pow(1024, 4)) // TB
-            return round($size/pow(1024, 4), 2).' '.$method[4];
-        else if ($size >= pow(1024, 3)) // GB
-            return round($size/pow(1024, 3), 2).' '.$method[3];
-        else if ($size >= pow(1024, 2)) // MB
-            return round($size/pow(1024, 2), 2).' '.$method[2];
-        else // KB
-            return round($size/1024, 2).' '.$method[1];
+        // la cual será en potencia de 2, por lo que, por ejemplo, es KiB y no KB
+        if ($size <= 1024) {
+            return $size.' B';
+        }
+        if ($size >= pow(1024, 4)) {
+            return round($size/pow(1024, 4), 2).' TiB';
+        }
+        if ($size >= pow(1024, 3)) {
+            return round($size/pow(1024, 3), 2).' GiB';
+        }
+        if ($size >= pow(1024, 2)) {
+            return round($size/pow(1024, 2), 2).' MiB';
+        }
+        return round($size/1024, 2).' KiB';
     }
 
     /**
-     * Abre un archivo y lo devuelve en el formato de arreglo
-     * @param file_name Ruta hacia el archivo
+     * Abrir y leer un archivo (lo devuelve en el formato de arreglo)
+     * @param string $file_name Ruta hacia el archivo
      * @return array con indices: name, type, size y data
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2011-08-11
@@ -185,7 +213,9 @@ class Utility_File
     public static function get($file_name)
     {
         // si el archivo no existe se retorna null
-        if (!file_exists($file_name)) return null;
+        if (!file_exists($file_name)) {
+            return null;
+        }
         // leer datos estandar de un archivo
         $file['name'] = basename($file_name);
         $file['type'] = mime_content_type($file_name);
@@ -196,19 +226,20 @@ class Utility_File
             list($file['w'], $file['h']) = getimagesize($file_name);
             $file['ratio'] = $file['w'] / $file['h'];
         }
+        // entregar archivo leído
         return $file;
     }
 
     /**
-     * Borra recursivamente un directorio
-     * @param dir Directorio a borrar
+     * Borrar recursivamente un directorio
+     * @param string $dir Directorio a borrar
      * @author http://en.kioskea.net/faq/793-warning-rmdir-directory-not-empty
      * @version 2015-04-21
      */
     public static function rmdir($dir)
     {
         // List the contents of the directory table
-        $dir_content = scandir ($dir);
+        $dir_content = scandir($dir);
         // Is it a directory?
         if ($dir_content!==false) {
             // For each directory entry
@@ -227,13 +258,13 @@ class Utility_File
             }
         }
         // It has erased all entries in the folder, we can now erase
-        rmdir ($dir);
+        rmdir($dir);
     }
 
     /**
      * Determinar la extensión de un archivo a partir de su nombre
-     * @param file Ruta hacia el archivo (o nombre del mismo)
-     * @return Extensión si existe
+     * @param string $file Ruta hacia el archivo (o nombre del mismo)
+     * @return string Extensión si existe
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2015-03-11
      */
@@ -245,8 +276,8 @@ class Utility_File
 
     /**
      * Método que cuenta la cantidad de líneas que un archivo posee
-     * @param file Ruta hacia el fichero
-     * @return Cantidad de líneas del fichero
+     * @param string $file Ruta hacia el fichero
+     * @return int Cantidad de líneas del fichero
      * @author http://stackoverflow.com/a/20537130
      * @version 2013-12-12
      */
@@ -263,15 +294,16 @@ class Utility_File
 
     /**
      * Método que entrega el mimetype de un archivo
-     * @param file Ruta hacia el fichero
-     * @return Mimetype del fichero o =false si no se pudo determinar
+     * @param string $file Ruta hacia el fichero
+     * @return string Mimetype del fichero o =false si no se pudo determinar
      * @author http://stackoverflow.com/a/23287361
      * @version 2015-11-03
      */
     public static function mimetype($file)
     {
-        if (!function_exists('finfo_open'))
+        if (!function_exists('finfo_open')) {
             return false;
+        }
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mimetype = finfo_file($finfo, $file);
         finfo_close($finfo);
@@ -282,8 +314,9 @@ class Utility_File
      * Método que empaqueta y comprime archivos (uno o varios, o directorios).
      * Si se pide usar formato zip entonces se usará ZipArchive de PHP para
      * comprimir
-     * @param filepath Directorio (o archivo) que se desea comprimir
-     * @param options Arreglo con opciones para comprmir (format, download, delete)
+     * @param string $filepath Directorio (o archivo) que se desea comprimir
+     * @param array $options Arreglo con opciones para comprmir (format, download, delete)
+     * @return bool =true si se pudo comprimir el archivo, =false si no fue posible
      * @todo Preparar datos si se pasa un arreglo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2017-03-15
@@ -311,12 +344,16 @@ class Utility_File
             // TODO
         }
         // si el archivo no se puede leer se entrega =false
-        if (!is_readable($file))
+        if (!is_readable($file)) {
             return false;
+        }
         // si es formato gz y es directorio se cambia a tgz
         if (is_dir($file)) {
-            if ($options['format']=='gz') $options['format'] = 'tar.gz';
-            else if ($options['format']=='bz2') $options['format'] = 'tar.bz2';
+            if ($options['format']=='gz') {
+                $options['format'] = 'tar.gz';
+            } else if ($options['format']=='bz2') {
+                $options['format'] = 'tar.bz2';
+            }
         }
         // obtener directorio que contiene al archivo/directorio y el nombre de este
         $filepath = $file;
@@ -327,10 +364,12 @@ class Utility_File
         if ($options['format']=='zip') {
             // crear archivo zip
             $zip = new \ZipArchive();
-            if (file_exists($dir.DIRECTORY_SEPARATOR.$file.'.zip'))
+            if (file_exists($dir.DIRECTORY_SEPARATOR.$file.'.zip')) {
                 unlink($dir.DIRECTORY_SEPARATOR.$file.'.zip');
-            if ($zip->open($dir.DIRECTORY_SEPARATOR.$file.'.zip', \ZipArchive::CREATE)!==true)
+            }
+            if ($zip->open($dir.DIRECTORY_SEPARATOR.$file.'.zip', \ZipArchive::CREATE)!==true) {
                 return false;
+            }
             // agregar un único archivo al zip
             if (!is_dir($filepath)) {
                 $zip->addFile($filepath, $file);
@@ -356,8 +395,9 @@ class Utility_File
             ob_clean();
             header ('Content-Disposition: attachment; filename='.$file_compressed);
             $mimetype = self::mimetype($dir.DIRECTORY_SEPARATOR.$file_compressed);
-            if ($mimetype)
+            if ($mimetype) {
                 header ('Content-Type: '.$mimetype);
+            }
             header ('Content-Length: '.filesize($dir.DIRECTORY_SEPARATOR.$file_compressed));
             readfile($dir.DIRECTORY_SEPARATOR.$file_compressed);
             unlink($dir.DIRECTORY_SEPARATOR.$file_compressed);
@@ -365,16 +405,21 @@ class Utility_File
         // borrar directorio o archivo que se está comprimiendo si así se ha
         // solicitado
         if ($options['delete']) {
-            if (is_dir($filepath)) self::rmdir($filepath);
-            else unlink($filepath);
+            if (is_dir($filepath)) {
+                self::rmdir($filepath);
+            } else {
+                unlink($filepath);
+            }
         }
+        // todo ok
+        return true;
     }
 
     /**
      * Extrae un archivo de un fichero comprimido zip
-     * @param archivoZip Nombre del archivo comprimido
-     * @param archivoBuscado Nombre del archivo que se busca extraer
-     * @return Arreglo con índices name, type (no definido), size y data (idem self::upload)
+     * @param string $archivoZip Nombre del archivo comprimido
+     * @param string $archivoBuscado Nombre del archivo que se busca extraer
+     * @return string|false Arreglo con índices name, type (no definido), size y data (idem self::upload)
      * @warning Sólo extrae un archivo del primer nivel (fuera de directorios)
      * @todo Extracción de un fichero que este en subdirectorios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
@@ -412,6 +457,8 @@ class Utility_File
 
     /**
      * Método que sanitiza el nombre de un archivo para ser usado en el sistema de archivos
+     * @param string $filename nombre del archivo que se desea limpiar el nombre
+     * @return string Nombre del archivo ya normalizado y limpiado para ser usado en el sistema de archivos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2018-12-02
      */
