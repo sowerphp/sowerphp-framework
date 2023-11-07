@@ -242,7 +242,7 @@ class View_Helper_Form
             $buffer = '    <div class="mb-3 row'.($config['notempty']?' required':'').'">'."\n";
             if (!empty($config['label'])) {
                 $required = $config['notempty'] ? '<span style="color:red"><strong>*</strong></span> ' : '';
-                $buffer .= '        <label'.(isset($config['id'])?(' for="'.$config['id'].'"'):'').' class="col-sm-'.$this->_cols_label.' col-form-label text-end">'.$required.$config['label'].'</label>'."\n";
+                $buffer .= '        <label'.(isset($config['id'])?(' for="'.$config['id'].'" ondblclick="__.copy(\''.$config['id'].'\')"'):'').' class="col-sm-'.$this->_cols_label.' col-form-label text-end">'.$required.$config['label'].'</label>'."\n";
             }
             if (!in_array($config['type'], ['submit'])) {
                 $buffer .= '        <div class="col-sm-'.(12-$this->_cols_label).'">'.$field.$config['help'].'</div>'."\n";
@@ -255,7 +255,7 @@ class View_Helper_Form
         else if ($config['style']=='inline') {
             $buffer = '<div>';
             if ($config['type']!='checkbox') {
-                $buffer .= '<label class="visually-hidden"'.(isset($config['id'])?' for="'.$config['id'].'"':'').'>'.$config['label'].'</label>'."\n";
+                $buffer .= '<label class="visually-hidden"'.(isset($config['id'])?' for="'.$config['id'].'" ondblclick="__.copy(\''.$config['id'].'\')"':'').'>'.$config['label'].'</label>'."\n";
             }
             if (isset($config['addon-icon'])) {
                 $buffer .= '<div class="input-group-addon"><i class="fa fa-'.$config['addon-icon'].'" aria-hidden="true"></i></div>'."\n";
@@ -264,7 +264,7 @@ class View_Helper_Form
             }
             $buffer .= $field;
             if ($config['type']=='checkbox') {
-                $buffer .= ' <label '.(isset($config['id'])?' for="'.$config['id'].'"':'').' style="fw-:normal"'.$config['popover'].'>'.$config['label'].'</label>'."\n";
+                $buffer .= ' <label '.(isset($config['id'])?' for="'.$config['id'].'" ondblclick="__.copy(\''.$config['id'].'\')"':'').' style="fw-:normal"'.$config['popover'].'>'.$config['label'].'</label>'."\n";
             }
             $buffer .= $config['help'];
             $buffer .= '</div>'."\n";
@@ -277,7 +277,7 @@ class View_Helper_Form
         // si se debe colocar un label
         else if (!empty($config['id']) and !empty($config['label'])) {
             $width = !empty($config['width']) ? (' style="width:'.$config['width'].'"') : '';
-            $buffer = '<div'.$width.'><label class="visually-hidden" for="'.$config['id'].'">'.$config['label'].'</label>'.$field.$config['help'].'</div>'."\n";
+            $buffer = '<div'.$width.'><label class="visually-hidden" for="'.$config['id'].'" ondblclick="__.copy(\''.$config['id'].'\')">'.$config['label'].'</label>'.$field.$config['help'].'</div>'."\n";
         }
         // si no se debe aplicar ningún formato solo agregar el campo dentro de un div y el EOL
         else {
