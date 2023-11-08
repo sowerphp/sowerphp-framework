@@ -407,7 +407,10 @@ class View_Helper_Form
         if ($form_select_wrapper === null) {
             $form_select_wrapper = 'select2';
         }
-        $config = array_merge(['wrapper'=>$form_select_wrapper], $config);
+        $config = array_merge([
+            'wrapper' => $form_select_wrapper,
+            'auto_options' => true,
+        ], $config);
         // configuración para los wrappers
         $wrapper_config = '';
         if ($config['wrapper']=='select2') {
@@ -499,6 +502,11 @@ class View_Helper_Form
                     }
                     if (!empty($any_option_selected)) {
                         $selected = (in_array((string)$key2, $config['value'], true)?' selected="selected"':'');
+                        if (!empty($selected)) {
+                            $keys_not_in_options = array_filter($keys_not_in_options, function ($k) use ($key2) {
+                                return (string)$k != (string)$key2;
+                            });
+                        }
                     }
                     $buffer .= '<option value="'.$key2.'"'.$selected.'>'.$value2.'</option>';
                 }
@@ -509,7 +517,7 @@ class View_Helper_Form
         // significa que venía alguno que no estaba en las opciones
         // se agrega como option para poder ser mostrado en el select
         // no se agregan llaves vacias o numéricos menores a 0
-        if (!empty($keys_not_in_options)) {
+        if ($config['auto_options'] and !empty($keys_not_in_options)) {
             $keys_not_in_options = array_filter($keys_not_in_options, function ($k) {
                 if (empty($k) or (is_numeric($k) and $k < 0)) {
                     return false;

@@ -769,7 +769,7 @@ class Model_Usuario extends \Model_App
     /**
      * Método que entrega el listado de recursos sobre los que el usuario tiene
      * permisos para acceder.
-     * @return Listado de recursos a los que el usuario tiene acceso
+     * @return array Listado de recursos a los que el usuario tiene acceso
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2017-06-11
      */
@@ -832,11 +832,13 @@ class Model_Usuario extends \Model_App
         $recurso = is_string($recurso) ? $recurso : $recurso->request;
         $permisos = $this->auths();
         // buscar permiso de forma exacta
-        if (in_array($recurso, $permisos))
+        if (in_array($recurso, $permisos)) {
             return true;
+        }
         // buscar si el usuario tiene permiso para acceder a todo
-        if (in_array('*', $permisos))
+        if (in_array('*', $permisos)) {
             return true;
+        }
         // revisar por cada permiso
         foreach ($permisos as &$permiso) {
             // buscar si el permiso es del tipo recurso*
@@ -854,8 +856,9 @@ class Model_Usuario extends \Model_App
                     }
                 } else {
                     $aux .= '/'.$parte;
-                    if ($recurso === $aux)
+                    if ($recurso === $aux) {
                         return true;
+                    }
                 }
             }
         }
