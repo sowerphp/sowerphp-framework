@@ -525,9 +525,13 @@ class View_Helper_Form
                 return true;
             });
             if (!empty($keys_not_in_options)) {
+                $values = [
+                    'null' => 'Sin valor',
+                    '!null' => 'Con valor',
+                ];
                 $buffer .= '<optgroup label="Valores temporales">';
                 foreach($keys_not_in_options as $k) {
-                    $buffer .= '<option value="'.$k.'" selected="selected">'.$k.'</option>';
+                    $buffer .= '<option value="'.$k.'" selected="selected">'.(isset($values[$k])?$values[$k]:$k).'</option>';
                 }
                 $buffer .= '</optgroup>';
             }
