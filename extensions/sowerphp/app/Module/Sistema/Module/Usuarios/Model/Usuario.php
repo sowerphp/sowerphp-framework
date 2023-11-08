@@ -244,7 +244,7 @@ class Model_Usuario extends \Model_App
                     WHERE usuario = :usuario
                 ', [':usuario'=>$id]);
             }
-            //
+            // se crea usuario a través de su hash
             else {
                 $id = $this->getDB()->getValue('
                     SELECT id
