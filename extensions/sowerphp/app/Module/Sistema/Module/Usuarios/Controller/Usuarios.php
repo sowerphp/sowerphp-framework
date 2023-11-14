@@ -66,19 +66,13 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
     {
         // si ya está logueado se redirecciona
         if ($this->Auth->logged()) {
-            /*\sowerphp\core\Model_Datasource_Session::message(sprintf(
-                'Usuario <em>%s</em> tiene su sesión iniciada. Para ingresar con un nuevo usuario primero debe cerrar esta sesión.',
-                $this->Auth->User->usuario
-            ), 'info');*/
-            $this->redirect(
-                $this->Auth->settings['redirect']['login']
-            );
+            $this->redirect($this->Auth->settings['redirect']['login']);
         }
         // asignar variables para la vista
         $this->layout .= '.min';
         $this->set([
             'redirect' => $redirect ? base64_decode ($redirect) : null,
-            'self_register' => (boolean)\sowerphp\core\Configure::read('app.self_register'),
+            'self_register' => (bool)\sowerphp\core\Configure::read('app.self_register'),
             'language' => \sowerphp\core\Configure::read('language'),
             'auth2_token_enabled' => \sowerphp\app\Model_Datasource_Auth2::tokenEnabled(),
         ]);

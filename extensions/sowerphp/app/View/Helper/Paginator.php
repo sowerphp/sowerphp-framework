@@ -36,14 +36,14 @@ class View_Helper_Paginator extends \sowerphp\general\View_Helper_Table
 
     /**
      * Constructor de la clase
-     * @param options Arreglo con las opciones para el mantenedor
+     * @param array $options Arreglo con las opciones para el mantenedor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2023-03-20
      */
     public function __construct(array $options = [], $filter = true)
     {
         if (!isset($options['filter'])) {
-            $options['filter'] = (boolean)$filter;
+            $options['filter'] = (bool)$filter;
         }
         if ($options['filter']) {
             $this->options = array_merge([

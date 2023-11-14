@@ -72,7 +72,7 @@ class Model_Datasource_Session
         // idioma
         if (!self::read('config.language')) {
             $defaultLang = Configure::read('language');
-            $userLang = (new Network_Request(false))->header('Accept-Language');
+            $userLang = (new Network_Request())->header('Accept-Language');
             if ($userLang) {
                 $userLang = explode(',', explode('-', $userLang)[0])[0];
                 if ($userLang === explode('_', $defaultLang)[0] || I18n::localeExists($userLang)) {

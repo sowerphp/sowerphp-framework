@@ -34,12 +34,12 @@ class Routing_Dispatcher
     /**
      * Método que despacha la página solicitada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-21
+     * @version 2023-11-14
      */
-    public static function dispatch ()
+    public static function dispatch()
     {
-        $request = new Network_Request ();
-        $response = new Network_Response ();
+        $request = new Network_Request();
+        $response = new Network_Response();
         // Verificar si el recurso solicitado es un archivo físico dentro del
         // directorio webroot
         if (self::_asset($request->request, $response)) {
@@ -47,8 +47,6 @@ class Routing_Dispatcher
             // procesado de la página
             return;
         }
-        // Parsear parámetros del request
-        $request->params = Routing_Router::parse ($request->request);
         // Si se solicita un módulo tratar de cargar y verificar que quede activo
         if (!empty($request->params['module'])) {
             Module::load($request->params['module']);
@@ -74,17 +72,18 @@ class Routing_Dispatcher
 
     /**
      * Busca si lo solicitado existe físicamente en el servidor y lo entrega
-     * @param url Ruta de los que se está solicitando
-     * @param response Objeto Response
-     * @return Verdadero si lo solicitado existe dentro de /webroot
+     * @param string $url Ruta de los que se está solicitando
+     * @param Network_Response $response Objeto Response
+     * @return bool Verdadero si lo solicitado existe dentro de /webroot
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-03-21
      */
-    private static function _asset($url, Network_Response $response)
+    private static function _asset(string $url, Network_Response $response)
     {
         // Si la URL es vacía se retorna falso
-        if ($url=='')
+        if ($url == '') {
             return false;
+        }
         // Inicializar el archivo como null
         $assetFile = null;
         // Buscar el archivo en los posibles directorios webroot, incluyendo
@@ -106,28 +105,30 @@ class Routing_Dispatcher
             if ($paths) {
                 $removeCount = count(explode('.', $module)) + 1;
                 $aux = explode('/', $url);
-                while ($removeCount-->0)
+                while ($removeCount-- > 0) {
                     array_shift($aux);
-                $url = '/'.implode('/', $aux);
+                }
+                $url = '/' . implode('/', $aux);
             }
         }
         // si no está definido el path entonces no era de módulo y se deberá
         // buscar en los paths de la aplicación
-        if (!$paths)
+        if (!$paths) {
             $paths = App::paths();
-        // en cada paths encontrado buscar el archivo solicitado
+        }
+        // en cada path encontrado buscar el archivo solicitado
         foreach ($paths as &$path) {
-            $file = $path.'/webroot'.$url;
+            $file = $path . '/webroot' . $url;
             if (file_exists($file) && !is_dir($file)) {
                 $assetFile = $file;
                 break;
             }
         }
         // Si se encontró el archivo se envía al cliente
-        if ($assetFile!==null) {
+        if ($assetFile !== null) {
             // Solo se entrega mediante PHP si el archivo no está en
             // DIR_WEBSITE/webroot
-            if (!strpos($assetFile, DIR_WEBSITE)!==false) {
+            if (!strpos($assetFile, DIR_WEBSITE) !== false) {
                 $response->sendFile($assetFile);
             }
             return true;
@@ -141,8 +142,7 @@ class Routing_Dispatcher
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-03-22
      */
-    private static function _getController (Network_Request $request,
-                                                    Network_Response $response)
+    private static function _getController(Network_Request $request, Network_Response $response)
     {
         // Cargar clase del controlador
         $class = App::findClass (
@@ -157,7 +157,7 @@ class Routing_Dispatcher
         // Se verifica que la clase no sea abstracta
         $reflection = new \ReflectionClass($class);
         if ($reflection->isAbstract()) {
-                return false;
+            return false;
         }
         // Se retorna la clase instanciada del controlador con los parámetros
         // $request y $response al constructor
@@ -170,8 +170,7 @@ class Routing_Dispatcher
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-03-22
      */
-    private static function _invoke(Controller $controller,
-                        Network_Request $request, Network_Response $response)
+    private static function _invoke(Controller $controller, Network_Request $request, Network_Response $response)
     {
         // Iniciar el proceso
         $controller->startupProcess();

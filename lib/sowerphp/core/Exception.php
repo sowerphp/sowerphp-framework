@@ -70,7 +70,7 @@ class Exception extends \RuntimeException
         );
         // renderizar dependiendo de si es una web o es una shell
         if (isset($_SERVER['REQUEST_URI'])) {
-            $controller = new Controller_Error (new Network_Request(), new Network_Response());
+            $controller = new Controller_Error(new Network_Request(), new Network_Response());
             $controller->error_reporting = Configure::read('debug');
             $controller->display($data);
             $controller->shutdownProcess();

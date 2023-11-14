@@ -44,10 +44,20 @@ function env($varname, $default = null)
  * @param resource Recurso (path) que se desea resolver
  * @return string URL completa que resuelve el recurso (path)
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2023-11-01
+ * @version 2023-11-14
  */
 function url($resource = '/') {
     $url = (new \sowerphp\core\Network_Request())->url;
+    if (!$url) {
+        throw new \Exception(__('No fue posible determinar la URL completa del recurso %s', $resource));
+    }
+    if (strpos($resource, '/static/') === 0) {
+        $url_static = \sowerphp\core\Configure::read('app.url_static');
+        if ($url_static !== null) {
+            $url = $url_static;
+            $resource = substr($resource, 7);
+        }
+    }
     return $resource == '/' ? $url : $url.$resource;
 }
 

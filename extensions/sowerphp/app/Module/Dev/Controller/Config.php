@@ -49,7 +49,7 @@ class Controller_Config extends \Controller_App
      */
     public function _api_nav_app_GET()
     {
-        $this->Api->send(\sowerphp\core\Configure::read('nav.app'), 200, JSON_PRETTY_PRINT);
+        $this->Api->send(\sowerphp\core\Configure::read('nav.app'), 200);
     }
 
     /**
@@ -69,7 +69,7 @@ class Controller_Config extends \Controller_App
      */
     public function _api_modulos_GET()
     {
-        $this->Api->send(\sowerphp\core\Module::loaded(), 200, JSON_PRETTY_PRINT);
+        $this->Api->send(\sowerphp\core\Module::loaded(), 200);
     }
 
 }

@@ -41,18 +41,19 @@ class View_Helper_HTML
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2013-06-27
      */
-    public static function codeFrom ($src, $recursive = false, $ext = array(), $header = 2)
+    public static function codeFrom($src, $recursive = false, $ext = array(), $header = 2)
     {
         // en caso que sea un directorio se recorre recursivamente
         if (is_dir($src)) {
             // si se limitan extensiones
-            if (count($ext)) $restrictExtensions = true;
-            else $restrictExtensions = false;
+            $restrictExtensions = (bool)count($ext);
             // buscar archivos
             $files = scandir($src);
             foreach ($files as &$file) {
                 // si es archivo oculto se omite
-                if ($file[0]=='.') continue;
+                if ($file[0] == '.') {
+                    continue;
+                }
                 // si se limitan extensiones y no esta en las permitidas saltar
                 if ($restrictExtensions && !in_array(substr($file, strrpos($file, '.')+1), $ext)) {
                     continue;
@@ -61,13 +62,12 @@ class View_Helper_HTML
                 // recursivamente, sino se veran solo archivos
                 if (is_dir($src.'/'.$file) && !$recursive) continue;
                 // si es un directorio colocar el nombre del directorio
-                if (is_dir ($src.'/'.$file)) {
-                    $permlink = \sowerphp\core\Utility_String::normalize($file);
-                    echo "<h$header id=\"$permlink\">$file <a href=\"#$permlink\">&lt;&gt;</a></h$header>";
-                    $h = $header + 1;
+                if (is_dir($src.'/'.$file)) {
+                    $permalink = \sowerphp\core\Utility_String::normalize($file);
+                    echo "<h$header id=\"$permalink\">$file <a href=\"#$permalink\">&lt;&gt;</a></h$header>";
                 }
                 // llamar a la función por cada archivo
-                self::codeFrom($src.'/'.$file, $recursive, $ext, $header);
+                self::codeFrom($src.'/'.$file, $recursive, $ext, ++$header);
             }
         }
         // si no es directorio entonces es un archivo, se muestra
@@ -89,7 +89,7 @@ class View_Helper_HTML
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-28
      */
-    public static function linksFrom ($dir, $recursive = false)
+    public static function linksFrom($dir, $recursive = false)
     {
         $realdir = DIR_WEBSITE.'/webroot'.$dir;
         if (!is_dir($realdir)) {
@@ -101,14 +101,18 @@ class View_Helper_HTML
         // procesar cada archivo
         foreach ($files as &$file) {
             // si es archivo oculto o no hay permiso de lectura => se omite
-            if ($file[0]=='.' || !is_readable($realdir.'/'.$file)) continue;
+            if ($file[0] == '.' || !is_readable($realdir.'/'.$file)) {
+                continue;
+            }
             // si es un directorio
             if (is_dir($realdir.'/'.$file)) {
                 // verificar que se deba procesar recursivamente, sino se veran
                 // solo archivos
-                if (!$recursive) continue;
+                if (!$recursive) {
+                    continue;
+                }
                 // mostrar directorio y llamar función de forma recursiva
-                echo '<li style="list-style-image: url(\'',_BASE,'/img/icons/16x16/files/directory.png\')">';
+                echo '<li style="list-style-image: url(\'',url('/img/icons/16x16/files/directory.png'),'\')">';
                 echo '<span style="display:block;margin-bottom:1em">',str_replace(array('_', '-'), ' ', $file),'</span>',"\n";
                 self::linksFrom($dir.'/'.$file, $recursive);
                 echo '</li>',"\n";
@@ -125,10 +129,13 @@ class View_Helper_HTML
                 }
                 // buscar icono a partir de la extension
                 $icon = \sowerphp\core\App::location('webroot/img/icons/16x16/files/'.$ext.'.png');
-                if($icon) $icon = 'img/icons/16x16/files/'.$ext.'.png';
-                else $icon = 'img/icons/16x16/files/generic.png';
+                if ($icon) {
+                    $icon = 'img/icons/16x16/files/'.$ext.'.png';
+                } else {
+                    $icon = 'img/icons/16x16/files/generic.png';
+                }
                 // mostrar enlace
-                echo '<li style="list-style-image: url(\'',_BASE,'/',$icon,'\')"><a href="',_BASE.$dir,'/',$file,'">',$name,'</a></li>',"\n";
+                echo '<li style="list-style-image: url(\'',url('/'.$icon),'\')"><a href="',url($dir.'/'.$file),'">',$name,'</a></li>',"\n";
             }
         }
         echo '</ul>',"\n";

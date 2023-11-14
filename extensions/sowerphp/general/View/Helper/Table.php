@@ -310,7 +310,7 @@ class View_Helper_Table
             $buffer .= '<div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown_'.$this->_id.'">';
             $extensions = \sowerphp\core\Configure::read('app.tables.extensions') ? \sowerphp\core\Configure::read('app.tables.extensions') : $this->extensions;
             foreach ($extensions as $e => $n) {
-                $buffer .= '<a href="'._BASE.'/exportar/'.$e.'/'.$this->_id.'" class="dropdown-item">'.$n.'</a>';
+                $buffer .= '<a href="'.url('/exportar/'.$e.'/'.$this->_id).'" class="dropdown-item">'.$n.'</a>';
             }
             $buffer .= '</div>'."\n";
         }

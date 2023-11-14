@@ -119,7 +119,9 @@ abstract class Model
     {
         // preparar pk
         $pk = $this->preparePk();
-        if (!$pk) return false;
+        if (!$pk) {
+            return false;
+        }
         // recuperar datos
         $datos = $this->db->getRow(
             'SELECT * FROM '.$this->_table.' WHERE '.$pk['where']
@@ -140,7 +142,7 @@ abstract class Model
 
     /**
      * Método para determinar si el objeto existe en la base de datos
-     * @return =true si el registro existe en la base de datos, =false si no existe
+     * @return bool =true si el registro existe en la base de datos, =false si no existe
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-19
      */
@@ -148,9 +150,11 @@ abstract class Model
     {
         // preparar pk
         $pk = $this->preparePk();
-        if (!$pk) return false;
+        if (!$pk) {
+            return false;
+        }
         // verificar si existe
-        return (boolean) $this->db->getValue(
+        return (bool)$this->db->getValue(
             'SELECT COUNT(*) FROM '.$this->_table.' WHERE '.$pk['where'],
             $pk['values']
         );
@@ -307,7 +311,7 @@ abstract class Model
         // asegurarse que sean métodos que inician con get
         $request = substr($method, 0, 3);
         // si la solicitud es un getFK() o un getAttribute()
-        if ($request=='get') {
+        if ($request == 'get') {
             $fk = substr($method, 3);
             // es un getFK() -> debe existir en fkNamespace
             if (isset($this::$fkNamespace) && isset($this::$fkNamespace['Model_'.$fk])) {
@@ -337,9 +341,9 @@ abstract class Model
 
     /**
      * Método que obtiene un objeto que es FK de este
-     * @param fk Nombre de la clase que es la FK (sin Model_)
-     * @param args Argunentos con la PK del objeto que es FK
-     * @return Model_FK
+     * @param string $fk Nombre de la clase que es la FK (sin Model_)
+     * @param array $args Argunentos con la PK del objeto que es FK
+     * @return object
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2015-04-24
      */
@@ -356,32 +360,42 @@ abstract class Model
         // tratar de recuperar con la clase plural (para usar caché)
         // clase plural sólo existe al tener la extesión sowerphp\app
         if (class_exists($fkClasss)) {
-            if (isset($args[0])) return (new $fkClasss)->get($args[0]);
-            else return (new $fkClasss)->get($this->{Utility_Inflector::underscore($fk)});
+            if (isset($args[0])) {
+                return (new $fkClasss)->get($args[0]);
+            } else {
+                return (new $fkClasss)->get($this->{Utility_Inflector::underscore($fk)});
+            }
         }
         // recuperar directamente con la clase singular
         else {
-            if (isset($args[0])) return new $fkClass($args[0]);
-            else return new $fkClass($this->{Utility_Inflector::underscore($fk)});
+            if (isset($args[0])) {
+                return new $fkClass($args[0]);
+            } else {
+                return new $fkClass($this->{Utility_Inflector::underscore($fk)});
+            }
         }
     }
 
     /**
      * Método que permite asignar el valor de un atributo
-     * @param attribute Atributo del objeto que se desea asignar
-     * @param value Valor que se desea asignar al objeto
-     * @param check Si se debe validar por algún tipo de dato en particular
-     * @param trim Si se debe aplicar la función trim() al valor
-     * @param strip_tags Si se debe aplicar la función strip_tags() al valor
-     * @return =true si pasó la validación y se pudo asignar el valor
+     * @param string $attribute Atributo del objeto que se desea asignar
+     * @param mixed $value Valor que se desea asignar al objeto
+     * @param bool $check Si se debe validar por algún tipo de dato en particular
+     * @param bool $trim Si se debe aplicar la función trim() al valor
+     * @param bool $strip_tags Si se debe aplicar la función strip_tags() al valor
+     * @return bool =true si pasó la validación y se pudo asignar el valor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2015-04-16
      */
     private function setAttribute($attribute, $value, $check = true, $trim = true, $strip_tags = true)
     {
-        if ($strip_tags) $value = strip_tags($value);
-        if ($trim) $value = trim($value);
-        if ($check===true or is_array($check)) {
+        if ($strip_tags) {
+            $value = strip_tags($value);
+        }
+        if ($trim) {
+            $value = trim($value);
+        }
+        if ($check === true or is_array($check)) {
             if (!is_array($check) and isset($this::$columnsInfo[$attribute]['check'])) {
                 $check = $this::$columnsInfo[$attribute]['check'];
             }

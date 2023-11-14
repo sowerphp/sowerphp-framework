@@ -28,7 +28,7 @@ namespace sowerphp\app;
  * Clase base para las implementaciones de clases de las apps de terceros que
  * se pueden ejecutar en la aplicación
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2019-06-27
+ * @version 2023-11-13
  */
 abstract class Utility_Apps_Base_Apps
 {
@@ -38,6 +38,7 @@ abstract class Utility_Apps_Base_Apps
     protected $config; ///< Configuración de la aplicación
     protected $vars = []; ///< Variables usadas por la aplicación pero que no son configurables por el usuario
     protected $directory; ///< Directorio de archivos de la aplicación
+    protected $namespace = 'apps'; ///< nombre del grupo de las aplicaciones que heredan esta clase
 
     /**
      * Constructor de la aplicación
@@ -60,14 +61,44 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
+     * Método que entrega el ID de la aplicación en base a su namespace de PHP y su código
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2023-11-13
+     */
+    public function getID()
+    {
+        return strtolower(str_replace('\\', '_', $this->getNamespacePHP()).'_app_'.$this->getCodigo());
+    }
+
+    /**
+     * Método que entrega el namespace de la aplicación (grupo de la app, no el de PHP)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2023-11-13
+     */
+    protected function getNamespace()
+    {
+        return $this->namespace;
+    }
+
+    /**
      * Método que entrega el namespace de la aplicación que se instanció
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-27
+     * @version 2023-11-13
      */
-    public function getNamespace()
+    protected function getNamespacePHP()
     {
         $class = '\Utility_Apps_'.\sowerphp\core\Utility_Inflector::camelize($this->getCodigo());
         return str_replace($class, '', get_class($this));
+    }
+
+    /**
+     * Método que entrega el prefijo de la configuración
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2023-11-13
+     */
+    protected function getConfigName()
+    {
+        return 'config_'.$this->getNamespace().'_'.$this->getCodigo();
     }
 
     /**
@@ -197,7 +228,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que asigna la configuración de la aplicación
+     * Método que asigna la configuración de la aplicación al objeto (no guarda)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2019-06-14
      */

@@ -50,7 +50,7 @@ class View_Helper_AppsConfig
      * Para generar la de múltiples aplicaciones se deberá iterar con este
      * método.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-06-27
+     * @version 2023-11-11
      */
     public function generate($App)
     {
@@ -58,7 +58,7 @@ class View_Helper_AppsConfig
         $buffer .= '<div class="card mb-4">'."\n";
         $buffer .= '    <div class="card-body">'."\n";
         $buffer .= '        <div class="float-end">'."\n";
-        $buffer .= '            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#app-'.$App->getCodigo().'">'."\n";
+        $buffer .= '            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#'.$this->id.'-app-'.$App->getCodigo().'">'."\n";
         $buffer .= '                <i class="fas fa-cogs fa-fw"></i>'."\n";
         $buffer .= '            </button>'."\n";
         $buffer .= '        </div>'."\n";
@@ -67,7 +67,7 @@ class View_Helper_AppsConfig
         $buffer .= '        <p class="small text-muted">'.$App->getDescripcion().'</p>'."\n";
         $buffer .= '    </div>'."\n";
         $buffer .= '</div>'."\n";
-        $buffer .= '<div class="modal fade" id="app-'.$App->getCodigo().'" tabindex="-1" role="dialog" aria-labelledby="'.$App->getCodigo().'Label" aria-hidden="true">'."\n";
+        $buffer .= '<div class="modal fade" id="'.$this->id.'-app-'.$App->getCodigo().'" tabindex="-1" role="dialog" aria-labelledby="'.$App->getCodigo().'Label" aria-hidden="true">'."\n";
         $buffer .= '    <div class="modal-dialog modal-lg" role="document">'."\n";
         $buffer .= '        <div class="modal-content">'."\n";
         $buffer .= '            <div class="modal-header">'."\n";
@@ -87,7 +87,7 @@ class View_Helper_AppsConfig
         if ($App->getURL()) {
             $buffer .= '            <a href="'.$App->getURL().'" class="btn btn-primary" target="_blank">Ir a '.$App->getNombre().'</a>'."\n";
         }
-        $buffer .= '                <button type="submit" name="'.str_replace('\\', '_', $App->getNamespace()).'_'.$App->getCodigo().'SubmitApp" class="btn btn-primary">Guardar configuración</button>'."\n";
+        $buffer .= '                <button type="submit" name="'.$App->getID().'SubmitApp" class="btn btn-primary">Guardar configuración</button>'."\n";
         $buffer .= '            </div>'."\n";
         $buffer .= '        </div>'."\n";
         $buffer .= '    </div>'."\n";

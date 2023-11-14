@@ -120,13 +120,13 @@ class Network_Email_Imap
 
     /**
      * Método que indica si se está o no conectado al servidor IMAP
-     * @return =true si se está conectado
+     * @return bool =true si se está conectado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2015-01-05
      */
     public function isConnected()
     {
-        return (boolean)$this->link;
+        return (bool)$this->link;
     }
 
     /**

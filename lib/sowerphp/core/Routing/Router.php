@@ -44,24 +44,30 @@ class Routing_Router
     public static function parse($url)
     {
         // La url requiere partir con "/", si no lo tiene se coloca
-        if (empty($url) || $url[0]!='/')
+        if (empty($url) || $url[0] != '/') {
             $url = '/'.$url;
+        }
         // Si existe una ruta para la url que se está revisando se carga su configuración
         if (isset(self::$routes[$url])) {
             return self::routeNormalize(self::$routes[$url]['to']);
         }
         // buscar página estática
-        if (self::$autoStaticPages && ($params = self::parseStaticPage ($url))!==false) {
+        if (self::$autoStaticPages && ($params = self::parseStaticPage($url)) !== false) {
             return $params;
         }
         // buscar página estática nuevamente, pero esta vez dentro del módulo (si existe)
         $module = Module::find($url);
-        if (self::$autoStaticPages && ($params = self::parseStaticPage (self::urlClean ($url, $module), $module))!==false) {
+        if (self::$autoStaticPages && ($params = self::parseStaticPage(self::urlClean($url, $module), $module)) !== false) {
             return $params;
         }
         // Buscar alguna que sea parcial (:controller, :action, :passX o *)
-        foreach (self::$routes as $key=>$info) {
-            $params = array_merge(['module'=>null, 'controller'=>null, 'action'=>null, 'pass'=>[]], $info['to']);
+        foreach (self::$routes as $key => $info) {
+            $params = array_merge([
+                'module' => null,
+                'controller' => null,
+                'action' => null,
+                'pass' => []
+            ], $info['to']);
             // buscar parametros con nombre si existen
             if ($info['params']) {
                 $url_partes = explode('/', $url);
@@ -70,24 +76,25 @@ class Routing_Router
                 $n_key_partes = count($key_partes);
                 if ($n_url_partes >= $n_key_partes) {
                     $match = true;
-                    for ($i=0; $i<$n_key_partes; $i++) {
+                    for ($i = 0; $i < $n_key_partes; $i++) {
                         // si son iguales las partes se deja pasar
-                        if ($key_partes[$i]==$url_partes[$i]) {
+                        if ($key_partes[$i] == $url_partes[$i]) {
                             continue;
                         }
                         // si es un parámetro se copia a donde corresponda (controlador, acción o variable acción)
-                        else if ($key_partes[$i][0]==':') {
+                        else if ($key_partes[$i][0] == ':') {
                             // verificar formato del parámetro contra expresión regular
+                            // TODO: pendiente de implementar
                             /*$regexp = '/'.$info['params'][$key_partes[$i]].'/';
                             if (!preg_match($regexp, $url_partes[$i])) {
                                 $match = false;
                                 break;
                             }*/
                             // asignar parte a donde corresponda
-                            if ($key_partes[$i]==':controller') {
+                            if ($key_partes[$i] == ':controller') {
                                 $params['controller'] = $url_partes[$i];
                             }
-                            else if ($key_partes[$i]==':action') {
+                            else if ($key_partes[$i] == ':action') {
                                 $params['action'] = $url_partes[$i];
                             }
                             else {
@@ -96,7 +103,7 @@ class Routing_Router
                             continue;
                         }
                         // si es asterisco se pasa todo como parámetro de la acción
-                        else if ($key_partes[$i]=='*') {
+                        else if ($key_partes[$i] == '*') {
                             if (isset($url_partes[$i])) {
                                 $params['pass'] = array_merge((array)$params['pass'], array_slice($url_partes, $i));
                             }
@@ -113,17 +120,17 @@ class Routing_Router
                 }
             }
             // Si no es una ruta con parámetros entonces se busca si la ruta tiene al final un *
-            if ($key[strlen($key)-1]=='*') {
+            if ($key[strlen($key)-1] == '*') {
                 $ruta = substr($key, 0, -1);
                 // Si se encuentra la ruta al inicio de la url
-                if (strpos($url, $ruta)===0) {
+                if (strpos($url, $ruta) === 0) {
                     $params['pass'] = explode('/', str_replace($ruta, '', $url));
                     return $params;
                 }
             }
         }
         // Procesar la URL recibida, en el formato /modulo(s)/controlador/accion/parámetro1/parámetro2/etc
-        $url = self::urlClean ($url, $module);
+        $url = self::urlClean($url, $module);
         // Arreglo por defecto para los datos de módulo, controlador, accion y parámetros pasados
         $params = array('module'=>$module, 'controller'=>null, 'action'=>'index', 'pass'=>[]);
         // Separar la url solicitada en partes separadas por los "/"
@@ -144,13 +151,13 @@ class Routing_Router
 
     /**
      * Método para conectar nuevas rutas
-     * @param from Ruta que se desea conectar (URL)
-     * @param to Hacia donde (módulo, controlador, acción y parámetros) se conectará la ruta
-     * @param regexp Expresiones regulares para hacer match con los parámetros que se pasan con nombre (defecto: .*)
+     * @param string $from Ruta que se desea conectar (URL)
+     * @param array $to Hacia donde (módulo, controlador, acción y parámetros) se conectará la ruta
+     * @param array regexp Expresiones regulares para hacer match con los parámetros que se pasan con nombre (defecto: .*)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2017-07-31
      */
-    public static function connect($from, array $to = [], array $regexp = [])
+    public static function connect(string $from, array $to = [], array $regexp = [])
     {
         $params = [];
         $partes = explode('/', $from);
@@ -159,25 +166,25 @@ class Routing_Router
                 $params[$p] = isset($regexp[$p]) ? $regexp[$p] : '.*';
             }
         }
-        self::$routes[$from] = ['to'=>$to, 'params'=>$params];
+        self::$routes[$from] = ['to' => $to, 'params' => $params];
         krsort(self::$routes);
     }
 
     /**
      * Método para obtener una ruta normalizada (con todos sus campos obligatorios)
-     * @param route Arreglo con los datos de la ruta, índice 'controller' es obligatorio
-     * @return Arreglo con la ruta normalizada, incluyendo índices: 'module', 'controller', 'action' y 'pass'
+     * @param array route Arreglo con los datos de la ruta, índice 'controller' es obligatorio
+     * @return array Arreglo con la ruta normalizada, incluyendo índices: 'module', 'controller', 'action' y 'pass'
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2021-07-15
      */
-    private static function routeNormalize($route)
+    private static function routeNormalize(array $route)
     {
         if (!empty($route['redirect'])) {
             header('location: '.$route['redirect']);
             exit;
         }
         if (empty($route['controller'])) {
-            throw new \sowerphp\core\Exception_Controller_Missing(__('Debe indicar el controlador en la ruta'));
+            throw new \sowerphp\core\Exception_Controller_Missing(__('Debe indicar el controlador en la ruta.'));
         }
         $params = [
             'module' => isset($route['module']) ? $route['module'] : null,
@@ -191,22 +198,22 @@ class Routing_Router
 
     /**
      * Método que quita el módulo solicitado de la parte de la URL
-     * @param url URL
-     * @param module Nombre del módulo (ejemplo: Nombre.De.ModuloQueSeEjecuta)
-     * @return URL sin el módulo
+     * @param string $url URL
+     * @param string $module Nombre del módulo (ejemplo: Nombre.De.ModuloQueSeEjecuta)
+     * @return string URL sin el módulo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-10-01
      */
-    private static function urlClean ($url, $module)
+    private static function urlClean(string $url, string $module)
     {
         if ($module) {
             $url = substr(
-                    Utility_String::replaceFirst(
-                        str_replace('.', '/', Utility_Inflector::underscore($module)),
-                        '',
-                        $url
-                    )
-                    , 1
+                Utility_String::replaceFirst(
+                    str_replace('.', '/', Utility_Inflector::underscore($module)),
+                    '',
+                    $url
+                ),
+                1
             );
         }
         return $url;
@@ -214,13 +221,13 @@ class Routing_Router
 
     /**
      * Método que busca si existe una página estática para la URL solicitada
-     * @param url URL
-     * @param module Nombre del módulo (ejemplo: Nombre.De.ModuloQueSeEjecuta)
-     * @return Parámetros para despachar la página estática o false si no se encontró una
+     * @param string $url URL
+     * @param string $module Nombre del módulo (ejemplo: Nombre.De.ModuloQueSeEjecuta)
+     * @return array Parámetros para despachar la página estática o false si no se encontró una
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-04-14
      */
-    private static function parseStaticPage ($url, $module = null) {
+    private static function parseStaticPage(string $url, string $module = null) {
         $location = View::location('Pages'.$url, $module);
         if ($location) {
             return [

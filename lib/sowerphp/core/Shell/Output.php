@@ -217,9 +217,10 @@ class Shell_Output {
  * Writes a message to the output stream.
  *
  * @param string $message Message to write.
- * @return boolean success
+ * @return bool success
  */
-	protected function _write($message) {
+	protected function _write($message)
+	{
 		return fwrite($this->_output, $message);
 	}
 

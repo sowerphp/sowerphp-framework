@@ -445,11 +445,11 @@ class Model_Usuario extends \Model_App
     public function checkIfUserAlreadyExists ()
     {
         if (empty($this->id)) {
-            return (boolean)$this->getDB()->getValue('
+            return (bool)$this->getDB()->getValue('
                 SELECT COUNT(*) FROM usuario WHERE LOWER(usuario) = :usuario
             ', [':usuario'=>strtolower($this->usuario)]);
         } else {
-            return (boolean)$this->getDB()->getValue('
+            return (bool)$this->getDB()->getValue('
                 SELECT COUNT(*)
                 FROM usuario
                 WHERE id != :id AND LOWER(usuario) = :usuario
@@ -466,11 +466,11 @@ class Model_Usuario extends \Model_App
     public function checkIfEmailAlreadyExists ()
     {
         if (empty($this->id)) {
-            return (boolean)$this->getDB()->getValue('
+            return (bool)$this->getDB()->getValue('
                 SELECT COUNT(*) FROM usuario WHERE email = :email
             ', [':email'=>$this->email]);
         } else {
-            return (boolean)$this->getDB()->getValue('
+            return (bool)$this->getDB()->getValue('
                 SELECT COUNT(*)
                 FROM usuario
                 WHERE id != :id AND email = :email
@@ -487,11 +487,11 @@ class Model_Usuario extends \Model_App
     public function checkIfHashAlreadyExists ()
     {
         if (empty($this->id)) {
-            return (boolean)$this->getDB()->getValue('
+            return (bool)$this->getDB()->getValue('
                 SELECT COUNT(*) FROM usuario WHERE hash = :hash
             ', [':hash'=>$this->hash]);
         } else {
-            return (boolean)$this->getDB()->getValue('
+            return (bool)$this->getDB()->getValue('
                 SELECT COUNT(*)
                 FROM usuario
                 WHERE id != :id AND hash = :hash
@@ -594,7 +594,7 @@ class Model_Usuario extends \Model_App
         if ($this->getEmailAccount()) {
             return $this->getEmailAccount()->isActive();
         }
-        return (boolean) $this->activo;
+        return (bool) $this->activo;
     }
 
     /**

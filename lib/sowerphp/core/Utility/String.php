@@ -194,7 +194,7 @@ class Utility_String {
  * - escape: The character or string used to escape the before character / string (Defaults to `\`)
  * - format: A regex to use for matching variable placeholders. Default is: `/(?<!\\)\:%s/`
  *   (Overwrites before, after, breaks escape / clean)
- * - clean: A boolean or array with instructions for String::cleanInsert
+ * - clean: A bool or array with instructions for String::cleanInsert
  *
  * @param string $str A string containing variable placeholders
  * @param string $data A key => val array where each key stands for a placeholder variable name

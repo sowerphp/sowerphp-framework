@@ -65,13 +65,13 @@ class Model_Datasource_Ldap_Person extends Model_Datasource_Ldap_Entry
 
     /**
      * Método que indica si la persona existe o no en el servidor LDAP
-     * @return =true si la persona existe
+     * @return bool =true si la persona existe
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-11-12
      */
     public function exists()
     {
-        return (boolean)$this->dn;
+        return (bool)$this->dn;
     }
 
     /**
@@ -98,19 +98,19 @@ class Model_Datasource_Ldap_Person extends Model_Datasource_Ldap_Entry
      * Método que valida si la contraseña que se pasa como argumento es la
      * contraseña del usuario
      * Referencia: http://php.net/manual/en/function.sha1.php#40226
-     * @param plain Contraseña en texto plano que se desea validar
-     * @return =true si la contraseña es correcta
+     * @param string $plain Contraseña en texto plano que se desea validar
+     * @return bool =true si la contraseña es correcta
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-12-28
      */
-    public function checkPassword($plain)
+    public function checkPassword(string $plain)
     {
         if (substr($this->userPassword,0,6) == '{SSHA}') {
             $hash = base64_decode(substr($this->userPassword, 6));
             $original_hash = substr($hash, 0, 20);
             $salt = substr($hash, 20);
             $new_hash = mhash(MHASH_SHA1, $plain.$salt);
-            return !(boolean)strcmp($original_hash, $new_hash);
+            return !(bool)strcmp($original_hash, $new_hash);
         }
         return false;
     }
@@ -118,12 +118,12 @@ class Model_Datasource_Ldap_Person extends Model_Datasource_Ldap_Entry
     /**
      * Función para calcular hash de un texto plano usando SSHA
      * Referencia: http://php.net/manual/en/function.sha1.php#40226
-     * @param plain Texto plano
-     * @return hash SSHA usando salt
+     * @param string $plain Texto plano
+     * @return string Hash SSHA usando salt
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-12-27
      */
-    public function hashPassword($plain)
+    public function hashPassword(string $plain)
     {
         mt_srand((double)microtime()*1000000);
         $salt = mhash_keygen_s2k(MHASH_SHA1, $plain, substr(pack('h*', md5(mt_rand())), 0, 8), 4);

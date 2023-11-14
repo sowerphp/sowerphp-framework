@@ -31,13 +31,10 @@ namespace sowerphp\general;
 class View_Helper_Gallery
 {
 
-    private $_base;
     private $_name;
 
     public function __construct ($dir = null, $name = 'galeria')
     {
-        // obtener base
-        $this->_base = _BASE;
         $this->_name = $name;
         // si se indico un directorio se genera e imprime (like TableHelper)
         if ($dir) {
@@ -64,7 +61,7 @@ class View_Helper_Gallery
         // mostrar imagenes
         foreach($imagenes as &$imagen) {
             if (!is_dir(DIR_WEBSITE.'/webroot'.$dir.$miniaturas.'/'.$imagen)) {
-                $buffer .= '<a href="'.$this->_base.$dir.'/'.$imagen.'" rel="prettyPhoto['.$this->_name.']"><img src="'.$this->_base.$dir.$miniaturas.'/'.$imagen.'" alt="'.$imagen.'" class="pp-thumbnail" /></a>'."\n";
+                $buffer .= '<a href="'.url($dir.'/'.$imagen).'" rel="prettyPhoto['.$this->_name.']"><img src="'.url($dir.$miniaturas.'/'.$imagen).'" alt="'.$imagen.'" class="pp-thumbnail" /></a>'."\n";
             }
         }
         // fin de la galería
@@ -76,9 +73,9 @@ class View_Helper_Gallery
     private function header ()
     {
         return '
-            <link rel="stylesheet" href="'.$this->_base.'/css/prettyPhoto.css" type="text/css" media="screen" charset="utf-8" />
-            <script src="'.$this->_base.'/js/jquery.browser.min.js" type="text/javascript" charset="utf-8"></script>
-            <script src="'.$this->_base.'/js/jquery.prettyPhoto.js" type="text/javascript" charset="utf-8"></script>
+            <link rel="stylesheet" href="'.url('/css/prettyPhoto.css').'" type="text/css" media="screen" charset="utf-8" />
+            <script src="'.url('/js/jquery.browser.min.js').'" type="text/javascript" charset="utf-8"></script>
+            <script src="'.url('/js/jquery.prettyPhoto.js').'" type="text/javascript" charset="utf-8"></script>
             <style type="text/css">
             img.pp-thumbnail {
                 margin: 5px;
