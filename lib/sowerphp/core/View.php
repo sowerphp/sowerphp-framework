@@ -73,7 +73,7 @@ class View
         // si no se encontró error
         if (!$location) {
             if (!empty($this->request->params)) {
-                if ($this->request->params['controller']=='pages') {
+                if ($this->request->params['controller'] == 'pages') {
                     $this->render('/error/404');
                 } else {
                     throw new Exception_View_Missing(array(

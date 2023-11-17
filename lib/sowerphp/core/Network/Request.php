@@ -26,30 +26,36 @@ namespace sowerphp\core;
 /**
  * Clase con la solicitud del cliente
  * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2023-11-14
+ * @version 2023-11-16
  */
 class Network_Request
 {
 
+    // atributos estáticos, toda instancia de esta clase será de la misma solicitud en una determinada ejecución de PHP
     private static $_request; ///< URI usada para la consulta (desde la aplicacion, o sea, sin base, iniciando con "/")
     private static $_base; ///< Ruta base de la URL (base + uri arma el total del request)
     private static $_url; ///< URL completa, partiendo desde HTTP o HTTPS según corresponda
     private static $_params; ///< Parámetros pasados que definen que ejecutar
     private static $_headers; ///< Cabeceras HTTP de la solicitud
 
-    private $params;
+    // atributos de instancia por retrocompatibilidad
+    // @deprecated 2023-11-14
+    public $request;
+    public $base;
+    public $url;
+    //public $params; ///< WARNING: si se definine genera Excepcion dentro de llamada a la API
 
     /**
      * Constructor de la clase
      * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-11-14
+     * @version 2023-11-16
      */
     public function __construct()
     {
         // asignar datos de la solicitud
-        $this->request();
-        $this->base();
-        $this->url();
+        $this->request = $this->request();
+        $this->base = $this->base();
+        $this->url = $this->url();
         // Quitar de lo pasado por get lo que se está solicitando
         unset($_GET[$this->request()]);
     }
