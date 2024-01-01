@@ -214,7 +214,7 @@ class View_Helper_Table
             $buffer .= '</div>'."\n";
         }
         // Iniciar tabla
-        $buffer .= '<div class="table-responsive-md">'."\n";
+        $buffer .= '<div class="clearfix"></div><div class="table-responsive">'."\n";
         $buffer .= '<table style="width:100%" class="'.$this->_class.'"'.($this->_id?' id="'.$this->_id.'"':'').'>'."\n";
         // Definir cabecera de la tabla
         // títulos de columnas
