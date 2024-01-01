@@ -60,7 +60,7 @@ class View
      * @param location Ubicación de la vista
      * @return Buffer de la página renderizada
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-08-04
+     * @version 2024-01-01
      */
     public function render($page, $location = null)
     {
@@ -68,7 +68,8 @@ class View
         if ($location) {
             $location = self::location(\sowerphp\core\App::layer($location).'/'.$location.'/View/'.$page);
         } else {
-            $location = self::location($page, is_array($this->request->params) ? $this->request->params['module'] : null);
+            $module = is_array($this->request->params) ? $this->request->params['module'] : null;
+            $location = self::location($page, $module);
         }
         // si no se encontró error
         if (!$location) {
@@ -208,21 +209,23 @@ class View
      * @param module Nombre del módulo en caso de pertenecer a uno
      * @return Ubicación de la vista que se busca
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-22
+     * @version 2024-01-01
      */
-    public static function location ($view, $module = null)
+    public static function location($view, $module = null)
     {
         // si la página está en caché se retorna
-        if (isset(self::$_viewsLocation[$view]))
+        if (isset(self::$_viewsLocation[$view])) {
             return self::$_viewsLocation[$view];
+        }
         // extensiones
         if (!self::$extensions) {
             self::$extensions = Configure::read('page.extensions');
-            if(!in_array('php', self::$extensions))
+            if (!in_array('php', self::$extensions)) {
                 self::$extensions[] = 'php'; // php siempre debe estar
+            }
         }
         // si la vista parte con / entonces se está pasando la ruta y solo falta su extension
-        if ($view[0]=='/') {
+        if ($view[0] == '/') {
             foreach(self::$extensions as $extension) {
                 if (is_readable($view.'.'.$extension)) {
                     self::$_viewsLocation[$view] = $view.'.'.$extension;
@@ -245,14 +248,24 @@ class View
                 }
             }
         }
-        // Si se busca la vista Module/index y no fue encontrada se carga la por defecto
-        if ($view=='Module/index') {
-            // Buscar el archivo de la vista en las posibles rutas
-            foreach ($paths as $path) {
-                $file = $path . '/View/Module/index.php';
+        // Existen algunas vistas que podrían no ser encontradas por no se parte de un
+        // módulo específico y ser generales para todos los módulos. Estas vistas si no
+        // están definidas y no se encuentran previamente se buscarán acá las por defecto
+        // que están escritas con extensión PHP y serán mostradas
+        $special_views = [
+            'Module/index',
+            'Error/error',
+        ];
+        foreach ($special_views as $special_view) {
+            if ($view == $special_view) {
+                // Buscar el archivo de la vista en todas las posibles rutas
+                // Esto es casi idéntico a lo de arriba y probablemente se pueda refactorizar
+                foreach ($paths as $path) {
+                    $file = $path . '/View/' . $special_view . '.php';
                     if (is_readable($file)) {
                         return $file;
                     }
+                }
             }
         }
         // si no se encontró el archivo de la vista se retorna falso
