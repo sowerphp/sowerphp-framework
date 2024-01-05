@@ -90,16 +90,47 @@ function debug($var, $withtype = false)
 }
 
 /**
- * Función para formatear números
- * @param n Número a formatear
- * @param d Cantidad de decimales
- * @return string Número formateado
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-10-23
+ * Función para formatear números con soporte para idioma y dígitos decimales.
+ *
+ * @param mixed $n Número a formatear.
+ * @param mixed $d Cantidad de decimales o true para usar 2. Si no se proporciona, se asume 0.
+ * @param string|null $language Idioma que se debe utilizar para formatear el número.
+ *                              Si no se pasa, se utiliza la función get_language() para obtenerlo.
+ * @return string Número formateado según la configuración regional.
  */
-function num($n, $d=0)
+function num($n, $d = 0, $language = null)
 {
-    return number_format((float)$n, $d, ',', '.');
+    if ($n === null || $n === '') {
+        return '0';
+    }
+
+    if (!is_numeric($n)) {
+        trigger_error("num: El argumento proporcionado no es un número válido.", E_USER_WARNING);
+        return $n;
+    }
+
+    $n = (float)$n;
+
+    if ($d === true) {
+        $d = 2;
+    }
+
+    if (!is_int($d) || $d < 0) {
+        trigger_error("num: La cantidad de dígitos decimales proporcionada no es válida.", E_USER_WARNING);
+        return $n;
+    }
+
+    $n = round($n, $d);
+
+    if ($language === null) {
+        $language = 'es_CL';
+    }
+
+    $formatter = new NumberFormatter($language, NumberFormatter::DECIMAL);
+    $formatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, $d);
+    $formatter->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, $d);
+
+    return $formatter->format($n);
 }
 
 /**

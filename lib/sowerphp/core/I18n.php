@@ -31,11 +31,11 @@ namespace sowerphp\core;
 class I18n
 {
 
-    public static $locale = array ( ///< Mapeo de idioma a locale
+    public static $locale = [
         'es' => 'es_CL.utf8',
         'en' => 'en_US.utf8',
         'it' => 'it_IT.utf8',
-    );
+    ]; ///< Mapeo de idioma a locale
 
     /**
      * Función que realiza la traducción de un string a otro idioma.
@@ -80,8 +80,7 @@ class I18n
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      * @version 2014-06-04
      */
-    public static function translate ($string, $domain = 'master',
-                                        $locale = null, $encoding = 'UTF-8')
+    public static function translate($string, $domain = 'master', $locale = null, $encoding = 'UTF-8')
     {
         if (!$locale) {
             $locale = Model_Datasource_Session::read('config.language');
@@ -109,9 +108,12 @@ class I18n
      */
     public static function localeExists ($locale)
     {
-        if (!isset($locale[0])) return false;
-        if (!strpos($locale, '_') and isset(self::$locale[$locale]))
+        if (!isset($locale[0])) {
+            return false;
+        }
+        if (!strpos($locale, '_') and isset(self::$locale[$locale])) {
             $locale = self::$locale[$locale];
+        }
         return is_dir(DIR_WEBSITE.'/Locale/'.$locale);
     }
 
