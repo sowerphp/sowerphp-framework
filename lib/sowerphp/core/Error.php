@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -24,28 +24,17 @@
 namespace sowerphp\core;
 
 /**
- * Configuración estándar de las páginas o aplicaciones
+ * Clase para manejar los errores producidos en la aplicación
  */
+class Error
+{
 
-// IMPORTANTE: ¡¡¡ESTO SE DEBE MODIFICAR EN LA CONFIGURACIÓN DEL PROYECTO!!! (NO ACÁ)
+    /**
+     * Método para manejar los errores ocurridos en la aplicación.
+     */
+    public static function handler($level, $message, $file, $line)
+    {
+        throw new Exception_Error($message, $level, $file, $line);
+    }
 
-// Errores
-Configure::write('debug', true);
-Configure::write('error.level', E_ALL & ~E_DEPRECATED & ~E_STRICT);
-Configure::write('error.exception', true);
-
-// Tiempo
-Configure::write('time.zone', 'America/Santiago');
-Configure::write('time.format', 'Y-m-d H:i:s');
-
-// Lenguaje de la página
-Configure::write('language', 'es');
-
-// Extensiones para las páginas que se desean renderizar
-Configure::write('page.extensions', ['php', 'md']);
-
-// Página inicial
-Configure::write('homepage', '/inicio');
-
-// tiempo de expiración de la sesión en minutos
-Configure::write('session.expires', 30);
+}

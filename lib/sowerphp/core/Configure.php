@@ -64,6 +64,9 @@ class Configure
         // Setear parámetros de errores
         ini_set('display_errors', self::$_values['debug']);
         error_reporting(self::$_values['error']['level']);
+        if (self::$_values['error']['exception']) {
+            set_error_handler('sowerphp\core\Error::handler');
+        }
         set_exception_handler('sowerphp\core\Exception::handler');
         // Definir la zona horaria
         date_default_timezone_set(self::$_values['time']['zone']);
