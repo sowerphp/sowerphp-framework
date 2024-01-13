@@ -1,7 +1,7 @@
 <div class="page-header"><h1>Sistema &raquo; Usuarios &raquo; Enviar email a grupos</h1></div>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
-echo $f->begin(['onsubmit'=>'Form.check() && Form.confirm(this, \'¿Enviar email?\')']);
+echo $f->begin(['onsubmit'=>'Form.check() && __.confirm(this, \'¿Enviar email?\')']);
 echo $f->input([
     'type' => 'tablecheck',
     'id' => 'grupos',

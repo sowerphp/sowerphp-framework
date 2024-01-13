@@ -1,13 +1,9 @@
-<script type="text/javascript">
-$(function() {
-    var url = document.location.toString();
-    if (url.match('#')) {
-        $('#'+url.split('#')[1]+'-tab').tab('show');
-        $('html,body').scrollTop(0);
-    }
-});
-</script>
 <div class="page-header"><h1>Mi perfil de usuario (<?=$_Auth->User->usuario?>)</h1></div>
+
+<script>
+$(function() { __.tabs_init(); });
+</script>
+
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item"><a href="#datos" aria-controls="datos" role="tab" data-bs-toggle="tab" id="datos-tab" class="nav-link active" aria-selected="true">Datos básicos</a></li>
@@ -179,7 +175,7 @@ if (!$_Auth->User->{'config_auth2_'.$method}) {
 } else {
     echo '<p>Aquí podrá desasociar su cuenta de usuario con la protección entregada por <a href="',$Auth2->getUrl(),'" target="_blank">',$Auth2->getName(),'</a>.</p>',"\n";
     echo $form->begin([
-        'onsubmit' => 'Form.confirm(this, \'¿Está seguro de querer eliminar la protección con '.$Auth2->getName().'?\')'
+        'onsubmit' => '__.confirm(this, \'¿Está seguro de querer eliminar la protección con '.$Auth2->getName().'?\')'
     ]);
     echo $form->input(array(
         'type' => 'hidden',

@@ -32,7 +32,7 @@ function buscar(formulario) {
  */
 function eliminar(objeto, registro, tupla) {
     'use strict';
-    return Form.confirm(objeto, '¿Eliminar registro ' + registro + '(' + tupla + ')?');
+    return __.confirm(objeto, '¿Eliminar registro ' + registro + '(' + tupla + ')?');
 }
 
 /**
