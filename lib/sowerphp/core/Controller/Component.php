@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase base para todos los componentes
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-10-14
  */
 abstract class Controller_Component
 {
@@ -41,8 +39,6 @@ abstract class Controller_Component
      * @todo Cargar componentes que este componente utilice
      * @param Components Colección de componentes
      * @param settings Opciones para la carga de componentes
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-14
      */
     public function __construct(Controller_Component_Collection $Components, $settings = array())
     {
@@ -55,8 +51,6 @@ abstract class Controller_Component
     /**
      * Método llamado desde Controller::beforeFilter()
      * Deberá se sobreescrito en el componente si se quiere utilizar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-14
      */
     public function beforeFilter()
     {
@@ -65,8 +59,6 @@ abstract class Controller_Component
     /**
      * Método llamado desde Controller::afterFilter()
      * Deberá se sobreescrito en el componente si se quiere utilizar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-14
      */
     public function afterFilter()
     {
@@ -75,8 +67,6 @@ abstract class Controller_Component
     /**
      * Método llamado desde Controller::beforeRender()
      * Deberá se sobreescrito en el componente si se quiere utilizar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-14
      */
     public function beforeRender()
     {
@@ -87,8 +77,6 @@ abstract class Controller_Component
      * Deberá se sobreescrito en el componente si se quiere utilizar
      * @param url Dirección hacia donde se está redirigiendo
      * @param status Estado de términi del script (0 es todo ok)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-14
      */
     public function beforeRedirect($url = null, $status = null)
     {

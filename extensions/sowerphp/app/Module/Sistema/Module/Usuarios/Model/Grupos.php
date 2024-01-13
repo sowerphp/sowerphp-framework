@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ namespace sowerphp\app\Sistema\Usuarios;
  * Clase para mapear la tabla grupo de la base de datos
  * Comentario de la tabla: Grupos de la aplicación
  * Esta clase permite trabajar sobre un conjunto de registros de la tabla grupo
- * @author SowerPHP Code Generator
- * @version 2014-04-05 17:32:18
  */
 class Model_Grupos extends \Model_Plural_App
 {
@@ -41,9 +39,7 @@ class Model_Grupos extends \Model_Plural_App
     /**
      * Método que entrega los IDs de un listado de nombres de grupos
      * @param grupos Arreglo con los grupos que se quiere saber sus IDs
-     * @return Arreglo asociativo con grupo => id
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-19
+     * @return array Arreglo asociativo con grupo => id
      */
     public function getIDs($grupos)
     {
@@ -51,10 +47,11 @@ class Model_Grupos extends \Model_Plural_App
         foreach ($grupos as &$grupo) {
             $id = $this->db->getValue(
                 'SELECT id FROM grupo WHERE grupo = :grupo',
-                [':grupo'=>$grupo]
+                [':grupo' => $grupo]
             );
-            if ($id)
+            if ($id) {
                 $ids[$grupo] = $id;
+            }
         }
         return $ids;
     }
@@ -62,25 +59,24 @@ class Model_Grupos extends \Model_Plural_App
     /**
      * Método que entrega las glosas de lo grupos a partir de sus IDs
      * @param grupos Arreglo con los grupos que se buscan sus glosas
-     * @return Arreglo con las glosas de los grupos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-03
+     * @return array Arreglo con las glosas de los grupos
      */
     public function getGlosas($grupos)
     {
-        if (!is_array($grupos))
+        if (!is_array($grupos)) {
             $grupos = [$grupos];
+        }
         $where = $vars = [];
         $i = 1;
         foreach ($grupos as &$g) {
-            $where[] = ':grupo'.$i;
-            $vars[':grupo'.$i] = $g;
+            $where[] = ':grupo' . $i;
+            $vars[':grupo' . $i] = $g;
             $i++;
         }
         return $this->db->getCol('
             SELECT DISTINCT grupo
             FROM grupo
-            WHERE id IN ('.implode(', ', $where).')
+            WHERE id IN (' . implode(', ', $where) . ')
             ORDER BY grupo
         ', $vars);
     }
@@ -89,25 +85,24 @@ class Model_Grupos extends \Model_Plural_App
      * Método que entrega los correos electrónicos de los usuarios que
      * pertenecen a los grupos indicados
      * @param grupos Arreglo con los grupos que se buscan los email de sus usuarios
-     * @return Arreglo con los correos de los usuarios que pertenecen a esos grupos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-07
+     * @return array Arreglo con los correos de los usuarios que pertenecen a esos grupos
      */
     public function emails($grupos)
     {
-        if (!is_array($grupos))
+        if (!is_array($grupos)) {
             $grupos = [$grupos];
+        }
         $where = $vars = [];
         $i = 1;
         foreach ($grupos as &$g) {
-            $where[] = ':grupo'.$i;
-            $vars[':grupo'.$i] = $g;
+            $where[] = ':grupo' . $i;
+            $vars[':grupo' . $i] = $g;
             $i++;
         }
         return $this->db->getCol('
             SELECT DISTINCT u.email
             FROM usuario AS u JOIN usuario_grupo AS ug ON u.id = ug.usuario
-            WHERE ug.grupo IN ('.implode(', ', $where).') AND u.activo
+            WHERE ug.grupo IN (' . implode(', ', $where) . ') AND u.activo
             ORDER BY u.email
         ', $vars);
     }

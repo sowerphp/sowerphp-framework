@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -27,9 +27,6 @@ namespace sowerphp\core;
  * Utilidad para realizar operaciones sobre datos:
  *  - Encriptar y desencriptar
  *  - Sanitizar/limpiar datos
- *
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-08-14
  */
 class Utility_Data
 {
@@ -39,9 +36,7 @@ class Utility_Data
     /**
      * Método que entrega el método de encriptación que se debe usar
      * @param crypt_method Método forzado si se desea usar uno en específico
-     * @return String con el nombre del método de encriptación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-08-14
+     * @return string String con el nombre del método de encriptación
      */
     protected static function getCryptMethod($crypt_method = null)
     {
@@ -57,7 +52,7 @@ class Utility_Data
             }
         }
         // verificar que el método solicitado exista
-        if (!method_exists('Utility_Data', $crypt_method.'_encrypt') or !method_exists('Utility_Data', $crypt_method.'_decrypt')) {
+        if (!method_exists('Utility_Data', $crypt_method.'_encrypt') || !method_exists('Utility_Data', $crypt_method.'_decrypt')) {
             throw new \Exception(__('Método de encriptado %s no disponible en Utility_Data', $crypt_method));
         }
         // entregar método de encriptación
@@ -68,9 +63,7 @@ class Utility_Data
      * Método que encripta un texto plano
      * @param plaintext Texto plano a encriptar
      * @param key Clave a usar para encriptar
-     * @return Texto encriptado en base64
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-08-14
+     * @return string Texto encriptado en base64
      */
     public static function encrypt($plaintext, $key = null, $crypt_method = null)
     {
@@ -85,9 +78,7 @@ class Utility_Data
      * Método que desencripta un texto encriptado
      * @param $ciphertext_base64 Texto encriptado en base64 a desencriptar
      * @param key Clave a uar para desencriptar
-     * @return Texto plano
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-08-14
+     * @return string Texto plano
      */
     public static function decrypt($ciphertext_base64, $key = null, $crypt_method = null)
     {
@@ -108,8 +99,6 @@ class Utility_Data
     /**
      * Método que encripta un texto plano usando sodium
      * @link https://stackoverflow.com/a/52688846
-     * @author M_R_K (https://stackoverflow.com/users/1362713/m-r-k)
-     * @version 2018-10-07
      */
     private static function sodium_encrypt($plaintext, $key)
     {
@@ -128,8 +117,6 @@ class Utility_Data
     /**
      * Método que desencripta un texto encriptado usando sodium
      * @link https://stackoverflow.com/a/52688846
-     * @author M_R_K (https://stackoverflow.com/users/1362713/m-r-k)
-     * @version 2018-10-07
      */
     private static function sodium_decrypt($ciphertext_dec, $key)
     {
@@ -155,8 +142,6 @@ class Utility_Data
     /**
      * Método que encripta un texto plano usando mcrypt
      * @deprecated https://www.php.net/manual/es/migration71.deprecated.php
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-08-14
      */
     private static function mcrypt_encrypt($plaintext, $key)
     {
@@ -178,8 +163,6 @@ class Utility_Data
     /**
      * Método que desencripta un texto encriptado usando mcrypt
      * @deprecated https://www.php.net/manual/es/migration71.deprecated.php
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-08-14
      */
     private static function mcrypt_decrypt($ciphertext_dec, $key)
     {
@@ -202,8 +185,6 @@ class Utility_Data
      * Método que limpia datos de tipo texto (string)
      * @param data Datos que se desean limpiar, puede ser un arreglo con los datos
      * @param options Opciones para la limpieza de los datos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-07-16
      */
     public static function sanitize(&$data, array $options = [])
     {
@@ -231,8 +212,6 @@ class Utility_Data
      * Método que obtiene los correos electrónicos desde un string
      * @param string String con el listado de correos
      * @return array Listado de correos que hay en el string
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-07-18
      */
     public static function emails($listado)
     {

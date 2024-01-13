@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ namespace sowerphp\app\Sistema\Notificaciones;
  * Clase para mapear la tabla notificacion de la base de datos
  * Comentario de la tabla:
  * Esta clase permite trabajar sobre un registro de la tabla notificacion
- * @author SowerPHP Code Generator
- * @version 2015-05-05 12:15:39
  */
 class Model_Notificacion extends \Model_App
 {
@@ -162,8 +160,6 @@ class Model_Notificacion extends \Model_App
 
     /**
      * Método que marca una notifiación como leída
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-05
      */
     public function leida()
     {
@@ -175,37 +171,34 @@ class Model_Notificacion extends \Model_App
      * Método que recupera el objeto del origen
      * @param facility Origen que se quiere obtener su objeto
      * @return std_class
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-08-18
      */
     public function getFacility($facility = null)
     {
-        if ($facility===null)
+        if ($facility === null) {
             $facility = $this->de;
-        return (object)['glosa'=>$facility?'USER':'KERN'];
+        }
+        return (object)['glosa' => $facility ? 'USER' : 'KERN'];
     }
 
     /**
      * Método que recupera el objeto de la gravedad
      * @param severity Gravedad que se quiere obtener su objeto
      * @return std_class
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-06-13
      */
     public function getSeverity($severity = null)
     {
-        if ($severity===null) {
+        if ($severity === null) {
             $severity = $this->gravedad;
         }
         $data = [
-            LOG_EMERG => (object)['glosa'=>'EMERG', 'style'=>'danger'],
-            LOG_ALERT => (object)['glosa'=>'ALERT', 'style'=>'danger'],
-            LOG_CRIT => (object)['glosa'=>'CRIT', 'style'=>'danger'],
-            LOG_ERR => (object)['glosa'=>'ERR', 'style'=>'danger'],
-            LOG_WARNING => (object)['glosa'=>'WARNING', 'style'=>'warning'],
-            LOG_NOTICE => (object)['glosa'=>'NOTICE', 'style'=>'info'],
-            LOG_INFO => (object)['glosa'=>'INFO', 'style'=>'success'],
-            LOG_DEBUG => (object)['glosa'=>'DEBUG', 'style'=>'default'],
+            LOG_EMERG => (object)['glosa' => 'EMERG', 'style' => 'danger'],
+            LOG_ALERT => (object)['glosa' => 'ALERT', 'style' => 'danger'],
+            LOG_CRIT => (object)['glosa' => 'CRIT', 'style' => 'danger'],
+            LOG_ERR => (object)['glosa' => 'ERR', 'style' => 'danger'],
+            LOG_WARNING => (object)['glosa' => 'WARNING', 'style' => 'warning'],
+            LOG_NOTICE => (object)['glosa' => 'NOTICE', 'style' => 'info'],
+            LOG_INFO => (object)['glosa' => 'INFO', 'style' => 'success'],
+            LOG_DEBUG => (object)['glosa' => 'DEBUG', 'style' => 'default'],
         ];
         return isset($data[$severity]) ? $data[$severity] : $severity;
     }

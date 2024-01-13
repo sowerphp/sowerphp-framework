@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\app;
 
 /**
  * Clase para generar datos paginados
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2017-04-05
  */
 class View_Helper_Paginator extends \sowerphp\general\View_Helper_Table
 {
@@ -37,8 +35,6 @@ class View_Helper_Paginator extends \sowerphp\general\View_Helper_Table
     /**
      * Constructor de la clase
      * @param array $options Arreglo con las opciones para el mantenedor
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-03-20
      */
     public function __construct(array $options = [], $filter = true)
     {
@@ -70,8 +66,6 @@ class View_Helper_Paginator extends \sowerphp\general\View_Helper_Table
      * @param data Registros que se deben renderizar
      * @param pages Cantidad total de páginas que tienen los registros
      * @param page Página que se está revisando o 0 para no usar el paginador
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-04-05
      */
     public function generate($data, $pages = 1, $page = 1)
     {
@@ -98,8 +92,6 @@ class View_Helper_Paginator extends \sowerphp\general\View_Helper_Table
      * @param pages Cantidad total de páginas que tienen los registros
      * @param page Página que se está revisando o 0 para no usar el paginador
      * @param groupOfPages De a cuantas páginas se mostrará en el paginador
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-10-15
      */
     protected function paginator($pages, $page, $groupOfPages = 10)
     {
@@ -107,15 +99,15 @@ class View_Helper_Paginator extends \sowerphp\general\View_Helper_Table
             return;
         }
         // cálculoss necesarios para crear enlaces
-        $group = ceil($page/$groupOfPages);
-        $from = ($group-1)*$groupOfPages + 1;
-        $to = min($from+$groupOfPages-1, $pages);
+        $group = ceil($page / $groupOfPages);
+        $from = ($group - 1) * $groupOfPages + 1;
+        $to = min($from + $groupOfPages - 1, $pages);
         // crear enlaces para paginador
         $buffer = '<div class="float-start w-50 d-flex justify-content-center" style="margin-left:20%"><nav><ul class="pagination">'."\n";
         $buffer .= '<li class="page-item'.($page==1?' disabled':'').'"><a href="'.$this->options['link'].'/1'.$this->options['linkEnd'].'" title="Ir a la primera página" class="page-link"><i class="fa fa-fast-backward fa-fw" aria-hidden="true"></i></a></li>';
         $buffer .= '<li class="page-item'.($group==1?' disabled':'').'"><a href="'.$this->options['link'].'/'.($from-1).$this->options['linkEnd'].'" title="Ir al grupo de páginas anterior (página '.($from-1).')" class="page-link"><i class="fa fa-backward fa-fw" aria-hidden="true"></i></a></li>';
         for ($i=$from; $i<=$to; $i++) {
-            if ($page==$i) {
+            if ($page == $i) {
                 $buffer .= '<li class="page-item active"><a href="#" onclick="return false" class="page-link">'.$i.'</a></li>';
             } else {
                 $buffer .= '<li class="page-item"><a href="'.$this->options['link'].'/'.$i.$this->options['linkEnd'].'" title="Ir a la página '.$i.'" class="page-link">'.$i.'</a></li>';

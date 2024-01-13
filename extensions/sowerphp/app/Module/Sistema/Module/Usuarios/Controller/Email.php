@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -27,8 +27,6 @@ namespace sowerphp\app\Sistema\Usuarios;
 /**
  * Controlador para el envío masivo de correos electrónicos a usuarios de la
  * aplicación
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2015-04-03
  */
 class Controller_Email extends \Controller_App
 {
@@ -36,8 +34,6 @@ class Controller_Email extends \Controller_App
     /**
      * Acción que permite enviar correos masivos a los usuarios de ciertos
      * grupos de la aplicación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-02-18
      */
     public function grupos()
     {
@@ -48,7 +44,7 @@ class Controller_Email extends \Controller_App
             'page_title' => $page_title,
         ]);
         if (isset($_POST['submit'])) {
-            if (!isset($_POST['grupos']) or empty($_POST['asunto']) or empty($_POST['mensaje'])) {
+            if (!isset($_POST['grupos']) || empty($_POST['asunto']) || empty($_POST['mensaje'])) {
                 \sowerphp\core\Model_Datasource_Session::message(
                     'Debe completar todos los campos del formulario', 'error'
                 );
@@ -61,7 +57,7 @@ class Controller_Email extends \Controller_App
                 $n_emails = count($emails);
                 if (!$n_emails) {
                     \sowerphp\core\Model_Datasource_Session::message(
-                        'No hay destinatarios para el correo electrónico con los grupos seleccionados', 'error'
+                        'No hay destinatarios para el correo electrónico con los grupos seleccionados.', 'error'
                     );
                 } else {
                     // preparar mensaje a enviar
@@ -81,7 +77,7 @@ class Controller_Email extends \Controller_App
                         $grupo = -1;
                         $destinatarios = [];
                         for ($i=0; $i<$n_emails; $i++) {
-                            if ($i%$_POST['agrupar']==0) {
+                            if ($i%$_POST['agrupar'] == 0) {
                                 $destinatarios[++$grupo] = [];
                             }
                             $destinatarios[$grupo][] = $emails[$i];
@@ -99,7 +95,7 @@ class Controller_Email extends \Controller_App
                             $email->to($this->Auth->User->email);
                             $primero = false;
                         }
-                        if ($_POST['enviar_como']=='cc') {
+                        if ($_POST['enviar_como'] == 'cc') {
                             $email->cc($correos);
                         } else {
                             $email->bcc($correos);
@@ -118,12 +114,13 @@ class Controller_Email extends \Controller_App
                         }
                         // enviar archivo
                         $status = $email->send($msg);
-                        if ($status!==true)
+                        if ($status!==true) {
                             break;
+                        }
                     }
-                    if ($status===true) {
+                    if ($status === true) {
                         \sowerphp\core\Model_Datasource_Session::message(
-                            'Mensaje envíado a '.num($n_emails).' usuarios', 'ok'
+                            'Mensaje envíado a '.num($n_emails).' usuarios.', 'ok'
                         );
                     } else {
                         \sowerphp\core\Model_Datasource_Session::message(

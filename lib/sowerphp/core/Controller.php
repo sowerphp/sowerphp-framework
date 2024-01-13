@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase base para los controladores de la aplicación
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-09-19
  */
 abstract class Controller
 {
@@ -45,8 +43,6 @@ abstract class Controller
      * Constructor de la clase
      * @param request Objeto con la solicitud realizada
      * @param response Objeto para la respuesta que se enviará al cliente
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-22
      */
     public function __construct (Network_Request $request, Network_Response $response)
     {
@@ -72,8 +68,6 @@ abstract class Controller
     /**
      * Método que se ejecuta al iniciar la ejecución del controlador.
      * Wrapper de Controller::beforeFilter()
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-06
      */
     public function startupProcess ()
     {
@@ -83,8 +77,6 @@ abstract class Controller
     /**
      * Método que se ejecuta al terminar la ejecución del controlador
      * Wrapper de Controller::afterFilter()
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-06
      */
     public function shutdownProcess ()
     {
@@ -93,8 +85,6 @@ abstract class Controller
 
     /**
      * Método que se ejecuta al iniciar la ejecución del controlador.
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-06
      */
     public function beforeFilter ()
     {
@@ -105,8 +95,6 @@ abstract class Controller
 
     /**
      * Método que se ejecuta al terminar la ejecución del controlador
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-19
      */
     public function afterFilter ()
     {
@@ -129,8 +117,6 @@ abstract class Controller
 
     /**
      * Método que se ejecuta antes de renderizar la página
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-06
      */
     public function beforeRender ()
     {
@@ -141,8 +127,6 @@ abstract class Controller
 
     /**
      * Método que se ejecuta antes de redirigir la página
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-06
      */
     public function beforeRedirect ($params)
     {
@@ -155,8 +139,6 @@ abstract class Controller
      * Método que ejecuta el método público solicitado como acción del
      * controlador
      * @param return Valor de retorno de la acción ejecutada
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-30
      */
     public function invokeAction ()
     {
@@ -204,8 +186,6 @@ abstract class Controller
      * @param view Vista que se desea renderizar
      * @param location Ubicación de la vista
      * @return Objeto Response con la página ya renderizada
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-22
      */
     public function render ($view = null, $location = null)
     {
@@ -229,8 +209,6 @@ abstract class Controller
      * Guarda una(s) variable(s) para usarla en una vista
      * @param one Nombre de la variable o arreglo asociativo
      * @param two Valor del variable o null si se paso un arreglo en one
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-24
      */
     public function set ($one, $two = null)
     {
@@ -250,8 +228,6 @@ abstract class Controller
      * Redireccionar página
      * @param url Dirección web a donde se debe redireccionar
      * @param status Estado de término del script PHP
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-17
      */
     public function redirect($url = null, $status = 0)
     {
@@ -272,8 +248,6 @@ abstract class Controller
      * Siempre y cuando estén presentes en la query de la URL (GET)
      * @param params Arreglo con los parámetros, si se manda param => value, value será el valor por defecto (sino será null)
      * @return Arreglo con los parámetros y sus valores
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-08-04
      */
     public function getQuery(array $params)
     {

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para trabajar con una base de datos MySQL
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-10-02
  */
 class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
 {
@@ -37,10 +35,8 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      * Realiza conexión a la base de datos, recibe parámetros para la
      * conexión
      * @param config Arreglo con los parámetros de la conexión
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-03-13
      */
-    public function __construct ($config)
+    public function __construct($config)
     {
         // definir configuración para el acceso a la base de datos
         $this->config = array_merge(array(
@@ -69,10 +65,8 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      * Asigna un límite para la obtención de filas en la consulta SQL
      * @param sql Consulta SQL a la que se le agrega el límite
      * @return String Consulta con el límite agregado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-10-22
      */
-    public function setLimit ($sql, $records, $offset = 0)
+    public function setLimit($sql, $records, $offset = 0)
     {
         return $sql.' LIMIT '.(int)$offset.','.(int)$records;
     }
@@ -84,17 +78,16 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      * pasados.
      * @param par1 Parámetro 1 que se quiere concatenar
      * @param par2 Parámetro 2 que se quiere concatenar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-07
      */
-    public function concat ($par1, $par2)
+    public function concat($par1, $par2)
     {
         $separators = array(' ', ',', ', ', '-', ' - ', '|', ':', ': ');
         $concat = array();
         $parameters = func_get_args();
         foreach($parameters as &$parameter) {
-            if(in_array($parameter, $separators))
+            if (in_array($parameter, $separators)) {
                 $parameter = "'".$parameter."'";
+            }
             array_push($concat, $parameter);
         }
         return 'CONCAT('.implode(', ', $concat).')';
@@ -103,8 +96,6 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
     /**
      * Entrega una fecha en cierto formato, se puede entregar a partir de cierta
      * fecha y hora o bien con la fecha y hora actual
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-06-06
      */
     public function date($format, $datetime = null, $cast = null)
     {
@@ -122,11 +113,9 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
 
     /**
      * Listado de tablas de la base de datos
-     * @return Array Arreglo con las tablas (nombre y comentario)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-26
+     * @return array Arreglo con las tablas (nombre y comentario)
      */
-    public function getTables ()
+    public function getTables()
     {
         return $this->getTable ('
             SELECT table_name AS name, table_comment AS comment
@@ -141,11 +130,9 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
     /**
      * Obtener comentario de una tabla
      * @param table Nombre de la tabla
-     * @return String Comentario de la tabla
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-26
+     * @return string Comentario de la tabla
      */
-    public function getCommentFromTable ($table)
+    public function getCommentFromTable($table)
     {
         return $this->getValue ('
             SELECT table_comment
@@ -160,11 +147,9 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      * Listado de columnas de una tabla (nombre, tipo, largo máximo, si
      * puede tener un valor nulo y su valor por defecto)
      * @param table Tabla a la que se quiere buscar las columnas
-     * @return Array Arreglo con la información de las columnas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-22
+     * @return array Arreglo con la información de las columnas
      */
-    public function getColsFromTable ($table)
+    public function getColsFromTable($table)
     {
         return $this->getTable ('
             SELECT
@@ -186,11 +171,9 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
     /**
      * Listado de claves primarias de una tabla
      * @param table Tabla a buscar su o sus claves primarias
-     * @return Arreglo con la o las claves primarias
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-26
+     * @return array Arreglo con la o las claves primarias
      */
-    public function getPksFromTable ($table)
+    public function getPksFromTable($table)
     {
         return $this->getCol ('
             SELECT column_name
@@ -205,11 +188,9 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
     /**
      * Listado de claves foráneas de una tabla
      * @param table Tabla a buscar su o sus claves foráneas
-     * @return Arreglo con la o las claves foráneas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-26
+     * @return array Arreglo con la o las claves foráneas
      */
-    public function getFksFromTable ($table)
+    public function getFksFromTable($table)
     {
         $fks =  $this->getTable ('
             SELECT

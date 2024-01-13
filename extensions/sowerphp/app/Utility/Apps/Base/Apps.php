@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -27,8 +27,6 @@ namespace sowerphp\app;
 /**
  * Clase base para las implementaciones de clases de las apps de terceros que
  * se pueden ejecutar en la aplicación
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2023-11-13
  */
 abstract class Utility_Apps_Base_Apps
 {
@@ -42,8 +40,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Constructor de la aplicación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-12
      */
     public function __construct($directory)
     {
@@ -52,8 +48,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que entrega el nombre de la app si se usa como string el objeto
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-12
      */
     public function __toString()
     {
@@ -62,8 +56,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que entrega el ID de la aplicación en base a su namespace de PHP y su código
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2023-11-13
      */
     public function getID()
     {
@@ -72,8 +64,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que entrega el namespace de la aplicación (grupo de la app, no el de PHP)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2023-11-13
      */
     protected function getNamespace()
     {
@@ -82,8 +72,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que entrega el namespace de la aplicación que se instanció
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2023-11-13
      */
     protected function getNamespacePHP()
     {
@@ -93,8 +81,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que entrega el prefijo de la configuración
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2023-11-13
      */
     protected function getConfigName()
     {
@@ -103,8 +89,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que indica si la app está o no activa
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-09-03
      */
     public function getActiva()
     {
@@ -113,8 +97,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que entrega el código de la app
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-12-01
      */
     public function getCodigo()
     {
@@ -128,8 +110,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que entrega el nombre de la app
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-12-01
      */
     public function getNombre()
     {
@@ -145,8 +125,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que entrega la descripción de la app
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-12-01
      */
     public function getDescripcion()
     {
@@ -155,8 +133,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que entrega la URL de la APP
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-12-01
      */
     public function getURL($clean = false)
     {
@@ -165,8 +141,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que entrega el logo de la APP
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-12-01
      */
     public function getLogo()
     {
@@ -175,8 +149,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que entrega el icono de la APP
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2023-01-21
      */
     public function getIcon()
     {
@@ -186,8 +158,6 @@ abstract class Utility_Apps_Base_Apps
     /**
      * Método que entrega el código HTML de la página de configuración de la aplicación
      * @param form Objeto con el formulario que se está usando para construir la página de configuración
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-16
      */
     public function getConfigPageHTML(\sowerphp\general\View_Helper_Form $form)
     {
@@ -206,8 +176,6 @@ abstract class Utility_Apps_Base_Apps
     /**
      * Método que asigna la configuración de la aplicación procesando el
      * formulario enviado por POST
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-13
      */
     public function setConfigPOST()
     {
@@ -219,8 +187,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que obtiene la configuración de la aplicación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-14
      */
     public function getConfig()
     {
@@ -229,8 +195,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que asigna la configuración de la aplicación al objeto (no guarda)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-14
      */
     public function setConfig($config)
     {
@@ -242,21 +206,19 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que entrega el valor de una variable de la app si existe
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-15
      */
     public function getVar($var)
     {
         if (!isset($this->vars[$var])) {
-            throw new \Exception('Variable "'.$var.'" de la aplicación "'.$this->getCodigo().'" no se encuentra asignada');
+            throw new \Exception(
+                'Variable "'.$var.'" de la aplicación "'.$this->getCodigo().'" no se encuentra asignada'
+            );
         }
         return $this->vars[$var];
     }
 
     /**
      * Método que asigna las variables de la aplicación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-15
      */
     public function setVars(array $vars)
     {
@@ -265,8 +227,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que entrega el código de la aplicación de alguna parte de la página
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-12
      */
     public function getPageCode($page, array $vars = [])
     {
@@ -282,8 +242,6 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que redirecciona una URL en la aplicación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
      */
     protected function redirect($url) {
         header('location: '.$url);

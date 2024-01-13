@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -24,11 +24,7 @@
 namespace sowerphp\general;
 
 /**
- * Manejar archivos csv
- *
  * Esta clase permite leer y generar archivos csv
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-07-18
  */
 final class Utility_Spreadsheet_CSV
 {
@@ -38,16 +34,14 @@ final class Utility_Spreadsheet_CSV
      * @param archivo archivo a leer (ejemplo índice tmp_name de un arreglo $_FILES)
      * @param delimiter separador a utilizar para diferenciar entre una columna u otra
      * @param enclosure Un caracter para rodear el dato
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-29
      */
     public static function read($archivo = null, $delimiter = null, $enclosure = '"')
     {
         $delimiter = self::setDelimiter($delimiter);
-        if (($handle = fopen($archivo, 'r')) !== FALSE) {
+        if (($handle = fopen($archivo, 'r')) !== false) {
             $data = array();
             $i = 0;
-            while (($row = fgetcsv($handle, 0, $delimiter, $enclosure)) !== FALSE) {
+            while (($row = fgetcsv($handle, 0, $delimiter, $enclosure)) !== false) {
                 $j = 0;
                 foreach ($row as &$col) {
                     $data[$i][$j++] = $col;
@@ -66,8 +60,6 @@ final class Utility_Spreadsheet_CSV
      * @param delimiter separador a utilizar para diferenciar entre una columna u otra
      * @param enclosure Un caracter para rodear el dato
      * @param size_mib Tamaño máximo del archivo temporal en memoria que se usará (si excede, se escribe archivo real en sistema de archivos)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-18
      */
     public static function generate($data, $id, $delimiter = null, $enclosure = '"', $extension = 'csv', $size_mib = 2)
     {
@@ -86,8 +78,6 @@ final class Utility_Spreadsheet_CSV
      * @param delimiter separador a utilizar para diferenciar entre una columna u otra
      * @param enclosure Un caracter para rodear el dato
      * @param size_mib Tamaño máximo del archivo temporal en memoria que se usará (si excede, se escribe archivo real en sistema de archivos)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-18
      */
     public static function get($data, $delimiter = null, $enclosure = '"', $size_mib = 2)
     {
@@ -105,8 +95,6 @@ final class Utility_Spreadsheet_CSV
      * @param delimiter separador a utilizar para diferenciar entre una columna u otra
      * @param enclosure Un caracter para rodear el dato
      * @param close =false permite obtener el descriptor de archivo para ser usado en otro lado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-18
      */
     public static function save($data, $archivo, $delimiter = null, $enclosure = '"', $close = true)
     {
@@ -134,9 +122,7 @@ final class Utility_Spreadsheet_CSV
      * Método que determina el delimitador que se deberá usar para trabajar con
      * el archivo CSV
      * @param delimiter Delimitador en caso que se quiera tratar de forzar uno
-     * @return Delimitador que se debe usar, podría ser: el forzado, el configurado en la APP o el por defecto (',')
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-29
+     * @return string Delimitador que se debe usar, podría ser: el forzado, el configurado en la APP o el por defecto (',')
      */
     private static function setDelimiter($delimiter = null)
     {

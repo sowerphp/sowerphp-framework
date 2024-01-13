@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para generar respuesta al cliente
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-07-15
  */
 class Network_Response
 {
@@ -60,8 +58,6 @@ class Network_Response
     /**
      * Asigna código de estado de la respuesta HTTP
      * @param status Estado que se desea asignar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-15
      */
     public function status($status = null)
     {
@@ -76,8 +72,6 @@ class Network_Response
      * respuesta
      * @param mimetype Tipo de dato (mimetype)
      * @param charset Juego de caracteres o codificación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-17
      */
     public function type($mimetype = null, $charset = null)
     {
@@ -94,8 +88,6 @@ class Network_Response
      * Método que permite asignar cabeceras al cliente
      * @param header Cabecera
      * @param value Valor
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-15
      */
     public function header($header = null, $value = null)
     {
@@ -108,9 +100,7 @@ class Network_Response
     /**
      * Método que asigna el cuerpo de la respuesta
      * @param content Contenito a asignar
-     * @return Contenido de la respuesta
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-15
+     * @return string Contenido de la respuesta
      */
     public function body($body = null)
     {
@@ -122,9 +112,7 @@ class Network_Response
 
     /**
      * Método que entrega el tamaño de los datos que se entregarán como respuesta
-     * @return Tamaño de los datos del cuerpo que se entregarán o -1
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-15
+     * @return int Tamaño de los datos del cuerpo que se entregarán o -1
      */
     public function length()
     {
@@ -135,8 +123,6 @@ class Network_Response
      * Enviar respuesta al cliente (escribe estado HTTP, cabecera y cuerpo de la respuesta)
      * @param body Contenido que se enviará, si no se asigna se enviará el atributo $_body
      * @param exit Estado de salida del envío de datos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-18
      */
     public function send($body = null, $exit = 0)
     {
@@ -174,8 +160,6 @@ class Network_Response
      * recurso abierto. Se envía informando que se debe usar caché para este archivo
      * @param file Archivo que se desea enviar al cliente o bien un arreglo con los campos: name, type, size y data
      * @param options Arreglo de opciones (indices: name, charset, disposition y exit)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-18
      */
     public function sendFile($file, $options = [])
     {
@@ -222,8 +206,6 @@ class Network_Response
      * para enviar archivos en memoria e informando que no se use caché
      * @param content Contenido en memoria del archivo que se enviará
      * @param options Arreglo de opciones (indices: mimetype, charset, disposition y exit)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-18
      */
     public function sendContent($content, $filename, $options = [])
     {
@@ -257,8 +239,6 @@ class Network_Response
      * Método estático para asignar un nuevo tipo mime a una extensión
      * @param ext Extensión
      * @param type Mimetype que se debe asociar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-09-23
      */
     public static function setMimetype($ext, $type)
     {
@@ -268,9 +248,7 @@ class Network_Response
     /**
      * Método estático para obtener un tipo mime de una extensión
      * @param ext Extensión
-     * @return Mimetype correspondiente a la extensión
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-18
+     * @return string Mimetype correspondiente a la extensión
      */
     public static function getMimetype($ext)
     {

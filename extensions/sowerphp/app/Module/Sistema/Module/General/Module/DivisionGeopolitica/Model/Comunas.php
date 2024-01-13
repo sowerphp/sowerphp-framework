@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
  * Clase para mapear la tabla comuna de la base de datos
  * Comentario de la tabla: Comunas de cada provincia del país
  * Esta clase permite trabajar sobre un conjunto de registros de la tabla comuna
- * @author SowerPHP Code Generator
- * @version 2014-04-26 01:36:28
  */
 class Model_Comunas extends \Model_Plural_App
 {
@@ -40,9 +38,7 @@ class Model_Comunas extends \Model_Plural_App
 
     /**
      * Método que entrega la lista de comunas agrupadas por regiones
-     * @return Arreglo con índice el código de región y una tabla con los códigos y glosas de comunas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-08
+     * @return array Arreglo con índice el código de región y una tabla con los códigos y glosas de comunas
      */
     public function getListByRegion()
     {
@@ -58,15 +54,14 @@ class Model_Comunas extends \Model_Plural_App
 
     /**
      * Método que recupera el código de una comuna a partir de su nombre
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-04-15
      */
     public function getComunaByName($nombre)
     {
-        $this->setWhereStatement(['UPPER(comuna) = :comuna'], [':comuna'=>mb_strtoupper($nombre)]);
+        $this->setWhereStatement(['UPPER(comuna) = :comuna'], [':comuna' => mb_strtoupper($nombre)]);
         $comunas = $this->getObjects();
-        if ($comunas and isset($comunas[0]))
+        if ($comunas && isset($comunas[0])) {
             return $comunas[0]->codigo;
+        }
         return false;
     }
 

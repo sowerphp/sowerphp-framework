@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -26,8 +26,6 @@ namespace sowerphp\app;
 
 /**
  * Clase base para los sistemas de autenticación secundaria
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2017-12-23
  */
 abstract class Model_Datasource_Auth2_Base
 {
@@ -38,8 +36,6 @@ abstract class Model_Datasource_Auth2_Base
 
     /**
      * Método que entrega el código del método de autenticación secundaria
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-11-06
      */
     public function getCode()
     {
@@ -48,8 +44,6 @@ abstract class Model_Datasource_Auth2_Base
 
     /**
      * Método que entrega todas las autenticaciones secundarias disponibles en la aplicación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-12-23
      */
     public function getName()
     {
@@ -58,8 +52,6 @@ abstract class Model_Datasource_Auth2_Base
 
     /**
      * Método que la URL asociada al servicio secundario o su página con información
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-12-22
      */
     public function getUrl()
     {
@@ -69,8 +61,6 @@ abstract class Model_Datasource_Auth2_Base
     /**
      * Método que crea el secreto en caso que sea requerido para hacer el pareo
      * Por defecto no se usa y se entrega falso
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-12-22
      */
     public function createSecret($user = null)
     {
@@ -79,8 +69,6 @@ abstract class Model_Datasource_Auth2_Base
 
     /**
      * Método que indica si el método de autenticación secundaria usa o no un token
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-12-23
      */
     public function needToken()
     {

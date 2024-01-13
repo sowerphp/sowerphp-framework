@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ define ('K_PATH_IMAGES', '');
 
 /**
  * Clase para generar PDFs
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2016-02-17
  */
 class View_Helper_PDF extends \TCPDF
 {
@@ -68,10 +66,8 @@ class View_Helper_PDF extends \TCPDF
      * @param u Unidad de medida
      * @param s Tipo de hoja
      * @param top Margen extra (al normal) para la parte de arriba del PDF
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-02-06
      */
-    public function __construct ($o = 'P', $u = 'mm', $s = 'LETTER', $top = 8)
+    public function __construct($o = 'P', $u = 'mm', $s = 'LETTER', $top = 8)
     {
         parent::__construct($o, $u, $s);
         $this->margin_top = $top;
@@ -82,10 +78,8 @@ class View_Helper_PDF extends \TCPDF
 
     /**
      * Asignar información del PDF
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-15
      */
-    public function setInfo ($autor, $titulo, $creador = 'SowerPHP')
+    public function setInfo($autor, $titulo, $creador = 'SowerPHP')
     {
         $this->SetCreator($creador);
         $this->SetAuthor($autor);
@@ -94,10 +88,8 @@ class View_Helper_PDF extends \TCPDF
 
     /**
      * Asignar encabezado y pie de página
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-12
      */
-    public function setStandardHeaderFooter ($logo, $title, $subtitle = '')
+    public function setStandardHeaderFooter($logo, $title, $subtitle = '')
     {
         $size = getimagesize($logo);
         $width = round(($size[0]*$this->defaultOptions['header']['logoheight'])/$size[1]);
@@ -115,8 +107,6 @@ class View_Helper_PDF extends \TCPDF
 
     /**
      * Método que sobreescribe la cabecera del PDF para agregar URL de la web
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-22
      */
     public function Header()
     {
@@ -128,8 +118,6 @@ class View_Helper_PDF extends \TCPDF
 
     /**
      * Método que sobreescribe el pie de página del PDF
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-10-19
      */
     public function Footer()
     {
@@ -142,19 +130,17 @@ class View_Helper_PDF extends \TCPDF
 
     /**
      * Obtener el ancho de las columnas de una tabla
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-01-22
      */
     private function getTableCellWidth($total, $cells)
     {
         $widths = [];
         if (is_int($cells)) {
             $width = floor($total/$cells);
-            for ($i=0; $i<$cells; ++$i) {
+            for ($i=0; $i < $cells; ++$i) {
                 $widths[] = $width;
             }
         }
-        else if (is_array($cells)){
+        else if (is_array($cells)) {
             $width = floor($total/count($cells));
             foreach ($cells as $i) {
                 $widths[$i] = $width;
@@ -166,17 +152,16 @@ class View_Helper_PDF extends \TCPDF
     /**
      * Agregar una tabla al PDF removiendo aquellas columnas donde no existen
      * dantos en la columna para todas las filas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-09-16
      */
     public function addTableWithoutEmptyCols($titles, $data, $options = [], $html = false)
     {
         $cols_empty = [];
         foreach ($data as $row) {
             foreach ($row as $col => $value) {
-                if (((string)$value)=='') {
-                    if (!array_key_exists($col, $cols_empty))
+                if (((string)$value) == '') {
+                    if (!array_key_exists($col, $cols_empty)) {
                         $cols_empty[$col] = 0;
+                    }
                     $cols_empty[$col]++;
                 }
             }
@@ -184,15 +169,17 @@ class View_Helper_PDF extends \TCPDF
         $n_rows = count($data);
         $titles_keys = array_flip(array_keys($titles));
         foreach ($cols_empty as $col => $rows) {
-            if ($rows==$n_rows) {
+            if ($rows == $n_rows) {
                 unset($titles[$col]);
                 foreach ($data as &$row) {
                     unset($row[$col]);
                 }
-                if (isset($options['width']))
+                if (isset($options['width'])) {
                     unset($options['width'][$titles_keys[$col]]);
-                if (isset($options['align']))
+                }
+                if (isset($options['align'])) {
                     unset($options['align'][$titles_keys[$col]]);
+                }
             }
         }
         if (isset($options['width'])) {
@@ -200,77 +187,80 @@ class View_Helper_PDF extends \TCPDF
             $key_0 = null;
             $suma = 0;
             foreach ($options['width'] as $key => $val) {
-                if ($val===0)
+                if ($val === 0) {
                     $key_0 = $key;
+                }
                 $suma += $val;
             }
-            if ($key_0!==null) {
+            if ($key_0 !== null) {
                 $options['width'][$key_0] = 190 - $suma;
             }
         }
-        if (isset($options['align']))
+        if (isset($options['align'])) {
             $options['align'] = array_slice($options['align'], 0);
+        }
         $this->addTable($titles, $data, $options, $html);
     }
 
     /**
      * Agregar una tabla al PDF
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-12
      */
     public function addTable ($headers, $data, $options = array(), $html = false)
     {
         // asignar opciones por defecto
         $options = array_merge($this->defaultOptions['table'],$options);
         // generar tabla
-        if ($html)
+        if ($html) {
             $this->addHTMLTable ($headers, $data, $options);
-        else
+        } else {
             $this->addNormalTable ($headers, $data, $options);
+        }
     }
 
     /**
      * Agregar una tabla generada a través de código HTML al PDF
      * @todo Utilizar las opciones para definir estilo de la tabla HTML
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-02-17
      */
     private function addHTMLTable ($headers, $data, $options = array())
     {
-        $w = (isset($options['width']) and is_array($options['width'])) ? $options['width'] : null;
-        $a = (isset($options['align']) and is_array($options['align'])) ? $options['align'] : [];
+        $w = (isset($options['width']) && is_array($options['width'])) ? $options['width'] : null;
+        $a = (isset($options['align']) && is_array($options['align'])) ? $options['align'] : [];
         $buffer = '<table>';
         // Definir títulos de columnas
-        $thead = isset($options['width']) and is_array($options['width']) and count($options['width']) == count($headers);
-        if ($thead)
+        $thead = isset($options['width']) && is_array($options['width']) && count($options['width']) == count($headers);
+        if ($thead) {
             $buffer .= '<thead>';
+        }
         $buffer .= '<tr>';
         $i = 0;
         foreach ($headers as &$col) {
-            $width = ($w and isset($w[$i])) ? (';width:'.$w[$i].'mm') : '';
+            $width = ($w && isset($w[$i])) ? (';width:'.$w[$i].'mm') : '';
             $align = isset($a[$i]) ? $a[$i] : 'center';
             $buffer .= '<th style="background-color:#eee;color:#666;text-align:'.$align.$width.'"><strong>'.strip_tags($col).'</strong></th>';
             $i++;
         }
         $buffer .= '</tr>';
-        if ($thead)
+        if ($thead) {
             $buffer .= '</thead>';
+        }
         // Definir datos de la tabla
-        if ($thead)
+        if ($thead) {
             $buffer .= '<tbody>';
+        }
         foreach ($data as &$row) {
             $buffer .= '<tr>';
             $i = 0;
             foreach ($row as &$col) {
-                $width = ($w and isset($w[$i])) ? (';width:'.$w[$i].'mm') : '';
+                $width = ($w && isset($w[$i])) ? (';width:'.$w[$i].'mm') : '';
                 $align = isset($a[$i]) ? $a[$i] : 'center';
                 $buffer .= '<td style="border-bottom:1px solid #ddd;text-align:'.$align.$width.'">'.$col.'</td>';
                 $i++;
             }
             $buffer .= '</tr>';
         }
-        if ($thead)
+        if ($thead) {
             $buffer .= '</tbody>';
+        }
         // Finalizar tabla
         $buffer .= '</table>';
         // generar tabla en HTML
@@ -279,8 +269,6 @@ class View_Helper_PDF extends \TCPDF
 
     /**
      * Agregar una tabla generada mediante el método Cell
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-03-03
      */
     private function addNormalTable(array $headers, array $data, array $options = [])
     {
@@ -320,7 +308,7 @@ class View_Helper_PDF extends \TCPDF
         }
         // Header
         $x = $this->GetX();
-        foreach($headers as $i => $header) {
+        foreach ($headers as $i => $header) {
             $this->Cell($options['width'][$i], $options['height'], $headers[$i], 1, 0, $options['align'][$i], 1);
         }
         $this->Ln();
@@ -348,20 +336,20 @@ class View_Helper_PDF extends \TCPDF
             $num_pages = $this->getNumPages();
             $this->startTransaction();
             $this->SetX($x);
-            foreach($headers as $i => $header) {
+            foreach ($headers as $i => $header) {
                 $this->Cell($options['width'][$i], $options['height'], $row[$i], 'LR', 0, $options['align'][$i], $fill);
             }
             $this->Ln();
-            if($num_pages < $this->getNumPages()) {
+            if ($num_pages < $this->getNumPages()) {
                 $this->rollbackTransaction(true);
                 $this->AddPage();
                 $this->SetX($x);
-                foreach($headers as $i => $header) {
+                foreach ($headers as $i => $header) {
                     $this->Cell($options['width'][$i], $options['height'], $headers[$i], 1, 0, $options['align'][$i], 1);
                 }
                 $this->Ln();
                 $this->SetX($x);
-                foreach($headers as $i => $header) {
+                foreach ($headers as $i => $header) {
                     $this->Cell($options['width'][$i], $options['height'], $row[$i], 'LR', 0, $options['align'][$i], $fill);
                 }
                 $this->Ln();
@@ -381,13 +369,15 @@ class View_Helper_PDF extends \TCPDF
      * Agregar texto al PDF, es una variación del método Text que permite
      * definir un ancho al texto. Además recibe menos parámetros para ser
      * más simple (parámetros comunes solamente).
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-20
      */
-    public function Texto ($txt, $x=null, $y=null, $align='', $w=0, $link='', $border=0, $fill=false)
+    public function Texto($txt, $x=null, $y=null, $align='', $w=0, $link='', $border=0, $fill=false)
     {
-        if ($x==null) $x = $this->GetX();
-        if ($y==null) $y = $this->GetY();
+        if ($x === null) {
+            $x = $this->GetX();
+        }
+        if ($y === null) {
+            $y = $this->GetY();
+        }
         $textrendermode = $this->textrendermode;
         $textstrokewidth = $this->textstrokewidth;
         $this->setTextRenderingMode(0, true, false);
@@ -402,13 +392,15 @@ class View_Helper_PDF extends \TCPDF
      * Método idéntico a Texto, pero en vez de utilizar Cell utiliza
      * MultiCell. La principal diferencia es que este método no permite
      * agregar un enlace y Texto si.
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-20
      */
-    public function MultiTexto ($txt, $x=null, $y=null, $align='', $w=0, $border=0, $fill=false)
+    public function MultiTexto($txt, $x=null, $y=null, $align='', $w=0, $border=0, $fill=false)
     {
-        if ($x==null) $x = $this->GetX();
-        if ($y==null) $y = $this->GetY();
+        if ($x === null) {
+            $x = $this->GetX();
+        }
+        if ($y === null) {
+            $y = $this->GetY();
+        }
         $textrendermode = $this->textrendermode;
         $textstrokewidth = $this->textstrokewidth;
         $this->setTextRenderingMode(0, true, false);

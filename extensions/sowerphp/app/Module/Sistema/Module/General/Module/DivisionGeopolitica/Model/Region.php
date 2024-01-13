@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
  * Clase para mapear la tabla region de la base de datos
  * Comentario de la tabla: Regiones del país
  * Esta clase permite trabajar sobre un registro de la tabla region
- * @author SowerPHP Code Generator
- * @version 2014-04-26 01:36:28
  */
 class Model_Region extends \Model_App
 {

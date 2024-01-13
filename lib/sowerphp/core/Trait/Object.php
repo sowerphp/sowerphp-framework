@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase genérica con método para trabajar con cualquier objeto
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-07-12
  */
 trait Trait_Object
 {
@@ -34,8 +32,6 @@ trait Trait_Object
     /**
      * Método para convertir el objeto a un string.
      * @return Nombre de la clase con que se instancio el objeto
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
      */
     public function __toString()
     {
@@ -45,8 +41,6 @@ trait Trait_Object
     /**
      * Método para setear los atributos de la clase
      * @param array Arreglo con los datos que se deben asignar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-01-29
      */
     public function set($array)
     {
@@ -55,8 +49,9 @@ trait Trait_Object
         );
         foreach ($props as &$prop) {
             $name = $prop->getName();
-            if (isset($array[$name]))
+            if (isset($array[$name])) {
                 $this->$name = $array[$name];
+            }
         }
         return $this;
     }

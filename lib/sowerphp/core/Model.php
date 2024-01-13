@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -26,8 +26,6 @@ namespace sowerphp\core;
 /**
  * Clase abstracta para todos los modelos
  * Permite trabajar con un registro de la tabla
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-07-12
  */
 abstract class Model
 {
@@ -41,8 +39,6 @@ abstract class Model
 
     /**
      * Constructor de la clase abstracta
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-04-27
      */
     public function __construct($pk=null)
     {
@@ -74,8 +70,6 @@ abstract class Model
     /**
      * Método que recupera la conexión a la base de datos del objeto
      * Si la conexión no existe se conecta
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-10-13
      */
     public function getDB()
     {
@@ -89,15 +83,13 @@ abstract class Model
      * Función que entrega un arreglo con la PK y los campos listos para ser
      * utilizados en una consulta SQL
      * @return Arreglo con los datos de la PK para la consulta y sus valores
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-21
      */
     protected function preparePk()
     {
         $pk = ['where'=>[], 'values'=>[]];
         foreach ($this::$columnsInfo as $col => &$info) {
             if ($info['pk']) {
-                if (empty($this->$col) and $this->$col!=0) {
+                if (empty($this->$col) && $this->$col != 0) {
                     return false;
                 }
                 $pk['where'][] = $col.' = :pk_'.$col;
@@ -112,8 +104,6 @@ abstract class Model
      * Método para obtener los atributos del objeto, esto es cada una
      * de las columnas que representan al objeto en la base de datos
      * @return =true si se logró obtener los datos desde la BD
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-05-04
      */
     public function get()
     {
@@ -143,8 +133,6 @@ abstract class Model
     /**
      * Método para determinar si el objeto existe en la base de datos
      * @return bool =true si el registro existe en la base de datos, =false si no existe
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
      */
     public function exists()
     {
@@ -163,8 +151,6 @@ abstract class Model
     /**
      * Método para borrar el objeto de la base de datos
      * @return =true si se logró eliminar, =false en caso de algún problema
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-26
      */
     public function delete()
     {
@@ -194,8 +180,6 @@ abstract class Model
     /**
      * Método para guardar el objeto en la base de datos
      * @return =true si todo fue ok, =false si hubo algún problema
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
      */
     public function save()
     {
@@ -206,8 +190,6 @@ abstract class Model
     /**
      * Método para insertar el objeto en la base de datos
      * @return =true si se logró insertar, =false en caso de algún problema
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-08-11
      */
     protected function insert()
     {
@@ -252,8 +234,6 @@ abstract class Model
      * simple desde desde fuera del modelo.
      * @param columns Arreglo asociativo con las columnas a editar o NULL para editar todas las columnas
      * @return =true si se logró actualizar, =false en caso de algún problema
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-08-11
      */
     protected function update($columns = null)
     {
@@ -303,8 +283,6 @@ abstract class Model
      * getAttribute(). En realidad atrapará las llamadas a cualquier método
      * inexistente, pero solo se procesarán aquellos mencionados y en otros
      * casos se generará una excepción (ya que el método no existirá)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-24
      */
     public function __call($method, $args)
     {
@@ -344,8 +322,6 @@ abstract class Model
      * @param string $fk Nombre de la clase que es la FK (sin Model_)
      * @param array $args Argunentos con la PK del objeto que es FK
      * @return object
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-24
      */
     private function getFK($fk, $args)
     {
@@ -384,8 +360,6 @@ abstract class Model
      * @param bool $trim Si se debe aplicar la función trim() al valor
      * @param bool $strip_tags Si se debe aplicar la función strip_tags() al valor
      * @return bool =true si pasó la validación y se pudo asignar el valor
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-16
      */
     private function setAttribute($attribute, $value, $check = true, $trim = true, $strip_tags = true)
     {
@@ -395,8 +369,8 @@ abstract class Model
         if ($trim) {
             $value = trim($value);
         }
-        if ($check === true or is_array($check)) {
-            if (!is_array($check) and isset($this::$columnsInfo[$attribute]['check'])) {
+        if ($check === true || is_array($check)) {
+            if (!is_array($check) && isset($this::$columnsInfo[$attribute]['check'])) {
                 $check = $this::$columnsInfo[$attribute]['check'];
             }
             if (is_array($check)) {
@@ -412,22 +386,20 @@ abstract class Model
 
     /**
      * Método que valida los valores asignados a los atributos del objeto
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-01-20
      */
     public function checkAttributes()
     {
         foreach ($this::$columnsInfo as $attribute => $info) {
             // verificar que el campo tenga una valor si no puede ser NULL
             // "0" es un valor aceptado como válido.
-            if (empty($info['auto']) and empty($info['null']) and ($this->{$attribute} === null or $this->{$attribute} === '')) {
+            if (empty($info['auto']) && empty($info['null']) && ($this->{$attribute} === null || $this->{$attribute} === '')) {
                 throw new \Exception(__(
                     'El campo "%s" debe tener un valor.',
                     $info['name'],
                 ));
             }
             // verificar largo del campo
-            if (!empty($info['length']) and in_array($info['type'], ['char', 'character varying', 'varchar', 'text'])) {
+            if (!empty($info['length']) && in_array($info['type'], ['char', 'character varying', 'varchar', 'text'])) {
                 $attribute_len = mb_strlen($this->{$attribute});
                 if ($attribute_len > $info['length']) {
                     throw new \Exception(__(
@@ -453,8 +425,6 @@ abstract class Model
     /**
      * Método que entrega un arreglo con las columnas que son la PK de la tabla
      * @return Arreglo con las columnas que son la PK
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-22
      */
     public function getPk()
     {
@@ -470,8 +440,6 @@ abstract class Model
     /**
      * Método que entrega un arreglo con los valores de la PK de la tabla
      * @return Arreglo con las columnas que son la PK
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-22
      */
     public function getPkValues()
     {
@@ -485,8 +453,6 @@ abstract class Model
 
     /**
      * Método que asigna un archivo a los campos que corresponden en la clase
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-19
      */
     public function setFile($name, $file)
     {
@@ -504,8 +470,6 @@ abstract class Model
 
     /**
      * Método que elimina la conexión a la base de datos antes de serializar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-16
      */
     public function __sleep()
     {
@@ -516,8 +480,6 @@ abstract class Model
     /**
      * Método que recupera la conexión a la base de datos después de
      * deserializar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-16
      */
     public function __wakeup()
     {

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Utilidad para trabajar con arreglos
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-07-25
  */
 class Utility_Array
 {
@@ -36,8 +34,6 @@ class Utility_Array
      * @param array $array1
      * @param array $array2
      * @return array
-     * @author Daniel <daniel (at) danielsmedegaardbuus (dot) dk>
-     * @author Gabriel Sobrinho <gabriel (dot) sobrinho (at) gmail (dot) com>
      */
     public static function mergeRecursiveDistinct(array &$array1, array &$array2)
     {
@@ -58,9 +54,7 @@ class Utility_Array
     /**
      * Convierte una tabla de Nx2 (N filas 2 columnas) a un arreglo asociativo
      * @param table Tabla de Nx2 (N filas 2 columnas) que se quiere convertir
-     * @return Arreglo convertido a asociativo
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-24
+     * @return array Arreglo convertido a asociativo
      */
     public static function fromTable($table)
     {
@@ -79,8 +73,10 @@ class Utility_Array
         $xml = new SimpleXMLElement('<'.$root.'/>');
         foreach ($array as $key => $value){
             if (is_array($value)) {
-                if (is_numeric($key)) $key = 'item'; // by DeLaF
-                    self::toXML($value, $xml->addChild($key));
+                if (is_numeric($key)) {
+                    $key = 'item';
+                }
+                self::toXML($value, $xml->addChild($key));
             } else {
                 $xml->addChild($key, $value);
             }
@@ -115,23 +111,22 @@ class Utility_Array
      * )
      * @param array Arreglo de donde extraer
      * @param keys Llaves que se extraeran
-     * @return Tabla con los campos extraídos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-19
+     * @return array Tabla con los campos extraídos
      */
-    public static function groupToTable ($array, $keys = null)
+    public static function groupToTable($array, $keys = null)
     {
         // determinar llaves y su cantidad
-        if ($keys==null) {
-            $keys = array_keys ($array);
+        if ($keys === null) {
+            $keys = array_keys($array);
         }
         $n_keys = count($keys);
         // determinar el arreglo con más elementos y cuantos son
         $n_elementos = count($array[$keys[0]]);
         for ($j=1; $j<$n_keys; ++$j) {
             $aux = count($array[$keys[$j]]);
-            if ($aux > $n_elementos)
+            if ($aux > $n_elementos) {
                 $n_elementos = $aux;
+            }
         }
         // extrar datos
         $data = array();
@@ -184,9 +179,7 @@ class Utility_Array
      * @param data Arreglo en formato tabla con los datos
      * @param camposEncabezado Cuandos campos (columnas) de la "tabla" son parte del encabezado
      * @param detalle Nombre del índice (key) que se utilizará para agrupar los detalles
-     * @return Arreglo con el formato de un encabezado y detalle
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-25
+     * @return array Arreglo con el formato de un encabezado y detalle
      */
     public static function fromTableWithHeaderAndBody($data, $camposEncabezado, $detalle = 'detalle')
     {
@@ -226,7 +219,7 @@ class Utility_Array
             // el item es igual a uno previamente guardado
             // en este caso se extrae sólo el detalle
             else if ($item[$id] == $d[$id]) {
-                $item[$detalle][] = array_slice ($d, $camposEncabezado);
+                $item[$detalle][] = array_slice($d, $camposEncabezado);
             }
             // es un nuevo item
             else {
@@ -266,9 +259,7 @@ class Utility_Array
      * índice de un arreglo asociativo, donde las otras columnas o columna son
      * los valores que tiene dicho índice
      * @param table Tabla que se desea convertir
-     * @return Arreglo asociativo
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-03-31
+     * @return array Arreglo asociativo
      */
     public static function tableToAssociativeArray($table)
     {
@@ -276,10 +267,11 @@ class Utility_Array
         $keys = [];
         foreach ($table as &$row) {
             $key = array_shift($row);
-            if (!isset($array[$key]))
+            if (!isset($array[$key])) {
                 $array[$key] = [];
+            }
             if (!isset($keys[$key])) {
-                $array[$key] = count($row)==1 ? array_shift($row) : $row;
+                $array[$key] = count($row) == 1 ? array_shift($row) : $row;
                 // indica que no es un arreglo de datos (hay que hacerlo así
                 // porque los datos en si pueden ser un arreglo, entonces no
                 // bastaría solamente verificar si $array[$key]  es ya un
@@ -304,16 +296,14 @@ class Utility_Array
      * @param field_parent Nombre del campo en el item que tiene el "enlace" al item padre
      * @param field_childs Nombre del campo en el item donde se deben colocar los hijos del item
      * @param parent Índice del item padre (primer nivel es =null)
-     * @return Arreglo asociativo con el árbol
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-09-04
+     * @return array Arreglo asociativo con el árbol
      */
     public static function toTree($items, $field_parent, $field_childs, $parent = null)
     {
         // agregar items del nivel parent al árbol
         $tree_level = [];
         foreach ($items as $key => $item) {
-            if (array_key_exists($field_parent, $item) and $item[$field_parent] == $parent) {
+            if (array_key_exists($field_parent, $item) && $item[$field_parent] == $parent) {
                 unset($item[$field_parent]);
                 $tree_level[$key] = $item;
                 unset($items[$key]);
@@ -333,9 +323,7 @@ class Utility_Array
      * @param tree Árbol
      * @param field_name Nombre del campo que contiene el nombre/glosa del item del árbol
      * @param field_childs Nombre del campo en el item de donde se deben extraer los hijos del item
-     * @return Arreglo asociativo con el árbol
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-25
+     * @return array Arreglo asociativo con el árbol
      */
     public static function treeToList($tree, $field_name, $field_childs, $level = 0, $spaces = 3, array &$list = [])
     {
@@ -356,9 +344,7 @@ class Utility_Array
      * @param tree Árbol
      * @param field_name Nombre del campo que contiene el nombre/glosa del item del árbol
      * @param field_childs Nombre del campo en el item de donde se deben extraer los hijos del item
-     * @return Arreglo asociativo con el árbol y todos sus datos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-25
+     * @return array Arreglo asociativo con el árbol y todos sus datos
      */
     public static function treeToAssociativeArray($tree, $field_name, $field_childs, $level = 0, array &$list = [])
     {
@@ -380,7 +366,6 @@ class Utility_Array
     /**
      * Método que entrega todos los sub conjuntos de un arreglo
      * @link https://stackoverflow.com/a/6092999/3333009
-     * @version 2011-05-23
      */
     public static function subsets($in, $minLength = 1) {
         $count = count($in);
@@ -390,7 +375,9 @@ class Utility_Array
             $b = sprintf('%0'.$count.'b',$i);
             $out = [];
             for ($j = 0; $j < $count; $j++) {
-                if ($b[$j] == '1') $out[] = $in[$j];
+                if ($b[$j] == '1') {
+                    $out[] = $in[$j];
+                }
             }
             if (count($out) >= $minLength) {
                 $return[] = $out;

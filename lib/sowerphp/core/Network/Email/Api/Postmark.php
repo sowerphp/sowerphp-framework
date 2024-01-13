@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -27,8 +27,6 @@ namespace sowerphp\core;
  * Clase para enviar correo electrónico mediante Postmark
  * Requiere:
  *   $ composer require wildbit/postmark-php
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2020-02-09
  */
 class Network_Email_Api_Postmark
 {
@@ -39,8 +37,6 @@ class Network_Email_Api_Postmark
     /**
      * Constructor de la clase
      * @param config Arreglo con la configuración de Postmark
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-09
      */
     public function __construct($config)
     {
@@ -50,7 +46,7 @@ class Network_Email_Api_Postmark
         }
         // si no están los campos mínimos necesarios error
         if (empty($config['token'])) {
-             throw new \sowerphp\core\Exception('Configuración del correo electrónico incompleta');
+            throw new \sowerphp\core\Exception('Configuración del correo electrónico incompleta');
         }
         $this->config = $config;
         // crear objeto pm
@@ -61,10 +57,8 @@ class Network_Email_Api_Postmark
      * Método que envía el correo
      * @param data Arrelgo con los datos que se enviarán (texto y adjuntos)
      * @param header Cabeceras del correo
-     * @return Arreglo con los estados de retorno por cada correo enviado
+     * @return mixed =true si se envió el correo o arreglo con error
      * @link https://postmarkapp.com/developer/user-guide/sending-email/sending-with-api
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-09
      */
     public function send($data, $header)
     {

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -31,9 +31,6 @@ namespace sowerphp\app;
  *
  * Para explorar el árbol de Zimbra usar:
  *   $ ldapsearch -x -H ldaps://localhost -D uid=zimbra,cn=admins,cn=zimbra -W '(objectclass=*)'
- *
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-12-30
  */
 class Model_Datasource_Zimbra extends \sowerphp\core\Model_Datasource
 {
@@ -49,13 +46,13 @@ class Model_Datasource_Zimbra extends \sowerphp\core\Model_Datasource
      * Método que permite obtener un objeto Zimbra
      * @param name Nombre de la configuración o arreglo con la configuración
      * @param config Arreglo con la configuración
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-29
      */
     public static function &get($name = 'default', $config = [])
     {
         $config = parent::getDatasource('zimbra', $name, $config);
-        if (is_object($config)) return $config;
+        if (is_object($config)) {
+            return $config;
+        }
         $class = __CLASS__;
         self::$datasources['zimbra'][$config['conf']] = new $class($config);
         return self::$datasources['zimbra'][$config['conf']];
@@ -64,8 +61,6 @@ class Model_Datasource_Zimbra extends \sowerphp\core\Model_Datasource
     /**
      * Constructor de la clase
      * @param config Arreglo con la configuración
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-29
      */
     public function __construct($config)
     {
@@ -76,8 +71,6 @@ class Model_Datasource_Zimbra extends \sowerphp\core\Model_Datasource
     /**
      * Método que obtiene la clave para preautenticación
      * @return zimbraPreAuthKey
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-29
      */
     public function getPreAuthKey()
     {
@@ -92,12 +85,16 @@ class Model_Datasource_Zimbra extends \sowerphp\core\Model_Datasource
     }
 
     /**
-     * Método que ejecuta un comando SOAP en el servicio web de Zimbra
-     * @param cmd Comando que se desea ejecutar
-     * @param args Arreglo con los argumentos del comando
-     * @return Resultado de la ejecución del comando
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-02
+     * Ejecuta un comando SOAP en el servicio web de Zimbra.
+     *
+     * Este método envía una solicitud SOAP al servidor de Zimbra utilizando el comando y argumentos proporcionados.
+     * Devuelve los resultados de la ejecución del comando SOAP. El tipo de los valores devueltos en el arreglo puede
+     * variar dependiendo del comando específico que se ejecute.
+     *
+     * @param string $cmd Comando SOAP que se desea ejecutar.
+     * @param array $args Arreglo con los argumentos del comando. Por defecto, es un arreglo vacío.
+     * @return array Resultado de la ejecución del comando, convertido en un arreglo. El contenido y la estructura del arreglo dependen del comando SOAP específico y de su respuesta.
+     * @throws \SoapFault Si ocurre un error durante la llamada SOAP.
      */
     public function soap($cmd, $args = [])
     {
@@ -119,8 +116,6 @@ class Model_Datasource_Zimbra extends \sowerphp\core\Model_Datasource
      * Método que obtiene un objeto de tipo Account de Zimbra
      * @param uid Identificador de la cuenta (nombre de usuario)
      * @return Model_Datasource_Zimbra_Account
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-29
      */
     public function getAccount($uid)
     {

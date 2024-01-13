@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase con la solicitud del cliente
- * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2023-11-16
  */
 class Network_Request
 {
@@ -47,8 +45,6 @@ class Network_Request
 
     /**
      * Constructor de la clase
-     * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-11-16
      */
     public function __construct()
     {
@@ -63,8 +59,6 @@ class Network_Request
     /**
      * Método mágico para retrocompatibilidad con los atributos públicos antiguos
      * Se puede consultar por: request, base, url y params
-     * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-11-14
      */
     public function __get(string $name)
     {
@@ -77,8 +71,6 @@ class Network_Request
     /**
      * Método que determina la solicitud utilizada para acceder a la página
      * @return string Solicitud completa para la página consultada
-     * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-11-14
      */
     public function request()
     {
@@ -87,7 +79,7 @@ class Network_Request
                 $request = '';
             } else {
                 // Obtener ruta que se uso sin "/" (base) inicial
-                $uri = (isset($_SERVER['QUERY_STRING'][0]) and $_SERVER['QUERY_STRING'][0] == '/')
+                $uri = (isset($_SERVER['QUERY_STRING'][0]) && $_SERVER['QUERY_STRING'][0] == '/')
                     ? substr($_SERVER['QUERY_STRING'], 1) : $_SERVER['QUERY_STRING']
                 ;
                 if (strpos($_SERVER['REQUEST_URI'], '/?'.$uri) !== false) {
@@ -112,8 +104,6 @@ class Network_Request
     /**
      * Método que determina los campos base y webroot
      * @return string Base de la URL
-     * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-11-14
      */
     public function base()
     {
@@ -138,8 +128,6 @@ class Network_Request
      * Método que determina la URL utiliza para acceder a la aplicación, esto
      * es: protocolo/esquema, dominio y path base a contar del webroot)
      * @return string URL completa para acceder a la la página
-     * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-11-14
      */
     public function url()
     {
@@ -176,8 +164,6 @@ class Network_Request
      * Método que entrega las cabeceras enviadas al servidor web por el cliente
      * @param string header Cabecera que se desea recuperar, o null si se quieren traer todas
      * @return mixed Arreglo si no se pidió por una específica o su valor si se pidió (=false si no existe cabecera, =null si no existe función apache_request_headers)
-     * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-11-13
      */
     public function header($header = null)
     {
@@ -194,8 +180,6 @@ class Network_Request
     /**
      * Método que entrega las cabeceras enviadas al servidor web por el cliente
      * @return array Arreglo con las cabeceras HTTP recibidas
-     * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-11-14
      */
     public function headers()
     {

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\app\Apps;
 
 /**
  * Modelo para interactuar con la API de Imgur
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2019-06-08
  */
 class Model_Imgur
 {
@@ -39,8 +37,6 @@ class Model_Imgur
      * Constructor del cliente de la API
      * Asigna configuración del cliente
      * Parámetro obligatorio: client_id
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-08
      */
     public function __construct(array $config = [])
     {
@@ -58,8 +54,6 @@ class Model_Imgur
 
     /**
      * Método que sube una imagen
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-08
      */
     public function upload($data)
     {
@@ -71,8 +65,6 @@ class Model_Imgur
 
     /**
      * Método que hace las llamadas reales a la API
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-08
      */
     private function consume($method, $resource, array $data = [])
     {
@@ -80,9 +72,9 @@ class Model_Imgur
         $response = $this->rest->$method(
             $this->url.$resource,
             $data,
-            ['Authorization' => 'Client-ID '.$this->config['client_id']]
+            ['Authorization' => 'Client-ID ' . $this->config['client_id']]
         );
-        if ($response['status']['code']!=200) {
+        if ($response['status']['code'] != 200) {
             if (!empty($response['body']['message'])) {
                 throw new \Exception($response['body']['message'], $response['status']['code']);
             }
@@ -90,7 +82,10 @@ class Model_Imgur
                 throw new \Exception($response['body'], $response['status']['code']);
             }
             else {
-                throw new \Exception('Error '.$response['status']['code'].': '.$response['status']['message'], $response['status']['code']);
+                throw new \Exception(
+                    'Error '.$response['status']['code'].': '.$response['status']['message'],
+                    $response['status']['code']
+                );
             }
         }
         return $response;
@@ -98,8 +93,6 @@ class Model_Imgur
 
     /**
      * Wrapper para llamadas GET a la API
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-28
      */
     private function get($resource, array $data = [])
     {
@@ -108,8 +101,6 @@ class Model_Imgur
 
     /**
      * Wrapper para llamadas POST a la API
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-28
      */
     private function post($resource, array $data = [])
     {
@@ -118,8 +109,6 @@ class Model_Imgur
 
     /**
      * Wrapper para llamadas PUT a la API
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-30
      */
     private function put($resource, array $data = [])
     {
@@ -128,8 +117,6 @@ class Model_Imgur
 
     /**
      * Wrapper para llamadas DELETE a la API
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-30
      */
     private function delete($resource, array $data = [])
     {

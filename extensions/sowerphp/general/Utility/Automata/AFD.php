@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\general;
 
 /**
  * Clase para trabajar con un autómata finito determinístico (AFD)
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2017-09-13
  */
 
 class Utility_Automata_AFD
@@ -52,8 +50,6 @@ class Utility_Automata_AFD
      * @param transitions Transiciones definidas para el AFD
      * @param F Estados finales de aceptación
      * @param q0 Estado inicial del AFD
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-30
      */
     public function __construct($transitions = array(), $F = array(), $q0 = 0)
     {
@@ -65,15 +61,13 @@ class Utility_Automata_AFD
     /**
      * Método que evalua la entrada según las transiciones del autómata
      * @param input Entrada para el AFD (un string o un arreglo de símbolos)
-     * @return =true si el estado de detención es de aceptación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-08-15
+     * @return bool =true si el estado de detención es de aceptación
      */
     public function run($input)
     {
         $estado = $this->q0;
-        $simbols = is_array($input) ? count($input) : strlen($input);
-        for ($i=0; $i<$simbols; ++$i) {
+        $symbols = is_array($input) ? count($input) : strlen($input);
+        for ($i=0; $i<$symbols; ++$i) {
             if (isset($this->transitions[$estado][$input[$i]])) {
                 $this->input = $input[$i];
                 $estado = $this->transitions[$estado][$input[$i]];
@@ -85,9 +79,7 @@ class Utility_Automata_AFD
 
     /**
      * Obtener el estado final en que se detuvo el AFD
-     * @return Entrega el estado donde se detuvo el AFD después de correr
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-08-17
+     * @return int Entrega el estado donde se detuvo el AFD después de correr
      */
     public function getFinalState()
     {
@@ -96,9 +88,7 @@ class Utility_Automata_AFD
 
     /**
      * Obtener la entrada final en que se detuvo el AFD
-     * @return Entrega el estado donde se detuvo el AFD después de correr
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-09-13
+     * @return array Entrega el estado donde se detuvo el AFD después de correr
      */
     public function getFinalInput()
     {
@@ -110,9 +100,7 @@ class Utility_Automata_AFD
      *
      * Requiere que esté la biblioteca clue/graph de composer
      *
-     * @return Grafo en instancia de la clase \Fhaculty\Graph\Graph
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-03-29
+     * @return \Fhaculty\Graph\Graph Grafo
      */
     public function getGraph()
     {
@@ -130,8 +118,9 @@ class Utility_Automata_AFD
                 }
             }
             foreach ($data as $valor => $to) {
-                if (!isset($vertexs[$to]))
+                if (!isset($vertexs[$to])) {
                     $vertexs[$to] = $graph->createVertex($to);
+                }
                 if (!isset($edges[$from][$to])) {
                     $vertexs[$from]->createEdgeTo($vertexs[$to]);
                     $edges[$from][$to] = [];
@@ -141,8 +130,9 @@ class Utility_Automata_AFD
         }
         // agregar valores de las transiciones
         foreach ($vertexs as $v) {
-            if (!isset($edges[$v->getId()]))
+            if (!isset($edges[$v->getId()])) {
                 continue;
+            }
             $aux = $edges[$v->getId()];
             foreach ($aux as $to => $valores) {
                 $e = $v->getEdgesTo($vertexs[$to])->getEdgeFirst();
@@ -158,9 +148,7 @@ class Utility_Automata_AFD
      *
      * Requiere: GraphViz y que esté la biblioteca graphp/graphviz de composer
      *
-     * @return Datos de una imagen PNG
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-03-29
+     * @return string Datos de una imagen PNG
      */
     public function image()
     {

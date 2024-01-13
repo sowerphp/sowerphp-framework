@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase que renderizará las vistas de la aplicación
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-12-10
  */
 class View
 {
@@ -42,8 +40,6 @@ class View
     /**
      * Constructor de la clase View
      * @param controller Objeto con el controlador que ocupa la vista
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-09
      */
     public function __construct(Controller $controller)
     {
@@ -51,6 +47,7 @@ class View
         $this->response = $controller->response;
         $this->viewVars = $controller->viewVars;
         $this->layout = $controller->layout;
+        $this->defaultLayout = Configure::read('page.layout', $this->defaultLayout);
     }
 
     /**
@@ -59,8 +56,6 @@ class View
      * @param page Ubicación relativa de la página
      * @param location Ubicación de la vista
      * @return Buffer de la página renderizada
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2024-01-01
      */
     public function render($page, $location = null)
     {
@@ -100,16 +95,18 @@ class View
             $_header_extra = '';
             if (isset($this->viewVars['_header_extra']['css'])) {
                 foreach ($this->viewVars['_header_extra']['css'] as &$css) {
-                    $_header_extra .= '        <link type="text/css" href="'.$this->request->base.$css.'" rel="stylesheet" />'."\n";
+                    $_header_extra .= '<link type="text/css" href="'.$this->request->base.$css.'" rel="stylesheet" />'."\n";
                 }
             }
             if (isset($this->viewVars['_header_extra']['js'])) {
                 foreach ($this->viewVars['_header_extra']['js'] as &$js) {
-                    $_header_extra .= '        <script type="text/javascript" src="'.$this->request->base.$js.'"></script>'."\n";
+                    $_header_extra .= '<script type="text/javascript" src="'.$this->request->base.$js.'"></script>'."\n";
                 }
             }
-            unset ($this->viewVars['_header_extra']);
-        } else $_header_extra = '';
+            unset($this->viewVars['_header_extra']);
+        } else {
+            $_header_extra = '';
+        }
         // dependiendo de la extensión de la página se renderiza
         $ext = substr($location, strrpos($location, '.')+1);
         $class = App::findClass('View_Helper_Pages_'.ucfirst($ext));
@@ -130,13 +127,13 @@ class View
             $this->layout = $this->defaultLayout;
             $layout_location = $this->getLayoutLocation($this->layout);
             if (!$layout_location) {
-                throw new \sowerphp\core\Exception('No se encontró layout '.$this->layout);
+                die(__('No se encontró layout por defecto %s.', $this->layout));
             }
         }
         // página que se está viendo
         if (!empty($this->request->request)) {
             $slash = strpos($this->request->request, '/', 1);
-            $page = $slash===false ? $this->request->request : substr($this->request->request, 0, $slash);
+            $page = $slash === false ? $this->request->request : substr($this->request->request, 0, $slash);
         } else {
             $page = '/'.Configure::read('homepage');
         }
@@ -148,15 +145,15 @@ class View
             foreach ($modulos as &$m) {
                 $link = Utility_Inflector::underscore($m);
                 $module_breadcrumb[$link] = $m;
-                $url .= '/'.$link;
+                $url .= '/' . $link;
             }
             $module_breadcrumb += explode('/', substr(str_replace($url, '', $this->request->request), 1));
         }
         // determinar título
         $titulo_pagina = isset($this->viewVars['header_title']) ? $this->viewVars['header_title'] : $this->request->request;
         $_header_title = isset($this->viewVars['__block_title'])
-                            ? $this->viewVars['__block_title']
-                            : Configure::read('page.header.title').($titulo_pagina?(': '.$titulo_pagina):'');
+            ? $this->viewVars['__block_title']
+            : Configure::read('page.header.title') . ($titulo_pagina ? (': ' . $titulo_pagina) : '');
         // renderizar layout de la página (con su contenido)
         $viewVars = array_merge([
             '_header_title' => $_header_title,
@@ -180,12 +177,10 @@ class View
      * Método que entrega la ubicación del tema que se está utilizando
      * @param layout Tema que se quiere buscar su ubicación
      * @return Ubicación del tema (o falso si no se encontró)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-05-13
      */
     private function getLayoutLocation($layout)
     {
-        if (!is_string($layout) or empty($layout)) {
+        if (!is_string($layout) || empty($layout)) {
             return false;
         }
         // si el layout es una ruta absoluta se entrega directamente
@@ -207,9 +202,7 @@ class View
      * Método que busca la vista en las posibles rutas y para todas las posibles extensiones
      * @param view Nombre de la vista buscada (ejemplo: /inicio)
      * @param module Nombre del módulo en caso de pertenecer a uno
-     * @return Ubicación de la vista que se busca
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2024-01-01
+     * @return string Ubicación de la vista que se busca
      */
     public static function location($view, $module = null)
     {
@@ -227,21 +220,21 @@ class View
         // si la vista parte con / entonces se está pasando la ruta y solo falta su extension
         if ($view[0] == '/') {
             foreach(self::$extensions as $extension) {
-                if (is_readable($view.'.'.$extension)) {
-                    self::$_viewsLocation[$view] = $view.'.'.$extension;
-                    return $view.'.'.$extension;
+                if (is_readable($view . '.' . $extension)) {
+                    self::$_viewsLocation[$view] = $view . '.' . $extension;
+                    return $view . '.' . $extension;
                 }
             }
             return null;
         }
         // Determinar de donde sacar la vista
-        $location = $module ? '/Module/'.str_replace('.', '/Module/', $module) : '';
+        $location = $module ? ('/Module/' . str_replace('.', '/Module/', $module)) : '';
         // obtener paths
         $paths = App::paths();
         // buscar archivo en cada ruta
         foreach ($paths as $path) {
             foreach(self::$extensions as $extension) {
-                $file = $path.$location.'/View/'.$view.'.'.$extension;
+                $file = $path . $location . '/View/' . $view . '.' . $extension;
                 if (is_readable($file)) {
                     self::$_viewsLocation[$view] = $file;
                     return $file;

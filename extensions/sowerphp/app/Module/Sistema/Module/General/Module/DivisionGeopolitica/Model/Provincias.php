@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
  * Clase para mapear la tabla provincia de la base de datos
  * Comentario de la tabla: Provincias de cada región del país
  * Esta clase permite trabajar sobre un conjunto de registros de la tabla provincia
- * @author SowerPHP Code Generator
- * @version 2014-04-26 01:36:28
  */
 class Model_Provincias extends \Model_Plural_App
 {

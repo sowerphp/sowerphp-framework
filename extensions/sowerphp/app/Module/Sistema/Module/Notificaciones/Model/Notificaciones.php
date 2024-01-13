@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ namespace sowerphp\app\Sistema\Notificaciones;
  * Clase para mapear la tabla notificacion de la base de datos
  * Comentario de la tabla:
  * Esta clase permite trabajar sobre un conjunto de registros de la tabla notificacion
- * @author SowerPHP Code Generator
- * @version 2015-05-05 12:03:07
  */
 class Model_Notificaciones extends \Model_Plural_App
 {
@@ -42,9 +40,7 @@ class Model_Notificaciones extends \Model_Plural_App
      * Método que entrega todas las notificaciones del usuario, leínas y no
      * leídas
      * @param usuario ID del usuario que se quiere obtener sus notificaciones
-     * @return Tabla con las notificaciones
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-10-15
+     * @return array Tabla con las notificaciones
      */
     public function getByUser($usuario)
     {
@@ -73,9 +69,7 @@ class Model_Notificaciones extends \Model_Plural_App
      * Método que entrega las últimas X notificaciones no leídas del usuario
      * @param usuario ID del usuario que se quiere obtener sus notificaciones
      * @param limit Cantidad de notificaciones que se desea obtener
-     * @return Tabla con las notificaciones no leídas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-10-15
+     * @return array Tabla con las notificaciones no leídas
      */
     public function getUnreadByUser($usuario, $limit = 3)
     {
@@ -103,9 +97,7 @@ class Model_Notificaciones extends \Model_Plural_App
     /**
      * Método que entrega la cantidad total de notificaciones sin leer
      * @param usuario ID del usuario que se quiere obtener sus notificaciones
-     * @return Cantidad de notificaciones sin leer
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-05
+     * @return int Cantidad de notificaciones sin leer
      */
     public function getCountUnreadByUser($usuario)
     {

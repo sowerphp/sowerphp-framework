@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -27,8 +27,6 @@ namespace sowerphp\core;
  * Clase para enviar correo electrónico mediante AWS SES
  * Requiere:
  *   $ composer require aws/aws-sdk-php
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2020-02-11
  */
 class Network_Email_Api_AwsSes
 {
@@ -39,8 +37,6 @@ class Network_Email_Api_AwsSes
     /**
      * Constructor de la clase
      * @param config Arreglo con la configuración de AWS SES
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-09
      */
     public function __construct($config)
     {
@@ -55,8 +51,8 @@ class Network_Email_Api_AwsSes
             'profile' => 'default',
         ], $config);
         // si no están los campos mínimos necesarios error
-        if (empty($config['version']) || empty($config['region']) || (empty($config['profile']) and empty($config['credentials']))) {
-             throw new \sowerphp\core\Exception('Configuración del correo electrónico incompleta');
+        if (empty($config['version']) || empty($config['region']) || (empty($config['profile']) && empty($config['credentials']))) {
+            throw new \sowerphp\core\Exception('Configuración del correo electrónico incompleta');
         }
         $this->config = [
             'version' => $config['version'],
@@ -75,9 +71,7 @@ class Network_Email_Api_AwsSes
      * Método que envía el correo
      * @param data Arrelgo con los datos que se enviarán (texto y adjuntos)
      * @param header Cabeceras del correo
-     * @return Arreglo con los estados de retorno por cada correo enviado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-09
+     * @return array Arreglo con los estados de retorno por cada correo enviado
      */
     public function send($data, $header)
     {
@@ -85,7 +79,7 @@ class Network_Email_Api_AwsSes
         // adjuntos
         if (class_exists('\PHPMailer\PHPMailer\PHPMailer')) {
             $mail = Network_Email_Smtp_Phpmailer::createEmail($data, $header);
-            if(!$mail->preSend()) {
+            if (!$mail->preSend()) {
                 die($mail->ErrorInfo);
             }
             $email = [
@@ -148,8 +142,6 @@ class Network_Email_Api_AwsSes
      * @link https://docs.aws.amazon.com/ses/latest/DeveloperGuide/send-using-sdk-php.html
      * @link https://stackoverflow.com/questions/45791673/how-to-send-file-as-attachment-using-aws-ses-latest-sdk-3-33-and-php7
      * @todo Crear mensaje "a mano" con archivos adjuntos para no depender de PHPMailer
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-11
      */
     private function createEmailData($data, $header)
     {
@@ -190,7 +182,7 @@ class Network_Email_Api_AwsSes
             'Data' => $header['subject'],
         ];
         // agregar mensaje
-        if (!empty($data['html']) or !empty($data['text'])) {
+        if (!empty($data['html']) || !empty($data['text'])) {
             if (!empty($data['html'])) {
                 $email['Message']['Body']['Html'] = [
                     //'Charset' => '',

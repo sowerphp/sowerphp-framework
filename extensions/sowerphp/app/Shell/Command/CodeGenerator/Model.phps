@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ namespace {namespace};
  * Clase para mapear la tabla {table} de la base de datos
  * Comentario de la tabla: {comment}
  * Esta clase permite trabajar sobre un registro de la tabla {table}
- * @author {author}
- * @version {version}
  */
 class Model_{class} extends \Model_App
 {

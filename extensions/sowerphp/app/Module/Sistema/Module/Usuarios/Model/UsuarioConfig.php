@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ namespace sowerphp\app\Sistema\Usuarios;
  * Clase para mapear la tabla usuario_config de la base de datos
  * Comentario de la tabla:
  * Esta clase permite trabajar sobre un registro de la tabla usuario_config
- * @author SowerPHP Code Generator
- * @version 2017-10-16 14:22:53
  */
 class Model_UsuarioConfig extends \Model_App
 {

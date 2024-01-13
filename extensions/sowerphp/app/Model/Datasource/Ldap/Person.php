@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\app;
 
 /**
  * Modelo para trabajar con una persona de LDAP
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-12-29
  */
 class Model_Datasource_Ldap_Person extends Model_Datasource_Ldap_Entry
 {
@@ -49,8 +47,6 @@ class Model_Datasource_Ldap_Person extends Model_Datasource_Ldap_Entry
      * Constructor del modelo
      * @param uid UID de la entrada de la persona o bien el arreglo de LDAP con la entrada
      * @param ldap Configuración para LDAP o nombre de la configuración
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-29
      */
     public function __construct($uid = null, $Ldap = 'default')
     {
@@ -66,8 +62,6 @@ class Model_Datasource_Ldap_Person extends Model_Datasource_Ldap_Entry
     /**
      * Método que indica si la persona existe o no en el servidor LDAP
      * @return bool =true si la persona existe
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-12
      */
     public function exists()
     {
@@ -78,9 +72,7 @@ class Model_Datasource_Ldap_Person extends Model_Datasource_Ldap_Entry
      * Método que cambia la contraseña del usuario
      * @param new Contraseña nueva en texto plano
      * @param old Contraseña actual en texto plano
-     * @return =true si la contraseña pudo ser cambiada
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-02
+     * @return bool =true si la contraseña pudo ser cambiada
      */
     public function savePassword($new, $old = null)
     {
@@ -91,17 +83,17 @@ class Model_Datasource_Ldap_Person extends Model_Datasource_Ldap_Entry
         if ($status) {
             $this->userPassword = $entry['userPassword'][0];
             return true;
-        } else return false;
+        } else {
+            return false;
+        }
     }
 
     /**
      * Método que valida si la contraseña que se pasa como argumento es la
      * contraseña del usuario
-     * Referencia: http://php.net/manual/en/function.sha1.php#40226
+     * @link http://php.net/manual/en/function.sha1.php#40226
      * @param string $plain Contraseña en texto plano que se desea validar
      * @return bool =true si la contraseña es correcta
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-28
      */
     public function checkPassword(string $plain)
     {
@@ -117,15 +109,13 @@ class Model_Datasource_Ldap_Person extends Model_Datasource_Ldap_Entry
 
     /**
      * Función para calcular hash de un texto plano usando SSHA
-     * Referencia: http://php.net/manual/en/function.sha1.php#40226
+     * @link http://php.net/manual/en/function.sha1.php#40226
      * @param string $plain Texto plano
      * @return string Hash SSHA usando salt
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-27
      */
     public function hashPassword(string $plain)
     {
-        mt_srand((double)microtime()*1000000);
+        mt_srand((double)microtime() * 1000000);
         $salt = mhash_keygen_s2k(MHASH_SHA1, $plain, substr(pack('h*', md5(mt_rand())), 0, 8), 4);
         return '{SSHA}'.base64_encode(mhash(MHASH_SHA1, $plain.$salt).$salt);
     }

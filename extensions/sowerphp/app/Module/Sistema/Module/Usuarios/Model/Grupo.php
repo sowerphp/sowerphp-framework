@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ namespace sowerphp\app\Sistema\Usuarios;
  * Clase para mapear la tabla grupo de la base de datos
  * Comentario de la tabla: Grupos de la aplicación
  * Esta clase permite trabajar sobre un registro de la tabla grupo
- * @author SowerPHP Code Generator
- * @version 2014-04-05 17:32:18
  */
 class Model_Grupo extends \Model_App
 {

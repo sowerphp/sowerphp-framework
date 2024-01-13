@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,30 +25,25 @@ namespace sowerphp\general;
 
 /**
  * Controlador para módulos
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-05-04
  */
 class Controller_Module extends \Controller_App
 {
 
     /**
      * Método para autorizar la carga de index en caso que hay autenticación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-28
      */
-    public function beforeFilter ()
+    public function beforeFilter()
     {
-        if (isset($this->Auth))
+        if (isset($this->Auth)) {
             $this->Auth->allow('index');
-        parent::beforeFilter ();
+        }
+        parent::beforeFilter();
     }
 
     /**
      * Renderizará (sin autenticación) el archivo en View/index
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-18
      */
-    public function index ()
+    public function index()
     {
         if ($this->autoRender) {
             $this->autoRender = false;
@@ -58,16 +53,17 @@ class Controller_Module extends \Controller_App
 
     /**
      * Mostrar la página principal para el módulo (con sus opciones de menú)
-     * @version 2016-01-19
      */
-    public function display ()
+    public function display()
     {
-        if (!$this->autoRender) return;
+        if (!$this->autoRender) {
+            return;
+        }
         // desactivar renderizado automático
         $this->autoRender = false;
         // Si existe una vista para el del modulo se usa
         if (\sowerphp\core\Module::fileLocation($this->request->params['module'], 'View/display')) {
-            $this->render ('display');
+            $this->render('display');
         }
         // Si no se incluye el archivo con el título y el menú para el módulo
         else {
@@ -76,16 +72,21 @@ class Controller_Module extends \Controller_App
                 $this->request->params['module'],
                 'Config/nav'
             );
-            $nav and include($nav);
-            $nav_module = \sowerphp\core\Configure::read ('nav.module');
-            if (!$nav_module)
+            $nav && include($nav);
+            $nav_module = \sowerphp\core\Configure::read('nav.module');
+            if (!$nav_module) {
                 $nav_module = array();
+            }
             // nombre del módulo para url
-            $module = str_replace('.', '/', \sowerphp\core\Utility_Inflector::underscore (
-                $this->request->params['module']
-            ));
+            $module = str_replace(
+                '.',
+                '/',
+                \sowerphp\core\Utility_Inflector::underscore(
+                    $this->request->params['module']
+                )
+            );
             // verificar permisos
-            foreach ($nav_module as $link=>&$info) {
+            foreach ($nav_module as $link => &$info) {
                 // si info no es un arreglo es solo el nombre y se arma
                 if (!is_array($info)) {
                     $info = array(
@@ -108,12 +109,18 @@ class Controller_Module extends \Controller_App
                 }
             }
             // setear variables para la vista
-            $module = str_replace ('.', '/', \sowerphp\core\Utility_Inflector::underscore(
-                $this->request->params['module']
-            ));
+            $module = str_replace(
+                '.',
+                '/',
+                \sowerphp\core\Utility_Inflector::underscore(
+                    $this->request->params['module']
+                )
+            );
             $title = \sowerphp\core\Configure::read('module.title');
             if (!$title) {
-                $title = str_replace ('.', ' &raquo; ',
+                $title = str_replace (
+                    '.',
+                    ' &raquo; ',
                     $this->request->params['module']
                 );
             }
@@ -122,7 +129,7 @@ class Controller_Module extends \Controller_App
                 'nav' => $nav_module,
                 'module' => $module,
             ));
-            unset ($title, $nav_module, $module);
+            unset($title, $nav_module, $module);
             // renderizar
             $this->render('Module/index');
         }

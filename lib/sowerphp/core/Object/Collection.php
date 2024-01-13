@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para manejar colecciones de objetos
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2012-11-09
  */
 abstract class Object_Collection
 {
@@ -35,17 +33,13 @@ abstract class Object_Collection
 
     /**
      * Método para cargar los objetos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-09
      */
     abstract public function load ($name, $options = array());
 
     /**
      * Obtiene un objeto desde la colección
      * @param name Nombre del objeto que se quiere obtener
-     * @return El objeto solicitado o null si no lo encontró
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-09
+     * @return object|null El objeto solicitado o null si no lo encontró
      */
     public function __get($name)
     {
@@ -58,9 +52,7 @@ abstract class Object_Collection
     /**
      * Verifica si un objeto existe dentro de la colección
      * @param Nombre del objeto que se quiere verificar si existe
-     * @return =true si existe, =false si no existe
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-09
+     * @return bool =true si existe, =false si no existe
      */
     public function __isset($name)
     {
@@ -70,9 +62,7 @@ abstract class Object_Collection
     /**
      * Normaliza un arreglo de objetos, para una carga más simple
      * @param objects Objetos a normalizar
-     * @return Objetos normalizados
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-09
+     * @return array Objetos normalizados
      */
     public static function normalizeObjectArray($objects)
     {

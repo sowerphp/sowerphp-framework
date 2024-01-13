@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\app\Dev;
 
 /**
  * Controlador para las acciones relacionadas con la base de datos
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-08-05
  */
 class Controller_Bd extends \Controller_App
 {
@@ -35,13 +33,11 @@ class Controller_Bd extends \Controller_App
      * Acción que permite listar las tablas de una de las base de datos
      * configuradas y mostrar sus tablas y la información de las mismas
      * (comentarios, columnas y pks).
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-03
      */
-    public function tablas ()
+    public function tablas()
     {
         if (isset($_POST['submit'])) {
-            $db = &\sowerphp\core\Model_Datasource_Database::get ($_POST['database']);
+            $db = &\sowerphp\core\Model_Datasource_Database::get($_POST['database']);
             $tables = $db->getTables();
             $data = array();
             // procesar cada una de las tablas
@@ -51,45 +47,43 @@ class Controller_Bd extends \Controller_App
                     'name' => $info['name'],
                     'comment' => $info['comment'],
                     'columns' => array(),
-                    'pk' => implode ('<br />', $info['pk']),
+                    'pk' => implode('<br />', $info['pk']),
                 );
                 // procesar cada columna para armar su
                 // información
                 foreach ($info['columns'] as &$column) {
-                    $row['columns'][] = '<strong>['.$column['name'].']</strong> '.
-                        ($column['comment']!=''?$column['comment'].': ':'').
+                    $row['columns'][] = '<strong>[' . $column['name'] . ']</strong> '.
+                        ($column['comment'] != '' ? ($column['comment'] .': ') : '').
                         $column['type'].
-                        '('.$column['length'].')'.
-                        (($column['null']==='YES'||$column['null']==1)?' NULL':' NOT NULL').
-                        (" DEFAULT '".$column['default']."' ").
+                        '(' . $column['length'] . ')'.
+                        (($column['null'] === 'YES' || $column['null'] == 1) ? ' NULL' : ' NOT NULL').
+                        (" DEFAULT '" . $column['default'] . "' ").
                         (($column['auto']==='YES'||$column['auto']==1)?'AUTO ':'').
-                        (in_array($column['name'], $info['pk'])?'PK ':'').
-                        (is_array($column['fk'])?'FK:'.$column['fk']['table'].'.'.$column['fk']['column']:'')
+                        (in_array($column['name'], $info['pk']) ? 'PK ' : '').
+                        (is_array($column['fk']) ? ('FK:' . $column['fk']['table'] . '.' . $column['fk']['column']) : '')
                     ;
                 }
                 $row['columns'] = implode ('<br />', $row['columns']);
                 $data[] = $row;
             }
             // setear las variables para mostrar los datos de la bd
-            $this->set (array(
+            $this->set(array(
                 'database' => $_POST['database'],
                 'data' => $data
             ));
         }
         // setear listado de bases de datos
-        $this->_setDatabases ();
+        $this->_setDatabases();
     }
 
     /**
      * Acción que permite poblar datos en tablas de una BD
-     * @todo Poblar tablas con PK autoincrementales (idea, actualizar serie)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-01
+     * @todo Poblar tablas con PK autoincrementales. IDEA: actualizar serie.
      */
-    public function poblar ()
+    public function poblar()
     {
         if (isset($_FILES['file']) && !$_FILES['file']['error']) {
-            $db = &\sowerphp\core\Model_Datasource_Database::get ($_POST['database']);
+            $db = &\sowerphp\core\Model_Datasource_Database::get($_POST['database']);
             $sheets = \sowerphp\general\Utility_Spreadsheet::sheets($_FILES['file']);
             $message = array();
             // hacer todo en una transacción
@@ -136,11 +130,11 @@ class Controller_Bd extends \Controller_App
                         $where = preg_replace ('/\?/', $row[$cols[$pk]], $where, 1);
                     }
                     // si el registro existe se actualiza
-                    if ($pkCompleta and $db->getValue($existsQuery.$where)) {
+                    if ($pkCompleta && $db->getValue($existsQuery.$where)) {
                         $values = array();
-                        $auxCols = array_keys ($cols);
+                        $auxCols = array_keys($cols);
                         foreach ($row as &$col) {
-                            if ((string)$col!=='0' && empty($col)) {
+                            if ((string)$col !== '0' && empty($col)) {
                                 $values[] = array_shift($auxCols).' = NULL';
                             } else {
                                 $values[] = array_shift($auxCols).' = \''.$col.'\'';
@@ -153,7 +147,7 @@ class Controller_Bd extends \Controller_App
                     else {
                         $values = array();
                         foreach ($row as &$col) {
-                            if ((string)$col!=='0' && empty($col)) {
+                            if ((string)$col !== '0' && empty($col)) {
                                 $values[] = 'NULL';
                             } else {
                                 $values[] = '\''.$col.'\'';
@@ -168,10 +162,10 @@ class Controller_Bd extends \Controller_App
                     }
                 }
                 // alterar secuencia
-                if (in_array('id', $info['pk']) && $id>0) {
+                if (in_array('id', $info['pk']) && $id > 0) {
                     $es_serial = false;
                     foreach ($info['columns'] as $columna) {
-                        if ($columna['name']=='id') {
+                        if ($columna['name'] == 'id') {
                             if ($columna['auto']) {
                                 $es_serial = true;
                             }
@@ -179,7 +173,7 @@ class Controller_Bd extends \Controller_App
                         }
                     }
                     if ($es_serial) {
-                        if ($db=='PostgreSQL') {
+                        if ($db == 'PostgreSQL') {
                             $db->query('SELECT SETVAL (\''.$table.'_id_seq\', '.$id.');')->errorCode();
                         }
                     }
@@ -194,7 +188,7 @@ class Controller_Bd extends \Controller_App
             }
             // terminar transacción
             $db->commit();
-            \sowerphp\core\Model_Datasource_Session::message (implode('<br />', $message));
+            \sowerphp\core\Model_Datasource_Session::message(implode('<br />', $message));
         }
         // setear listado de bases de datos
         $this->_setDatabases ();
@@ -206,25 +200,23 @@ class Controller_Bd extends \Controller_App
      * eligen las tablas para las cuales se desea descargar sus datos. Una
      * vez se eligen las tablas se descargan los datos en el archivo de
      * formato seleccionado (ej: ODS o XLS).
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-18
      */
-    public function descargar ()
+    public function descargar()
     {
         $this->autoRender = false;
         // en caos que se haya seleccionado una base de datos
         if (isset($_POST['step1'])) {
-            $db = &\sowerphp\core\Model_Datasource_Database::get ($_POST['database']);
+            $db = &\sowerphp\core\Model_Datasource_Database::get($_POST['database']);
             $this->set(array(
                 'database' => $_POST['database'],
                 'type' => $_POST['type'],
                 'tables' => $db->getTables(),
             ));
-            $this->render ('Bd/descargar_step2');
+            $this->render('Bd/descargar_step2');
         }
         // en caso que se hayan seleccionado las tablas descargar datos
         else if (isset($_POST['step2'])) {
-            $db = &\sowerphp\core\Model_Datasource_Database::get ($_POST['database']);
+            $db = &\sowerphp\core\Model_Datasource_Database::get($_POST['database']);
             $data = array();
             foreach ($_POST['tables'] as &$table) {
                 $data[$table] = $db->getTableWithColsNames ('
@@ -233,30 +225,28 @@ class Controller_Bd extends \Controller_App
                 ');
             }
             $this->set(array(
-                'id'=>'database_'.$_POST['database'],
-                'type'=>$_POST['type'],
-                'data'=>$data,
+                'id' => 'database_' . $_POST['database'],
+                'type' => $_POST['type'],
+                'data' => $data,
             ));
             $this->render ('Bd/descargar_step3');
         }
         // en caso que no se haya seleccionado aun la bd
         else {
             // setear listado de bases de datos
-            $this->_setDatabases ();
+            $this->_setDatabases();
             $this->render ('Bd/descargar_step1');
         }
     }
 
     /**
      * Acción para ejecutar una consulta SQL en una de las bases de datos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-01-22
      */
     public function consulta()
     {
         if (isset($_POST['submit'])) {
             ini_set('memory_limit', '1024M');
-            $db = &\sowerphp\core\Model_Datasource_Database::get ($_POST['database']);
+            $db = &\sowerphp\core\Model_Datasource_Database::get($_POST['database']);
             try {
                 $data = $db->getTableWithColsNames($_POST['query']);
             } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
@@ -265,7 +255,7 @@ class Controller_Bd extends \Controller_App
                 );
             }
             if (isset($data)) {
-                if ($_POST['resultados']=='web') {
+                if ($_POST['resultados'] == 'web') {
                     $this->set([
                         'data' => $data,
                         'database' => $_POST['database']
@@ -282,17 +272,15 @@ class Controller_Bd extends \Controller_App
     /**
      * Método que busca las bases de datos configuradas a través de
      * Configure y las asigna para la vista como un arreglo asociativo
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-03
      */
-    private function _setDatabases ()
+    private function _setDatabases()
     {
         $databases = array();
         $aux = \sowerphp\core\Configure::read('database');
         foreach ($aux as $database => &$config) {
             $databases[$database] = $database;
         }
-        $this->set ('databases', $databases);
+        $this->set('databases', $databases);
     }
 
 }

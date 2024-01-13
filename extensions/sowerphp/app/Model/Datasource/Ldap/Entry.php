@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\app;
 
 /**
  * Clase abstracta de la que heredarán todas las entradas de Ldap
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-12-29
  */
 abstract class Model_Datasource_Ldap_Entry
 {
@@ -34,8 +32,6 @@ abstract class Model_Datasource_Ldap_Entry
     /**
      * Método que asigna los atributos de la clase a partir de los datos de una
      * entrada de LDAP
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-30
      */
     public function setFromEntry($entry)
     {
@@ -45,13 +41,14 @@ abstract class Model_Datasource_Ldap_Entry
                 $key = strtolower($var);
                 if ($var == 'dn') {
                     $this->dn = $entry['dn'];
-                } else if (isset($entry[$key]) and !empty($entry[$key]['count'])) {
-                    if ($entry[$key]['count']==1) {
+                } else if (isset($entry[$key]) && !empty($entry[$key]['count'])) {
+                    if ($entry[$key]['count'] == 1) {
                         $this->{$var} = $entry[$key][0];
                     } else {
                         $this->{$var} = [];
-                        for ($i=0; $i<$entry[$key]['count']; $i++)
+                        for ($i=0; $i < $entry[$key]['count']; $i++) {
                             $this->{$var}[] = $entry[$key][$i];
+                        }
                     }
                 }
             }

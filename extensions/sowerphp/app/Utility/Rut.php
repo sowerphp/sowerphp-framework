@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\app;
 
 /**
  * Clase para trabajar con RUTs (y RUNs) de Chile
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2016-01-30
  */
 class Utility_Rut
 {
@@ -35,8 +33,6 @@ class Utility_Rut
      * Método que valida el RUT ingresado
      * @param mixed $rut RUT con dígito verificador (puntos son opcionales)
      * @return bool
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-04
      */
     public static function check($rut)
     {
@@ -55,14 +51,12 @@ class Utility_Rut
      * Calcula el dígito verificador de un RUT
      * @param mixed $r RUT al que se calculará el dígito verificador
      * @return string Dígito verificador
-     * @author Desconocido
-     * @version 2010-05-23
      */
     public static function dv($r)
     {
         $r = str_replace('.', '', $r);
         $r = str_replace(',', '', $r);
-        $s=1;
+        $s = 1;
         for ($m = 0; $r != 0; $r/=10) {
             $s = ($s + $r%10 * (9 - $m++ % 6)) % 11;
         }
@@ -75,8 +69,6 @@ class Utility_Rut
      * @param mixed $rut RUT que se quiere transformar
      * @param bool $quitarDV Si es true el dígito verificador se quita, sino se mantiene
      * @return mixed RUT formateado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-01
      */
     public static function normalizar($rut, $quitarDV = true)
     {
@@ -88,7 +80,7 @@ class Utility_Rut
 
     private static function normalizar_array($arreglo, $quitarDV = true)
     {
-        if (isset($arreglo[1]) and (!empty($arreglo[1]) or $arreglo[1]==='0')) {
+        if (isset($arreglo[1]) && (!empty($arreglo[1]) || $arreglo[1]==='0')) {
             $arreglo[0] .= '-' . strtoupper($arreglo[1]);
         }
         if (!strpos($arreglo[0], '-')) {
@@ -121,8 +113,6 @@ class Utility_Rut
      * Agrega un número su dígito verificador y lo formatea como RUT
      * @param mixed $rut RUT en formato número y sin dígito verificador
      * @return string RUT formateado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-01
      */
     public static function addDV($rut)
     {

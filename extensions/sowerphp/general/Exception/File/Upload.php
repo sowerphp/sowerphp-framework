@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\general;
 
 /**
  * Excepción que se lanza con los códigos de error al subir un archivo mediante formulario
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2023-11-06
  */
 class Exception_File_Upload extends \Exception {
 
@@ -39,30 +37,38 @@ class Exception_File_Upload extends \Exception {
     private function codeToMessage($code)
     {
         switch ($code) {
-            case \UPLOAD_ERR_INI_SIZE:
+            case \UPLOAD_ERR_INI_SIZE: {
                 $message = __('El archivo excede el tamaño máximo permitido por el servidor (opción: upload_max_filesize).');
                 break;
-            case \UPLOAD_ERR_FORM_SIZE:
+            }
+            case \UPLOAD_ERR_FORM_SIZE: {
                 $message = __('El archivo excede el tamaño máximo permitido por el formulario (opción: MAX_FILE_SIZE).');
                 break;
-            case \UPLOAD_ERR_PARTIAL:
+            }
+            case \UPLOAD_ERR_PARTIAL: {
                 $message = __('El archivo pudo ser subido sólo parcialmente.');
                 break;
-            case \UPLOAD_ERR_NO_FILE:
+            }
+            case \UPLOAD_ERR_NO_FILE: {
                 $message = __('No se subió el archivo.');
                 break;
-            case \UPLOAD_ERR_NO_TMP_DIR:
+            }
+            case \UPLOAD_ERR_NO_TMP_DIR: {
                 $message = __('No fue posible encontrar una carpeta temporal para subir el archivo en el servidor.');
                 break;
-            case \UPLOAD_ERR_CANT_WRITE:
+            }
+            case \UPLOAD_ERR_CANT_WRITE: {
                 $message = __('Ocurrió un problema al tratar de guardar el archivo en el sistema de archivos del servidor.');
                 break;
-            case \UPLOAD_ERR_EXTENSION:
+            }
+            case \UPLOAD_ERR_EXTENSION: {
                 $message = __('La subida del archivo fue detenida por una extensión de PHP en uso.');
                 break;
-            default:
+            }
+            default: {
                 $message = __('Ocurrió un error desconocido al subir el archivo.');
                 break;
+            }
         }
         return $message;
     }

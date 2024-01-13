@@ -28,7 +28,7 @@ foreach ($columns as $column => &$info) {
         $end = substr($column, -5);
         if (in_array($end, ['_data', '_name', '_type', '_size'])) {
             $col = substr($column, 0, -5);
-            if (isset($columns[$col.'_data']) and isset($columns[$col.'_name']) and isset($columns[$col.'_type']) and isset($columns[$col.'_size'])) {
+            if (isset($columns[$col.'_data']) && isset($columns[$col.'_name']) && isset($columns[$col.'_type']) && isset($columns[$col.'_size'])) {
                 if ($end=='_name') {
                     $input['name'] = $col;
                     $input['type'] = 'file';

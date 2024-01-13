@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -27,8 +27,6 @@ namespace sowerphp\general;
  * Clase para generar gráficos
  * Hace uso de libchart, presentando métodos más simples y evitando que el
  * programador deba escribir tando código
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-11-19
  */
 class View_Helper_Chart
 {
@@ -47,11 +45,8 @@ class View_Helper_Chart
      * @param type Tipo de gráfico que se desea generar
      * @param options Opciones para el gráfico
      * @param exit =true si se debe terminar el script, =false si no se debe terminar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-30
      */
-    private function generate ($title, $series, $type,
-                                            $options = array(), $exit = true)
+    private function generate($title, $series, $type, $options = array(), $exit = true)
     {
         // asignar opciones por defecto del gráfico
         $options = array_merge($this->defaultOptions, $options);
@@ -61,12 +56,13 @@ class View_Helper_Chart
         // asignar colores
         if (isset($options['colors'])) {
             $colors = array();
-            foreach ($options['colors'] as &$c)
+            foreach ($options['colors'] as &$c) {
                 $colors[] = new \Libchart\View\Color\Color($c[0], $c[1], $c[2]);
-            if ($type=='Line') {
+            }
+            if ($type == 'Line') {
                 $chart->getPlot()->getPalette()->setLineColor($colors);
             }
-            else if ($type=='VerticalBar') {
+            else if ($type == 'VerticalBar') {
                 $chart->getPlot()->getPalette()->setBarColor($colors);
             }
         }
@@ -98,10 +94,8 @@ class View_Helper_Chart
      * @param data Datos del gráfico
      * @param options Opciones del gráfico
      * @param exit =true si se debe terminar el script, =false si no se debe terminar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-19
      */
-    private function render (&$chart, $title, $data, $options, $exit = true)
+    private function render(&$chart, $title, $data, $options, $exit = true)
     {
         // opciones por defecto
         $options = array_merge (
@@ -129,7 +123,9 @@ class View_Helper_Chart
         header('Content-Disposition: '.$options['disposition'].'; filename="'.$options['filename'].'"');
         // renderizar y terminar script
         $chart->render();
-        if ($exit) exit(0);
+        if ($exit) {
+            exit(0);
+        }
     }
 
     /**
@@ -138,10 +134,8 @@ class View_Helper_Chart
      * @param series Datos del gráfico
      * @param options Opciones para el gráfico
      * @param exit =true si se debe terminar el script, =false si no se debe terminar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-03
      */
-    public function line ($title, $series, $options=array(), $exit= true)
+    public function line($title, $series, $options=array(), $exit= true)
     {
         $this->generate ($title, $series, 'Line', $options, $exit);
     }
@@ -152,13 +146,10 @@ class View_Helper_Chart
      * @param series Datos del gráfico
      * @param options Opciones para el gráfico
      * @param exit =true si se debe terminar el script, =false si no se debe terminar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-03
      */
-    public function vertical_bar ($title, $series,
-                                            $options = array(), $exit = true)
+    public function vertical_bar($title, $series, $options = array(), $exit = true)
     {
-        $this->generate ($title, $series, 'VerticalBar', $options, $exit);
+        $this->generate($title, $series, 'VerticalBar', $options, $exit);
     }
 
     /**
@@ -167,13 +158,10 @@ class View_Helper_Chart
      * @param series Datos del gráfico
      * @param options Opciones para el gráfico
      * @param exit =true si se debe terminar el script, =false si no se debe terminar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-03
      */
-    public function horizontal_bar ($title, $series,
-                                            $options = array(), $exit = true)
+    public function horizontal_bar($title, $series, $options = array(), $exit = true)
     {
-        $this->generate ($title, $series, 'HorizontalBar', $options, $exit);
+        $this->generate($title, $series, 'HorizontalBar', $options, $exit);
     }
 
     /**
@@ -182,10 +170,8 @@ class View_Helper_Chart
      * @param data Datos del gráfico
      * @param options Opciones para el gráfico
      * @param exit =true si se debe terminar el script, =false si no se debe terminar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-19
      */
-    public function pie ($title, $data, $options = array(), $exit = true)
+    public function pie($title, $data, $options = array(), $exit = true)
     {
         // asignar opciones por defecto del gráfico
         $options = array_merge($this->defaultOptions, ['padding'=>false], $options);
@@ -194,8 +180,9 @@ class View_Helper_Chart
         // asignar colores
         if (isset($options['colors'])) {
             $colors = array();
-            foreach ($options['colors'] as &$c)
+            foreach ($options['colors'] as &$c) {
                 $colors[] = new Color($c[0], $c[1], $c[2]);
+            }
             $chart->getPlot()->getPalette()->setPieColor($colors);
         }
         // asignar datos

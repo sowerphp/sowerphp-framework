@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -27,8 +27,6 @@ namespace sowerphp\core;
  * Clase para enviar correo electrónico mediante Mailgun
  * Requiere:
  *   $ composer require mailgun/mailgun-php kriswallsmith/buzz nyholm/psr7
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2020-02-09
  */
 class Network_Email_Api_Mailgun
 {
@@ -39,8 +37,6 @@ class Network_Email_Api_Mailgun
     /**
      * Constructor de la clase
      * @param config Arreglo con la configuración de Mailgun
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-09
      */
     public function __construct($config)
     {
@@ -54,7 +50,7 @@ class Network_Email_Api_Mailgun
         ], $config);
         // si no están los campos mínimos necesarios error
         if (empty($this->config['domain']) || empty($this->config['secret']) || empty($this->config['endpoint'])) {
-             throw new \sowerphp\core\Exception('Configuración del correo electrónico incompleta');
+            throw new \sowerphp\core\Exception('Configuración del correo electrónico incompleta');
         }
         // crar objeto mg
         $this->mg = \Mailgun\Mailgun::create($this->config['secret'], 'https://'.$this->config['endpoint']);
@@ -64,10 +60,8 @@ class Network_Email_Api_Mailgun
      * Método que envía el correo
      * @param data Arrelgo con los datos que se enviarán (texto y adjuntos)
      * @param header Cabeceras del correo
-     * @return Arreglo con los estados de retorno por cada correo enviado
+     * @return mixed =true si se envió el correo o arreglo con error
      * @link https://documentation.mailgun.com/en/latest/api-sending.html#sending
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-09
      */
     public function send($data, $header)
     {

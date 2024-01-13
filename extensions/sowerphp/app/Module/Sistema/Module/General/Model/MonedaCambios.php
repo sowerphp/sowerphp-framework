@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ namespace sowerphp\app\Sistema\General;
  * Clase para mapear la tabla moneda_cambio de la base de datos
  * Comentario de la tabla:
  * Esta clase permite trabajar sobre un conjunto de registros de la tabla moneda_cambio
- * @author SowerPHP Code Generator
- * @version 2015-05-14 01:01:15
  */
 class Model_MonedaCambios extends \Model_Plural_App
 {
@@ -48,8 +46,6 @@ class Model_MonedaCambios extends \Model_Plural_App
     /**
      * Método que busca los valores de varias monedas al mismo tiempo para un
      * día determinado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-10-29
      */
     public function getValor($monedas, $dia = null)
     {
@@ -67,8 +63,8 @@ class Model_MonedaCambios extends \Model_Plural_App
         $i = 1;
         $in = [];
         foreach ($monedas as $m) {
-            $in[] = ':moneda'.$i;
-            $vars[':moneda'.$i] = $m;
+            $in[] = ':moneda' . $i;
+            $vars[':moneda' . $i] = $m;
             $i++;
         }
         $where[] = 'desde IN ('.implode(', ', $in).')';
@@ -83,8 +79,6 @@ class Model_MonedaCambios extends \Model_Plural_App
     /**
      * Método que busca los valores de varias monedas al mismo tiempo para un
      * rango de días determinados
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2023-02-28
      */
     public function getValores($monedas, $fecha_desde = null, $fecha_hasta)
     {
@@ -103,30 +97,28 @@ class Model_MonedaCambios extends \Model_Plural_App
         $i = 1;
         $in = [];
         foreach ($monedas as $m) {
-            $in[] = ':moneda'.$i;
-            $vars[':moneda'.$i] = $m;
+            $in[] = ':moneda' . $i;
+            $vars[':moneda' . $i] = $m;
             $i++;
         }
-        $where[] = 'desde IN ('.implode(', ', $in).')';
+        $where[] = 'desde IN (' . implode(', ', $in) . ')';
         return $this->db->getAssociativeArray('
             SELECT desde AS moneda, fecha, valor
             FROM moneda_cambio
-            WHERE '.implode(' AND ', $where).'
+            WHERE ' . implode(' AND ', $where) . '
             ORDER BY desde, fecha
         ', $vars);
     }
 
     /**
      * Método que convierte un monto de una moneda a otra
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-10-26
      */
     public function convertir($desde, $a, $monto, $fecha = null, $decimales = null)
     {
         if (!$fecha) {
             $fecha = date('Y-m-d');
         }
-        if ($decimales===null) {
+        if ($decimales === null) {
             $decimales = $this->getDecimales($a);
         }
         $cambio = (new \sowerphp\app\Sistema\General\Model_MonedaCambio($desde, $a, $fecha))->valor;
@@ -142,12 +134,10 @@ class Model_MonedaCambios extends \Model_Plural_App
 
     /**
      * Método que entrega los decimales asociados a una moneda
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-10-26
      */
     public function getDecimales($moneda)
     {
-        return isset($this->decimales[$moneda]) ? $this->decimales[$moneda] : 3;
+        return isset($this->decimales[$moneda]) ? $this->decimales[$moneda] : 2;
     }
 
 }

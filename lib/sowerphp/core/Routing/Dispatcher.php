@@ -25,16 +25,12 @@ namespace sowerphp\core;
 
 /**
  * Clase para despachar la página que se esté solicitando
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-21
  */
 class Routing_Dispatcher
 {
 
     /**
      * Método que despacha la página solicitada
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-11-14
      */
     public static function dispatch()
     {
@@ -75,8 +71,6 @@ class Routing_Dispatcher
      * @param string $url Ruta de los que se está solicitando
      * @param Network_Response $response Objeto Response
      * @return bool Verdadero si lo solicitado existe dentro de /webroot
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-21
      */
     private static function _asset(string $url, Network_Response $response)
     {
@@ -139,8 +133,6 @@ class Routing_Dispatcher
 
     /**
      * Método que obtiene el controlador
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-22
      */
     private static function _getController(Network_Request $request, Network_Response $response)
     {
@@ -167,8 +159,6 @@ class Routing_Dispatcher
     /**
      * Método que se encarga de invocar a la acción del controlador y
      * entregar la respuesta
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-22
      */
     private static function _invoke(Controller $controller, Network_Request $request, Network_Response $response)
     {

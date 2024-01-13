@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\app;
 
 /**
  * Modelo general para trabajar con autenticación secundaria
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2017-12-22
  */
 class Model_Datasource_Auth2 extends Model_Datasource_Auth2_Base
 {
@@ -35,8 +33,6 @@ class Model_Datasource_Auth2 extends Model_Datasource_Auth2_Base
      * Método que permite obtener un objeto de autenticación secundaria
      * @param name Nombre del método de autenticación secundaria
      * @param config Arreglo con la configuración
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-12-23
      */
     public static function get($name = '2FA', array $config = [])
     {
@@ -52,8 +48,6 @@ class Model_Datasource_Auth2 extends Model_Datasource_Auth2_Base
 
     /**
      * Método que entrega todas las autenticaciones secundarias disponibles en la aplicación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-12-22
      */
     public static function getAll()
     {
@@ -67,8 +61,6 @@ class Model_Datasource_Auth2 extends Model_Datasource_Auth2_Base
 
     /**
      * Método que indica si hay alguna auth2 que use token
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-12-23
      */
     public static function tokenEnabled()
     {

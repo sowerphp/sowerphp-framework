@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -26,8 +26,6 @@ namespace sowerphp\core;
 /**
  * Clase para desplegar los errores que se generan en la ejecución de la
  * aplicación
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-23
  */
 class Controller_Error extends \Controller_App
 {
@@ -37,8 +35,6 @@ class Controller_Error extends \Controller_App
     /**
      * Renderizar error
      * @param data Datos qye se deben pasar a la vista del error
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-09-16
      */
     public function display($data)
     {
@@ -55,7 +51,7 @@ class Controller_Error extends \Controller_App
         }
         $this->layout .= '.min';
         $this->set($data);
-        $this->set('soporte', \sowerphp\core\Configure::read('email.default')!==NULL);
+        $this->set('soporte', \sowerphp\core\Configure::read('email.default') !== null);
         $this->render('Error/error');
     }
 

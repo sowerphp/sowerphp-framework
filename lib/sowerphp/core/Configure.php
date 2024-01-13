@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para configurar la aplicación
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-21
  */
 class Configure
 {
@@ -36,8 +34,6 @@ class Configure
 
     /**
      * Realizar configuración al inicio de la aplicación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-30
      */
     public static function bootstrap()
     {
@@ -55,11 +51,11 @@ class Configure
         }
         // Incluir configuraciones de la aplicación web
         foreach ($paths as &$path) {
-            App::import($path.'/Config/core');
+            App::import($path . '/Config/core');
         }
         // Incluir rutas de la aplicación web
         foreach ($paths as &$path) {
-            App::import($path.'/Config/routes');
+            App::import($path . '/Config/routes');
         }
         // Setear parámetros de errores
         ini_set('display_errors', self::$_values['debug']);
@@ -77,7 +73,7 @@ class Configure
             define('TMP', sys_get_temp_dir());
         }
         // cargar reglas de Inflector para el idioma de la aplicación
-        App::import ('Config/Inflector/'.self::$_values['language']);
+        App::import ('Config/Inflector/' . self::$_values['language']);
         // procesar cada capa (excepto SowerPHP/core) buscando funciones y bootstrap
         $paths = array_reverse(App::paths());
         array_shift($paths);
@@ -102,9 +98,8 @@ class Configure
      * parámetro.
      * @param config Parámetro
      * @param value Valor
-     * @author CakePHP
      */
-    public static function write ($config, $value = null)
+    public static function write($config, $value = null)
     {
         // Si config no es arreglo se crea como arreglo
         if (!is_array($config)) {
@@ -117,19 +112,22 @@ class Configure
             if (strpos($name, '.') === false) {
                 self::$_values[$name] = $value;
             }
-            // En caso que tuviese punto se asume que se debe dividir en niveles
+            // En caso que tuviese punto se asume que se debe dividir en niveles (hasta 4)
             else {
                 $names = explode('.', $name, 4);
                 switch (count($names)) {
-                    case 2:
+                    case 2: {
                         self::$_values[$names[0]][$names[1]] = $value;
                         break;
-                    case 3:
+                    }
+                    case 3: {
                         self::$_values[$names[0]][$names[1]][$names[2]] = $value;
                         break;
-                    case 4:
+                    }
+                    case 4: {
                         self::$_values[$names[0]][$names[1]][$names[2]][$names[3]] = $value;
                         break;
+                    }
                 }
             }
         }
@@ -138,10 +136,10 @@ class Configure
     /**
      * Leer el valor de una variable desde el arreglo de configuraciones
      * @param var Variable / parámetro que se desea leer
-     * @return Valor de la variable o nulo si no se encontró
-     * @author CakePHP
+     * @param default Valor por defecto de la variable o parámetro que se busca en la configuración
+     * @return mixed Valor de la variable o null si no se encontró y no hay valor por defecto
      */
-    public static function read ($var = null)
+    public static function read($var = null, $default = null)
     {
         // Si var no se especificó se devuelven todas las configuraciones
         if ($var === null) {
@@ -156,30 +154,33 @@ class Configure
             $names = explode('.', $var, 4);
             $var = $names[0];
         }
-        // Si la variable no existe se retorna nulo
+        // Si la variable no existe se retorna el valor por defecto (que por defecto es null)
         if (!isset(self::$_values[$var])) {
-            return null;
+            return $default;
         }
         // Si se llegó aquí es porque la variable (primera clave del arreglo $_values existe)
         switch (count($names)) {
-            case 2:
+            case 2: {
                 if (isset(self::$_values[$names[0]][$names[1]])) {
                     return self::$_values[$names[0]][$names[1]];
                 }
                 break;
-            case 3:
+            }
+            case 3: {
                 if (isset(self::$_values[$names[0]][$names[1]][$names[2]])) {
                     return self::$_values[$names[0]][$names[1]][$names[2]];
                 }
                 break;
-            case 4:
+            }
+            case 4: {
                 if (isset(self::$_values[$names[0]][$names[1]][$names[2]][$names[3]])) {
                     return self::$_values[$names[0]][$names[1]][$names[2]][$names[3]];
                 }
                 break;
+            }
         }
-        // Si no se encontró definida la variable
-        return null;
+        // Si no se encontró definida la variable se entrega el valor por defecto
+        return $default;
     }
 
 }

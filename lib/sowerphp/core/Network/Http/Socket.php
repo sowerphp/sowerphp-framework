@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para manejar conexiones HTTP
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2016-01-15
  */
 class Network_Http_Socket
 {
@@ -46,13 +44,11 @@ class Network_Http_Socket
      * @param data Datos que se enviarán
      * @param header Cabecera que se enviará
      * @param sslv3 =true se fuerza sslv3, por defecto es false
-     * @return Respusta HTTP (cabecera y cuerpo)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-08-04
+     * @return array Arreglo con la respuesta HTTP (cabecera y cuerpo)
      */
     public static function __callStatic($method, $args)
     {
-        if (!isset($args[0]) or !in_array($method, self::$methods)) {
+        if (!isset($args[0]) || !in_array($method, self::$methods)) {
             return false;
         }
         $method = strtoupper($method);
@@ -65,14 +61,19 @@ class Network_Http_Socket
         // inicializar curl
         $curl = curl_init();
         // asignar método y datos dependiendo de si es GET u otro método
-        if ($method=='GET') {
-            if (is_array($data))
+        if ($method == 'GET') {
+            if (is_array($data)) {
                 $data = http_build_query($data);
-            if ($data) $url = sprintf("%s?%s", $url, $data);
+            }
+            if ($data) {
+                $url = sprintf("%s?%s", $url, $data);
+            }
         } else {
             curl_setopt($curl, CURLOPT_POST, 1);
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
-            if ($data) curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+            if ($data) {
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+            }
         }
         // asignar cabeceras de la solicitud HTTP
         $headers = [];
@@ -126,9 +127,7 @@ class Network_Http_Socket
      * entonces dicha cabecerá tendrá como valor un arreglo con todos sus
      * valores.
      * @param header Cabecera HTTP en texto plano
-     * @return Arreglo asociativo con la cabecera
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-03
+     * @return array Arreglo asociativo con la cabecera
      */
     private static function parseHeader($header)
     {
@@ -136,7 +135,9 @@ class Network_Http_Socket
         $lineas = explode("\n", $header);
         foreach ($lineas as &$linea) {
             $linea = trim($linea);
-            if (!isset($linea[0])) continue;
+            if (!isset($linea[0])) {
+                continue;
+            }
             if (strpos($linea, ':')) {
                 list($key, $value) = explode(':', $linea, 2);
             } else {
@@ -161,9 +162,7 @@ class Network_Http_Socket
      * Método que procesa la línea de respuesta y extrae el protocolo, código de
      * estado y el mensaje del estado
      * @param response_line
-     * @return Arreglo con índices: protocol, code, message
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-11-12
+     * @return array Arreglo con índices: protocol, code, message
      */
     private static function parseStatus($response_line)
     {
@@ -180,9 +179,7 @@ class Network_Http_Socket
 
     /**
      * Método que entrega los errores ocurridos
-     * @return Arreglo con los strings de los errores de cURL
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-01-15
+     * @return array Arreglo con los strings de los errores de cURL
      */
     public static function getErrors()
     {
@@ -191,9 +188,7 @@ class Network_Http_Socket
 
     /**
      * Método que entrega el último error de cURL
-     * @return Arreglo con los strings de los errores de cURL
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-01-15
+     * @return array Arreglo con los strings de los errores de cURL
      */
     public static function getLastError()
     {

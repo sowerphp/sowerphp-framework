@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\general;
 
 /**
  * Helper para la creación de tablas en HTML
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2016-10-06
  */
 class View_Helper_Table
 {
@@ -46,8 +44,6 @@ class View_Helper_Table
      * @param table Datos con la tabla que se desea generar
      * @param id Identificador de la tabla
      * @param export Si se desea poder exportar los datos de la tabla
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-02-18
      */
     public function __construct($table = null, $id = null, $export = false, $display = null)
     {
@@ -64,8 +60,6 @@ class View_Helper_Table
     /**
      * Asigna un identificador a la tabla
      * @param id Identificador para asignar a la tabla
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-12-02
      */
     public function setId($id)
     {
@@ -75,8 +69,6 @@ class View_Helper_Table
     /**
      * Asignar el atributo class para la tabla
      * @param class Atributo class (o varios) que se asignarán
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-12-02
      */
     public function setClass($class)
     {
@@ -86,8 +78,6 @@ class View_Helper_Table
     /**
      * Asignar si se deberán generar o no iconos para exportar la tabla
      * @param export Flag para indicar si se debe o no exportar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-12-02
      */
     public function setExport($export = true)
     {
@@ -97,8 +87,6 @@ class View_Helper_Table
     /**
      * Definir que se deberá remover de la tabla antes de poder exportarla
      * @param remove Atributo con lo que se desea extraer antes de exportar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-12-02
      */
     public function setExportRemove($remove)
     {
@@ -108,8 +96,6 @@ class View_Helper_Table
     /**
      * Asignar si se debe o no mostrar la tabla (o se usa más para mostrar)
      * @param display Flag para indicar si se debe o no mostrar la tabla
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-12-02
      */
     public function setDisplay($display = true)
     {
@@ -119,8 +105,6 @@ class View_Helper_Table
     /**
      * Asignar la altura que podrá ocupar todo el contenedor (div) de la tabla
      * @param height Altura en pixeles del div
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-05-14
      */
     public function setHeight($height = null)
     {
@@ -130,8 +114,6 @@ class View_Helper_Table
     /**
      * Asignar ancho de las columnas
      * @param width Arreglo con los anchos de las columnas (null si una columna debe ser automática)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-07-09
      */
     public function setColsWidth($width = [])
     {
@@ -141,8 +123,6 @@ class View_Helper_Table
     /**
      * Asignar si se deben o no mostrar las columnas vacías de la tabla
      * @param show =true se mostrarán todas las columnas =false sólo aquellas donde exista al menos una fila con un dato
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-10-06
      */
     public function setShowEmptyCols($show = true)
     {
@@ -153,8 +133,6 @@ class View_Helper_Table
      * Método que genera la tabla en HTML a partir de un arreglo
      * @param table Tabla que se generará
      * @todo Programar opción para no mostrar todas las columnas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-17
      */
     public function generate($table, $thead = 1)
     {
@@ -183,7 +161,7 @@ class View_Helper_Table
             foreach ($table as $k_row => $row) {
                 $col_count = 0;
                 foreach ($row as $k_col => $col) {
-                    if (isset($empty_cols[$col_count]) and $empty_cols[$col_count]==$n_rows) {
+                    if (isset($empty_cols[$col_count]) && $empty_cols[$col_count] == $n_rows) {
                         unset($table[$k_row][$k_col]);
                     }
                     $col_count++;
@@ -207,7 +185,7 @@ class View_Helper_Table
         // de imprimir directamente
         $buffer = ($this->_height ? '<div style="max-height:'.$this->_height.'px;overflow:auto">' : '<div>')."\n";
         // Crear iconos para exportar y ocultar/mostrar tabla
-        if ($this->_id!==null) {
+        if ($this->_id !== null) {
             $buffer .= '<div class="tableIcons hidden-print text-end">'."\n";
             $buffer .= $this->export($table);
             $buffer .= $this->showAndHide();
@@ -223,7 +201,7 @@ class View_Helper_Table
         $buffer .= "\t\t".'<tr>'."\n";
         $i = 0;
         foreach ($titles as &$col) {
-            if (isset($colsWidth[$i]) && $colsWidth[$i]!=null) {
+            if (isset($colsWidth[$i]) && $colsWidth[$i] != null) {
                 $w = ' style="width:'.$colsWidth[$i].'px"';
             } else {
                 $w = '';
@@ -267,8 +245,6 @@ class View_Helper_Table
     /**
      * Crea los datos de la sesión de la tabla para poder exportarla
      * @param table Tabla que se está exportando
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-10-15
      */
     private function export(&$table)
     {
@@ -319,13 +295,11 @@ class View_Helper_Table
 
     /**
      * Botones para mostrar y ocultar la tabla (+/-)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-10-15
      */
     public function showAndHide()
     {
         $buffer = '';
-        if ($this->_display!==null) {
+        if ($this->_display !== null) {
             $buffer .= '<button type="button" class="btn btn-primary" onclick="$(\'#'.$this->_id.'\').show(); $(\'#tableShow'.$this->_id.'\').hide(); $(\'#tableHide'.$this->_id.'\').show();" id="tableShow'.$this->_id.'" title="Mostrar tabla"><i class="far fa-plus-square fa-fw"></i></button>';
             $buffer .= '<button type="button" class="btn btn-primary" onclick="$(\'#'.$this->_id.'\').hide(); $(\'#tableHide'.$this->_id.'\').hide(); $(\'#tableShow'.$this->_id.'\').show();" id="tableHide'.$this->_id.'" title="Ocultar tabla"><i class="far fa-minus-square fa-fw"></i></button>';
             $buffer .= '<script type="text/javascript"> $(function() { ';

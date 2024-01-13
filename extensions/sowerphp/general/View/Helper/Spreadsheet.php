@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\general;
 
 /**
  * Helper para generar planillas de cálculo
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2015-04-19
  */
 class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
 {
@@ -38,8 +36,6 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
      * Método que guarda la planilla en el sistema de archivos
      * @param file Ruta completa donde guardar la planilla en el sistema de archivos
      * @param type Tipo de archivo que se generará (formato de la planilla)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-19
      */
     public function save($file, $type = 'Xls')
     {
@@ -51,8 +47,6 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
      * Método que descarga la planilla a través el navegador
      * @param file Nombre del archivo que se descargará
      * @param type Tipo de archivo que se generará (formato de la planilla)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-19
      */
     public function download($file, $type = 'Xls')
     {
@@ -67,8 +61,6 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
     /**
      * Asignar margenes a la vista de impresión de la planilla
      * @param margins Arreglo de margenes que se desean asignar o bien solo un margen que será igual a todos lados (en centímetros)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-19
      */
     public function setMargins($margins)
     {
@@ -90,9 +82,7 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
      * Método que traduce un índice de columna a su representación en letra(s).
      * Este método es un wrapper de \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex()
      * @param col Índice de la columna que se desea obtener
-     * @return Letra(s) de la columna
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-19
+     * @return string Letra de la columna
      */
     public function getCol($col)
     {
@@ -103,13 +93,12 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
      * Método que aplica un formato de negrita y centrado a una celda
      * @param cell Celda (o rango de celdas) que se quiere modificar
      * @param sheet Índice de la hoja donde está la celda que se quiere modificar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-19
      */
     public function setFormatCenterBold($cell, $sheet = null)
     {
-        if ($sheet===null)
+        if ($sheet === null) {
             $sheet = $this->getActiveSheetIndex();
+        }
         $this->setActiveSheetIndex($sheet)->getStyle($cell)->applyFromArray([
             'alignment' => [
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
@@ -124,13 +113,12 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
      * Método que aplica un borde a una celda
      * @param cell Celda (o rango de celdas) que se quiere modificar
      * @param sheet Índice de la hoja donde está la celda que se quiere modificar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-19
      */
     public function setFormatBorder($cell, $sheet = null)
     {
-        if ($sheet===null)
+        if ($sheet === null) {
             $sheet = $this->getActiveSheetIndex();
+        }
         $this->setActiveSheetIndex($sheet)->getStyle($cell)->applyFromArray([
             'borders' => [
                 'allborders' => [
@@ -145,20 +133,17 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
      * @param cell Celda (o rango de celdas) que se quiere modificar
      * @param sheet Índice de la hoja donde está la celda que se quiere modificar
      * @param format Formato de número que se desea aplicar a la celda
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-19
      */
     public function setFormatNumber($cell, $sheet = null, $format = '#,##0')
     {
-        if ($sheet===null)
+        if ($sheet === null) {
             $sheet = $this->getActiveSheetIndex();
+        }
         $this->setActiveSheetIndex($sheet)->getStyle($cell)->getNumberFormat()->setFormatCode($format);
     }
 
     /**
      * Método que asigna un valor a una celda unida
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-02-02
      */
     public function setMergeCellValue($value, $start, $end)
     {
@@ -170,8 +155,6 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
 
     /**
      * Método que asigna un valor a una celda unida y la rota
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-02-02
      */
     public function setRotateCellValue($value, $col, $end)
     {
@@ -186,13 +169,12 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
      * Método que activa el tamaño automático de columnas
      * @param cell Celda (o rango de celdas) que se quiere modificar
      * @param sheet Índice de la hoja donde está la celda que se quiere modificar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-19
      */
     public function setAutoSize($to, $from = 'A', $sheet = null)
     {
-        if ($sheet===null)
+        if ($sheet === null) {
             $sheet = $this->getActiveSheetIndex();
+        }
         foreach(range($from, $to) as $columnID) {
             $this->setActiveSheetIndex($sheet)->getColumnDimension($columnID)->setAutoSize(true);
         }

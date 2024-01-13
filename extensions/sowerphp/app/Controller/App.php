@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -26,8 +26,6 @@ namespace sowerphp\app;
 /**
  * Clase que sirve para extender la clase Controller, este archivo
  * deberá ser sobreescrito en cada una de las aplicaciones
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2017-10-10
  */
 class Controller_App extends \sowerphp\core\Controller
 {
@@ -40,10 +38,8 @@ class Controller_App extends \sowerphp\core\Controller
      * Constructor de la clase
      * @param request Objeto con la solicitud realizada
      * @param response Objeto para la respuesta que se enviará al cliente
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-16
      */
-    public function __construct (\sowerphp\core\Network_Request $request, \sowerphp\core\Network_Response $response)
+    public function __construct(\sowerphp\core\Network_Request $request, \sowerphp\core\Network_Response $response)
     {
         parent::__construct ($request, $response);
         $this->Cache = new \sowerphp\core\Cache();
@@ -54,8 +50,6 @@ class Controller_App extends \sowerphp\core\Controller
      * Método para permitir el acceso a las posibles funcionalidades de la API
      * del controlador que se está ejecutando. Aquí no se validan permisos para
      * la funcionalidad, estos deberán ser validados en cada función
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-01-29
      */
     public function beforeFilter()
     {
@@ -71,8 +65,6 @@ class Controller_App extends \sowerphp\core\Controller
 
     /**
      * Método que lanza el servicio web que se ha solicitado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-02
      */
     public function api($resource, $args = null)
     {
@@ -81,8 +73,6 @@ class Controller_App extends \sowerphp\core\Controller
 
     /**
      * Método que permite consumir por POST o GET un recurso de la misma aplicación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2023-07-03
      */
     protected function consume($recurso, $datos = [], $assoc = true)
     {
@@ -102,13 +92,11 @@ class Controller_App extends \sowerphp\core\Controller
 
     /**
      * Método que permite ejecutar un comando en la terminal
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-11-28
      */
     protected function shell($cmd, $log = false, &$output = [])
     {
-        if ($log and !is_string($log)) {
-            $log = TMP.'/screen_'.$this->Auth->ip().'_'.date('YmdHis').'.log';
+        if ($log && !is_string($log)) {
+            $log = TMP . '/screen_' . $this->Auth->ip() . '_' . date('YmdHis') . '.log';
         }
         return shell_exec_async($cmd, $log, $output);
     }

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -27,8 +27,6 @@ namespace sowerphp\app;
 /**
  * Utilidad general para trabajar con las aplicaciones que se pueden integrar a
  * la aplicación
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2019-06-12
  */
 class Utility_Apps
 {
@@ -38,8 +36,6 @@ class Utility_Apps
     /**
      * Constructor de la clase que procesa las aplicaciones de terceros
      * disponibles en la aplicación web
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-01
      */
     public function __construct($config = [])
     {
@@ -57,8 +53,6 @@ class Utility_Apps
 
     /**
      * Método que entrega una sóla aplicación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-14
      */
     public function getApp($app)
     {
@@ -68,8 +62,6 @@ class Utility_Apps
 
     /**
      * Método que entrega todas los aplicaciones disponibles
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-01
      */
     public function getApps(array $filtros = [])
     {
@@ -83,17 +75,17 @@ class Utility_Apps
         foreach ($this->config as $config) {
             // si el directorio no existe se entrega vacio el arreglo de aplicaciones
             // se falla silenciosamente, para no tener errores en la aplicación web
-            if (empty($config['directory']) or !is_dir($config['directory'])) {
+            if (empty($config['directory']) || !is_dir($config['directory'])) {
                 continue;
             }
             $dir = opendir($config['directory']);
             while (($archivo = readdir($dir)) !== false) {
-                if ($archivo[0] == '.' or is_dir($config['directory'].'/'.$archivo)) {
+                if ($archivo[0] == '.' || is_dir($config['directory'].'/'.$archivo)) {
                     continue;
                 }
                 $class = substr($archivo,0,-4);
                 $app = \sowerphp\core\Utility_Inflector::underscore($class);
-                if ($filtros['apps'] and !in_array($app, $filtros['apps'])) {
+                if ($filtros['apps'] && !in_array($app, $filtros['apps'])) {
                     continue;
                 }
                 $directory = $config['directory'].'/'.$class;
@@ -102,7 +94,7 @@ class Utility_Apps
                     continue;
                 }
                 $App = new $class($directory);
-                if ($filtros['activas'] and !$App->getActiva()) {
+                if ($filtros['activas'] && !$App->getActiva()) {
                     continue;
                 }
                 $apps[$app] = $App;

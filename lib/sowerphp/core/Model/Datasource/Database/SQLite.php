@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,9 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para trabajar con una base de datos SQLite3
- * Se require: php5-sqlite
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-20
  */
 class Model_Datasource_Database_SQLite extends Model_Datasource_Database_Manager
 {
@@ -38,8 +35,6 @@ class Model_Datasource_Database_SQLite extends Model_Datasource_Database_Manager
      * Realiza conexión a la base de datos, recibe parámetros para la
      * conexión
      * @param config Arreglo con los parámetros de la conexión
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-05-06
      */
     public function __construct($config)
     {
@@ -56,9 +51,7 @@ class Model_Datasource_Database_SQLite extends Model_Datasource_Database_Manager
     /**
      * Asigna un límite para la obtención de filas en la consulta SQL
      * @param sql Consulta SQL a la que se le agrega el límite
-     * @return String Consulta con el límite agregado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-23
+     * @return string Consulta con el límite agregado
      */
     public function setLimit($sql, $records, $offset = 0)
     {
@@ -72,8 +65,6 @@ class Model_Datasource_Database_SQLite extends Model_Datasource_Database_Manager
      * pasados.
      * @param par1 Parámetro 1 que se quiere concatenar
      * @param par2 Parámetro 2 que se quiere concatenar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-07
      */
     public function concat($par1, $par2)
     {
@@ -81,8 +72,9 @@ class Model_Datasource_Database_SQLite extends Model_Datasource_Database_Manager
         $concat = array();
         $parameters = func_get_args();
         foreach($parameters as &$parameter) {
-            if(in_array($parameter, $separators))
+            if (in_array($parameter, $separators)) {
                 $parameter = "'".$parameter."'";
+            }
             array_push($concat, $parameter);
         }
         return implode(' || ', $concat);

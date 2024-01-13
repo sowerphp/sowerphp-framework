@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\app;
 
 /**
  * Clase para generar página de configuración de aplicaciones
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-06-12
  */
 class View_Helper_AppsConfig
 {
@@ -36,10 +34,8 @@ class View_Helper_AppsConfig
 
     /**
      * Constructor de la clase
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-06-12
      */
-    public function __construct($id , $form)
+    public function __construct($id, $form)
     {
         $this->id = $id;
         $this->form = $form;
@@ -49,8 +45,6 @@ class View_Helper_AppsConfig
      * Método que generará la configuración de una aplicación.
      * Para generar la de múltiples aplicaciones se deberá iterar con este
      * método.
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-11-11
      */
     public function generate($App)
     {

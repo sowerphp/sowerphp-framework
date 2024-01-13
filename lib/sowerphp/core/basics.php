@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -22,17 +22,13 @@
  */
 
 /**
- * @file basics.php
  * Archivo de funciones básicas para la aplicación
- * @version 2022-07-24
  */
 
 /**
  * Función que carga una variable de entorno o su valor por defecto
  * @param varname Variable que se desea consultar
  * @param default Valor por defecto de la variable
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2022-07-25
  */
 function env($varname, $default = null)
 {
@@ -43,8 +39,6 @@ function env($varname, $default = null)
  * Función que entrega la ruta completa (URL) de un recurso (path) de la aplicación
  * @param resource Recurso (path) que se desea resolver
  * @return string URL completa que resuelve el recurso (path)
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2023-11-14
  */
 function url($resource = '/') {
     $url = (new \sowerphp\core\Network_Request())->url;
@@ -66,8 +60,6 @@ function url($resource = '/') {
  * clase)
  * @param var Variable que se desea mostrar
  * @param withtype Si es verdadero se usará "var_dump" sino "print_r"
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-03
  */
 function debug($var, $withtype = false)
 {
@@ -138,8 +130,6 @@ function num($n, $d = 0, $language = null)
  * @param string Texto que se desea traducir
  * @param args Argumentos para reemplazar en el string, puede ser un arreglo o bien n argumentos a la función
  * @return string Texto traducido
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-16
  */
 function __($string, $args = null)
 {
@@ -154,8 +144,6 @@ function __($string, $args = null)
  * @param string Texto que se desea traducir
  * @param args Argumentos para reemplazar en el string, puede ser un arreglo o bien n argumentos a la función
  * @return string Texto traducido
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-03
  */
 function __d($dominio, $string, $args = null)
 {
@@ -173,8 +161,6 @@ function __d($dominio, $string, $args = null)
 
 /**
  * Función que permite ejecutar un comando en la terminal
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2022-07-28
  */
 function shell_exec_async($cmd, $log = false, &$output = [])
 {
@@ -212,15 +198,13 @@ function shell_exec_async($cmd, $log = false, &$output = [])
  * @param string Mensaje al que se desea dar el formato (contiene marcadores especiales)
  * @param html Indica si el formato debe ser HTML o texto plano
  * @return string Mensaje formateado en HTML o texto plano según se solicitó
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2023-11-04
  */
 function message_format($string, $html = true) {
     // preguntas frecuentes de la aplicación
     if (strpos($string, '[faq:') !== false) {
         $faq = (array)\sowerphp\core\Configure::read('faq');
         // hay config de faqs -> se agrega enlace
-        if (!empty($faq['url']) and !empty($faq['text'])) {
+        if (!empty($faq['url']) && !empty($faq['text'])) {
             $replace = $html
                         ? '<a href="'.$faq['url'].'$2" target="_blank" class="alert-link">'.$faq['text'].'</a>'
                         : $faq['text'].': '.$faq['url'].'$2';

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -37,9 +37,6 @@ namespace sowerphp\app;
  *  - LOG_NEWS: mensajes de notificaciones
  *  - LOG_CRON: mensajes de tareas programadas (comandos Shell)
  *  - LOG_LOCAL0 a LOG_LOCAL7: se dejarán para ser utilizados por cada aplicación
- *
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2016-03-20
  */
 class Controller_Component_Log extends \sowerphp\core\Controller_Component
 {
@@ -77,12 +74,10 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
     /**
      * Se registran automáticamente eventos que ocurrieron durante la ejecución
      * del controlador (incluyendo la renderización de la vista)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-28
      */
     public function afterFilter($url = null, $status = null)
     {
-        if (get_class($this->controller)=='sowerphp\core\Controller_Error') {
+        if (get_class($this->controller) == 'sowerphp\core\Controller_Error') {
             $message = [
                 'exception' => $this->controller->viewVars['exception'],
                 'message' => $this->controller->viewVars['message'],
@@ -97,8 +92,6 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      * Método que escribe un evento en el Log
      * @param message Evento (mensaje) que se desea registrar
      * @param severity Gravedad del evento (por defecto informativos)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-28
      */
     public function write($message, $severity = LOG_INFO, $facility = null)
     {
@@ -113,8 +106,6 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      * Método que procesa y reporta (de ser necesario) un registro
      * @param message Mensaje que se desea reportar (puede ser un arreglo asociativo)
      * @param priority Prioridad en un entero (formato Syslog) o arreglo [facility, severity]
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-29
      */
     private function report($message, $priority)
     {
@@ -128,7 +119,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         // reportar el mensaje de acuerdo la severidad del mismo
         if (isset($this->settings['report'][$facility][$severity])) {
             foreach ($this->settings['report'][$facility][$severity] as $method) {
-                $method = 'report'.ucfirst($method);
+                $method = 'report' . ucfirst($method);
                 $this->$method($message, $facility, $severity);
             }
         }
@@ -136,13 +127,14 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
 
     /**
      * Método que entrega la URL completa que gatilló el regitro
-     * @return URL completa (incluyendo parámetros por GET)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-04-26
+     * @return string URL completa (incluyendo parámetros por GET)
      */
     private function getURL()
     {
-        $get = strpos($_SERVER['QUERY_STRING'], '&') ? ('?'.substr($_SERVER['QUERY_STRING'], strpos($_SERVER['QUERY_STRING'], '&')+1)) : '';
+        $get = strpos($_SERVER['QUERY_STRING'], '&')
+            ? ('?'.substr($_SERVER['QUERY_STRING'], strpos($_SERVER['QUERY_STRING'], '&')+1))
+            : ''
+        ;
         return $this->controller->request->url.$this->controller->request->request.$get;
     }
 
@@ -151,14 +143,12 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      * @param message Mensaje que se desea reportar (puede ser un arreglo asociativo)
      * @param facility Origen del envío (no se usa, ya que se cambia por la configuración del componente) Esto porque se envía al sistema operativo
      * @param severity Gravedad del registro
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-28
      */
     private function reportSyslog($message, $facility, $severity)
     {
         // si es arreglo se arma el mensaje
         if (is_array($message)) {
-            if (isset($message['exception']) and isset($message['message']) and isset($message['code'])) {
+            if (isset($message['exception']) && isset($message['message']) && isset($message['code'])) {
                 $message = '['.$message['code'].'] '.$message['exception'].' "'.$message['message'].'"';
             }
         } else {
@@ -185,8 +175,6 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      * @param message Mensaje que se desea reportar (puede ser un arreglo asociativo)
      * @param facility Origen del envío
      * @param severity Gravedad del registro
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-23
      */
     private function reportEmail($message, $facility, $severity)
     {
@@ -250,7 +238,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         }
         // adjuntar datos de POST
         if (!empty($_POST)) {
-            $_POST_file = TMP.'/_POST_'.$timestamp.'.txt';
+            $_POST_file = TMP . '/_POST_' . $timestamp . '.txt';
             file_put_contents($_POST_file, json_encode($_POST));
             $email->attach([
                 'tmp_name' => $_POST_file,
@@ -261,7 +249,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         // adjuntos
         if (!empty($_FILES)) {
             // archivo _FILES.txt con los datos del arreglo $_FILES
-            $_FILES_file = TMP.'/_FILES_'.$timestamp.'.txt';
+            $_FILES_file = TMP . '/_FILES_' . $timestamp . '.txt';
             file_put_contents($_FILES_file, json_encode($_FILES));
             $email->attach([
                 'tmp_name' => $_FILES_file,
@@ -310,9 +298,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
 
     /**
      * Método que abre el log para la base de datos
-     * @return =true si se pudo abrir el log (existe módulos Sistema.Logs)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-29
+     * @return bool =true si se pudo abrir el log (existe módulos Sistema.Logs)
      */
     private function openlog()
     {
@@ -330,8 +316,6 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      * @param message Mensaje que se desea reportar (puede ser un arreglo asociativo)
      * @param facility Origen del envío
      * @param severity Gravedad del registro
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-29
      */
     private function reportDb($message, $facility, $severity)
     {
@@ -348,7 +332,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         if (is_array($message)) {
             $this->Log->mensaje = '';
             foreach ($message as $key => $value) {
-                $this->Log->mensaje .= $key.":\n".$value."\n\n";
+                $this->Log->mensaje .= $key . ":\n" . $value . "\n\n";
             }
         } else {
             $this->Log->mensaje = $message;
@@ -361,13 +345,11 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      * @param message Mensaje que se desea reportar (puede ser un arreglo asociativo)
      * @param facility Origen del envío
      * @param severity Gravedad del registro
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-03-20
      */
     private function reportFile($message, $facility, $severity)
     {
         $log = TMP.'/log_'.$this->getFacility($facility).'_'.$this->getSeverity($severity).'_'.date('Ymd').'.log';
-        if (is_array($message) or is_object($message) or is_bool($message)) {
+        if (is_array($message) || is_object($message) || is_bool($message)) {
             $message = json_encode($message);
         }
         $info = date('Y-m-d H:i:s').' '.$this->controller->Auth->ip(true).' '.($this->getUser()?$this->getUser()->usuario:'^_^');
@@ -377,9 +359,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
     /**
      * Método que recupera la glosa del origen
      * @param facility Origen que se quiere obtener su glosa
-     * @return Glosa del origen
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-29
+     * @return string Glosa del origen
      */
     private function getFacility($facility)
     {
@@ -392,9 +372,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
     /**
      * Método que recupera la glosa de la gravedad
      * @param severity Gravedad que se quiere obtener su glosa
-     * @return Glosa de la gravedad
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-29
+     * @return string Glosa de la gravedad
      */
     private function getSeverity($severity)
     {
@@ -407,12 +385,10 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
     /**
      * Método que obtiene el usuario que está reportando el log, si es que
      * existe uno
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-03-20
      */
     protected function getUser()
     {
-        if ($this->User===null) {
+        if ($this->User === null) {
             // usuario autenticado en el controlador de la aplicación web
             if ($this->controller->Auth->User) {
                 $this->User = $this->controller->Auth->User;

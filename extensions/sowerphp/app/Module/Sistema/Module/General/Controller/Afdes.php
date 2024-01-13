@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -30,8 +30,6 @@ namespace sowerphp\app\Sistema\General;
  * Comentario de la tabla:
  * Esta clase permite controlar las acciones entre el modelo y vista para la
  * tabla afd
- * @author SowerPHP Code Generator
- * @version 2014-12-19 18:06:09
  */
 class Controller_Afdes extends \Controller_Maintainer
 {
@@ -46,10 +44,8 @@ class Controller_Afdes extends \Controller_Maintainer
 
     /**
      * Acción para crear un AFD
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-19
      */
-    public function crear ()
+    public function crear()
     {
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         // si se envió el formulario se procesa
@@ -67,15 +63,15 @@ class Controller_Afdes extends \Controller_Maintainer
                 'hastas' => $_POST['hasta']
             ];
             $Afd->save();
-            \sowerphp\core\Model_Datasource_Session::message('AFD <em>'.$Afd->nombre.'</em> creado', 'ok');
+            \sowerphp\core\Model_Datasource_Session::message('AFD <em>'.$Afd->nombre.'</em> creado.', 'ok');
             $this->redirect(
-                $this->module_url.$this->request->params['controller'].'/listar'.$filterListar
+                $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar
             );
         }
         // setear variables
         $this->set([
             'accion' => 'Crear',
-            'listarUrl' => $this->module_url.$this->request->params['controller'].'/listar'.$filterListar,
+            'listarUrl' => $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar,
         ]);
         // renderizar
         $this->autoRender = false;
@@ -85,21 +81,19 @@ class Controller_Afdes extends \Controller_Maintainer
     /**
      * Acción para editar un AFD
      * @param codigo Código del AFD a editar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-13
      */
-    public function editar ($codigo)
+    public function editar($codigo)
     {
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         $Afd = new Model_Afd($codigo);
         // si el registro que se quiere editar no existe error
         if(!$Afd->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'AFD <em>'.$codigo.'</em> no existe, no se puede editar',
+                'AFD <em>'.$codigo.'</em> no existe, no se puede editar.',
                 'error'
             );
             $this->redirect(
-                $this->module_url.$this->request->params['controller'].'/listar'.$filterListar
+                $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar
             );
         }
         // si no se ha enviado el formulario se mostrará
@@ -107,7 +101,7 @@ class Controller_Afdes extends \Controller_Maintainer
             $this->set(array(
                 'Afd' => $Afd,
                 'accion' => 'Editar',
-                'listarUrl' => $this->module_url.$this->request->params['controller'].'/listar'.$filterListar,
+                'listarUrl' => $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar,
             ));
             // renderizar
             $this->autoRender = false;
@@ -127,9 +121,10 @@ class Controller_Afdes extends \Controller_Maintainer
                 'hastas' => $_POST['hasta']
             ];
             $Afd->save();
-            \sowerphp\core\Model_Datasource_Session::message('AFD <em>'.$Afd->nombre.'</em> editado', 'ok');
+            \sowerphp\core\Model_Datasource_Session::message('AFD <em>'.$Afd->nombre.'</em> editado.', 'ok');
             $this->redirect(
-                $this->module_url.$this->request->params['controller'].'/editar/'.$codigo.(!empty($_GET['listar']) ? '?listar='.$_GET['listar'] : '')
+                $this->module_url . $this->request->params['controller'] . '/editar/' . $codigo
+                . (!empty($_GET['listar']) ? '?listar='.$_GET['listar'] : '')
             );
         }
     }
@@ -137,8 +132,6 @@ class Controller_Afdes extends \Controller_Maintainer
     /**
      * Acción que genera la imagen del grafo del AFD
      * @param codigo Código del AFD a generar su imagen
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-03-29
      */
     public function grafo($codigo)
     {

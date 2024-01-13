@@ -1,19 +1,24 @@
 <?php
+
 /**
- * ConsoleOutput file.
+ * SowerPHP
+ * Copyright (C) SowerPHP (http://sowerphp.org)
  *
- * PHP 5
+ * Este programa es software libre: usted puede redistribuirlo y/o
+ * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
+ * publicada por la Fundación para el Software Libre, ya sea la versión
+ * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
+ * misma.
  *
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright 2005-2012, Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * Este programa se distribuye con la esperanza de que sea útil, pero
+ * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
+ * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU para
+ * obtener una información más detallada.
  *
- * Licensed under The MIT License
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright 2005-2012, Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
- * @since         CakePHP(tm) v 2.0
- * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+ * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
+ * junto a este programa.
+ * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
 namespace sowerphp\core;
@@ -42,49 +47,47 @@ namespace sowerphp\core;
  * This would create orange 'Overwrite:' text, while the rest of the text would remain the normal color.
  * See ConsoleOutput::styles() to learn more about defining your own styles.  Nested styles are not supported
  * at this time.
- *
- * @package       Cake.Console
  */
 class Shell_Output {
-/**
- * Raw output constant - no modification of output text.
- */
+	/**
+	 * Raw output constant - no modification of output text.
+	 */
 	const RAW = 0;
 
-/**
- * Plain output - tags will be stripped.
- */
+	/**
+	 * Plain output - tags will be stripped.
+	 */
 	const PLAIN = 1;
 
-/**
- * Color output - Convert known tags in to ANSI color escape codes.
- */
+	/**
+	 * Color output - Convert known tags in to ANSI color escape codes.
+	 */
 	const COLOR = 2;
 
-/**
- * Constant for a newline.
- */
+	/**
+	 * Constant for a newline.
+	 */
 	const LF = PHP_EOL;
 
-/**
- * File handle for output.
- *
- * @var resource
- */
+	/**
+	 * File handle for output.
+	 *
+	 * @var resource
+	 */
 	protected $_output;
 
-/**
- * The current output type. Manipulated with ConsoleOutput::outputAs();
- *
- * @var integer.
- */
+	/**
+	 * The current output type. Manipulated with ConsoleOutput::outputAs();
+	 *
+	 * @var integer.
+	 */
 	protected $_outputAs = self::COLOR;
 
-/**
- * text colors used in colored output.
- *
- * @var array
- */
+	/**
+	 * text colors used in colored output.
+	 *
+	 * @var array
+	 */
 	protected static $_foregroundColors = array(
 		'black' => 30,
 		'red' => 31,
@@ -96,11 +99,11 @@ class Shell_Output {
 		'white' => 37
 	);
 
-/**
- * background colors used in colored output.
- *
- * @var array
- */
+	/**
+	 * background colors used in colored output.
+	 *
+	 * @var array
+	 */
 	protected static $_backgroundColors = array(
 		'black' => 40,
 		'red' => 41,
@@ -112,11 +115,11 @@ class Shell_Output {
 		'white' => 47
 	);
 
-/**
- * formatting options for colored output
- *
- * @var string
- */
+	/**
+	 * formatting options for colored output
+	 *
+	 * @var string
+	 */
 	protected static $_options = array(
 		'bold' => 1,
 		'underline' => 4,
@@ -124,12 +127,12 @@ class Shell_Output {
 		'reverse' => 7,
 	);
 
-/**
- * Styles that are available as tags in console output.
- * You can modify these styles with ConsoleOutput::styles()
- *
- * @var array
- */
+	/**
+	 * Styles that are available as tags in console output.
+	 * You can modify these styles with ConsoleOutput::styles()
+	 *
+	 * @var array
+	 */
 	protected static $_styles = array(
 		'error' => array('text' => 'red', 'underline' => true),
 		'warning' => array('text' => 'yellow'),
@@ -139,26 +142,26 @@ class Shell_Output {
 		'question' => array('text' => "magenta"),
 	);
 
-/**
- * Construct the output object.
- *
- * Checks for a pretty console environment. Ansicon allows pretty consoles
- * on windows, and is supported.
- *
- * @param string $stream The identifier of the stream to write output to.
- */
+	/**
+	 * Construct the output object.
+	 *
+	 * Checks for a pretty console environment. Ansicon allows pretty consoles
+	 * on windows, and is supported.
+	 *
+	 * @param string $stream The identifier of the stream to write output to.
+	 */
 	public function __construct($stream = 'php://stdout') {
 		$this->_output = fopen($stream, 'w');
 	}
 
-/**
- * Outputs a single or multiple messages to stdout. If no parameters
- * are passed, outputs just a newline.
- *
- * @param mixed $message A string or a an array of strings to output
- * @param integer $newlines Number of newlines to append
- * @return integer Returns the number of bytes returned from writing to stdout.
- */
+	/**
+	 * Outputs a single or multiple messages to stdout. If no parameters
+	 * are passed, outputs just a newline.
+	 *
+	 * @param mixed $message A string or a an array of strings to output
+	 * @param integer $newlines Number of newlines to append
+	 * @return integer Returns the number of bytes returned from writing to stdout.
+	 */
 	public function write($message, $newlines = 1) {
 		if (is_array($message)) {
 			$message = implode(self::LF, $message);
@@ -166,12 +169,12 @@ class Shell_Output {
 		return $this->_write($this->styleText($message . str_repeat(self::LF, $newlines)));
 	}
 
-/**
- * Apply styling to text.
- *
- * @param string $text Text with styling tags.
- * @return string String with color codes added.
- */
+	/**
+	 * Apply styling to text.
+	 *
+	 * @param string $text Text with styling tags.
+	 * @return string String with color codes added.
+	 */
 	public function styleText($text) {
 		if ($this->_outputAs == self::RAW) {
 			return $text;
@@ -185,12 +188,12 @@ class Shell_Output {
 		);
 	}
 
-/**
- * Replace tags with color codes.
- *
- * @param array $matches.
- * @return string
- */
+	/**
+	 * Replace tags with color codes.
+	 *
+	 * @param array $matches.
+	 * @return string
+	 */
 	protected function _replaceTags($matches) {
 		$style = $this->styles($matches['tag']);
 		if (empty($style)) {
@@ -213,42 +216,42 @@ class Shell_Output {
 		return "\033[" . implode(';', $styleInfo) . 'm' . $matches['text'] . "\033[0m";
 	}
 
-/**
- * Writes a message to the output stream.
- *
- * @param string $message Message to write.
- * @return bool success
- */
+	/**
+	 * Writes a message to the output stream.
+	 *
+	 * @param string $message Message to write.
+	 * @return bool success
+	 */
 	protected function _write($message)
 	{
 		return fwrite($this->_output, $message);
 	}
 
-/**
- * Get the current styles offered, or append new ones in.
- *
- * ### Get a style definition
- *
- * `$this->output->styles('error');`
- *
- * ### Get all the style definitions
- *
- * `$this->output->styles();`
- *
- * ### Create or modify an existing style
- *
- * `$this->output->styles('annoy', array('text' => 'purple', 'background' => 'yellow', 'blink' => true));`
- *
- * ### Remove a style
- *
- * `$this->output->styles('annoy', false);`
- *
- * @param string $style The style to get or create.
- * @param mixed $definition The array definition of the style to change or create a style
- *   or false to remove a style.
- * @return mixed If you are getting styles, the style or null will be returned. If you are creating/modifying
- *   styles true will be returned.
- */
+	/**
+	 * Get the current styles offered, or append new ones in.
+	 *
+	 * ### Get a style definition
+	 *
+	 * `$this->output->styles('error');`
+	 *
+	 * ### Get all the style definitions
+	 *
+	 * `$this->output->styles();`
+	 *
+	 * ### Create or modify an existing style
+	 *
+	 * `$this->output->styles('annoy', array('text' => 'purple', 'background' => 'yellow', 'blink' => true));`
+	 *
+	 * ### Remove a style
+	 *
+	 * `$this->output->styles('annoy', false);`
+	 *
+	 * @param string $style The style to get or create.
+	 * @param mixed $definition The array definition of the style to change or create a style
+	 *   or false to remove a style.
+	 * @return mixed If you are getting styles, the style or null will be returned. If you are creating/modifying
+	 *   styles true will be returned.
+	 */
 	public function styles($style = null, $definition = null) {
 		if ($style === null && $definition === null) {
 			return self::$_styles;
@@ -264,12 +267,12 @@ class Shell_Output {
 		return true;
 	}
 
-/**
- * Get/Set the output type to use.  The output type how formatting tags are treated.
- *
- * @param integer $type The output type to use.  Should be one of the class constants.
- * @return mixed Either null or the value if getting.
- */
+	/**
+	 * Get/Set the output type to use.  The output type how formatting tags are treated.
+	 *
+	 * @param integer $type The output type to use.  Should be one of the class constants.
+	 * @return mixed Either null or the value if getting.
+	 */
 	public function outputAs($type = null) {
 		if ($type === null) {
 			return $this->_outputAs;
@@ -277,10 +280,10 @@ class Shell_Output {
 		$this->_outputAs = $type;
 	}
 
-/**
- * clean up and close handles
- *
- */
+	/**
+	 * clean up and close handles
+	 *
+	 */
 	public function __destruct() {
 		fclose($this->_output);
 	}

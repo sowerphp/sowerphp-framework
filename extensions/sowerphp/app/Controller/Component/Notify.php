@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\app;
 
 /**
  * Componente para proveer de un sistema de notificaciones para la aplicación
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2015-08-18
  */
 class Controller_Component_Notify extends \sowerphp\core\Controller_Component
 {
@@ -41,8 +39,6 @@ class Controller_Component_Notify extends \sowerphp\core\Controller_Component
      * @param to A quien va dirigida la notificación (un arreglo sin son varios usuarios)
      * @param message Mensaje que se desea registrar o arreglo con el mensaje y su configuración
      * @param methods Métodos que se deberán utilizar para notificar a los destinatarios
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-09-23
      */
     public function send($from, $to, $message, $methods = 'db')
     {
@@ -62,7 +58,7 @@ class Controller_Component_Notify extends \sowerphp\core\Controller_Component
         }
         $status = true;
         foreach ($methods as $method) {
-            $method = 'send'.ucfirst($method);
+            $method = 'send' . ucfirst($method);
             if (!$this->$method($from, $to, $message)) {
                 $status = false;
             }
@@ -75,8 +71,6 @@ class Controller_Component_Notify extends \sowerphp\core\Controller_Component
      * @param from Quien genera la notificación (null si es del sistema)
      * @param to A quien va dirigida la notificación (un arreglo sin son varios usuarios)
      * @param message Mensaje que se desea registrar o arreglo con el mensaje y su configuración
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-10-15
      */
     private function sendDb($from, $to, $message)
     {
@@ -109,8 +103,6 @@ class Controller_Component_Notify extends \sowerphp\core\Controller_Component
      * @param from ID del usuario que envía el mensaje o bien null para que lo envíe el sistema
      * @param to ID del usuario que recibe el mensaje
      * @param message Mensaje que se desea reportar (puede ser un arreglo asociativo)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-10-15
      */
     private function sendEmail($from, $to, $message)
     {
@@ -149,9 +141,7 @@ class Controller_Component_Notify extends \sowerphp\core\Controller_Component
     /**
      * Método que recupera la glosa del origen
      * @param severity Origen que se quiere obtener su glosa
-     * @return Glosa del origen
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-08-18
+     * @return string Glosa del origen
      */
     private function getFacility($facility)
     {
@@ -165,9 +155,7 @@ class Controller_Component_Notify extends \sowerphp\core\Controller_Component
     /**
      * Método que recupera la glosa de la gravedad
      * @param severity Gravedad que se quiere obtener su glosa
-     * @return Glosa de la gravedad
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-05
+     * @return string Glosa de la gravedad
      */
     private function getSeverity($severity)
     {

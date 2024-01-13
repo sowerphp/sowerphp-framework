@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -26,8 +26,6 @@ namespace sowerphp\core;
 /**
  * Clase para realizar la transferencia de archivos entre servidores de manera
  * fácil
- * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-08-14
  */
 class Network_Transfer
 {
@@ -36,8 +34,6 @@ class Network_Transfer
 
     /**
      * Constructor de la clase de transferencias
-     * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-08-14
      */
     public function __construct($uri)
     {
@@ -58,8 +54,6 @@ class Network_Transfer
 
     /**
      * Método que envía un archivo a un servidor según su URI
-     * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-08-14
      */
     public function send($local_file, $remote_file)
     {
@@ -75,8 +69,6 @@ class Network_Transfer
     /**
      * Método que envía un archivo a un servidor SFTP
      * Requiere tener instalado en el sistema operativo: php-ssh2
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-14
      */
     protected function send_sftp($local_file, $remote_file)
     {
@@ -108,7 +100,7 @@ class Network_Transfer
         else {
             $pubkey = '/home/'.get_current_user().'/.ssh/id_rsa.pub';
             $prikey = '/home/'.get_current_user().'/.ssh/id_rsa';
-            if (!is_readable($pubkey) or !is_readable($prikey)) {
+            if (!is_readable($pubkey) || !is_readable($prikey)) {
                 throw new \Exception(__('No se especificó contraseña para el usuario %s y no se encontró clave pública para autenticar (o no se puede leer)', $config['user']));
             }
             if (!@ssh2_auth_pubkey_file($connection, $config['user'], $pubkey, $prikey)) {
@@ -133,12 +125,10 @@ class Network_Transfer
 
     /**
      * Método que envía un archivo a un servidor FTP con SSL
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-14
      */
     protected function send_ftps($local_file, $remote_file)
     {
-        $config = array_merge([
+        $this->config = array_merge([
             'port' => 990,
         ], $this->config);
         return $this->send_ftp($local_file, $remote_file);
@@ -146,8 +136,6 @@ class Network_Transfer
 
     /**
      * Método que envía un archivo a un servidor FTP
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-14
      */
     protected function send_ftp($local_file, $remote_file)
     {

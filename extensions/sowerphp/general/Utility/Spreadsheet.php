@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -27,8 +27,6 @@ namespace sowerphp\general;
  * Manejar planillas en formato CSV, ODS y XLS
  *
  * Esta clase permite leer y generar planillas de cálculo
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-26
  */
 class Utility_Spreadsheet
 {
@@ -38,30 +36,28 @@ class Utility_Spreadsheet
     /**
      * Lee una planilla de cálculo (CSV, ODS o XLS)
      * @param archivo arreglo pasado el archivo (ejemplo $_FILES['archivo']) o bien la ruta hacia el archivo
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-25
      */
-    public static function read ($archivo, $hoja = 0)
+    public static function read($archivo, $hoja = 0)
     {
-        $archivo = self::archivo ($archivo);
+        $archivo = self::archivo($archivo);
         // en caso que sea archivo CSV
-        if ($archivo['type']=='text/csv' || $archivo['type']=='text/plain') {
+        if ($archivo['type'] == 'text/csv' || $archivo['type'] == 'text/plain') {
             return Utility_Spreadsheet_CSV::read($archivo['tmp_name']);
         }
         // en caso que sea archivo ODS
-        else if($archivo['type']=='application/vnd.oasis.opendocument.spreadsheet') {
+        else if ($archivo['type'] == 'application/vnd.oasis.opendocument.spreadsheet') {
             return Utility_Spreadsheet_ODS::read($archivo['tmp_name'], $hoja);
         }
         // en caso que sea archivo XLS
-        else if($archivo['type']=='application/vnd.ms-excel') {
+        else if ($archivo['type'] == 'application/vnd.ms-excel') {
             return Utility_Spreadsheet_XLS::read($archivo['tmp_name'], $hoja);
         }
         // en caso que sea archivo XLSX
-        else if($archivo['type']=='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+        else if ($archivo['type'] == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
             return Utility_Spreadsheet_XLS::read($archivo['tmp_name'], $hoja, 'Excel2007');
         }
         // en caso que sea archivo XLSM
-        else if($archivo['type']=='application/vnd.ms-excel.sheet.macroEnabled.12') {
+        else if ($archivo['type'] == 'application/vnd.ms-excel.sheet.macroEnabled.12') {
             return Utility_Spreadsheet_XLS::read($archivo['tmp_name'], $hoja, 'Excel2007');
         }
     }
@@ -71,28 +67,26 @@ class Utility_Spreadsheet
      * @param data Arreglo utilizado para generar la planilla
      * @param id Identificador de la planilla
      * @param formato extension de la planilla para definir formato
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-07-05
      */
-    public static function generate ($data, $id, $formato = 'ods')
+    public static function generate($data, $id, $formato = 'ods')
     {
         // en caso que sea archivo CSV
         if ($formato == 'csv') {
             Utility_Spreadsheet_CSV::generate($data, $id);
         }
         // en caso que sea archivo ODS
-        else if($formato == 'ods') {
+        else if ($formato == 'ods') {
             Utility_Spreadsheet_ODS::generate($data, $id);
         }
         // en caso que sea archivo XLS
-        else if($formato == 'xls') {
+        else if ($formato == 'xls') {
             Utility_Spreadsheet_XLS::generate($data, $id);
         }
-        else if($formato == 'xml') {
+        else if ($formato == 'xml') {
             Utility_Spreadsheet_XML::generate($data, $id);
         }
         // en caso que sea archivo JSON
-        else if($formato == 'json') {
+        else if ($formato == 'json') {
             Utility_Spreadsheet_JSON::generate($data, $id);
         }
         // terminar ejecucion del script
@@ -102,7 +96,6 @@ class Utility_Spreadsheet
     /**
      * Cargar tabla desde un archivo HTML
      * @todo Revisar errores que se generán por loadHTML (quitar el @, no usarlo!!)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
      */
     public static function readFromHTML($html, $tableId = 1, $withColsNames = true, $utf8decode = false)
     {
@@ -143,27 +136,25 @@ class Utility_Spreadsheet
     /**
      * Método que retorna los nombres de las hojas
      * @param archivo Archivo que se procesará
-     * @return Arreglo con los nombres de las hojas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-27
+     * @return array Arreglo con los nombres de las hojas
      */
-    public static function sheets ($archivo)
+    public static function sheets($archivo)
     {
         $archivo = self::archivo ($archivo);
         // en caso que sea archivo CSV
-        if ($archivo['type']=='text/csv' || $archivo['type']=='text/plain') {
+        if ($archivo['type'] == 'text/csv' || $archivo['type'] == 'text/plain') {
             return [substr($archivo['name'], 0, -4)];
         }
         // en caso que sea archivo ODS
-        else if ($archivo['type']=='application/vnd.oasis.opendocument.spreadsheet') {
+        else if ($archivo['type'] == 'application/vnd.oasis.opendocument.spreadsheet') {
             return Utility_Spreadsheet_ODS::sheets($archivo['tmp_name']);
         }
         // en caso que sea archivo XLS
-        else if ($archivo['type']=='application/vnd.ms-excel') {
+        else if ($archivo['type'] == 'application/vnd.ms-excel') {
             return Utility_Spreadsheet_XLS::sheets($archivo['tmp_name']);
         }
         // en caso que sea archivo XLSX
-        else if($archivo['type']=='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+        else if ($archivo['type'] == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
             return Utility_Spreadsheet_XLS::sheets($archivo['tmp_name'], 'Excel2007');
         }
     }
@@ -173,9 +164,7 @@ class Utility_Spreadsheet
      * por cada una de ellas
      * @param file Archivo con la planilla que se desea renderizar
      * @param options Opciones que se desean utilizar en el renderizado
-     * @return Código HTML con las hojas del archivo
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-13
+     * @return string Código HTML con las hojas del archivo
      */
     public static function file2html($file, $options = [])
     {
@@ -190,8 +179,9 @@ class Utility_Spreadsheet
         $table->setExport($options['export']);
         // obtener las hojas del archivo
         $sheets = self::sheets($file);
-        if ($options['sheet']>-1)
+        if ($options['sheet'] > -1) {
             $sheets = array($options['sheet']=>$sheets[$options['sheet']]);
+        }
         // agregar títulos de la pestaña
         $buffer = '<script type="text/javascript"> $(function(){ var url = document.location.toString(); if (url.match(\'#\')) $(\'.nav-tabs a[href=#\'+url.split(\'#\')[1]+\']\').tab(\'show\'); else $(\'.nav-tabs > li:first-child > a\').tab(\'show\'); }); </script>'."\n";
         $buffer .= '<div role="tabpanel">'."\n";
@@ -206,8 +196,9 @@ class Utility_Spreadsheet
         foreach ($sheets as $id => &$name) {
             $nameN = \sowerphp\core\Utility_String::normalize($name);
             $buffer .= '<div role="tabpanel" class="tab-pane" id="'.$options['id'].'_'.$nameN.'">'."\n";
-            if ($options['export'])
+            if ($options['export']) {
                 $table->setId($nameN);
+            }
             $buffer .= $table->generate(self::read($file, $id));
             $buffer .= '</div>'."\n";
         }
@@ -223,10 +214,8 @@ class Utility_Spreadsheet
      * la primera fila son los nombres de las columnas) a un
      * arreglo asociativo (donde las claves de las columnas en
      * las filas es el nombre de la columna).
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-05-08
      */
-    public static function sheet2array ($data)
+    public static function sheet2array($data)
     {
         $colNames = array_shift($data);
         $cols = count($colNames);
@@ -244,10 +233,8 @@ class Utility_Spreadsheet
     /**
      * Método que normaliza los datos del archivo en un arreglo (igual a arreglo en $_FILES)
      * @param archivo Nombre del archivo
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-12
      */
-    private static function archivo ($archivo)
+    private static function archivo($archivo)
     {
         // si lo que se paso fue la ruta del archivo se debe construir el arreglo con los datos del mismo (igual a arreglo $_FILES)
         if (!is_array($archivo)) {
@@ -262,11 +249,26 @@ class Utility_Spreadsheet
         // extensión siempre se chequea y reemplaza (ya que PHP puede cambiar
         // esto entre distintas versiones)
         switch (strtolower(substr($archivo['name'], strrpos($archivo['name'], '.')+1))) {
-            case 'csv': { $archivo['type'] = 'text/csv'; break; }
-            case 'txt': { $archivo['type'] = 'text/plain'; break; }
-            case 'ods': { $archivo['type'] = 'application/vnd.oasis.opendocument.spreadsheet'; break; }
-            case 'xls': { $archivo['type'] = 'application/vnd.ms-excel'; break; }
-            case 'xlsx': { $archivo['type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'; break; }
+            case 'csv': {
+                $archivo['type'] = 'text/csv';
+                break;
+            }
+            case 'txt': {
+                $archivo['type'] = 'text/plain';
+                break;
+            }
+            case 'ods': {
+                $archivo['type'] = 'application/vnd.oasis.opendocument.spreadsheet';
+                break;
+            }
+            case 'xls': {
+                $archivo['type'] = 'application/vnd.ms-excel';
+                break;
+            }
+            case 'xlsx': {
+                $archivo['type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                break;
+            }
         }
         // entregar archivo normalizado
         return $archivo;

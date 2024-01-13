@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para el envío de correo electrónico
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2020-02-09
  */
 class Network_Email
 {
@@ -49,8 +47,6 @@ class Network_Email
     /**
      * Constructor de la clase
      * @param config Configuración del correo electrónico que se usará
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-09
      */
     public function __construct($config = 'default')
     {
@@ -59,7 +55,7 @@ class Network_Email
             $config = \SowerPHP\core\Configure::read('email.'.$config);
         }
         // determinar "from" por defecto
-        if (isset($config['from']) or isset($config['user'])) {
+        if (isset($config['from']) || isset($config['user'])) {
             if (isset($config['from'])) {
                 $this->from($config['from']);
                 unset($config['from']);
@@ -79,8 +75,6 @@ class Network_Email
     /**
      * Método que obtiene el objeto que se usará para el envío de los correos
      * @param config Configuración del correo electrónico que se usará
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-11
      */
     private function getSender(array $config)
     {
@@ -111,8 +105,6 @@ class Network_Email
      * Asignar desde que cuenta enviar el correo
      * @param email Correo desde donde se envía supuestamente el email
      * @param name Nombre de quien envía supuestamente el email
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-05-29
      */
     public function from($email, $name = null) {
         if (is_array($email)) {
@@ -133,8 +125,6 @@ class Network_Email
      * Define a quién se debe responder el correo
      * @param email Correo electrónico a quien responder
      * @param name Nombre a quien responder
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-05-29
      */
     public function replyTo($email, $name = null)
     {
@@ -151,8 +141,6 @@ class Network_Email
     /**
      * Asigna la lista de destinatarios
      * @param email Email o arreglo con los emails que se desean agregar como destinatarios
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-26
      */
     public function to($email)
     {
@@ -173,8 +161,6 @@ class Network_Email
     /**
      * Asigna la lista de destinatarios CC
      * @param email Email o arreglo con los emails que se desean agregar como destinatarios
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-03
      */
     public function cc($email)
     {
@@ -195,8 +181,6 @@ class Network_Email
     /**
      * Asigna la lista de destinatarios BCC
      * @param email Email o arreglo con los emails que se desean agregar como destinatarios
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-16
      */
     public function bcc($email)
     {
@@ -217,8 +201,6 @@ class Network_Email
     /**
      * Asignar asunto del correo electrónico
      * @param subject Asunto del correo electrónico
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2010-10-09
      */
     public function subject($subject)
     {
@@ -228,8 +210,6 @@ class Network_Email
     /**
      * Agregar un archivo para enviar en el correo
      * @param src Arreglo (formato de $_FILES) con el archivo a adjuntar o ruta al archivo a adjuntar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-08
      */
     public function attach($src)
     {
@@ -246,9 +226,7 @@ class Network_Email
     /**
      * Enviar correo electrónico
      * @param msg Cuerpo del mensaje que se desea enviar (arreglo o string)
-     * @return Arreglo asociativo con los estados de cada correo enviado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-09
+     * @return array Arreglo asociativo con los estados de cada correo enviado
      */
     public function send($msg)
     {
@@ -263,7 +241,7 @@ class Network_Email
             if (!empty($this->to_default)) {
                 $this->to($this->to_default);
             }
-            else if (empty($this->cc) and empty($this->bcc)) {
+            else if (empty($this->cc) && empty($this->bcc)) {
                 throw new \sowerphp\core\Exception('No existe destinatario del correo electrónico');
             }
         }

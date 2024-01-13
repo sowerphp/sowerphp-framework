@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\app;
 
 /**
  * Clase para comunicación con Bot de Telegram
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2015-10-12
  */
 class Utility_Bot_Telegram
 {
@@ -37,8 +35,6 @@ class Utility_Bot_Telegram
     /**
      * Constructor del Bot: asigna configuración y recupera datos envíados al bot
      * @param config Configuración: arreglo, token o nombre de la configuración en SowerPHP
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-07-01
      */
     public function __construct($config = 'default')
     {
@@ -48,9 +44,10 @@ class Utility_Bot_Telegram
                 $config = ['token' => $config];
             } else {
                 if (class_exists('\sowerphp\core\Configure')) {
-                    $config = \sowerphp\core\Configure::read('telegram.'.$config);
-                    if (!$config)
+                    $config = \sowerphp\core\Configure::read('telegram.' . $config);
+                    if (!$config) {
                         $config = [];
+                    }
                 } else {
                     $config = [];
                 }
@@ -69,9 +66,7 @@ class Utility_Bot_Telegram
 
     /**
      * Método que obtiene el objeto con el mensaje envíado al Bot
-     * @return Objeto StdClass con el mensaje enviado al Bot
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-06-28
+     * @return stdclass Objeto con el mensaje enviado al Bot
      */
     public function getMessage()
     {
@@ -80,9 +75,7 @@ class Utility_Bot_Telegram
 
     /**
      * Método que obtiene el objeto de quien envió el mensaje al bot
-     * @return Objeto StdClass con el remitente del mensaje al Bot
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-07-01
+     * @return stdclass Objeto con el remitente del mensaje al Bot
      */
     public function getFrom()
     {
@@ -92,52 +85,54 @@ class Utility_Bot_Telegram
     /**
      * Método que obtiene el comando que está solicitando el usuario, ya sea un
      * texto o un comando especial por algo que haya enviado (por ejemplo una foto)
-     * @return Comando que se deberá ejecutar o =false en caso de no existir un mensaje recibido
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-07-01
+     * @return string|bool Comando que se deberá ejecutar o =false en caso de no existir un mensaje recibido
      */
     public function getCommand()
     {
-        if (!$this->getMessage())
+        if (!$this->getMessage()) {
             return false;
-        if (isset($this->getMessage()->text))
+        }
+        if (isset($this->getMessage()->text)) {
             return $this->getMessage()->text;
-        if (isset($this->getMessage()->location))
+        }
+        if (isset($this->getMessage()->location)) {
             return '/location '.$this->getMessage()->location->latitude.' '.$this->getMessage()->location->longitude;
-        if (isset($this->getMessage()->photo))
+        }
+        if (isset($this->getMessage()->photo)) {
             return '/photo '.$this->getMessage()->photo[0]->file_id;
-        if (isset($this->getMessage()->document))
+        }
+        if (isset($this->getMessage()->document)) {
             return '/document '.$this->getMessage()->document->file_id;
-        if (isset($this->getMessage()->audio))
+        }
+        if (isset($this->getMessage()->audio)) {
             return '/audio '.$this->getMessage()->audio->file_id;
-        if (isset($this->getMessage()->video))
+        }
+        if (isset($this->getMessage()->video)) {
             return '/video '.$this->getMessage()->video->file_id;
-        if (isset($this->getMessage()->contact))
+        }
+        if (isset($this->getMessage()->contact)) {
             return '/contact '.$this->getMessage()->contact->phone_number;
+        }
     }
 
     /**
      * Método que envía una respuesta a un usuario
      * @param message Mensaje que se desea enviar al usuario
      * @param chat_id ID del chat con el usuario, sino se indica se asumirá es respuesta a mensaje previo enviado por usuario
-     * @return Retorno de \sowerphp\core\Network_Http_Socket::post() con estado solicitud POST
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-06-29
+     * @return array Arreglo con respuesta HTTP e índices: status, header y body.
      */
     public function send($message, $chat_id = null)
     {
         return $this->sendMessage(array_merge([
             'chat_id' => $chat_id ? $chat_id : $this->data->message->chat->id,
             'reply_markup' => json_encode(['hide_keyboard'=>true]),
-        ], !is_array($message) ? ['text'=>$message] : $message));
+        ], !is_array($message) ? ['text' => $message] : $message));
     }
 
     /**
      * Método que prepara el teclado y lo entrega como objeto json
      * @param keyboard Layout del teclado o bien arreglo con las opciones más el layout en índice keyboard
-     * @return Objeto json reply_markup con el teclado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-07-04
+     * @return string Objeto json reply_markup con el teclado
      */
     private function getKeyboard($keyboard)
     {
@@ -156,9 +151,7 @@ class Utility_Bot_Telegram
      * @param message Mensaje que se desea enviar al usuario
      * @param keyboard Layout, en arreglo, del teclado que se enviará
      * @param chat_id ID del chat con el usuario, sino se indica se asumirá es respuesta a mensaje previo enviado por usuario
-     * @return Retorno de \sowerphp\core\Network_Http_Socket::post() con estado solicitud POST
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-07-04
+     * @return array Arreglo con respuesta HTTP e índices: status, header y body.
      */
     public function sendKeyboard($message, $keyboard, $chat_id = null)
     {
@@ -172,9 +165,7 @@ class Utility_Bot_Telegram
      * Método que envía un archivo al usuario
      * @param endpoint El método que se ejecutará en la API de Telegram
      * @param params Arreglo con los datos que se enviarán
-     * @return Respuesta del método Network_Http_Socket::post()
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-07-04
+     * @return array Arreglo con respuesta HTTP e índices: status, header y body.
      */
     private function uploadFile($endpoint, $params)
     {
@@ -187,8 +178,9 @@ class Utility_Bot_Telegram
                 );
             }
         }
-        if (!$params['chat_id'])
+        if (!$params['chat_id']) {
             $params['chat_id'] = $this->data->message->chat->id;
+        }
         return $this->__call($endpoint, [$params]);
     }
 
@@ -199,9 +191,7 @@ class Utility_Bot_Telegram
      * @param chat_id Identificador del chat al que se envía el mensaje
      * @param reply_to_message_id ID de a quien se le está respondiendo
      * @param reply_markup Opciones a enviar en el mensaje al usuario
-     * @return Retorno de Network_Http_Socket::post()
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-10-11
+     * @return array Arreglo con respuesta HTTP e índices: status, header y body.
      */
     public function sendDocument($document, $caption = null, $chat_id = null, $reply_to_message_id = null, $reply_markup = null)
     {
@@ -209,7 +199,10 @@ class Utility_Bot_Telegram
         if (is_array($document)) {
             return $this->__call('sendDocument', $document);
         }
-        return $this->uploadFile('sendDocument', compact('document', 'caption', 'chat_id', 'reply_to_message_id', 'reply_markup'));
+        return $this->uploadFile(
+            'sendDocument',
+            compact('document', 'caption', 'chat_id', 'reply_to_message_id', 'reply_markup')
+        );
     }
 
     /**
@@ -219,16 +212,18 @@ class Utility_Bot_Telegram
      * @param chat_id Identificador del chat al que se envía el mensaje
      * @param reply_to_message_id ID de a quien se le está respondiendo
      * @param reply_markup Opciones a enviar en el mensaje al usuario
-     * @return Retorno de Network_Http_Socket::post()
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-07-04
+     * @return array Arreglo con respuesta HTTP e índices: status, header y body.
      */
     public function sendPhoto($photo, $caption = null, $chat_id = null, $reply_to_message_id = null, $reply_markup = null)
     {
         $this->sendChatAction('upload_photo', $chat_id);
-        if (is_array($photo))
+        if (is_array($photo)) {
             return $this->__call('sendPhoto', $photo);
-        return $this->uploadFile('sendPhoto', compact('photo', 'caption', 'chat_id', 'reply_to_message_id', 'reply_markup'));
+        }
+        return $this->uploadFile(
+            'sendPhoto',
+            compact('photo', 'caption', 'chat_id', 'reply_to_message_id', 'reply_markup')
+        );
     }
 
     /**
@@ -237,9 +232,7 @@ class Utility_Bot_Telegram
      * @param keyboard Objeto JSON con el Layout y opciones del teclado
      * @param caption Texto a enviar junto con la imagen
      * @param chat_id Identificador del chat al que se envía el mensaje
-     * @return Retorno de Network_Http_Socket::post()
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-07-04
+     * @return array Arreglo con respuesta HTTP e índices: status, header y body.
      */
     public function sendPhotoKeyboard($photo, $keyboard = [], $caption = null, $chat_id = null)
     {
@@ -250,9 +243,7 @@ class Utility_Bot_Telegram
      * Método que envía un estado de acción de chat al usuario
      * @param action Acción que se informará al usuario
      * @param chat_id ID del chat con el usuario, sino se indica se asumirá es respuesta a mensaje previo enviado por usuario
-     * @return Retorno de \sowerphp\core\Network_Http_Socket::post() con estado solicitud POST
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-06-29
+     * @return array Arreglo con respuesta HTTP e índices: status, header y body.
      */
     public function sendChatAction($action = 'typing', $chat_id = null)
     {
@@ -265,9 +256,7 @@ class Utility_Bot_Telegram
     /**
      * Método que obtiene la información de un archivo para descargar
      * @param file_id ID del archivo que se desea obtener su información para descargar
-     * @return Retorno de \sowerphp\core\Network_Http_Socket::post() con estado solicitud POST
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-10-12
+     * @return array Arreglo con respuesta HTTP e índices: status, header y body.
      */
     public function getFile($file_id)
     {
@@ -277,27 +266,28 @@ class Utility_Bot_Telegram
     /**
      * Método que descarga un archivo desde el servidor de telegram
      * @param file_id ID del archivo que se desea descargar
-     * @return Arreglo con los índices: id, name, size, path y data
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-10-12
+     * @return array Arreglo con los índices: id, name, size, path y data
      */
     public function downloadFile($file_id)
     {
         $response = $this->getFile($file_id);
-        if (!$response or $response['status']['code']!=200)
+        if (!$response || $response['status']['code'] != 200) {
             return false;
+        }
         $body = json_decode($response['body']);
-        if (!$body->ok)
+        if (!$body->ok) {
             return false;
+        }
         $file = [
             'id' => $body->result->file_id,
             'size' => $body->result->file_size,
             'path' => $body->result->file_path,
         ];
-        $url = 'https://api.telegram.org/file/bot'.$this->config['token'].'/'.$file['path'];
+        $url = 'https://api.telegram.org/file/bot' . $this->config['token'] . '/' . $file['path'];
         $file['data'] = file_get_contents($url);
-        if ($file['data']===false)
+        if ($file['data'] === false) {
             return false;
+        }
         return $file;
     }
 
@@ -305,14 +295,12 @@ class Utility_Bot_Telegram
      * Método que permite ejecutar un comando en la API de Bots de Telegram
      * @param method Método que se quiere ejecutar en la API de Bots de Telegram
      * @param args Argumentos que se enviarán al servidor de Telegram
-     * @return Retorno de \sowerphp\core\Network_Http_Socket::post() con estado solicitud POST
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-07-04
+     * @return array Arreglo con respuesta HTTP e índices: status, header y body.
      */
     public function __call($method, $args = [])
     {
         return \sowerphp\core\Network_Http_Socket::post(
-            'https://api.telegram.org/bot'.$this->config['token'].'/'.$method,
+            'https://api.telegram.org/bot' . $this->config['token'] . '/' . $method,
             isset($args[0]) ? $args[0] : []
         );
     }
@@ -320,9 +308,7 @@ class Utility_Bot_Telegram
     /**
      * Método mágico que entrega el nombre del Bot cuando el objeto es usado
      * como string
-     * @return Nombre del Bot
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-06-28
+     * @return string Nombre del Bot
      */
     public function __toString()
     {

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\general;
 
 /**
  * Clase para iteractuar con Google reCaptcha v3
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2022-08-14
  */
 class Utility_Google_Recaptcha
 {
@@ -35,8 +33,6 @@ class Utility_Google_Recaptcha
 
     /**
      * Método que genera genera el código javascript general a todos los formularios
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2022-08-14
      */
     public static function js()
     {
@@ -71,8 +67,6 @@ class Utility_Google_Recaptcha
 
     /**
      * Método que genera genera el código javascript que va en el formulario
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2022-08-14
      */
     public static function form($form, $action = null)
     {
@@ -90,8 +84,6 @@ class Utility_Google_Recaptcha
 
     /**
      * Método que valida que el captcha esté ok en el backend
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2022-08-14
      */
     public static function check()
     {

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para interacturar con un servidor de correo IMAP
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2015-01-05
  */
 class Network_Email_Imap
 {
@@ -43,14 +41,12 @@ class Network_Email_Imap
     /**
      * Constructor de la clase
      * @param config Arreglo con la configuración del servidor IMAP
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-07-06
      */
     public function __construct(array $config)
     {
         if (!isset($config['mailbox'])) {
             // definir puerto si no se pasó
-            if (!isset($config['port']) and isset($config['ssl']) and !$config['ssl']) {
+            if (!isset($config['port']) && isset($config['ssl']) && !$config['ssl']) {
                 $config['port'] = 143;
             }
             $this->config = array_merge($this->config, $config);
@@ -78,8 +74,6 @@ class Network_Email_Imap
 
     /**
      * Destructor de la clase
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-05
      */
     public function __destruct()
     {
@@ -92,9 +86,7 @@ class Network_Email_Imap
      * Método que crea la dirección del Mailbox que se utilizará para las
      * funciones de IMAP
      * @param folder Carpeta en caso que se quira usar una diferente a la configuración de la conexión
-     * @return Dirección completa para acceder al Mailbox en IMAP
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-07-20
+     * @return string Dirección completa para acceder al Mailbox en IMAP
      */
     private function createMailbox($folder = null)
     {
@@ -121,8 +113,6 @@ class Network_Email_Imap
     /**
      * Método que indica si se está o no conectado al servidor IMAP
      * @return bool =true si se está conectado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-05
      */
     public function isConnected()
     {
@@ -131,9 +121,7 @@ class Network_Email_Imap
 
     /**
      * Método que comprueba la casilla de correo
-     * @return Arreglo con los datos de la casilla de correo
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-05
+     * @return array Arreglo con los datos de la casilla de correo
      */
     public function check()
     {
@@ -142,9 +130,7 @@ class Network_Email_Imap
 
     /**
      * Método que entrega la cantidad de mensajes de la casilla de correo
-     * @return Cantidad de mensajes en la casilla (leídos y no leídos)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-05
+     * @return int Cantidad de mensajes en la casilla (leídos y no leídos)
      */
     public function countMessages()
     {
@@ -153,9 +139,7 @@ class Network_Email_Imap
 
     /**
      * Método que entrega la cantidad de mensajes sin leer de la casilla de correo
-     * @return Cantidad de mensajes sin leer
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-08-02
+     * @return int Cantidad de mensajes sin leer
      */
     public function countUnreadMessages($folder = null)
     {
@@ -171,9 +155,7 @@ class Network_Email_Imap
 
     /**
      * Método que entrega la información de estado de una casilla de correo
-     * @return Arreglo con el estado de la casilla de correo
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-08-02
+     * @return array Arreglo con el estado de la casilla de correo
      */
     public function status($folder = null)
     {
@@ -183,20 +165,16 @@ class Network_Email_Imap
     /**
      * Método que realiza una búsqueda sobre los mensajes de la casilla de correo
      * @param filter Criterios de búsqueda para la casilla
-     * @return Arreglo con UIDs de los mensajes que coincidían con el filtro
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-03-14
+     * @return array Arreglo con UIDs de los mensajes que coincidían con el filtro
      */
     public function search($filter = 'UNSEEN')
     {
         $uids = imap_search($this->link, $filter, SE_UID);
-        return $uids===false ? [] : $uids;
+        return $uids === false ? [] : $uids;
     }
 
     /**
      * Método que entrega el número de mensaje a partir del UID
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-04-07
      */
     public function getMsgNumber($uid)
     {
@@ -205,8 +183,6 @@ class Network_Email_Imap
 
     /**
      * Método que entrega la información de la cabecera del mensaje
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-04-07
      */
     public function getHeaderInfo($uid)
     {
@@ -217,9 +193,7 @@ class Network_Email_Imap
      * Método que entrega rescata un mensaje desde la casilla de correo
      * @param uid UID del mensaje que se desea obtener
      * @param filter Arreglo con filtros a usar para las partes del mensaje. Ej: ['subtype'=>['PLAIN', 'XML'], 'extension'=>['xml']]
-     * @return Arreglo con los datos del mensaje, índices: header, body, charset y attachments
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-08-28
+     * @return array Arreglo con los datos del mensaje, índices: header, body, charset y attachments
      */
     public function getMessage($uid, $filter = [])
     {
@@ -252,7 +226,8 @@ class Network_Email_Imap
         }
         // decodificar
         if (!empty($message['header']->subject)) {
-            $message['header']->subject = utf8_encode(imap_mime_header_decode($message['header']->subject)[0]->text);
+            $string = imap_mime_header_decode($message['header']->subject)[0]->text;
+            $message['header']->subject = mb_convert_encoding($string, 'UTF-8', 'ISO-8859-1');
         }
         // entregar mensaje
         return $message;
@@ -263,8 +238,6 @@ class Network_Email_Imap
      * @param uid UID del mensaje que se desea obtener
      * @param parts Partes del mensaje que se está iterando
      * @param filter Arreglo con filtros a usar para las partes del mensaje. Ej: ['subtype'=>['PLAIN', 'XML'], 'extension'=>['xml']]
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-08-28
      */
     private function iterateParts($uid, $parts, $filter, &$message, $partno0 = '0')
     {
@@ -278,7 +251,7 @@ class Network_Email_Imap
                     $this->getMessagePart($uid, $p, $this->messagePartNext($partno0), $message);
                 }
                 // buscar por extensión del archivo adjunto (si lo es)
-                else if (isset($filter['extension']) and (($p->ifdisposition and strtoupper($p->disposition)=='ATTACHMENT') or (in_array($p->subtype, ['OCTET-STREAM', '*']) and ($p->ifparameters or $p->ifdparameters)))) {
+                else if (isset($filter['extension']) && (($p->ifdisposition && strtoupper($p->disposition)=='ATTACHMENT') || (in_array($p->subtype, ['OCTET-STREAM', '*']) && ($p->ifparameters || $p->ifdparameters)))) {
                     $extension = array_map('strtolower', $filter['extension']);
                     $add = false;
                     $params = $p->ifparameters ? $p->parameters : ( $p->ifdparameters ? $p->dparameters : [] );
@@ -294,7 +267,7 @@ class Network_Email_Imap
                     }
                 }
             }
-            if (!empty($filter) and !empty($p->parts)) {
+            if (!empty($filter) && !empty($p->parts)) {
                 $this->iterateParts($uid, $p->parts, $filter, $message, $this->messagePartNext($partno0).'.0');
             }
             $partno0 = $this->messagePartNext($partno0);
@@ -305,8 +278,6 @@ class Network_Email_Imap
      * Método que incrementa la sección (parte) del mensaje en 1
      * @param partno Parte del mensaje actual
      * @return string Parte del mensaje nueva (siguiente a la original)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-08-28
      */
     private function messagePartNext($partno)
     {
@@ -321,8 +292,6 @@ class Network_Email_Imap
      * @param p Metadados de la parte del cuerpo
      * @param partno '1', '2', '2.1', '2.1.3', etc for multipart, 0 if simple
      * @param message Arreglo con el mensaje, se agregan partes por referencia
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-08-18
      */
     private function getMessagePart($uid, $p, $partno, &$message, $attachment = false)
     {
@@ -331,9 +300,9 @@ class Network_Email_Imap
                 imap_fetchbody($this->link, $uid, $partno, FT_UID | FT_PEEK) :  // multipart
                 imap_body($this->link, $uid, FT_UID | FT_PEEK); // simple
         // Any part may be encoded, even plain text messages, so check everything.
-        if ($p->encoding==4) {
+        if ($p->encoding == 4) {
             $data = quoted_printable_decode($data);
-        } else if ($p->encoding==3) {
+        } else if ($p->encoding == 3) {
             $data = base64_decode($data);
         }
 
@@ -352,7 +321,7 @@ class Network_Email_Imap
         }
 
         // ATTACHMENT
-        if ($attachment or ($p->ifdisposition and strtolower($p->disposition)=='attachment') or isset($params['filename'])) {
+        if ($attachment || ($p->ifdisposition && strtolower($p->disposition)=='attachment') || isset($params['filename'])) {
             // filename may be given as 'Filename' or 'Name' or both
             $filename = isset($params['filename']) ? $params['filename'] : $params['name'];
             // filename may be encoded, so see imap_mime_header_decode()
@@ -365,7 +334,7 @@ class Network_Email_Imap
         }
 
         // TEXT
-        if ($p->type==0 && $data) {
+        if ($p->type == 0 && $data) {
             // Messages may be split in different parts because of inline attachments,
             // so append parts together with blank row.
             if (strtolower($p->subtype)=='plain') {
@@ -383,14 +352,15 @@ class Network_Email_Imap
         // but AOL uses type 1 (multipart), which is not handled here.
         // There are no PHP functions to parse embedded messages,
         // so this just appends the raw source to the main message.
-        else if ($p->type==2 && $data) {
+        else if ($p->type == 2 && $data) {
             $message['body']['plain'] .= $data."\n\n";
         }
 
         // SUBPART RECURSION
         if (isset($p->parts)) {
-            foreach ($p->parts as $partno0=>$p2)
+            foreach ($p->parts as $partno0=>$p2) {
                 $this->getMessagePart($uid, $p2, $partno.'.'.($partno0+1), $message);
+            }
         }
 
     }
@@ -398,8 +368,6 @@ class Network_Email_Imap
     /**
      * Método que entrega la fecha de recepción del mensaje
      * @param uid UID del mensaje que se desea conocer la fecha
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-06-11
      */
     private function getMessageDate($m)
     {
@@ -422,8 +390,6 @@ class Network_Email_Imap
     /**
      * Método que elimina un mensaje del buzón IMAP
      * @param uid UID del mensaje que se desea eliminar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-03-14
      */
     public function delete($uid)
     {
@@ -434,8 +400,6 @@ class Network_Email_Imap
     /**
      * Método que marca un mensaje como leído
      * @param uid UID del mensaje que se desea marcar como leído
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-09-25
      */
     public function setSeen($uid, $flag = '\Seen')
     {

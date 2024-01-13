@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ namespace sowerphp\app\Sistema\General;
  * Clase para mapear la tabla moneda_cambio de la base de datos
  * Comentario de la tabla:
  * Esta clase permite trabajar sobre un registro de la tabla moneda_cambio
- * @author SowerPHP Code Generator
- * @version 2015-05-14 01:01:15
  */
 class Model_MonedaCambio extends \Model_App
 {
@@ -107,8 +105,6 @@ class Model_MonedaCambio extends \Model_App
      * Constructor del tipo de cambio
      * Permite utilizar como desde el nombre de la moneda en el formato de la
      * aduana de Chile
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2018-10-29
      */
     public function __construct($desde = null, $a = null, $fecha = null)
     {
@@ -116,7 +112,7 @@ class Model_MonedaCambio extends \Model_App
             list($desde, $a, $fecha) = $desde;
         }
         // buscar moneda
-        if ($desde and $a) {
+        if ($desde && $a) {
             if (isset(self::$monedas_aduana[$desde])) {
                 $desde = self::$monedas_aduana[$desde];
             }
@@ -126,11 +122,11 @@ class Model_MonedaCambio extends \Model_App
             if (!$fecha) {
                 $fecha = date('Y-m-d');
             }
-            $desde = strtoupper($desde);
-            $a = strtoupper($a);
+            $desde = mb_strtoupper($desde);
+            $a = mb_strtoupper($a);
             parent::__construct($desde, $a, $fecha);
             // si no existe el tipo de cambio, buscar si existe "a" USD y luego desde USD a la moneda $a original
-            if (!$this->valor and $a!='USD') {
+            if (!$this->valor && $a != 'USD') {
                 $MonedaCambioUSD = (new Model_MonedaCambios)->get($desde, 'USD', $fecha);
                 if ($MonedaCambioUSD->valor) {
                     $USD = (new Model_MonedaCambios)->get('USD', $a, $fecha);

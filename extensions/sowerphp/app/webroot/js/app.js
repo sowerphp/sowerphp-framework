@@ -1,11 +1,8 @@
-/*! SowerPHP | (c) 2014 SowerPHP | GPL3+ */
-/*jslint browser: true, devel: true, nomen: true, indent: 4 */
+/*! (C) SowerPHP | AGPL3+ */
 
 /**
  * Envía un formulario para filtrar por diferentes parámetros
  * @param formulario Formulario genérico que se utilizará para enviar elementos
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2023-03-10
  */
 function buscar(formulario) {
     'use strict';
@@ -32,8 +29,6 @@ function buscar(formulario) {
  * Función que consulta si efectivamente se desea eliminar el registro
  * @param registro Nombre del registro
  * @param tupla Identificador (generalmente PK) del registro
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-06-26
  */
 function eliminar(objeto, registro, tupla) {
     'use strict';
@@ -42,8 +37,6 @@ function eliminar(objeto, registro, tupla) {
 
 /**
  * Función ajustar el div wrapper según tamaño del contenedor del header fijo
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-11-14
  */
 function header_fix_adjust_wrapper() {
     var height;
@@ -61,8 +54,6 @@ function header_fix_adjust_wrapper() {
  * Función para autocompletar un input de un formulario
  * @param id Identificador del input
  * @param url URL donde están los posibles valores para el input
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-16
  */
 function autocomplete(id, url) {
     var field = id+'Field';

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para cargar una página
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-09-16
  */
 class View_Helper_Page
 {
@@ -36,9 +34,9 @@ class View_Helper_Page
      * necesita hacer y lo ejecuta.
      * @param $location Ubicación de la vista que se desea renderizar
      * @param $viewVars Variables que se deben pasar a la vista
-     * @return Buffer de la página renderizada
+     * @return string Buffer de la página renderizada
      */
-    public static function render ($location, $viewVars=[])
+    public static function render($location, $viewVars=[])
     {
 
         $ext = substr($location, strrpos($location, '.')+1);

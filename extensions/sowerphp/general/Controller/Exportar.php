@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -67,7 +67,7 @@ class Controller_Exportar extends \Controller_App
             'Tabla: '.$id
         );
         $pdf->AddPage();
-        $pdf->addTable (array_shift($data), $data, array(), true);
+        $pdf->addTable(array_shift($data), $data, array(), true);
         $pdf->Output($id.'.pdf', 'D');
         exit(0);
     }
@@ -88,7 +88,7 @@ class Controller_Exportar extends \Controller_App
     {
         $data = (new \sowerphp\core\Cache())->get('session.'.session_id().'.export.'.$id);
         if (!$data) {
-            throw new Exception_Data_Missing(['id'=>$id]);
+            throw new Exception_Data_Missing(['id' => $id]);
         }
         return $data;
     }

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -24,11 +24,7 @@
 namespace sowerphp\general;
 
 /**
- * Manejar archivos xml
- *
  * Esta clase permite leer y generar archivos xml
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-03
  */
 class Utility_Spreadsheet_XML
 {
@@ -37,16 +33,14 @@ class Utility_Spreadsheet_XML
      * Clase que lee un archivo XML
      * @todo Implementar método
      */
-    public static function read ($archivo)
+    public static function read($archivo)
     {
     }
 
     /**
      * Función para generar un archivo XML a partir de una "tabla"
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-01-17
      */
-    public static function generate ($data, $id)
+    public static function generate($data, $id)
     {
         // limpiar posible contenido envíado antes
         ob_clean();

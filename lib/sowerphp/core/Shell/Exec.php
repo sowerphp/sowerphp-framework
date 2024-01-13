@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para despachar una Shell
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2021-06-03
  */
 class Shell_Exec
 {
@@ -34,9 +32,7 @@ class Shell_Exec
     /**
      * Método que ejecuta el comando solicitado
      * @param argv Argumentos pasados al script (incluye comando)
-     * @return Resultado de la ejecición del comando
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-17
+     * @return int Resultado de la ejecición del comando
      */
     public static function run($argv)
     {
@@ -58,9 +54,7 @@ class Shell_Exec
      * Método que ejecuta un comando
      * @param command Comando a ejecutar
      * @param args Argumentos que se pasarán al comando
-     * @return Resultado de la ejecución del comando
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-06-03
+     * @return int Resultado de la ejecución del comando
      */
     private static function dispatch($command, $args)
     {
@@ -132,7 +126,7 @@ class Shell_Exec
             foreach ($procesos as $p) {
                 $cmd = $p['cmd'];
                 $cmd = trim(mb_substr($cmd, strpos($cmd, '/shell.php ') + 1));
-                if (!in_array($p['pid'], [$pid_actual, $ppid_actual]) and $cmd == $cmd_actual) {
+                if (!in_array($p['pid'], [$pid_actual, $ppid_actual]) && $cmd == $cmd_actual) {
                     $otros_procesos[] = $p;
                 }
             }
@@ -156,8 +150,6 @@ class Shell_Exec
     /**
      * Método que entrega el listado de procesos en ejecución en el sistema
      * con sus argumentos y otros datos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-06-03
      */
     private static function getCurrentProcesses($filter = null)
     {

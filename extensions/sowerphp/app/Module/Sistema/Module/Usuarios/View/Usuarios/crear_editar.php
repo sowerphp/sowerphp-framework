@@ -30,7 +30,7 @@ echo $form->input([
     'check' => (!$columns['usuario']['null']?['notempty']:[]),
     'attr' => 'maxlength="'.$columns['usuario']['length'].'"',
 ]);
-if (is_array($ldap) and isset($ldap['person_uid']) and $ldap['person_uid']=='usuario_ldap') {
+if (is_array($ldap) && isset($ldap['person_uid']) && $ldap['person_uid']=='usuario_ldap') {
     echo $form->input([
         'name' => 'usuario_ldap',
         'label' => $columns['usuario_ldap']['name'],

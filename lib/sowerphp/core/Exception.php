@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase base para todas las excepciones
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2015-04-24
  */
 class Exception extends \RuntimeException
 {
@@ -37,11 +35,9 @@ class Exception extends \RuntimeException
     /**
      * Constructor para la excepción
      * @param message Un string con el error o bien un arreglo con atributos que son pasados al mensaje que se traducirá
-     * @param code string Código del error (default: 500)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-10-27
+     * @param code string Código del error (default: 400)
      */
-    public function __construct($message, $code = 500)
+    public function __construct($message, $code = 400)
     {
         // si es un arreglo se utilizará junto a sprintf
         if (is_array($message)) {
@@ -54,8 +50,6 @@ class Exception extends \RuntimeException
     /**
      * Método para manejar las excepciones ocurridas en la aplicación
      * @param exception Excepción producida (\Exception  o \Error)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-03-15
      */
     public static function handler($exception)
     {

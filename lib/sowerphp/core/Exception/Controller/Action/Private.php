@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -30,8 +30,10 @@ class Exception_Controller_Action_Private extends Exception
 {
     protected $_messageTemplate = 'Acción %s::%s() es privada y no puede ser accedida mediante la URL';
     protected $severity = LOG_NOTICE;
+
     public function __construct($message, $code = 401)
     {
         parent::__construct($message, $code);
     }
+
 }

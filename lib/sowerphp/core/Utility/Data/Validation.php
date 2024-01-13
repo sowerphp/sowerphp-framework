@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Utilidad para validar datos
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2015-04-16
  */
 class Utility_Data_Validation
 {
@@ -42,14 +40,13 @@ class Utility_Data_Validation
      * un email o un número entero
      * @param data Dato que se quiere validar
      * @param rules Reglas que se revisarán para validar el dato
-     * @return =true si todo va ok, =false o =string si hubo un error al validar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-08-23
+     * @return mixed =true si todo va ok, =false o =string si hubo un error al validar
      */
     public static function check($data, $rules)
     {
-        if (!is_array($rules))
+        if (!is_array($rules)) {
             $rules = [$rules];
+        }
         // probar cada una de las reglas
         foreach ($rules as &$rule) {
             // si existe una expresión regular para la regla se usa
@@ -78,9 +75,7 @@ class Utility_Data_Validation
     /**
      * Método que valida que el dato no sea vacío
      * @param data Dato que se quiere validar
-     * @return =true si no es vacio
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-16
+     * @return bool =true si no es vacio
      */
     public static function check_notempty($data)
     {
@@ -90,9 +85,7 @@ class Utility_Data_Validation
     /**
      * Método que valida que el dato sea una representación de un entero
      * @param data Dato que se quiere validar
-     * @return =true si es un entero
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-16
+     * @return bool =true si es un entero
      */
     public static function check_integer($data)
     {
@@ -102,14 +95,13 @@ class Utility_Data_Validation
     /**
      * Método que valida que el dato sea un RUT válido
      * @param data Dato que se quiere validar
-     * @return =true si es un RUT válido
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-08-28
+     * @return bool =true si es un RUT válido
      */
     public static function check_rut($data)
     {
-        if (!class_exists('\sowerphp\app\Utility_Rut'))
+        if (!class_exists('\sowerphp\app\Utility_Rut')) {
             return false;
+        }
         return \sowerphp\app\Utility_Rut::check($data);
     }
 

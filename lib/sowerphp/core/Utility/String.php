@@ -1,39 +1,39 @@
 <?php
 
 /**
- * String handling methods.
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
- * PHP 5
+ * Este programa es software libre: usted puede redistribuirlo y/o
+ * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
+ * publicada por la Fundación para el Software Libre, ya sea la versión
+ * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
+ * misma.
  *
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright 2005-2011, Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * Este programa se distribuye con la esperanza de que sea útil, pero
+ * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
+ * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU para
+ * obtener una información más detallada.
  *
- * Licensed under The MIT License
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright 2005-2011, Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
- * @package       Cake.Utility
- * @since         CakePHP(tm) v 1.2.0.5551
- * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+ * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
+ * junto a este programa.
+ * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
 namespace sowerphp\core;
 
 /**
  * String handling methods.
- *
- *
- * @package       Cake.Utility
  */
 class Utility_String {
 
-/**
- * Generate a random UUID
- *
- * @see http://www.ietf.org/rfc/rfc4122.txt
- * @return RFC 4122 UUID
- */
+	/**
+	 * Generate a random UUID
+	 *
+	 * @see http://www.ietf.org/rfc/rfc4122.txt
+	 * @return RFC 4122 UUID
+	 */
 	public static function uuid() {
 		$node = env('SERVER_ADDR');
 
@@ -103,16 +103,16 @@ class Utility_String {
 		return $uuid;
 	}
 
-/**
- * Tokenizes a string using $separator, ignoring any instance of $separator that appears between
- * $leftBound and $rightBound
- *
- * @param string $data The data to tokenize
- * @param string $separator The token to split the data on.
- * @param string $leftBound The left boundary to ignore separators in.
- * @param string $rightBound The right boundary to ignore separators in.
- * @return array Array of tokens in $data.
- */
+	/**
+	 * Tokenizes a string using $separator, ignoring any instance of $separator that appears between
+	 * $leftBound and $rightBound
+	 *
+	 * @param string $data The data to tokenize
+	 * @param string $separator The token to split the data on.
+	 * @param string $leftBound The left boundary to ignore separators in.
+	 * @param string $rightBound The right boundary to ignore separators in.
+	 * @return array Array of tokens in $data.
+	 */
 	public static function tokenize($data, $separator = ',', $leftBound = '(', $rightBound = ')') {
 		if (empty($data) || is_array($data)) {
 			return $data;
@@ -181,27 +181,27 @@ class Utility_String {
 		return $data;
 	}
 
-/**
- * Replaces variable placeholders inside a $str with any given $data. Each key in the $data array
- * corresponds to a variable placeholder name in $str.
- * Example: `String::insert(':name is :age years old.', array('name' => 'Bob', '65'));`
- * Returns: Bob is 65 years old.
- *
- * Available $options are:
- *
- * - before: The character or string in front of the name of the variable placeholder (Defaults to `:`)
- * - after: The character or string after the name of the variable placeholder (Defaults to null)
- * - escape: The character or string used to escape the before character / string (Defaults to `\`)
- * - format: A regex to use for matching variable placeholders. Default is: `/(?<!\\)\:%s/`
- *   (Overwrites before, after, breaks escape / clean)
- * - clean: A bool or array with instructions for String::cleanInsert
- *
- * @param string $str A string containing variable placeholders
- * @param string $data A key => val array where each key stands for a placeholder variable name
- *     to be replaced with val
- * @param string $options An array of options, see description above
- * @return string
- */
+	/**
+	 * Replaces variable placeholders inside a $str with any given $data. Each key in the $data array
+	 * corresponds to a variable placeholder name in $str.
+	 * Example: `String::insert(':name is :age years old.', array('name' => 'Bob', '65'));`
+	 * Returns: Bob is 65 years old.
+	 *
+	 * Available $options are:
+	 *
+	 * - before: The character or string in front of the name of the variable placeholder (Defaults to `:`)
+	 * - after: The character or string after the name of the variable placeholder (Defaults to null)
+	 * - escape: The character or string used to escape the before character / string (Defaults to `\`)
+	 * - format: A regex to use for matching variable placeholders. Default is: `/(?<!\\)\:%s/`
+	 *   (Overwrites before, after, breaks escape / clean)
+	 * - clean: A bool or array with instructions for String::cleanInsert
+	 *
+	 * @param string $str A string containing variable placeholders
+	 * @param string $data A key => val array where each key stands for a placeholder variable name
+	 *     to be replaced with val
+	 * @param string $options An array of options, see description above
+	 * @return string
+	 */
 	public static function insert($str, $data, $options = array()) {
 		$defaults = array(
 			'before' => ':', 'after' => null, 'escape' => '\\', 'format' => null, 'clean' => false
@@ -257,17 +257,17 @@ class Utility_String {
 		return ($options['clean']) ? String::cleanInsert($str, $options) : $str;
 	}
 
-/**
- * Cleans up a String::insert() formatted string with given $options depending on the 'clean' key in
- * $options. The default method used is text but html is also available. The goal of this function
- * is to replace all whitespace and unneeded markup around placeholders that did not get replaced
- * by String::insert().
- *
- * @param string $str
- * @param string $options
- * @return string
- * @see String::insert()
- */
+	/**
+	 * Cleans up a String::insert() formatted string with given $options depending on the 'clean' key in
+	 * $options. The default method used is text but html is also available. The goal of this function
+	 * is to replace all whitespace and unneeded markup around placeholders that did not get replaced
+	 * by String::insert().
+	 *
+	 * @param string $str
+	 * @param string $options
+	 * @return string
+	 * @see String::insert()
+	 */
 	public static function cleanInsert($str, $options) {
 		$clean = $options['clean'];
 		if (!$clean) {
@@ -322,20 +322,20 @@ class Utility_String {
 		return $str;
 	}
 
-/**
- * Wraps text to a specific width, can optionally wrap at word breaks.
- *
- * ### Options
- *
- * - `width` The width to wrap to.  Defaults to 72
- * - `wordWrap` Only wrap on words breaks (spaces) Defaults to true.
- * - `indent` String to indent with. Defaults to null.
- * - `indentAt` 0 based index to start indenting at. Defaults to 0.
- *
- * @param string $text Text the text to format.
- * @param mixed $options Array of options to use, or an integer to wrap the text to.
- * @return string Formatted text.
- */
+	/**
+	 * Wraps text to a specific width, can optionally wrap at word breaks.
+	 *
+	 * ### Options
+	 *
+	 * - `width` The width to wrap to.  Defaults to 72
+	 * - `wordWrap` Only wrap on words breaks (spaces) Defaults to true.
+	 * - `indent` String to indent with. Defaults to null.
+	 * - `indentAt` 0 based index to start indenting at. Defaults to 0.
+	 *
+	 * @param string $text Text the text to format.
+	 * @param mixed $options Array of options to use, or an integer to wrap the text to.
+	 * @return string Formatted text.
+	 */
 	public static function wrap($text, $options = array()) {
 		if (is_numeric($options)) {
 			$options = array('width' => $options);
@@ -363,9 +363,8 @@ class Utility_String {
      * @param uc Si se desea (=true) o no (=false) usar mayúsculas
      * @param n Si se desea (=true) o no (=false) usar números
      * @param sc Si se desea (=true) o no (=false) usar caracteres especiales
-     * @author http://phpes.wordpress.com/2007/06/12/generador-de-una-cadena-aleatoria/
      */
-    public static function random ($length=10, $uc=true, $n=true, $sc=false)
+    public static function random($length=10, $uc=true, $n=true, $sc=false)
     {
         $source = 'abcdefghijklmnopqrstuvwxyz';
         if ($uc) $source .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -388,9 +387,7 @@ class Utility_String {
      * @param search String que se busca
      * @param replace String con que reemplazar lo buscado
      * @param subject String donde se está buscando
-     * @return String nuevo con el reemplazo realizado
-     * @author http://stackoverflow.com/a/1252710
-     * @version 2011-09-06
+     * @return string String nuevo con el reemplazo realizado
      */
     public static function replaceFirst ($search, $replace, $subject)
     {
@@ -403,12 +400,10 @@ class Utility_String {
 
     /**
      * Convierte una cadena de texto "normal" a una del tipo url, ejemplo:
-     *   Cadena normal: Esto es un texto
-     *   Cadena convertida: esto-es-un-texto
+     *   - Cadena normal: Esto es un texto
+     *   - Cadena convertida: esto-es-un-texto
      * @param string String a convertir
      * @param encoding Codificación del string
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-17
      */
     public static function normalize($string, $encoding = 'UTF-8')
     {
@@ -435,16 +430,18 @@ class Utility_String {
      * @param begindelimiter String que inicia la delimitación de lo que se extraerá
      * @param enddelimiter String que termina la delimitación de lo que se extraerá
      * @param offset Corrimiento desde $begindelimiter
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-30
      */
     public static function extract($text, $begindelimiter, $enddelimiter, $offset = 0)
     {
         $pos = strpos($text, $begindelimiter, $offset);
-        if ($pos===false) return false;
+        if ($pos === false) {
+			return false;
+		}
         $start = $pos + strlen($begindelimiter);
         $end = strpos($text, $enddelimiter, $start);
-        if ($end===false) return false;
+        if ($end === false) {
+			return false;
+		}
         return [
             'string'=>trim(substr($text, $start, $end-$start)),
             'start'=>$start,

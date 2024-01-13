@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,16 +25,12 @@ namespace sowerphp\general;
 
 /**
  * Controlador para página de contacto
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2018-10-15
  */
 class Controller_Contacto extends \Controller_App
 {
 
     /**
      * Método para autorizar la carga de index en caso que hay autenticación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-03-18
      */
     public function beforeFilter()
     {
@@ -46,14 +42,12 @@ class Controller_Contacto extends \Controller_App
 
     /**
      * Método que desplegará y procesará el formulario de contacto
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-08-14
      */
     public function index()
     {
         // si no hay datos para el envió del correo electrónico no
         // permirir cargar página de contacto
-        if (\sowerphp\core\Configure::read('email.default')===NULL) {
+        if (\sowerphp\core\Configure::read('email.default') === null) {
             \sowerphp\core\Model_Datasource_Session::message(
                 __('La página de contacto no se encuentra disponible'), 'error'
             );
@@ -74,14 +68,18 @@ class Controller_Contacto extends \Controller_App
             $_POST['nombre'] = trim(strip_tags($_POST['nombre']));
             $_POST['correo'] = trim(strip_tags($_POST['correo']));
             $_POST['mensaje'] = trim(strip_tags($_POST['mensaje']));
-            if (!empty($_POST['nombre']) and !empty($_POST['correo']) and !empty($_POST['mensaje'])) {
+            if (!empty($_POST['nombre']) && !empty($_POST['correo']) && !empty($_POST['mensaje'])) {
                 $email = new \sowerphp\core\Network_Email();
                 $email->replyTo($_POST['correo'], $_POST['nombre']);
                 $email->to(\sowerphp\core\Configure::read('email.default.to'));
-                $email->subject(!empty($_POST['asunto']) ? trim(strip_tags($_POST['asunto'])) : __('Contacto desde %s #%d', $this->request->url, date('YmdHis')));
+                $email->subject(
+                    !empty($_POST['asunto'])
+                    ? trim(strip_tags($_POST['asunto']))
+                    : __('Contacto desde %s #%d', $this->request->url, date('YmdHis'))
+                );
                 $msg = $_POST['mensaje']."\n\n".'-- '."\n".$_POST['nombre']."\n".$_POST['correo'];
                 $status = $email->send($msg);
-                if ($status===true) {
+                if ($status === true) {
                     \sowerphp\core\Model_Datasource_Session::message(
                         __('Su mensaje ha sido enviado, se responderá a la brevedad.'), 'ok'
                     );

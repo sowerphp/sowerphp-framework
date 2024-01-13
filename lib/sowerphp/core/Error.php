@@ -34,6 +34,11 @@ class Error
      */
     public static function handler($level, $message, $file, $line)
     {
+        // Cerrar la sesión antes de lanzar la excepción si la sesión está activa
+        if (session_status() == PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+        // Lanzar la excepción personalizada
         throw new Exception_Error($message, $level, $file, $line);
     }
 

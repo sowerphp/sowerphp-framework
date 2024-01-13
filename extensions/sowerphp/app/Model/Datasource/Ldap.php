@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\app;
 
 /**
  * Modelo para trabajar con LDAP
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2015-01-02
  */
 class Model_Datasource_Ldap extends \sowerphp\core\Model_Datasource
 {
@@ -44,13 +42,13 @@ class Model_Datasource_Ldap extends \sowerphp\core\Model_Datasource
      * Método que permite obtener un objeto Ldap
      * @param name Nombre de la configuración o arreglo con la configuración
      * @param config Arreglo con la configuración
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-29
      */
     public static function &get($name = 'default', $config = [])
     {
         $config = parent::getDatasource('ldap', $name, $config);
-        if (is_object($config)) return $config;
+        if (is_object($config)) {
+            return $config;
+        }
         $class = __CLASS__;
         self::$datasources['ldap'][$config['conf']] = new $class($config);
         return self::$datasources['ldap'][$config['conf']];
@@ -59,8 +57,6 @@ class Model_Datasource_Ldap extends \sowerphp\core\Model_Datasource
     /**
      * Constructor de la clase
      * @param config Arreglo con la configuración
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-29
      */
     public function __construct($config)
     {
@@ -74,9 +70,7 @@ class Model_Datasource_Ldap extends \sowerphp\core\Model_Datasource
 
     /**
      * Método que realiza la conexión con el servidor LDAP
-     * @return =true si se pudo realizar la conexión
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-30
+     * @return bool =true si se pudo realizar la conexión
      */
     private function connect()
     {
@@ -101,37 +95,32 @@ class Model_Datasource_Ldap extends \sowerphp\core\Model_Datasource
     /**
      * Método para obtener el valor de una opción del servidor LDAP
      * @param option Opción que se desea consultar (una de http://php.net/manual/en/ldap.constants.php)
-     * @return Valor de la opción o null si no se pudo determinar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-30
+     * @return mixed Valor de la opción o null si no se pudo determinar
      */
     public function getOption($option)
     {
         $val = null;
-        if (!ldap_get_option($this->link, $option, $val))
+        if (!ldap_get_option($this->link, $option, $val)) {
             return null;
+        }
         return $val;
     }
 
     /**
      * Método que cierra la conexión con el servidor LDAP
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-12
      */
     public function __destruct()
     {
-        if (is_resource($this->link))
+        if (is_resource($this->link)) {
             ldap_close($this->link);
+        }
     }
 
     /**
-     * Método que realiza sanitizado de caracteres especiales de acuerdo a
-     * RFC 2254:
-     *   http://www.ietf.org/rfc/rfc2254.txt
+     * Método que realiza sanitizado de caracteres especiales de acuerdo a la RFC 2254
+     * @link http://www.ietf.org/rfc/rfc2254.txt
      * @param string String que se quiere sanitizar
-     * @return String sanitizado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-28
+     * @return string String sanitizado
      */
     public function sanitize($string)
     {
@@ -146,9 +135,7 @@ class Model_Datasource_Ldap extends \sowerphp\core\Model_Datasource
      * Método que modifica una entrada en el servidor LDAP
      * @param dn distinguished name del objeto a modificar
      * @param entrey Arreglo asociativo con los nuevos valores para la entrada
-     * @return =true si se pudo hacer la modificación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-12
+     * @return bool =true si se pudo hacer la modificación
      */
     public function modify($dn, $entry)
     {
@@ -158,8 +145,6 @@ class Model_Datasource_Ldap extends \sowerphp\core\Model_Datasource
     /**
      * Método que entrega el dn base el servidor LDAP
      * @return dn base
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-29
      */
     public function getBaseDN()
     {
@@ -168,15 +153,13 @@ class Model_Datasource_Ldap extends \sowerphp\core\Model_Datasource
 
     /**
      * Método que obtiene una entrada desde el servidor LDAP
-     * @param
-     * @return
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-29
      */
     public function getEntries($base_dn, $filter, $attributes = [])
     {
         $r = ldap_search($this->link, $base_dn, $filter, $attributes);
-        if (!ldap_count_entries($this->link, $r)) return false;
+        if (!ldap_count_entries($this->link, $r)) {
+            return false;
+        }
         $entry = ldap_get_entries($this->link, $r);
         ldap_free_result($r);
         return $entry;
@@ -187,8 +170,6 @@ class Model_Datasource_Ldap extends \sowerphp\core\Model_Datasource
      * servidor LDAP
      * @param uid Identificador de la persona (nombre de usuario)
      * @return Model_Datasource_Ldap_Person
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-29
      */
     public function getPerson($uid)
     {

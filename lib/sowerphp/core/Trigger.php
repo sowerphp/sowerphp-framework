@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,9 +28,6 @@ namespace sowerphp\core;
  *
  * Permite desencadenar acciones bajo ciertos eventos que se ejecutan en la
  * aplicación.
- *
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2017-10-10
  */
 class Trigger
 {
@@ -39,8 +36,6 @@ class Trigger
 
     /**
      * Método que asigna el handler para los triggers
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-10-10
      */
     public static function setHandler($handler)
     {
@@ -50,8 +45,6 @@ class Trigger
     /**
      * Método que lanza el handler de los triggers o falla silenciosamente
      * en caso que no exista uno asociado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-10-10
      */
     public static function run($trigger, $args = null)
     {

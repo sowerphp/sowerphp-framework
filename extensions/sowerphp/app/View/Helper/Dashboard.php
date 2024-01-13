@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,16 +25,12 @@ namespace sowerphp\app;
 
 /**
  * Helper para la generación de los dashboards
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-07-23
  */
 class View_Helper_Dashboard
 {
 
     /**
      * Método que genera las tarjetas para el dashboard
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-23
      */
     public static function cards(array $cards, $config = null)
     {
@@ -55,7 +51,7 @@ class View_Helper_Dashboard
         foreach($cards[0] as $key => $val) {
             for ($i=1; $i<=$n_cards; $i++) {
                 $vars[] = '{card_'.$i.'_'.$key.'}';
-                if ($key=='link') {
+                if ($key == 'link') {
                     $config['link-display'] = 'block';
                 }
             }

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -30,8 +30,6 @@ namespace sowerphp\app\Sistema\General;
  * Comentario de la tabla:
  * Esta clase permite controlar las acciones entre el modelo y vista para la
  * tabla moneda_cambio
- * @author SowerPHP Code Generator
- * @version 2015-05-14 01:01:15
  */
 class Controller_MonedaCambios extends \Controller_Maintainer
 {
@@ -40,16 +38,14 @@ class Controller_MonedaCambios extends \Controller_Maintainer
 
     /**
      * Recurso que entrega el tipo de cambio para cierta moneda en cierto día
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2022-06-20
      */
     public function _api_tasa_GET($from, $to, $fecha = null)
     {
         if (empty($fecha)) {
             $fecha = date('Y-m-d');
         }
-        $from = strtoupper($from);
-        $to = strtoupper($to);
+        $from = mb_strtoupper($from);
+        $to = mb_strtoupper($to);
         return [
             $from => [
                 $to => [

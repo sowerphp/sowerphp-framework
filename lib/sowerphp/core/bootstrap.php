@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -22,9 +22,7 @@
  */
 
 /**
- * @file bootstrap.php
  * Archivo de arranque de la aplicación
- * @version 2022-07-30
  */
 
 // Asignar nivel de error máximo (para reportes previo a que se asigne el valor

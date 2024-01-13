@@ -4,7 +4,7 @@
 <div class="h-100 p-5 bg-body-tertiary border rounded-3 mb-4">
     <h2 class="mb-4">¡Lo sentimos!</h2>
     <p>Encontramos un problema y la aplicación dejó de ejecutarse.</p>
-    <?php if (!empty($exception) and !empty($message)): ?>
+    <?php if (!empty($exception) && !empty($message)): ?>
         <div class="card mb-4">
             <div class="card-header text-muted"><?=$exception?></div>
             <div class="card-body"><pre class="text-dark"><?=$message?></pre></div>

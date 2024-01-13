@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ namespace sowerphp\core;
  *
  * Capa de abstracción para base de datos, la clase puede ser fácilmente
  * utilizada fuera del framework SowerPHP sin mayores modificaciones.
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-12-29
  */
 class Model_Datasource_Database extends Model_Datasource
 {
@@ -46,14 +44,13 @@ class Model_Datasource_Database extends Model_Datasource
      * @param database La base de datos que se desea cargar,
      * @param config Configuración de la base de datos
      * @return Objeto con la base de datos seleccionada
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-05-06
      */
     public static function &get($name = 'default', $config = [])
     {
         $config = parent::getDatasource('database', $name, $config);
-        if (is_object($config))
+        if (is_object($config)) {
             return $config;
+        }
         $class = '\Model_Datasource_Database_'.$config['type'];
         try {
             self::$datasources['database'][$config['conf']] = new $class($config);
@@ -74,8 +71,6 @@ class Model_Datasource_Database extends Model_Datasource
      * datos la cierre). Si no se cierran mediante este método las bases
      * de datos serán cerradas al finalizar el script.
      * @param database La base de datos que se desea cerrar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-29
      */
     public static function close($database = '')
     {

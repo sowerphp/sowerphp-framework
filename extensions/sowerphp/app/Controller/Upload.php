@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,23 +25,19 @@ namespace sowerphp\app;
 
 /**
  * Clase que implementa los servicios web para subir archivos a la aplicación
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-06-08
  */
 class Controller_Upload extends \Controller_App
 {
 
     /**
      * Servicio web para subir una imagen usando diferentes métodos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-06-13
      */
     public function _api_image_POST($method = 'imgur')
     {
         if (empty($_FILES['file'])) {
             $this->Api->send('Debe enviar la imagen', 400);
         }
-        $class = 'Utility_Upload_Image_'.\sowerphp\core\Utility_Inflector::camelize($method);
+        $class = 'Utility_Upload_Image_' . \sowerphp\core\Utility_Inflector::camelize($method);
         if (!class_exists($class)) {
             $this->Api->send('No se encontró el método "'.$method.'" para subir la imagen', 400);
         }

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\app;
 
 /**
  * Clase para generar una imagen codificada (local encoded image)
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-06-13
  */
 class Utility_Upload_Image_Encoded
 {
@@ -34,8 +32,6 @@ class Utility_Upload_Image_Encoded
     /**
      * Método que sube la imagen y entrega la misma codificada para ser incluida
      * directamente en el atributo "src" del tag "img"
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-06-08
      */
     public function upload($file)
     {

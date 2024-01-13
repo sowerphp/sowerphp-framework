@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\app;
 
 /**
  * Componente para proveer una API para funciones de los controladores
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2021-03-01
  */
 class Controller_Component_Api extends \sowerphp\core\Controller_Component
 {
@@ -61,8 +59,6 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
 
     /**
      * Método para inicializar la función de la API que se está ejecutando
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-08-23
      */
     private function init()
     {
@@ -73,7 +69,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
             $this->data = $input;
         } else {
             $this->data = json_decode($input, true);
-            if ($this->data === null and !empty($input)) {
+            if ($this->data === null && !empty($input)) {
                 $this->send($this->settings['messages']['error']['input-invalid'], 400);
             }
         }
@@ -84,8 +80,6 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
      * lanzará las funciones, obteniendo su resultado y devolvíendolos a quien
      * solicitó la ejecución. Este método es el que controla las funciones del
      * controlador que se está ejecutando.
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-24
      */
     public function run($api_class_method, $args = null)
     {
@@ -98,20 +92,24 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
             $this->controller->response->header('Access-Control-Allow-Origin', '*');
         }
         // si se solicitan opciones se buscan para el recurso
-        if ($this->method=='OPTIONS') {
+        if ($this->method == 'OPTIONS') {
             $resources = $this->resources();
             $methods = ['OPTIONS'];
             foreach ($resources as $r) {
                 $method = substr($r, strrpos($r, '_')+1);
-                if ($r == $api_class_method.'_'.$method and !in_array($method, $methods)) {
+                if ($r == $api_class_method.'_'.$method && !in_array($method, $methods)) {
                     $methods[] = $method;
                 }
             }
             if (isset($methods[1])) {
                 if ($this->settings['cors']) {
-                    $this->controller->response->header('Access-Control-Allow-Methods',  implode(',', $methods));
+                    $this->controller->response->header(
+                        'Access-Control-Allow-Methods', implode(',', $methods)
+                    );
                 }
-                $this->controller->response->header('Allow', implode(',', $methods));
+                $this->controller->response->header(
+                    'Allow', implode(',', $methods)
+                );
                 $this->send($methods);
             } else {
                 $this->send(
@@ -125,7 +123,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
             }
         }
         // verificar que la función de la API del controlador exista
-        $method = '_api_'.$api_class_method.'_'.$this->method;
+        $method = '_api_' . $api_class_method . '_' . $this->method;
         if (!method_exists($this->controller, $method)) {
             $this->send(
                 sprintf(
@@ -133,13 +131,14 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
                     $api_class_method,
                     $this->method,
                     get_class($this->controller)
-                ), 405
+                ),
+                405
             );
         }
         // verificar que a lo menos se hayan pasado los argumentos requeridos
         $n_args = func_num_args() - 1;
         $reflectionMethod = new \ReflectionMethod($this->controller, $method);
-        if ($n_args<$reflectionMethod->getNumberOfRequiredParameters()) {
+        if ($n_args < $reflectionMethod->getNumberOfRequiredParameters()) {
             $args = [];
             foreach($reflectionMethod->getParameters() as &$p) {
                 $args[] = $p->isOptional() ? '['.$p->name.']' : $p->name;
@@ -151,20 +150,21 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
                     implode(', ', $args),
                     $this->method,
                     get_class($this->controller)
-                ), 406
+                ),
+                406
             );
         }
         unset($reflectionMethod);
         // si se requiere autenticación se valida con el usuario que se haya pasado
         $this->resource = $this->getResource();
-        if (\sowerphp\core\Configure::read('api.auth') and !$this->controller->Auth->allowedWithoutLogin($method) and !$this->controller->Auth->allowedWithLogin($method)) {
+        if (\sowerphp\core\Configure::read('api.auth') && !$this->controller->Auth->allowedWithoutLogin($method) && !$this->controller->Auth->allowedWithLogin($method)) {
             // obtener usuario autenticado y dar error si no hay uno
             $User = $this->getAuthUser();
             if (is_string($User)) {
                 $this->send($User, 401);
             }
             // verificar que el usuario tenga acceso al recurso solicitado
-            if (!in_array($this->controller->Auth->ip(), $this->settings['localhost']) and !$User->auth($this->resource)) {
+            if (!in_array($this->controller->Auth->ip(), $this->settings['localhost']) && !$User->auth($this->resource)) {
                 if (\sowerphp\core\Trigger::run('api_auth', $this) !== true) {
                     $this->send(
                         sprintf(
@@ -172,7 +172,8 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
                             $api_class_method,
                             $this->method,
                             get_class($this->controller)
-                        ), 402
+                        ),
+                        402
                     );
                 }
             }
@@ -183,7 +184,9 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         // ejecutar función de la API
         try {
             if ($n_args) {
-                $data = call_user_func_array([$this->controller, $method], array_slice(func_get_args(), 1));
+                $data = call_user_func_array(
+                    [$this->controller, $method], array_slice(func_get_args(), 1)
+                );
             } else {
                 $data = $this->controller->$method();
             }
@@ -199,14 +202,16 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
 
     /**
      * Método que entrega el recurso que se está accediendo a través de la API
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-08-15
      */
     public function getResource()
     {
         if (!isset($this->resource)) {
-            $find = '/'.$this->controller->request->params['controller'].'/'.(!empty($this->controller->request->params['pass'][0])?$this->controller->request->params['pass'][0]:'');
-            $pos = strrpos($this->controller->request->request, $find)+strlen($find);
+            $find = '/' . $this->controller->request->params['controller'] . '/' . (
+                !empty($this->controller->request->params['pass'][0])
+                    ? $this->controller->request->params['pass'][0]
+                    : ''
+            );
+            $pos = strrpos($this->controller->request->request, $find) + strlen($find);
             $this->resource = substr($this->controller->request->request, 0, $pos);
         }
         return $this->resource;
@@ -215,14 +220,12 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
     /**
      * Método que lista los recursos disponibles de la API en el controlador
      * que se está ejecutando
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-07-03
      */
     public function resources()
     {
         $resources = [];
         foreach(get_class_methods($this->controller) as $action) {
-            if (substr($action, 0, 5)=='_api_' && $action!=__FUNCTION__) {
+            if (substr($action, 0, 5) == '_api_' && $action != __FUNCTION__) {
                 $resources[] = substr($action, 5);
             }
         }
@@ -234,12 +237,14 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
      * @param data Datos que se enviarán
      * @param status Estado HTTP de resultado de la ejecución de la funcionalidad
      * @param options Opciones para ser usadas según los datos que se estén enviando
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-17
      */
     public function send($data, $status = 200, $options = 0)
     {
         try {
+            // NOTE: [Esteban] No se entregan estados 5XX por problemas con AWS EC2 LB
+            if ($status >= 500) {
+                $status = 400;
+            }
             // preparar datos que se enviarán
             $this->controller->response->status($status);
             if (!$this->controller->response->type()) {
@@ -264,17 +269,18 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
      * Método que realiza el log del uso de la API
      * @param request Objeto con la solicitud a la aplicación
      * @param response Objeto con la respuesta de la API
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-15
      */
     public function log() {
         if (\sowerphp\core\Trigger::run('api_log', $this) !== true) {
             if ($this->settings['log']) {
-                $msg = $this->method.' '.$this->getResource().' '.$this->controller->response->status().' '.$this->controller->response->length();
-                $msg .= ' '.round(microtime(true)-TIME_START, 2);
-                $msg .= ' '.round(memory_get_usage()/1024/1024,2);
-                $msg .= ' '.\sowerphp\core\Model_Datasource_Database_Manager::$querysCount;
-                $msg .= ' '.\sowerphp\core\Cache::$setCount.' '.\sowerphp\core\Cache::$getCount;
+                $msg = $this->method . ' ' . $this->getResource() . ' '
+                    . $this->controller->response->status() . ' '
+                    . $this->controller->response->length()
+                ;
+                $msg .= ' ' . round(microtime(true)-TIME_START, 2);
+                $msg .= ' ' . round(memory_get_usage()/1024/1024,2);
+                $msg .= ' ' . \sowerphp\core\Model_Datasource_Database_Manager::$querysCount;
+                $msg .= ' ' . \sowerphp\core\Cache::$setCount . ' ' . \sowerphp\core\Cache::$getCount;
                 $this->controller->Log->write($msg, LOG_INFO, $this->settings['log']);
             }
         }
@@ -283,8 +289,6 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
     /**
      * Método que envía una página de error por la API
      * @param e Excepción que se desea enviar (también puede ser un error)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-15
      */
     private function sendException($e) {
         $this->controller->response->status(500);
@@ -295,14 +299,12 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
     /**
      * Método que valida las credenciales pasadas a la función de la API del
      * controlador y devuelve el usuario que se autenticó
-     * @return Objeto con usuario autenticado o string con el error si hubo uno
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-03-01
+     * @return object|string Objeto con usuario autenticado o string con el error si hubo uno
      */
     public function getAuthUser($auth2_check = true)
     {
         // si ya se determinó el usuario se entrega
-        if ($this->User!==null) {
+        if ($this->User !== null) {
             return $this->User;
         }
         // si hay un usuario con sesión iniciada se usa ese
@@ -310,17 +312,24 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
             $this->User = $this->controller->Auth->User;
             return $this->User;
         }
-        // buscar datos del usuario (se busca en cabecera Authorization o bien en api_hash o api_key por GET, esto último no se recomienda usar)
-        $auth = isset($this->headers['Authorization']) ? trim($this->headers['Authorization']) : (isset($this->headers['authorization']) ? trim($this->headers['authorization']) : false);
-        if ($auth===false) {
+        // buscar datos del usuario (se busca en cabecera Authorization,
+        // o bien en api_hash o api_key por GET, esto último no se recomienda usar)
+        $auth = isset($this->headers['Authorization'])
+            ? trim($this->headers['Authorization'])
+            : (
+                isset($this->headers['authorization'])
+                    ? trim($this->headers['authorization'])
+                    : false
+            );
+        if ($auth === false) {
             if (!empty($_GET['api_hash'])) {
-                $auth = base64_encode($_GET['api_hash'].':X');
+                $auth = base64_encode($_GET['api_hash'] . ':X');
             }
             else if (!empty($_GET['api_key'])) {
                 $auth = $_GET['api_key'];
             }
         }
-        if ($auth===false) {
+        if ($auth === false) {
             $this->User = $this->settings['messages']['error']['auth-miss'];
             return $this->User;
         }
@@ -328,7 +337,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
             $user_pass = $auth;
         } else {
             list($auth_type, $user_pass) = explode(' ', $auth);
-            if ($auth_type=='Bearer') {
+            if ($auth_type == 'Bearer') {
                 $user_pass = base64_encode($user_pass.':X');
             }
         }
@@ -347,12 +356,18 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         }
         // si el usuario no existe -> error
         if (!$User->exists()) {
-            $this->User = sprintf($this->controller->Auth->settings['messages']['error']['invalid'], $User->usuario);
+            $this->User = sprintf(
+                $this->controller->Auth->settings['messages']['error']['invalid'],
+                $User->usuario
+            );
             return $this->User;
         }
         // si el usuario está inactivo -> error
         if (!$User->isActive()) {
-            $this->User = sprintf($this->controller->Auth->settings['messages']['error']['inactive'], $User->usuario);
+            $this->User = sprintf(
+                $this->controller->Auth->settings['messages']['error']['inactive'],
+                $User->usuario
+            );
             return $this->User;
         }
         // solo hacer las validaciones de contraseña y auth2 si se está
@@ -361,16 +376,25 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         if ($user != $User->hash) {
             // si el usuario tiene bloqueada su cuenta por intentos máximos -> error
             if (!$User->contrasenia_intentos) {
-                $this->User = sprintf($this->controller->Auth->settings['messages']['error']['login_attempts_exceeded'], $User->usuario);
+                $this->User = sprintf(
+                    $this->controller->Auth->settings['messages']['error']['login_attempts_exceeded'],
+                    $User->usuario
+                );
                 return $this->User;
             }
             // si la contraseña no es correcta -> error
             if (!$User->checkPassword($pass)) {
                 $User->setContraseniaIntentos($User->contrasenia_intentos-1);
                 if ($User->contrasenia_intentos) {
-                    $this->User = sprintf($this->controller->Auth->settings['messages']['error']['invalid'], $User->usuario);
+                    $this->User = sprintf(
+                        $this->controller->Auth->settings['messages']['error']['invalid'],
+                        $User->usuario
+                    );
                 } else {
-                    $this->User = sprintf($this->controller->Auth->settings['messages']['error']['login_attempts_exceeded'], $User->usuario);
+                    $this->User = sprintf(
+                        $this->controller->Auth->settings['messages']['error']['login_attempts_exceeded'],
+                        $User->usuario
+                    );
                 }
                 return $this->User;
             }
@@ -379,7 +403,11 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
                 try {
                     $User->checkAuth2(!empty($_GET['auth2_token']) ? $_GET['auth2_token'] : null);
                 } catch (\Exception $e) {
-                    $this->User = sprintf($this->controller->Auth->settings['messages']['error']['auth2'], $User->usuario, $e->getMessage());
+                    $this->User = sprintf(
+                        $this->controller->Auth->settings['messages']['error']['auth2'],
+                        $User->usuario,
+                        $e->getMessage()
+                    );
                     return $this->User;
                 }
             }
@@ -393,8 +421,6 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
     /**
      * Método que permite mantener los datos crudos y no convertirlos a JSON
      * @param keep =true (por defecto) para mantener datos en crudo
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-08-16
      */
     public function setKeepRawData($keep = true)
     {
@@ -404,8 +430,6 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
     /**
      * Método que entrega el objeto de la respuesta de la solicitud HTTP
      * @return \sowerphp\core\Network_Response
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-07-17
      */
     public function response()
     {

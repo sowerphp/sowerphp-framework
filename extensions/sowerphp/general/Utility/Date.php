@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\general;
 
 /**
  * Clase para trabajar con fechas
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2020-06-05
  */
 class Utility_Date
 {
@@ -38,9 +36,8 @@ class Utility_Date
      * Método que valida si la fecha es o no válida según el formato
      * @param date Fecha que se quiere validar
      * @param format Formato que se quiere validar
-     * @return =true si la fecha está ok
-     * @author https://stackoverflow.com/a/13194398/3333009
-     * @version 2012-11-02
+     * @return bool =true si la fecha está ok
+     * @link https://stackoverflow.com/a/13194398/3333009
      */
     public static function check($date, $format = 'Y-m-d')
     {
@@ -53,29 +50,32 @@ class Utility_Date
      * @param fecha Desde donde empezar
      * @param dias Días que se deben sumar a la fecha
      * @param feriados Días que no se deberán considerar al sumar
-     * @return Fecha con los días hábiles sumados
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-07
+     * @return string Fecha con los días hábiles sumados
      */
     public static function addWorkingDays($fecha, $dias, $feriados = [])
     {
         // mover fecha los días solicitados
         $start = $end = strtotime($fecha);
         $dia = date('N', $start);
-        if ($dias==0) {
-            if ($dia==6) $end = $start + 2*86400;
-            else if ($dia==7) $end = $start + 86400;
+        if ($dias == 0) {
+            if ($dia == 6) {
+                $end = $start + 2 * 86400;
+            } else if ($dia == 7) {
+                $end = $start + 86400;
+            }
         } else {
             $total = $dia + $dias;
             $fds = (int)($total/5) * 2;
-            if ($total%5==0) $fds -= 2;
+            if ($total % 5 == 0) {
+                $fds -= 2;
+            }
             $end = $start + ($dias+$fds)*86400;
         }
         $nuevaFecha = date('Y-m-d', $end);
         // ver si hay feriados, por cada feriado encontrado mover un día hábil
         // la fecha, hacer esto hasta que no hayan más días feriados en el rango
         // que se movió la fecha
-        while (($dias=self::countDaysMatch($fecha, $nuevaFecha, $feriados, true))!=0) {
+        while (($dias=self::countDaysMatch($fecha, $nuevaFecha, $feriados, true)) != 0) {
             $fecha = date('Y-m-d', strtotime($nuevaFecha)+86400);
             $nuevaFecha = self::addWorkingDays($nuevaFecha, $dias);
         }
@@ -88,22 +88,23 @@ class Utility_Date
      * @param fecha Desde donde empezar
      * @param dias Días que se deben restar a la fecha
      * @param feriados Días que no se deberán considerar al restar
-     * @return Fecha con los días hábiles restados
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-10
+     * @return string Fecha con los días hábiles restados
      */
     public static function subtractWorkingDays($fecha, $dias, $feriados = [])
     {
         // mover fecha los días solicitados
         $start = $end = strtotime($fecha);
         $dia = date('N', $start);
-        if ($dias==0) {
-            if ($dia==6) $end = $start - 86400;
-            else if ($dia==7) $end = $start - 2*86400;
+        if ($dias == 0) {
+            if ($dia == 6) {
+                $end = $start - 86400;
+            } else if ($dia == 7) {
+                $end = $start - 2 * 86400;
+            }
         } else {
             $total = $dia - $dias;
             $fds = $total > 0 ? (int)(abs($total)/5) * 2 : (int)(abs($total)/5) * 2 + 2;
-            $end = $start - ($dias+$fds)*86400;
+            $end = $start - ($dias + $fds) * 86400;
         }
         $nuevaFecha = date('Y-m-d', $end);
         // ver si hay feriados, por cada feriado encontrado mover un día hábil
@@ -122,9 +123,7 @@ class Utility_Date
      * corresponde el día de la fecha que se está pasando
      * @param fecha Fecha que se quiere saber que día hábil del mes correspone
      * @param feriados Arreglo con los feriados del mes (si no se pasa solo se omitirán fin de semanas)
-     * @return Número de día hábil del mes que corresponde la fecha pasada o =false si no es día hábil
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-06-21
+     * @return int|bool Número de día hábil del mes que corresponde la fecha pasada o =false si no es día hábil
      */
     public static function whatWorkingDay($fecha, $feriados = [])
     {
@@ -132,8 +131,9 @@ class Utility_Date
         $desde = $anio.'-'.$mes.'-01';
         for($i=0; $i<$dia; $i++) {
             $f = self::addWorkingDays($desde, $i, $feriados);
-            if ($f == $fecha)
+            if ($f == $fecha) {
                 return $i+1;
+            }
         }
         return false;
     }
@@ -144,34 +144,31 @@ class Utility_Date
      * @param mes Mes del día hábil que se busca
      * @param dia_habil Número de día hábil dentro del mes y año que se busca
      * @param feriados Arreglo con los feriados del mes (si no se pasa solo se omitirán fin de semanas)
-     * @return Fecha del día hábil
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-06-21
+     * @return string Fecha del día hábil
      */
     public static function getWorkingDay($anio, $mes, $dia_habil, $feriados = [])
     {
         $fecha = self::addWorkingDays($anio.'-'.$mes.'-01', 0, $feriados); // obtiene primer día hábil
         $fecha = self::addWorkingDays($fecha, $dia_habil-1, $feriados);
         list($anio2, $mes2, $dia2) = explode('-', $fecha);
-        return ($anio2 == $anio and $mes2 == $mes) ? $fecha : false;
+        return ($anio2 == $anio && $mes2 == $mes) ? $fecha : false;
     }
 
     /**
      * Método que indica si una fecha es el último día laboral del mes
      * @param fecha Fecha que se quiere saber si es el último día laboral del mes
      * @param feriados Arreglo con los feriados del mes (si no se pasa solo se omitirán fin de semanas)
-     * @return =true si es el último día laboral del mes
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-07-20
+     * @return bool =true si es el último día laboral del mes
      */
     public static function isLastWorkingDay($fecha, $feriados = [])
     {
-        if (!self::whatWorkingDay($fecha, $feriados))
+        if (!self::whatWorkingDay($fecha, $feriados)) {
             return false;
+        }
         $fecha2 = self::addWorkingDays($fecha, 1, $feriados);
         list($anio, $mes, $dia) = explode('-', $fecha);
         list($anio2, $mes2, $dia2) = explode('-', $fecha2);
-        return ($anio2 == $anio and $mes2 == $mes) ? false : true;
+        return ($anio2 == $anio && $mes2 == $mes) ? false : true;
     }
 
     /**
@@ -181,9 +178,7 @@ class Utility_Date
      * @param to Hasta cuando revisar
      * @param days Días que se están buscando en el rango
      * @param excludeWeekend =true se omitirán días que sean sábado o domingo
-     * @return Cantidad de días que se encontraron en el rango
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-09-07
+     * @return int Cantidad de días que se encontraron en el rango
      */
     public static function countDaysMatch($from, $to, $days, $excludeWeekend = false)
     {
@@ -196,8 +191,9 @@ class Utility_Date
                 $date += 86400;
                 continue;
             }
-            if (in_array(date('Y-m-d', $date), $days))
+            if (in_array(date('Y-m-d', $date), $days)) {
                 $count++;
+            }
             $date += 86400;
         }
         return $count;
@@ -209,8 +205,6 @@ class Utility_Date
      * @param hora Si se desea (true) o no (false) mostrar la hora
      * @param letrasFormato Si van en mayúscula ('u'), mínuscula ('l') o normal ('')
      * @param mostrarDia Si se incluye (=true) o no el día
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-04-19
      */
     public static function timestamp2string ($timestamp, $hora = true, $letrasFormato = '', $mostrarDia = true)
     {
@@ -219,11 +213,14 @@ class Utility_Date
             $timestamp = substr($timestamp, 0, $puntoPos);
         }
         $unixtime = strtotime($timestamp);
-        if ($mostrarDia)
+        if ($mostrarDia) {
             $fecha = date('\D\I\A j \d\e \M\E\S \d\e\l Y', $unixtime);
-        else
+        } else {
             $fecha = date('j \d\e \M\E\S \d\e\l Y', $unixtime);
-        if ($hora) $fecha .= ' a las '.date ('H:i', $unixtime);
+        }
+        if ($hora) {
+            $fecha .= ' a las '.date ('H:i', $unixtime);
+        }
         $dia = self::$dias[date('w', $unixtime)];
         $mes = self::$meses[date('n', $unixtime)-1];
         if ($letrasFormato == 'l') {
@@ -240,18 +237,22 @@ class Utility_Date
      * Método para transformar un string a una fecha
      * @param fecha String a transformar (20100523 o 201005)
      * @param invertir =true si la fecha a normalizar parte con día o mes
-     * @return String trasnformado (2010-05-23 o 2010-05)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-18
+     * @return string Fecha transformada (2010-05-23 o 2010-05)
      */
     public static function normalize($fecha, $invertir = false)
     {
         if ($invertir) {
-            if (strlen($fecha)==6) return $fecha[2].$fecha[3].$fecha[4].$fecha[5].'-'.$fecha[0].$fecha[1];
-            else if (strlen($fecha)==8) return $fecha[4].$fecha[5].$fecha[6].$fecha[7].'-'.$fecha[2].$fecha[3].'-'.$fecha[0].$fecha[1];
+            if (strlen($fecha) == 6) {
+                return $fecha[2].$fecha[3].$fecha[4].$fecha[5].'-'.$fecha[0].$fecha[1];
+            } else if (strlen($fecha) == 8) {
+                return $fecha[4].$fecha[5].$fecha[6].$fecha[7].'-'.$fecha[2].$fecha[3].'-'.$fecha[0].$fecha[1];
+            }
         } else {
-            if (strlen($fecha)==6) return $fecha[0].$fecha[1].$fecha[2].$fecha[3].'-'.$fecha[4].$fecha[5];
-            else if (strlen($fecha)==8) return $fecha[0].$fecha[1].$fecha[2].$fecha[3].'-'.$fecha[4].$fecha[5].'-'.$fecha[6].$fecha[7];
+            if (strlen($fecha) == 6) {
+                return $fecha[0].$fecha[1].$fecha[2].$fecha[3].'-'.$fecha[4].$fecha[5];
+            } else if (strlen($fecha) == 8) {
+                return $fecha[0].$fecha[1].$fecha[2].$fecha[3].'-'.$fecha[4].$fecha[5].'-'.$fecha[6].$fecha[7];
+            }
         }
         return $fecha;
     }
@@ -259,14 +260,13 @@ class Utility_Date
     /**
      * Método que calcula los años que han pasado a partir de una fecha
      * @param fecha Desde cuando calcular los años
-     * @return Años que han pasado desde la fecha indicada
-     * @author http://es.wikibooks.org/wiki/Programaci%C3%B3n_en_PHP/Ejemplos/Calcular_edad
-     * @version 2015-03-27
+     * @return int Años que han pasado desde la fecha indicada
+     * @link http://es.wikibooks.org/wiki/Programaci%C3%B3n_en_PHP/Ejemplos/Calcular_edad
      */
     public static function age($fecha)
     {
         list($Y, $m, $d) = explode('-', $fecha);
-        return date('md') < $m.$d ? date('Y')-$Y-1 : date('Y')-$Y;
+        return date('md') < $m.$d ? date('Y') - $Y - 1 : date('Y') - $Y;
     }
 
     /**
@@ -274,9 +274,8 @@ class Utility_Date
      * entrega en un string que representa dicho tiempo
      * @param datetime Fecha y hora en cualquier formato soportado por clase \DateTime
      * @param full Si se debe mostrar todo el string o solo una parte
-     * @return String con el tiempo que ha pasado para la fecha
-     * @author http://stackoverflow.com/a/18602474
-     * @version 2014-08-19
+     * @return string String con el tiempo que ha pasado para la fecha
+     * @link http://stackoverflow.com/a/18602474
      */
     public static function ago($datetime, $full = false)
     {
@@ -301,7 +300,9 @@ class Utility_Date
                 unset($string[$k]);
             }
         }
-        if (!$full) $string = array_slice($string, 0, count($string)>=2 ? 2 : 1);
+        if (!$full) {
+            $string = array_slice($string, 0, count($string) >= 2 ? 2 : 1);
+        }
         return $string ? 'hace '.implode(', ', $string) : 'recién';
     }
 
@@ -310,14 +311,11 @@ class Utility_Date
      * entrega como la cantidad de días
      * @param from Fecha desde cuando contar
      * @param to Fecha hasta cuando contar (si es null será la fecha actual)
-     * @return Días que han pasado entre las fechas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-06
+     * @return int Días que han pasado entre las fechas
      */
     public static function count($from, $to = null)
     {
-        if (!$to) $now = new \DateTime();
-        else $now = new \DateTime($to);
+        $now = !$to ? new \DateTime() : new \DateTime($to);
         $ago = new \DateTime($from);
         $diff = $now->diff($ago);
         return $diff->days;
@@ -327,22 +325,20 @@ class Utility_Date
      * Método que aplica un formato en particular a un timestamp
      * @param datetime Fecha y hora (http://php.net/manual/es/datetime.formats.php)
      * @param format Formato de salida requerido (http://php.net/manual/es/function.date.php)
-     * @return Fecha formateada según formato solicitado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-13
+     * @return string Fecha formateada según formato solicitado
      */
     public static function format($datetime, $format = 'd/m/Y')
     {
-        if (!$datetime) return null;
+        if (!$datetime) {
+            return null;
+        }
         return date($format, strtotime($datetime));
     }
 
     /**
      * Método que obtiene la fecha a partir de un número serial
      * @param n número serial
-     * @return Fecha en formato YYYY-MM-DD
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-07-07
+     * @return string Fecha en formato YYYY-MM-DD
      */
     public static function fromSerialNumber($n)
     {
@@ -352,9 +348,7 @@ class Utility_Date
     /**
      * Método que obtiene un periodo (mes) siguiente a uno específicado
      * @param periodo Período para el cual se quiere saber el siguiente o =null para actual
-     * @return Periodo en formato YYYYMM
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-08-01
+     * @return int Periodo en formato YYYYMM
      */
     public static function nextPeriod($periodo = null, $mover = 1)
     {
@@ -371,8 +365,8 @@ class Utility_Date
             return self::nextPeriod(self::nextPeriod($periodo), $mover - 1);
         }
         $periodo_siguiente = $periodo + 1;
-        if (substr($periodo_siguiente, 4)=='13') {
-            $periodo_siguiente = $periodo_siguiente +100 - 12;
+        if (substr($periodo_siguiente, 4) == '13') {
+            $periodo_siguiente = $periodo_siguiente + 100 - 12;
         }
         return $periodo_siguiente;
     }
@@ -380,9 +374,7 @@ class Utility_Date
     /**
      * Método que obtiene un periodo (mes) anterior a uno específicado
      * @param periodo Período para el cual se quiere saber el anterior o =null para actual
-     * @return Periodo en formato YYYYMM
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-08-01
+     * @return int Periodo en formato YYYYMM
      */
     public static function previousPeriod($periodo = null, $mover = 1)
     {
@@ -399,7 +391,7 @@ class Utility_Date
             return self::previousPeriod(self::previousPeriod($periodo), $mover - 1);
         }
         $periodo_anterior = $periodo - 1;
-        if (substr($periodo_anterior, 4)=='00') {
+        if (substr($periodo_anterior, 4) == '00') {
             $periodo_anterior = $periodo_anterior - 100 + 12;
         }
         return $periodo_anterior;
@@ -407,9 +399,7 @@ class Utility_Date
 
     /**
      * Método que entrega el último día de un período
-     * @return Último día del período
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-02-01
+     * @return string Último día del período
      */
     public static function lastDayPeriod($periodo = null)
     {
@@ -423,23 +413,21 @@ class Utility_Date
 
     /**
      * Método que valida un período con formato AAAA y AAAAMM en un rango de años
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-10-13
      */
     public static function validPeriod($period, $year_from = 2000, $year_to = 2100, $length = null)
     {
         $n_period = strlen((string)(int)$period);
-        if ($length !== null and $length != $n_period) {
+        if ($length !== null && $length != $n_period) {
             return false;
         }
         if ($n_period == 4) {
             $period = (int)$period;
-            return ($period >= $year_from and $period <= $year_to);
+            return ($period >= $year_from && $period <= $year_to);
         }
         else if ($n_period == 6) {
             $year = (int)substr((string)$period, 0, 4);
             $month = (int)substr((string)$period, 4);
-            return ($year >= $year_from and $year <= $year_to and $month >= 1 and $month <= 12);
+            return ($year >= $year_from && $year <= $year_to && $month >= 1 && $month <= 12);
         }
         else {
             return false;
@@ -448,8 +436,6 @@ class Utility_Date
 
     /**
      * Método que valida un período con formato AAAA en un rango de años
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-10-13
      */
     public static function validPeriod4($period, $year_from = 2000, $year_to = 2100)
     {
@@ -458,8 +444,6 @@ class Utility_Date
 
     /**
      * Método que valida un período con formato AAAAMM en un rango de años
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-10-13
      */
     public static function validPeriod6($period, $year_from = 2000, $year_to = 2100)
     {
@@ -470,10 +454,8 @@ class Utility_Date
      * Método que calcula cuantos meses han pasado entre dos fecha
      * @param from Fechas desde cuando contar
      * @param to Fecha hasta cual contar
-     * @return Meses que han pasado entre las fechas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @author http://stackoverflow.com/a/4233624
-     * @version 2017-01-10
+     * @return int Meses que han pasado entre las fechas
+     * @link http://stackoverflow.com/a/4233624
      */
     public static function countMonths($from, $to = null)
     {
@@ -488,7 +470,7 @@ class Utility_Date
         }
         $d1 = new \DateTime($from);
         $d2 = new \DateTime($to);
-        return $d1->diff($d2)->m + ($d1->diff($d2)->y*12);
+        return $d1->diff($d2)->m + ($d1->diff($d2)->y * 12);
     }
 
     /**
@@ -496,47 +478,50 @@ class Utility_Date
      * @param fecha Fecha actual a la que se quiere obtener la siguiente
      * @param tiempo Tiempo que se agregará a la fecha actual: A:año, M:mes, S:semana, D:día
      * @param cantidad Cantidad de 'frecuencia' a agregar
-     * @return Nueva fecha en formato YYYY-MM-DD
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-07-10
+     * @return string Nueva fecha en formato YYYY-MM-DD
      */
     public static function getNext($fecha = null, $tiempo = 'M', $cantidad = 1, $operacion = '+')
     {
-        if (!$fecha)
+        if (!$fecha) {
             $fecha = date('Y-m-d');
-        if ($tiempo=='A') {
+        }
+        if ($tiempo == 'A') {
             list($y, $m, $d) = explode('-', $fecha);
-            $y = $operacion=='+' ? ($y+$cantidad) : ($y-$cantidad);
-            if ($m=='02' and $d==29)
+            $y = $operacion == '+' ? ($y + $cantidad) : ($y - $cantidad);
+            if ($m == '02' && $d == 29) {
                 $d = 28;
+            }
             return $y.'-'.$m.'-'.$d;
         }
-        else if ($tiempo=='M') {
+        else if ($tiempo == 'M') {
             list($y, $m, $d) = explode('-', $fecha);
             $siguientePeriodo = $y.$m;
             for ($i=0; $i<$cantidad; $i++) {
-                if ($operacion=='+')
+                if ($operacion == '+') {
                     $siguientePeriodo = self::nextPeriod($siguientePeriodo);
-                else
+                } else {
                     $siguientePeriodo = self::previousPeriod($siguientePeriodo);
+                }
             }
             $siguienteFecha = self::normalize($siguientePeriodo.$d);
             list($y, $m, $d) = explode('-', $siguienteFecha);
-            if ($m=='02' and $d>28)
+            if ($m == '02' && $d > 28) {
                 $d = 28;
-            else if (in_array($m, ['04', '06', '09', '11']) and $d>30)
+            } else if (in_array($m, ['04', '06', '09', '11']) && $d > 30) {
                 $d = 30;
+            }
             return $y.'-'.$m.'-'.$d;
         }
-        else if ($tiempo=='S') {
+        else if ($tiempo == 'S') {
             return self::getNext($fecha, 'D', 7*$cantidad, $operacion);
         }
-        else if ($tiempo=='D') {
+        else if ($tiempo == 'D') {
             $date = new \DateTime($fecha);
-            if ($operacion=='+')
+            if ($operacion == '+') {
                 $date->add(new \DateInterval('P'.$cantidad.'D'));
-            else
+            } else {
                 $date->sub(new \DateInterval('P'.$cantidad.'D'));
+            }
             return $date->format('Y-m-d');
         }
         else if (is_numeric($tiempo)) {
@@ -552,9 +537,7 @@ class Utility_Date
      * @param fecha Fecha actual a la que se quiere obtener la anterior
      * @param tiempo Tiempo que se quitará a la fecha actual: A:año, M:mes, S:semana, D:día
      * @param cantidad Cantidad de 'frecuencia' a quitar
-     * @return Nueva fecha en formato YYYY-MM-DD
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-12-20
+     * @return string Nueva fecha en formato YYYY-MM-DD
      */
     public static function getPrevious($fecha = null, $tiempo = 'M', $cantidad = 1)
     {
@@ -564,8 +547,6 @@ class Utility_Date
     /**
      * Método que entrega el primer día de la semana
      * @return string Primer Día de la semana
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-06-05
      */
     public static function firstDayWeek($date = null)
     {
@@ -579,8 +560,6 @@ class Utility_Date
     /**
      * Método que entrega el último día de la semana
      * @return string Último Día de la semana
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-06-05
      */
     public static function lastDayWeek($date = null)
     {
@@ -594,8 +573,6 @@ class Utility_Date
     /**
      * Método que entrega un listado de años
      * @return array Arreglo decreciente con el listado de años
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-06-07
      */
     public static function years($total_years, $from = null)
     {
@@ -614,8 +591,6 @@ class Utility_Date
     /**
      * Método que entrega la cantidad de días que tiene un mes
      * @return int Cantidad de días
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-06-07
      */
     public static function daysInMonth($periodo)
     {

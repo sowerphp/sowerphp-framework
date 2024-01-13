@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para escribir y recuperar datos desde una sesión
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-22
  */
 class Model_Datasource_Session
 {
@@ -34,8 +32,6 @@ class Model_Datasource_Session
     /**
      * Método que inicia la sesión
      * @param expires Minutos en que expirará la sesión
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-09-16
      */
     public static function start($expires = 30)
     {
@@ -64,8 +60,6 @@ class Model_Datasource_Session
 
     /**
      * Carga configuración del inicio de la sesión
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-22
      */
     public static function configure()
     {
@@ -96,8 +90,6 @@ class Model_Datasource_Session
      * Método que guarda parámetros de rastreo (ej: UTM) para seguimiento de
      * campañas en la sesión. Así no se tienen que arrastrar por las URLs y se
      * puede saber estos datos para usar en otros lados (ej: formularios).
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-10-18
      */
     private static function saveUrlTracking()
     {
@@ -123,8 +115,6 @@ class Model_Datasource_Session
      * Entrega true si la variable esta creada en la sesión
      * @param name Nombre de la variable que se quiere buscar
      * @return Verdadero si la variable existe en la sesión
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-23
      */
     public static function check($name)
     {
@@ -139,8 +129,6 @@ class Model_Datasource_Session
      * Recuperar el valor de una variable de sesión
      * @param name Nombre de la variable que se desea leer
      * @return Valor de la variable o falso en caso que no exista o la sesión no este iniciada
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-23
      */
     public static function read($name = null)
     {
@@ -165,8 +153,6 @@ class Model_Datasource_Session
      * Quitar una variable de la sesión
      * @param name Nombre de la variable que se desea eliminar
      * @return Verdadero si se logro eliminar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-23
      */
     public static function delete($name)
     {
@@ -183,9 +169,7 @@ class Model_Datasource_Session
      * Escribir un valor de una variable de sesión
      * @param name Nombre de la variable
      * @param value Valor que se desea asignar a la variable
-     * @return Verdadero si se logró escribir la variable de sesión
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-23
+     * @return bool Verdadero si se logró escribir la variable de sesión
      */
     public static function write($name, $value = null)
     {
@@ -211,7 +195,6 @@ class Model_Datasource_Session
      * Used to write new data to _SESSION, since PHP doesn't like us setting the _SESSION var itself
      * @param old Antiguo conjunto de datos
      * @param new Nuevo conjunto de datos
-     * @author CakePHP
      */
     protected static function _overwrite(&$old, $new)
     {
@@ -229,8 +212,6 @@ class Model_Datasource_Session
 
     /**
      * Método para destruir e invalidar una sesión
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-06
      */
     public static function destroy()
     {
@@ -243,8 +224,6 @@ class Model_Datasource_Session
      * Método para escribir un mensaje de sesión y recuperarlo
      * @param message Mensaje que se desea mostrar
      * @param type Tipo de mensaje: success, info, warning o danger
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-06-14
      */
     public static function message($message = null, $type = 'info')
     {

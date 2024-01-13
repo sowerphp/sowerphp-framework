@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para manejar la internacionalización
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-06-04
  */
 class I18n
 {
@@ -77,8 +75,6 @@ class I18n
      * @param domain Dominio que se desea utilizar para la traducción
      * @param locale Localee (o idioma) al cual traducir el texto
      * @param encoding Tipo de codificación de las traducciones
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-06-04
      */
     public static function translate($string, $domain = 'master', $locale = null, $encoding = 'UTF-8')
     {
@@ -102,19 +98,17 @@ class I18n
     /**
      * Método que verifica si el lenguaje solicitado existe
      * @param locale Locale que se está buscando si existe
-     * @return =true si la traducción está disponible (existe el directorio
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-24
+     * @return bool =true si la traducción está disponible (existe el directorio
      */
     public static function localeExists ($locale)
     {
         if (!isset($locale[0])) {
             return false;
         }
-        if (!strpos($locale, '_') and isset(self::$locale[$locale])) {
+        if (!strpos($locale, '_') && isset(self::$locale[$locale])) {
             $locale = self::$locale[$locale];
         }
-        return is_dir(DIR_WEBSITE.'/Locale/'.$locale);
+        return is_dir(DIR_WEBSITE . '/Locale/' . $locale);
     }
 
 }

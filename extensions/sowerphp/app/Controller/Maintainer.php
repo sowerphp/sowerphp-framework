@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\app;
 
 /**
  * Clase que implementa los métodos básicos de un mantenedor, métodos CRUD.
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2018-10-17
  */
 class Controller_Maintainer extends \Controller_App
 {
@@ -41,66 +39,64 @@ class Controller_Maintainer extends \Controller_App
 
     /**
      * Constructor del controlador
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-22
      */
-    public function __construct (\sowerphp\core\Network_Request $request, \sowerphp\core\Network_Response $response)
+    public function __construct(\sowerphp\core\Network_Request $request, \sowerphp\core\Network_Response $response)
     {
-        parent::__construct ($request, $response);
+        parent::__construct($request, $response);
         $this->setModelName();
-        $this->module_url = $this->setModuleUrl ($this->request->params['module']);
+        $this->module_url = $this->setModuleUrl($this->request->params['module']);
     }
 
     /**
      * Método que asigna los namespaces y nombres de los modelos tanto singular
      * como plural usados por este controlador
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-17
      */
-    private function setModelName ()
+    private function setModelName()
     {
-        if (!$this->models)
-            $this->models = \sowerphp\core\Utility_Inflector::camelize($this->request->params['controller']);
-        if (!$this->model)
-            $this->model = \sowerphp\core\Utility_Inflector::singularize($this->models);
+        if (!$this->models) {
+            $this->models = \sowerphp\core\Utility_Inflector::camelize(
+                $this->request->params['controller']
+            );
+        }
+        if (!$this->model) {
+            $this->model = \sowerphp\core\Utility_Inflector::singularize(
+                $this->models
+            );
+        }
         $this->set('models', $this->models);
         $this->set('model', $this->model);
-        $this->model = '\\'.$this->namespace.'\Model_'.$this->model;
-        $this->models = '\\'.$this->namespace.'\Model_'.$this->models;
+        $this->model = '\\' . $this->namespace . '\Model_' . $this->model;
+        $this->models = '\\' . $this->namespace . '\Model_' . $this->models;
     }
 
     /**
      * Método que asigna la url del módulo que se usa en el controlador
      * @param modulo Nombre del módulo donde se generarán los archivos
-     * @return URL que se usa para acceder al módulo
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-03-15
+     * @return string URL que se usa para acceder al módulo
      */
-    private function setModuleUrl ($modulo = '')
+    private function setModuleUrl($modulo = '')
     {
         $partes = explode('.', $modulo);
         $module_url = '';
         foreach ($partes as &$p) {
-            $module_url .= \sowerphp\core\Utility_Inflector::underscore($p).'/';
+            $module_url .= \sowerphp\core\Utility_Inflector::underscore($p) . '/';
         }
-        return $module_url!='/' ? ('/'.$module_url) : $module_url;
+        return $module_url != '/' ? ('/' . $module_url) : $module_url;
     }
 
     /**
      * Método que busca la vista que se deberá renderizar
      * @param view Vista que se desea renderizar
      * @param location No se utiliza, esta por compatibilidad con método padre
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-03-16
      */
     protected function renderView($view = null, $location = null)
     {
         $this->autoRender = false;
         list($namespace, $ControllerName) = explode('\Controller_', get_class($this));
         if (\sowerphp\core\View::location($ControllerName.'/'.$view, $this->request->params['module'])) {
-            return parent::render($ControllerName.'/'.$view, $location);
+            return parent::render($ControllerName . '/' . $view, $location);
         } else {
-            return parent::render('Maintainer/'.$view, 'sowerphp/app');
+            return parent::render('Maintainer/' . $view, 'sowerphp/app');
         }
     }
 
@@ -108,15 +104,13 @@ class Controller_Maintainer extends \Controller_App
      * Método que permite forzar las opciones de búsqueda para la acción listar
      * esto permite a cierto usuario mostrar sólo cierto listado de registros
      * y no todos, esto evita tener que reprogramar la acción listar :-)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-31
      */
     protected function forceSearch(array $data)
     {
         // se asignan datos forzados para búsqueda
         $search = [];
         foreach ($data as $var => $val) {
-            $search[] = $var.':'.$val;
+            $search[] = $var . ':' . $val;
         }
         // se copian filtros extras, menos los forzados
         if (!empty($_GET['search'])) {
@@ -126,7 +120,7 @@ class Controller_Maintainer extends \Controller_App
                 if (strpos($filter, ':')) {
                     list($var, $val) = explode(':', $filter);
                     if (!in_array($var, $vars)) {
-                        $search[] = $var.':'.$val;
+                        $search[] = $var . ':' . $val;
                     }
                 }
             }
@@ -137,8 +131,6 @@ class Controller_Maintainer extends \Controller_App
 
     /**
      * Acción para listar los registros de la tabla
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-08-05
      */
     public function listar($page = 1, $orderby = null, $order = 'A')
     {
@@ -149,7 +141,7 @@ class Controller_Maintainer extends \Controller_App
         $searchUrl = null;
         $search = array();
         if (!empty($_GET['search'])) {
-            $searchUrl = '?search='.$_GET['search'];
+            $searchUrl = '?search=' . $_GET['search'];
             $filters = explode(',', $_GET['search']);
             $where = [];
             $vars = [];
@@ -165,48 +157,48 @@ class Controller_Maintainer extends \Controller_App
                 $search[$var] = $val;
                 // si el valor es '!null' se compara contra IS NOT NULL
                 if ($val == '!null') {
-                    $where[] = $var.' IS NOT NULL';
+                    $where[] = $var . ' IS NOT NULL';
                 }
                 // si el valor es null o 'null' se compara contra IS NULL
-                else if ($val === null or $val == 'null') {
-                    $where[] = $var.' IS NULL';
+                else if ($val === null || $val == 'null') {
+                    $where[] = $var . ' IS NULL';
                 }
                 // si es una FK se filtra con igualdad
                 else if (!empty($model::$columnsInfo[$var]['fk'])) {
-                    $where[] = $var.' = :'.$var;
-                    $vars[':'.$var] = $val;
+                    $where[] = $var . ' = :' . $var;
+                    $vars[':' . $var] = $val;
                 }
                 // si es un campo de texto se filtrará con LIKE
                 else if (in_array($model::$columnsInfo[$var]['type'], ['char', 'character varying', 'varchar', 'text'])) {
-                    $where[] = 'LOWER('.$var.') LIKE :'.$var;
-                    $vars[':'.$var] = '%'.strtolower($val).'%';
+                    $where[] = 'LOWER(' . $var . ') LIKE :' . $var;
+                    $vars[':' . $var] = '%' . strtolower($val) . '%';
                 }
                 // si es un tipo fecha con hora se usará like
                 else if (in_array($model::$columnsInfo[$var]['type'], ['timestamp', 'timestamp without time zone'])) {
-                    $where[] = 'CAST('.$var.' AS TEXT) LIKE :'.$var;
-                    $vars[':'.$var] = $val.' %';
+                    $where[] = 'CAST(' . $var . ' AS TEXT) LIKE :' . $var;
+                    $vars[':' . $var] = $val . ' %';
                 }
                 // si es un campo número entero se castea
                 else if (in_array($model::$columnsInfo[$var]['type'], ['smallint', 'integer', 'bigint', 'smallserial', 'serial', 'bigserial'])) {
-                    $where[] = $var.' = :'.$var;
-                    $vars[':'.$var] = (int)$val;
+                    $where[] = $var . ' = :' . $var;
+                    $vars[':' . $var] = (int)$val;
                 }
                 // si es un campo número decimal se castea
                 else if (in_array($model::$columnsInfo[$var]['type'], ['decimal', 'numeric', 'real', 'double precision'])) {
-                    $where[] = $var.' = :'.$var;
-                    $vars[':'.$var] = (float)$val;
+                    $where[] = $var . ' = :' . $var;
+                    $vars[':' . $var] = (float)$val;
                 }
                 // si es cualquier otro caso se comparará con una igualdad
                 else {
-                    $where[] = $var.' = :'.$var;
-                    $vars[':'.$var] = $val;
+                    $where[] = $var . ' = :' . $var;
+                    $vars[':' . $var] = $val;
                 }
             }
             $Objs->setWhereStatement($where, $vars);
         }
         // si se debe ordenar se agrega
         if (isset($model::$columnsInfo[$orderby])) {
-            $Objs->setOrderByStatement([$orderby=>($order=='D'?'DESC':'ASC')]);
+            $Objs->setOrderByStatement([$orderby => ($order == 'D' ? 'DESC' : 'ASC')]);
         }
         // total de registros
         try {
@@ -225,7 +217,8 @@ class Controller_Maintainer extends \Controller_App
             $Objs->setLimitStatement($registers_per_page, ($page-1)*$registers_per_page);
             if ($page != 1 && $page > $pages) {
                 $this->redirect(
-                    $this->module_url.$this->request->params['controller'].'/listar/1'.($orderby ? '/'.$orderby.'/'.$order : '').$searchUrl
+                    $this->module_url . $this->request->params['controller'] . '/listar/1'
+                    . ($orderby ? ('/' . $orderby . '/' . $order) : '') . $searchUrl
                 );
             }
         }
@@ -253,10 +246,12 @@ class Controller_Maintainer extends \Controller_App
             'columns' => $columns,
             'registers_total' => $registers_total,
             'pages' => isset($pages) ? $pages : 0,
-            'linkEnd' => ($orderby ? '/'.$orderby.'/'.$order : '').$searchUrl,
+            'linkEnd' => ($orderby ? ('/' . $orderby . '/' . $order) : '') . $searchUrl,
             'fkNamespace' => $model::$fkNamespace,
             'comment' => $model::$tableComment,
-            'listarFilterUrl' => '?listar='.base64_encode('/'.$page.($orderby ? '/'.$orderby.'/'.$order : '').$searchUrl),
+            'listarFilterUrl' => '?listar=' . base64_encode(
+                '/' . $page . ($orderby ? ('/' . $orderby . '/' . $order) : '') . $searchUrl
+            ),
             'deleteRecord' => $this->deleteRecord,
             'actionsColsWidth' => $this->actionsColsWidth,
             'extraActions' => $this->extraActions,
@@ -267,8 +262,6 @@ class Controller_Maintainer extends \Controller_App
 
     /**
      * Acción para crear un registro en la tabla
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-31
      */
     public function crear()
     {
@@ -286,18 +279,18 @@ class Controller_Maintainer extends \Controller_App
                 try {
                     $Obj->checkAttributes();
                     if ($Obj->save()) {
-                        \sowerphp\core\Model_Datasource_Session::message('Registro creado', 'ok');
+                        \sowerphp\core\Model_Datasource_Session::message('Registro creado.', 'ok');
                     } else {
-                        \sowerphp\core\Model_Datasource_Session::message('Registro no creado', 'error');
+                        \sowerphp\core\Model_Datasource_Session::message('Registro no creado.', 'error');
                     }
                     $this->redirect(
-                        $this->module_url.$this->request->params['controller'].'/listar'.$filterListar
+                        $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar
                     );
                 } catch (\Exception $e) {
                     \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
                 }
             } else {
-                \sowerphp\core\Model_Datasource_Session::message('Registro ya existe', 'error');
+                \sowerphp\core\Model_Datasource_Session::message('Registro ya existe.', 'error');
             }
         }
         // setear variables
@@ -308,7 +301,8 @@ class Controller_Maintainer extends \Controller_App
             'accion' => 'Crear',
             'columns' => $model::$columnsInfo,
             'contraseniaNames' => $this->contraseniaNames,
-            'listarUrl' => $this->module_url.$this->request->params['controller'].'/listar'.$filterListar,
+            'listarUrl' => $this->module_url . $this->request->params['controller']
+                . '/listar' . $filterListar,
         ));
         // renderizar
         $this->renderView('crear_editar');
@@ -317,17 +311,15 @@ class Controller_Maintainer extends \Controller_App
     /**
      * Acción para editar un registro de la tabla
      * @param pk Parámetro que representa la PK, pueden ser varios parámetros los pasados
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-31
      */
     public function editar($pk)
     {
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         $Obj = new $this->model(array_map('urldecode', func_get_args()));
         // si el registro que se quiere editar no existe error
-        if(!$Obj->exists()) {
+        if (!$Obj->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'Registro ('.implode(', ', func_get_args()).') no existe, no se puede editar',
+                'Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede editar.',
                 'error'
             );
             $this->redirect(
@@ -338,7 +330,7 @@ class Controller_Maintainer extends \Controller_App
         $model = $this->model;
         if (isset($_POST['submit'])) {
             foreach ($model::$columnsInfo as $col => &$info) {
-                if (in_array($col, $this->contraseniaNames) and empty($_POST[$col])) {
+                if (in_array($col, $this->contraseniaNames) && empty($_POST[$col])) {
                     $_POST[$col] = $Obj->$col;
                 }
             }
@@ -351,12 +343,16 @@ class Controller_Maintainer extends \Controller_App
             try {
                 $Obj->checkAttributes();
                 if ($Obj->save()) {
-                    \sowerphp\core\Model_Datasource_Session::message('Registro ('.implode(', ', func_get_args()).') editado', 'ok');
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        'Registro ('.implode(', ', func_get_args()).') editado.', 'ok'
+                    );
                 } else {
-                    \sowerphp\core\Model_Datasource_Session::message('Registro ('.implode(', ', func_get_args()).') no editado', 'error');
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        'Registro ('.implode(', ', func_get_args()).') no editado.', 'error'
+                    );
                 }
                 $this->redirect(
-                    $this->module_url.$this->request->params['controller'].'/listar'.$filterListar
+                    $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar
                 );
             } catch (\Exception $e) {
                 \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
@@ -369,7 +365,8 @@ class Controller_Maintainer extends \Controller_App
             'contraseniaNames' => $this->contraseniaNames,
             'fkNamespace' => $model::$fkNamespace,
             'accion' => 'Editar',
-            'listarUrl' => $this->module_url.$this->request->params['controller'].'/listar'.$filterListar,
+            'listarUrl' => $this->module_url . $this->request->params['controller']
+                . '/listar' . $filterListar,
         ));
         // renderizar
         $this->renderView('crear_editar');
@@ -378,17 +375,15 @@ class Controller_Maintainer extends \Controller_App
     /**
      * Acción para eliminar un registro de la tabla
      * @param pk Parámetro que representa la PK, pueden ser varios parámetros los pasados
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-03-04
      */
-    public function eliminar ($pk)
+    public function eliminar($pk)
     {
         if (!$this->deleteRecord) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'No se permite el borrado de registros', 'error'
+                'No se permite el borrado de registros.', 'error'
             );
             $this->redirect(
-                $this->module_url.$this->request->params['controller'].'/listar'.$filterListar
+                $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar
             );
         }
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
@@ -396,7 +391,7 @@ class Controller_Maintainer extends \Controller_App
         // si el registro que se quiere eliminar no existe error
         if(!$Obj->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'Registro ('.implode(', ', func_get_args()).') no existe, no se puede eliminar',
+                'Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede eliminar.',
                 'error'
             );
             $this->redirect(
@@ -406,54 +401,52 @@ class Controller_Maintainer extends \Controller_App
         try {
             $Obj->delete();
             \sowerphp\core\Model_Datasource_Session::message(
-                'Registro ('.implode(', ', func_get_args()).') eliminado', 'ok'
+                'Registro (' . implode(', ', func_get_args()) . ') eliminado.', 'ok'
             );
         } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'No se pudo eliminar el registro ('.implode(', ', func_get_args()).'): '.$e->getMessage(), 'error'
+                'No se pudo eliminar el registro (' . implode(', ', func_get_args()) . '): '.$e->getMessage(), 'error'
             );
         }
         $this->redirect(
-            $this->module_url.$this->request->params['controller'].'/listar'.$filterListar
+            $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar
         );
     }
 
     /**
      * Método para descargar un archivo desde la base de datos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-14
      */
-    public function d ($campo, $pk)
+    public function d($campo, $pk)
     {
         // si el campo que se solicita no existe error
         $model = $this->model;
-        if (!isset($model::$columnsInfo[$campo.'_data'])) {
+        if (!isset($model::$columnsInfo[$campo . '_data'])) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'Campo '.$campo.' no existe', 'error'
+                'Campo '.$campo.' no existe.', 'error'
             );
             $this->redirect(
-                $this->module_url.$this->request->params['controller'].'/listar'
+                $this->module_url . $this->request->params['controller'] . '/listar'
             );
         }
-        $pks = array_slice(func_get_args(),1);
+        $pks = array_slice(func_get_args(), 1);
         $Obj = new $this->model($pks);
         // si el registro que se quiere eliminar no existe error
         if(!$Obj->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'Registro ('.implode(', ', $pks).') no existe. No se puede obtener '.$campo,
+                'Registro (' . implode(', ', $pks) . ') no existe. No se puede obtener '.$campo.'.',
                 'error'
             );
             $this->redirect(
-                $this->module_url.$this->request->params['controller'].'/listar'
+                $this->module_url . $this->request->params['controller'] . '/listar'
             );
         }
-        if ($Obj->{$campo.'_size'}==0) {
+        if ($Obj->{$campo.'_size'} == 0) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'No hay datos para el campo '.$campo.' en el registro ('.implode(', ', $pks).')',
+                'No hay datos para el campo ' . $campo . ' en el registro ('.implode(', ', $pks).').',
                 'error'
             );
             $this->redirect(
-                $this->module_url.$this->request->params['controller'].'/listar'
+                $this->module_url . $this->request->params['controller'] . '/listar'
             );
         }
         // entregar archivo

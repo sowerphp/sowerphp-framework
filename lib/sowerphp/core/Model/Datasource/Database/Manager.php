@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ namespace sowerphp\core;
  *
  * Define métodos que deberán ser implementados, clases específicas para
  * la conexión con X base de datos deberán extender esta clase
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2016-09-24
  */
 abstract class Model_Datasource_Database_Manager extends \PDO
 {
@@ -40,8 +38,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
 
     /**
      * Manejador de errores para la base de datos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-21
      */
     public function error($msg)
     {
@@ -58,8 +54,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param sql Consulta SQL que se desea realizar
      * @param params Parámetros que se deben enlazar a la consulta
      * @return PDOStatement
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-11-23
      */
     public function query($sql, $params = array())
     {
@@ -100,8 +94,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param sql Consulta SQL que se desea realizar
      * @param params Parámetros que se deben enlazar a la consulta
      * @return Array Arreglo bidimensional con la tabla y sus datos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
      */
     public function getTable($sql, $params = array())
     {
@@ -113,8 +105,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param sql Consulta SQL que se desea realizar
      * @param params Parámetros que se deben enlazar a la consulta
      * @return Array Arreglo unidimensional con la fila
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-02-27
      */
     public function getRow($sql, $params = array())
     {
@@ -129,8 +119,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param sql Consulta SQL que se desea realizar
      * @param params Parámetros que se deben enlazar a la consulta
      * @return Array Arreglo unidimensional con la columna
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-06
      */
     public function getCol($sql, $params = array())
     {
@@ -148,8 +136,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param sql Consulta SQL que se desea realizar
      * @param params Parámetros que se deben enlazar a la consulta
      * @return Mixed Valor devuelto
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-02-27
      */
     public function getValue($sql, $params = array())
     {
@@ -164,8 +150,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param sql Consulta SQL que se desea realizar
      * @param params Parámetros que se deben enlazar a la consulta
      * @return Generator Object
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-06
      */
     public function getTableGenerator($sql, $params = [])
     {
@@ -181,8 +165,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param sql Consulta SQL que se desea realizar
      * @param params Parámetros que se deben enlazar a la consulta
      * @return Generator Object
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-06
      */
     public function getColGenerator($sql, $params = [])
     {
@@ -199,8 +181,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param sql Consulta SQL que se desea realizar
      * @param params Parámetros que se deben enlazar a la consulta
      * @return Array Arreglo unidimensional con los índices y sus datos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-03-31
      */
     public function getAssociativeArray($sql, $params = [])
     {
@@ -210,20 +190,18 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     /**
      * Wrapper para comenzar una transacción (evita iniciar más de una transacción)
      * @param serializable =true ejecutará la transacción de forma SERIALIZABLE (sólo MariaDB/MySQL y PostgreSQL)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-03-28
      */
     public function beginTransaction($serializable = false)
     {
         if (!$this->inTransaction) {
             // serializar transacción en MariaDB y MySQL
-            if ($serializable and in_array($this->config['type'], ['MariaDB', 'MySQL'])) {
+            if ($serializable && in_array($this->config['type'], ['MariaDB', 'MySQL'])) {
                 $this->query('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
             }
             // iniciar transacción
             if (parent::beginTransaction()) {
                 // serializar transacción en PostgreSQL
-                if ($serializable and $this->config['type']=='PostgreSQL') {
+                if ($serializable && $this->config['type'] == 'PostgreSQL') {
                     $this->query('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
                     $this->query('SET TRANSACTION READ WRITE');
                 }
@@ -242,14 +220,13 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     /**
      * Wrapper para aceptar una transacción (evita hacer commit cuando no es la
      * primera transacción)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-03-28
      */
     public function commit()
     {
         if ($this->inTransaction) {
-            if ($this->inTransaction==1)
+            if ($this->inTransaction==1) {
                 parent::commit();
+            }
             $this->inTransaction--;
             return true;
         }
@@ -258,12 +235,10 @@ abstract class Model_Datasource_Database_Manager extends \PDO
 
     /**
      * Wrapper para cancelar una transacción (evita cancelar más de una transacción)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-03-28
      */
     public function rollBack()
     {
-        if ($this->inTransaction and parent::rollBack()) {
+        if ($this->inTransaction && parent::rollBack()) {
             $this->inTransaction = 0;
             return true;
         }
@@ -274,9 +249,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * Entrega información de una tabla (nombre, comentario, columnas,
      * pks y fks)
      * @param table Tabla a buscar sus datos
-     * @return Arreglo con los datos de la tabla
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-05-10
+     * @return array Arreglo con los datos de la tabla
      */
     public function getInfoFromTable($tablename)
     {
@@ -323,9 +296,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * Seleccionar una tabla con los nombres de las columnas
      * @param sql Consulta SQL que se desea realizar
      * @param params Parámetros que se deben pasar a la consulta preparada
-     * @return Arreglo con una tabla que tiene nombres de columnas y luego los datos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-25
+     * @return array Arreglo con una tabla que tiene nombres de columnas y luego los datos
      */
     public function getTableWithColsNames($sql, $params = array())
     {
@@ -347,8 +318,9 @@ abstract class Model_Datasource_Database_Manager extends \PDO
         $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         foreach ($result as &$row) {
             foreach ($row as $col => &$value) {
-                if (in_array($columns[$col]['native_type'], $omitir))
+                if (in_array($columns[$col]['native_type'], $omitir)) {
                     $value = '['.$columns[$col]['native_type'].']';
+                }
             }
             $data[] = $row;
         }
@@ -360,8 +332,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * Obtener una tabla mediante un procedimiento almacenado
      * @param procedure Procedimiento almacenado que se desea ejecutar
      * @return Array Arreglo bidimensional con la tabla y sus datos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
      */
     public function getTableFromSP($procedure)
     {
@@ -371,8 +341,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * Obtener una sola fila mediante un procedimiento almacenado
      * @param procedure Procedimiento almacenado que se desea ejecutar
      * @return Array Arreglo unidimensional con la fila
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
      */
     public function getRowFromSP($procedure)
     {
@@ -382,8 +350,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * Obtener una sola columna mediante un procedimiento almacenado
      * @param procedure Procedimiento almacenado que se desea ejecutar
      * @return Array Arreglo unidimensional con la columna
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
      */
     public function getColFromSP($procedure)
     {
@@ -393,8 +359,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * Obtener un solo valor mediante un procedimiento almacenado
      * @param procedure Procedimiento almacenado que se desea ejecutar
      * @return Mixed Valor devuelto por el procedimiento
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-26
      */
     public function getValueFromSP($procedure)
     {
@@ -404,8 +368,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * Asigna un límite para la obtención de filas en la consulta SQL
      * @param sql Consulta SQL a la que se le agrega el límite
      * @return String Consulta con el límite agregado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
      */
     public function setLimit($sql, $records, $offset = 0)
     {
@@ -416,8 +378,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * @param colum Columna por la que se filtrará
      * @param value Valor a buscar mediante like
      * @return String Filtro utilizando like
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
      */
     public function like($column, $value)
     {
@@ -430,8 +390,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * pasados.
      * @param par1 Parámetro 1 que se quiere concatenar
      * @param par2 Parámetro 2 que se quiere concatenar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
      */
     public function concat($par1, $par2)
     {
@@ -440,8 +398,6 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     /**
      * Entrega una fecha en cierto formato, se puede entregar a partir de cierta
      * fecha y hora o bien con la fecha y hora actual
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-10-12
      */
     public function date($format, $datetime = null, $cast = null)
     {
@@ -452,25 +408,22 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * base de datos
      * Este método es por compatibilidad, aquellas BD que no soportan este método
      * entregarán NULL para cada PATH solicitado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-12-21
      */
     public function xml($column, $path, $namespace = null, $data_format = null)
     {
-        if (!is_array($path))
+        if (!is_array($path)) {
             $path = [$path];
+        }
         $select = [];
         foreach ($path as $p) {
             $select[] = 'NULL';
         }
-        return count($select)>1 ? $select : array_shift($select);
+        return count($select) > 1 ? $select : array_shift($select);
     }
 
     /**
      * Listado de tablas de la base de datos
-     * @return Array Arreglo con las tablas (nombre y comentario)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
+     * @return array Array Arreglo con las tablas (nombre y comentario)
      */
     public function getTables()
     {
@@ -479,9 +432,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     /**
      * Obtener comentario de una tabla
      * @param table Nombre de la tabla
-     * @return String Comentario de la tabla
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
+     * @return string Comentario de la tabla
      */
     public function getCommentFromTable($table)
     {
@@ -491,9 +442,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * Listado de columnas de una tabla (nombre, tipo, largo máximo, si
      * puede tener un valor nulo y su valor por defecto)
      * @param table Tabla a la que se quiere buscar las columnas
-     * @return Array Arreglo con la información de las columnas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
+     * @return array Arreglo con la información de las columnas
      */
     public function getColsFromTable($table)
     {
@@ -502,9 +451,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     /**
      * Listado de claves primarias de una tabla
      * @param table Tabla a buscar su o sus claves primarias
-     * @return Arreglo con la o las claves primarias
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
+     * @return array Arreglo con la o las claves primarias
      */
     public function getPksFromTable($table)
     {
@@ -513,9 +460,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     /**
      * Listado de claves foráneas de una tabla
      * @param table Tabla a buscar su o sus claves foráneas
-     * @return Arreglo con la o las claves foráneas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-19
+     * @return array Arreglo con la o las claves foráneas
      */
     public function getFksFromTable($table)
     {
@@ -523,9 +468,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
 
     /**
      * Método que entrega el tipo de base de datos instanciada
-     * @return Tipo de la BD instanciada
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-02-04
+     * @return string Tipo de la BD instanciada
      */
     public function __toString()
     {

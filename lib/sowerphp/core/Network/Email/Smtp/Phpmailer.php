@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -26,8 +26,6 @@ namespace sowerphp\core;
 /**
  * Clase para enviar correo electrónico mediante SMTP
  * Requiere: PHPMailer
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2020-02-09
  */
 class Network_Email_Smtp_Phpmailer
 {
@@ -37,8 +35,6 @@ class Network_Email_Smtp_Phpmailer
     /**
      * Constructor de la clase
      * @param config Arreglo con la configuración de PHPMailer
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-23
      */
     public function __construct($config)
     {
@@ -61,7 +57,7 @@ class Network_Email_Smtp_Phpmailer
         }
         // si no están los campos mínimos necesarios error
         if (empty($config['host']) || empty($config['port']) || empty($config['user']) || empty($config['pass'])) {
-             throw new \sowerphp\core\Exception('Configuración del correo electrónico incompleta');
+            throw new \sowerphp\core\Exception('Configuración del correo electrónico incompleta');
         }
         // determinar host y seguridad si existe
         if (strpos($config['host'], '://')) {
@@ -97,9 +93,7 @@ class Network_Email_Smtp_Phpmailer
      * Método que envía el correo
      * @param data Arreglo con los datos que se enviarán (texto y adjuntos)
      * @param header Cabeceras del correo
-     * @return Arreglo con los estados de retorno por cada correo enviado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-09
+     * @return array Arreglo con los estados de retorno por cada correo enviado
      */
     public function send($data, $header)
     {
@@ -143,9 +137,7 @@ class Network_Email_Smtp_Phpmailer
      * Método que crea el correo con PHPMailer (pero no lo envía)
      * @param data Arreglo con los datos que se enviarán (texto y adjuntos)
      * @param header Cabeceras del correo
-     * @return Arreglo con los estados de retorno por cada correo enviado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-09
+     * @return array Arreglo con los estados de retorno por cada correo enviado
      */
     public static function createEmail($data, $header)
     {

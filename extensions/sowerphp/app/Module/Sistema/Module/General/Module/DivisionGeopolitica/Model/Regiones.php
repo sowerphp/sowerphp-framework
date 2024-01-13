@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
  * Clase para mapear la tabla region de la base de datos
  * Comentario de la tabla: Regiones del país
  * Esta clase permite trabajar sobre un conjunto de registros de la tabla region
- * @author SowerPHP Code Generator
- * @version 2014-04-26 01:36:28
  */
 class Model_Regiones extends \Model_Plural_App
 {
@@ -40,9 +38,7 @@ class Model_Regiones extends \Model_Plural_App
 
     /**
      * Método que entrega la lista de regiones ordenadas por código
-     * @return Tabla con los códigos y regiones
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-01-07
+     * @return array Tabla con los códigos y regiones
      */
     public function getList()
     {

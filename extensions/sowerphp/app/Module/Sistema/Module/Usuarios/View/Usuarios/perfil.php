@@ -67,7 +67,7 @@ echo $form->input(array(
     'help' => 'Valor de la cabecera Authorization de HTTP para autenticar en la API usando sólo la API key, la cual está basada en el hash del usuario',
     'attr' => 'readonly="readonly" onclick="this.select()"',
 ));
-if ($_Auth->User->getLdapPerson() and $_Auth->User->getLdapPerson()->uid != $_Auth->User->usuario) {
+if ($_Auth->User->getLdapPerson() && $_Auth->User->getLdapPerson()->uid != $_Auth->User->usuario) {
     echo $form->input(array(
         'type' => 'div',
         'label' => 'Usuario LDAP',
@@ -75,7 +75,7 @@ if ($_Auth->User->getLdapPerson() and $_Auth->User->getLdapPerson()->uid != $_Au
         'help' => 'Usuario LDAP asociado a la cuenta de usuario',
     ));
 }
-if ($_Auth->User->getEmailAccount() and $_Auth->User->getEmailAccount()->getEmail() != $_Auth->User->email) {
+if ($_Auth->User->getEmailAccount() && $_Auth->User->getEmailAccount()->getEmail() != $_Auth->User->email) {
     echo $form->input(array(
         'type' => 'div',
         'label' => 'Email oficial',

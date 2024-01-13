@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para cargar otras clases y/o archivos
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-04-04
  */
 class App
 {
@@ -37,8 +35,6 @@ class App
     /**
      * Método que agrega las capas de la aplicación
      * @param extensions Arreglo con las capas de la aplicación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-10-10
      */
     public static function createLayers ($extensions)
     {
@@ -79,8 +75,6 @@ class App
      * Método que indica si una capa existe o no
      * @param layer Capa que se busca
      * @return =true si la capa existe
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-26
      */
     public static function layerExists ($layer)
     {
@@ -92,8 +86,6 @@ class App
      * @param class Clase que se desea cargar
      * @param loadAlias =true si no se encuentra la clase se buscará un alias para la misma
      * @return =true si se encontró la clase
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-09-20
      */
     public static function loadClass ($class, $loadAlias = true)
     {
@@ -120,8 +112,6 @@ class App
      * el namespace donde se encuentra la clase
      * @param class Clase que se quiere cargar a través de un alias
      * @return =true si se encontró la clase
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-25
      */
     public static function loadClassAlias ($class)
     {
@@ -145,8 +135,6 @@ class App
      * @param class Clase que se está buscando
      * @param module Módulo donde buscar la clase (si existe uno)
      * @return Entrega el FQN de la clase (o sea con el namespace completo)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-23
      */
     public static function findClass ($class, $module = null)
     {
@@ -170,11 +158,9 @@ class App
 
     /**
      * Entrega las rutas registradas
-     * @return Las rutas registradas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-04
+     * @return array Las rutas registradas
      */
-    public static function paths ()
+    public static function paths()
     {
         return self::$_paths;
     }
@@ -183,13 +169,12 @@ class App
      * Entrega la ruta a la capa solicitada
      * @param layer Capa que se requiere su ruta
      * @return Ruta hacia la capa
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-04
      */
-    public static function layer ($layer)
+    public static function layer($layer)
     {
-        if (isset(self::$_layers[$layer]))
+        if (isset(self::$_layers[$layer])) {
             return self::$_layers[$layer];
+        }
         return false;
     }
 
@@ -198,11 +183,9 @@ class App
      * Si se pasa una ruta absoluta se incluirá solo ese archivo si
      * existe, si es relativa se buscará en los posibles paths
      * @param archivo Archivo que se desea incluir (sin extensión .php)
-     * @return Verdadero si se pudo incluir el archivo (falso si no)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-10-29
+     * @return bool Verdadero si se pudo incluir el archivo (falso si no)
      */
-    public static function import ($archivo)
+    public static function import($archivo)
     {
         // Si es una ruta absoluta
         if ($archivo[0]=='/' || strpos($archivo, ':\\')) {
@@ -226,11 +209,9 @@ class App
      * Método que entrega la ubicación real de un archivo (busca en los
      * posibles paths)
      * @param archivo Archivo que se está buscando
-     * @return Ruta del archivo si fue encontrado (falso si no)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-09-14
+     * @return string Ruta del archivo si fue encontrado (falso si no)
      */
-    public static function location ($archivo)
+    public static function location($archivo)
     {
         foreach (self::$_paths as $path) {
             $file = $path.'/'.$archivo;

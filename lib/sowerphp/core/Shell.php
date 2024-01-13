@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase base para todo comando de la Shell
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2021-06-03
  */
 abstract class Shell
 {
@@ -37,8 +35,6 @@ abstract class Shell
 
     /**
      * Constructor de la clase, asigna salida estándar a stdout
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-22
      */
     public function __construct()
     {
@@ -50,8 +46,6 @@ abstract class Shell
      * @param message Mensaje que se desea imprimir
      * @param newlines Cuantas nuevas líneas se deben agregar
      * @return Caracteres escritos (o falso si falló)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-09-14
      */
     public function out($message = null, $newlines = 1)
     {
@@ -64,8 +58,6 @@ abstract class Shell
      * @param newlines Cuantas nuevas líneas se deben agregar después del mensaje
      * @param trim Si se debe usar trim en lo leído (por defecto true)
      * @return Lo leído desde el teclado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-09-14
      */
     public function in($message = null, $newlines = 0, $trim = true)
     {
@@ -80,8 +72,6 @@ abstract class Shell
      * Guardar un archivo con cierto contenido
      * @param filename Nombre del archivo
      * @param data Datos que se deben guardar en el archivo
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-09-14
      */
     public function createFile($filename, $data)
     {
@@ -91,8 +81,6 @@ abstract class Shell
     /**
      * Método para mostrar estadísticas finales de la ejecución del comando
      * @param stream Se permite elegir a través de que stream se enviarán las estadísticas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-02-03
      */
     public function showStats($stream = 'php://stderr')
     {
@@ -110,8 +98,6 @@ abstract class Shell
 
     /**
      * Método que indica si este comando ("shell script") puede ejecutar múltiples instancias
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-06-03
      */
     public function canHaveMultipleInstances()
     {

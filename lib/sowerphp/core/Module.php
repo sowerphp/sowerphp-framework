@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para manejar modulos: cargarlos, rutas y bootstrap
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2022-07-26
  */
 class Module
 {
@@ -45,8 +43,6 @@ class Module
      * que se desea utilizar un módulo.
      * @param module Nombre del módulo (o un arreglo de módulos con sus configuraciones)
      * @param config Arreglo con configuración del módulo
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-24
      */
     public static function uses($module, $config = array())
     {
@@ -87,8 +83,6 @@ class Module
     /**
      * Método para indicar que se debe descartar un módulo previamente cargado
      * @param module Nombre del módulo a descartar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-26
      */
     public static function drop($module)
     {
@@ -103,8 +97,6 @@ class Module
     /**
      * Cargar módulo e inicializarlo
      * @param module Nombre del módulo que se desea cargar
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-22
      */
     public static function load($module)
     {
@@ -159,8 +151,6 @@ class Module
      * @param module Nombre del modulo
      * @param file Ruta hacia el archivo, sin .php
      * @return Ruta completa para el archivo solicitado o null si no existe
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-17
      */
     public static function fileLocation($module, $file)
     {
@@ -178,8 +168,6 @@ class Module
      * Entrega listado de modulos cargados o si se especifica un modulo
      * si ese esta cargado o no
      * @param module Módulo que se desea verificar si está cargado o null para pedir todos los módulos cargados
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-02-24
      */
     public static function loaded($module = null)
     {
@@ -199,8 +187,6 @@ class Module
      * módulo que se indicó con self::uses())
      * @param url Solicitud realizada (sin la base de la aplicación)
      * @return Nombre del módulo si es que existe uno en la url
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-22
      */
     public static function find($url)
     {
@@ -245,8 +231,6 @@ class Module
      * Entrega la rutas donde se encuentra el módulo
      * @param module Nombre del módulo
      * @return Rutas donde el módulo existe
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-06-10
      */
     public static function paths($module)
     {
@@ -261,8 +245,6 @@ class Module
      * Separa el nombre del módulo del nombre de la clase que se desea cargar
      * @param name Nombre a separar
      * @return Arreglo con el nombre del módulo y la clase
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2012-11-20
      */
     public static function split($name)
     {

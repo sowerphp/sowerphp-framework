@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -28,8 +28,6 @@ namespace sowerphp\app\Sistema\General;
  * Clase para mapear la tabla afd de la base de datos
  * Comentario de la tabla:
  * Esta clase permite trabajar sobre un registro de la tabla afd
- * @author SowerPHP Code Generator
- * @version 2014-12-19 18:06:09
  */
 class Model_Afd extends \Model_App
 {
@@ -81,8 +79,6 @@ class Model_Afd extends \Model_App
     /**
      * Contructor para el modelo AFD
      * @param codigo Código del AFD en la BD
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-20
      */
     public function __construct($codigo = null)
     {
@@ -94,8 +90,6 @@ class Model_Afd extends \Model_App
      * Método que guarda el AFD
      * @param estados Arreglo con arreglo de codigos y nombres de estados
      * @param transiciones Arreglo con arreglo de desdes, valor y hastas de las transiciones
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-19
      */
     public function save()
     {
@@ -118,8 +112,6 @@ class Model_Afd extends \Model_App
      * Método que guarda los estados del AFD
      * @param codigo Arreglo con los códigos de los estados
      * @param nombres Arreglo con los nombres/glosas de los estados
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-13
      */
     private function saveEstados($codigos, $nombres)
     {
@@ -127,16 +119,17 @@ class Model_Afd extends \Model_App
         $this->db->query('
             DELETE FROM afd_estado
             WHERE afd = :afd
-        ', [':afd'=>$this->codigo]);
+        ', [':afd' => $this->codigo]);
         $n = count($codigos);
         for ($i=0; $i<$n; $i++) {
             $codigos[$i] = trim($codigos[$i]);
             $nombres[$i] = trim($nombres[$i]);
-            if (!isset($codigos[$i][0]) or !isset($nombres[$i][0]))
+            if (!isset($codigos[$i][0]) || !isset($nombres[$i][0])) {
                 continue;
+            }
             $this->db->query(
                 'INSERT INTO afd_estado VALUES (:afd, :codigo, :nombre)',
-                [':afd'=>$this->codigo, ':codigo'=>$codigos[$i], ':nombre'=>$nombres[$i]]
+                [':afd' => $this->codigo, ':codigo' => $codigos[$i], ':nombre' => $nombres[$i]]
             );
         }
         $this->db->commit();
@@ -147,8 +140,6 @@ class Model_Afd extends \Model_App
      * @param desdes Arreglo con los estados desde
      * @param valores Arreglo con los valores que hacen pasar desde "desde" a "hasta"
      * @param hastas Arreglo con los estados hasta
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-13
      */
     private function saveTransiciones($desdes, $valores, $hastas)
     {
@@ -156,14 +147,15 @@ class Model_Afd extends \Model_App
         $this->db->query('
             DELETE FROM afd_transicion
             WHERE afd = :afd
-        ', [':afd'=>$this->codigo]);
+        ', [':afd' => $this->codigo]);
         $n = count($desdes);
         for ($i=0; $i<$n; $i++) {
             $desdes[$i] = trim($desdes[$i]);
             $valores[$i] = trim($valores[$i]);
             $hastas[$i] = trim($hastas[$i]);
-            if (!isset($desdes[$i][0]) or !isset($valores[$i][0]) or !isset($hastas[$i][0]))
+            if (!isset($desdes[$i][0]) || !isset($valores[$i][0]) || !isset($hastas[$i][0])) {
                 continue;
+            }
             $AfdTransicion = new Model_AfdTransicion();
             $AfdTransicion->afd = $this->codigo;
             $AfdTransicion->desde = $desdes[$i];
@@ -177,9 +169,7 @@ class Model_Afd extends \Model_App
     /**
      * Método que entrega el listado de estados del AFD
      * @param prefix Prefijo que se debe usar en el nombre de la columna (clave en el arreglo)
-     * @return Tabla con los estados: código y nombre
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-19
+     * @return array Tabla con los estados: código y nombre
      */
     public function getEstados($prefix = '')
     {
@@ -188,14 +178,12 @@ class Model_Afd extends \Model_App
             FROM afd_estado
             WHERE afd = :afd
             ORDER BY codigo
-        ', [':afd'=>$this->codigo]);
+        ', [':afd' => $this->codigo]);
     }
 
     /**
      * Método que entrega el listado de transiciones del AFD
-     * @return Tabla con las transiciones: hasta, valor y desde
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-19
+     * @return array Tabla con las transiciones: hasta, valor y desde
      */
     public function getTransicionesTabla()
     {
@@ -204,23 +192,22 @@ class Model_Afd extends \Model_App
             FROM afd_transicion
             WHERE afd = :afd
             ORDER BY desde, hasta, valor
-        ', [':afd'=>$this->codigo]);
+        ', [':afd' => $this->codigo]);
     }
 
     /**
      * Método que entrega el listado de transiciones del AFD normalizadas para
      * ser utilizadas con la utilidad \sowerphp\general\Utility_Automada_AFD
-     * @return Arreglo en formato requerido por Utility_Automada_AFD
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-19
+     * @return array Arreglo en formato requerido por Utility_Automada_AFD
      */
     public function getTransiciones()
     {
         $aux = $this->getTransicionesTabla();
         $transiciones = [];
         foreach ($aux as &$t) {
-            if (!isset($transiciones[$t['desde']]))
+            if (!isset($transiciones[$t['desde']])) {
                 $transiciones[$t['desde']] = [];
+            }
             $transiciones[$t['desde']][$t['valor']] = $t['hasta'];
         }
         return $transiciones;

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para manejar una colección de componentes
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-03-22
  */
 class Controller_Component_Collection extends Object_Collection
 {
@@ -39,10 +37,8 @@ class Controller_Component_Collection extends Object_Collection
      * Cargará cada uno de los componentes creando un atributo en el
      * controlador con el nombre del componente
      * @param Controller Controlador para el que se usan los componentes
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-14
      */
-    public function init (Controller $Controller)
+    public function init(Controller $Controller)
     {
         $this->_Controller = &$Controller;
         $components = self::normalizeObjectArray (
@@ -60,10 +56,8 @@ class Controller_Component_Collection extends Object_Collection
      * @param component Componente que se quiere cargar
      * @param settins Opciones para el componente
      * @return Componente cargado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-04
      */
-    public function load ($component, $settings = array())
+    public function load($component, $settings = array())
     {
         // si ya se cargó solo se retorna
         if (isset($this->_loaded[$component])) {
@@ -88,8 +82,6 @@ class Controller_Component_Collection extends Object_Collection
      * callback
      * @param callback Función que se debe ejecutar (ej: beforeRender)
      * @param params Parámetros que se pasarán a la función callback
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-14
      */
     public function trigger($callback, $params = [])
     {

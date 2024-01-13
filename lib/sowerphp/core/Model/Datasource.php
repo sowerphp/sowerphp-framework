@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -27,8 +27,6 @@ namespace sowerphp\core;
  * Clase base para las fuentes de datos, permite obtener la configuración de las
  * mismas y mantener un caché con los objetos que representan las conexiones a
  * las fuentes de datos.
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-12-29
  */
 abstract class Model_Datasource
 {
@@ -41,13 +39,11 @@ abstract class Model_Datasource
      * @param datasource Identificador de la fuente de datos (ej: database)
      * @param name Nombre de la configuración o arreglo con la configuración
      * @param config Arreglo con la configuración
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-04-21
      */
     public static function getDatasource($datasource, $name = 'default', $config = [])
     {
         // si el objeto solicitado está en caché se entrega
-        if (is_string($name) and isset(self::$datasources[$datasource][$name])) {
+        if (is_string($name) && isset(self::$datasources[$datasource][$name])) {
             return self::$datasources[$datasource][$name];
         }
         // si $name es un arreglo entonces es la configuración lo que se pasó
@@ -63,8 +59,9 @@ abstract class Model_Datasource
             ));
         }
         // si no está el nombre de la configuración se asigna
-        if (!isset($config['conf']))
+        if (!isset($config['conf'])) {
             $config['conf'] = is_string($name) ? $name : 'default';
+        }
         // entregar configuración
         return $config;
     }

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -26,16 +26,12 @@ namespace sowerphp\app\Dev;
 /**
  * Controlador para las acciones relacionadas con la configuración de la
  * aplicación
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2017-01-26
  */
 class Controller_Config extends \Controller_App
 {
 
     /**
      * Servicio web que permite obtener el nombre del layout de la aplicación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-01-26
      */
     public function _api_layout_GET()
     {
@@ -44,8 +40,6 @@ class Controller_Config extends \Controller_App
 
     /**
      * Servicio web que permite obtener el menú de la aplicación web
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-01-26
      */
     public function _api_nav_app_GET()
     {
@@ -54,8 +48,6 @@ class Controller_Config extends \Controller_App
 
     /**
      * Servicio web que permite obtener el correo que usa la aplicación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-01-26
      */
     public function _api_email_GET()
     {
@@ -64,8 +56,6 @@ class Controller_Config extends \Controller_App
 
     /**
      * Servicio web que permite obtener los módulos cargados en la aplicación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-01-26
      */
     public function _api_modulos_GET()
     {

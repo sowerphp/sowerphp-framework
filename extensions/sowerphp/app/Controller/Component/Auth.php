@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\app;
 
 /**
  * Componente para proveer de un sistema de autenticación y autorización
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-10-21
  */
 class Controller_Component_Auth extends \sowerphp\core\Controller_Component
 {
@@ -73,8 +71,6 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
 
     /**
      * Método que inicializa el componente y carga la sesión activa
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-31
      */
     public function __construct(\sowerphp\core\Controller_Component_Collection $Components, $settings = [])
     {
@@ -101,19 +97,19 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
 
     /**
      * Método que actualiza el usuario autenticado en la caché
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-11-06
      */
     public function saveCache()
     {
-        $this->Cache->set($this->settings['session']['key'].$this->session['id'], $this->User, $this->settings['session']['cache']);
+        $this->Cache->set(
+            $this->settings['session']['key'] . $this->session['id'],
+            $this->User,
+            $this->settings['session']['cache']
+        );
     }
 
     /**
      * Método que verifica si el usuario tiene permisos o bien da error
      * Wrapper para el método que hace la validación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-28
      */
     public function beforeFilter()
     {
@@ -124,7 +120,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
                     $this->controller->request->request
                 ), 'error');
                 $this->controller->redirect(
-                    $this->settings['redirect']['form'].'/'.
+                    $this->settings['redirect']['form'] . '/' .
                     base64_encode($this->controller->request->request)
                 );
             } else {
@@ -142,8 +138,6 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
 
     /**
      * Agregar acciones que se permitirán ejecutar sin estár autenticado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-06-30
      */
     public function allow($action = null)
     {
@@ -155,8 +149,6 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     /**
      * Agregar acciones que se permitirán ejecutar a cualquier usuario que
      * esté autenticado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-22
      */
     public function allowWithLogin($action = null)
     {
@@ -168,9 +160,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     /**
      * Método que permite determinar si la acción solicitada del controlador
      * puede o no ser ejecutada sin estar con una sesión activa
-     * @return =true si la acción del controlador se puede ejecutar sin tener sesión creada
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-08-06
+     * @return bool =true si la acción del controlador se puede ejecutar sin tener sesión creada
      */
     public function allowedWithoutLogin($action = null)
     {
@@ -183,9 +173,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     /**
      * Método que permite determinar si la acción solicitada del controlador
      * puede o no ser ejecutada sólo con tener una sesión activa
-     * @return =true si la acción del controlador se puede ejecutar sólo con tener sesión creada
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2020-02-11
+     * @return bool =true si la acción del controlador se puede ejecutar sólo con tener sesión creada
      */
     public function allowedWithLogin($action = null)
     {
@@ -197,8 +185,6 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
 
     /**
      * Método para determinar si un usuario está o no autorizado a un área
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-29
      */
     public function isAuthorized()
     {
@@ -221,15 +207,15 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
 
     /**
      * Indica si existe una sesión de un usuario creada
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-07-23
      */
     public function logged()
     {
         if ($this->__logged === null) {
-            if ($this->session and $this->User) {
+            if ($this->session && $this->User) {
                 if (!$this->User->checkLastLoginHash($this->session['hash'])) {
-                    (new \sowerphp\core\Cache())->delete($this->settings['session']['key'].$this->session['id']);
+                    (new \sowerphp\core\Cache())->delete(
+                        $this->settings['session']['key'].$this->session['id']
+                    );
                     \sowerphp\core\Model_Datasource_Session::destroy();
                     \sowerphp\core\Model_Datasource_Session::message(
                         sprintf(
@@ -252,8 +238,6 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
      * Método que revisa si hay o no permisos para determinado recurso y cierto
      * usuario (por defecto la web que se trata de acceder y el usuario
      * autenticado).
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-11-14
      */
     public function check($recurso = false, $usuario = null)
     {
@@ -269,8 +253,6 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
 
     /**
      * Método que realiza el login del usuario
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2022-08-14
      */
     public function login($usuario, $contrasenia, $auth2_token = null)
     {
@@ -307,7 +289,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
             return;
         }
         // si ya hubo un intento de login fallido entonces se pedirá captcha
-        if ($this->settings['maxLoginAttempts'] and $this->User->contrasenia_intentos<$this->settings['maxLoginAttempts']) {
+        if ($this->settings['maxLoginAttempts'] && $this->User->contrasenia_intentos<$this->settings['maxLoginAttempts']) {
             try {
                 \sowerphp\general\Utility_Google_Recaptcha::check();
             } catch (\Exception $e) {
@@ -320,7 +302,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         // si la contraseña no es correcta -> error
         if (!$this->User->checkPassword($contrasenia)) {
             if ($this->settings['maxLoginAttempts']) {
-                $this->User->savePasswordRetry($this->User->contrasenia_intentos-1);
+                $this->User->savePasswordRetry($this->User->contrasenia_intentos - 1);
             }
             if ($this->User->contrasenia_intentos) {
                 $msg = $this->settings['messages']['error']['invalid'];
@@ -337,7 +319,8 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
             $this->User->checkAuth2($auth2_token);
         } catch (\Exception $e) {
             \sowerphp\core\Model_Datasource_Session::message(
-                sprintf($this->settings['messages']['error']['auth2'], $usuario, $e->getMessage()), 'error'
+                sprintf($this->settings['messages']['error']['auth2'], $usuario, $e->getMessage()),
+                'error'
             );
             return;
         }
@@ -345,7 +328,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         // registrar ingreso en la base de datos
         $lastLogin = $this->User->lastLogin();
         if (isset($lastLogin['fecha_hora'][0])) {
-            $lastlogin = '. '.sprintf(
+            $lastlogin = '. ' . sprintf(
                 $this->settings['messages']['ok']['lastlogin'],
                 \sowerphp\general\Utility_Date::format($lastLogin['fecha_hora'], 'd/m/Y H:i'),
                 $lastLogin['desde']
@@ -358,7 +341,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         $msg = sprintf(
             $this->settings['messages']['ok']['login'],
             $this->User->usuario
-        ).$lastlogin;
+        ) . $lastlogin;
         \sowerphp\core\Model_Datasource_Session::message($msg, 'ok');
         $this->log($msg);
         // si el usuario tiene layout personalizado se asigna
@@ -377,8 +360,6 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
 
     /**
      * Método que crea la sesión del usuario registrado en la autenticación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2019-10-21
      */
     private function createSession()
     {
@@ -397,8 +378,6 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
 
     /**
      * Método que realiza el login del usuario a través de preautenticación
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-12-23
      */
     public function preauth($token, $usuario = null, $auth2_token = null)
     {
@@ -412,14 +391,14 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
             if (!$key) {
                 return false;
             }
-            $real_token = md5($usuario.date('Ymd').$key);
+            $real_token = md5($usuario.date('Ymd') . $key);
             if ($token != $real_token) {
                 return false;
             }
             $this->User = new $this->settings['model']($usuario);
         }
         // si el usuario no existe error
-        if (!$this->User->exists() or !$this->User->isActive()) {
+        if (!$this->User->exists() || !$this->User->isActive()) {
             return false;
         }
         // verificar token de autenticación secundaria
@@ -435,43 +414,40 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
 
     /**
      * Método que termina la sesión del usuario
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-09
      */
     public function logout()
     {
         (new \sowerphp\core\Cache())->delete($this->settings['session']['key'].$this->session['id']);
         \sowerphp\core\Model_Datasource_Session::destroy();
         \sowerphp\core\Model_Datasource_Session::start();
-        \sowerphp\core\Model_Datasource_Session::message(sprintf(
-            $this->settings['messages']['ok']['logout'],
-            $this->User->usuario
-        ), 'ok');
+        \sowerphp\core\Model_Datasource_Session::message(
+            sprintf(
+                $this->settings['messages']['ok']['logout'],
+                $this->User->usuario
+            ),
+            'ok'
+        );
         $this->controller->redirect($this->settings['redirect']['logout']);
     }
 
     /**
      * Establecer ip del visitante
-     * @return Ip del visitante
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-29
+     * @return string Ip del visitante
      */
-    public function ip ($get_from_proxy = false)
+    public function ip($get_from_proxy = false)
     {
         if ($get_from_proxy && getenv('HTTP_X_FORWARDED_FOR')) {
             $ips = explode(', ', getenv('HTTP_X_FORWARDED_FOR'));
-            return $ips[count($ips)-1];
+            return $ips[count($ips) - 1];
         }
         return $_SERVER['REMOTE_ADDR'];
     }
 
     /**
      * Establecer host del visitante
-     * @return Host del visitante
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-03-29
+     * @return string Host del visitante
      */
-    public function host ($get_from_proxy = false)
+    public function host($get_from_proxy = false)
     {
         return gethostbyaddr($this->ip($get_from_proxy));
     }
@@ -480,9 +456,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
      * Obtiene la ubicación del usuario que accede al sitio, si está disponible
      * GeoIP localmente en el servidor lo utilizará en caso contrario usará
      * el servicio https://freegeoip.net (máximo de 10.000 consultas por hora)
-     * @return Arreglo con los datos de la ubicación del usuario
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-07-09
+     * @return array Arreglo con los datos de la ubicación del usuario
      */
     public function location()
     {
@@ -492,9 +466,10 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         }
         if (!isset($location)) {
             $response = \sowerphp\core\Network_Http_Socket::get(
-                'https://freegeoip.net/json/'.$ip
+                'https://freegeoip.net/json/' . $ip
             );
-            $location = $response['status']['code']==200 ? (array)json_decode($response['body']) : false;
+            $location = $response['status']['code'] == 200
+                ? (array)json_decode($response['body']) : false;
         }
         return $location;
     }
@@ -503,8 +478,6 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
      * Método que guarda un evento en el log
      * @param message Mensaje del evento
      * @param severity Gravedad del evento
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-05-28
      */
     protected function log($message, $severity = LOG_INFO)
     {

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\core;
 
 /**
  * Clase para trabajar con conexiones FTP
- * @author Esteban De la Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2015-06-16
  */
 class Network_Ftp
 {
@@ -37,8 +35,6 @@ class Network_Ftp
     /**
      * Constructor de la clase para conexiones FTP
      * @param config Configuración para el servidor FTP (índices: host, port, timeout, user, pass y passive)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-06-16
      */
     public function __construct($config = [])
     {
@@ -57,7 +53,7 @@ class Network_Ftp
         if ($this->link) {
             if ($this->config['user']) {
                 $login = $this->login($this->config['user'], $this->config['pass']);
-                if ($login and $this->config['passive']) {
+                if ($login && $this->config['passive']) {
                     $this->pasv($this->config['passive']);
                 }
             }
@@ -66,8 +62,6 @@ class Network_Ftp
 
     /**
      * Destructor de la clase para conexiones FTP
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-06-16
      */
     public function __destruct()
     {
@@ -78,17 +72,14 @@ class Network_Ftp
     /**
      * Método que permite obtener los archivos de un directorio
      * @param dir Directorio que se desea escanear
-     * @return Arreglo con los archivos agrupados por tipo (ej: d y -)
-     * @warning Método sólo funciona con sistemas like Unix
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-06-16
+     * @return array Arreglo con los archivos agrupados por tipo (ej: d y -)
      */
     public function scandir($dir = '/')
     {
         // método sólo funciona con FTP en sistemas like Unix
-        if ($this->systype()!='UNIX') {
+        if ($this->systype() != 'UNIX') {
             throw new \sowerphp\core\Exception(
-                'Método '.__CLASS__.'::scandir() sólo funciona con sistemas like Unix'
+                'Método '.__CLASS__.'::scandir() sólo funciona con sistemas like Unix.'
             );
         }
         // obtener archivos
@@ -111,9 +102,7 @@ class Network_Ftp
 
     /**
      * Método que entrega la URI del servidor FTP
-     * @return URI completa del servidor FTP
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-06-16
+     * @return string URI completa del servidor FTP
      */
     public function getUri()
     {
@@ -123,9 +112,7 @@ class Network_Ftp
 
     /**
      * Método mágico para ejecutar funciones ftp_*
-     * @return URI completa del servidor FTP
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-06-16
+     * @return string URI completa del servidor FTP
      */
     public function __call($func, $args)
     {

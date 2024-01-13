@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -24,11 +24,7 @@
 namespace sowerphp\general;
 
 /**
- * Manejar archivos json
- *
  * Esta clase permite leer y generar archivos json
- * @author DeLaF, esteban[at]delaf.cl
- * @version 2014-02-12
  */
 final class Utility_Spreadsheet_JSON
 {
@@ -36,16 +32,14 @@ final class Utility_Spreadsheet_JSON
     /**
      * @todo Implementar método (debe ser el "inverso" de self::generate())
      */
-    public static function read ($archivo) {
+    public static function read($archivo) {
     }
 
     /**
      * Método que genera un string JSON a partir de una tabla en un arreglo
      * bidimensional
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-01-17
      */
-    public static function generate ($data, $id)
+    public static function generate($data, $id)
     {
         // limpiar posible contenido envíado antes
         ob_clean();
@@ -60,7 +54,7 @@ final class Utility_Spreadsheet_JSON
         foreach ($titles as &$col) {
             $col = \sowerphp\core\Utility_String::normalize(trim(strip_tags($col)));
         }
-        foreach($data as &$row) {
+        foreach ($data as &$row) {
             $dato = [];
             foreach($row as $key => &$col) {
                 $dato[$titles[$key]] = rtrim(str_replace('<br />', ', ', strip_tags($col, '<br>')), " \t\n\r\0\x0B,");

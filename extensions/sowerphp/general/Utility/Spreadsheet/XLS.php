@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -24,11 +24,7 @@
 namespace sowerphp\general;
 
 /**
- * Manejar archivos en excel
- *
  * Esta clase permite leer y generar archivos en excel
- * @author DeLaF, esteban[at]delaf.cl
- * @version 2014-02-20
  */
 final class Utility_Spreadsheet_XLS
 {
@@ -37,10 +33,8 @@ final class Utility_Spreadsheet_XLS
      * Lee una planilla de cálculo
      * @param archivo archivo a leer (ejemplo celda tmp_name de un arreglo $_FILES)
      * @param hoja Hoja que se quiere devolver, comenzando por la 0
-     * @author DeLaF, esteban[at]delaf.cl
-     * @version 2014-02-23
      */
-    public static function read ($archivo = null, $hoja = 0, $type = 'Xls')
+    public static function read($archivo = null, $hoja = 0, $type = 'Xls')
     {
         // Crear objeto para leer archivo
         $objReader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($type);
@@ -68,10 +62,8 @@ final class Utility_Spreadsheet_XLS
      * @param tabla Arreglo utilizado para generar la planilla
      * @param id Identificador de la planilla
      * @param horizontal Indica si la hoja estara horizontalmente (true) o verticalmente (false)
-     * @author DeLaF, esteban[at]delaf.cl
-     * @version 2014-07-10
      */
-    public static function generate ($tabla, $id, $type = 'Xls')
+    public static function generate($tabla, $id, $type = 'Xls')
     {
         // Crear objeto PHPOffice
         $objPHPOffice = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -81,7 +73,7 @@ final class Utility_Spreadsheet_XLS
         }
         // generar hojas
         $hoja = 0;
-        $n_hojas = count ($tabla);
+        $n_hojas = count($tabla);
         foreach ($tabla as $name => &$sheet) {
             // agregar hoja
             $objWorkSheet = $objPHPOffice->setActiveSheetIndex($hoja);
@@ -92,14 +84,17 @@ final class Utility_Spreadsheet_XLS
             $x=0; // columna
             foreach ($sheet as &$fila) {
                 foreach ($fila as &$celda) {
-                    $objWorkSheet->getCell(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($x++).$y)->setValue(rtrim(str_replace('<br />', "\n", strip_tags($celda, '<br>'))));
+                    $objWorkSheet->getCell(
+                        \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($x++).$y
+                    )->setValue(rtrim(str_replace('<br />', "\n", strip_tags($celda, '<br>'))));
                 }
                 $x=0;
                 ++$y;
             }
             ++$hoja;
-            if ($hoja<$n_hojas)
+            if ($hoja < $n_hojas) {
                 $objPHPOffice->createSheet($hoja);
+            }
         }
         $objPHPOffice->setActiveSheetIndex(0);
         // Generar archivo excel
@@ -114,21 +109,18 @@ final class Utility_Spreadsheet_XLS
     /**
      * Método que retorna los nombres de las hojas
      * @param archivo Archivo que se procesará
-     * @return Arreglo con los nombres de las hojas
-     * @author DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-27
+     * @return array Arreglo con los nombres de las hojas
      */
-    public static function sheets ($archivo, $type = 'Xls')
+    public static function sheets($archivo, $type = 'Xls')
     {
         // Crear objeto para leer archivo
-        // echo $type;
-        // exit;
         $objReader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($type);
         $objReader->setReadDataOnly(true);
         $objPHPOffice = $objReader->load($archivo);
         // Retornar hojas
-        if ($type=='Ods')
+        if ($type == 'Ods') {
             return array_slice($objPHPOffice->getSheetNames(), 0, -1);
+        }
         return $objPHPOffice->getSheetNames();
     }
 

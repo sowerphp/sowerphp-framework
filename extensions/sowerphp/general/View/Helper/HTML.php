@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\general;
 
 /**
  * Helper para la creación de código HTML genérico a través de métodos estáticos
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2015-01-18
  */
 class View_Helper_HTML
 {
@@ -38,8 +36,6 @@ class View_Helper_HTML
      * @param recursive Procesar (o no) de forma recursiva el directorio src
      * @param ext Procesar solo extensiones indicadas
      * @param header Header desde el cual se desea utilizar (ej: 2, que es <h2>)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2013-06-27
      */
     public static function codeFrom($src, $recursive = false, $ext = array(), $header = 2)
     {
@@ -60,7 +56,9 @@ class View_Helper_HTML
                 }
                 // si es un directorio, verificar que se deba procesar
                 // recursivamente, sino se veran solo archivos
-                if (is_dir($src.'/'.$file) && !$recursive) continue;
+                if (is_dir($src.'/'.$file) && !$recursive) {
+                    continue;
+                }
                 // si es un directorio colocar el nombre del directorio
                 if (is_dir($src.'/'.$file)) {
                     $permalink = \sowerphp\core\Utility_String::normalize($file);
@@ -86,8 +84,6 @@ class View_Helper_HTML
      * sea (en este caso) dir = /full/path
      * @param dir Directorio donde están los archivos que se desean enlazar
      * @param recursive Procesar (o no) de forma recursiva el directorio dir
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-28
      */
     public static function linksFrom($dir, $recursive = false)
     {
@@ -142,11 +138,15 @@ class View_Helper_HTML
     }
 
     /**
-     * @author http://stackoverflow.com/questions/1960461/convert-plain-text-urls-into-html-hyperlinks-in-php
+     * @link http://stackoverflow.com/questions/1960461/convert-plain-text-urls-into-html-hyperlinks-in-php
      */
-    public static function makeClickableLinks($s)
+    public static function makeClickableLinks($string)
     {
-        return preg_replace('@(https?://([-\w\.]+[-\w])+(:\d+)?(/([\w/_\.#-]*(\?\S+)?[^\.\s])?)?)@', '<a href="$1">$1</a>', $s);
+        return preg_replace(
+            '@(https?://([-\w\.]+[-\w])+(:\d+)?(/([\w/_\.#-]*(\?\S+)?[^\.\s])?)?)@',
+            '<a href="$1">$1</a>',
+            $string
+        );
     }
 
 }

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\general;
 
 /**
  * Manejo de planillas de cálculo de OpenDocumment
- * @author DeLaF, esteban[at]delaf.cl
- * @version 2014-03-03
  */
 final class Utility_Spreadsheet_ODS
 {
@@ -34,11 +32,9 @@ final class Utility_Spreadsheet_ODS
     /**
      * Lee el contenido de una hoja y lo devuelve como arreglo
      * @param sheet Hoja a leer (0..n)
-     * @return Arreglo con los datos de la hoja (indices parten en 1)
-     * @author DeLaF, esteban[at]delaf.cl
-     * @version 2012-06-11
+     * @return array Arreglo con los datos de la hoja (indices parten en 1)
      */
-    public static function read ($archivo = null, $hoja = 0)
+    public static function read($archivo = null, $hoja = 0)
     {
         return Utility_Spreadsheet_XLS::read($archivo, $hoja, 'Ods');
     }
@@ -47,10 +43,8 @@ final class Utility_Spreadsheet_ODS
      * Crea una planilla de cálculo a partir de un arreglo
      * @param data Arreglo utilizado para generar la planilla
      * @param id Identificador de la planilla
-     * @author DeLaF, esteban[at]delaf.cl
-     * @version 2016-01-17
      */
-    public static function generate ($data, $id, $type = 'Ods')
+    public static function generate($data, $id, $type = 'Ods')
     {
         // Crear objeto PHPOffice
         $objPHPOffice = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -77,8 +71,9 @@ final class Utility_Spreadsheet_ODS
                 ++$y;
             }
             ++$hoja;
-            if ($hoja<$n_hojas)
+            if ($hoja<$n_hojas) {
                 $objPHPOffice->createSheet($hoja);
+            }
         }
         $objPHPOffice->setActiveSheetIndex(0);
         // Generar archivo excel
@@ -93,11 +88,9 @@ final class Utility_Spreadsheet_ODS
     /**
      * Método que retorna los nombres de las hojas
      * @param archivo Archivo que se procesará
-     * @return Arreglo con los nombres de las hojas
-     * @author DeLaF (esteban[at]delaf.cl)
-     * @version 2013-04-04
+     * @return array Arreglo con los nombres de las hojas
      */
-    public static function sheets ($archivo)
+    public static function sheets($archivo)
     {
         return Utility_Spreadsheet_XLS::sheets($archivo, 'Ods');
     }

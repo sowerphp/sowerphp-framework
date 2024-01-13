@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -24,17 +24,14 @@
 namespace sowerphp\core;
 
 /**
- * @file es.php
  * Reglas de español para clase Inflector
- * @author http://joecabezas.tumblr.com/post/572538183/espanolizando-cakephp-mediante-inflections-version
- * @version 2014-05-10
  */
 
 // reglas para pasar de plural a singular
 Utility_Inflector::rules('singular', [
     'rules' => [
-        '/bles$/i' => 'ble', // by DeLaF
-        '/ses$/i' => 's', // by DeLaF
+        '/bles$/i' => 'ble',
+        '/ses$/i' => 's',
         '/([r|d|j|n|l|m|y|z])es$/i' => '\1',
         '/as$/i' => 'a',
         '/([ti])a$/i' => '\1a'
@@ -49,6 +46,6 @@ Utility_Inflector::rules('plural', [
         '/([r|d|j|n|l|m|y|z])$/i' => '\1es',
         '/a$/i' => '\1as'
     ],
-    'irregular' => ['pais'=>'paises'], // by DeLaF
+    'irregular' => ['pais'=>'paises'],
     'uninflected' => [],
 ]);

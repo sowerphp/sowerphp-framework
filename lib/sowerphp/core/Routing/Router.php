@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -26,8 +26,6 @@ namespace sowerphp\core;
 /**
  * Clase para manejar rutas de la aplicación
  * Las rutas conectan URLs con controladores y acciones
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2014-05-06
  */
 class Routing_Router
 {
@@ -38,8 +36,6 @@ class Routing_Router
     /**
      * Procesa la url indicando que es lo que se espera obtener según las
      * rutas que existen conectadas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-07-31
      */
     public static function parse($url)
     {
@@ -154,15 +150,13 @@ class Routing_Router
      * @param string $from Ruta que se desea conectar (URL)
      * @param array $to Hacia donde (módulo, controlador, acción y parámetros) se conectará la ruta
      * @param array regexp Expresiones regulares para hacer match con los parámetros que se pasan con nombre (defecto: .*)
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-07-31
      */
     public static function connect(string $from, array $to = [], array $regexp = [])
     {
         $params = [];
         $partes = explode('/', $from);
         foreach($partes as $p) {
-            if (isset($p[0]) and $p[0]==':') {
+            if (isset($p[0]) && $p[0] == ':') {
                 $params[$p] = isset($regexp[$p]) ? $regexp[$p] : '.*';
             }
         }
@@ -174,8 +168,6 @@ class Routing_Router
      * Método para obtener una ruta normalizada (con todos sus campos obligatorios)
      * @param array route Arreglo con los datos de la ruta, índice 'controller' es obligatorio
      * @return array Arreglo con la ruta normalizada, incluyendo índices: 'module', 'controller', 'action' y 'pass'
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2021-07-15
      */
     private static function routeNormalize(array $route)
     {
@@ -201,8 +193,6 @@ class Routing_Router
      * @param string $url URL
      * @param string $module Nombre del módulo (ejemplo: Nombre.De.ModuloQueSeEjecuta)
      * @return string URL sin el módulo
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-10-01
      */
     private static function urlClean(string $url, string $module)
     {
@@ -224,8 +214,6 @@ class Routing_Router
      * @param string $url URL
      * @param string $module Nombre del módulo (ejemplo: Nombre.De.ModuloQueSeEjecuta)
      * @return array Parámetros para despachar la página estática o false si no se encontró una
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-04-14
      */
     private static function parseStaticPage(string $url, string $module = null) {
         $location = View::location('Pages'.$url, $module);

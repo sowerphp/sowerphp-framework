@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\general;
 
 /**
  * Clase para trabajar con temas asociados al HTML
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2019-06-17
  */
 class Utility_HTML
 {
@@ -36,8 +34,6 @@ class Utility_HTML
      * de bootstrap
      * @param items Cantidad total de items a ubicar en lña grilla
      * @param max Cantida máxima de elementos en la grilla
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-17
      */
     public static function getBootstrapCols($items, $max_items = 4, $grid_width = 12)
     {

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Framework PHP hecho en Chile.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -25,8 +25,6 @@ namespace sowerphp\general;
 
 /**
  * Helper para la creación de formularios en HTML
- * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
- * @version 2023-10-25
  */
 class View_Helper_Form
 {
@@ -38,8 +36,6 @@ class View_Helper_Form
      * Método que inicia el código del formulario
      * @param style Estilo del formulario que se renderizará
      * @param cols_label Cantidad de columnas de la grilla para la etiqueta
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-10
      */
     public function __construct($style = 'horizontal', $cols_label = 2)
     {
@@ -50,8 +46,6 @@ class View_Helper_Form
     /**
      * Método para asignar el estilo del formulario una vez ya se creo el objeto
      * @param style Estilo del formulario que se renderizará
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-08-21
      */
     public function setStyle($style = false)
     {
@@ -61,8 +55,6 @@ class View_Helper_Form
     /**
      * Método para asignar la cantidad de columnas de la grilla para la etiqueta
      * @param cols_label Cantidad de columnas de la grilla para la etiqueta
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2015-03-25
      */
     public function setColsLabel($cols_label = 2)
     {
@@ -72,9 +64,7 @@ class View_Helper_Form
     /**
      * Método que inicia el código del formulario
      * @param config Arreglo con la configuración para el formulario
-     * @return String Código HTML de lo solicitado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-27
+     * @return string Código HTML de lo solicitado
      */
     public function begin($config = [])
     {
@@ -113,9 +103,7 @@ class View_Helper_Form
     /**
      * Método que termina el código del formulario
      * @param config Arreglo con la configuración para el botón submit
-     * @return String Código HTML de lo solicitado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2014-12-10
+     * @return string Código HTML de lo solicitado
      */
     public function end($config = [])
     {
@@ -146,9 +134,7 @@ class View_Helper_Form
      * Método para crear una nuevo campo para que un usuario ingrese
      * datos a través del formulario, ya sea un tag: input, select, etc
      * @param config Arreglo con la configuración para el elemento
-     * @return String Código HTML de lo solicitado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-12-16
+     * @return string Código HTML de lo solicitado
      */
     public function input($config)
     {
@@ -205,7 +191,7 @@ class View_Helper_Form
             $config['class'] = (!empty($config['class']) ? $config['class'] : '').' form-control';
         }
         // asignar id si no se asignó
-        if (!isset($config['id']) and !empty($config['name']) and substr($config['name'], -2)!='[]') {
+        if (!isset($config['id']) && !empty($config['name']) && substr($config['name'], -2)!='[]') {
             $config['id'] = $config['name'].'Field';
         }
         // determinar popover
@@ -213,7 +199,7 @@ class View_Helper_Form
             $config['popover'] = ' data-bs-toggle="popover" data-bs-trigger="focus" title="'.$config['label'].'" data-bs-placement="top" data-bs-content="'.$config['popover'].'" onmouseover="$(this).popover(\'show\')" onmouseout="$(this).popover(\'hide\')"';
         }
         // limpiar valor del campo
-        if ($config['type']!='div' and $config['sanitize'] and isset($config['value'][0]) and !is_array($config['value'])) {
+        if ($config['type']!='div' && $config['sanitize'] && isset($config['value'][0]) && !is_array($config['value'])) {
             $config['value'] = trim(strip_tags($config['value']));
             if (!in_array($config['type'], ['submit', 'button'])) {
                 $config['value'] = htmlentities($config['value']);
@@ -227,13 +213,11 @@ class View_Helper_Form
      * Método que aplica o no un diseño al campo
      * @param field Campo que se desea formatear
      * @param config Arreglo con la configuración para el elemento
-     * @return String Código HTML de lo solicitado
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2023-10-09
+     * @return string Código HTML de lo solicitado
      */
     private function _format($field, $config)
     {
-        if ($config['help']!='') {
+        if ($config['help'] != '') {
             $config['help'] = ' <div class="form-text text-muted"'.(isset($config['id'])?' id="'.$config['id'].'Help"':'').'>'.$config['help'].'</div>';
         }
         // si es campo oculto no se aplica ningún estilo
@@ -278,7 +262,7 @@ class View_Helper_Form
             $buffer = '<div style="text-align:'.$config['align'].$width.'">'.$field.$config['help'].'</div>'."\n";
         }
         // si se debe colocar un label
-        else if (!empty($config['id']) and !empty($config['label'])) {
+        else if (!empty($config['id']) && !empty($config['label'])) {
             $width = !empty($config['width']) ? (' style="width:'.$config['width'].'"') : '';
             $buffer = '<div'.$width.'><label class="visually-hidden" for="'.$config['id'].'">'.$config['label'].'</label>'.$field.$config['help'].'</div>'."\n";
         }
@@ -317,7 +301,7 @@ class View_Helper_Form
     {
         $id = isset($config['id']) ? ' id="'.$config['id'].'"' : '';
         $growup = !empty($config['growup']) ? 'ondblclick="Form.growup(this)"' : '';
-        $autocomplete = (isset($config['autocomplete']) and $config['autocomplete']===false) ? 'autocomplete="off"' : '';
+        $autocomplete = (isset($config['autocomplete']) && $config['autocomplete']===false) ? 'autocomplete="off"' : '';
         return '<input type="text" name="'.$config['name'].'" value="'.$config['value'].'"'.$id.' class="'.$config['class'].'" placeholder="'.$config['placeholder'].'" '.$config['attr'].$config['popover'].' '.$growup.' '.$autocomplete.' />';
     }
 
@@ -394,7 +378,7 @@ class View_Helper_Form
                 (array)\sowerphp\core\Configure::read('select2'),
                 isset($config['select2']) ? $config['select2'] : []
             );
-            if (empty($config['select2']['placeholder']) and !empty($config['placeholder'])) {
+            if (empty($config['select2']['placeholder']) && !empty($config['placeholder'])) {
                 $config['select2']['placeholder'] = $config['placeholder'];
             }
             if (!empty($config['select2']['dropdownParent'])) {
@@ -441,7 +425,7 @@ class View_Helper_Form
             $attr .= ' onmouseover="'.$onmouseover.'"';
         }
         if (!is_array($config['value'])) {
-            $config['value'] = ($config['value'] or (string)$config['value']=='0') ? [$config['value']] : [];
+            $config['value'] = ($config['value'] || (string)$config['value']=='0') ? [$config['value']] : [];
         }
         if (!empty($config['value'])) {
             $any_option_selected = true;
@@ -493,9 +477,9 @@ class View_Helper_Form
         // significa que venía alguno que no estaba en las opciones
         // se agrega como option para poder ser mostrado en el select
         // no se agregan llaves vacias o numéricos menores a 0
-        if ($config['auto_options'] and !empty($keys_not_in_options)) {
+        if ($config['auto_options'] && !empty($keys_not_in_options)) {
             $keys_not_in_options = array_filter($keys_not_in_options, function ($k) {
-                if (empty($k) or (is_numeric($k) and $k < 0)) {
+                if (empty($k) || (is_numeric($k) && $k < 0)) {
                     return false;
                 }
                 return true;
@@ -627,7 +611,9 @@ class View_Helper_Form
                 }
             }
             // si no hay valores por post se crea una fila con los campos vacíos
-            else $values = $inputs;
+            else {
+                $values = $inputs;
+            }
         }
         // en caso que se cree el formulario con valores por defecto ya asignados
         else {
@@ -683,7 +669,7 @@ class View_Helper_Form
 
     private function _input_checkbox($config)
     {
-        if (!isset($config['checked']) and isset($_POST[$config['name']])) {
+        if (!isset($config['checked']) && isset($_POST[$config['name']])) {
             $config['checked'] = true;
         }
         $id = isset($config['id']) ? ' id="'.$config['id'].'"' : '';
@@ -751,12 +737,12 @@ class View_Helper_Form
             $buffer .= '<tr>';
             $count = 0;
             foreach ($row as &$col) {
-                if ($config['display-key'] or $count>=$n_keys) {
+                if ($config['display-key'] || $count>=$n_keys) {
                     $buffer .= '<td>'.$col.'</td>';
                 }
                 $count++;
             }
-            $checked = (in_array($key, $config['checked']) or $config['mastercheck']) ? ' checked="checked"' : '' ;
+            $checked = (in_array($key, $config['checked']) || $config['mastercheck']) ? ' checked="checked"' : '' ;
             $buffer .= '<td style="width:1px"><input type="checkbox" name="'.$config['name'].'[]" value="'.$key.'"'.$checked.' /></td>';
             $buffer .= '</tr>';
         }
