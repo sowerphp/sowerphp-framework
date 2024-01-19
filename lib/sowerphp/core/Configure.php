@@ -43,9 +43,11 @@ class Configure
             App::import($path.'/Vendor/autoload');
         }
         // cargar variables de entorno
-        self::$env = \Dotenv\Dotenv::createImmutable(DIR_PROJECT, 'env');
+        self::$env = \Dotenv\Dotenv::createMutable(DIR_PROJECT, 'env');
         try {
-            self::$env->safeLoad();
+            self::$env->load();
+        } catch (\Dotenv\Exception\InvalidPathException $e) {
+            die($e->getMessage());
         } catch (\Dotenv\Exception\InvalidFileException $e) {
             die($e->getMessage());
         }

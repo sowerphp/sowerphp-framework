@@ -44,7 +44,7 @@ class Cache
      * @param port Puerto donde Memcached está escuchando
      * @param prefix Prefijo que se utilizará en las claves de los elementos del caché
      */
-    public function __construct($host = null, $port = null, $prefix = false)
+    public function __construct($host = null, $port = null, $prefix = null)
     {
         if (class_exists('\Memcached')) {
             // definir host y puerto
@@ -60,8 +60,17 @@ class Cache
             // conectar a Memcached
             $this->_cache = new \Memcached();
             $this->_cache->addServer($host, $port);
-            $this->_prefix = $prefix ? $prefix : (defined('DIR_PROJECT') ? DIR_PROJECT.':' : '');
+            $this->setPrefix($prefix);
         }
+    }
+
+    /**
+     * Asignar el prefijo que se usará en las claves de los elementos del caché
+     * @param prefix Prefijo que se utilizará en las claves de los elementos del caché
+     */
+    public function setPrefix($prefix = null)
+    {
+        $this->_prefix = $prefix ? $prefix : (defined('DIR_PROJECT') ? (DIR_PROJECT . ':') : '');
     }
 
     /**
@@ -69,14 +78,14 @@ class Cache
      * @param key Clave que tendrá el elemento en la caché
      * @param value Valor del elemento en la caché
      * @param expires Tiempo en segundos que se debe almacenar en memoria
-     * @return =true si se pudo asignar el elemento en la caché
+     * @return bool =true si se pudo asignar el elemento en la caché
      */
-    public function set($key, $value, $expires=600)
+    public function set($key, $value, $expires = 600)
     {
         if (!$this->_cache) {
             return false;
         }
-        $result = $this->_cache->set($this->_prefix.$key, $value, $expires);
+        $result = $this->_cache->set($this->_prefix . $key, $value, $expires);
         if ($result) {
             self::$setCount++;
         }
@@ -86,14 +95,14 @@ class Cache
     /**
      * Método para recuperar un elemento desde la caché
      * @param key clave del elemento que se desea recuperar desde la caché
-     * @return elemento solicitado o =false si no se pudo recuperar
+     * @return mixed elemento solicitado o =false si no se pudo recuperar
      */
     public function get($key)
     {
         if (!$this->_cache) {
             return false;
         }
-        $result = $this->_cache->get($this->_prefix.$key);
+        $result = $this->_cache->get($this->_prefix . $key);
         if ($result) {
             self::$getCount++;
         }
@@ -103,19 +112,19 @@ class Cache
     /**
      * Método para eliminar un elemento de la caché
      * @param key clave del elemento que se desea eliminar de la caché
-     * @return =true en caso que se haya podido eliminar el elemento de la caché
+     * @return bool =true en caso que se haya podido eliminar el elemento de la caché
      */
     public function delete($key)
     {
         if (!$this->_cache) {
             return false;
         }
-        return $this->_cache->delete($this->_prefix.$key);
+        return $this->_cache->delete($this->_prefix . $key);
     }
 
     /**
      * Método que obtiene todas las claves de elementos almacenados en la caché
-     * @return Arreglo con las claves que están actualmente almacenadas
+     * @return array Arreglo con las claves que están actualmente almacenadas
      */
     public function getAllKeys()
     {
@@ -129,7 +138,7 @@ class Cache
         $keys = [];
         $start = strlen($this->_prefix);
         foreach ($allKeys as &$key) {
-            if (strpos($key, $this->_prefix)===0) {
+            if (strpos($key, $this->_prefix) === 0) {
                 $keys[] = substr($key, $start);
             }
         }
@@ -139,7 +148,7 @@ class Cache
     /**
      * Método que obtiene los elementos de las claves indicadas en la caché
      * @param keys Arreglo con las claves que se desen obtener
-     * @return Arreglo con las claves como índices y los elementos como valores
+     * @return array Arreglo con las claves como índices y los elementos como valores
      */
     public function getMulti($keys)
     {
@@ -147,7 +156,7 @@ class Cache
             return false;
         }
         foreach ($keys as &$key) {
-            $key = $this->_prefix.$key;
+            $key = $this->_prefix . $key;
         }
         $vals = $this->_cache->getMulti($keys);
         if (!$vals) {
@@ -163,7 +172,7 @@ class Cache
 
     /**
      * Método que elimina todos los elementos de la caché
-     * @return =true si fue posible hacer el flush
+     * @return bool =true si fue posible hacer el flush
      */
     public function flush()
     {
@@ -172,7 +181,7 @@ class Cache
         }
         $keys = $this->getAllKeys();
         foreach ($keys as &$key) {
-            $key = $this->_prefix.$key;
+            $key = $this->_prefix . $key;
         }
         return $this->_cache->deleteMulti($keys);
     }
@@ -180,13 +189,15 @@ class Cache
     /**
      * Método que ejecutará un método del objeto de Memcached al no existir el
      * método en la clase Cache
-     * @return Valor de retorno original del método que se estpa ejecutando
+     * @return mixed Valor de retorno original del método que se está ejecutando
      */
     public function __call($method, $args)
     {
         if (method_exists($this->_cache, $method)) {
             return call_user_func_array([$this->_cache, $method], $args);
-        } else return false;
+        } else {
+            return false;
+        }
     }
 
 }

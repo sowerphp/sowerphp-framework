@@ -32,7 +32,14 @@
  */
 function env($varname, $default = null)
 {
-    return isset($_ENV[$varname]) ? $_ENV[$varname] : $default;
+    if (isset($_ENV[$varname])) {
+        return $_ENV[$varname];
+    }
+    $value = getenv($varname);
+    if ($value !== false) {
+        return $value;
+    }
+    return $default;
 }
 
 /**
