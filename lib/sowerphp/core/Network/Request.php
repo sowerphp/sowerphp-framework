@@ -194,4 +194,19 @@ class Network_Request
         return self::$_headers;
     }
 
+    /**
+     * Método que indica si la solicitud HTTP es o no a la API.
+     * Esto se determina de 2 formas:
+     *   - La solicitud parte por /api/
+     *   - La solicitud acepta como respuesta un JSON
+     *
+     * @return boolean
+     */
+    public function isApiRequest()
+    {
+        $api_prefix = strpos($this->request, '/api/') === 0;
+        $accept_json = $this->header('Accept') == 'application/json'; // WARNING: podría retornar arreglo (?)
+        return $api_prefix || $accept_json;
+    }
+
 }

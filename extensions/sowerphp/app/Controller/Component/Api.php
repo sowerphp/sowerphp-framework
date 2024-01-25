@@ -54,6 +54,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
             'keep-raw' => false, // por defecto los datos de entrada por POST se asumen JSON y se parsean como tal
         ],
         'cors' => false, // permite activar CORS en las solicitudes a la API
+        'http_error_code_5XX' => true,
     ];
     protected $User = null; ///< Usuario que se ha autenticado en la API
 
@@ -241,8 +242,8 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
     public function send($data, $status = 200, $options = 0)
     {
         try {
-            // NOTE: [Esteban] No se entregan estados 5XX por problemas con AWS EC2 LB
-            if ($status >= 500) {
+            // verificar si se puede responder con estados 5XX
+            if (!$this->settings['http_error_code_5XX'] && $status >= 500) {
                 $status = 400;
             }
             // preparar datos que se enviarán
@@ -290,8 +291,18 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
      * Método que envía una página de error por la API
      * @param e Excepción que se desea enviar (también puede ser un error)
      */
-    private function sendException($e) {
-        $this->controller->response->status(500);
+    public function sendException($e) {
+        // Se busca y corrobora que el estado sea un número del rango de los 400 o superior
+        $status = $e->getCode();
+        if ($status < 400) {
+            $status = 400;
+        }
+        // verificar si se puede responder con estados 5XX
+        if (!$this->settings['http_error_code_5XX'] && $status >= 500) {
+            $status = 400;
+        }
+        // entregar respuesta a cliente
+        $this->controller->response->status($status);
         $this->controller->response->type('application/json');
         $this->controller->response->send(json_encode($e->getMessage()));
     }

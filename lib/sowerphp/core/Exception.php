@@ -65,11 +65,18 @@ class Exception extends \RuntimeException
         // renderizar dependiendo de si es una web o es una shell
         if (isset($_SERVER['REQUEST_URI'])) {
             $controller = new Controller_Error(new Network_Request(), new Network_Response());
-            $controller->error_reporting = Configure::read('debug');
-            $controller->display($data);
-            $controller->shutdownProcess();
-            $controller->response->status($data['code']);
-            $controller->response->send();
+            // es una solicitud mediante un servicio web
+            if ($controller->request->isApiRequest()) {
+                $controller->Api->sendException($exception);
+            }
+            // es una solicitud mediante la interfaz web
+            else {
+                $controller->error_reporting = Configure::read('debug');
+                $controller->display($data);
+                $controller->shutdownProcess();
+                $controller->response->status($data['code']);
+                $controller->response->send();
+            }
         } else {
             $stdout = new Shell_Output('php://stdout');
             $stdout->write("\n".'<error>'.$data['exception'].':</error>', 2);

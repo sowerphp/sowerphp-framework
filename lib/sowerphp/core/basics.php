@@ -99,7 +99,7 @@ function debug($var, $withtype = false)
  */
 function num($n, $d = 0, $language = null)
 {
-    if ($n === null || $n === '') {
+    if (empty($n)) {
         return '0';
     }
 
