@@ -24,7 +24,7 @@
 namespace sowerphp\general;
 
 /**
- * Clase para trabajar con fechas
+ * Clase para trabajar con fechas.
  */
 class Utility_Date
 {
@@ -33,10 +33,10 @@ class Utility_Date
     public static $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
     /**
-     * Método que valida si la fecha es o no válida según el formato
-     * @param date Fecha que se quiere validar
-     * @param format Formato que se quiere validar
-     * @return bool =true si la fecha está ok
+     * Método que valida si la fecha es o no válida según el formato.
+     * @param date Fecha que se quiere validar.
+     * @param format Formato que se quiere validar.
+     * @return bool =true si la fecha está ok.
      * @link https://stackoverflow.com/a/13194398/3333009
      */
     public static function check($date, $format = 'Y-m-d')
@@ -46,11 +46,11 @@ class Utility_Date
     }
 
     /**
-     * Método que suma días hábiles a una fecha
-     * @param fecha Desde donde empezar
-     * @param dias Días que se deben sumar a la fecha
-     * @param feriados Días que no se deberán considerar al sumar
-     * @return string Fecha con los días hábiles sumados
+     * Método que suma días hábiles a una fecha.
+     * @param fecha Desde donde empezar.
+     * @param dias Días que se deben sumar a la fecha.
+     * @param feriados Días que no se deberán considerar al sumar.
+     * @return string Fecha con los días hábiles sumados.
      */
     public static function addWorkingDays($fecha, $dias, $feriados = [])
     {
@@ -84,11 +84,11 @@ class Utility_Date
     }
 
     /**
-     * Método que resta días hábiles a una fecha
-     * @param fecha Desde donde empezar
-     * @param dias Días que se deben restar a la fecha
-     * @param feriados Días que no se deberán considerar al restar
-     * @return string Fecha con los días hábiles restados
+     * Método que resta días hábiles a una fecha.
+     * @param fecha Desde donde empezar.
+     * @param dias Días que se deben restar a la fecha.
+     * @param feriados Días que no se deberán considerar al restar.
+     * @return string Fecha con los días hábiles restados.
      */
     public static function subtractWorkingDays($fecha, $dias, $feriados = [])
     {
@@ -120,10 +120,10 @@ class Utility_Date
 
     /**
      * Método que obtiene el número de día hábil dentro de un mes que
-     * corresponde el día de la fecha que se está pasando
-     * @param fecha Fecha que se quiere saber que día hábil del mes correspone
-     * @param feriados Arreglo con los feriados del mes (si no se pasa solo se omitirán fin de semanas)
-     * @return int|bool Número de día hábil del mes que corresponde la fecha pasada o =false si no es día hábil
+     * corresponde el día de la fecha que se está pasando.
+     * @param fecha Fecha que se quiere saber que día hábil del mes correspone.
+     * @param feriados Arreglo con los feriados del mes (si no se pasa solo se omitirán fin de semanas).
+     * @return int|bool Número de día hábil del mes que corresponde la fecha pasada o =false si no es día hábil.
      */
     public static function whatWorkingDay($fecha, $feriados = [])
     {
@@ -139,12 +139,12 @@ class Utility_Date
     }
 
     /**
-     * Método que obtiene la fecha de un día hábil X en un mes
-     * @param anio Año del día hábil que se busca
-     * @param mes Mes del día hábil que se busca
-     * @param dia_habil Número de día hábil dentro del mes y año que se busca
-     * @param feriados Arreglo con los feriados del mes (si no se pasa solo se omitirán fin de semanas)
-     * @return string Fecha del día hábil
+     * Método que obtiene la fecha de un día hábil X en un mes.
+     * @param anio Año del día hábil que se busca.
+     * @param mes Mes del día hábil que se busca.
+     * @param dia_habil Número de día hábil dentro del mes y año que se busca.
+     * @param feriados Arreglo con los feriados del mes (si no se pasa solo se omitirán fin de semanas).
+     * @return string Fecha del día hábil.
      */
     public static function getWorkingDay($anio, $mes, $dia_habil, $feriados = [])
     {
@@ -155,10 +155,10 @@ class Utility_Date
     }
 
     /**
-     * Método que indica si una fecha es el último día laboral del mes
-     * @param fecha Fecha que se quiere saber si es el último día laboral del mes
-     * @param feriados Arreglo con los feriados del mes (si no se pasa solo se omitirán fin de semanas)
-     * @return bool =true si es el último día laboral del mes
+     * Método que indica si una fecha es el último día laboral del mes.
+     * @param fecha Fecha que se quiere saber si es el último día laboral del mes.
+     * @param feriados Arreglo con los feriados del mes (si no se pasa solo se omitirán fin de semanas).
+     * @return bool =true si es el último día laboral del mes.
      */
     public static function isLastWorkingDay($fecha, $feriados = [])
     {
@@ -174,11 +174,11 @@ class Utility_Date
     /**
      * Método que cuenta cuantos de los días de la variable 'days' existen en el
      * rango desde 'from' hasta 'to'.
-     * @param from Desde cuando revisar
-     * @param to Hasta cuando revisar
-     * @param days Días que se están buscando en el rango
-     * @param excludeWeekend =true se omitirán días que sean sábado o domingo
-     * @return int Cantidad de días que se encontraron en el rango
+     * @param from Desde cuando revisar.
+     * @param to Hasta cuando revisar.
+     * @param days Días que se están buscando en el rango.
+     * @param excludeWeekend =true se omitirán días que sean sábado o domingo.
+     * @return int Cantidad de días que se encontraron en el rango.
      */
     public static function countDaysMatch($from, $to, $days, $excludeWeekend = false)
     {
@@ -200,13 +200,13 @@ class Utility_Date
     }
 
     /**
-     * Función para mostrar una fecha con hora con un formato "agradable"
-     * @param timestamp Fecha en formto (de función date): Y-m-d H:i:s
-     * @param hora Si se desea (true) o no (false) mostrar la hora
-     * @param letrasFormato Si van en mayúscula ('u'), mínuscula ('l') o normal ('')
-     * @param mostrarDia Si se incluye (=true) o no el día
+     * Función para mostrar una fecha con hora con un formato "agradable".
+     * @param timestamp Fecha en formto (de función date): Y-m-d H:i:s.
+     * @param mostrarHora Si se desea (true) o no (false) mostrar la hora.
+     * @param letrasFormato Si van en mayúscula ('u'), mínuscula ('l') o normal ('').
+     * @param mostrarDia Si se incluye (=true) o no el día.
      */
-    public static function timestamp2string ($timestamp, $hora = true, $letrasFormato = '', $mostrarDia = true)
+    public static function timestamp2string($timestamp, $mostrarHora = true, $letrasFormato = '', $mostrarDia = true)
     {
         $puntoPos = strpos($timestamp, '.');
         if ($puntoPos) {
@@ -218,7 +218,7 @@ class Utility_Date
         } else {
             $fecha = date('j \d\e \M\E\S \d\e\l Y', $unixtime);
         }
-        if ($hora) {
+        if ($mostrarHora && strpos($timestamp, ':')) {
             $fecha .= ' a las '.date ('H:i', $unixtime);
         }
         $dia = self::$dias[date('w', $unixtime)];
@@ -234,10 +234,10 @@ class Utility_Date
     }
 
     /**
-     * Método para transformar un string a una fecha
-     * @param fecha String a transformar (20100523 o 201005)
-     * @param invertir =true si la fecha a normalizar parte con día o mes
-     * @return string Fecha transformada (2010-05-23 o 2010-05)
+     * Método para transformar un string a una fecha.
+     * @param fecha String a transformar (20100523 o 201005).
+     * @param invertir =true si la fecha a normalizar parte con día o mes.
+     * @return string Fecha transformada (2010-05-23 o 2010-05).
      */
     public static function normalize($fecha, $invertir = false)
     {
@@ -258,9 +258,9 @@ class Utility_Date
     }
 
     /**
-     * Método que calcula los años que han pasado a partir de una fecha
-     * @param fecha Desde cuando calcular los años
-     * @return int Años que han pasado desde la fecha indicada
+     * Método que calcula los años que han pasado a partir de una fecha.
+     * @param fecha Desde cuando calcular los años.
+     * @return int Años que han pasado desde la fecha indicada.
      * @link http://es.wikibooks.org/wiki/Programaci%C3%B3n_en_PHP/Ejemplos/Calcular_edad
      */
     public static function age($fecha)
@@ -271,10 +271,10 @@ class Utility_Date
 
     /**
      * Método que calcula cuanto tiempo ha pasado desde cierta fecha y hora y lo
-     * entrega en un string que representa dicho tiempo
-     * @param datetime Fecha y hora en cualquier formato soportado por clase \DateTime
-     * @param full Si se debe mostrar todo el string o solo una parte
-     * @return string String con el tiempo que ha pasado para la fecha
+     * entrega en un string que representa dicho tiempo.
+     * @param datetime Fecha y hora en cualquier formato soportado por clase \DateTime.
+     * @param full Si se debe mostrar todo el string o solo una parte.
+     * @return string String con el tiempo que ha pasado para la fecha.
      * @link http://stackoverflow.com/a/18602474
      */
     public static function ago($datetime, $full = false)
@@ -308,10 +308,10 @@ class Utility_Date
 
     /**
      * Método que calcula cuanto tiempo ha pasado desde cierta fecha y hora y lo
-     * entrega como la cantidad de días
-     * @param from Fecha desde cuando contar
-     * @param to Fecha hasta cuando contar (si es null será la fecha actual)
-     * @return int Días que han pasado entre las fechas
+     * entrega como la cantidad de días.
+     * @param from Fecha desde cuando contar.
+     * @param to Fecha hasta cuando contar (si es null será la fecha actual).
+     * @return int Días que han pasado entre las fechas.
      */
     public static function count($from, $to = null)
     {
@@ -322,7 +322,7 @@ class Utility_Date
     }
 
     /**
-     * Método que aplica un formato en particular a un timestamp
+     * Método que aplica un formato en particular a un timestamp.
      * @param datetime Fecha y hora (http://php.net/manual/es/datetime.formats.php)
      * @param format Formato de salida requerido (http://php.net/manual/es/function.date.php)
      * @return string Fecha formateada según formato solicitado
@@ -336,9 +336,9 @@ class Utility_Date
     }
 
     /**
-     * Método que obtiene la fecha a partir de un número serial
-     * @param n número serial
-     * @return string Fecha en formato YYYY-MM-DD
+     * Método que obtiene la fecha a partir de un número serial.
+     * @param n número serial.
+     * @return string Fecha en formato YYYY-MM-DD.
      */
     public static function fromSerialNumber($n)
     {
@@ -346,9 +346,9 @@ class Utility_Date
     }
 
     /**
-     * Método que obtiene un periodo (mes) siguiente a uno específicado
-     * @param periodo Período para el cual se quiere saber el siguiente o =null para actual
-     * @return int Periodo en formato YYYYMM
+     * Método que obtiene un periodo (mes) siguiente a uno específicado.
+     * @param periodo Período para el cual se quiere saber el siguiente o =null para actual.
+     * @return int Periodo en formato YYYYMM.
      */
     public static function nextPeriod($periodo = null, $mover = 1)
     {
@@ -372,9 +372,9 @@ class Utility_Date
     }
 
     /**
-     * Método que obtiene un periodo (mes) anterior a uno específicado
-     * @param periodo Período para el cual se quiere saber el anterior o =null para actual
-     * @return int Periodo en formato YYYYMM
+     * Método que obtiene un periodo (mes) anterior a uno específicado.
+     * @param periodo Período para el cual se quiere saber el anterior o =null para actual.
+     * @return int Periodo en formato YYYYMM.
      */
     public static function previousPeriod($periodo = null, $mover = 1)
     {
@@ -398,8 +398,8 @@ class Utility_Date
     }
 
     /**
-     * Método que entrega el último día de un período
-     * @return string Último día del período
+     * Método que entrega el último día de un período.
+     * @return string Último día del período.
      */
     public static function lastDayPeriod($periodo = null)
     {
@@ -412,7 +412,7 @@ class Utility_Date
     }
 
     /**
-     * Método que valida un período con formato AAAA y AAAAMM en un rango de años
+     * Método que valida un período con formato AAAA y AAAAMM en un rango de años.
      */
     public static function validPeriod($period, $year_from = 2000, $year_to = 2100, $length = null)
     {
@@ -435,7 +435,7 @@ class Utility_Date
     }
 
     /**
-     * Método que valida un período con formato AAAA en un rango de años
+     * Método que valida un período con formato AAAA en un rango de años.
      */
     public static function validPeriod4($period, $year_from = 2000, $year_to = 2100)
     {
@@ -443,7 +443,7 @@ class Utility_Date
     }
 
     /**
-     * Método que valida un período con formato AAAAMM en un rango de años
+     * Método que valida un período con formato AAAAMM en un rango de años.
      */
     public static function validPeriod6($period, $year_from = 2000, $year_to = 2100)
     {
@@ -451,10 +451,10 @@ class Utility_Date
     }
 
     /**
-     * Método que calcula cuantos meses han pasado entre dos fecha
-     * @param from Fechas desde cuando contar
-     * @param to Fecha hasta cual contar
-     * @return int Meses que han pasado entre las fechas
+     * Método que calcula cuantos meses han pasado entre dos fecha.
+     * @param from Fechas desde cuando contar.
+     * @param to Fecha hasta cual contar.
+     * @return int Meses que han pasado entre las fechas.
      * @link http://stackoverflow.com/a/4233624
      */
     public static function countMonths($from, $to = null)
@@ -474,11 +474,11 @@ class Utility_Date
     }
 
     /**
-     * Método que obtiene la siguiente fecha a partir de una fecha y una frecuencia
-     * @param fecha Fecha actual a la que se quiere obtener la siguiente
-     * @param tiempo Tiempo que se agregará a la fecha actual: A:año, M:mes, S:semana, D:día
-     * @param cantidad Cantidad de 'frecuencia' a agregar
-     * @return string Nueva fecha en formato YYYY-MM-DD
+     * Método que obtiene la siguiente fecha a partir de una fecha y una frecuencia.
+     * @param fecha Fecha actual a la que se quiere obtener la siguiente.
+     * @param tiempo Tiempo que se agregará a la fecha actual: A:año, M:mes, S:semana, D:día.
+     * @param cantidad Cantidad de 'frecuencia' a agregar.
+     * @return string Nueva fecha en formato YYYY-MM-DD.
      */
     public static function getNext($fecha = null, $tiempo = 'M', $cantidad = 1, $operacion = '+')
     {
@@ -533,11 +533,11 @@ class Utility_Date
     }
 
     /**
-     * Método que obtiene la anterior fecha a partir de una fecha y una frecuencia
-     * @param fecha Fecha actual a la que se quiere obtener la anterior
-     * @param tiempo Tiempo que se quitará a la fecha actual: A:año, M:mes, S:semana, D:día
-     * @param cantidad Cantidad de 'frecuencia' a quitar
-     * @return string Nueva fecha en formato YYYY-MM-DD
+     * Método que obtiene la anterior fecha a partir de una fecha y una frecuencia.
+     * @param fecha Fecha actual a la que se quiere obtener la anterior.
+     * @param tiempo Tiempo que se quitará a la fecha actual: A:año, M:mes, S:semana, D:día.
+     * @param cantidad Cantidad de 'frecuencia' a quitar.
+     * @return string Nueva fecha en formato YYYY-MM-DD.
      */
     public static function getPrevious($fecha = null, $tiempo = 'M', $cantidad = 1)
     {
@@ -545,8 +545,8 @@ class Utility_Date
     }
 
     /**
-     * Método que entrega el primer día de la semana
-     * @return string Primer Día de la semana
+     * Método que entrega el primer día de la semana.
+     * @return string Primer Día de la semana.
      */
     public static function firstDayWeek($date = null)
     {
@@ -558,8 +558,8 @@ class Utility_Date
     }
 
     /**
-     * Método que entrega el último día de la semana
-     * @return string Último Día de la semana
+     * Método que entrega el último día de la semana.
+     * @return string Último Día de la semana.
      */
     public static function lastDayWeek($date = null)
     {
@@ -571,8 +571,8 @@ class Utility_Date
     }
 
     /**
-     * Método que entrega un listado de años
-     * @return array Arreglo decreciente con el listado de años
+     * Método que entrega un listado de años.
+     * @return array Arreglo decreciente con el listado de años.
      */
     public static function years($total_years, $from = null)
     {
@@ -589,8 +589,8 @@ class Utility_Date
     }
 
     /**
-     * Método que entrega la cantidad de días que tiene un mes
-     * @return int Cantidad de días
+     * Método que entrega la cantidad de días que tiene un mes.
+     * @return int Cantidad de días.
      */
     public static function daysInMonth($periodo)
     {
