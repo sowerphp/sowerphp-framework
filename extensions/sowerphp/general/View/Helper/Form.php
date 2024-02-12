@@ -277,7 +277,7 @@ class View_Helper_Form
 
     private function _input_div($config)
     {
-        return '<div'.(!empty($config['attr'])?(' '.$config['attr']):'').(!empty($config['id'])?(' id="'.$config['id'].'"'):'').' class="'.$config['class'].'">'.$config['value'].'</div>';
+        return '<div'.(!empty($config['attr'])?(' '.$config['attr']):'').(!empty($config['id'])?(' id="'.$config['id'].'"'):'').' class="form-control-plaintext '.$config['class'].'">'.$config['value'].'</div>';
     }
 
     private function _input_hidden($config)
