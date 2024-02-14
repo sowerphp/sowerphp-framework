@@ -329,12 +329,11 @@ class View_Helper_Form
         );
         $datepicker_config = str_replace('"', '\'', json_encode($config['datepicker']));
         $buffer = '';
+        $attr = '';
         if (isset($config['id'])) {
-            $attr = ' id="'.$config['id'].'"';
-            $buffer .= '<script>$(function() { $("#'.$config['id'].'").datepicker('.$datepicker_config.'); }); </script>';
-        } else {
-            $attr = ' onmouseover="$(this).datepicker('.$datepicker_config.')"';
+            $attr .= ' id="'.$config['id'].'"';
         }
+        $attr .= ' data-datepicker-config="'.$datepicker_config.'"';
         $buffer .= '<input type="text" name="'.$config['name'].'" value="'.$config['value'].'"'.$attr.' class="'.$config['class'].'" placeholder="'.$config['placeholder'].'" '.$config['attr'].$config['popover'].' autocomplete="off" />';
         return $buffer;
     }
@@ -399,7 +398,6 @@ class View_Helper_Form
         }
         $buffer = '';
         $attr = '';
-        $onmouseover = '';
         if (!empty($config['id'])) {
             $attr .= ' id="'.$config['id'].'"';
             if (!empty($config['wrapper'])) {
@@ -407,22 +405,19 @@ class View_Helper_Form
             }
         } else {
             if (!empty($config['wrapper'])) {
-                $onmouseover .= ' $(this).'.$config['wrapper'].'('.$wrapper_config.');';
+                $attr .= ' data-wrapper-method="'.$config['wrapper'].'" data-wrapper-config="'.$wrapper_config.'"';
             }
         }
         if (!empty($config['onblur'])) {
-            if ($config['wrapper']=='select2') {
+            if ($config['wrapper'] == 'select2') {
                 if (!empty($config['id'])) {
                     $buffer .= '<script>$(function() { $("#'.$config['id'].'").on("select2:close", function(){ '.$config['onblur'].'; }); });</script>';
                 } else {
-                    $onmouseover .= ' $(this).on(\'select2:close\', function(){ '.$config['onblur'].'; });';
+                    $attr .= ' data-wrapper-onblur="'.str_replace('"', '\"', $config['onblur']).'"';
                 }
             } else {
                 $attr .= ' onblur="'.$config['onblur'].'"';
             }
-        }
-        if (!empty($onmouseover)) {
-            $attr .= ' onmouseover="'.$onmouseover.'"';
         }
         if (!is_array($config['value'])) {
             $config['value'] = ($config['value'] || (string)$config['value']=='0') ? [$config['value']] : [];
