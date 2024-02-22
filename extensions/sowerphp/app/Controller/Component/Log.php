@@ -24,19 +24,20 @@
 namespace sowerphp\app;
 
 /**
- * Componente para proveer de un sistema de Logs para las aplicaciones
+ * Componente para proveer de un sistema de Logs para las aplicaciones.
  *
  * Se utiliza la misma idea de syslog, asumiendo la aplicación como si fuese un
  * sistema like Unix. Los tipos de programas que están registrando un mensaje
  * pueden ser:
  *
- *  - LOG_KERN: mensajes del núcleo de la aplicación (ej: automáticos por error)
- *  - LOG_USER: origen por defecto de los controladores (se pueden cambiar por LOG_LOCAL0 a LOG_LOCAL7)
- *  - LOG_MAIL: mensajes de la aplicación de correo electrónico
- *  - LOG_AUTH: mensajes del sistema de autenticación
- *  - LOG_NEWS: mensajes de notificaciones
- *  - LOG_CRON: mensajes de tareas programadas (comandos Shell)
- *  - LOG_LOCAL0 a LOG_LOCAL7: se dejarán para ser utilizados por cada aplicación
+ *  - LOG_KERN: mensajes del núcleo de la aplicación (ej: automáticos por error).
+ *  - LOG_USER: origen por defecto de los controladores (se pueden cambiar por LOG_LOCAL0 a LOG_LOCAL7).
+ *  - LOG_MAIL: mensajes de la aplicación de correo electrónico.
+ *  - LOG_AUTH: mensajes del sistema de autenticación.
+ *  - LOG_NEWS: mensajes de notificaciones.
+ *  - LOG_CRON: mensajes de tareas programadas (comandos Shell).
+ *  - LOG_LOCAL0 a LOG_LOCAL7: se dejarán para ser utilizados por cada aplicación.
+ *  - LOG_UUCP: mensajes de la API (recomendado, no forzado ni obligatorio).
  */
 class Controller_Component_Log extends \sowerphp\core\Controller_Component
 {
@@ -73,7 +74,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
 
     /**
      * Se registran automáticamente eventos que ocurrieron durante la ejecución
-     * del controlador (incluyendo la renderización de la vista)
+     * del controlador (incluyendo la renderización de la vista).
      */
     public function afterFilter($url = null, $status = null)
     {
@@ -89,9 +90,9 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
     }
 
     /**
-     * Método que escribe un evento en el Log
-     * @param message Evento (mensaje) que se desea registrar
-     * @param severity Gravedad del evento (por defecto informativos)
+     * Método que escribe un evento en el Log.
+     * @param message Evento (mensaje) que se desea registrar.
+     * @param severity Gravedad del evento (por defecto informativos).
      */
     public function write($message, $severity = LOG_INFO, $facility = null)
     {
@@ -103,9 +104,9 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
     }
 
     /**
-     * Método que procesa y reporta (de ser necesario) un registro
-     * @param message Mensaje que se desea reportar (puede ser un arreglo asociativo)
-     * @param priority Prioridad en un entero (formato Syslog) o arreglo [facility, severity]
+     * Método que procesa y reporta (de ser necesario) un registro.
+     * @param message Mensaje que se desea reportar (puede ser un arreglo asociativo).
+     * @param priority Prioridad en un entero (formato Syslog) o arreglo [facility, severity].
      */
     private function report($message, $priority)
     {
@@ -114,20 +115,49 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
             list($facility, $severity) = $priority;
         } else {
             $facility = floor($priority/8);
-            $severity = $priority - $facility*8;
+            $severity = $priority - $facility * 8;
         }
         // reportar el mensaje de acuerdo la severidad del mismo
         if (isset($this->settings['report'][$facility][$severity])) {
             foreach ($this->settings['report'][$facility][$severity] as $method) {
-                $method = 'report' . ucfirst($method);
-                $this->$method($message, $facility, $severity);
+                // se reporta a través de un método de esta clase
+                if (is_string($method)) {
+                    $method = 'report' . ucfirst($method);
+                    $this->$method($message, $facility, $severity);
+                }
+                // se reporta a través de un handler (método de otra clase)
+                else if (is_array($method) && isset($method[1])) {
+                    $class = $method[0];
+                    if (!class_exists($class)) {
+                        throw new \Exception(
+                            'Clase ' . $class . ' para reportar el log no existe.'
+                        );
+                    }
+                    $handler = $method[1];
+                    if (!method_exists($class, $handler)) {
+                        throw new \Exception(
+                            'Método ' . $class . '::' . $handler . ' para reportar el log no existe.'
+                        );
+                    }
+                    $options = $method[2] ?? [];
+                    $context = [
+                        'ip' => $this->controller->Auth->ip(true),
+                        'User' => $this->getUser(),
+                        'options' => $options,
+                    ];
+                    $class::$handler($message, $facility, $severity, $context);
+                } else {
+                    throw new \Exception(
+                        'Método ' . json_encode($method). ' no es válido para reportar el log.'
+                    );
+                }
             }
         }
     }
 
     /**
-     * Método que entrega la URL completa que gatilló el regitro
-     * @return string URL completa (incluyendo parámetros por GET)
+     * Método que entrega la URL completa que gatilló el regitro.
+     * @return string URL completa (incluyendo parámetros por GET).
      */
     private function getURL()
     {
@@ -139,10 +169,10 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
     }
 
     /**
-     * Método que envía el registro a Syslog
-     * @param message Mensaje que se desea reportar (puede ser un arreglo asociativo)
-     * @param facility Origen del envío (no se usa, ya que se cambia por la configuración del componente) Esto porque se envía al sistema operativo
-     * @param severity Gravedad del registro
+     * Método que envía el registro a Syslog.
+     * @param message Mensaje que se desea reportar (puede ser un arreglo asociativo).
+     * @param facility Origen del envío (no se usa, ya que se cambia por la configuración del componente). *                 Esto porque se envía al sistema operativo.
+     * @param severity Gravedad del registro.
      */
     private function reportSyslog($message, $facility, $severity)
     {
@@ -171,10 +201,10 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
     }
 
     /**
-     * Método que envía el registro por email
-     * @param message Mensaje que se desea reportar (puede ser un arreglo asociativo)
-     * @param facility Origen del envío
-     * @param severity Gravedad del registro
+     * Método que envía el registro por email.
+     * @param message Mensaje que se desea reportar (puede ser un arreglo asociativo).
+     * @param facility Origen del envío.
+     * @param severity Gravedad del registro.
      */
     private function reportEmail($message, $facility, $severity)
     {
@@ -297,8 +327,8 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
     }
 
     /**
-     * Método que abre el log para la base de datos
-     * @return bool =true si se pudo abrir el log (existe módulos Sistema.Logs)
+     * Método que abre el log para la base de datos.
+     * @return bool =true si se pudo abrir el log (existe módulos Sistema.Logs).
      */
     private function openlog()
     {
@@ -341,10 +371,10 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
     }
 
     /**
-     * Método que envía el registro a un archivo de texto
-     * @param message Mensaje que se desea reportar (puede ser un arreglo asociativo)
-     * @param facility Origen del envío
-     * @param severity Gravedad del registro
+     * Método que envía el registro a un archivo de texto.
+     * @param message Mensaje que se desea reportar (puede ser un arreglo asociativo).
+     * @param facility Origen del envío.
+     * @param severity Gravedad del registro.
      */
     private function reportFile($message, $facility, $severity)
     {
@@ -352,14 +382,15 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         if (is_array($message) || is_object($message) || is_bool($message)) {
             $message = json_encode($message);
         }
-        $info = date('Y-m-d H:i:s').' '.$this->controller->Auth->ip(true).' '.($this->getUser()?$this->getUser()->usuario:'^_^');
+        $info = date('Y-m-d H:i:s') . ' ' . $this->controller->Auth->ip(true) . ' '
+                . ($this->getUser() ? $this->getUser()->usuario : '^_^');
         file_put_contents($log, $info.' '.$message."\n", FILE_APPEND);
     }
 
     /**
-     * Método que recupera la glosa del origen
-     * @param facility Origen que se quiere obtener su glosa
-     * @return string Glosa del origen
+     * Método que recupera la glosa del origen.
+     * @param facility Origen que se quiere obtener su glosa.
+     * @return string Glosa del origen.
      */
     private function getFacility($facility)
     {
@@ -370,9 +401,9 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
     }
 
     /**
-     * Método que recupera la glosa de la gravedad
-     * @param severity Gravedad que se quiere obtener su glosa
-     * @return string Glosa de la gravedad
+     * Método que recupera la glosa de la gravedad.
+     * @param severity Gravedad que se quiere obtener su glosa.
+     * @return string Glosa de la gravedad.
      */
     private function getSeverity($severity)
     {
@@ -384,7 +415,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
 
     /**
      * Método que obtiene el usuario que está reportando el log, si es que
-     * existe uno
+     * existe uno.
      */
     protected function getUser()
     {
