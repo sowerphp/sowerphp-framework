@@ -118,9 +118,6 @@ final class Utility_Spreadsheet_XLS
         $objReader->setReadDataOnly(true);
         $objPHPOffice = $objReader->load($archivo);
         // Retornar hojas
-        if ($type == 'Ods') {
-            return array_slice($objPHPOffice->getSheetNames(), 0, -1);
-        }
         return $objPHPOffice->getSheetNames();
     }
 

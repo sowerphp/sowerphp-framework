@@ -134,9 +134,9 @@ class Utility_Spreadsheet
     }
 
     /**
-     * Método que retorna los nombres de las hojas
-     * @param archivo Archivo que se procesará
-     * @return array Arreglo con los nombres de las hojas
+     * Método que retorna los nombres de las hojas.
+     * @param archivo Archivo que se procesará.
+     * @return array Arreglo con los nombres de las hojas.
      */
     public static function sheets($archivo)
     {
@@ -157,6 +157,7 @@ class Utility_Spreadsheet
         else if ($archivo['type'] == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
             return Utility_Spreadsheet_XLS::sheets($archivo['tmp_name'], 'Excel2007');
         }
+        throw new \Exception('No fue posible procesar el archivo ' . $archivo['name'] . ' de tipo ' . $archivo['type']);
     }
 
     /**

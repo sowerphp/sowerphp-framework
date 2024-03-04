@@ -82,13 +82,29 @@ class Controller_Bd extends \Controller_App
      */
     public function poblar()
     {
-        if (isset($_FILES['file']) && !$_FILES['file']['error']) {
-            $db = &\sowerphp\core\Model_Datasource_Database::get($_POST['database']);
-            $sheets = \sowerphp\general\Utility_Spreadsheet::sheets($_FILES['file']);
-            $message = array();
+        // setear listado de bases de datos
+        $this->_setDatabases();
+        // procesar formulario si fue enviado
+        if (isset($_POST['submit'])) {
+            if (!isset($_FILES['file']) || $_FILES['file']['error']) {
+                \sowerphp\core\Model_Datasource_Session::message('No fue posible leer el archivo de carga de datos.', 'error');
+                return;
+            }
+            // cargar hojas del archivo
+            try {
+                $sheets = \sowerphp\general\Utility_Spreadsheet::sheets($_FILES['file']);
+                if (!$sheets) {
+                    throw new \Exception('No se encontraron hojas para procesar en el archivo de carga de datos (o bien no se logró leer el listado de hojas del archivo).');
+                }
+            } catch (\Exception $e) {
+                \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+                return;
+            }
             // hacer todo en una transacción
+            $db = &\sowerphp\core\Model_Datasource_Database::get($_POST['database']);
             $db->beginTransaction();
             // cada hoja del archivo son los datos de una tabla
+            $message = [];
             foreach ($sheets as $id => &$name) {
                 $data = \sowerphp\general\Utility_Spreadsheet::read($_FILES['file'], $id);
                 $table = $name;
@@ -190,8 +206,6 @@ class Controller_Bd extends \Controller_App
             $db->commit();
             \sowerphp\core\Model_Datasource_Session::message(implode('<br />', $message));
         }
-        // setear listado de bases de datos
-        $this->_setDatabases ();
     }
 
     /**
