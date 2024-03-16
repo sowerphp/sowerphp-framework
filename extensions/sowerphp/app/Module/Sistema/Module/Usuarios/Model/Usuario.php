@@ -230,7 +230,7 @@ class Model_Usuario extends \Model_App
                     SELECT id
                     FROM usuario
                     WHERE email = :email
-                ', [':email' => $id]);
+                ', [':email' => mb_strtolower($id)]);
             }
             // se crea usuario a través de su nombre de usuario
             else if (!isset($id[31])) {

@@ -22,10 +22,6 @@
  */
 
 /**
- * Archivo de funciones básicas para la aplicación
- */
-
-/**
  * Función que carga una variable de entorno o su valor por defecto
  * @param varname Variable que se desea consultar
  * @param default Valor por defecto de la variable
@@ -47,8 +43,12 @@ function env($varname, $default = null)
  * @param resource Recurso (path) que se desea resolver
  * @return string URL completa que resuelve el recurso (path)
  */
-function url($resource = '/') {
-    $url = (new \sowerphp\core\Network_Request())->url;
+function url($resource = '/')
+{
+    $url = (string)\sowerphp\core\Configure::read('app.url');
+    if (!$url) {
+        $url = (new \sowerphp\core\Network_Request())->url;
+    }
     if (!$url) {
         throw new \Exception(__('No fue posible determinar la URL completa del recurso %s', $resource));
     }
@@ -206,7 +206,8 @@ function shell_exec_async($cmd, $log = false, &$output = [])
  * @param html Indica si el formato debe ser HTML o texto plano
  * @return string Mensaje formateado en HTML o texto plano según se solicitó
  */
-function message_format($string, $html = true) {
+function message_format($string, $html = true)
+{
     // preguntas frecuentes de la aplicación
     if (strpos($string, '[faq:') !== false) {
         $faq = (array)\sowerphp\core\Configure::read('faq');
