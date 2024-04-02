@@ -164,13 +164,13 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 }
                 if (!$Usuario->exists()) {
                     \sowerphp\core\Model_Datasource_Session::message (
-                        'Usuario no válido.', 'error'
+                        'Usuario no válido. Recuerda que puedes buscar por tu nombre de usuario o correo.', 'error'
                     );
                     $this->render('Usuarios/contrasenia_recuperar_step1');
                 }
                 else if (!$Usuario->activo) {
                     \sowerphp\core\Model_Datasource_Session::message (
-                        'Usuario no activo.', 'error'
+                        'Usuario no activo. Primero deberás realizar la activación del usuario, luego podrás cambiar la contraseña.', 'error'
                     );
                     $this->render('Usuarios/contrasenia_recuperar_step1');
                 }
@@ -182,7 +182,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                         md5(hash('sha256', $Usuario->contrasenia))
                     );
                     \sowerphp\core\Model_Datasource_Session::message (
-                        'Se ha enviado un email con las instrucciones para recuperar su contraseña.',
+                        'Se ha enviado un email con las instrucciones para recuperar tu contraseña.',
                         'ok'
                     );
                     $this->redirect('/usuarios/ingresar');
@@ -191,20 +191,24 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         }
         // cambiar contraseña
         else {
-            $Usuario = new $class($usuario);
+            // buscar usuario al que se desea cambiar la contraseña
+            $Usuario = new $class(urldecode($usuario));
             if (!$Usuario->exists()) {
                 \sowerphp\core\Model_Datasource_Session::message (
                     'Usuario inválido.', 'error'
                 );
                 $this->redirect ('/usuarios/contrasenia/recuperar');
             }
+            // formulario de cambio de contraseña
             if (!isset($_POST['contrasenia1'])) {
                 $this->set([
-                    'usuario' => $usuario,
+                    'usuario' => $Usuario->usuario,
                     'codigo' => $codigo,
                 ]);
                 $this->render('Usuarios/contrasenia_recuperar_step2');
-            } else {
+            }
+            // procesar cambio de contraseña
+            else {
                 // validar captcha
                 try {
                     \sowerphp\general\Utility_Google_Recaptcha::check();
