@@ -229,10 +229,10 @@ class Model_Datasource_Session
     {
         // si se indicó un mensaje se asigna
         if ($message) {
-            if ($type=='ok') {
+            if ($type == 'ok') {
                 $type = 'success';
             }
-            else if ($type=='error') {
+            else if ($type == 'error') {
                 $type = 'danger';
             }
             $messages = self::message();
@@ -244,9 +244,9 @@ class Model_Datasource_Session
         }
         // si no se indicó un mensaje se recupera y limpia
         else {
-            $message = self::read('session.messages');
+            $messages = self::read('session.messages');
             self::delete('session.messages');
-            return $message ? (array)$message : [];
+            return $messages ? (array)$messages : [];
         }
     }
 

@@ -92,7 +92,7 @@ class Controller_Module extends \Controller_App
                     $info = array(
                         'name' => $info,
                         'desc' => '',
-                        'imag' => '/img/icons/48x48/icono.png',
+                        'icon' => 'fa-solid fa-link',
                     );
                 }
                 // si es un arreglo colocar opciones por defecto
@@ -100,7 +100,7 @@ class Controller_Module extends \Controller_App
                     $info = array_merge(array(
                         'name' => $link,
                         'desc' => '',
-                        'imag' => '/img/icons/48x48/icono.png',
+                        'icon' => 'fa-solid fa-link',
                     ), $info);
                 }
                 // Verificar permisos para acceder al enlace
