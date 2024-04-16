@@ -75,7 +75,10 @@ foreach ($Objs as &$obj) {
         }
         // si es boolean se usa Si o No según corresponda
         else if ($info['type']=='boolean' || $info['type']=='tinyint') {
-            $row[] = $obj->{$column}=='t' || $obj->{$column}=='1' ? 'Si' : 'No';
+            $row[] = $obj->{$column}=='t' || $obj->{$column}=='1'
+                ? '<div class="text-center"><i class="fa-solid fa-check-circle fa-fw text-success"></i></div>'
+                : '<div class="text-center"><i class="fa-solid fa-times-circle fa-fw text-danger"></i></div>'
+            ;
         }
         // si es llave foránea
         else if ($info['fk']) {
@@ -87,9 +90,29 @@ foreach ($Objs as &$obj) {
                 $row[] = '';
             }
         }
+        // si es una fecha
+        else if ($info['type'] == 'date') {
+            $row[] = \sowerphp\general\Utility_Date::format($obj->{$column});
+        }
+        // si es una fecha con hora (sin zona horaria)
+        else if ($info['type'] == 'timestamp without time zone') {
+            $row[] = \sowerphp\general\Utility_Date::format($obj->{$column}, 'd/m/Y H:i:s');
+        }
+        // si es una fecha con hora (con zona horaria)
+        else if ($info['type'] == 'timestamp') {
+            $row[] = \sowerphp\general\Utility_Date::format($obj->{$column}, 'd/m/Y H:i:sO');
+        }
+        // si es un número entero
+        else if ($info['type'] == 'integer') {
+            $row[] = (int)$obj->{$column};
+        }
+        // si es un número decimal
+        else if (in_array($info['type'], ['real', 'float'])) {
+            $row[] = (float)$obj->{$column};
+        }
         // si es cualquier otro tipo de datos
         else {
-            $row[] = $info['type']=='real' ? (float)$obj->{$column} : $obj->{$column};
+            $row[] = $obj->{$column};
         }
     }
     $pkValues = $obj->getPkValues();
@@ -102,7 +125,7 @@ foreach ($Objs as &$obj) {
     }
     $actions .= '<a href="'.$_base.$module_url.$controller.'/editar/'.$pkURL.$listarFilterUrl.'" title="Editar" class="btn btn-primary mb-2"><i class="fa fa-edit fa-fw"></i></a>';
     if ($deleteRecord) {
-        $actions .= ' <a href="'.$_base.$module_url.$controller.'/eliminar/'.$pkURL.$listarFilterUrl.'" title="Eliminar" onclick="return eliminar(this, \''.$model.'\', \''.implode(', ', $pkValues).'\')" class="btn btn-primary mb-2"><i class="fas fa-times fa-fw"></i></a>';
+        $actions .= ' <a href="'.$_base.$module_url.$controller.'/eliminar/'.$pkURL.$listarFilterUrl.'" title="Eliminar" onclick="return eliminar(this, \''.$model.'\', \''.implode(', ', $pkValues).'\')" class="btn btn-danger mb-2"><i class="fas fa-times fa-fw"></i></a>';
     }
     $row[] = $actions;
     $data[] = $row;

@@ -48,7 +48,7 @@ class Model_Auth extends \Model_App
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
         'id' => array(
-            'name'      => 'Id',
+            'name'      => 'ID',
             'comment'   => 'Identificador (serial)',
             'type'      => 'integer',
             'length'    => 32,

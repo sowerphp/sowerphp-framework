@@ -323,11 +323,10 @@ class View_Helper_Form
 
     private function _input_date($config)
     {
-        $config['datepicker'] = array_merge(
-            (array)\sowerphp\core\Configure::read('datepicker'),
-            isset($config['datepicker']) ? $config['datepicker'] : []
-        );
-        $datepicker_config = str_replace('"', '\'', json_encode($config['datepicker']));
+        $datepicker_config = !empty($config['datepicker'])
+            ? str_replace('"', '\'', json_encode($config['datepicker']))
+            : '{}'
+        ;
         $buffer = '';
         $attr = '';
         if (isset($config['id'])) {
@@ -372,9 +371,9 @@ class View_Helper_Form
         ], $config);
         // configuración para los wrappers
         $wrapper_config = '';
-        if ($config['wrapper']=='select2') {
+        if ($config['wrapper'] == 'select2') {
             $config['select2'] = array_merge(
-                (array)\sowerphp\core\Configure::read('select2'),
+                ['theme' => 'bootstrap-5', 'width' => '100%'],
                 isset($config['select2']) ? $config['select2'] : []
             );
             if (empty($config['select2']['placeholder']) && !empty($config['placeholder'])) {
