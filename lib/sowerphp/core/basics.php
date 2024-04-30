@@ -104,7 +104,7 @@ function num($n, $d = 0, $language = null)
     }
 
     if (!is_numeric($n)) {
-        trigger_error("num: El argumento proporcionado no es un número válido.", E_USER_WARNING);
+        trigger_error("num: El argumento proporcionado ($n) no es un número válido.", E_USER_WARNING);
         return $n;
     }
 
@@ -115,7 +115,7 @@ function num($n, $d = 0, $language = null)
     }
 
     if (!is_int($d) || $d < 0) {
-        trigger_error("num: La cantidad de dígitos decimales proporcionada no es válida.", E_USER_WARNING);
+        trigger_error("num: La cantidad de dígitos decimales proporcionada ($d) no es válida.", E_USER_WARNING);
         return $n;
     }
 
