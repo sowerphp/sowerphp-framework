@@ -592,11 +592,13 @@ class Utility_Date
      * Método que entrega la cantidad de días que tiene un mes.
      * @return int Cantidad de días.
      */
-    public static function daysInMonth($periodo)
+    public static function daysInMonth($periodo): int
     {
-        $anio = (int)substr($periodo,0,4);
-        $mes = (int)substr($periodo,4);
-        return cal_days_in_month(\CAL_GREGORIAN, $mes, $anio);
+        $anio = (int)substr($periodo, 0, 4);
+        $mes = (int)substr($periodo, 4);
+        $date = new \DateTime("$anio-$mes-01");
+        return (int)$date->format('t');
     }
+
 
 }

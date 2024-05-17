@@ -21,19 +21,20 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del controlador
+// Namespace del controlador.
 namespace {namespace};
 
 /**
  * Clase para el controlador asociado a la tabla {table} de la base de
- * datos
+ * datos.
  * Comentario de la tabla: {comment}
  * Esta clase permite controlar las acciones entre el modelo y vista para la
- * tabla {table}
+ * tabla {table}.
  */
 class Controller_{classs} extends \Controller_Maintainer
 {
 
-    protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
+    // Namespace del controlador y modelos asociados.
+    protected $namespace = __NAMESPACE__;
 
 }

@@ -24,16 +24,16 @@
 namespace sowerphp\core;
 
 /**
- * Clase para escribir y recuperar datos desde una sesión
+ * Clase para escribir y recuperar datos desde una sesión.
  */
 class Model_Datasource_Session
 {
 
     /**
-     * Método que inicia la sesión
-     * @param expires Minutos en que expirará la sesión
+     * Método que inicia la sesión.
+     * @param expires Minutos en que expirará la sesión.
      */
-    public static function start($expires = 30)
+    public static function start(int $expires = 30): void
     {
         $Request = new Network_Request();
         $lifetime = $expires * 60;
@@ -59,9 +59,9 @@ class Model_Datasource_Session
     }
 
     /**
-     * Carga configuración del inicio de la sesión
+     * Carga configuración del inicio de la sesión.
      */
-    public static function configure()
+    public static function configure(): void
     {
         // idioma
         if (!self::read('config.language')) {
@@ -82,7 +82,7 @@ class Model_Datasource_Session
         if (!self::read('config.page.layout')) {
             self::write('config.page.layout', Configure::read('page.layout'));
         }
-        // parámetros de rastro mediante la URL (ej: parámetros UTM)
+        // parámetros de rastro mediante la URL (ej: parámetros UTM).
         self::saveUrlTracking();
     }
 
@@ -91,7 +91,7 @@ class Model_Datasource_Session
      * campañas en la sesión. Así no se tienen que arrastrar por las URLs y se
      * puede saber estos datos para usar en otros lados (ej: formularios).
      */
-    private static function saveUrlTracking()
+    private static function saveUrlTracking(): void
     {
         $url_tracking_keys = [
             'utm_source',
@@ -112,11 +112,11 @@ class Model_Datasource_Session
     }
 
     /**
-     * Entrega true si la variable esta creada en la sesión
-     * @param name Nombre de la variable que se quiere buscar
-     * @return Verdadero si la variable existe en la sesión
+     * Entrega true si la variable esta creada en la sesión.
+     * @param name Nombre de la variable que se quiere buscar.
+     * @return Verdadero si la variable existe en la sesión.
      */
-    public static function check($name)
+    public static function check(string $name): bool
     {
         if (!isset($_SESSION)) {
             return false;
@@ -126,62 +126,62 @@ class Model_Datasource_Session
     }
 
     /**
-     * Recuperar el valor de una variable de sesión
-     * @param name Nombre de la variable que se desea leer
-     * @return Valor de la variable o falso en caso que no exista o la sesión no este iniciada
+     * Recuperar el valor de una variable de sesión.
+     * @param name Nombre de la variable que se desea leer.
+     * @return mixed Valor de la variable o falso en caso que no exista o la sesión no este iniciada.
      */
-    public static function read($name = null)
+    public static function read(?string $name = null)
     {
         if (!isset($_SESSION)) {
             return false;
         }
-        // Si no se indico un nombre, se entrega todo el arreglo de la sesión
+        // Si no se indico un nombre, se entrega todo el arreglo de la sesión.
         if ($name === null) {
             return $_SESSION;
         }
-        // Extraer los datos que se están solicitando
+        // Extraer los datos que se están solicitando.
         $result = Utility_Set::classicExtract($_SESSION, $name);
-        // Verificar que lo solicitado existe
+        // Verificar que lo solicitado existe.
         if (!isset($result)) {
             return false;
         }
-        // Retornar lo solicitado (ya se reviso si existía, por lo cual si es null es válido el valor)
+        // Retornar lo solicitado (ya se reviso si existía, por lo cual si es null es válido el valor).
         return $result;
     }
 
     /**
-     * Quitar una variable de la sesión
-     * @param name Nombre de la variable que se desea eliminar
-     * @return Verdadero si se logro eliminar
+     * Quitar una variable de la sesión.
+     * @param name Nombre de la variable que se desea eliminar.
+     * @return bool Verdadero si se logro eliminar.
      */
-    public static function delete($name)
+    public static function delete(string $name): bool
     {
         // Si la variable existe se quita
         if (self::check($name)) {
             self::_overwrite($_SESSION, Utility_Set::remove($_SESSION, $name));
-            return (self::check($name) === false);
+            return self::check($name) === false;
         }
-        // En caso que no se encontrara la variable se retornará falso
+        // En caso que no se encontrara la variable se retornará falso.
         return false;
     }
 
     /**
-     * Escribir un valor de una variable de sesión
-     * @param name Nombre de la variable
-     * @param value Valor que se desea asignar a la variable
-     * @return bool Verdadero si se logró escribir la variable de sesión
+     * Escribir un valor de una variable de sesión.
+     * @param name Nombre de la variable.
+     * @param value Valor que se desea asignar a la variable.
+     * @return bool Verdadero si se logró escribir la variable de sesión.
      */
-    public static function write($name, $value = null)
+    public static function write(string $name, $value = null): bool
     {
         if (!isset($_SESSION)) {
             return false;
         }
-        // Armar el arreglo necesario para realizar la escritura
+        // Armar el arreglo necesario para realizar la escritura.
         $write = $name;
         if (!is_array($name)) {
             $write = array($name => $value);
         }
-        // Por cada elemento del arreglo escribir los datos de la sesión
+        // Por cada elemento del arreglo escribir los datos de la sesión.
         foreach ($write as $key => $val) {
             self::_overwrite($_SESSION, Utility_Set::insert($_SESSION, $key, $val));
             if (Utility_Set::classicExtract($_SESSION, $key) !== $val) {
@@ -192,11 +192,11 @@ class Model_Datasource_Session
     }
 
     /**
-     * Used to write new data to _SESSION, since PHP doesn't like us setting the _SESSION var itself
-     * @param old Antiguo conjunto de datos
-     * @param new Nuevo conjunto de datos
+     * Used to write new data to _SESSION, since PHP doesn't like us setting the _SESSION var itself.
+     * @param old Antiguo conjunto de datos.
+     * @param new Nuevo conjunto de datos.
      */
-    protected static function _overwrite(&$old, $new)
+    protected static function _overwrite(&$old, $new): void
     {
         if (!empty($old)) {
             foreach ($old as $key => $var) {
@@ -211,9 +211,9 @@ class Model_Datasource_Session
     }
 
     /**
-     * Método para destruir e invalidar una sesión
+     * Método para destruir e invalidar una sesión.
      */
-    public static function destroy()
+    public static function destroy(): void
     {
         if (session_status() == PHP_SESSION_ACTIVE) {
             session_destroy();
@@ -222,31 +222,19 @@ class Model_Datasource_Session
 
     /**
      * Método para escribir un mensaje de sesión y recuperarlo
+     * @deprecated Se debe utilizar Model_Datasource_Session_Message
      * @param message Mensaje que se desea mostrar
      * @param type Tipo de mensaje: success, info, warning o danger
      */
-    public static function message($message = null, $type = 'info')
+    public static function message(?string $message = null, string $type = 'info')
     {
         // si se indicó un mensaje se asigna
         if ($message) {
-            if ($type == 'ok') {
-                $type = 'success';
-            }
-            else if ($type == 'error') {
-                $type = 'danger';
-            }
-            $messages = self::message();
-            $messages[] =  [
-                'text' => $message,
-                'type' => $type,
-            ];
-            self::write('session.messages', $messages);
+            Model_Datasource_Session_Message::write($message, $type);
         }
         // si no se indicó un mensaje se recupera y limpia
         else {
-            $messages = self::read('session.messages');
-            self::delete('session.messages');
-            return $messages ? (array)$messages : [];
+            return Model_Datasource_Session_Message::flush();
         }
     }
 

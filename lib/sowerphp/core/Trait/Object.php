@@ -24,25 +24,25 @@
 namespace sowerphp\core;
 
 /**
- * Clase genérica con método para trabajar con cualquier objeto
+ * Clase genérica con método para trabajar con cualquier objeto.
  */
 trait Trait_Object
 {
 
     /**
      * Método para convertir el objeto a un string.
-     * @return Nombre de la clase con que se instancio el objeto
+     * @return string Nombre de la clase con que se instancio el objeto.
      */
-    public function __toString()
+    public function __toString(): string
     {
         return get_class($this);
     }
 
     /**
-     * Método para setear los atributos de la clase
-     * @param array Arreglo con los datos que se deben asignar
+     * Método para setear los atributos de la clase.
+     * @param array Arreglo con los datos que se deben asignar.
      */
-    public function set($array)
+    public function set(array $array)
     {
         $props = (new \ReflectionClass($this))->getProperties(
             \ReflectionProperty::IS_PUBLIC

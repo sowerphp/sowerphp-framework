@@ -34,7 +34,7 @@ class Controller_Maintainer extends \Controller_App
     protected $module_url; ///< Atributo con la url para acceder el módulo
     protected $deleteRecord = true; ///< Indica si se permite o no borrar registros
     protected $contraseniaNames = ['contrasenia', 'clave', 'password', 'pass']; ///< Posibles nombres de campo tipo contraseña
-    protected $actionsColsWidth = 110; ///< Ancho de la columna de acciónes en acción listar
+    protected $actionsColsWidth = 170; ///< Ancho de la columna de acciónes en acción listar
     protected $extraActions = []; ///< iconos extra para la columna de acciones
 
     /**

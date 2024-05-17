@@ -31,7 +31,7 @@ class Network_Email
 
     protected $Sender; ///< Objeto que hará el envío del correo electrónico
     protected $default_methods = [
-        'smtp' => 'pear',
+        'smtp' => 'smtp-phpmailer',
     ]; ///< Método por defecto a usar si no se indicó uno
 
     // datos del correo que se enviará
@@ -52,7 +52,7 @@ class Network_Email
     {
         // Si no es arreglo, es el nombre de la configuración
         if (!is_array($config)) {
-            $config = \SowerPHP\core\Configure::read('email.'.$config);
+            $config = \sowerphp\core\Configure::read('email.'.$config);
         }
         // determinar "from" por defecto
         if (isset($config['from']) || isset($config['user'])) {

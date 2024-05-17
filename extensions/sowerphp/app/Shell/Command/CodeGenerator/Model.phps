@@ -21,32 +21,33 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+// Namespace del modelo.
 namespace {namespace};
 
 /**
- * Clase para mapear la tabla {table} de la base de datos
+ * Clase para mapear la tabla {table} de la base de datos.
  * Comentario de la tabla: {comment}
- * Esta clase permite trabajar sobre un registro de la tabla {table}
+ * Esta clase permite trabajar sobre un registro de la tabla {table}.
  */
 class Model_{class} extends \Model_App
 {
 
-    // Datos para la conexión a la base de datos
-    protected $_database = '{database}'; ///< Base de datos del modelo
-    protected $_table = '{table}'; ///< Tabla del modelo
+    // Datos para la conexión a la base de datos.
+    protected $_database = '{database}'; ///< Base de datos del modelo.
+    protected $_table = '{table}'; ///< Tabla del modelo.
 
-    // Atributos de la clase (columnas en la base de datos)
+    // Atributos de la clase (columnas en la base de datos).
     {columns}
 
-    // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
+    // Información de las columnas de la tabla en la base de datos.
+    public static $columnsInfo = [
 {columnsInfo}
-    );
+    ];
 
-    // Comentario de la tabla en la base de datos
+    // Comentario de la tabla en la base de datos.
     public static $tableComment = '{comment}';
 
-    public static $fkNamespace = array({fkNamespace}); ///< Namespaces que utiliza esta clase
+    // Namespaces que utiliza esta clase.
+    public static $fkNamespace = [{fkNamespace}];
 
 }

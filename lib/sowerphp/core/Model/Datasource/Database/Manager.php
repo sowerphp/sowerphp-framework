@@ -93,18 +93,18 @@ abstract class Model_Datasource_Database_Manager extends \PDO
      * Obtener una tabla (como arreglo) desde la base de datos
      * @param sql Consulta SQL que se desea realizar
      * @param params Parámetros que se deben enlazar a la consulta
-     * @return Array Arreglo bidimensional con la tabla y sus datos
+     * @return array Arreglo bidimensional con la tabla y sus datos
      */
     public function getTable($sql, $params = array())
     {
-        return $this->query($sql, $params)->fetchAll(\PDO::FETCH_ASSOC);
+        return (array)$this->query($sql, $params)->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /**
      * Obtener una sola fila desde la base de datos
      * @param sql Consulta SQL que se desea realizar
      * @param params Parámetros que se deben enlazar a la consulta
-     * @return Array Arreglo unidimensional con la fila
+     * @return array Arreglo unidimensional con la fila
      */
     public function getRow($sql, $params = array())
     {
@@ -124,7 +124,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     {
         $stmt = $this->query($sql, $params);
         $cols = [];
-        while (($col = $stmt->fetchColumn())!==false) {
+        while (($col = $stmt->fetchColumn()) !== false) {
             $cols[] = $col;
         }
         $stmt->closeCursor();

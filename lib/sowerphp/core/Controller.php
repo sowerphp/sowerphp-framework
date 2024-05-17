@@ -225,17 +225,17 @@ abstract class Controller
     }
 
     /**
-     * Redireccionar página
+     * Redireccionar página.
      * @param url Dirección web a donde se debe redireccionar
      * @param status Estado de término del script PHP
      */
-    public function redirect($url = null, $status = 0)
+    public function redirect(?string $url = null, int $status = 0): void
     {
         $this->beforeRedirect(array($url, $status));
         if (!$url) {
             $url = $this->request->request;
         }
-        if ($url[0]=='/') {
+        if ($url[0] == '/') {
             header('location: '.$this->request->base.$url);
         } else {
             header('location: '.$url);
@@ -244,12 +244,12 @@ abstract class Controller
     }
 
     /**
-     * Método que entrega los valores de los parámetros solicitados
-     * Siempre y cuando estén presentes en la query de la URL (GET)
-     * @param params Arreglo con los parámetros, si se manda param => value, value será el valor por defecto (sino será null)
-     * @return Arreglo con los parámetros y sus valores
+     * Método que entrega los valores de los parámetros solicitados.
+     * Siempre y cuando estén presentes en la query de la URL (GET).
+     * @param params Arreglo con los parámetros, si se manda param => value, value será el valor por defecto (sino será null).
+     * @return array Arreglo con los parámetros y sus valores.
      */
-    public function getQuery(array $params)
+    public function getQuery(array $params): array
     {
         $vars = [];
         foreach ($params as $param => $default) {

@@ -22,35 +22,40 @@
  */
 
 /**
- * Función que carga una variable de entorno o su valor por defecto
- * @param varname Variable que se desea consultar
- * @param default Valor por defecto de la variable
+ * Recupera una variable de entorno o su valor por defecto.
+ *
+ * @param string $name Nombre de la variable de entorno que se desea consultar.
+ * @param mixed $default Valor por defecto para retornar si la variable de entorno no existe.
+ * @return mixed El valor de la variable de entorno si existe, de lo contrario el valor por defecto.
  */
-function env($varname, $default = null)
+function env(string $name, $default = null)
 {
-    if (isset($_ENV[$varname])) {
-        return $_ENV[$varname];
+    // Comprobar si la variable de entorno existe en el array $_ENV
+    if (isset($_ENV[$name])) {
+        return $_ENV[$name];
     }
-    $value = getenv($varname);
-    if ($value !== false) {
-        return $value;
-    }
-    return $default;
+
+    // Intentar obtener la variable de entorno usando getenv()
+    $value = getenv($name);
+
+    // Retornar el valor si existe, de lo contrario retornar el valor por defecto
+    return $value !== false ? $value : $default;
 }
 
 /**
- * Función que entrega la ruta completa (URL) de un recurso (path) de la aplicación
- * @param resource Recurso (path) que se desea resolver
- * @return string URL completa que resuelve el recurso (path)
+ * Función que entrega la ruta completa (URL) de un recurso (path) de la aplicación.
+ * @param resource Recurso (path) que se desea resolver.
+ * @return string URL completa que resuelve el recurso (path).
  */
-function url($resource = '/')
+function url(string $resource = '/', ...$args): string
 {
+    $resource = vsprintf($resource, $args);
     $url = (string)\sowerphp\core\Configure::read('app.url');
     if (!$url) {
         $url = (new \sowerphp\core\Network_Request())->url;
     }
     if (!$url) {
-        throw new \Exception(__('No fue posible determinar la URL completa del recurso %s', $resource));
+        throw new \Exception(__('No fue posible determinar la URL completa del recurso %s.', $resource));
     }
     if (strpos($resource, '/static/') === 0) {
         $url_static = \sowerphp\core\Configure::read('app.url_static');
@@ -59,14 +64,13 @@ function url($resource = '/')
             $resource = substr($resource, 7);
         }
     }
-    return $resource == '/' ? $url : $url.$resource;
+    return $resource == '/' ? $url : $url . $resource;
 }
 
 /**
- * Función para mostrar el valor de una variable (y su tipo) o un objeto (y su
- * clase)
- * @param var Variable que se desea mostrar
- * @param withtype Si es verdadero se usará "var_dump" sino "print_r"
+ * Función para mostrar el valor de una variable (y su tipo) o un objeto (y su clase).
+ * @param var Variable que se desea mostrar.
+ * @param withtype Si es verdadero se usará "var_dump" sino "print_r".
  */
 function debug($var, $withtype = false)
 {
@@ -133,41 +137,68 @@ function num($n, $d = 0, $language = null)
 }
 
 /**
- * Función para traducción de string singulares, en dominio master.
- * @param string Texto que se desea traducir
- * @param args Argumentos para reemplazar en el string, puede ser un arreglo o bien n argumentos a la función
- * @return string Texto traducido
+ * Función para traducción de string singulares en dominio master con soporte de interpolación mixta.
+ * Permite utilizar tanto el formato de placeholders de Python (%(name)s) como el de sprintf (%s, %d).
+ *
+ * @param string $string Texto que se desea traducir.
+ * @param mixed ...$args Argumentos para reemplazar en el string, pueden ser un arreglo asociativo o valores individuales.
+ * @return string Texto traducido con los placeholders reemplazados.
  */
-function __($string, $args = null)
+function __(string $string, ...$args): string
 {
-    if (!is_array($args)) {
-        $args = array_slice(func_get_args(), 1);
-    }
-    return __d('master', $string, $args);
+    return __d('master', $string, ...$args);
 }
 
 /**
- * Función para traducción de string singulares, eligiendo dominio.
- * @param string Texto que se desea traducir
- * @param args Argumentos para reemplazar en el string, puede ser un arreglo o bien n argumentos a la función
- * @return string Texto traducido
+ * Función para traducción de string singulares, eligiendo dominio con soporte de interpolación mixta.
+ * Permite utilizar tanto el formato de placeholders de Python (%(name)s) como el formato clásico (%s, %d, %f)
+ * y el formato simulado de parámetros SQL (:name) para uniformidad en la definición de strings.
+ * Además, la función automáticamente ajusta los placeholders que no incluyen el formato específico (%( )s).
+ *
+ * @param string $domain Dominio del lenguaje al que se traducirá el texto.
+ * @param string $string Texto que se desea traducir.
+ * @param mixed ...$args Argumentos para reemplazar en el string, pueden ser un arreglo asociativo o valores individuales.
+ * @return string Texto traducido con los placeholders reemplazados.
+ *
+ * Ejemplos de uso:
+ * 1. Interpolación al estilo Python con formato completo:
+ *    echo __('Hello %(name)s, your balance is %(balance).2f', ['%(name)s' => 'John', '%(balance).2f' => 1234.56]);
+ *
+ * 2. Interpolación al estilo Python sin formato específico en los placeholders:
+ *    echo __('Hello %(name)s, your balance is %(balance).2f', ['name' => 'John', 'balance' => 1234.56]);
+ *
+ * 3. Uso con formato clásico de sprintf:
+ *    echo __('Hello %s, you have %d new messages', 'Alice', 5);
+ *
+ * 4. Uso del formato simulado de parámetros SQL (no para consultas SQL):
+ *    echo __('Your username is :name and your ID is :id', [':name' => 'Alice', ':id' => '123']);
  */
-function __d($dominio, $string, $args = null)
+function __d(string $domain, string $string, ...$args): string
 {
-    // si no hay argumentos solo se retorna el texto traducido
-    if (!$args) {
-        return \sowerphp\core\I18n::translate($string, $dominio);
+    $translated = \sowerphp\core\I18n::translate($string, $domain);
+    if (empty($args)) {
+        return $translated;
     }
-    // si los argumentos no son un arreglo se obtiene arreglo a partir
-    // de los argumentos pasados a la función
-    if (!is_array($args)) {
-        $args = array_slice(func_get_args(), 2);
+
+    // Verificar si se usó un array asociativo o valores individuales
+    $firstArg = $args[0];
+    if (is_array($firstArg) && Utility_Array::isAssoc($firstArg)) {
+        $placeholders = [];
+        foreach ($firstArg as $key => $value) {
+            if (in_array($key[0], ['%(', ':'])) {
+                $placeholders[$key] = $value;
+            } else {
+                $placeholders['%(' . $key . ')s'] = $value;
+            }
+        }
+        return strtr($translated, $placeholders);
+    } else {
+        return vsprintf($translated, $args);
     }
-    return vsprintf(\sowerphp\core\I18n::translate($string, $dominio), $args);
 }
 
 /**
- * Función que permite ejecutar un comando en la terminal
+ * Función que permite ejecutar un comando en la terminal.
  */
 function shell_exec_async($cmd, $log = false, &$output = [])
 {
@@ -176,12 +207,12 @@ function shell_exec_async($cmd, $log = false, &$output = [])
         return 255;
     }
     if ($cmd[0]!='/') {
-        $cmd = DIR_PROJECT.'/website/Shell/shell.php '.$cmd;
+        $cmd = DIR_PROJECT . '/website/Shell/shell.php ' . $cmd;
     }
     $screen_cmd = 'screen -dm';
     if ($log) {
         if (!is_string($log)) {
-            $log = TMP.'/screen_'.microtime(true).'.log';
+            $log = TMP . '/screen_' . microtime(true) . '.log';
         } else {
             $log = trim($log);
         }
@@ -214,8 +245,8 @@ function message_format($string, $html = true)
         // hay config de faqs -> se agrega enlace
         if (!empty($faq['url']) && !empty($faq['text'])) {
             $replace = $html
-                        ? '<a href="'.$faq['url'].'$2" target="_blank" class="alert-link">'.$faq['text'].'</a>'
-                        : $faq['text'].': '.$faq['url'].'$2';
+                ? '<a href="'.$faq['url'].'$2" target="_blank" class="alert-link">'.$faq['text'].'</a>'
+                : $faq['text'].': '.$faq['url'].'$2';
             $string = preg_replace(
                 '/\[(faq):([\w\d]+)\]/i',
                 $replace,

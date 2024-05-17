@@ -21,19 +21,19 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+// Namespace del modelo.
 namespace {namespace};
 
 /**
- * Clase para mapear la tabla {table} de la base de datos
+ * Clase para mapear la tabla {table} de la base de datos.
  * Comentario de la tabla: {comment}
- * Esta clase permite trabajar sobre un conjunto de registros de la tabla {table}
+ * Esta clase permite trabajar sobre un conjunto de registros de la tabla {table}.
  */
 class Model_{classs} extends \Model_Plural_App
 {
 
-    // Datos para la conexión a la base de datos
-    protected $_database = '{database}'; ///< Base de datos del modelo
-    protected $_table = '{table}'; ///< Tabla del modelo
+    // Datos para la conexión a la base de datos.
+    protected $_database = '{database}'; ///< Base de datos del modelo.
+    protected $_table = '{table}'; ///< Tabla del modelo.
 
 }

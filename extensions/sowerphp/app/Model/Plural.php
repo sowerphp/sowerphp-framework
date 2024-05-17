@@ -199,13 +199,16 @@ abstract class Model_Plural
     /**
      * Entrega la cantidad de registros que hay en la tabla, hará uso
      * del whereStatement si no es null también de groupByStatement y
-     * havingStatement
-     * @return integer Cantidad de registros encontrados
+     * havingStatement.
+     * @return int Cantidad de registros encontrados.
      */
-    public function count()
+    public function count(): int
     {
         // armar consulta
-        $query = 'SELECT COUNT(*) FROM '.$this->_table;
+        $query = '
+            SELECT COUNT(*)
+            FROM ' . $this->_table
+        ;
         // si hay where se usa
         if ($this->whereStatement) {
             $query .= $this->whereStatement;

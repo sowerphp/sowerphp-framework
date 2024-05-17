@@ -113,15 +113,15 @@ abstract class Model
             return false;
         }
         // recuperar datos
-        $datos = $this->db->getRow(
-            'SELECT * FROM '.$this->_table.' WHERE '.$pk['where']
-            , $pk['values']
-        );
+        $datos = $this->db->getRow('
+            SELECT *
+            FROM ' . $this->_table . ' WHERE ' . $pk['where']
+        , $pk['values']);
         // si se encontraron datos asignar columnas a los atributos
         // del objeto
         if (count($datos)) {
             foreach ($datos as $key => &$value) {
-                if ($this::$columnsInfo[$key]['type']=='boolean') {
+                if ($this::$columnsInfo[$key]['type'] == 'boolean') {
                     $value = (int)$value;
                 }
                 $this->{$key} = $value;

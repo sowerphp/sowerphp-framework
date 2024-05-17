@@ -24,26 +24,34 @@
 namespace sowerphp\core;
 
 /**
- * Utilidad para trabajar con arreglos
+ * Utilidad para trabajar con arreglos.
  */
 class Utility_Array
 {
 
     /**
-     * Une dos o más arrays recursivamente
+     * Determina si un arreglo es asociativo.
+     *
+     * @param array $arr El arreglo a verificar.
+     * @return bool Retorna true si el arreglo es asociativo, false si no.
+     */
+    public static function isAssoc(array $arr): bool
+    {
+        return array_keys($arr) !== range(0, count($arr) - 1);
+    }
+
+    /**
+     * Une dos o más arrays recursivamente.
      * @param array $array1
      * @param array $array2
      * @return array
      */
-    public static function mergeRecursiveDistinct(array &$array1, array &$array2)
+    public static function mergeRecursiveDistinct(array &$array1, array &$array2): array
     {
         $merged = $array1;
-        foreach ( $array2 as $key => &$value ) {
+        foreach ($array2 as $key => &$value ) {
             if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
-                $merged [$key] = self::mergeRecursiveDistinct (
-                    $merged [$key],
-                    $value
-                );
+                $merged [$key] = self::mergeRecursiveDistinct($merged[$key], $value);
             } else {
                 $merged [$key] = $value;
             }
@@ -52,13 +60,13 @@ class Utility_Array
     }
 
     /**
-     * Convierte una tabla de Nx2 (N filas 2 columnas) a un arreglo asociativo
-     * @param table Tabla de Nx2 (N filas 2 columnas) que se quiere convertir
-     * @return array Arreglo convertido a asociativo
+     * Convierte una tabla de Nx2 (N filas 2 columnas) a un arreglo asociativo.
+     * @param table Tabla de Nx2 (N filas 2 columnas) que se quiere convertir.
+     * @return array Arreglo convertido a asociativo.
      */
-    public static function fromTable($table)
+    public static function fromTable(array $table): array
     {
-        $array = array();
+        $array = [];
         foreach($table as &$row) {
             $array[array_shift($row)] = array_shift($row);
         }
@@ -70,7 +78,7 @@ class Utility_Array
      */
     public static function toXML($array, $root = 'root')
     {
-        $xml = new SimpleXMLElement('<'.$root.'/>');
+        $xml = new \SimpleXMLElement('<'.$root.'/>');
         foreach ($array as $key => $value){
             if (is_array($value)) {
                 if (is_numeric($key)) {
@@ -85,13 +93,16 @@ class Utility_Array
     }
 
     /**
-     * Función que extra de un arreglo en formato:
+     * Función que procesa un arreglo en formato:
+     *
      * array(
      *   'key1' => array(1,2,3),
      *   'key2' => array(4,5,6),
      *   'key3' => array(7,8,9),
      * )
+     *
      * Y lo entrega como una "tabla":
+     *
      * array (
      *   array (
      *     'key1' => 1,
@@ -109,11 +120,12 @@ class Utility_Array
      *     'key3' => 9,
      *   ),
      * )
-     * @param array Arreglo de donde extraer
-     * @param keys Llaves que se extraeran
-     * @return array Tabla con los campos extraídos
+     *
+     * @param array $array Arreglo de donde extraer.
+     * @param array keys Llaves que se extraeran.
+     * @return array Tabla con los campos extraídos.
      */
-    public static function groupToTable($array, $keys = null)
+    public static function groupToTable(array $array, ?array $keys = null): array
     {
         // determinar llaves y su cantidad
         if ($keys === null) {
@@ -129,9 +141,9 @@ class Utility_Array
             }
         }
         // extrar datos
-        $data = array();
+        $data = [];
         for ($i=0; $i<$n_elementos; ++$i) {
-            $d = array();
+            $d = [];
             for ($j=0; $j<$n_keys; ++$j) {
                 if (isset($array[$keys[$j]][$i])) {
                     $d[$keys[$j]] = $array[$keys[$j]][$i];
@@ -147,6 +159,7 @@ class Utility_Array
     /**
      * Método que toma un arreglo con un formato de tabla el cual contiene
      * un encabezado y detalle, ejemplo:
+     *
      *   $arreglo = array (
      *     array (
      *       'run' => '1-9'
@@ -161,7 +174,9 @@ class Utility_Array
      *       'telefono' => 'Tel 2'
      *     ),
      *   );
-     * Y con la llamada tableToArrayWithHeaderAndBody($arreglo, 2) lo entrega como:
+     *
+     * Y con la llamada fromTableWithHeaderAndBody($arreglo, 2) lo entrega como:
+     *
      *   $arreglo = array (
      *     'run' => '1-9'
      *     'nombre' => 'Juan Pérez'
@@ -176,12 +191,13 @@ class Utility_Array
      *       ),
      *     )
      *   );
-     * @param data Arreglo en formato tabla con los datos
-     * @param camposEncabezado Cuandos campos (columnas) de la "tabla" son parte del encabezado
-     * @param detalle Nombre del índice (key) que se utilizará para agrupar los detalles
-     * @return array Arreglo con el formato de un encabezado y detalle
+     *
+     * @param array $data Arreglo en formato tabla con los datos.
+     * @param int $camposEncabezado Cuandos campos (columnas) de la "tabla" son parte del encabezado.
+     * @param string $detalle Nombre del índice (key) que se utilizará para agrupar los detalles.
+     * @return array Arreglo con el formato de un encabezado y detalle.
      */
-    public static function fromTableWithHeaderAndBody($data, $camposEncabezado, $detalle = 'detalle')
+    public static function fromTableWithHeaderAndBody(array $data, int $camposEncabezado, string $detalle = 'detalle'): array
     {
         if (!isset($data[0])) {
             return [];
@@ -199,7 +215,7 @@ class Utility_Array
                 $i = 0;
                 foreach ($d as $key => $value) {
                     $item[$key] = array_shift($d);
-                    if (++$i==$camposEncabezado) {
+                    if (++$i == $camposEncabezado) {
                         break;
                     }
                 }
@@ -230,7 +246,7 @@ class Utility_Array
                 $i = 0;
                 foreach ($d as $key => $value) {
                     $item[$key] = array_shift($d);
-                    if (++$i==$camposEncabezado) {
+                    if (++$i == $camposEncabezado) {
                         break;
                     }
                 }
@@ -257,11 +273,11 @@ class Utility_Array
     /**
      * Método que toma la primera columna de una tabla y la convierte en el
      * índice de un arreglo asociativo, donde las otras columnas o columna son
-     * los valores que tiene dicho índice
-     * @param table Tabla que se desea convertir
-     * @return array Arreglo asociativo
+     * los valores que tiene dicho índice.
+     * @param array $table Tabla que se desea convertir.
+     * @return array Arreglo asociativo.
      */
-    public static function tableToAssociativeArray($table)
+    public static function tableToAssociativeArray(array $table): array
     {
         $array = [];
         $keys = [];
@@ -282,7 +298,7 @@ class Utility_Array
                     $array[$key] = [$array[$key]];
                     $keys[$key] = true;
                 }
-                $array[$key][] = count($row)==1 ? array_shift($row) : $row;
+                $array[$key][] = count($row) == 1 ? array_shift($row) : $row;
             }
         }
         return $array;
@@ -291,14 +307,14 @@ class Utility_Array
     /**
      * Método que toma un arreglo asociativo de items, donde cada item contiene
      * un campo que hace referencia a otro item. De esta forma crea un árbol
-     * jerárquico con los items
-     * @param items Listado de items que se deben buscar y procesar
-     * @param field_parent Nombre del campo en el item que tiene el "enlace" al item padre
-     * @param field_childs Nombre del campo en el item donde se deben colocar los hijos del item
-     * @param parent Índice del item padre (primer nivel es =null)
-     * @return array Arreglo asociativo con el árbol
+     * jerárquico con los items.
+     * @param array $items Listado de items que se deben buscar y procesar.
+     * @param field_parent Nombre del campo en el item que tiene el "enlace" al item padre.
+     * @param field_childs Nombre del campo en el item donde se deben colocar los hijos del item.
+     * @param parent Índice del item padre (primer nivel es =null).
+     * @return array Arreglo asociativo con el árbol.
      */
-    public static function toTree($items, $field_parent, $field_childs, $parent = null)
+    public static function toTree(array $items, $field_parent, $field_childs, $parent = null): array
     {
         // agregar items del nivel parent al árbol
         $tree_level = [];
@@ -318,20 +334,20 @@ class Utility_Array
     }
 
     /**
-     * Método que convierte un árbol a un listado jerárquico
-     * Listo para usar en un campo select y con la jerarquía del árbol
-     * @param tree Árbol
-     * @param field_name Nombre del campo que contiene el nombre/glosa del item del árbol
-     * @param field_childs Nombre del campo en el item de donde se deben extraer los hijos del item
-     * @return array Arreglo asociativo con el árbol
+     * Método que convierte un árbol a un listado jerárquico.
+     * Listo para usar en un campo select y con la jerarquía del árbol.
+     * @param array $tree Árbol.
+     * @param field_name Nombre del campo que contiene el nombre/glosa del item del árbol.
+     * @param field_childs Nombre del campo en el item de donde se deben extraer los hijos del item.
+     * @return array Arreglo asociativo con el árbol.
      */
-    public static function treeToList($tree, $field_name, $field_childs, $level = 0, $spaces = 3, array &$list = [])
+    public static function treeToList(array $tree, $field_name, $field_childs, int $level = 0, int $spaces = 3, array &$list = []): array
     {
         foreach ($tree as $key => $item) {
-            $name = str_repeat('&nbsp;',$level*$spaces).$item[$field_name];
+            $name = str_repeat('&nbsp;', $level * $spaces) . $item[$field_name];
             $list[$key] = $name;
             if (!empty($item[$field_childs])) {
-                self::treeToList($item[$field_childs], $field_name, $field_childs, $level+1, $spaces, $list);
+                self::treeToList($item[$field_childs], $field_name, $field_childs, $level + 1, $spaces, $list);
             }
             unset($tree[$key]);
         }
@@ -339,14 +355,14 @@ class Utility_Array
     }
 
     /**
-     * Método que convierte un árbol a arreglo asociativo con la glosa con los espacios del nivel
-     * Listo para usar en un campo select y con la jerarquía del árbol pero con todos los datos
-     * @param tree Árbol
-     * @param field_name Nombre del campo que contiene el nombre/glosa del item del árbol
-     * @param field_childs Nombre del campo en el item de donde se deben extraer los hijos del item
-     * @return array Arreglo asociativo con el árbol y todos sus datos
+     * Método que convierte un árbol a arreglo asociativo con la glosa con los espacios del nivel.
+     * Listo para usar en un campo select y con la jerarquía del árbol pero con todos los datos.
+     * @param array $tree Árbol.
+     * @param field_name Nombre del campo que contiene el nombre/glosa del item del árbol.
+     * @param field_childs Nombre del campo en el item de donde se deben extraer los hijos del item.
+     * @return array Arreglo asociativo con el árbol y todos sus datos.
      */
-    public static function treeToAssociativeArray($tree, $field_name, $field_childs, $level = 0, array &$list = [])
+    public static function treeToAssociativeArray($tree, $field_name, $field_childs, $level = 0, array &$list = []): array
     {
         foreach ($tree as $key => $item) {
             if (!empty($item[$field_childs])) {
@@ -356,7 +372,7 @@ class Utility_Array
             $item['level'] = $level;
             $list[$key] = $item;
             if (!empty($childs)) {
-                self::treeToAssociativeArray($childs, $field_name, $field_childs, $level+1, $list);
+                self::treeToAssociativeArray($childs, $field_name, $field_childs, $level + 1, $list);
             }
             unset($tree[$key]);
         }
@@ -367,12 +383,13 @@ class Utility_Array
      * Método que entrega todos los sub conjuntos de un arreglo
      * @link https://stackoverflow.com/a/6092999/3333009
      */
-    public static function subsets($in, $minLength = 1) {
+    public static function subsets(array $in, int $minLength = 1): array
+    {
         $count = count($in);
-        $members = pow(2,$count);
+        $members = pow(2, $count);
         $return = [];
         for ($i = 0; $i < $members; $i++) {
-            $b = sprintf('%0'.$count.'b',$i);
+            $b = sprintf('%0' . $count .'b', $i);
             $out = [];
             for ($j = 0; $j < $count; $j++) {
                 if ($b[$j] == '1') {

@@ -24,7 +24,7 @@
 namespace sowerphp\core;
 
 /**
- * Clase con la solicitud del cliente
+ * Clase con la solicitud del cliente.
  */
 class Network_Request
 {
@@ -44,7 +44,7 @@ class Network_Request
     //public $params; ///< WARNING: si se definine genera Excepcion dentro de llamada a la API
 
     /**
-     * Constructor de la clase
+     * Constructor de la clase.
      */
     public function __construct()
     {
@@ -57,8 +57,8 @@ class Network_Request
     }
 
     /**
-     * Método mágico para retrocompatibilidad con los atributos públicos antiguos
-     * Se puede consultar por: request, base, url y params
+     * Método mágico para retrocompatibilidad con los atributos públicos antiguos.
+     * Se puede consultar por: request, base, url y params.
      */
     public function __get(string $name)
     {
@@ -69,10 +69,10 @@ class Network_Request
     }
 
     /**
-     * Método que determina la solicitud utilizada para acceder a la página
-     * @return string Solicitud completa para la página consultada
+     * Método que determina la solicitud utilizada para acceder a la página.
+     * @return string Solicitud completa para la página consultada.
      */
-    public function request()
+    public function request(): string
     {
         if (!isset(self::$_request)) {
             if (!isset($_SERVER['QUERY_STRING'])) {
@@ -80,18 +80,22 @@ class Network_Request
             } else {
                 // Obtener ruta que se uso sin "/" (base) inicial
                 $uri = (isset($_SERVER['QUERY_STRING'][0]) && $_SERVER['QUERY_STRING'][0] == '/')
-                    ? substr($_SERVER['QUERY_STRING'], 1) : $_SERVER['QUERY_STRING']
+                    ? substr($_SERVER['QUERY_STRING'], 1)
+                    : $_SERVER['QUERY_STRING']
                 ;
-                if (strpos($_SERVER['REQUEST_URI'], '/?'.$uri) !== false) {
+                if (strpos($_SERVER['REQUEST_URI'], '/?' . $uri) !== false) {
                     $uri = '';
                 }
                 // verificar si se pasaron variables GET
                 $inicio_variables_get = strpos($uri, '&');
                 // Asignar uri
-                $request = $inicio_variables_get===false ? $uri : substr($uri, 0, $inicio_variables_get);
+                $request = $inicio_variables_get === false
+                    ? $uri
+                    : substr($uri, 0, $inicio_variables_get)
+                ;
                 // Agregar slash inicial de la uri
-                if(!isset($request) || (isset($request[0]) && $request[0] != '/')) {
-                    $request = '/'.$request;
+                if (!isset($request) || (isset($request[0]) && $request[0] != '/')) {
+                    $request = '/' . $request;
                 }
                 // Decodificar url
                 $request = urldecode($request);
@@ -102,10 +106,10 @@ class Network_Request
     }
 
     /**
-     * Método que determina los campos base y webroot
-     * @return string Base de la URL
+     * Método que determina los campos base y webroot.
+     * @return string Base de la URL.
      */
-    public function base()
+    public function base(): string
     {
         if (!isset(self::$_base)) {
             if (!isset($_SERVER['REQUEST_URI'])) {
@@ -113,8 +117,11 @@ class Network_Request
             } else {
                 $parts = explode('?', urldecode($_SERVER['REQUEST_URI']));
                 $last = strrpos($parts[0], $this->request());
-                $base = $last !== false ? substr($parts[0], 0, $last) : $parts[0];
-                $position = strlen($base)-1;
+                $base = $last !== false
+                    ? substr($parts[0], 0, $last)
+                    : $parts[0]
+                ;
+                $position = strlen($base) - 1;
                 if ($position >= 0 && $base[$position] == '/') {
                     $base = substr($base, 0, -1);
                 }
@@ -126,10 +133,10 @@ class Network_Request
 
     /**
      * Método que determina la URL utiliza para acceder a la aplicación, esto
-     * es: protocolo/esquema, dominio y path base a contar del webroot)
-     * @return string URL completa para acceder a la la página
+     * es: protocolo/esquema, dominio y path base a contar del webroot).
+     * @return string URL completa para acceder a la la página.
      */
-    public function url()
+    public function url(): string
     {
         if (!isset(self::$_url)) {
             if (empty($_SERVER['HTTP_HOST'])) {
@@ -148,7 +155,7 @@ class Network_Request
     }
 
     /**
-     * Método que asigna o entrega los parámetros de la solicitud
+     * Método que asigna o entrega los parámetros de la solicitud.
      * @param array|null $params
      * @return array
      */
@@ -161,11 +168,11 @@ class Network_Request
     }
 
     /**
-     * Método que entrega las cabeceras enviadas al servidor web por el cliente
-     * @param string header Cabecera que se desea recuperar, o null si se quieren traer todas
-     * @return mixed Arreglo si no se pidió por una específica o su valor si se pidió (=false si no existe cabecera, =null si no existe función apache_request_headers)
+     * Método que entrega las cabeceras enviadas al servidor web por el cliente.
+     * @param string header Cabecera que se desea recuperar, o null si se quieren traer todas.
+     * @return mixed Arreglo si no se pidió por una específica o su valor si se pidió (=false si no existe cabecera, =null si no existe función apache_request_headers).
      */
-    public function header($header = null)
+    public function header(?string $header = null)
     {
         $headers = $this->headers();
         if ($header === null) {
@@ -178,10 +185,10 @@ class Network_Request
     }
 
     /**
-     * Método que entrega las cabeceras enviadas al servidor web por el cliente
-     * @return array Arreglo con las cabeceras HTTP recibidas
+     * Método que entrega las cabeceras enviadas al servidor web por el cliente.
+     * @return array Arreglo con las cabeceras HTTP recibidas.
      */
-    public function headers()
+    public function headers(): array
     {
         if (!isset(self::$_headers)) {
             if (!function_exists('apache_request_headers')) {
@@ -202,11 +209,24 @@ class Network_Request
      *
      * @return boolean
      */
-    public function isApiRequest()
+    public function isApiRequest(): bool
     {
         $api_prefix = strpos($this->request, '/api/') === 0;
         $accept_json = $this->header('Accept') == 'application/json'; // WARNING: podría retornar arreglo (?)
         return $api_prefix || $accept_json;
+    }
+
+    /**
+     * Establece el módulo en los parámetros de la solicitud.
+     * Este método asigna directamente el valor del módulo en los parámetros
+     * de la solicitud para sobrescribirlo en caso que sea necesario.
+     *
+     * @param string $module El nombre del módulo a establecer.
+     * @return void
+     */
+    public function setModule(string $module): void
+    {
+        self::$_params['module'] = $module;
     }
 
 }

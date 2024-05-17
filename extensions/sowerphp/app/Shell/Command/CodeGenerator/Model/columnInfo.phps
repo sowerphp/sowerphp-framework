@@ -1,4 +1,4 @@
-        '{column}' => array(
+        '{column}' => [
             'name'      => '{name}',
             'comment'   => '{comment}',
             'type'      => '{type}',
@@ -8,4 +8,4 @@
             'auto'      => {auto},
             'pk'        => {pk},
             'fk'        => {fk}
-        ),
+        ],
