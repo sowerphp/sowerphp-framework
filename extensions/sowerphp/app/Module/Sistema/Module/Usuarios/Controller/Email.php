@@ -77,7 +77,7 @@ class Controller_Email extends \Controller_App
                         $grupo = -1;
                         $destinatarios = [];
                         for ($i=0; $i<$n_emails; $i++) {
-                            if ($i%$_POST['agrupar'] == 0) {
+                            if ($i % $_POST['agrupar'] == 0) {
                                 $destinatarios[++$grupo] = [];
                             }
                             $destinatarios[$grupo][] = $emails[$i];

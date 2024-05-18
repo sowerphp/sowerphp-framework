@@ -440,7 +440,7 @@ class Controller_Maintainer extends \Controller_App
                 $this->module_url . $this->request->params['controller'] . '/listar'
             );
         }
-        if ($Obj->{$campo.'_size'} == 0) {
+        if ((float)$Obj->{$campo.'_size'} == 0.0) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No hay datos para el campo ' . $campo . ' en el registro ('.implode(', ', $pks).').',
                 'error'

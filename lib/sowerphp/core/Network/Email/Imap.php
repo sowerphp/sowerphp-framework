@@ -77,7 +77,7 @@ class Network_Email_Imap
      */
     public function __destruct()
     {
-        if (is_resource($this->link)) {
+        if (is_resource($this->link) || $this->link instanceof \IMAP\Connection) {
             imap_close($this->link);
         }
     }
@@ -251,7 +251,7 @@ class Network_Email_Imap
                     $this->getMessagePart($uid, $p, $this->messagePartNext($partno0), $message);
                 }
                 // buscar por extensión del archivo adjunto (si lo es)
-                else if (isset($filter['extension']) && (($p->ifdisposition && strtoupper($p->disposition)=='ATTACHMENT') || (in_array($p->subtype, ['OCTET-STREAM', '*']) && ($p->ifparameters || $p->ifdparameters)))) {
+                else if (isset($filter['extension']) && (($p->ifdisposition && strtoupper($p->disposition) == 'ATTACHMENT') || (in_array($p->subtype, ['OCTET-STREAM', '*']) && ($p->ifparameters || $p->ifdparameters)))) {
                     $extension = array_map('strtolower', $filter['extension']);
                     $add = false;
                     $params = $p->ifparameters ? $p->parameters : ( $p->ifdparameters ? $p->dparameters : [] );
@@ -321,7 +321,7 @@ class Network_Email_Imap
         }
 
         // ATTACHMENT
-        if ($attachment || ($p->ifdisposition && strtolower($p->disposition)=='attachment') || isset($params['filename'])) {
+        if ($attachment || ($p->ifdisposition && strtolower($p->disposition) == 'attachment') || isset($params['filename'])) {
             // filename may be given as 'Filename' or 'Name' or both
             $filename = isset($params['filename']) ? $params['filename'] : $params['name'];
             // filename may be encoded, so see imap_mime_header_decode()
@@ -337,7 +337,7 @@ class Network_Email_Imap
         if ($p->type == 0 && $data) {
             // Messages may be split in different parts because of inline attachments,
             // so append parts together with blank row.
-            if (strtolower($p->subtype)=='plain') {
+            if (strtolower($p->subtype) == 'plain') {
                 $message['body']['plain'] .= trim($data) ."\n\n";
             } else {
                 $message['body']['html'] .= $data.'<br/><br/>';

@@ -407,41 +407,65 @@ class Utility_File
     }
 
     /**
-     * Extrae un archivo de un fichero comprimido zip
-     * @param string $archivoZip Nombre del archivo comprimido
-     * @param string $archivoBuscado Nombre del archivo que se busca extraer
-     * @return string|false Arreglo con índices name, type (no definido), size y data (idem self::upload)
-     * @warning Sólo extrae un archivo del primer nivel (fuera de directorios)
-     * @todo Extracción de un fichero que este en subdirectorios
+     * Extrae un archivo de un fichero comprimido ZIP.
+     *
+     * Busca y extrae un archivo específico dentro de un archivo ZIP,
+     * incluyendo subdirectorios, o una ruta exacta si el nombre del
+     * archivo comienza con "/".
+     *
+     * @param string $zipFile Nombre del archivo comprimido ZIP.
+     * @param string|null $searchedFile Nombre del archivo que se busca
+     * extraer. Si se proporciona una ruta que comienza con "/", se
+     * buscará una coincidencia exacta.
+     * @return array|false Retorna un arreglo asociativo con las claves
+     * 'name', 'type', 'size', y 'data' correspondientes al archivo
+     * extraído, o false si el archivo no se encuentra o si ocurre un error.
+     * @example ezip('path/to/myzip.zip', 'myfile.txt')
+     * Extrae "myfile.txt" del ZIP.
+     * @example ezip('path/to/myzip.zip', '/path/to/myfile.txt')
+     * Extrae "myfile.txt" usando la ruta completa.
      */
-    public static function ezip($archivoZip, $archivoBuscado = null)
+    public static function ezip(string $zipFile, ?string $searchedFile = null)
     {
-        $zip = zip_open($archivoZip);
-        if (is_resource($zip)) {
-            // buscar contenido
-            do {
-                $entry = zip_read($zip);
-                if ($entry === false) {
-                    continue;
+        $zip = new \ZipArchive();
+        $res = $zip->open($zipFile);
+        if ($res === true) {
+            $fileData = false;
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $name = $zip->getNameIndex($i);
+                if (
+                    $searchedFile !== null
+                    && (
+                        basename($name) === $searchedFile
+                        || $name === ltrim($searchedFile, '/')
+                    )
+                ) {
+                    $entry = $zip->getFromIndex($i);
+                    if ($entry !== false) {
+                        $stat = $zip->statIndex($i);
+                        $size = $stat['size'];
+                        // Temporalmente guarda datos en un archivo para
+                        // determinar el tipo MIME.
+                        $tmpFile = tempnam(sys_get_temp_dir(), 'ZIP');
+                        file_put_contents($tmpFile, $entry);
+                        $type = self::mimetype($tmpFile);
+                        unlink($tmpFile); // Elimina el archivo temporal
+                        // Armar arreglo con los datos del archivo.
+                        $fileData = [
+                            'name' => $name,
+                            'type' => $type,
+                            'size' => $size,
+                            'data' => $entry,
+                        ];
+                        break;
+                    }
                 }
-                $name = zip_entry_name($entry);
-            } while ($entry && $name != $archivoBuscado && $archivoBuscado !== null);
-            if ($entry === false) {
-                return false;
             }
-            // abrir contenido
-            zip_entry_open($zip, $entry, 'r');
-            $size = zip_entry_filesize($entry);
-            $entry_content = zip_entry_read($entry, $size);
-            // pasar datos del archivo
-            $archivo['name'] = $name;
-            $archivo['type'] = null;
-            $archivo['size'] = $size;
-            $archivo['data'] = $entry_content;
+            $zip->close();
         } else {
-            $archivo = false;
+            $fileData = false;
         }
-        return $archivo;
+        return $fileData;
     }
 
     /**

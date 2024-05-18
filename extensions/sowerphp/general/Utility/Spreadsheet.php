@@ -125,7 +125,10 @@ class Utility_Spreadsheet
             $cols = $rows->item($i)->getElementsByTagName('td');
             $row = array();
             foreach ($cols as $col) {
-                $row[] = $utf8decode ? trim(utf8_decode($col->nodeValue)) : trim($col->nodeValue);
+                $row[] = $utf8decode
+                    ? trim(mb_convert_encoding($col->nodeValue, 'ISO-8859-1', 'UTF-8'))
+                    : trim($col->nodeValue)
+                ;
             }
             $data[] = $row;
         }

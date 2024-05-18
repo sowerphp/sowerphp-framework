@@ -72,7 +72,7 @@ class Network_Http_Socket
             curl_setopt($curl, CURLOPT_POST, 1);
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
             if ($data) {
-                curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+                curl_setopt($curl, CURLOPT_POSTFIELDS, (array)$data);
             }
         }
         // asignar cabeceras de la solicitud HTTP

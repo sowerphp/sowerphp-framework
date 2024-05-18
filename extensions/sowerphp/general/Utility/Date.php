@@ -52,7 +52,7 @@ class Utility_Date
      * @param feriados Días que no se deberán considerar al sumar.
      * @return string Fecha con los días hábiles sumados.
      */
-    public static function addWorkingDays($fecha, $dias, $feriados = [])
+    public static function addWorkingDays(string $fecha, int $dias, array $feriados = [])
     {
         // mover fecha los días solicitados
         $start = $end = strtotime($fecha);
@@ -65,7 +65,7 @@ class Utility_Date
             }
         } else {
             $total = $dia + $dias;
-            $fds = (int)($total/5) * 2;
+            $fds = (int)($total / 5) * 2;
             if ($total % 5 == 0) {
                 $fds -= 2;
             }
@@ -76,7 +76,7 @@ class Utility_Date
         // la fecha, hacer esto hasta que no hayan más días feriados en el rango
         // que se movió la fecha
         while (($dias=self::countDaysMatch($fecha, $nuevaFecha, $feriados, true)) != 0) {
-            $fecha = date('Y-m-d', strtotime($nuevaFecha)+86400);
+            $fecha = date('Y-m-d', strtotime($nuevaFecha) + 86400);
             $nuevaFecha = self::addWorkingDays($nuevaFecha, $dias);
         }
         // retornar fecha
@@ -90,7 +90,7 @@ class Utility_Date
      * @param feriados Días que no se deberán considerar al restar.
      * @return string Fecha con los días hábiles restados.
      */
-    public static function subtractWorkingDays($fecha, $dias, $feriados = [])
+    public static function subtractWorkingDays(string $fecha, int $dias, array $feriados = [])
     {
         // mover fecha los días solicitados
         $start = $end = strtotime($fecha);
@@ -350,25 +350,25 @@ class Utility_Date
      * @param periodo Período para el cual se quiere saber el siguiente o =null para actual.
      * @return int Periodo en formato YYYYMM.
      */
-    public static function nextPeriod($periodo = null, $mover = 1)
+    public static function nextPeriod(?int $periodo = null, $mover = 1): int
     {
         if (!$periodo) {
-            $periodo = date('Ym');
+            $periodo = (int)date('Ym');
         }
         if ($mover < 0) {
-            return self::previousPeriod($periodo, $mover * -1);
+            return (int)self::previousPeriod($periodo, $mover * -1);
         }
         if ($mover == 0) {
-            return $periodo;
+            return (int)$periodo;
         }
         if ($mover > 1) {
-            return self::nextPeriod(self::nextPeriod($periodo), $mover - 1);
+            return (int)self::nextPeriod(self::nextPeriod($periodo), $mover - 1);
         }
         $periodo_siguiente = $periodo + 1;
         if (substr($periodo_siguiente, 4) == '13') {
             $periodo_siguiente = $periodo_siguiente + 100 - 12;
         }
-        return $periodo_siguiente;
+        return (int)$periodo_siguiente;
     }
 
     /**
@@ -376,25 +376,25 @@ class Utility_Date
      * @param periodo Período para el cual se quiere saber el anterior o =null para actual.
      * @return int Periodo en formato YYYYMM.
      */
-    public static function previousPeriod($periodo = null, $mover = 1)
+    public static function previousPeriod(?int $periodo = null, int $mover = 1)
     {
         if (!$periodo) {
-            $periodo = date('Ym');
+            $periodo = (int)date('Ym');
         }
         if ($mover < 0) {
-            return self::nextPeriod($periodo, $mover * -1);
+            return (int)self::nextPeriod($periodo, $mover * -1);
         }
         if ($mover == 0) {
-            return $periodo;
+            return (int)$periodo;
         }
         if ($mover > 1) {
-            return self::previousPeriod(self::previousPeriod($periodo), $mover - 1);
+            return (int)self::previousPeriod(self::previousPeriod($periodo), $mover - 1);
         }
         $periodo_anterior = $periodo - 1;
-        if (substr($periodo_anterior, 4) == '00') {
+        if (substr((string)$periodo_anterior, 4) == '00') {
             $periodo_anterior = $periodo_anterior - 100 + 12;
         }
-        return $periodo_anterior;
+        return (int)$periodo_anterior;
     }
 
     /**

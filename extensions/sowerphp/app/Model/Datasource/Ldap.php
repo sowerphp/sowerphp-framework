@@ -75,7 +75,7 @@ class Model_Datasource_Ldap extends \sowerphp\core\Model_Datasource
     private function connect()
     {
         $this->link = ldap_connect(
-            $this->config['host'], $this->config['port']
+            $this->config['host'] . ':' . $this->config['port']
         );
         if (!$this->link) {
             return false;
@@ -111,7 +111,7 @@ class Model_Datasource_Ldap extends \sowerphp\core\Model_Datasource
      */
     public function __destruct()
     {
-        if (is_resource($this->link)) {
+        if (is_resource($this->link) || $this->link instanceof \LDAP\Connection) {
             ldap_close($this->link);
         }
     }

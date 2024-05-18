@@ -38,7 +38,7 @@ foreach ($columns as $column => &$info) {
             }
         }
         // si es de tipo text se muestra un textarea
-        if (substr($info['type'], -4)=='text') {
+        if (substr($info['type'], -4) == 'text') {
             $input['type'] = 'textarea';
             if (isset($Obj)) $input['value'] = $Obj->{$column};
             echo $form->input($input);

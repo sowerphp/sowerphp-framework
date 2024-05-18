@@ -274,7 +274,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
             $column['null'] = $column['null']=='YES' ? 1 : 0;
             // definir si es auto_increment (depende de la base de datos como se hace)
             if ($this->config['type']=='PostgreSQL') {
-                $column['auto'] = substr($column['default'], 0, 7)=='nextval' ? 1 : 0;
+                $column['auto'] = substr($column['default'], 0, 7) == 'nextval' ? 1 : 0;
             } else if ($this->config['type']=='MariaDB' || $this->config['type']=='MySQL') {
                 $column['auto'] = $column['extra']=='auto_increment' ? 1 : 0;
                 unset ($column['extra']);
@@ -286,7 +286,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
                 if($column['default']=='NULL') $column['default'] = null;
             }
             // definir fk
-            $column['fk'] = array_key_exists($column['name'], $fk) ? $fk[$column['name']] : null;
+            $column['fk'] = $fk[$column['name']] ?? null;
         }
         $table['columns'] = $columns;
         return $table;
