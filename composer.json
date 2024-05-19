@@ -15,10 +15,8 @@
         "issues": "https://github.com/sascocl/sowerphp/issues",
         "source": "https://github.com/sascocl/sowerphp"
     },
-    "config": {
-        "platform": {
-            "php": "7.3"
-        }
+    "autoload": {
+        "classmap": ["src/"]
     },
     "require": {
         "php": "^7.3 || ^8.0",
