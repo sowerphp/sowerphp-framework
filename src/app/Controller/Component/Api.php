@@ -40,13 +40,13 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         'log' => false,
         'messages' => [
             'error' => [
-                'not-found' => 'Recurso %s no permite método %s en la API %s',
-                'methods-miss' => 'El recurso %s no tiene métodos asociados en la API %s',
-                'args-miss' => 'Argumentos insuficientes para el recurso %s(%s) a través de %s en la API %s',
-                'auth-miss' => 'Cabecera Authorization no fue recibida',
-                'auth-bad' => 'Cabecera Authorization es incorrecta',
-                'not-auth' => 'No está autorizado a acceder al recurso %s a través del método %s en la API %s',
-                'input-invalid' => 'Los datos enviados a la API no son válidos (no es un JSON válido)',
+                'not-found' => 'Recurso %s no permite método %s en la API %s.',
+                'methods-miss' => 'El recurso %s no tiene métodos asociados en la API %s.',
+                'args-miss' => 'Argumentos insuficientes para el recurso %s(%s) a través de %s en la API %s.',
+                'auth-miss' => 'Cabecera Authorization no fue recibida.',
+                'auth-bad' => 'Cabecera Authorization es incorrecta.',
+                'not-auth' => 'No está autorizado a acceder al recurso %s a través del método %s en la API %s.',
+                'input-invalid' => 'Los datos enviados a la API no son válidos (no es un JSON válido).',
             ]
         ],
         'localhost' => ['::1', '127.0.0.1'],

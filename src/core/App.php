@@ -253,6 +253,7 @@ class App
         define('DIR_FRAMEWORK', dirname(dirname(__DIR__)));
         define('DIR_PROJECT', dirname(dirname($caller)));
         define('DIR_STORAGE', DIR_PROJECT . '/storage');
+        define('DIR_STATIC', DIR_STORAGE . '/static');
 
         // definir directorio temporal
         if (is_writable(DIR_STORAGE . '/tmp')) {
@@ -309,9 +310,6 @@ class App
      */
     private function configure(): void
     {
-        // Cargar los archivos de la App de cada capa.
-        $this->loadFiles();
-
         // Servicio de configuración:
         $config = $this->getService('config');
 
@@ -324,6 +322,9 @@ class App
         } catch (\Dotenv\Exception\InvalidFileException $e) {
             die($e->getMessage());
         }
+
+        // Cargar los archivos de la App de cada capa.
+        $this->loadFiles();
 
         // Setear parámetros de errores
         ini_set('display_errors', $config->get('debug'));
