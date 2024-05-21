@@ -24,72 +24,84 @@
 namespace sowerphp\core;
 
 /**
- * Clase para un cliente de APIs REST
- * Permite manejar solicitudes y respuestas
+ * Clase para un cliente de APIs REST.
+ * Permite manejar solicitudes y respuestas HTTP usando JSON.
  */
 class Network_Http_Rest
 {
 
-    protected $methods = ['get', 'put', 'patch', 'delete', 'post']; ///< Métodos HTTP soportados
-    protected $config; ///< Configuración para el cliente REST
-    protected $header; ///< Cabecerá que se enviará
-    protected $errors = []; ///< Errores de la consulta REST
-    protected $assoc = true; ///< Indica si los object de JSON se deben entregar como arreglos asociativos o no
+    // Métodos HTTP soportados.
+    protected $methods = ['get', 'put', 'patch', 'delete', 'post'];
+
+    // Configuración para el cliente HTTP.
+    protected $config;
+
+    // Cabecerá que se enviará.
+    protected $header;
+
+    // Errores de la consulta HTTP.
+    protected $errors = [];
+
+    // Indica si los object de JSON se deben entregar como arreglos
+    // asociativos o no.
+    protected $assoc = true;
 
     /**
-     * Constructor del cliente REST
-     * @param config Arreglo con la configuración del cliente
+     * Constructor del cliente REST.
+     * @param array $config Arreglo con la configuración del cliente.
      */
-    public function __construct($config = [])
+    public function __construct(array $config = [])
     {
-        // cargar configuración de la solicitud que se hará
+        // Cargar configuración de la solicitud que se hará.
         if (!is_array($config)) {
-            $config = ['base'=>$config];
+            $config = [
+                'base' => $config,
+            ];
         }
         $this->config = array_merge([
             'base' => '',
             'user' => null,
             'pass' => 'X',
         ], $config);
-        // crear cabecera para la solicitud que se hará
+        // Crear cabecera para la solicitud que se hará.
         $this->header['User-Agent'] = 'SowerPHP Network_Http_Rest';
         $this->header['Content-Type'] = 'application/json';
         if ($this->config['user'] !== null) {
-            $this->header['Authorization'] = 'Basic '.base64_encode(
-                $this->config['user'].':'.$this->config['pass']
-            );
+            $this->setAuth($this->config['user'], $this->config['pass']);
         }
     }
 
     /**
-     * Método que asigna la autenticación para la API REST
-     * @param user Usuario (o token) con el que se está autenticando
-     * @param pass Contraseña con que se está autenticando (se omite si se usa token)
+     * Método que asigna la autenticación para la API REST.
+     * @param string $user Usuario (o token) con el que se está autenticando.
+     * @param string $pass Contraseña con que se está autenticando
+     * (se omite si se usa token).
      */
-    public function setAuth($user, $pass = 'X')
+    public function setAuth(string $user, string $pass = 'X'): void
     {
         $this->config['user'] = $user;
         $this->config['pass'] = $pass;
-        $this->header['Authorization'] = 'Basic '.base64_encode(
-            $this->config['user'].':'.$this->config['pass']
+        $this->header['Authorization'] = 'Basic ' . base64_encode(
+            $this->config['user'] . ':' . $this->config['pass']
         );
     }
 
     /**
-     * Método que indica si las respuestas JSON se deben entregar como arreglos
-     * asociativos o no
-     * @param assoc =true respuestas serán arreglos asociativos, =fale serán objetos
+     * Método que indica si las respuestas JSON se deben entregar como
+     * arreglos asociativos o no.
+     * @param bool $assoc =true respuestas serán arreglos asociativos,
+     * =fale serán objetos.
      */
-    public function setAssoc($assoc = true)
+    public function setAssoc(bool $assoc = true): void
     {
         $this->assoc = $assoc;
     }
 
     /**
-     * Método para realizar solicitud al recurso de la API
-     * @param method Nombre del método que se está ejecutando
-     * @param args Argumentos para el métood de Network_Http_Socket
-     * @return array Arreglo con la respuesta HTTP (índices: status, header y body)
+     * Método para realizar solicitud al recurso de la API.
+     * @param string $method Nombre del método que se está ejecutando.
+     * @param mixed $args Argumentos para el métood de Network_Http_Socket.
+     * @return array Arreglo con la respuesta HTTP (índices: status, header y body).
      */
     public function __call($method, $args)
     {
@@ -105,7 +117,9 @@ class Network_Http_Rest
             if (isset($data['@files'])) {
                 $files = $data['@files'];
                 unset($data['@files']);
-                $data = ['@data' => json_encode($data)];
+                $data = [
+                    '@data' => json_encode($data),
+                ];
                 foreach ($files as $key => $file) {
                     $data[$key] = $file;
                 }
@@ -129,15 +143,15 @@ class Network_Http_Rest
         return [
             'status' => $response['status'],
             'header' => $response['header'],
-            'body' => $body!==null ? $body : $response['body'],
+            'body' => $body ?? $response['body'],
         ];
     }
 
     /**
-     * Método que entrega los errores ocurridos al ejecutar la consulta a REST
-     * @return array Arreglo con los errores
+     * Método que entrega los errores ocurridos al ejecutar la consulta a REST.
+     * @return array Arreglo con los errores.
      */
-    public function getErrors()
+    public function getErrors(): array
     {
         return $this->errors;
     }

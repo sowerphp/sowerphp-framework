@@ -24,27 +24,33 @@
 namespace sowerphp\core;
 
 /**
- * Clase para manejar conexiones HTTP
+ * Clase para manejar conexiones HTTP.
  */
 class Network_Http_Socket
 {
 
-    protected static $methods = ['get', 'put', 'patch', 'delete', 'post']; ///< Métodos HTTP soportados
+    ///< Métodos HTTP soportados
+    protected static $methods = ['get', 'put', 'patch', 'delete', 'post'];
+
+    // Cabeceras por defecto.
     protected static $header = [
         'User-Agent' => 'SowerPHP Network_Http_Socket',
         //'Content-Type' => 'application/x-www-form-urlencoded',
-    ]; ///< Cabeceras por defecto
-    protected static $errors = []; ///< Arrglo para errores de cURL
+    ];
+
+    // Arrglo para errores de cURL.
+    protected static $errors = [];
 
     /**
-     * Método para ejecutar una solicitud a una URL, es la función que realmente
-     * contiene las implementaciones para ejecutar GET, POST, PUT, DELETE, etc
-     * @param method Método HTTP que se requiere ejecutar sobre la URL
-     * @param url URL donde se enviarán los datos
-     * @param data Datos que se enviarán
-     * @param header Cabecera que se enviará
-     * @param sslv3 =true se fuerza sslv3, por defecto es false
-     * @return array Arreglo con la respuesta HTTP (cabecera y cuerpo)
+     * Método para ejecutar una solicitud a una URL, es la función que
+     * realmente contiene las implementaciones para ejecutar GET, POST,
+     * PUT, DELETE, etc.
+     * @param string $method Método HTTP que se requiere ejecutar sobre la URL.
+     * @param string $url URL donde se enviarán los datos.
+     * @param mixed $data Datos que se enviarán.
+     * @param array $header Cabecera que se enviará.
+     * @param bool $sslv3 =true se fuerza sslv3, por defecto es false.
+     * @return array Arreglo con la respuesta HTTP (cabecera y cuerpo).
      */
     public static function __callStatic($method, $args)
     {
@@ -72,7 +78,7 @@ class Network_Http_Socket
             curl_setopt($curl, CURLOPT_POST, 1);
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
             if ($data) {
-                curl_setopt($curl, CURLOPT_POSTFIELDS, (array)$data);
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
             }
         }
         // asignar cabeceras de la solicitud HTTP
@@ -121,15 +127,15 @@ class Network_Http_Socket
     }
 
     /**
-     * Método que procesa la cabecera en texto plano y la convierte a un arreglo
-     * con los nombres de la cabecera como índices y sus valores.
+     * Método que procesa la cabecera en texto plano y la convierte a un
+     * arreglo con los nombres de la cabecera como índices y sus valores.
      * Si una cabecera aparece más de una vez, por tener varios valores,
      * entonces dicha cabecerá tendrá como valor un arreglo con todos sus
      * valores.
-     * @param header Cabecera HTTP en texto plano
-     * @return array Arreglo asociativo con la cabecera
+     * @param string $header Cabecera HTTP en texto plano.
+     * @return array Arreglo asociativo con la cabecera.
      */
-    private static function parseHeader($header)
+    private static function parseHeader(string $header): array
     {
         $headers = [];
         $lineas = explode("\n", $header);
@@ -159,12 +165,12 @@ class Network_Http_Socket
     }
 
     /**
-     * Método que procesa la línea de respuesta y extrae el protocolo, código de
-     * estado y el mensaje del estado
-     * @param response_line
-     * @return array Arreglo con índices: protocol, code, message
+     * Método que procesa la línea de respuesta y extrae el protocolo,
+     * código de estado y el mensaje del estado.
+     * @param string $response_line
+     * @return array Arreglo con índices: protocol, code, message.
      */
-    private static function parseStatus($response_line)
+    private static function parseStatus($response_line): array
     {
         if (is_array($response_line)) {
             $response_line = $response_line[count($response_line)-1];
@@ -178,19 +184,19 @@ class Network_Http_Socket
     }
 
     /**
-     * Método que entrega los errores ocurridos
-     * @return array Arreglo con los strings de los errores de cURL
+     * Método que entrega los errores ocurridos.
+     * @return array Arreglo con los strings de los errores de cURL.
      */
-    public static function getErrors()
+    public static function getErrors(): array
     {
         return self::$errors;
     }
 
     /**
-     * Método que entrega el último error de cURL
-     * @return array Arreglo con los strings de los errores de cURL
+     * Método que entrega el último error de cURL.
+     * @return array Arreglo con los strings de los errores de cURL.
      */
-    public static function getLastError()
+    public static function getLastError(): string
     {
         return self::$errors[count(self::$errors)-1];
     }

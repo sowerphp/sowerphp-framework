@@ -78,13 +78,6 @@ function url(string $resource = '/', ...$args): string
             $resource
         ));
     }
-    if (strpos($resource, '/static/') === 0) {
-        $url_static = \sowerphp\core\Configure::read('app.url_static');
-        if ($url_static !== null) {
-            $url = $url_static;
-            $resource = substr($resource, 7);
-        }
-    }
     return $resource == '/' ? $url : $url . $resource;
 }
 
