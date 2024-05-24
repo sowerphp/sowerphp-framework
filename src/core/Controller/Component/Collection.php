@@ -24,13 +24,76 @@
 namespace sowerphp\core;
 
 /**
- * Clase para manejar una colección de componentes
+ * Clase para manejar una colección de componentes.
  */
-class Controller_Component_Collection extends Object_Collection
+class Controller_Component_Collection
 {
 
     protected $_Controller = null; ///< Controlador donde esta colección esta siendo inicializada
     protected $_loaded = []; ///< Arreglo con los componentes ya cargados
+
+    /**
+     * Obtiene un objeto desde la colección.
+     * @param string $name Nombre del objeto que se quiere obtener.
+     * @return object|null El objeto solicitado o null si no lo encontró.
+     */
+    public function __get($name)
+    {
+        if (isset($this->_loaded[$name])) {
+            return $this->_loaded[$name];
+        }
+        return null;
+    }
+
+    /**
+     * Verifica si un objeto existe dentro de la colección.
+     * @param string $name Nombre del objeto que se quiere verificar si existe.
+     * @return bool =true si existe, =false si no existe.
+     */
+    public function __isset($name)
+    {
+        return isset($this->_loaded[$name]);
+    }
+
+    /**
+     * Normaliza un arreglo de objetos, para una carga más simple.
+     * @param array $objects Objetos a normalizar.
+     * @return array Objetos normalizados.
+     */
+    private function normalizeObjectArray(array $objects)
+    {
+        $normal = [];
+        foreach ($objects as $i => $objectName) {
+            $options = [];
+            if (!is_int($i)) {
+                $options = (array)$objectName;
+                $objectName = $i;
+            }
+            list($plugin, $name) = $this->splitModuleName($objectName);
+            $normal[$name] = [
+                'class' => $objectName,
+                'settings' => $options,
+            ];
+        }
+        return $normal;
+    }
+
+    /**
+     * Separar el nombre del módulo del nombre de la clase que se desea cargar.
+     * @param string $name Nombre a separar.
+     * @return array Arreglo con el nombre del módulo y la clase.
+     */
+    private function splitModuleName(string $name): array
+    {
+        $lastdot = strrpos($name, '.');
+        if ($lastdot !== false) {
+            $module = substr($name, 0, $lastdot);
+            $name = substr($name, $lastdot + 1);
+        } else {
+            $module = '';
+        }
+        return array($module, $name);
+    }
 
     /**
      * Método que inicializa la colección de componentes.
@@ -41,7 +104,7 @@ class Controller_Component_Collection extends Object_Collection
     public function init(Controller $Controller)
     {
         $this->_Controller = &$Controller;
-        $components = self::normalizeObjectArray (
+        $components = $this->normalizeObjectArray(
             $Controller->components
         );
         foreach ($components as $name => $properties) {

@@ -23,40 +23,22 @@
 
 namespace sowerphp\core;
 
-trait Trait_ServiceContainer
+interface Interface_Service
 {
 
     /**
-     * Arreglo para almacenar los servicios registrados.
+     * Registra el servicio en el contenedor.
      */
-    protected $serviceContainer = [];
+    public function register();
 
     /**
-     * Registra un servicio en el contenedor.
-     *
-     * @param string $key Identificador del servicio.
-     * @param mixed $service Instancia del servicio.
+     * Inicializa el servicio.
      */
-    public function registerService($key, $service) {
-        $this->serviceContainer[$key] = $service;
-    }
+    public function boot();
 
     /**
-     * Obtiene un servicio del contenedor.
-     *
-     * @param string $key Identificador del servicio.
-     * @return mixed Retorna el servicio registrado bajo la clave especificada.
-     * @throws Exception Si el servicio solicitado no existe.
+     * Entrega la configuración del servicio.
      */
-    public function getService(string $key)
-    {
-        if (!isset($this->serviceContainer[$key])) {
-            throw new \Exception(__(
-                'El servicio %s no está registrado en el contenedor.',
-                $key
-            ));
-        }
-        return $this->serviceContainer[$key];
-    }
+    public function getConfig();
 
 }

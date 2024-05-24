@@ -24,10 +24,12 @@
 namespace sowerphp\core;
 
 /**
- * Excepción cuando no se encuentra un módulo que ha sido configurado con
- * Module::uses()
+ * Excepción cuando no se encuentra un módulo que ha sido solicitado.
  */
-class Exception_Module_Missing extends Exception {
-    protected $_messageTemplate = 'Módulo %s no fue encontrado';
+class Exception_Module_Missing extends Exception
+{
+
+    protected $_messageTemplate = 'Módulo %s no fue encontrado.';
     protected $severity = LOG_NOTICE;
+
 }

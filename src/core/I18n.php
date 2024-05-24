@@ -83,7 +83,7 @@ class I18n
         }
         if (!strpos($locale, '_')) {
             if (!isset(self::$locale[$locale])) {
-                $locale = Configure::read('language');
+                $locale = config('language');
             }
             $locale = self::$locale[$locale];
         }

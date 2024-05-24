@@ -192,7 +192,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         $message .= ' from '.$this->controller->Auth->ip(true);
         // enviar mensaje a syslog
         openlog(
-            \sowerphp\core\Utility_String::normalize(\sowerphp\core\Configure::read('page.header.title')).'_app',
+            \sowerphp\core\Utility_String::normalize(config('page.header.title')).'_app',
             LOG_ODELAY,
             $this->settings['syslog_facility']
         );
@@ -209,7 +209,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
     private function reportEmail($message, $facility, $severity)
     {
         // verificar que exista soporte para correo
-        $config = \sowerphp\core\Configure::read('email.default');
+        $config = config('email.default');
         if (!$config) {
             return false;
         }
@@ -226,7 +226,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         $email->to($Grupos->emails($Grupos->getIDs($this->settings['report_email']['groups'])));
         $timestamp = microtime(true);
         // asunto
-        $email->subject('['.\sowerphp\core\Configure::read('page.header.title').'] Log '.$this->getFacility($facility).'.'.$this->getSeverity($severity).' '.$timestamp);
+        $email->subject('['.config('page.header.title').'] Log '.$this->getFacility($facility).'.'.$this->getSeverity($severity).' '.$timestamp);
         // inicio mensaje
         $msg = "Estimad@s,\n\nSe ha registrado el siguiente evento en la aplicación:\n\n";
         // usuario
@@ -332,7 +332,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      */
     private function openlog()
     {
-        if (\sowerphp\core\Module::loaded('Sistema.Logs')) {
+        if (app('module')->isModuleLoaded('Sistema.Logs')) {
             if (!$this->Log) {
                 $this->Log = new \sowerphp\app\Sistema\Logs\Model_Log();
             }

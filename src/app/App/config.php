@@ -21,15 +21,15 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-app('config')->set([
+return [
 
-    // Registros por página
+    // Registros por página.
     'app.registers_per_page' => 20,
 
-]);
+    // Módulos que usará esta aplicación.
+    'modules' => [
+        'Sistema',
+        'Sistema.Usuarios' => ['autoLoad' => true],
+    ]
 
-// Módulos que usará esta aplicación
-\sowerphp\core\Module::uses(array(
-    'Sistema',
-    'Sistema.Usuarios' => array('autoLoad' => true),
-));
+];

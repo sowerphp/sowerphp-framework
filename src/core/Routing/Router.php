@@ -52,7 +52,7 @@ class Routing_Router
             return $params;
         }
         // buscar página estática nuevamente, pero esta vez dentro del módulo (si existe)
-        $module = Module::find($url);
+        $module = app('module')->findModuleByUrl($url);
         if (self::$autoStaticPages && ($params = self::parseStaticPage(self::urlClean($url, $module), $module)) !== false) {
             return $params;
         }
@@ -128,7 +128,12 @@ class Routing_Router
         // Procesar la URL recibida, en el formato /modulo(s)/controlador/accion/parámetro1/parámetro2/etc
         $url = self::urlClean($url, $module);
         // Arreglo por defecto para los datos de módulo, controlador, accion y parámetros pasados
-        $params = array('module'=>$module, 'controller'=>null, 'action'=>'index', 'pass'=>[]);
+        $params = [
+            'module' => $module,
+            'controller' => null,
+            'action' => 'index',
+            'pass' => [],
+        ];
         // Separar la url solicitada en partes separadas por los "/"
         $partes = explode('/', $url);
         // quitar primer elemento que es vacio, ya que el string parte con "/"
@@ -136,7 +141,8 @@ class Routing_Router
         $params['controller'] = array_shift($partes);
         $params['action'] = count($partes) ? array_shift($partes) : 'index';
         $params['pass'] = $partes;
-        // Si no hay controlador y es un módulo se asigna un controlador estándar para cargar la página con el menú del modulo
+        // Si no hay controlador y es un módulo se asigna un controlador
+        // estándar para cargar la página con el menú del módulo.
         if (empty($params['controller']) && !empty($params['module'])) {
             $params['controller'] = 'module';
             $params['action'] = 'display';

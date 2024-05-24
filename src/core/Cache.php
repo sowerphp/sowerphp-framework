@@ -49,7 +49,7 @@ class Cache
         if (class_exists('\Memcached')) {
             // definir host y puerto
             if (!$host || !$port) {
-                $cache = \sowerphp\core\Configure::read('cache.default');
+                $cache = config('cache.default');
                 if (!$host) {
                     $host = !empty($cache['host']) ? $cache['host'] : env('SOWERPHP_MEMCACHED_HOST', '127.0.0.1');
                 }

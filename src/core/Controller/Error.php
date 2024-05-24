@@ -51,7 +51,7 @@ class Controller_Error extends \Controller_App
         }
         $this->layout .= '.min';
         $this->set($data);
-        $this->set('soporte', Configure::read('email.default') !== null);
+        $this->set('soporte', config('email.default') !== null);
         $this->render('Error/error');
     }
 

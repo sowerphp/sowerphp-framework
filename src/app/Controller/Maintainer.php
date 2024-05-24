@@ -212,7 +212,7 @@ class Controller_Maintainer extends \Controller_App
         }
         // paginar si es necesario
         if ((integer)$page>0) {
-            $registers_per_page = \sowerphp\core\Configure::read('app.registers_per_page');
+            $registers_per_page = config('app.registers_per_page');
             $pages = ceil($registers_total/$registers_per_page);
             $Objs->setLimitStatement($registers_per_page, ($page-1)*$registers_per_page);
             if ($page != 1 && $page > $pages) {

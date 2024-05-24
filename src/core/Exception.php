@@ -71,7 +71,7 @@ class Exception extends \RuntimeException
             }
             // es una solicitud mediante la interfaz web
             else {
-                $controller->error_reporting = Configure::read('debug');
+                $controller->error_reporting = config('debug');
                 $controller->display($data);
                 $controller->shutdownProcess();
                 $controller->response->status($data['code']);

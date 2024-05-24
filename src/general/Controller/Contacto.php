@@ -47,7 +47,7 @@ class Controller_Contacto extends \Controller_App
     {
         // si no hay datos para el envió del correo electrónico no
         // permirir cargar página de contacto
-        if (\sowerphp\core\Configure::read('email.default') === null) {
+        if (config('email.default') === null) {
             \sowerphp\core\Model_Datasource_Session::message(
                 __('La página de contacto no se encuentra disponible'), 'error'
             );
@@ -71,7 +71,7 @@ class Controller_Contacto extends \Controller_App
             if (!empty($_POST['nombre']) && !empty($_POST['correo']) && !empty($_POST['mensaje'])) {
                 $email = new \sowerphp\core\Network_Email();
                 $email->replyTo($_POST['correo'], $_POST['nombre']);
-                $email->to(\sowerphp\core\Configure::read('email.default.to'));
+                $email->to(config('email.default.to'));
                 $email->subject(
                     !empty($_POST['asunto'])
                     ? trim(strip_tags($_POST['asunto']))

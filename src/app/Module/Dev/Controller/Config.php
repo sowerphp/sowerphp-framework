@@ -35,7 +35,7 @@ class Controller_Config extends \Controller_App
      */
     public function _api_layout_GET()
     {
-        return \sowerphp\core\Configure::read('page.layout');
+        return config('page.layout');
     }
 
     /**
@@ -43,7 +43,7 @@ class Controller_Config extends \Controller_App
      */
     public function _api_nav_app_GET()
     {
-        $this->Api->send(\sowerphp\core\Configure::read('nav.app'), 200);
+        $this->Api->send(config('nav.app'), 200);
     }
 
     /**
@@ -51,7 +51,7 @@ class Controller_Config extends \Controller_App
      */
     public function _api_email_GET()
     {
-        return \sowerphp\core\Configure::read('email.default.user');
+        return config('email.default.user');
     }
 
     /**
@@ -59,7 +59,7 @@ class Controller_Config extends \Controller_App
      */
     public function _api_modulos_GET()
     {
-        $this->Api->send(\sowerphp\core\Module::loaded(), 200);
+        $this->Api->send(app('module')->getLoadedModules(), 200);
     }
 
 }

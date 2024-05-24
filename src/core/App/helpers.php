@@ -22,41 +22,36 @@
  */
 
 /**
- * Recupera una variable de entorno o su valor por defecto.
- *
- * @param string $name Nombre de la variable de entorno a consultar.
- * @param mixed $default Valor por defecto si la variable no existe.
- * @return mixed El valor de la variable de entorno determinado.
- */
-function env(string $name, $default = null)
-{
-    // Comprobar si la variable de entorno existe en el array $_ENV
-    if (isset($_ENV[$name])) {
-        return $_ENV[$name];
-    }
-
-    // Intentar obtener la variable de entorno usando getenv()
-    $value = getenv($name);
-
-    // Retornar el valor si existe, de lo contrario retornar el valor
-    // por defecto
-    return $value !== false ? $value : $default;
-}
-
-/**
  * Función global para acceder a las instancias almacenadas en el
  * contenedor de servicio de una clase, por defecto App.
  *
- * @param string $key La clave del servicio que se desea obtener.
- * @return mixed La instancia del servicio solicitado.
+ * @param string|null $key La clave del servicio que se desea obtener.
+ * @param array $parameters Parámetros adicionales para la creación de
+ * instancias.
+ * @return mixed La instancia del servicio solicitado o la instancia de
+ * la clase contenedora.
  */
-function app(string $key = null, $class = '\sowerphp\core\App')
+function app(string $key = null, array $parameters = [])
 {
-    $instance = $class::getInstance();
+    $instance = \sowerphp\core\App::getInstance();
     if ($key === null) {
         return $instance;
     }
-    return $instance->getService($key);
+    return empty($parameters)
+        ? $instance->getService($key)
+        : $instance->getService($key, $parameters)
+    ;
+}
+
+/**
+ * Función global para acceder a la configuración de la aplicación.
+ * @param string $selector Variable / parámetro que se desea leer.
+ * @param mixed $default Valor por defecto de la variable buscada.
+ * @return mixed Valor determinado de la variable (real, defecto o null).
+ */
+function config(string $selector, $default = null)
+{
+    return app('config')->get($selector, $default);
 }
 
 /**
@@ -68,7 +63,7 @@ function app(string $key = null, $class = '\sowerphp\core\App')
 function url(string $resource = '/', ...$args): string
 {
     $resource = vsprintf($resource, $args);
-    $url = (string)\sowerphp\core\Configure::read('app.url');
+    $url = (string)config('app.url');
     if (!$url) {
         $url = (new \sowerphp\core\Network_Request())->url;
     }
@@ -300,7 +295,7 @@ function message_format(string $string, bool $html = true): string
 {
     // preguntas frecuentes de la aplicación
     if (strpos($string, '[faq:') !== false) {
-        $faq = (array)\sowerphp\core\Configure::read('faq');
+        $faq = (array)config('faq');
         // hay config de faqs -> se agrega enlace
         if (!empty($faq['url']) && !empty($faq['text'])) {
             $replace = $html

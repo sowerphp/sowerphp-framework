@@ -37,7 +37,7 @@ class Utility_Mapas_Google
     public function __construct($api_key = null)
     {
         if (!$api_key) {
-            $api_key = \sowerphp\core\Configure::read('proveedores.api.google');
+            $api_key = config('proveedores.api.google');
             if (is_array($api_key)) {
                 $api_key = $api_key['server'];
             }

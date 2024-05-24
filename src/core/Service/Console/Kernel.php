@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SowerPHP: Framework PHP hecho en Chile.
- * Copyright (C) SowerPHP <https://www.sowerphp.org>
+ * SowerPHP
+ * Copyright (C) SowerPHP (http://sowerphp.org)
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -23,34 +23,15 @@
 
 namespace sowerphp\core;
 
-/**
- * Clase para cargar una página y entregarla al usuario.
- */
-class Controller_Pages extends \Controller_App
+class Service_Console_Kernel implements Interface_Service
 {
 
-    /**
-     * Método que se ejecuta antes de ejecutar la acción del controlador.
-     */
-    public function beforeFilter()
-    {
-        if (isset($this->Auth)) {
-            $this->Auth->allow('display');
-        }
-        parent::beforeFilter();
-    }
+    use Trait_Service;
 
-    /**
-     * Renderizar página "estática".
-     * @param string $page Página que se desea renderizar ubicada en View/Pages.
-     */
-    public function display($page)
+    public function handle()
     {
-        $page = $page ? $page : config('homepage');
-        if ($this->autoRender) {
-            $this->autoRender = false;
-            $this->render('Pages' . $page);
-        }
+        global $argv;
+        return Shell_Exec::run($argv);
     }
 
 }

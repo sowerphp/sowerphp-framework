@@ -43,14 +43,7 @@ class Utility_Bot_Telegram
             if (strpos($config, ':')) {
                 $config = ['token' => $config];
             } else {
-                if (class_exists('\sowerphp\core\Configure')) {
-                    $config = \sowerphp\core\Configure::read('telegram.' . $config);
-                    if (!$config) {
-                        $config = [];
-                    }
-                } else {
-                    $config = [];
-                }
+                $config = (array)config('telegram.' . $config);
             }
         }
         $this->config = array_merge([

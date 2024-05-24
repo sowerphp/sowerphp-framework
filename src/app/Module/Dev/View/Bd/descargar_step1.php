@@ -9,7 +9,7 @@ echo $f->input (array(
     'label'=>'Base de datos',
     'options'=>$databases,
     'check'=>'notempty',
-    'help'=>'Nombre de la base de datos definida dentro de la configuración en Config/core.php',
+    'help'=>'Nombre de la base de datos definida dentro de la configuración.',
 ));
 echo $f->input(array(
     'type'=>'select',
@@ -17,6 +17,6 @@ echo $f->input(array(
     'label'=>'Tipo de archivo a generar',
     'options'=>array('ods'=>'ODS', 'xls'=>'XLS'),
     'check'=>'notempty',
-    'help'=>'Formato en el que se exportarán los datos',
+    'help'=>'Formato en el que se exportarán los datos.',
 ));
 echo $f->end(array('name'=>'step1', 'value'=>'Siguiente >>'));

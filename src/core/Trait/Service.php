@@ -23,34 +23,29 @@
 
 namespace sowerphp\core;
 
-/**
- * Clase para cargar una página y entregarla al usuario.
- */
-class Controller_Pages extends \Controller_App
+trait Trait_Service
 {
 
-    /**
-     * Método que se ejecuta antes de ejecutar la acción del controlador.
-     */
-    public function beforeFilter()
+    protected $app;
+    protected $config;
+
+    public function __construct($app, array $config = [])
     {
-        if (isset($this->Auth)) {
-            $this->Auth->allow('display');
-        }
-        parent::beforeFilter();
+        $this->app = $app;
+        $this->config = $config;
     }
 
-    /**
-     * Renderizar página "estática".
-     * @param string $page Página que se desea renderizar ubicada en View/Pages.
-     */
-    public function display($page)
+    public function register()
     {
-        $page = $page ? $page : config('homepage');
-        if ($this->autoRender) {
-            $this->autoRender = false;
-            $this->render('Pages' . $page);
-        }
+    }
+
+    public function boot()
+    {
+    }
+
+    public function getConfig()
+    {
+        return $this->config;
     }
 
 }

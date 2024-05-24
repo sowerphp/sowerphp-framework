@@ -41,7 +41,7 @@ class Model_Datasource_Auth2 extends Model_Datasource_Auth2_Base
             throw new \Exception('Autenticación secundaria usando '.$name.' no está disponible');
         }
         if (!$config) {
-            $config = \sowerphp\core\Configure::read('auth2.'.$name);
+            $config = config('auth2.'.$name);
         }
         return new $class($config);
     }
@@ -52,7 +52,7 @@ class Model_Datasource_Auth2 extends Model_Datasource_Auth2_Base
     public static function getAll()
     {
         $auths2 = [];
-        $auth2 = (array)\sowerphp\core\Configure::read('auth2');
+        $auth2 = (array)config('auth2');
         foreach ($auth2 as $name => $config) {
             $auths2[] = self::get($name, $config);
         }

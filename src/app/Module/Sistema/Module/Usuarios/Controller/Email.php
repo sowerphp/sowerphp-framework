@@ -38,7 +38,7 @@ class Controller_Email extends \Controller_App
     public function grupos()
     {
         $Grupos = new Model_Grupos();
-        $page_title = \sowerphp\core\Configure::read('page.header.title');
+        $page_title = config('page.header.title');
         $this->set([
             'grupos' => $Grupos->getList(),
             'page_title' => $page_title,

@@ -40,7 +40,7 @@ class Utility_Google_Recaptcha
             return '';
         }
         self::$jsAlreadyIncluded = true;
-        $captcha_public_key = \sowerphp\core\Configure::read('recaptcha.public_key');
+        $captcha_public_key = config('recaptcha.public_key');
         if (empty($captcha_public_key)) {
             return '';
         }
@@ -70,7 +70,7 @@ class Utility_Google_Recaptcha
      */
     public static function form($form, $action = null)
     {
-        $captcha_public_key = \sowerphp\core\Configure::read('recaptcha.public_key');
+        $captcha_public_key = config('recaptcha.public_key');
         if (empty($captcha_public_key)) {
             return '';
         }
@@ -87,7 +87,7 @@ class Utility_Google_Recaptcha
      */
     public static function check()
     {
-        $captcha_private_key = \sowerphp\core\Configure::read('recaptcha.private_key');
+        $captcha_private_key = config('recaptcha.private_key');
         if (!$captcha_private_key) {
             return true;
         }

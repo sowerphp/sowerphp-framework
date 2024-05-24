@@ -284,7 +284,7 @@ class View_Helper_Table
         if ($data_saved) {
             $buffer = '<button type="button" class="btn btn-primary dropdown-toggle mb-2" data-bs-toggle="dropdown" role="button" aria-expanded="false" id="dropdown_'.$this->_id.'" title="Guardar como..."><i class="fas fa-download fa-fw"></i> Guardar como...</button>';
             $buffer .= '<div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown_'.$this->_id.'">';
-            $extensions = \sowerphp\core\Configure::read('app.tables.extensions') ? \sowerphp\core\Configure::read('app.tables.extensions') : $this->extensions;
+            $extensions = config('app.tables.extensions') ? config('app.tables.extensions') : $this->extensions;
             foreach ($extensions as $e => $n) {
                 $buffer .= '<a href="'.url('/exportar/'.$e.'/'.$this->_id).'" class="dropdown-item">'.$n.'</a>';
             }

@@ -74,7 +74,7 @@ class Controller_Component_Notify extends \sowerphp\core\Controller_Component
      */
     private function sendDb($from, $to, $message)
     {
-        if (!\sowerphp\core\Module::loaded('Sistema.Notificaciones')) {
+        if (!app('module')->isModuleLoaded('Sistema.Notificaciones')) {
             return false;
         }
         $Notificacion = new \sowerphp\app\Sistema\Notificaciones\Model_Notificacion();
@@ -111,14 +111,14 @@ class Controller_Component_Notify extends \sowerphp\core\Controller_Component
             $From = is_object($from) ? $from : new $this->settings['model']($from);
             $email->replyTo($From->email, $From->nombre);
         } else {
-            $aux = \sowerphp\core\Configure::read('email.default')['from'];
+            $aux = config('email.default')['from'];
             $email->replyTo($aux['email'], $aux['name']);
         }
         $To = is_object($to) ? $to : new $this->settings['model']($to);
         $email->to($To->email);
         $timestamp = microtime(true);
         // asunto
-        $email->subject('['.\sowerphp\core\Configure::read('page.header.title').'] Notify '.$this->getFacility($from).'.'.$this->getSeverity($message['gravedad']).' '.$timestamp);
+        $email->subject('['.config('page.header.title').'] Notify '.$this->getFacility($from).'.'.$this->getSeverity($message['gravedad']).' '.$timestamp);
         // mensaje
         $msg = $To->nombre.",\n\nTienes una nueva notificación en la aplicación:\n\n";
         if (is_array($message['descripcion'])) {
@@ -145,7 +145,7 @@ class Controller_Component_Notify extends \sowerphp\core\Controller_Component
      */
     private function getFacility($facility)
     {
-        if (\sowerphp\core\Module::loaded('Sistema.Notificaciones')) {
+        if (app('module')->isModuleLoaded('Sistema.Notificaciones')) {
             return (new \sowerphp\app\Sistema\Notificaciones\Model_Notificacion())->getFacility($facility)->glosa;
         } else {
             return $facility ? 'USER' : 'KERN';
@@ -159,7 +159,7 @@ class Controller_Component_Notify extends \sowerphp\core\Controller_Component
      */
     private function getSeverity($severity)
     {
-        if (\sowerphp\core\Module::loaded('Sistema.Notificaciones')) {
+        if (app('module')->isModuleLoaded('Sistema.Notificaciones')) {
             return (new \sowerphp\app\Sistema\Notificaciones\Model_Notificacion())->getSeverity($severity)->glosa;
         } else {
             return $severity;

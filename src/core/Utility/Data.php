@@ -44,7 +44,7 @@ class Utility_Data
         if ($crypt_method) {
             $crypt_method = $crypt_method;
         } else {
-            $config_crypt_method = Configure::read('data.crypt.method');
+            $config_crypt_method = config('data.crypt.method');
             if ($config_crypt_method) {
                 $crypt_method = $config_crypt_method;
             } else {

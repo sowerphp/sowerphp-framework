@@ -67,13 +67,16 @@ class Shell_Exec
         $dot = strrpos($command, '.');
         if ($dot) {
             $module = substr($command, 0, $dot);
-            $command_real = substr($command, $dot+1);
-            $class = app()->findClass('Shell_Command_' . $command_real, $module);
+            $class = 'Shell_Command_' . substr($command, $dot + 1);
+            if ($module) {
+                $class = str_replace('.', '\\', $module) . '\\' . $class;
+            }
+            $class = '\\sowerphp\\magicload\\' . $class;
         } else {
             $class = 'Shell_Command_' . $command;
         }
         if (!class_exists($class)) {
-            echo 'SowerPHP shell: ',$command,': no se encontró la orden',"\n";
+            echo 'SowerPHP shell: ',$command,': no se encontró la orden (',$class,').',"\n";
             return 1;
         }
         $shell = new $class();

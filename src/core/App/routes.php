@@ -33,5 +33,5 @@ namespace sowerphp\core;
 Routing_Router::connect('/', [
     'controller' => 'pages',
     'action' => 'display',
-    Configure::read('homepage')
+    config('homepage')
 ]);

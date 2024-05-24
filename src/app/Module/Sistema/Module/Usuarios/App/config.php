@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-app('config')->set([
+return [
 
     // Menú para el módulo
     'nav.module' => [
@@ -52,4 +52,4 @@ app('config')->set([
         ],
     ],
 
-]);
+];

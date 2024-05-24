@@ -66,8 +66,8 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         $this->layout .= '.min';
         $this->set([
             'redirect' => $redirect ? base64_decode ($redirect) : null,
-            'self_register' => (bool)\sowerphp\core\Configure::read('app.self_register'),
-            'language' => \sowerphp\core\Configure::read('language'),
+            'self_register' => (bool)config('app.self_register'),
+            'language' => config('language'),
             'auth2_token_enabled' => \sowerphp\app\Model_Datasource_Auth2::tokenEnabled(),
         ]);
         // procesar inicio de sesión
@@ -334,7 +334,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                         $Usuario->savePassword($contrasenia);
                     }
                     // enviar correo
-                    $emailConfig = \sowerphp\core\Configure::read('email.default');
+                    $emailConfig = config('email.default');
                     if (!empty($emailConfig['type']) && !empty($emailConfig['from'])) {
                         $layout = $this->layout;
                         $this->layout = null;
@@ -374,7 +374,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             'columns' => $class::$columnsInfo,
             'grupos_asignados' => (isset($_POST['grupos']) ? $_POST['grupos'] : []),
             'listarUrl' => '/sistema/usuarios/usuarios/listar' . $filterListar,
-            'ldap' => \sowerphp\core\Configure::read('ldap.default'),
+            'ldap' => config('ldap.default'),
         ));
         $this->setGruposAsignables();
         $this->autoRender = false;
@@ -419,7 +419,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 'columns' => $class::$columnsInfo,
                 'grupos_asignados' => array_keys($grupos_asignados),
                 'listarUrl' => $redirect,
-                'ldap' => \sowerphp\core\Configure::read('ldap.default'),
+                'ldap' => config('ldap.default'),
             ));
             $this->autoRender = false;
             $this->render ('Usuarios/crear_editar');
@@ -459,7 +459,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             $Usuario->save();
             // enviar correo solo si el usuario estaba inactivo y ahora está activo
             if (!$activo && $Usuario->activo) {
-                $emailConfig = \sowerphp\core\Configure::read('email.default');
+                $emailConfig = config('email.default');
                 if (!empty($emailConfig['type']) && !empty($emailConfig['user']) && !empty($emailConfig['pass'])) {
                     $layout = $this->layout;
                     $this->layout = null;
@@ -659,7 +659,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 'changeUsername' => $this->changeUsername,
                 'qrcode' => base64_encode($this->request->url . ';' . $this->Auth->User->hash),
                 'auths2' => \sowerphp\app\Model_Datasource_Auth2::getAll(),
-                'layouts' => (array)\sowerphp\core\Configure::read('page.layouts'),
+                'layouts' => (array)config('page.layouts'),
                 'layout' => $this->Auth->User->config_page_layout ? $this->Auth->User->config_page_layout : $this->layout,
             ]);
         }
@@ -681,7 +681,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             );
         }
         // si no se permite el registro se redirecciona
-        $config = \sowerphp\core\Configure::read('app.self_register');
+        $config = config('app.self_register');
         if (!$config) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'El registro de usuarios está deshabilitado.', 'error'
@@ -752,7 +752,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     $Usuario->saveGroups($config['groups']);
                 }
                 // enviar correo
-                $emailConfig = \sowerphp\core\Configure::read('email.default');
+                $emailConfig = config('email.default');
                 if (!empty($emailConfig['type']) && !empty($emailConfig['from'])) {
                     $layout = $this->layout;
                     $this->layout = null;
@@ -802,7 +802,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         }
         // buscar clave de preauth, si no existe se indica que la
         // preautenticación no está disponible
-        $enabled = \sowerphp\core\Configure::read('preauth.enabled');
+        $enabled = config('preauth.enabled');
         if (!$enabled) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'La preautenticación no está disponible.', 'error'
@@ -810,7 +810,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             $this->redirect('/usuarios/ingresar');
         }
         if ($usuario) {
-            $key = \sowerphp\core\Configure::read('preauth.key');
+            $key = config('preauth.key');
             if (!$key) {
                 \sowerphp\core\Model_Datasource_Session::message(
                     'No hay clave global para preautenticación.', 'error'

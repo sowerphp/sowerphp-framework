@@ -8,14 +8,14 @@ echo $f->input (array(
     'label'=>'Base de datos',
     'options'=>$databases,
     'check'=>'notempty',
-    'help'=>'Nombre de la base de datos definida dentro de la configuración en Config/core.php',
+    'help'=>'Nombre de la base de datos definida dentro de la configuración.',
 ));
 echo $f->input([
     'type'=>'textarea',
     'name'=>'query',
     'label'=>'Consulta SQL',
     'check'=>'notempty',
-    'help'=>'Consulta SQL que se desea ejecutar en la base de datos seleccionada',
+    'help'=>'Consulta SQL que se desea ejecutar en la base de datos seleccionada.',
     'rows'=>10,
 ]);
 echo $f->input([

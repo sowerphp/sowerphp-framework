@@ -42,7 +42,7 @@ class Model_Imgur
     {
         // configuración y campos mínimos
         if (empty($config)) {
-            $config = \sowerphp\core\Configure::read('module.Apps.Imgur');
+            $config = config('module.Apps.Imgur');
         }
         $this->config = $config;
         if (empty($this->config['client_id'])) {

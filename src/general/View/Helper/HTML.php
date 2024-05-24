@@ -124,7 +124,7 @@ class View_Helper_HTML
                     $name = str_replace(array('_', '-'), ' ', $file);
                 }
                 // buscar icono a partir de la extension
-                $icon = app()->location('webroot/img/icons/16x16/files/'.$ext.'.png');
+                $icon = app('layers')->getFilePath('webroot/img/icons/16x16/files/'.$ext.'.png');
                 if ($icon) {
                     $icon = 'img/icons/16x16/files/'.$ext.'.png';
                 } else {

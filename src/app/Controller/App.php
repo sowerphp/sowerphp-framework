@@ -90,7 +90,7 @@ class Controller_App extends \sowerphp\core\Controller
     {
         $hash = $this->Auth->User
             ? $this->Auth->User->hash
-            : \sowerphp\core\Configure::read('api.default.token')
+            : config('api.default.token')
         ;
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($hash);

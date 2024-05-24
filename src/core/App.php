@@ -23,41 +23,43 @@
 
 namespace sowerphp\core;
 
+use Illuminate\Container\Container;
+
 /**
  * Clase principal de la aplicación.
- * Se encarga de:
- *   - Coordinar toda la ejecución de la aplicación.
- *      - Inicializar la aplicación.
- *      - Configuraciones iniciales.
- *      - Despachar la ejecución.
- *   - Cargar otras clases y/o archivos de manera automágica.
+ * Se encarga de coordinar toda la ejecución de la aplicación:
+ *   - Inicializar y gestionar el contenedor de servicios.
+ *   - Inicializar la aplicación.
+ *   - Registrar y configurar los servicios.
+ *   - Despachar la ejecución de la aplicación.
  */
 class App
 {
 
-    // Trait para poder usar en la clase un contenedor de servicios.
-    use Trait_ServiceContainer;
-
-    // Atributo estático para mantener una sola instancia de esta clase.
-    private static $instance;
-
-    // Mapa de capas y su ubicación.
-    // Cada capa tiene su propio namespace base, que puede o no tener
-    // otros namespaces en subniveles. Si existen namespaces inferiores
-    // serán módulos de la capa.
-    private $layers;
-
-    // Rutas donde se buscarán los archivos de la aplicación.
-    private $paths;
-    private $pathsReverse;
+    /**
+     * Instancia única de la clase App.
+     * @var App
+     */
+    private static App $instance;
 
     /**
-     * Constructor de la clase App de la aplicación.
-     * Es protected para evitar la instanciación directa (desde fuera).
+     * Contenedor de servicios.
+     * @var Container
+     */
+    protected Container $container;
+
+    /**
+     * Tipo de aplicación que se está ejecutando.
+     */
+    protected string $type;
+
+    /**
+     * Constructor protegido para evitar la instanciación directa.
      */
     protected function __construct()
     {
-        // Sin código, existe para no ser instanciado de afuera.
+        // NOTE: ¡este método debe estar vacío siempre!
+        // Cualquier lógica de inicialización deber ir en bootstrap()
     }
 
     /**
@@ -65,315 +67,143 @@ class App
      */
     public static function getInstance(): self
     {
-        if (self::$instance === null) {
+        if (!isset(self::$instance)) {
             self::$instance = new self();
+            self::$instance->bootstrap();
         }
         return self::$instance;
     }
 
     /**
      * Método que ejecuta la aplicación web.
-     *  - Inicializa.
-     *  - Configura.
-     *  - Despacha la aplicación HTTP o CLI.
+     * Se encarga de despachar la aplicación HTTP o lanzar la CLI.
      */
     public function run(): int
     {
-        // Inicializar y configurar aplicación.
-        $this->init();
-        $this->configure();
-        // Ejecutar como aplicación de línea de comandos.
-        if (php_sapi_name() === 'cli') {
-            global $argv;
-            return Shell_Exec::run($argv);
-        }
-        // Ejecutar como aplicación web (HTTP).
-        else {
-            Model_Datasource_Session::start(
-                $this->getService('config')->get('session.expires')
-            );
-            Model_Datasource_Session::configure();
-            \sowerphp\core\Routing_Dispatcher::dispatch();
-            return 0;
-        }
+        $kernel = $this->container->make('kernel');
+        $result = $kernel->handle();
+        return $result;
     }
 
     /**
-     * Entrega las rutas registradas según las capas definidas.
-     * @return array Las rutas registradas.
+     * Obtiene un servicio del contenedor.
+     * @param string $key Identificador del servicio.
+     * @param array $parameters Parámetros para la creación de instancias.
+     * @return mixed Retorna el servicio registrado bajo la clave especificada.
+     * @throws \Exception Si el servicio solicitado no existe.
      */
-    public function paths(bool $reverse = false): array
+    public function getService(string $key, array $parameters = [])
     {
-        // Entregar los paths en orden invertido.
-        // Desde la capa inferior a la capa superior.
-        if ($reverse) {
-            if (!isset($this->pathsReverse)) {
-                $this->pathsReverse = array_reverse(
-                    $this->paths(false)
-                );
-            }
-            return $this->pathsReverse;
+        if (!$this->container->bound($key)) {
+            throw new \Exception(sprintf(
+                'El servicio %s no está registrado en el contenedor.',
+                $key
+            ));
         }
-        // Entregar los paths en el orden de las capas.
-        // Desde la capa superior a la capa inferior.
-        else {
-            if (!isset($this->paths)) {
-                $this->paths = array_map(function($layer) {
-                    return $layer['path'];
-                }, $this->layers);
-            }
-            return $this->paths;
-        }
+        return $this->container->make($key, $parameters);
     }
 
     /**
-     * Entrega la ruta a la capa solicitada.
-     * @param string $layer Capa que se requiere su ruta.
-     * @return string|false Ruta hacia la capa.
+     * Inicializa la aplicación.
      */
-    public function layer(string $layer)
+    private function bootstrap(): void
     {
-        $layer = str_replace('/', '\\', $layer);
-        return $this->layers[$layer] ?? false;
-    }
+        // Definir el tiempo de inicio del script.
+        define('TIME_START', microtime(true));
 
-    /**
-     * Método que entrega la ubicación real de un archivo buscando a
-     * partir de la ubicación base en una capa en todas las capas
-     * disponibles.
-     * Si es un módulo, se debe incluir como parte del nombre del
-     * archivo la ubicación del módulo. Ya que sólo se busca en las
-     * rutas de las capas.
-     * @param string $filename Archivo que se está buscando en las capas.
-     * @return string|false Ruta del archivo si fue encontrado (falso si no).
-     */
-    public function location(string $filename)
-    {
-        foreach ($this->paths() as $path) {
-            $filepath = $path . ($filename[0] != '/' ? '/' : '') . $filename;
-            if (is_readable($filepath)) {
-                return $filepath;
-            }
-        }
-        return false;
-    }
+        // Definir tipo de aplicación que se está ejecutando.
+        $this->type = php_sapi_name() === 'cli' ? 'console' : 'http';
 
-    /**
-     * Método para autocarga de clases que no están cubiertas por composer.
-     * @param string $class Clase que se desea cargar.
-     * @param bool $loadAlias =true si no se encuentra la clase se
-     * buscará un alias para la misma.
-     * @return bool =true si se encontró la clase.
-     */
-    public function loadClass(string $class, bool $loadAlias = true): bool
-    {
-        if (strpos($class, '\\') !== false) {
-            return class_exists($class);
-        }
-        if ($loadAlias && self::loadClassAlias($class)) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Método que busca una clase en las posibles ubicaciones (capas y módulos)
-     * y entrega el nombre de la clase con su namespace correspondiente.
-     * @param string $class Clase que se está buscando.
-     * @param string $module Módulo donde buscar la clase (si existe uno).
-     * @return string Entrega el FQN de la clase (o sea con el namespace completo).
-     */
-    public function findClass(string $class, ?string $module = null): string
-    {
-        $file = str_replace ('_', '/', $class) . '.php';
-        foreach ($this->layers as $namespace => $layer) {
-            if (!$module) {
-                $fileLocation = $layer['path'] .'/' . $file;
-                if (file_exists($fileLocation)) {
-                    return $namespace . '\\' . $class;
-                }
-            } else {
-                $fileLocation = $layer['path']. '/' . '/Module/'
-                    . str_replace('.', '/Module/', $module) . '/' . $file
-                ;
-                if (file_exists($fileLocation)) {
-                    return $namespace . '\\'
-                        . str_replace('.', '\\', $module) . '\\'
-                        . $class
-                    ;
-                }
-            }
-        }
-        return $class;
-    }
-
-    /**
-     * Método que carga clases buscándola en las layers y creando un
-     * alias para el namespace donde se encuentra la clase.
-     * @param string $class Clase que se quiere cargar usando un alias.
-     * @return bool =true si se encontró la clase.
-     */
-    private function loadClassAlias(string $class): bool
-    {
-        // Si no se encontró o se solicitó una clase de forma directa
-        // (sin el namespace) buscar si existe en alguna capa y crear
-        // un alias para la clase.
-        $realClass = $this->findClass($class);
-        if ($realClass) {
-            if ($this->loadClass($realClass, false)) {
-                class_alias($realClass, $class);
-                return true;
-            }
-        }
-        // Si definitivamente no se encontró retornar falso.
-        return false;
-    }
-
-    /**
-     * Método que inicializa la aplicación.
-     */
-    private function init(): void
-    {
         // Iniciar buffer.
         ob_start();
 
         // Asignar nivel de error máximo (para reportes previo a que se
-        // asigne el valor real con $this->configure()).
+        // asigne el valor real con la configuración).
         ini_set('display_errors', true);
         error_reporting(E_ALL);
 
-        // Definir el tiempo de inicio del script.
-        define('TIME_START', microtime(true));
+        // Crear el contenedor de servicios y registrar la aplicación.
+        $this->container = new Container();
+        $this->container->instance('app', $this);
 
-        // Rastreo de llamadas para encontrar el archivo de origen.
-        $backtrace = debug_backtrace();
-        $caller = $backtrace[count($backtrace) - 1]['file'];
-
-        // Definir constantes con los directorios principales de la aplicación.
-        define('DIR_FRAMEWORK', dirname(dirname(__DIR__)));
-        define('DIR_PROJECT', dirname(dirname($caller)));
-        define('DIR_STORAGE', DIR_PROJECT . '/storage');
-        define('DIR_STATIC', DIR_STORAGE . '/static');
-
-        // definir directorio temporal
-        if (is_writable(DIR_STORAGE . '/tmp')) {
-            define('TMP', DIR_STORAGE . '/tmp');
-        } else {
-            define('TMP', sys_get_temp_dir());
-        }
-
-        // Registrar el autocargador mágico de las clases.
-        spl_autoload_register([$this, 'loadClass']);
-
-        // Cargar las capas.
-        $layers = require DIR_PROJECT . '/config/layers.php';
-        $this->loadLayers($layers);
-
-        // TODO: hay que dejar de usar esta constante y que sea libre
-        // el directorio principal de la aplicación.
-        define(
-            'DIR_WEBSITE',
-            $this->layer('website')['path'] ?? DIR_PROJECT . '/website'
-        );
-
-        // Registrar los proveedores de servicios de la clase App.
-        $this->registerService('config', new Configure());
+        // Registrar e inicializar el resto de servicios de la aplicación.
+        $this->registerServices();
+        $this->bootServices();
     }
 
     /**
-     * Método que agrega las capas de la aplicación.
-     * @param extensions Arreglo con las capas de la aplicación.
+     * Registra todos los servicios obligatorios de la aplicación en
+     * el contenedor de servicios.
+     * NOTE: el orden de registro de los servicios es MUY importante.
      */
-    private function loadLayers(array $layers): void
+    private function registerServices(): void
     {
-        $this->layers = [];
-        foreach ($layers as $layer) {
-            switch($layer['location']) {
-                case 'framework':
-                    $dir = DIR_FRAMEWORK;
-                    break;
-                case 'project':
-                    $dir = DIR_PROJECT;
-                    break;
-                case 'path':
-                    $dir = '';
-                    break;
+        // Registrar servicios del núcleo (compartidos).
+        $this->registerService('layers', Service_Layers::class);
+        $this->registerService('module', Service_Module::class);
+        $this->registerService('config', Service_Config::class);
+        $this->registerService('storage', Service_Storage::class);
+
+        // Registrar servicios para ejecución en consola.
+        if ($this->type == 'console') {
+            $this->registerService('kernel', Service_Console_Kernel::class);
+        }
+
+        // Registrar servicios para solicitud HTTP
+        else {
+            $this->registerService('session', Service_Http_Session::class);
+            $this->registerService('kernel', Service_Http_Kernel::class);
+        }
+    }
+
+    /**
+     * Inicializa todos los servicios necesarios después del registro.
+     */
+    private function bootServices(): void
+    {
+        foreach ($this->container->getBindings() as $key => $binding) {
+            $service = $this->container->make($key);
+            if ($service instanceof Interface_Service) {
+                $service->boot();
             }
-            $this->layers[$layer['namespace']] = [
-                'path' => $dir . '/' . $layer['directory'],
-            ];
         }
     }
 
     /**
-     * Método que configura la aplicación.
+     * Registra un servicio en el contenedor.
+     * @param string $key Identificador del servicio.
+     * @param mixed $service Instancia del servicio o el nombre de la clase.
+     * @param array $parameters Parámetros adicionales para el constructor del servicio.
      */
-    private function configure(): void
+    private function registerService($key, $service, array $parameters = []): void
     {
-        // Servicio de configuración:
-        $config = $this->getService('config');
-
-        // Cargar variables de entorno.
-        $env = \Dotenv\Dotenv::createMutable(DIR_PROJECT, '.env');
-        try {
-            $env->load();
-        } catch (\Dotenv\Exception\InvalidPathException $e) {
-            die($e->getMessage());
-        } catch (\Dotenv\Exception\InvalidFileException $e) {
-            die($e->getMessage());
+        // Si el servicio ya está registrado no volver a registrarlo.
+        if ($this->container->bound($key)) {
+            return;
         }
-
-        // Cargar los archivos de la App de cada capa.
-        $this->loadFiles();
-
-        // Setear parámetros de errores
-        ini_set('display_errors', $config->get('debug'));
-        error_reporting($config->get('error.level'));
-        if ($config->get('error.exception')) {
-            set_error_handler('sowerphp\core\Error::handler');
+        // Verificar que la clase del servicio exista.
+        if (is_string($service) && !class_exists($service)) {
+            throw new \InvalidArgumentException(sprintf(
+                'La clase del servicio %s no existe.',
+                $service
+            ));
         }
-        set_exception_handler('sowerphp\core\Exception::handler');
-
-        // Definir la zona horaria
-        date_default_timezone_set($config->get('time.zone'));
-
-        // cargar reglas de Inflector para el idioma de la aplicación
-        $inflector_rules = (array)$config->get(
-            'inflector.' . $config->get('language')
-        );
-        foreach ($inflector_rules as $type => $rules) {
-            Utility_Inflector::rules($type, $rules);
+        // Si $service es una instancia, usar instance para registrar.
+        if (is_object($service)) {
+            if ($service instanceof Interface_Service) {
+                $service->register();
+            }
+            $this->container->instance($key, $service);
         }
-
-        // asignar handler para triggers de la app
-        Trigger::setHandler($config->get('app.trigger_handler'));
-    }
-
-    /**
-     * Método que carga los archivos del directorio App de cada capa.
-     */
-    private function loadFiles(): void
-    {
-        // Archivos que se buscarán para cargar.
-        $files = [
-            'functions.php',
-            'bootstrap.php',
-            'config.php',
-            'routes.php',
-        ];
-
-        // Cargar los paths en orden reverso para poder sobrescribir
-        // con los archivos que se cargarán.
-        $paths = $this->paths(true);
-
-        // Incluir los archivos que existen en la carpeta App de cada capa.
-        foreach ($files as $file) {
-            foreach ($paths as $path) {
-                $filepath = $path . '/App/' . $file;
-                if (is_readable($filepath)) {
-                    include $filepath;
+        // Si $service es una clase, usar singleton para registrar.
+        else {
+            $this->container->singleton($key, function($app) use ($service, $parameters) {
+                $instance = new $service($app, ...$parameters);
+                if ($instance instanceof Interface_Service) {
+                    $instance->register();
                 }
-            }
+                return $instance;
+            });
         }
     }
 

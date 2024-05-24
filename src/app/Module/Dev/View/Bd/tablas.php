@@ -8,7 +8,7 @@ echo $f->input (array(
     'label'=>'Base de datos',
     'options'=>$databases,
     'check'=>'notempty',
-    'help'=>'Nombre de la base de datos definida dentro de la configuración en Config/core.php',
+    'help'=>'Nombre de la base de datos definida dentro de la configuración.',
 ));
 echo $f->end('Ver tablas');
 

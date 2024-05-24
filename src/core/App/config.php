@@ -21,12 +21,16 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-app('config')->set([
+return [
 
     // Errores.
     'debug' => true,
     'error.level' => E_ALL & ~E_DEPRECATED & ~E_STRICT,
     'error.exception' => true,
+
+    // Manejadores
+    'handler.error' => 'sowerphp\core\Error::handler',
+    'handler.exception' => 'sowerphp\core\Exception::handler',
 
     // Tiempo.
     'time.zone' => 'America/Santiago',
@@ -92,4 +96,4 @@ app('config')->set([
         'to' => '',
     ],*/
 
-]);
+];

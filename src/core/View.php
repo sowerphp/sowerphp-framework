@@ -47,7 +47,7 @@ class View
         $this->response = $controller->response;
         $this->viewVars = $controller->viewVars;
         $this->layout = $controller->layout;
-        $this->defaultLayout = Configure::read('page.layout', $this->defaultLayout);
+        $this->defaultLayout = config('page.layout', $this->defaultLayout);
     }
 
     /**
@@ -62,7 +62,7 @@ class View
         // buscar página
         if ($location) {
             $location = self::location(
-                app()->layer($location) . '/View/' . $page
+                app('layers')->getLayer($location)['path'] . '/View/' . $page
             );
         } else {
             $module = is_array($this->request->params)
@@ -139,7 +139,7 @@ class View
             $slash = strpos($this->request->request, '/', 1);
             $page = $slash === false ? $this->request->request : substr($this->request->request, 0, $slash);
         } else {
-            $page = '/'.Configure::read('homepage');
+            $page = '/'.config('homepage');
         }
         // determinar module breadcrumb
         $module_breadcrumb = [];
@@ -157,19 +157,19 @@ class View
         $titulo_pagina = isset($this->viewVars['header_title']) ? $this->viewVars['header_title'] : $this->request->request;
         $_header_title = isset($this->viewVars['__block_title'])
             ? $this->viewVars['__block_title']
-            : Configure::read('page.header.title') . ($titulo_pagina ? (': ' . $titulo_pagina) : '');
+            : config('page.header.title') . ($titulo_pagina ? (': ' . $titulo_pagina) : '');
         // renderizar layout de la página (con su contenido)
         $viewVars = array_merge([
             '_header_title' => $_header_title,
-            '_body_title' => Configure::read('page.body.title'),
-            '_footer' => Configure::read('page.footer'),
+            '_body_title' => config('page.body.title'),
+            '_footer' => config('page.footer'),
             '_header_extra' => $_header_extra,
             '_request' => $this->request->request,
             '_page' => $page,
-            '_nav_website' => Configure::read('nav.website'),
-            '_nav_app' => (array)Configure::read('nav.app'),
-            '_nav_module' => \sowerphp\core\Configure::read('nav.module'),
-            '_timestamp' => date(Configure::read('time.format'), filemtime($location)),
+            '_nav_website' => config('nav.website'),
+            '_nav_app' => (array)config('nav.app'),
+            '_nav_module' => config('nav.module'),
+            '_timestamp' => date(config('time.format'), filemtime($location)),
             '_layout' => $this->layout,
             '_content' => $page_content,
             '_module_breadcrumb' => $module_breadcrumb,
@@ -193,7 +193,7 @@ class View
         }
         // buscar en las rutas de Layouts
         $filename = '/View/Layouts/' . $layout . '.php';
-        $location = app()->location($filename);
+        $location = app('layers')->getFilePath($filename);
         if ($location) {
             return $location;
         }
@@ -214,7 +214,7 @@ class View
         }
         // extensiones
         if (!self::$extensions) {
-            self::$extensions = Configure::read('page.extensions');
+            self::$extensions = config('page.extensions');
             if (!in_array('php', self::$extensions)) {
                 self::$extensions[] = 'php'; // php siempre debe estar
             }
@@ -236,7 +236,7 @@ class View
         ) . '/View/' . $view . '.';
         foreach(self::$extensions as $extension) {
             $filename = $base_location . $extension;
-            $location = app()->location($filename);
+            $location = app('layers')->getFilePath($filename);
             if ($location) {
                 self::$_viewsLocation[$view] = $location;
                 return $location;
@@ -255,7 +255,7 @@ class View
                 // Buscar el archivo de la vista en todas las posibles rutas
                 // Esto es casi idéntico a lo de arriba y probablemente se pueda refactorizar
                 $filename = '/View/' . $special_view . '.php';
-                $location = app()->location($filename);
+                $location = app('layers')->getFilePath($filename);
                 if ($location) {
                     self::$_viewsLocation[$view] = $location;
                     return $location;

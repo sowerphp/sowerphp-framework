@@ -115,7 +115,7 @@ class Shell_Command_CodeGenerator extends \Shell_App
     {
         $this->out('<info>Seleccionando base de datos para generar código</info>');
         // obtener bases de datos disponibles
-        $databases = (array)\sowerphp\core\Configure::read('database');
+        $databases = (array)config('database');
         $keys = array_keys($databases);
         $encontradas = count($keys);
         // si no hay
@@ -407,7 +407,7 @@ class Shell_Command_CodeGenerator extends \Shell_App
     private function src(string $plantilla, array $variables = []): string
     {
         // location
-        $archivo = app()->location('Shell/Command/CodeGenerator/' . $plantilla);
+        $archivo = app('layers')->getFilePath('Shell/Command/CodeGenerator/' . $plantilla);
         // cargar plantilla
         if ($archivo) {
             $plantilla = file_get_contents($archivo);

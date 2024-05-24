@@ -79,7 +79,7 @@ class Utility_String {
 		}
 
 		if (empty($node)) {
-			$node = crc32(Configure::read('Security.salt'));
+			$node = crc32(config('security.salt'));
 		}
 
 		if (function_exists('hphp_get_thread_id')) {

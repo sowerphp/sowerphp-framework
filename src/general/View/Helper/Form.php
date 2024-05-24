@@ -360,7 +360,7 @@ class View_Helper_Form
 
     private function _input_select($config)
     {
-        $form_select_wrapper = \sowerphp\core\Configure::read('form.select.wrapper');
+        $form_select_wrapper = config('form.select.wrapper');
         if ($form_select_wrapper === null) {
             $form_select_wrapper = 'select2';
         }

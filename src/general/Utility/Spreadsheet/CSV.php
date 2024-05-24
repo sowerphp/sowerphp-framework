@@ -129,7 +129,7 @@ final class Utility_Spreadsheet_CSV
         if ($delimiter !== null) {
             return $delimiter;
         }
-        $delimiter = \sowerphp\core\Configure::read('spreadsheet.csv.delimiter');
+        $delimiter = config('spreadsheet.csv.delimiter');
         return $delimiter ? $delimiter : ',';
     }
 

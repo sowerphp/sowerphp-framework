@@ -52,7 +52,7 @@ class Network_Email
     {
         // Si no es arreglo, es el nombre de la configuración
         if (!is_array($config)) {
-            $config = \sowerphp\core\Configure::read('email.'.$config);
+            $config = config('email.'.$config);
         }
         // determinar "from" por defecto
         if (isset($config['from']) || isset($config['user'])) {

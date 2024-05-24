@@ -140,7 +140,7 @@ class Network_Request
     {
         if (!isset(self::$_url)) {
             if (empty($_SERVER['HTTP_HOST'])) {
-                $url = (string)Configure::read('app.url');
+                $url = (string)config('app.url');
             } else {
                 if ($this->header('X-Forwarded-Proto') == 'https') {
                     $scheme = 'https';

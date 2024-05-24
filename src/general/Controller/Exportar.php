@@ -52,7 +52,7 @@ class Controller_Exportar extends \Controller_App
     {
         $data = $this->_getData($id);
         error_reporting(false);
-        $title = \sowerphp\core\Configure::read('page.body.title');
+        $title = config('page.body.title');
         if (empty($title)) {
             $title = 'Listado en PDF';
         }

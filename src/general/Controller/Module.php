@@ -62,21 +62,13 @@ class Controller_Module extends \Controller_App
         // desactivar renderizado automático
         $this->autoRender = false;
         // Si existe una vista para el del modulo se usa
-        if (\sowerphp\core\Module::fileLocation($this->request->params['module'], 'View/display')) {
+        if (app('module')->getFilePath($this->request->params['module'], '/View/display.php')) {
             $this->render('display');
         }
         // Si no se incluye el archivo con el título y el menú para el módulo
         else {
-            // incluir menú del módulo
-            $nav = \sowerphp\core\Module::fileLocation (
-                $this->request->params['module'],
-                'Config/nav'
-            );
-            $nav && include($nav);
-            $nav_module = \sowerphp\core\Configure::read('nav.module');
-            if (!$nav_module) {
-                $nav_module = [];
-            }
+            // menú del módulo
+            $nav_module = (array)config('nav.module');
             // nombre del módulo para url
             $module = str_replace(
                 '.',
@@ -116,7 +108,7 @@ class Controller_Module extends \Controller_App
                     $this->request->params['module']
                 )
             );
-            $title = \sowerphp\core\Configure::read('module.title');
+            $title = config('module.title');
             if (!$title) {
                 $title = str_replace (
                     '.',

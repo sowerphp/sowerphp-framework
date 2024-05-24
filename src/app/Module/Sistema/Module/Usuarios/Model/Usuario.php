@@ -285,7 +285,7 @@ class Model_Usuario extends \Model_App
                     if (in_array($configuracion . '_' . $dato['variable'], $class::$config_encrypt)) {
                         $dato['valor'] = \sowerphp\core\Utility_Data::decrypt(
                             $dato['valor'],
-                            \sowerphp\core\Configure::read('app.pkey')
+                            config('app.pkey')
                         );
                     }
                     $this->config[$configuracion][$dato['variable']] =
@@ -378,7 +378,7 @@ class Model_Usuario extends \Model_App
         }
         // guardar configuración
         if ($this->config && class_exists('\sowerphp\app\Sistema\Usuarios\Model_UsuarioConfig')) {
-            $app_pkey = \sowerphp\core\Configure::read('app.pkey');
+            $app_pkey = config('app.pkey');
             foreach ($this->config as $configuracion => $datos) {
                 foreach ($datos as $variable => $valor) {
                     $Config = new Model_UsuarioConfig($this->id, $configuracion, $variable);
@@ -903,7 +903,7 @@ class Model_Usuario extends \Model_App
         if ($this->getEmailAccount() !== null) {
             return $this->LdapPerson;
         }
-        if ($this->LdapPerson === null && \sowerphp\core\Configure::read('ldap.default')) {
+        if ($this->LdapPerson === null && config('ldap.default')) {
             try {
                 $this->LdapPerson = \sowerphp\app\Model_Datasource_Ldap::get()->getPerson(
                     $this->{\sowerphp\app\Model_Datasource_Ldap::get()->config['person_uid']}
@@ -927,7 +927,7 @@ class Model_Usuario extends \Model_App
         if ($this->LdapPerson && get_class($this->LdapPerson) != 'sowerphp\app\Model_Datasource_Zimbra_Account') {
             return false;
         }
-        if ($this->LdapPerson === null && \sowerphp\core\Configure::read('zimbra.default')) {
+        if ($this->LdapPerson === null && config('zimbra.default')) {
             try {
                 $this->LdapPerson = \sowerphp\app\Model_Datasource_Zimbra::get()->getAccount(
                     $this->{\sowerphp\app\Model_Datasource_Ldap::get()->config['person_uid']}
@@ -975,8 +975,8 @@ class Model_Usuario extends \Model_App
             $email->replyTo($replyTo);
         }
         $email->to($this->email);
-        $email->subject('['.\sowerphp\core\Configure::read('page.body.title').'] '.$subject);
-        $msg = $msg."\n\n".'-- '."\n".\sowerphp\core\Configure::read('page.body.title');
+        $email->subject('['.config('page.body.title').'] '.$subject);
+        $msg = $msg."\n\n".'-- '."\n".config('page.body.title');
         return $email->send($msg);
     }
 

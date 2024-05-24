@@ -290,7 +290,7 @@ class Controller_Bd extends \Controller_App
     private function _setDatabases()
     {
         $databases = [];
-        $aux = \sowerphp\core\Configure::read('database');
+        $aux = config('database');
         foreach ($aux as $database => &$config) {
             $databases[$database] = $database;
         }

@@ -75,7 +75,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     public function __construct(\sowerphp\core\Controller_Component_Collection $Components, $settings = [])
     {
         // asignar configuración de duración de la sesión (session.expires está en minutos)
-        $this->settings['session']['cache'] = \sowerphp\core\Configure::read('session.expires') * 60;
+        $this->settings['session']['cache'] = config('session.expires') * 60;
         // ejecutar el constructor padre
         parent::__construct($Components, $settings);
         // recuperar sesión
@@ -387,7 +387,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         }
         // autenticar con los datos del token
         else {
-            $key = \sowerphp\core\Configure::read('preauth.key');
+            $key = config('preauth.key');
             if (!$key) {
                 return false;
             }
