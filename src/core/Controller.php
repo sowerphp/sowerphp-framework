@@ -57,9 +57,9 @@ abstract class Controller
         }
         // agregar variables por defecto que se pasarán a la vista
         $this->set(array(
-            '_base' => $this->request->base,
-            '_request' => $this->request->request,
-            '_url' => $this->request->url,
+            '_base' => $this->request->getBaseUrlWithoutSlash(),
+            '_request' => $this->request->getRequestUriDecoded(),
+            '_url' => $this->request->getFullUrlWithoutQuery(),
         ));
         // obtener layout por defecto (el de la sesión)
         $this->layout = Model_Datasource_Session::read('config.page.layout');
@@ -145,16 +145,16 @@ abstract class Controller
         // Probar si el método existe
         try {
             // Obtener método
-            $method = new \ReflectionMethod($this, $this->request->params['action']);
+            $method = new \ReflectionMethod($this, $this->request->getParsedParams()['action']);
             // Verificar que el método no sea privado
             if ($method->name[0] === '_' || !$method->isPublic()) {
                 throw new Exception_Controller_Action_Private(array(
                     'controller' => get_class($this),
-                    'action' => $this->request->params['action']
+                    'action' => $this->request->getParsedParams()['action']
                 ));
             }
             // Verificar la cantidad de parámetros que se están pasando
-            $n_args = count($this->request->params['pass']);
+            $n_args = count($this->request->getParsedParams()['pass']);
             if ($n_args<$method->getNumberOfRequiredParameters()) {
                 $args = [];
                 foreach($method->getParameters() as &$p) {
@@ -162,13 +162,13 @@ abstract class Controller
                 }
                 throw new Exception_Controller_Action_Args_Missing([
                     'controller' => get_class($this),
-                    'action' => $this->request->params['action'],
+                    'action' => $this->request->getParsedParams()['action'],
                     'args' => implode(', ', $args)
                 ]);
             }
-            // Invocar el método con los argumentos de $request->params['pass']
+            // Invocar el método con los argumentos de $request->getParsedParams()['pass']
             if ($n_args)
-                return $method->invokeArgs($this, $this->request->params['pass']);
+                return $method->invokeArgs($this, $this->request->getParsedParams()['pass']);
             else
                 return $method->invoke($this);
         // Si el método no se encuentra
@@ -176,7 +176,7 @@ abstract class Controller
             // Generar excepción
             throw new Exception_Controller_Action_Missing(array(
                     'controller' => get_class($this),
-                    'action' => $this->request->params['action']
+                    'action' => $this->request->getParsedParams()['action']
             ));
         }
     }
@@ -193,7 +193,7 @@ abstract class Controller
         $this->beforeRender();
         // Si la vista es nula se carga la vista según el controlador y accion solicitado
         if (!$view) {
-            $view = Utility_Inflector::camelize($this->request->params['controller']).'/'.$this->request->params['action'];
+            $view = Utility_Inflector::camelize($this->request->getParsedParams()['controller']).'/'.$this->request->getParsedParams()['action'];
         }
         // Crear vista para este controlador
         if (!$this->View) {
@@ -233,10 +233,10 @@ abstract class Controller
     {
         $this->beforeRedirect(array($url, $status));
         if (!$url) {
-            $url = $this->request->request;
+            $url = $this->request->getRequestUriDecoded();
         }
         if ($url[0] == '/') {
-            header('location: '.$this->request->base.$url);
+            header('location: '.$this->request->getBaseUrlWithoutSlash().$url);
         } else {
             header('location: '.$url);
         }

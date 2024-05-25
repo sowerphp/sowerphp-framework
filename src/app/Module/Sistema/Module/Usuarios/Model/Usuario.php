@@ -790,7 +790,7 @@ class Model_Usuario extends \Model_App
      */
     public function auth($recurso)
     {
-        $recurso = is_string($recurso) ? $recurso : $recurso->request;
+        $recurso = is_string($recurso) ? $recurso : $recurso->getRequestUriDecoded();
         $permisos = $this->auths();
         // buscar permiso de forma exacta
         if (in_array($recurso, $permisos)) {

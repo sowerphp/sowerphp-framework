@@ -64,7 +64,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
     private function init()
     {
         $this->method = strtoupper($_SERVER['REQUEST_METHOD']);
-        $this->headers = $this->controller->request->header();
+        $this->headers = $this->controller->request->getAllHeaders();
         $input = file_get_contents('php://input');
         if ($this->settings['data']['keep-raw']) {
             $this->data = $input;
@@ -207,13 +207,13 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
     public function getResource()
     {
         if (!isset($this->resource)) {
-            $find = '/' . $this->controller->request->params['controller'] . '/' . (
-                !empty($this->controller->request->params['pass'][0])
-                    ? $this->controller->request->params['pass'][0]
+            $find = '/' . $this->controller->request->getParsedParams()['controller'] . '/' . (
+                !empty($this->controller->request->getParsedParams()['pass'][0])
+                    ? $this->controller->request->getParsedParams()['pass'][0]
                     : ''
             );
-            $pos = strrpos($this->controller->request->request, $find) + strlen($find);
-            $this->resource = substr($this->controller->request->request, 0, $pos);
+            $pos = strrpos($this->controller->request->getRequestUriDecoded(), $find) + strlen($find);
+            $this->resource = substr($this->controller->request->getRequestUriDecoded(), 0, $pos);
         }
         return $this->resource;
     }

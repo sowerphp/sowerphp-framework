@@ -167,7 +167,7 @@ class Service_Http_Kernel implements Interface_Service
         // Crear una instancia de la respuesta.
         $response = $this->getResponse();
         // Revisar si la solicitud es por un archivo estático.
-        $filepath = $this->getFilePath($request->request);
+        $filepath = $this->getFilePath($request->getRequestUriDecoded());
         if ($filepath) {
             return $response->sendFile($filepath);
         }
@@ -245,13 +245,13 @@ class Service_Http_Kernel implements Interface_Service
     private function handleWithController()
     {
         $controller = $this->getController(
-            $this->getRequest()->params['controller'],
-            $this->getRequest()->params['module'] ?? null
+            $this->getRequest()->getParsedParams()['controller'],
+            $this->getRequest()->getParsedParams()['module'] ?? null
         );
         if (!($controller instanceof Controller)) {
             throw new Exception_Controller_Missing(array(
                 'class' => 'Controller_'.Utility_Inflector::camelize(
-                    $this->getRequest()->params['controller']
+                    $this->getRequest()->getParsedParams()['controller']
                 )
             ));
         }
@@ -316,7 +316,7 @@ class Service_Http_Kernel implements Interface_Service
         // Detener el proceso.
         $controller->shutdownProcess();
         // Retornar respuesta al cliente.
-        if (isset($this->getRequest()->params['return'])) {
+        if (isset($this->getRequest()->getParsedParams()['return'])) {
             return $this->getResponse()->body();
         }
         // Enviar respuesta al cliente.

@@ -39,7 +39,7 @@ class Controller_UsuarioGrupos extends \sowerphp\app\Controller_Maintainer
 
     public function editar($usuario)
     {
-        $listar = base64_encode($this->request->url.$this->request->base.'/sistema/usuarios/usuario_grupos/listar'.base64_decode($_GET['listar']));
+        $listar = base64_encode($this->request->getFullUrlWithoutQuery().$this->request->getBaseUrlWithoutSlash().'/sistema/usuarios/usuario_grupos/listar'.base64_decode($_GET['listar']));
         $this->redirect('/sistema/usuarios/usuarios/editar/'.$usuario.'?listar='.$listar);
     }
 

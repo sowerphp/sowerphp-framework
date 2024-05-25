@@ -65,24 +65,24 @@ class View
                 app('layers')->getLayer($location)['path'] . '/View/' . $page
             );
         } else {
-            $module = is_array($this->request->params)
-                ? $this->request->params['module']
+            $module = is_array($this->request->getParsedParams())
+                ? $this->request->getParsedParams()['module']
                 : null
             ;
             $location = self::location($page, $module);
         }
         // si no se encontró error
         if (!$location) {
-            if (!empty($this->request->params)) {
-                if ($this->request->params['controller'] == 'pages') {
+            if (!empty($this->request->getParsedParams())) {
+                if ($this->request->getParsedParams()['controller'] == 'pages') {
                     $this->render('/error/404');
                 } else {
                     throw new Exception_View_Missing(array(
                         'view' => $page,
                         'controller' => Utility_Inflector::camelize(
-                            $this->request->params['controller']
+                            $this->request->getParsedParams()['controller']
                         ),
-                        'action' => $this->request->params['action'],
+                        'action' => $this->request->getParsedParams()['action'],
                     ));
                 }
             } else {
@@ -99,12 +99,12 @@ class View
             $_header_extra = '';
             if (isset($this->viewVars['_header_extra']['css'])) {
                 foreach ($this->viewVars['_header_extra']['css'] as &$css) {
-                    $_header_extra .= '<link type="text/css" href="'.$this->request->base.$css.'" rel="stylesheet" />'."\n";
+                    $_header_extra .= '<link type="text/css" href="'.$this->request->getBaseUrlWithoutSlash().$css.'" rel="stylesheet" />'."\n";
                 }
             }
             if (isset($this->viewVars['_header_extra']['js'])) {
                 foreach ($this->viewVars['_header_extra']['js'] as &$js) {
-                    $_header_extra .= '<script type="text/javascript" src="'.$this->request->base.$js.'"></script>'."\n";
+                    $_header_extra .= '<script type="text/javascript" src="'.$this->request->getBaseUrlWithoutSlash().$js.'"></script>'."\n";
                 }
             }
             unset($this->viewVars['_header_extra']);
@@ -135,26 +135,26 @@ class View
             }
         }
         // página que se está viendo
-        if (!empty($this->request->request)) {
-            $slash = strpos($this->request->request, '/', 1);
-            $page = $slash === false ? $this->request->request : substr($this->request->request, 0, $slash);
+        if (!empty($this->request->getRequestUriDecoded())) {
+            $slash = strpos($this->request->getRequestUriDecoded(), '/', 1);
+            $page = $slash === false ? $this->request->getRequestUriDecoded() : substr($this->request->getRequestUriDecoded(), 0, $slash);
         } else {
             $page = '/'.config('homepage');
         }
         // determinar module breadcrumb
         $module_breadcrumb = [];
-        if (is_array($this->request->params) && $this->request->params['module']) {
-            $modulos = explode('.', $this->request->params['module']);
+        if (is_array($this->request->getParsedParams()) && $this->request->getParsedParams()['module']) {
+            $modulos = explode('.', $this->request->getParsedParams()['module']);
             $url = '';
             foreach ($modulos as &$m) {
                 $link = Utility_Inflector::underscore($m);
                 $module_breadcrumb[$link] = $m;
                 $url .= '/' . $link;
             }
-            $module_breadcrumb += explode('/', substr(str_replace($url, '', $this->request->request), 1));
+            $module_breadcrumb += explode('/', substr(str_replace($url, '', $this->request->getRequestUriDecoded()), 1));
         }
         // determinar título
-        $titulo_pagina = isset($this->viewVars['header_title']) ? $this->viewVars['header_title'] : $this->request->request;
+        $titulo_pagina = isset($this->viewVars['header_title']) ? $this->viewVars['header_title'] : $this->request->getRequestUriDecoded();
         $_header_title = isset($this->viewVars['__block_title'])
             ? $this->viewVars['__block_title']
             : config('page.header.title') . ($titulo_pagina ? (': ' . $titulo_pagina) : '');
@@ -164,7 +164,7 @@ class View
             '_body_title' => config('page.body.title'),
             '_footer' => config('page.footer'),
             '_header_extra' => $_header_extra,
-            '_request' => $this->request->request,
+            '_request' => $this->request->getRequestUriDecoded(),
             '_page' => $page,
             '_nav_website' => config('nav.website'),
             '_nav_app' => (array)config('nav.app'),

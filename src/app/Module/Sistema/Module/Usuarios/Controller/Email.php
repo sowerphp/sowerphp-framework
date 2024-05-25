@@ -127,7 +127,7 @@ class Controller_Email extends \Controller_App
                             'Ha ocurrido un error al intentar enviar su mensaje, por favor intente nuevamente.<br /><em>'.$status['message'].'</em>', 'error'
                         );
                     }
-                    $this->redirect($this->request->request);
+                    $this->redirect($this->request->getRequestUriDecoded());
                 }
             }
         }

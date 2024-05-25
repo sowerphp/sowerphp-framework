@@ -28,7 +28,7 @@ use Illuminate\Http\Request;
 /**
  * Clase con la solicitud del cliente.
  */
-class Network_Request //extends Request
+class Network_Request extends Request
 {
 
     /**
@@ -56,36 +56,6 @@ class Network_Request //extends Request
      * Cabeceras HTTP de la solicitud.
      */
     private array $headersList;
-
-    //public $request;  -> getRequestUriDecoded()
-    //public $base;     -> getBaseUrlWithoutSlash()
-    //public $url;      -> getFullUrlWithoutQuery()
-    //public $params;   -> getParsedParams()
-
-    /**
-     * Obtener el estado actual de la solicitud HTTP.
-     */
-    public function __construct()
-    {
-        // asignar datos de la solicitud
-        $this->getRequestUriDecoded();
-        $this->getBaseUrlWithoutSlash();
-        $this->getFullUrlWithoutQuery();
-        // Quitar de lo pasado por get lo que se está solicitando
-        unset($_GET[$this->getRequestUriDecoded()]);
-    }
-
-    /**
-     * Método mágico para retrocompatibilidad con los atributos públicos antiguos.
-     * Se puede consultar por: request, base, url y params.
-     */
-    public function __get(string $name)
-    {
-        if (method_exists($this, $name)) {
-            return $this->{$name}();
-        }
-        //throw new \Exception('Atributo Network_Request::$'.$name.' no está definido.');
-    }
 
     /**
      * Método que determina la solicitud utilizada para acceder a la página.
@@ -120,6 +90,7 @@ class Network_Request //extends Request
                 $request = urldecode($request);
             }
             $this->requestUriDecoded = $request;
+            unset($_GET[$this->requestUriDecoded]);
         }
         return $this->requestUriDecoded;
     }
@@ -230,7 +201,7 @@ class Network_Request //extends Request
      */
     public function isApiRequest(): bool
     {
-        $api_prefix = strpos($this->request, '/api/') === 0;
+        $api_prefix = strpos($this->getRequestUriDecoded(), '/api/') === 0;
         $accept_json = $this->getSingleHeader('Accept') == 'application/json'; // WARNING: podría retornar arreglo (?)
         return $api_prefix || $accept_json;
     }

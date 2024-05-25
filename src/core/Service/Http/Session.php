@@ -60,9 +60,9 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
             $expires = $this->configService->get('session.expires', 30);
             $lifetime = $expires * 60;
             $session_name = 'sec_session_id';
-            $path = $this->request->base();
+            $path = $this->request->getBaseUrlWithoutSlash();
             $path = $path != '' ? $path : '/';
-            $domain = $this->request->header('X-Forwarded-Host');
+            $domain = $this->request->getSingleHeader('X-Forwarded-Host');
             if (!$domain) {
                 $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
             }
@@ -89,7 +89,7 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
         // Idioma.
         if (!$this->get('config.language')) {
             $defaultLang = config('language');
-            $userLang = $this->request->header('Accept-Language');
+            $userLang = $this->request->getSingleHeader('Accept-Language');
             if ($userLang) {
                 $userLang = explode(',', explode('-', $userLang)[0])[0];
                 if ($userLang === explode('_', $defaultLang)[0] || I18n::localeExists($userLang)) {

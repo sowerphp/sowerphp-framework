@@ -133,7 +133,7 @@ class Controller_Component_Notify extends \sowerphp\core\Controller_Component
         if (isset($From)) {
             $msg .= $From->nombre."\n".$From->email."\n";
         }
-        $msg .= $this->controller->request->url;
+        $msg .= $this->controller->request->getFullUrlWithoutQuery();
         // enviar email
         return $email->send($msg) === true ? true : false;
     }

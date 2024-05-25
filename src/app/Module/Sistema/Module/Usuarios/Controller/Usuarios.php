@@ -154,7 +154,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     \sowerphp\core\Model_Datasource_Session::message(
                         __('Falló validación captcha: '.$e->getMessage()), 'error'
                     );
-                    $this->redirect($this->request->request);
+                    $this->redirect($this->request->getRequestUriDecoded());
                 }
                 // buscar usuario y solicitar correo de recuperación
                 try {
@@ -216,7 +216,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     \sowerphp\core\Model_Datasource_Session::message(
                         __('Falló validación captcha: '.$e->getMessage()), 'error'
                     );
-                    $this->redirect($this->request->request);
+                    $this->redirect($this->request->getRequestUriDecoded());
                 }
                 // cambiar la contraseña al usuario
                 if ($_POST['codigo'] != md5(hash('sha256', $Usuario->contrasenia))) {
@@ -657,7 +657,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         else {
             $this->set([
                 'changeUsername' => $this->changeUsername,
-                'qrcode' => base64_encode($this->request->url . ';' . $this->Auth->User->hash),
+                'qrcode' => base64_encode($this->request->getFullUrlWithoutQuery() . ';' . $this->Auth->User->hash),
                 'auths2' => \sowerphp\app\Model_Datasource_Auth2::getAll(),
                 'layouts' => (array)config('page.layouts'),
                 'layout' => $this->Auth->User->config_page_layout ? $this->Auth->User->config_page_layout : $this->layout,

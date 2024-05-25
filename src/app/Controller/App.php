@@ -95,7 +95,7 @@ class Controller_App extends \sowerphp\core\Controller
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($hash);
         $rest->setAssoc($assoc);
-        $url = $this->request->url . $recurso;
+        $url = $this->request->getFullUrlWithoutQuery() . $recurso;
         if ($datos) {
             $response = $rest->post($url, $datos);
         } else {

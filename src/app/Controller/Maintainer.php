@@ -44,7 +44,7 @@ class Controller_Maintainer extends \Controller_App
     {
         parent::__construct($request, $response);
         $this->setModelName();
-        $this->module_url = $this->setModuleUrl($this->request->params['module']);
+        $this->module_url = $this->setModuleUrl($this->request->getParsedParams()['module']);
     }
 
     /**
@@ -55,7 +55,7 @@ class Controller_Maintainer extends \Controller_App
     {
         if (!$this->models) {
             $this->models = \sowerphp\core\Utility_Inflector::camelize(
-                $this->request->params['controller']
+                $this->request->getParsedParams()['controller']
             );
         }
         if (!$this->model) {
@@ -93,7 +93,7 @@ class Controller_Maintainer extends \Controller_App
     {
         $this->autoRender = false;
         list($namespace, $ControllerName) = explode('\Controller_', get_class($this));
-        if (\sowerphp\core\View::location($ControllerName.'/'.$view, $this->request->params['module'])) {
+        if (\sowerphp\core\View::location($ControllerName.'/'.$view, $this->request->getParsedParams()['module'])) {
             return parent::render($ControllerName . '/' . $view, $location);
         } else {
             return parent::render('Maintainer/' . $view, 'sowerphp/app');
@@ -208,7 +208,7 @@ class Controller_Maintainer extends \Controller_App
             // si se llegó acá con el error, para que no falle la app se redirecciona al listado
             // con el error. Lo ideal es controlar esto antes con un "error más lindo".
             \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
-            $this->redirect($this->request->request);
+            $this->redirect($this->request->getRequestUriDecoded());
         }
         // paginar si es necesario
         if ((integer)$page>0) {
@@ -217,7 +217,7 @@ class Controller_Maintainer extends \Controller_App
             $Objs->setLimitStatement($registers_per_page, ($page-1)*$registers_per_page);
             if ($page != 1 && $page > $pages) {
                 $this->redirect(
-                    $this->module_url . $this->request->params['controller'] . '/listar/1'
+                    $this->module_url . $this->request->getParsedParams()['controller'] . '/listar/1'
                     . ($orderby ? ('/' . $orderby . '/' . $order) : '') . $searchUrl
                 );
             }
@@ -236,7 +236,7 @@ class Controller_Maintainer extends \Controller_App
         // setear variables
         $this->set(array(
             'module_url' => $this->module_url,
-            'controller' => $this->request->params['controller'],
+            'controller' => $this->request->getParsedParams()['controller'],
             'page' => $page,
             'orderby' => $orderby,
             'order' => $order,
@@ -284,7 +284,7 @@ class Controller_Maintainer extends \Controller_App
                         \sowerphp\core\Model_Datasource_Session::message('Registro no creado.', 'error');
                     }
                     $this->redirect(
-                        $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar
+                        $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
                     );
                 } catch (\Exception $e) {
                     \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
@@ -301,7 +301,7 @@ class Controller_Maintainer extends \Controller_App
             'accion' => 'Crear',
             'columns' => $model::$columnsInfo,
             'contraseniaNames' => $this->contraseniaNames,
-            'listarUrl' => $this->module_url . $this->request->params['controller']
+            'listarUrl' => $this->module_url . $this->request->getParsedParams()['controller']
                 . '/listar' . $filterListar,
         ));
         // renderizar
@@ -323,7 +323,7 @@ class Controller_Maintainer extends \Controller_App
                 'error'
             );
             $this->redirect(
-                $this->module_url.$this->request->params['controller'].'/listar'.$filterListar
+                $this->module_url.$this->request->getParsedParams()['controller'].'/listar'.$filterListar
             );
         }
         // si no se ha enviado el formulario se mostrará
@@ -352,7 +352,7 @@ class Controller_Maintainer extends \Controller_App
                     );
                 }
                 $this->redirect(
-                    $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar
+                    $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
                 );
             } catch (\Exception $e) {
                 \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
@@ -365,7 +365,7 @@ class Controller_Maintainer extends \Controller_App
             'contraseniaNames' => $this->contraseniaNames,
             'fkNamespace' => $model::$fkNamespace,
             'accion' => 'Editar',
-            'listarUrl' => $this->module_url . $this->request->params['controller']
+            'listarUrl' => $this->module_url . $this->request->getParsedParams()['controller']
                 . '/listar' . $filterListar,
         ));
         // renderizar
@@ -383,7 +383,7 @@ class Controller_Maintainer extends \Controller_App
                 'No se permite el borrado de registros.', 'error'
             );
             $this->redirect(
-                $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar
+                $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
             );
         }
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
@@ -395,7 +395,7 @@ class Controller_Maintainer extends \Controller_App
                 'error'
             );
             $this->redirect(
-                $this->module_url.$this->request->params['controller'].'/listar'.$filterListar
+                $this->module_url.$this->request->getParsedParams()['controller'].'/listar'.$filterListar
             );
         }
         try {
@@ -409,7 +409,7 @@ class Controller_Maintainer extends \Controller_App
             );
         }
         $this->redirect(
-            $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar
+            $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
         );
     }
 
@@ -425,7 +425,7 @@ class Controller_Maintainer extends \Controller_App
                 'Campo '.$campo.' no existe.', 'error'
             );
             $this->redirect(
-                $this->module_url . $this->request->params['controller'] . '/listar'
+                $this->module_url . $this->request->getParsedParams()['controller'] . '/listar'
             );
         }
         $pks = array_slice(func_get_args(), 1);
@@ -437,7 +437,7 @@ class Controller_Maintainer extends \Controller_App
                 'error'
             );
             $this->redirect(
-                $this->module_url . $this->request->params['controller'] . '/listar'
+                $this->module_url . $this->request->getParsedParams()['controller'] . '/listar'
             );
         }
         if ((float)$Obj->{$campo.'_size'} == 0.0) {
@@ -446,7 +446,7 @@ class Controller_Maintainer extends \Controller_App
                 'error'
             );
             $this->redirect(
-                $this->module_url . $this->request->params['controller'] . '/listar'
+                $this->module_url . $this->request->getParsedParams()['controller'] . '/listar'
             );
         }
         // entregar archivo

@@ -65,13 +65,13 @@ class Controller_Afdes extends \Controller_Maintainer
             $Afd->save();
             \sowerphp\core\Model_Datasource_Session::message('AFD <em>'.$Afd->nombre.'</em> creado.', 'ok');
             $this->redirect(
-                $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar
+                $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
             );
         }
         // setear variables
         $this->set([
             'accion' => 'Crear',
-            'listarUrl' => $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar,
+            'listarUrl' => $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar,
         ]);
         // renderizar
         $this->autoRender = false;
@@ -93,7 +93,7 @@ class Controller_Afdes extends \Controller_Maintainer
                 'error'
             );
             $this->redirect(
-                $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar
+                $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
             );
         }
         // si no se ha enviado el formulario se mostrará
@@ -101,7 +101,7 @@ class Controller_Afdes extends \Controller_Maintainer
             $this->set(array(
                 'Afd' => $Afd,
                 'accion' => 'Editar',
-                'listarUrl' => $this->module_url . $this->request->params['controller'] . '/listar' . $filterListar,
+                'listarUrl' => $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar,
             ));
             // renderizar
             $this->autoRender = false;
@@ -123,7 +123,7 @@ class Controller_Afdes extends \Controller_Maintainer
             $Afd->save();
             \sowerphp\core\Model_Datasource_Session::message('AFD <em>'.$Afd->nombre.'</em> editado.', 'ok');
             $this->redirect(
-                $this->module_url . $this->request->params['controller'] . '/editar/' . $codigo
+                $this->module_url . $this->request->getParsedParams()['controller'] . '/editar/' . $codigo
                 . (!empty($_GET['listar']) ? '?listar='.$_GET['listar'] : '')
             );
         }

@@ -165,7 +165,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
             ? ('?'.substr($_SERVER['QUERY_STRING'], strpos($_SERVER['QUERY_STRING'], '&')+1))
             : ''
         ;
-        return $this->controller->request->url.$this->controller->request->request.$get;
+        return $this->controller->request->getFullUrlWithoutQuery().$this->controller->request->getRequestUriDecoded().$get;
     }
 
     /**
@@ -260,7 +260,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         if ($this->getUser()) {
             $msg .= $this->getUser()->nombre."\n".$this->getUser()->email."\n";
         }
-        $msg .= $this->controller->request->url;
+        $msg .= $this->controller->request->getFullUrlWithoutQuery();
         // si no se deben adjuntar archivos enviar email
         if (!$this->settings['report_email']['attach']) {
             $email->send($msg);

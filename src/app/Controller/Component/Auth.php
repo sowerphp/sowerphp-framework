@@ -117,17 +117,17 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
             if (!$this->logged()) {
                 \sowerphp\core\Model_Datasource_Session::message(sprintf(
                     $this->settings['messages']['error']['nologin'],
-                    $this->controller->request->request
+                    $this->controller->request->getRequestUriDecoded()
                 ), 'error');
                 $this->controller->redirect(
                     $this->settings['redirect']['form'] . '/' .
-                    base64_encode($this->controller->request->request)
+                    base64_encode($this->controller->request->getRequestUriDecoded())
                 );
             } else {
                 $msg = sprintf(
                     $this->settings['messages']['error']['auth'],
                     $this->User->usuario,
-                    $this->controller->request->request
+                    $this->controller->request->getRequestUriDecoded()
                 );
                 \sowerphp\core\Model_Datasource_Session::message($msg, 'error');
                 $this->log($msg, LOG_ERR);
@@ -165,7 +165,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     public function allowedWithoutLogin($action = null)
     {
         if (!$action) {
-            $action = $this->controller->request->params['action'];
+            $action = $this->controller->request->getParsedParams()['action'];
         }
         return in_array($action, $this->allowedActions);
     }
@@ -178,7 +178,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     public function allowedWithLogin($action = null)
     {
         if (!$action) {
-            $action = $this->controller->request->params['action'];
+            $action = $this->controller->request->getParsedParams()['action'];
         }
         return in_array($action, $this->allowedActionsWithLogin);
     }
@@ -189,7 +189,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     public function isAuthorized()
     {
         // Si la acción se encuentra dentro de las permitidas dejar pasar
-        if (in_array($this->controller->request->params['action'], $this->allowedActions)) {
+        if (in_array($this->controller->request->getParsedParams()['action'], $this->allowedActions)) {
             return true;
         }
         // si el usuario no existe en la sesión se retorna falso
@@ -198,7 +198,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         }
         // si la acción se encuentra dentro de las que solo requieren un
         // usuario logueado se acepta
-        if (in_array($this->controller->request->params['action'], $this->allowedActionsWithLogin)) {
+        if (in_array($this->controller->request->getParsedParams()['action'], $this->allowedActionsWithLogin)) {
             return true;
         }
         // Chequear permisos
@@ -242,7 +242,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     public function check($recurso = false, $usuario = null)
     {
         if (!$recurso) {
-            $recurso = $this->controller->request->request;
+            $recurso = $this->controller->request->getRequestUriDecoded();
         }
         if ($usuario) {
             return (new $this->settings['model']($usuario))->auth($recurso);

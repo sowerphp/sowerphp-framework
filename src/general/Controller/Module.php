@@ -62,7 +62,7 @@ class Controller_Module extends \Controller_App
         // desactivar renderizado automático
         $this->autoRender = false;
         // Si existe una vista para el del modulo se usa
-        if (app('module')->getFilePath($this->request->params['module'], '/View/display.php')) {
+        if (app('module')->getFilePath($this->request->getParsedParams()['module'], '/View/display.php')) {
             $this->render('display');
         }
         // Si no se incluye el archivo con el título y el menú para el módulo
@@ -74,7 +74,7 @@ class Controller_Module extends \Controller_App
                 '.',
                 '/',
                 \sowerphp\core\Utility_Inflector::underscore(
-                    $this->request->params['module']
+                    $this->request->getParsedParams()['module']
                 )
             );
             // verificar permisos
@@ -105,7 +105,7 @@ class Controller_Module extends \Controller_App
                 '.',
                 '/',
                 \sowerphp\core\Utility_Inflector::underscore(
-                    $this->request->params['module']
+                    $this->request->getParsedParams()['module']
                 )
             );
             $title = config('module.title');
@@ -113,7 +113,7 @@ class Controller_Module extends \Controller_App
                 $title = str_replace (
                     '.',
                     ' &raquo; ',
-                    $this->request->params['module']
+                    $this->request->getParsedParams()['module']
                 );
             }
             $this->set(array(
