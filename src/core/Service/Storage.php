@@ -26,8 +26,6 @@ namespace sowerphp\core;
 class Service_Storage implements Interface_Service
 {
 
-    use Trait_Service;
-
     public function register()
     {
     }

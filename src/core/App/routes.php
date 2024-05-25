@@ -23,12 +23,6 @@
 
 namespace sowerphp\core;
 
-/**
- * Rutas estándares de las páginas o aplicaciones
- */
-
-// IMPORTANTE: ¡¡¡ESTO SE DEBE MODIFICAR EN LA CONFIGURACIÓN DEL PROYECTO!!! (NO ACÁ)
-
 // Definir la página de inicio
 Routing_Router::connect('/', [
     'controller' => 'pages',

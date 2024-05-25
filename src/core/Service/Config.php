@@ -26,16 +26,24 @@ namespace sowerphp\core;
 class Service_Config implements Interface_Service
 {
 
-    use Trait_Service;
+    protected $config = [];
 
     // Dependencias de otros servicios.
     protected $layersService;
     protected $moduleService;
 
+    public function __construct(Service_Layers $layersService, Service_Module $moduleService)
+    {
+        $this->layersService = $layersService;
+        $this->moduleService = $moduleService;
+    }
+
+    public function register()
+    {
+    }
+
     public function boot()
     {
-        $this->layersService = $this->app->make('layers');
-        $this->moduleService = $this->app->make('module');
         $this->loadEnvironmentVariables();
         $this->loadConfigurations();
         $this->configure();
@@ -107,10 +115,6 @@ class Service_Config implements Interface_Service
         // Configuración de errores y su manejo en PHP.
         ini_set('display_errors', $this->get('debug'));
         error_reporting($this->get('error.level'));
-        if ($this->get('error.exception')) {
-            set_error_handler($this->get('handler.error'));
-        }
-        set_exception_handler($this->get('handler.exception'));
 
         // Definir la zona horaria.
         date_default_timezone_set($this->get('time.zone'));

@@ -26,12 +26,29 @@ namespace sowerphp\core;
 class Service_Console_Kernel implements Interface_Service
 {
 
-    use Trait_Service;
+    public function register()
+    {
+    }
+
+    public function boot()
+    {
+    }
 
     public function handle()
     {
         global $argv;
         return Shell_Exec::run($argv);
+    }
+
+    private function handleException(\Exception $exception): void
+    {
+        /*
+        $stdout = new Shell_Output('php://stdout');
+        $stdout->write("\n".'<error>'.$data['exception'].':</error>', 2);
+        $stdout->write("\t".'<error>'.str_replace("\n", "\n\t", $data['message']).'</error>', 2);
+        $stdout->write("\t".'<error>'.str_replace("\n", "\n\t", $data['trace']).'</error>', 2);
+        exit($data['code']);
+        */
     }
 
 }

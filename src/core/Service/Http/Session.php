@@ -26,12 +26,16 @@ namespace sowerphp\core;
 class Service_Http_Session implements Interface_Service, Interface_Service_Session
 {
 
-    use Trait_Service;
-
     //protected $sessionManager;
     //protected $store;
+    protected $request;
 
     private $configService;
+
+    public function __construct(Service_Config $configService)
+    {
+        $this->configService = $configService;
+    }
 
     public function register()
     {
@@ -41,7 +45,7 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
 
     public function boot()
     {
-        $this->configService = $this->app->make('config');
+        $this->request = new Network_Request(); // TODO: Se debe inyectar como dependencia.
         $this->start();
         $this->configure();
         $this->saveUrlTracking();
@@ -53,13 +57,12 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
     public function start(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
-            $Request = new Network_Request();
             $expires = $this->configService->get('session.expires', 30);
             $lifetime = $expires * 60;
             $session_name = 'sec_session_id';
-            $path = $Request->base();
+            $path = $this->request->base();
             $path = $path != '' ? $path : '/';
-            $domain = $Request->header('X-Forwarded-Host');
+            $domain = $this->request->header('X-Forwarded-Host');
             if (!$domain) {
                 $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
             }
@@ -86,7 +89,7 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
         // Idioma.
         if (!$this->get('config.language')) {
             $defaultLang = config('language');
-            $userLang = (new Network_Request())->header('Accept-Language');
+            $userLang = $this->request->header('Accept-Language');
             if ($userLang) {
                 $userLang = explode(',', explode('-', $userLang)[0])[0];
                 if ($userLang === explode('_', $defaultLang)[0] || I18n::localeExists($userLang)) {
@@ -230,6 +233,13 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
             session_destroy();
         }
         $this->overwrite($_SESSION, []);
+    }
+
+    public function close(): void
+    {
+        if (session_status() == PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
     }
 
 }

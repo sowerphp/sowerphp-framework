@@ -36,9 +36,4 @@ interface Interface_Service
      */
     public function boot();
 
-    /**
-     * Entrega la configuración del servicio.
-     */
-    public function getConfig();
-
 }

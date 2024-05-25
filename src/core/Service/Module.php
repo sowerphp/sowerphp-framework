@@ -26,23 +26,32 @@ namespace sowerphp\core;
 class Service_Module implements Interface_Service
 {
 
-    use Trait_Service;
-
     // Dependencias de otros servicios.
+    protected $app;
     protected $layersService;
     protected $configService;
 
     // Listado de modulos cargados.
     private $modules = [];
 
+    public function __construct(App $app, Service_Layers $layersService)
+    {
+        $this->app = $app;
+        $this->layersService = $layersService;
+    }
+
+    public function register()
+    {
+    }
+
     public function boot()
     {
-        $this->layersService = $this->app->make('layers');
-        $this->configService = $this->app->make('config');
+        $this->configService = $this->app->getService('config');
     }
 
     /**
      * Registrar un módulo para su uso.
+     *
      * @param string|array $module Nombre del módulo o un arreglo de módulos
      * con sus configuraciones.
      * @param array $config Arreglo con configuración del módulo.
@@ -92,6 +101,7 @@ class Service_Module implements Interface_Service
 
     /**
      * Desregistrar un módulo previamente registrado.
+     *
      * @param string|array $module Nombre del módulo a desregistrar.
      */
     public function unregisterModule($module): void
@@ -106,6 +116,7 @@ class Service_Module implements Interface_Service
 
     /**
      * Cargar e inicializar un módulo.
+     *
      * @param string $module Nombre del módulo que se desea cargar.
      * @return array Configuración del módulo cargado.
      */
@@ -175,6 +186,7 @@ class Service_Module implements Interface_Service
 
     /**
      * Obtener la ubicación completa de un archivo en un módulo.
+     *
      * @param string $module Nombre del módulo sobre el que se buscará.
      * @param string $filename Ruta del archivo buscado dentro del módulo.
      * @return string|null Ruta completa para el archivo solicitado o null si
@@ -191,6 +203,7 @@ class Service_Module implements Interface_Service
 
     /**
      * Verificar si un módulo está cargado.
+     *
      * @param string $module Módulo que se desea verificar si está cargado.
      * @return bool
      */
@@ -201,6 +214,7 @@ class Service_Module implements Interface_Service
 
     /**
      * Obtener todos los módulos cargados.
+     *
      * @return array Listado de módulos cargados.
      */
     public function getLoadedModules(): array
@@ -212,6 +226,7 @@ class Service_Module implements Interface_Service
 
     /**
      * Determinar si una URL corresponde a un módulo y cargarlo.
+     *
      * @param string $url Solicitud realizada (sin la base de la aplicación).
      * @return string Nombre del módulo si es que existe uno en la URL.
      */
@@ -258,6 +273,7 @@ class Service_Module implements Interface_Service
 
     /**
      * Obtener las rutas donde se encuentra un módulo.
+     *
      * @param string $module Nombre del módulo.
      * @return array|null Rutas donde el módulo existe.
      */

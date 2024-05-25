@@ -55,6 +55,26 @@ function config(string $selector, $default = null)
 }
 
 /**
+ * Función global para acceder a la solicitud HTTP en curso.
+ *
+ * @return \sowerphp\core\Network_Request
+ */
+function request(): \sowerphp\core\Network_Request
+{
+    return app('kernel')->getRequest();
+}
+
+/**
+ * Función global para acceder a la respuesta HTTP en curso.
+ *
+ * @return \sowerphp\core\Network_Response
+ */
+function response(): \sowerphp\core\Network_Response
+{
+    return app('kernel')->getResponse();
+}
+
+/**
  * Función que entrega la ruta completa (URL) de un recurso (path) de la
  * aplicación.
  * @param resource Recurso (path) que se desea resolver.

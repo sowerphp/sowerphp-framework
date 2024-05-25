@@ -28,10 +28,6 @@ return [
     'error.level' => E_ALL & ~E_DEPRECATED & ~E_STRICT,
     'error.exception' => true,
 
-    // Manejadores
-    'handler.error' => 'sowerphp\core\Error::handler',
-    'handler.exception' => 'sowerphp\core\Exception::handler',
-
     // Tiempo.
     'time.zone' => 'America/Santiago',
     'time.format' => 'Y-m-d H:i:s',

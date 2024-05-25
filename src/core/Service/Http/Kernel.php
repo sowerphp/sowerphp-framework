@@ -26,31 +26,165 @@ namespace sowerphp\core;
 class Service_Http_Kernel implements Interface_Service
 {
 
-    use Trait_Service;
-
     protected $layersService;
     protected $moduleService;
+    protected $configService;
+    protected $sessionService;
 
     protected $request;
     protected $response;
 
-    public function boot()
+    public function __construct(
+        Service_Layers $layersService,
+        Service_Module $moduleService,
+        Service_Config $configService,
+        Service_Http_Session $sessionService
+    )
     {
-        $this->layersService = $this->app->make('layers');
-        $this->moduleService = $this->app->make('module');
-        $this->request = new Network_Request();
-        $this->response = new Network_Response();
+        $this->layersService = $layersService;
+        $this->moduleService = $moduleService;
+        $this->configService = $configService;
+        $this->sessionService = $sessionService;
     }
 
-    public function handle()
+    public function register()
     {
+    }
+
+    public function boot()
+    {
+        // Cargar las rutas de la aplicación.
+        $this->layersService->loadFiles([
+            '/App/routes.php',
+        ]);
+    }
+
+    /**
+     * Obtener la instancia de Network_Request.
+     *
+     * @return \sowerphp\core\Network_Request
+     */
+    public function getRequest(): Network_Request
+    {
+        if (!isset($this->request)) {
+            $this->request = new Network_Request();
+        }
+        return $this->request;
+    }
+
+    /**
+     * Obtener la instancia de Network_Response.
+     *
+     * @return \sowerphp\core\Network_Response
+     */
+    public function getResponse(): Network_Response
+    {
+        if (!isset($this->response)) {
+            $this->response = new Network_Response();
+        }
+        return $this->response;
+    }
+
+    public function handle(): int
+    {
+        $request = $this->getRequest();
+        $response = $this->handleRequest($request);
+        $response->send();
+        $this->terminate($request, $response);
+        return 0;
+    }
+
+    public function handleThrowable(\Throwable $throwable): void
+    {
+        if ($throwable instanceof \Error ) {
+            $this->handleError($throwable);
+        } else {
+            $this->handleException($throwable);
+        }
+    }
+
+    private function handleError(\Error $error): void
+    {
+        $this->sessionService->close();
+        if ($this->configService->get('error.exception')) {
+            $exception = new \ErrorException(
+                $error->getMessage(),
+                $error->getCode(),
+                \E_ERROR, // $severity siempre asignada como E_ERROR
+                $error->getFile(),
+                $error->getLine(),
+                $error
+            );
+            $this->handleException($exception);
+        } else {
+            $message = sprintf(
+                '[Error] %s en %s:%s.',
+                $message = $error->getMessage(),
+                $error->getFile(),
+                $error->getLine()
+            );
+            echo $message , PHP_EOL;
+        }
+    }
+
+    private function handleException(\Exception $exception): void
+    {
+        //ob_clean();
+        $request = $this->getRequest();
+        $response = $this->getResponse();
+        // Generar arreglo con los datos para la vista.
+        $data = [
+            'exception' => get_class($exception),
+            'message' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+            'code' => $exception->getCode(),
+            'severity' => $exception->severity ?? LOG_ERR,
+        ];
+        // Renderizar la excepción a través del controlador de errores.
+        $controller = new Controller_Error($request, $response);
+        // Es una solicitud mediante un servicio web.
+        if ($request->isApiRequest()) {
+            $controller->Api->sendException($exception);
+        }
+        // Es una solicitud mediante la interfaz web.
+        else {
+            $controller->error_reporting = config('debug');
+            $controller->display($data);
+            $controller->shutdownProcess();
+            $response->status($data['code']);
+            $response->send();
+        }
+    }
+
+    /**
+     * Manejar la solicitud HTTP y obtener la respuesta.
+     *
+     * @param Network_Request $request
+     * @return Network_Response
+     */
+    private function handleRequest(Network_Request $request): Network_Response
+    {
+        // Crear una instancia de la respuesta.
+        $response = $this->getResponse();
         // Revisar si la solicitud es por un archivo estático.
-        $filepath = $this->getFilePath($this->request->request);
+        $filepath = $this->getFilePath($request->request);
         if ($filepath) {
-            return $this->response->sendFile($filepath);
+            return $response->sendFile($filepath);
         }
         // Procesar la solicitud con un controlador.
-        return $this->handleWithController();
+        return $this->handleWithController($request, $response);
+    }
+
+    /**
+     * Terminar la solicitud (realizar cualquier limpieza necesaria).
+     *
+     * @param Network_Request $request
+     * @param Network_Response $response
+     * @return void
+     */
+    private function terminate(Network_Request $request, Network_Response $response): void
+    {
+        // Realizar cualquier limpieza necesaria después de enviar la respuesta.
     }
 
     /**
@@ -58,6 +192,7 @@ class Service_Http_Kernel implements Interface_Service
      * La búsqueda se realiza en todos los posibles directorios webroot de la
      * aplicación, incluyendo las rutas de los modulos si la solicitud es de un
      * módulo.
+     *
      * @param string $url Ruta de los que se está solicitando.
      * @return string Ruta del archivo estático o null si no se encontró.
      */
@@ -110,13 +245,13 @@ class Service_Http_Kernel implements Interface_Service
     private function handleWithController()
     {
         $controller = $this->getController(
-            $this->request->params['controller'],
-            $this->request->params['module'] ?? null
+            $this->getRequest()->params['controller'],
+            $this->getRequest()->params['module'] ?? null
         );
         if (!($controller instanceof Controller)) {
             throw new Exception_Controller_Missing(array(
                 'class' => 'Controller_'.Utility_Inflector::camelize(
-                    $this->request->params['controller']
+                    $this->getRequest()->params['controller']
                 )
             ));
         }
@@ -148,7 +283,7 @@ class Service_Http_Kernel implements Interface_Service
         }
         // Se retorna la clase instanciada del controlador con los parámetros
         // $request y $response al constructor.
-        return $reflection->newInstance($this->request, $this->response);
+        return $reflection->newInstance($this->getRequest(), $this->getResponse());
     }
 
     /**
@@ -175,17 +310,17 @@ class Service_Http_Kernel implements Interface_Service
         // Renderizar proceso.
         if ($controller->autoRender) {
             $this->response = $controller->render();
-        } elseif ($this->response->body() === null) {
-            $this->response->body($result);
+        } elseif ($this->getResponse()->body() === null) {
+            $this->getResponse()->body($result);
         }
         // Detener el proceso.
         $controller->shutdownProcess();
         // Retornar respuesta al cliente.
-        if (isset($this->request->params['return'])) {
-            return $this->response->body();
+        if (isset($this->getRequest()->params['return'])) {
+            return $this->getResponse()->body();
         }
         // Enviar respuesta al cliente.
-        return $this->response->send();
+        return $this->getResponse()->send();
     }
 
 }

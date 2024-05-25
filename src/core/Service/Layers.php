@@ -32,13 +32,12 @@ namespace sowerphp\core;
 class Service_Layers implements Interface_Service
 {
 
-    use Trait_Service;
-
     /**
      * Arreglo con los archivos dentro de una ruta que representan puntos desde
      * donde se puede lanzar la aplicación.
      * Se utilizan para determinar el directorio del proyecto, aquel que
      * contiene al archivo que se encuentre en el backtrace.
+     *
      * @var array
      */
     private array $start_files = [
@@ -54,6 +53,7 @@ class Service_Layers implements Interface_Service
      *   - storage: directorio para almacenamiento de archivos.
      *   - static: directorio para archivos estáticos accesibles por HTTP.
      *   - tmp: directorio para archivos temporales.
+     *
      * @var array
      */
     private array $directories;
@@ -66,6 +66,7 @@ class Service_Layers implements Interface_Service
      * Cada capa define un "grupo de funcionalidades". En estas capas es donde
      * estará todo el código y archivos de la aplicación separado en diferentes
      * rutas según las funcionalidades u orden que se de a la aplicación.
+     *
      * @var array
      */
     private array $layers;
@@ -73,6 +74,7 @@ class Service_Layers implements Interface_Service
     /**
      * Arreglo con las rutas de las capas ordenadas de mayor a menor
      * preferencia.
+     *
      * @var array
      */
     private $paths;
@@ -80,6 +82,7 @@ class Service_Layers implements Interface_Service
     /**
      * Arreglo con las rutas en las capas ordenadas de menor a mayor
      * preferencia.
+     *
      * @var array
      */
     private $pathsReverse;
@@ -99,6 +102,7 @@ class Service_Layers implements Interface_Service
 
     /**
      * Inicializar el servicio de capas.
+     *
      * @return void
      */
     public function boot(): void
@@ -120,11 +124,14 @@ class Service_Layers implements Interface_Service
         $this->getPathsReverse();
 
         // Cargar (importar) archivos PHP que no son clases.
-        $this->loadFiles();
+        $this->loadFiles([
+            '/App/helpers.php',
+        ]);
     }
 
     /**
      * Obtener todos los directorios de la aplicación.
+     *
      * @return array Arreglo asociativo con los directorios.
      */
     public function getDirectories(): array
@@ -136,7 +143,9 @@ class Service_Layers implements Interface_Service
             define('DIR_STORAGE', $this->getStorageDir());
             define('DIR_STATIC', $this->getStaticDir());
             define('DIR_TMP', $this->getTmpDir());
-            define('TMP', $this->getTmpDir()); // DEPRECATED.
+            // DEPRECATED: es la constante antigua del directorio temporal.
+            // TODO: migrar a usar la nueva constante DIR_TMP.
+            define('TMP', $this->getTmpDir());
         }
         // Entregar el arreglo asociativo de directorios.
         return $this->directories;
@@ -144,6 +153,7 @@ class Service_Layers implements Interface_Service
 
     /**
      * Obtiene el directorio del framework.
+     *
      * @param string $path Ruta que se desea obtener dentro del directorio.
      * @return string La ruta del directorio del framework.
      */
@@ -201,6 +211,7 @@ class Service_Layers implements Interface_Service
     /**
      * Obtiene el directorio de almacenamiento de la aplicación.
      * Por defecto es el directorio /storage dentro del proyecto.
+     *
      * @param string $path Ruta que se desea obtener dentro del directorio.
      * @return string La ruta del directorio de almacenamiento.
      */
@@ -217,6 +228,7 @@ class Service_Layers implements Interface_Service
     /**
      * Obtiene el directorio de archivos estáticos de la aplicación.
      * Por defecto es el directorio /storage/static dentro del proyecto.
+     *
      * @param string $path Ruta que se desea obtener dentro del directorio.
      * @return string La ruta del directorio de archivos estáticos.
      */
@@ -235,6 +247,7 @@ class Service_Layers implements Interface_Service
      * Por defecto es el directorio /storage/tmp dentro del proyecto si existe
      * y tiene permisos de lectura, o bien el directorio de archivos temporales
      * del sistema operativo.
+     *
      * @param string $path Ruta que se desea obtener dentro del directorio.
      * @return string La ruta del directorio de archivos temporales.
      */
@@ -253,6 +266,7 @@ class Service_Layers implements Interface_Service
 
     /**
      * Obtener todas las capas de la aplicación.
+     *
      * @return array Arreglo asociativo con las capas de la aplicación.
      */
     private function getLayers(): array
@@ -277,6 +291,7 @@ class Service_Layers implements Interface_Service
 
     /**
      * Entrega la información de una capa específica de la aplicación.
+     *
      * @param string $layer Capa que se requiere su información.
      * @return array Información de la capa si fue encontrada o null.
      */
@@ -288,6 +303,7 @@ class Service_Layers implements Interface_Service
 
     /**
      * Obtener las rutas registradas según las capas definidas.
+     *
      * @return array Las rutas registradas.
      */
     public function getPaths(): array
@@ -296,7 +312,7 @@ class Service_Layers implements Interface_Service
         if (!isset($this->paths)) {
             $this->paths = array_map(function($layer) {
                 return $layer['path'];
-            }, $this->layers);
+            }, $this->getLayers());
         }
         // Entregar el listado de rutas de la aplicación
         return $this->paths;
@@ -305,6 +321,7 @@ class Service_Layers implements Interface_Service
     /**
      * Obtener las rutas registradas según las capas definidas en orden
      * inverso al que están definidas (de menor a mayor prioridad).
+     *
      * @return array Las rutas registradas en orden inverso.
      */
     public function getPathsReverse(): array
@@ -324,6 +341,7 @@ class Service_Layers implements Interface_Service
      * prioridad.
      * Este método permite buscar cualquier archivo dentro de las capas de la
      * aplicación.
+     *
      * @param string $filename
      * @return string|null Ruta absoluta al archivo si fue encontrado o null.
      */
@@ -351,20 +369,13 @@ class Service_Layers implements Interface_Service
     /**
      * Método que carga los archivos del directorio App de cada capa.
      */
-    private function loadFiles(): void
+    public function loadFiles(array $files): void
     {
-        // Archivos que se buscarán para cargar.
-        $files = [
-            '/App/helpers.php',
-            '/App/routes.php',
-            '/App/bootstrap.php', // DEPRECATED
-        ];
-
         // Cargar los paths en orden reverso para poder sobrescribir
         // con los archivos que se cargarán.
         $paths = $this->getPathsReverse();
 
-        // Incluir los archivos que existen en la carpeta App de cada capa.
+        // Incluir los archivos que existen en cada capa.
         foreach ($files as $file) {
             foreach ($paths as $path) {
                 $filepath = $path . $file;
@@ -389,6 +400,7 @@ class Service_Layers implements Interface_Service
      * Sólo se deben buscar clases donde su namespace (prefijo) sea:
      *   - No tengan prefijo. Esto es temporal mientras se migra al prefijo.
      *   - Partan con el prefijo: \sowerphp\magicload\
+     *
      * @param string $class Clase que se desea cargar.
      * @return bool =true si se encontró y cargó la clase.
      */

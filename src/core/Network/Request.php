@@ -23,37 +23,56 @@
 
 namespace sowerphp\core;
 
+use Illuminate\Http\Request;
+
 /**
  * Clase con la solicitud del cliente.
  */
-class Network_Request
+class Network_Request //extends Request
 {
 
-    // atributos estáticos, toda instancia de esta clase será de la misma solicitud en una determinada ejecución de PHP
-    private static $_request; ///< URI usada para la consulta (desde la aplicacion, o sea, sin base, iniciando con "/")
-    private static $_base; ///< Ruta base de la URL (base + uri arma el total del request)
-    private static $_url; ///< URL completa, partiendo desde HTTP o HTTPS según corresponda
-    private static $_params; ///< Parámetros pasados que definen que ejecutar
-    private static $_headers; ///< Cabeceras HTTP de la solicitud
-
-    // atributos de instancia por retrocompatibilidad
-    // @deprecated 2023-11-14
-    public $request;
-    public $base;
-    public $url;
-    //public $params; ///< WARNING: si se definine genera Excepcion dentro de llamada a la API
+    /**
+     * URI usada para la consulta desde la aplicacion, o sea, sin base,
+     * iniciando con "/".
+     */
+    private string $requestUriDecoded;
 
     /**
-     * Constructor de la clase.
+     * Ruta base de la URL (base + uri arma el total del request).
+     */
+    private string $baseUrlWithoutSlash;
+
+    /**
+     * URL completa, partiendo desde HTTP o HTTPS según corresponda.
+     */
+    private string $fullUrlWithoutQuery;
+
+    /**
+     * Parámetros pasados que definen que ejecutar.
+     */
+    private array $parsedParams;
+
+    /**
+     * Cabeceras HTTP de la solicitud.
+     */
+    private array $headersList;
+
+    //public $request;  -> getRequestUriDecoded()
+    //public $base;     -> getBaseUrlWithoutSlash()
+    //public $url;      -> getFullUrlWithoutQuery()
+    //public $params;   -> getParsedParams()
+
+    /**
+     * Obtener el estado actual de la solicitud HTTP.
      */
     public function __construct()
     {
         // asignar datos de la solicitud
-        $this->request = $this->request();
-        $this->base = $this->base();
-        $this->url = $this->url();
+        $this->getRequestUriDecoded();
+        $this->getBaseUrlWithoutSlash();
+        $this->getFullUrlWithoutQuery();
         // Quitar de lo pasado por get lo que se está solicitando
-        unset($_GET[$this->request()]);
+        unset($_GET[$this->getRequestUriDecoded()]);
     }
 
     /**
@@ -72,9 +91,9 @@ class Network_Request
      * Método que determina la solicitud utilizada para acceder a la página.
      * @return string Solicitud completa para la página consultada.
      */
-    public function request(): string
+    public function getRequestUriDecoded(): string
     {
-        if (!isset(self::$_request)) {
+        if (!isset($this->requestUriDecoded)) {
             if (!isset($_SERVER['QUERY_STRING'])) {
                 $request = '';
             } else {
@@ -100,23 +119,23 @@ class Network_Request
                 // Decodificar url
                 $request = urldecode($request);
             }
-            self::$_request = $request;
+            $this->requestUriDecoded = $request;
         }
-        return self::$_request;
+        return $this->requestUriDecoded;
     }
 
     /**
      * Método que determina los campos base y webroot.
      * @return string Base de la URL.
      */
-    public function base(): string
+    public function getBaseUrlWithoutSlash(): string
     {
-        if (!isset(self::$_base)) {
+        if (!isset($this->baseUrlWithoutSlash)) {
             if (!isset($_SERVER['REQUEST_URI'])) {
                 $base = '';
             } else {
                 $parts = explode('?', urldecode($_SERVER['REQUEST_URI']));
-                $last = strrpos($parts[0], $this->request());
+                $last = strrpos($parts[0], $this->getRequestUriDecoded());
                 $base = $last !== false
                     ? substr($parts[0], 0, $last)
                     : $parts[0]
@@ -126,9 +145,9 @@ class Network_Request
                     $base = substr($base, 0, -1);
                 }
             }
-            self::$_base = $base;
+            $this->baseUrlWithoutSlash = $base;
         }
-        return self::$_base;
+        return $this->baseUrlWithoutSlash;
     }
 
     /**
@@ -136,22 +155,22 @@ class Network_Request
      * es: protocolo/esquema, dominio y path base a contar del webroot).
      * @return string URL completa para acceder a la la página.
      */
-    public function url(): string
+    public function getFullUrlWithoutQuery(): string
     {
-        if (!isset(self::$_url)) {
+        if (!isset($this->fullUrlWithoutQuery)) {
             if (empty($_SERVER['HTTP_HOST'])) {
                 $url = (string)config('app.url');
             } else {
-                if ($this->header('X-Forwarded-Proto') == 'https') {
+                if ($this->getSingleHeader('X-Forwarded-Proto') == 'https') {
                     $scheme = 'https';
                 } else {
                     $scheme = 'http' . (isset($_SERVER['HTTPS']) ? 's' : null);
                 }
-                $url = $scheme . '://' . $_SERVER['HTTP_HOST'] . $this->base();
+                $url = $scheme . '://' . $_SERVER['HTTP_HOST'] . $this->getBaseUrlWithoutSlash();
             }
-            self::$_url = $url;
+            $this->fullUrlWithoutQuery = $url;
         }
-        return self::$_url;
+        return $this->fullUrlWithoutQuery;
     }
 
     /**
@@ -159,12 +178,12 @@ class Network_Request
      * @param array|null $params
      * @return array
      */
-    public function params(): array
+    public function getParsedParams(): array
     {
-        if (!isset(self::$_params)) {
-            self::$_params = Routing_Router::parse($this->request());
+        if (!isset($this->parsedParams)) {
+            $this->parsedParams = Routing_Router::parse($this->getRequestUriDecoded());
         }
-        return self::$_params;
+        return $this->parsedParams;
     }
 
     /**
@@ -172,9 +191,9 @@ class Network_Request
      * @param string header Cabecera que se desea recuperar, o null si se quieren traer todas.
      * @return mixed Arreglo si no se pidió por una específica o su valor si se pidió (=false si no existe cabecera, =null si no existe función apache_request_headers).
      */
-    public function header(?string $header = null)
+    public function getSingleHeader(?string $header = null)
     {
-        $headers = $this->headers();
+        $headers = $this->getAllHeaders();
         if ($header === null) {
             return $headers;
         }
@@ -188,17 +207,17 @@ class Network_Request
      * Método que entrega las cabeceras enviadas al servidor web por el cliente.
      * @return array Arreglo con las cabeceras HTTP recibidas.
      */
-    public function headers(): array
+    public function getAllHeaders(): array
     {
-        if (!isset(self::$_headers)) {
+        if (!isset($this->headersList)) {
             if (!function_exists('apache_request_headers')) {
                 $headers = [];
             } else {
                 $headers = apache_request_headers();
             }
-            self::$_headers = $headers;
+            $this->headersList = $headers;
         }
-        return self::$_headers;
+        return $this->headersList;
     }
 
     /**
@@ -212,21 +231,8 @@ class Network_Request
     public function isApiRequest(): bool
     {
         $api_prefix = strpos($this->request, '/api/') === 0;
-        $accept_json = $this->header('Accept') == 'application/json'; // WARNING: podría retornar arreglo (?)
+        $accept_json = $this->getSingleHeader('Accept') == 'application/json'; // WARNING: podría retornar arreglo (?)
         return $api_prefix || $accept_json;
-    }
-
-    /**
-     * Establece el módulo en los parámetros de la solicitud.
-     * Este método asigna directamente el valor del módulo en los parámetros
-     * de la solicitud para sobrescribirlo en caso que sea necesario.
-     *
-     * @param string $module El nombre del módulo a establecer.
-     * @return void
-     */
-    public function setModule(string $module): void
-    {
-        self::$_params['module'] = $module;
     }
 
 }

@@ -419,7 +419,6 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     {
         (new \sowerphp\core\Cache())->delete($this->settings['session']['key'].$this->session['id']);
         \sowerphp\core\Model_Datasource_Session::destroy();
-        \sowerphp\core\Model_Datasource_Session::start();
         \sowerphp\core\Model_Datasource_Session::message(
             sprintf(
                 $this->settings['messages']['ok']['logout'],

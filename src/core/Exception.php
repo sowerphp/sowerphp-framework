@@ -47,43 +47,4 @@ class Exception extends \RuntimeException
         parent::__construct($message, $code);
     }
 
-    /**
-     * Método para manejar las excepciones ocurridas en la aplicación
-     * @param exception Excepción producida (\Exception  o \Error)
-     */
-    public static function handler($exception)
-    {
-        ob_clean();
-        // Generar arreglo
-        $data = array(
-            'exception' => get_class($exception),
-            'message' => $exception->getMessage(),
-            'trace' => $exception->getTraceAsString(),
-            'code' => $exception->getCode(),
-            'severity' => isset($exception->severity) ? $exception->severity : LOG_ERR,
-        );
-        // renderizar dependiendo de si es una web o es una shell
-        if (isset($_SERVER['REQUEST_URI'])) {
-            $controller = new Controller_Error(new Network_Request(), new Network_Response());
-            // es una solicitud mediante un servicio web
-            if ($controller->request->isApiRequest()) {
-                $controller->Api->sendException($exception);
-            }
-            // es una solicitud mediante la interfaz web
-            else {
-                $controller->error_reporting = config('debug');
-                $controller->display($data);
-                $controller->shutdownProcess();
-                $controller->response->status($data['code']);
-                $controller->response->send();
-            }
-        } else {
-            $stdout = new Shell_Output('php://stdout');
-            $stdout->write("\n".'<error>'.$data['exception'].':</error>', 2);
-            $stdout->write("\t".'<error>'.str_replace("\n", "\n\t", $data['message']).'</error>', 2);
-            $stdout->write("\t".'<error>'.str_replace("\n", "\n\t", $data['trace']).'</error>', 2);
-            exit($data['code']);
-        }
-    }
-
 }

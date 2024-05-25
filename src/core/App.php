@@ -38,12 +38,14 @@ class App
 
     /**
      * Instancia única de la clase App.
+     *
      * @var App
      */
     private static App $instance;
 
     /**
      * Contenedor de servicios.
+     *
      * @var Container
      */
     protected Container $container;
@@ -80,13 +82,58 @@ class App
      */
     public function run(): int
     {
-        $kernel = $this->container->make('kernel');
-        $result = $kernel->handle();
-        return $result;
+        try {
+            $kernel = $this->container->make('kernel');
+            $result = $kernel->handle();
+            return $result;
+        } catch (\Throwable $throwable) {
+            if (isset($kernel)) {
+                $kernel->handleThrowable($throwable);
+            } else {
+                $this->handleThrowable($throwable);
+            }
+            return 1;
+        }
+    }
+
+    /**
+     * Manejador de errores y excepciones cuando el kernel aún no está
+     * disponible. Esto mostrará un error "feo", sin embargo, en producción
+     * no debería ocurrir un error de este tipo ya que pruebas adecuadas hasta
+     * que el kernel esté disponible asegurarán que el error se maneje por el
+     * kernel de una manera más amigable con el usuario.
+     *
+     * @param \Throwable $throwable
+     * @return void
+     */
+    private function handleThrowable(\Throwable $throwable): void
+    {
+        // Variables con los datos del error o excepción.
+        $type = $throwable instanceof \Error ? 'error' : 'excepción';
+        $class = get_class($throwable);
+        $message = $throwable->getMessage();
+        $code = $throwable->getCode();
+        $severity = $throwable->severity;
+        $file = $throwable->getFile();
+        $line = $throwable->getLine();
+        $trace = $throwable->getTraceAsString();
+        // Armar mensaje con el detalle del error o excepción.
+        $error = sprintf(
+            'Se capturó %s (%s de nivel %s):' . "\n\n"
+                .' %s.' . "\n\n"
+                . 'En %s:%d.' . "\n\n"
+                . 'Traza completa:' . "\n\n"
+                . '%s'
+            , $class, $type, $severity, $message, $file, $line, $trace
+        );
+        // Generar mensaje con el error o excepción.
+        header('Content-Type: text/plain');
+        die($error);
     }
 
     /**
      * Obtiene un servicio del contenedor.
+     *
      * @param string $key Identificador del servicio.
      * @param array $parameters Parámetros para la creación de instancias.
      * @return mixed Retorna el servicio registrado bajo la clave especificada.
@@ -124,11 +171,16 @@ class App
 
         // Crear el contenedor de servicios y registrar la aplicación.
         $this->container = new Container();
-        $this->container->instance('app', $this);
+        $this->registerService('app', $this); // No es un servicio realmente.
 
         // Registrar e inicializar el resto de servicios de la aplicación.
         $this->registerServices();
         $this->bootServices();
+
+        // Inicializar cada capa con su archivo bootstrap personalizado.
+        $this->getService('layers')->loadFiles([
+            '/App/bootstrap.php',
+        ]);
     }
 
     /**
@@ -154,6 +206,17 @@ class App
             $this->registerService('session', Service_Http_Session::class);
             $this->registerService('kernel', Service_Http_Kernel::class);
         }
+
+        // Ejecutar método register() en cada servicio.
+        $registered = [];
+        foreach ($this->container->getBindings() as $key => $binding) {
+            $service = $this->container->make($key);
+            $serviceClass = get_class($service);
+            if ($service instanceof Interface_Service && !isset($registered[$serviceClass])) {
+                $service->register();
+                $registered[$serviceClass] = true;
+            }
+        }
     }
 
     /**
@@ -161,49 +224,57 @@ class App
      */
     private function bootServices(): void
     {
+        $initialized = [];
         foreach ($this->container->getBindings() as $key => $binding) {
             $service = $this->container->make($key);
-            if ($service instanceof Interface_Service) {
+            $serviceClass = get_class($service);
+            if ($service instanceof Interface_Service && !isset($initialized[$serviceClass])) {
                 $service->boot();
+                $initialized[$serviceClass] = true;
             }
         }
     }
 
     /**
      * Registra un servicio en el contenedor.
+     *
      * @param string $key Identificador del servicio.
      * @param mixed $service Instancia del servicio o el nombre de la clase.
-     * @param array $parameters Parámetros adicionales para el constructor del servicio.
      */
-    private function registerService($key, $service, array $parameters = []): void
+    private function registerService($key, $service): void
     {
         // Si el servicio ya está registrado no volver a registrarlo.
         if ($this->container->bound($key)) {
             return;
         }
-        // Verificar que la clase del servicio exista.
-        if (is_string($service) && !class_exists($service)) {
-            throw new \InvalidArgumentException(sprintf(
-                'La clase del servicio %s no existe.',
-                $service
-            ));
-        }
+
         // Si $service es una instancia, usar instance para registrar.
         if (is_object($service)) {
             if ($service instanceof Interface_Service) {
                 $service->register();
             }
             $this->container->instance($key, $service);
+            $this->container->instance(get_class($service), $service);
         }
         // Si $service es una clase, usar singleton para registrar.
+        else if (is_string($service)) {
+            // Verificar que la clase del servicio exista.
+            if (!class_exists($service)) {
+                throw new \InvalidArgumentException(sprintf(
+                    'La clase del servicio %s no existe.',
+                    $service
+                ));
+            }
+            // Registrar.
+            $this->container->singleton($key, $service);
+            $this->container->singleton($service, $service);
+        }
+        // Si $service es otra cosa, lanzar una excepción.
         else {
-            $this->container->singleton($key, function($app) use ($service, $parameters) {
-                $instance = new $service($app, ...$parameters);
-                if ($instance instanceof Interface_Service) {
-                    $instance->register();
-                }
-                return $instance;
-            });
+            throw new \InvalidArgumentException(sprintf(
+                'El servicio %s no es válido para ser registrado.',
+                $key
+            ));
         }
     }
 
