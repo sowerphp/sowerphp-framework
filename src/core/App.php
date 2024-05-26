@@ -41,19 +41,19 @@ class App
      *
      * @var App
      */
-    private static App $instance;
+    private static $instance;
 
     /**
      * Contenedor de servicios.
      *
      * @var Container
      */
-    protected Container $container;
+    protected $container;
 
     /**
      * Tipo de aplicación que se está ejecutando.
      */
-    protected string $type;
+    protected $type;
 
     /**
      * Constructor protegido para evitar la instanciación directa.

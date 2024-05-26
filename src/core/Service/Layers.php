@@ -40,7 +40,7 @@ class Service_Layers implements Interface_Service
      *
      * @var array
      */
-    private array $start_files = [
+    private $start_files = [
         'public/index.php',
         'console/shell.php',
     ];
@@ -56,7 +56,7 @@ class Service_Layers implements Interface_Service
      *
      * @var array
      */
-    private array $directories;
+    private $directories;
 
     /**
      * Arreglo asociativo con las capas de la aplicación.
@@ -69,7 +69,7 @@ class Service_Layers implements Interface_Service
      *
      * @var array
      */
-    private array $layers;
+    private $layers;
 
     /**
      * Arreglo con las rutas de las capas ordenadas de mayor a menor

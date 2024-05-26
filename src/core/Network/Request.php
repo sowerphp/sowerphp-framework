@@ -36,22 +36,22 @@ class Network_Request extends Request
      * URI usada para la consulta desde la aplicacion, o sea, sin base,
      * iniciando con "/".
      */
-    private string $requestUriDecoded;
+    private $requestUriDecoded;
 
     /**
      * Ruta base de la URL (base + uri arma el total del request).
      */
-    private string $baseUrlWithoutSlash;
+    private $baseUrlWithoutSlash;
 
     /**
      * URL completa, partiendo desde HTTP o HTTPS según corresponda.
      */
-    private string $fullUrlWithoutQuery;
+    private $fullUrlWithoutQuery;
 
     /**
      * Parámetros pasados que definen que ejecutar.
      */
-    private array $parsedParams;
+    private $parsedParams;
 
     /**
      * Método que determina la solicitud utilizada para acceder a la página.
