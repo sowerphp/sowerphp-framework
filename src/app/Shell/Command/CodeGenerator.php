@@ -39,10 +39,12 @@ class Shell_Command_CodeGenerator extends \Shell_App
     private static $nTables; ///< Cantidad de tablas que se estarán procesando
 
     /**
-     * Método principal del comando
+     * Método principal del comando.
      */
     public function main($procesarTablas = null)
     {
+        $this->out('<error>Comando no disponible hasta refactorizar selectDestination().</error>');
+        return 1;
         // obtener nombre de la base de datos
         $database = $this->selectDatabase();
         if (!$database) {
@@ -151,6 +153,8 @@ class Shell_Command_CodeGenerator extends \Shell_App
      */
     private function selectDestination()
     {
+        // TODO: SE DEBE REVISAR, ya que cambiaron los directorios por la
+        // nueva forma de manejar las capas.
         $this->out('Directorios de destino disponibles:');
         // mostrar directorio principal
         $this->out('1.- Directorio base de la aplicación: website ');

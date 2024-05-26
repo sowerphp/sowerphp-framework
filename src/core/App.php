@@ -203,6 +203,8 @@ class App
 
         // Registrar servicios para solicitud HTTP
         else {
+            $request = Network_Request::capture();
+            $this->registerService('request', $request);
             $this->registerService('session', Service_Http_Session::class);
             $this->registerService('kernel', Service_Http_Kernel::class);
         }

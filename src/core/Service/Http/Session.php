@@ -32,9 +32,10 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
 
     private $configService;
 
-    public function __construct(Service_Config $configService)
+    public function __construct(Service_Config $configService, Network_Request $request)
     {
         $this->configService = $configService;
+        $this->request = $request;
     }
 
     public function register()
@@ -45,7 +46,6 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
 
     public function boot()
     {
-        $this->request = new Network_Request(); // TODO: Se debe inyectar como dependencia.
         $this->start();
         $this->configure();
         $this->saveUrlTracking();
@@ -62,7 +62,7 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
             $session_name = 'sec_session_id';
             $path = $this->request->getBaseUrlWithoutSlash();
             $path = $path != '' ? $path : '/';
-            $domain = $this->request->getSingleHeader('X-Forwarded-Host');
+            $domain = $this->request->headers->get('X-Forwarded-Host');
             if (!$domain) {
                 $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
             }
@@ -86,10 +86,11 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
      */
     private function configure(): void
     {
-        // Idioma.
+        // Idioma por defecto de la aplicación será el del navegador web del
+        // usuario si no está configurado.
         if (!$this->get('config.language')) {
             $defaultLang = config('language');
-            $userLang = $this->request->getSingleHeader('Accept-Language');
+            $userLang = $this->request->headers->get('Accept-Language');
             if ($userLang) {
                 $userLang = explode(',', explode('-', $userLang)[0])[0];
                 if ($userLang === explode('_', $defaultLang)[0] || I18n::localeExists($userLang)) {
@@ -101,7 +102,7 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
                 $this->put('config.language', $defaultLang);
             }
         }
-        // layout
+        // Layout por defecto de la aplicación.
         if (!$this->get('config.page.layout')) {
             $this->put('config.page.layout', config('page.layout'));
         }

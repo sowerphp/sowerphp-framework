@@ -139,7 +139,7 @@ class Controller_Afdes extends \Controller_Maintainer
             (new Model_Afd($codigo))->getTransiciones()
         ))->image();
         $this->response->header('Content-type', 'image/png');
-        $this->response->send($image);
+        $this->response->sendAndExit($image);
     }
 
 }

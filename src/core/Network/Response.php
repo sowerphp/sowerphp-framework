@@ -23,13 +23,18 @@
 
 namespace sowerphp\core;
 
+use Illuminate\Http\Response;
+
 /**
  * Clase para generar respuesta al cliente
  */
-class Network_Response
+class Network_Response //extends Response
 {
 
-    protected static $_mimeTypes = array( ///< Tipos de datos mime
+    /**
+     * Tipos de datos mime de los archivos según su extensión.
+     */
+    private $mimeTypes = [
         'tar' => 'application/x-tar',
         'gz' => 'application/x-gzip',
         'zip' => 'application/zip',
@@ -47,169 +52,211 @@ class Network_Response
         'xls' => 'application/vnd.ms-office',
         'xlsx' => 'application/octet-stream',
         'txt' => 'text/plain',
-    );
-
-    // datos a enviar en la respuesta
-    protected $_status = null;
-    protected $_type = [];
-    protected $_headers = [];
-    protected $_body = null; ///< Datos que se enviarán al cliente
+    ];
 
     /**
-     * Asigna código de estado de la respuesta HTTP
-     * @param status Estado que se desea asignar
+     * Datos que se utilizarán para enviar en la respuesta HTTP al cliente.
      */
-    public function status($status = null)
+    private $responseData = [
+        'status' => 200,
+        'headers' => [],
+        'body' => '',
+    ];
+
+    /**
+     * Asigna el código de estado de la respuesta HTTP que se enviará o lo
+     * recupera.
+     *
+     * @param int $status Estado HTTP que se desea asignar a la respuesta.
+     */
+    public function status(?int $status = null): int
     {
         if ($status !== null) {
-            $this->_status = $status;
+            $this->responseData['status'] = $status;
         }
-        return $this->_status;
+        return $this->responseData['status'];
     }
 
     /**
      * Método que permite asignar el tipo de archivo al que corresponde la
-     * respuesta
-     * @param mimetype Tipo de dato (mimetype)
-     * @param charset Juego de caracteres o codificación
+     * respuesta o recuperar el tipo de la respuesta.
+     *
+     * @param string $mimetype Tipo de dato (mimetype).
+     * @param string $charset Juego de caracteres o codificación.
      */
-    public function type($mimetype = null, $charset = null)
+    public function type(?string $mimetype = null, ?string $charset = null): ?string
     {
         if ($mimetype !== null) {
-            $this->_type = [
-                'mimetype' => $mimetype,
-                'charset' => $charset,
-            ];
-        }
-        return $this->_type;
-    }
-
-    /**
-     * Método que permite asignar cabeceras al cliente
-     * @param header Cabecera
-     * @param value Valor
-     */
-    public function header($header = null, $value = null)
-    {
-        if ($header !== null && $value !== null) {
-            $this->_headers[] = $header.': '.$value;
-        }
-        return $this->_headers;
-    }
-
-    /**
-     * Método que asigna el cuerpo de la respuesta
-     * @param content Contenito a asignar
-     * @return string Contenido de la respuesta
-     */
-    public function body($body = null)
-    {
-        if ($body !== null) {
-            $this->_body = $body;
-        }
-        return $this->_body;
-    }
-
-    /**
-     * Método que entrega el tamaño de los datos que se entregarán como respuesta
-     * @return int Tamaño de los datos del cuerpo que se entregarán o -1
-     */
-    public function length()
-    {
-        return $this->_body !== null ? strlen($this->_body) : -1;
-    }
-
-    /**
-     * Enviar respuesta al cliente (escribe estado HTTP, cabecera y cuerpo de la respuesta)
-     * @param body Contenido que se enviará, si no se asigna se enviará el atributo $_body
-     * @param exit Estado de salida del envío de datos
-     */
-    public function send($body = null, $exit = 0)
-    {
-        // enviar estado HTTP
-        if ($this->_status !== null) {
-            http_response_code($this->_status);
-        }
-        // agregar tipo de respuesta a las cabeceras
-        if (!empty($this->_type['mimetype'])) {
-            if (!empty($this->_type['charset'])) {
-                $this->header('Content-Type', $this->_type['mimetype'].'; charset='.$this->_type['charset']);
+            if ($charset !== null) {
+                $this->responseData['headers']['Content-Type'] =
+                    $mimetype . '; charset=' . $charset
+                ;
             } else {
-                $this->header('Content-Type', $this->_type['mimetype']);
+                $this->responseData['headers']['Content-Type'] = $mimetype;
             }
         }
-        // enviar cabeceras de la respuesta
-        foreach ($this->_headers as $header) {
-            header($header);
-        }
-        // enviar cuerpo de la respuesta
-        if ($body !== null) {
-            echo $body;
-        } else {
-            echo $this->_body;
-        }
-        // terminar el script
-        if ($exit !== false) {
-            exit((integer)$exit); // este debería ser el único exit en la app
-        }
+        return $this->responseData['headers']['Content-Type'] ?? null;
     }
 
     /**
-     * Enviar un archivo (estático) al cliente
-     * Envía un archivo existente en el sistema de archivos o bien desde un
-     * recurso abierto. Se envía informando que se debe usar caché para este archivo
-     * @param file Archivo que se desea enviar al cliente o bien un arreglo con los campos: name, type, size y data
-     * @param options Arreglo de opciones (indices: name, charset, disposition y exit)
+     * Método que permite asignar cabeceras al cliente o las recupera.
+     *
+     * @param string $header Cabecera que se desea asignar.
+     * @param mixed $value Valor de la cabecera.
+     * @return array Arreglo con las cabeceras que están asignadas.
      */
-    public function sendFile($file, $options = [])
+    public function header(?string $header = null, $value = null): array
     {
-        // opciones
+        if ($header !== null && $value !== null) {
+            $this->responseData['headers'][$header] = $value;
+        }
+        return $this->responseData['headers'];
+    }
+
+    /**
+     * Método que asigna el cuerpo de la respuesta o lo recupera.
+     *
+     * @param string $body Contenido a asignar al cuerpo.
+     * @return string Contenido de la respuesta está asignado.
+     */
+    public function body(?string $body = null): string
+    {
+        if ($body !== null) {
+            $this->responseData['body'] = $body;
+        }
+        return $this->responseData['body'];
+    }
+
+    /**
+     * Método que entrega el tamaño de los datos que se entregarán como
+     * respuesta.
+     *
+     * @return int Tamaño de los datos del cuerpo que se entregarán o -1.
+     */
+    public function length(): int
+    {
+        return $this->responseData['body'] !== null
+            ? strlen($this->responseData['body'])
+            : -1
+        ;
+    }
+
+    /**
+     * Enviar respuesta HTTP al cliente.
+     * Escribe estado HTTP, cabeceras y cuerpo de la respuesta.
+     *
+     * @param string $body Contenido que se enviará, si no se asigna se enviará
+     * el atributo $_body.
+     */
+    public function send(): int
+    {
+        // Enviar el código de estado HTTP de la respuesta.
+        http_response_code($this->responseData['status']);
+        // Enviar las cabeceras de la respuesta.
+        foreach ($this->responseData['headers'] as $header => $value) {
+            header($header . ': '. $value);
+        }
+        // Enviar el cuerpo de la respuesta.
+        if ($this->responseData['body']) {
+            echo $this->responseData['body'];
+        }
+        // Entregar respuesta para el manejador (y pasar al kernel).
+        return $this->responseData['status'] < 400 ? 0 : 1;
+    }
+
+    /**
+     * Preparar los datos de respuesta a partir de un archivo.
+     *
+     * El archivo puede ser:
+     *   - Archivo estático del sistema de archivos.
+     *   - Los datos en memoria de un archivo.
+     *   - El acceso a un recurso (resource) abierto que deberá ser leído.
+     * Se envía informando que se debe usar caché para este archivo.
+     *
+     * @param string|array $file Archivo que se desea enviar al cliente o bien
+     * un arreglo con los campos: name, type, size y data.
+     * @param array $options Arreglo de opciones. Índices: name, charset,
+     * disposition y exit).
+     */
+    public function prepareFileResponse($file, array $options = []): self
+    {
+        // Opciones del archivo para la respuesta.
         $options = array_merge([
+            // Codificación del archivo.
             'charset' => 'utf-8',
-            'disposition' => 'inline', // inline o attachement
-            'exit' => 0,
-            'cache' => 86400, // segundos que el archivo se recomienda tener en caché
+            // inline o attachement.
+            'disposition' => 'inline',
+            // Segundos que se recomienda tener el archivo en caché.
+            'cache' => 86400,
         ], $options);
-        // si no es un arreglo se genera
+        // Si el archivo que se pasó es la ruta se genera el arreglo con los
+        // datos del archivo en el formato estándar de $_FILES.
         if (!is_array($file)) {
             $location = $file;
             $file = [];
-            $file['name'] = isset($options['name']) ? $options['name'] : basename($location);
-            $ext = substr(strrchr($file['name'], '.'), 1);
-            $file['type'] = (isset(self::$_mimeTypes[$ext])?self::$_mimeTypes[$ext]:'application/octet-stream');
+            $file['name'] = isset($options['name'])
+                ? $options['name']
+                : basename($location)
+            ;
+            $extension = substr(
+                $file['name'],
+                strrpos($file['name'], '.') + 1
+            );
+            $file['type'] = $this->mimeTypes[$extension]
+                ?? 'application/octet-stream'
+            ;
             $file['size'] = filesize($location);
-            $file['data'] = fread(fopen($location, 'rb'), $file['size']);
+            $file['data'] = fread(
+                fopen($location, 'rb'),
+                $file['size']
+            );
         }
-        // si los datos son un recurso se obtiene su contenido
+        // Si los datos son un recurso se obtiene su contenido.
         if (is_resource($file['data'])) {
             $resource = $file['data'];
             rewind($resource);
             $file['data'] = stream_get_contents($resource);
             fclose($resource);
         }
-        // limpiar buffer salida
-        ob_end_clean();
-        // crear cabeceras para el archivo
-        $this->type($file['type'], $options['charset']);
-        $this->header('Content-Length', $file['size']);
-        $this->header('Content-Disposition', $options['disposition'].'; filename="'.$file['name'].'"');
-        $this->header('Cache-Control', 'max-age='.$options['cache']);
-        $this->header('Date', gmdate('D, d M Y H:i:s', time()).' GMT');
-        $this->header('Expires', gmdate('D, d M Y H:i:s', time()+$options['cache']).' GMT');
-        $this->header('Pragma', 'cache');
-        // enviar archivo
-        $this->send($file['data'], $options['exit']);
+        // Armar datos de la respuesta.
+        $this->responseData['headers']['Content-Type'] =
+            $file['type'] . '; charset=' . $options['charset']
+        ;
+        $this->responseData['headers']['Content-Disposition'] =
+            $options['disposition'] . '; filename="' . $file['name'] . '"'
+        ;
+        $this->responseData['headers']['Cache-Control'] =
+            'max-age=' . $options['cache']
+        ;
+        $this->responseData['headers']['Date'] =
+            gmdate('D, d M Y H:i:s', time()).' GMT'
+        ;
+        $this->responseData['headers']['Expires'] =
+            gmdate('D, d M Y H:i:s', time()+$options['cache']).' GMT'
+        ;
+        $this->responseData['headers']['Pragma'] ='cache';
+        $this->responseData['headers']['Content-Length'] = $file['size'];
+        $this->responseData['body'] = $file['data'];
+        // Retornar objeto de la respuesta.
+        return $this;
     }
 
     /**
-     * Método que envía un contenido al navegador, la ventaja es que está diseñado
-     * para enviar archivos en memoria e informando que no se use caché
-     * @param content Contenido en memoria del archivo que se enviará
-     * @param options Arreglo de opciones (indices: mimetype, charset, disposition y exit)
+     * Método que envía un contenido al navegador.
+     *
+     * El método está diseñado para enviar datos (ej: archivos) en memoria e
+     * informando que no se use caché. Además una vez envía los datos termina
+     * inmediatamente, un comportamiento que debe ser manejado de otra forma
+     * en futuras versiones de esta clase.
+     *
+     * @param string $content Contenido en memoria que que se enviará.
+     * @param string $filename Nombre del archivo que se enviará.
+     * @param array $options Arreglo de opciones. Índices: mimetype, charset,
+     * disposition y exit.
      */
-    public function sendContent($content, $filename, $options = [])
+    public function sendAndExit(?string $content = null, ?string $filename = null, array $options = [])
     {
-        // opciones
+        // Determinar opciones por defecto.
         if (is_string($options)) {
             $aux = explode(';', $options);
             $options = ['mimetype' => $aux[0]];
@@ -221,38 +268,35 @@ class Network_Response
             'mimetype' => null,
             'charset' => null,
             'disposition' => 'attachement', // inline o attachement
-            'exit' => 0,
         ], $options);
-        if (empty($options['mimetype'])) {
-            $options['mimetype'] = self::getMimetype(substr($filename, strrpos($filename, '.')+1));
+        if (empty($options['mimetype']) && $filename) {
+            $extension = substr($filename, strrpos($filename, '.') + 1);
+            $options['mimetype'] = $this->mimeTypes[$extension] ?? null;
         }
+        // Asignar datos de la respuesta.
         if ($options['mimetype']) {
-            $this->type($options['mimetype'], $options['charset']);
+            if ($options['charset'] !== null) {
+                $this->responseData['headers']['Content-Type'] =
+                    $options['mimetype'] . '; charset=' . $options['charset']
+                ;
+            } else {
+                $this->responseData['headers']['Content-Type'] =
+                    $options['mimetype']
+                ;
+            }
         }
-        $this->header('Content-Disposition', $options['disposition'].'; filename='.$filename);
-        $this->header('Pragma', 'no-cache');
-        $this->header('Expires', 0);
-        $this->send($content, $options['exit']);
-    }
-
-    /**
-     * Método estático para asignar un nuevo tipo mime a una extensión
-     * @param ext Extensión
-     * @param type Mimetype que se debe asociar
-     */
-    public static function setMimetype($ext, $type)
-    {
-        self::$_mimeTypes[$ext] = $type;
-    }
-
-    /**
-     * Método estático para obtener un tipo mime de una extensión
-     * @param ext Extensión
-     * @return string Mimetype correspondiente a la extensión
-     */
-    public static function getMimetype($ext)
-    {
-        return !empty(self::$_mimeTypes[$ext]) ? self::$_mimeTypes[$ext] : null;
+        if ($filename) {
+            $this->responseData['headers']['Content-Disposition'] =
+                $options['disposition'].'; filename=' . $filename
+            ;
+        }
+        $this->responseData['headers']['Pragma'] = 'no-cache';
+        $this->responseData['headers']['Expires'] = 0;
+        if ($content) {
+            $this->responseData['body'] = $content;
+        }
+        $this->send();
+        exit(); // TODO: refactorizar para no cerrar acá pues detiene controlador.
     }
 
 }

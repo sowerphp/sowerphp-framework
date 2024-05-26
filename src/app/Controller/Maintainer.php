@@ -450,7 +450,8 @@ class Controller_Maintainer extends \Controller_App
             );
         }
         // entregar archivo
-        $this->response->sendFile([
+        $this->autoRender = false;
+        $this->response->prepareFileResponse([
             'name' => $Obj->{$campo.'_name'},
             'type' => $Obj->{$campo.'_type'},
             'size' => $Obj->{$campo.'_size'},

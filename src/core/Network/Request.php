@@ -24,6 +24,7 @@
 namespace sowerphp\core;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 /**
  * Clase con la solicitud del cliente.
@@ -53,12 +54,8 @@ class Network_Request extends Request
     private array $parsedParams;
 
     /**
-     * Cabeceras HTTP de la solicitud.
-     */
-    private array $headersList;
-
-    /**
      * Método que determina la solicitud utilizada para acceder a la página.
+     *
      * @return string Solicitud completa para la página consultada.
      */
     public function getRequestUriDecoded(): string
@@ -97,6 +94,7 @@ class Network_Request extends Request
 
     /**
      * Método que determina los campos base y webroot.
+     *
      * @return string Base de la URL.
      */
     public function getBaseUrlWithoutSlash(): string
@@ -124,6 +122,7 @@ class Network_Request extends Request
     /**
      * Método que determina la URL utiliza para acceder a la aplicación, esto
      * es: protocolo/esquema, dominio y path base a contar del webroot).
+     *
      * @return string URL completa para acceder a la la página.
      */
     public function getFullUrlWithoutQuery(): string
@@ -132,7 +131,7 @@ class Network_Request extends Request
             if (empty($_SERVER['HTTP_HOST'])) {
                 $url = (string)config('app.url');
             } else {
-                if ($this->getSingleHeader('X-Forwarded-Proto') == 'https') {
+                if ($this->headers->get('X-Forwarded-Proto') == 'https') {
                     $scheme = 'https';
                 } else {
                     $scheme = 'http' . (isset($_SERVER['HTTPS']) ? 's' : null);
@@ -146,6 +145,7 @@ class Network_Request extends Request
 
     /**
      * Método que asigna o entrega los parámetros de la solicitud.
+     *
      * @param array|null $params
      * @return array
      */
@@ -155,40 +155,6 @@ class Network_Request extends Request
             $this->parsedParams = Routing_Router::parse($this->getRequestUriDecoded());
         }
         return $this->parsedParams;
-    }
-
-    /**
-     * Método que entrega las cabeceras enviadas al servidor web por el cliente.
-     * @param string header Cabecera que se desea recuperar, o null si se quieren traer todas.
-     * @return mixed Arreglo si no se pidió por una específica o su valor si se pidió (=false si no existe cabecera, =null si no existe función apache_request_headers).
-     */
-    public function getSingleHeader(?string $header = null)
-    {
-        $headers = $this->getAllHeaders();
-        if ($header === null) {
-            return $headers;
-        }
-        if (isset($headers[$header])) {
-            return $headers[$header];
-        }
-        return false;
-    }
-
-    /**
-     * Método que entrega las cabeceras enviadas al servidor web por el cliente.
-     * @return array Arreglo con las cabeceras HTTP recibidas.
-     */
-    public function getAllHeaders(): array
-    {
-        if (!isset($this->headersList)) {
-            if (!function_exists('apache_request_headers')) {
-                $headers = [];
-            } else {
-                $headers = apache_request_headers();
-            }
-            $this->headersList = $headers;
-        }
-        return $this->headersList;
     }
 
     /**
@@ -202,7 +168,8 @@ class Network_Request extends Request
     public function isApiRequest(): bool
     {
         $api_prefix = strpos($this->getRequestUriDecoded(), '/api/') === 0;
-        $accept_json = $this->getSingleHeader('Accept') == 'application/json'; // WARNING: podría retornar arreglo (?)
+        $accept_header = $this->headers->get('Accept');
+        $accept_json = Str::contains($accept_header, 'application/json');
         return $api_prefix || $accept_json;
     }
 

@@ -63,8 +63,8 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
      */
     private function init()
     {
+        $this->controller->autoRender = false;
         $this->method = strtoupper($_SERVER['REQUEST_METHOD']);
-        $this->headers = $this->controller->request->getAllHeaders();
         $input = file_get_contents('php://input');
         if ($this->settings['data']['keep-raw']) {
             $this->data = $input;
@@ -251,14 +251,14 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
             if (!$this->controller->response->type()) {
                 $this->controller->response->type('application/json', 'utf-8');
             }
-            if ($this->controller->response->type()['mimetype'] == 'application/json') {
+            if (strpos($this->controller->response->type(), 'application/json') !== false) {
                 $data = json_encode($data, $options)."\n";
             }
             $this->controller->response->body($data);
             // hacer log de la consulta a la API
             $this->log();
             // enviar respuesta del servidor al cliente
-            $this->controller->response->send();
+            $this->controller->response->sendAndExit();
         } catch (\Exception $e) {
             $this->sendException($e);
         } catch (\Error $e) {
@@ -304,7 +304,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         // entregar respuesta a cliente
         $this->controller->response->status($status);
         $this->controller->response->type('application/json');
-        $this->controller->response->send(json_encode($e->getMessage()));
+        $this->controller->response->sendAndExit(json_encode($e->getMessage()));
     }
 
     /**
@@ -325,13 +325,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         }
         // buscar datos del usuario (se busca en cabecera Authorization,
         // o bien en api_hash o api_key por GET, esto último no se recomienda usar)
-        $auth = isset($this->headers['Authorization'])
-            ? trim($this->headers['Authorization'])
-            : (
-                isset($this->headers['authorization'])
-                    ? trim($this->headers['authorization'])
-                    : false
-            );
+        $auth = $this->controller->request->headers->get('Authorization');
         if ($auth === false) {
             if (!empty($_GET['api_hash'])) {
                 $auth = base64_encode($_GET['api_hash'] . ':X');
