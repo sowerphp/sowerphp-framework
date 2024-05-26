@@ -113,12 +113,6 @@ class Service_Layers implements Interface_Service
         // Determinar las capas de la aplicación.
         $this->getLayers();
 
-        // Determinar el directorio "website" (requiere tener las capas).
-        // DEPRECATED: Antiguo directorio del proyecto, antes de usar composer.
-        // TODO: Hay que dejar de usar esta constante y usar las capas.
-        // NOTE: No se agrega al arreglo $this->directories por estar obsoleto.
-        define('DIR_WEBSITE', $this->getLayer('website')['path']);
-
         // Determinar los paths existentes a partir de las capas.
         $this->getPaths();
         $this->getPathsReverse();
@@ -138,14 +132,11 @@ class Service_Layers implements Interface_Service
     {
         // Si no se han cargado los directorios se cargan.
         if (empty($this->directories)) {
-            define('DIR_FRAMEWORK', $this->getFrameworkDir());
-            define('DIR_PROJECT', $this->getProjectDir());
-            define('DIR_STORAGE', $this->getStorageDir());
+            $this->getFrameworkDir();
+            $this->getProjectDir();
+            $this->getStorageDir();
             define('DIR_STATIC', $this->getStaticDir());
             define('DIR_TMP', $this->getTmpDir());
-            // DEPRECATED: es la constante antigua del directorio temporal.
-            // TODO: migrar a usar la nueva constante DIR_TMP.
-            define('TMP', $this->getTmpDir());
         }
         // Entregar el arreglo asociativo de directorios.
         return $this->directories;

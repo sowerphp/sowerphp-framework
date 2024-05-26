@@ -37,15 +37,9 @@ class Utility_Apps
      * Constructor de la clase que procesa las aplicaciones de terceros
      * disponibles en la aplicación web
      */
-    public function __construct($config = [])
+    public function __construct(array $config)
     {
-        if (!$config) {
-            $config = [
-                'directory' => DIR_WEBSITE.'/Utility/Apps',
-                'namespace' => '\website',
-            ];
-        }
-        $this->config = (array)$config;
+        $this->config = $config;
         if (!isset($this->config[0])) {
             $this->config = [$this->config];
         }

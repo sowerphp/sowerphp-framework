@@ -65,12 +65,17 @@ class Cache
     }
 
     /**
-     * Asignar el prefijo que se usará en las claves de los elementos del caché
-     * @param prefix Prefijo que se utilizará en las claves de los elementos del caché
+     * Asignar el prefijo que se usará en las claves de los elementos de
+     * la caché.
+     * @param string $prefix Prefijo que se utilizará en las claves de los
+     * elementos del caché.
      */
-    public function setPrefix($prefix = null)
+    public function setPrefix(?string $prefix = null)
     {
-        $this->_prefix = $prefix ? $prefix : (defined('DIR_PROJECT') ? (DIR_PROJECT . ':') : '');
+        if (!$prefix) {
+            $prefix = app('layers')->getProjectDir() . ':';
+        }
+        $this->_prefix = $prefix;
     }
 
     /**

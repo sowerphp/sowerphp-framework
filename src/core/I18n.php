@@ -55,7 +55,7 @@ class I18n
      *	msgid "Buscar"
      *	msgstr "Search"
      *
-     * Guardar la plantilla en DIR_WEBSITE/Locale/en_US.utf8/LC_MESSAGES/master.po
+     * Guardar la plantilla en /resources/locale/en_US.utf8/LC_MESSAGES/master.po
      * Luego ejecutar:
      *   $ msgfmt master.po -o master.mo
      *
@@ -68,7 +68,7 @@ class I18n
      * En caso que no exista editar /etc/locale.gen para agregarla y luego ejecutar:
      *   # locale-gen
      *
-     * Cuando se crean o modifican los directorios en DIR_WEBSITE/Locale se
+     * Cuando se crean o modifican los directorios en /resources/locale se
      * debe reiniciar el servicio Apache (¿?)
      *
      * @param string Texto que se desea traducir
@@ -89,7 +89,7 @@ class I18n
         }
         putenv("LANG=".$locale);
         setlocale(LC_MESSAGES, $locale);
-        bindtextdomain($domain, DIR_WEBSITE.'/Locale');
+        bindtextdomain($domain, app('layers')->getProjectDir('/resources/locale'));
         textdomain($domain);
         bind_textdomain_codeset($domain, $encoding);
         return gettext($string);
@@ -100,7 +100,7 @@ class I18n
      * @param locale Locale que se está buscando si existe
      * @return bool =true si la traducción está disponible (existe el directorio
      */
-    public static function localeExists ($locale)
+    public static function localeExists($locale)
     {
         if (!isset($locale[0])) {
             return false;
@@ -108,7 +108,7 @@ class I18n
         if (!strpos($locale, '_') && isset(self::$locale[$locale])) {
             $locale = self::$locale[$locale];
         }
-        return is_dir(DIR_WEBSITE . '/Locale/' . $locale);
+        return is_dir(app('layers')->getProjectDir('/resources/locale/' . $locale));
     }
 
 }

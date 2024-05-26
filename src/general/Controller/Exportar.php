@@ -61,8 +61,8 @@ class Controller_Exportar extends \Controller_App
             $title,
             'Tabla: '.$id
         );
-        $pdf->setStandardHeaderFooter (
-            DIR_WEBSITE.'/webroot/img/logo.png',
+        $pdf->setStandardHeaderFooter(
+            app('layers')->getFilePath('/webroot/img/logo.png'),
             $title,
             'Tabla: '.$id
         );

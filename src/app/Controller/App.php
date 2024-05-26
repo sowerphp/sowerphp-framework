@@ -116,7 +116,7 @@ class Controller_App extends \sowerphp\core\Controller
     protected function shell($cmd, $log = false, &$output = [])
     {
         if ($log && !is_string($log)) {
-            $log = TMP . '/screen_' . $this->Auth->ip() . '_' . date('YmdHis') . '.log';
+            $log = DIR_TMP . '/screen_' . $this->Auth->ip() . '_' . date('YmdHis') . '.log';
         }
         return shell_exec_async($cmd, $log, $output);
     }

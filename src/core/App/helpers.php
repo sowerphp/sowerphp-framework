@@ -97,6 +97,17 @@ function url(string $resource = '/', ...$args): string
 }
 
 /**
+ * Obtener una instancia de almacenamiento.
+ *
+ * @param string|null $disk Nombre del disco que se desea usar.
+ * @return \League\Flysystem\Filesystem
+ */
+function storage(?string $disk = null): \League\Flysystem\Filesystem
+{
+    return app('storage')->disk($disk);
+}
+
+/**
  * Función para mostrar información relevante para depuración de una
  * variale.
  * @param mixed $var Variable que se desea mostrar.
@@ -280,12 +291,12 @@ function shell_exec_async($cmd, $log = false, &$output = []): int
         return 255;
     }
     if ($cmd[0] != '/') {
-        $cmd = DIR_PROJECT . '/website/Shell/shell.php ' . $cmd;
+        $cmd = app('layers')->getProjectDir() . '/console/shell.php ' . $cmd;
     }
     $screen_cmd = 'screen -dm';
     if ($log) {
         if (!is_string($log)) {
-            $log = TMP . '/screen_' . microtime(true) . '.log';
+            $log = DIR_TMP . '/screen_' . microtime(true) . '.log';
         } else {
             $log = trim($log);
         }

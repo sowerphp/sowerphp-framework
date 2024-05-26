@@ -183,20 +183,20 @@ class Shell_Command_CodeGenerator extends \Shell_App
         // la ubicación es la base de la aplicación
         if ($opcion == 1) {
             $this->setModuleUrl();
-            return DIR_WEBSITE;
+            return 'project:/src/website';
         }
         // la ubicación es un módulo dentro del proyecto principal
         else if (isset($modulos[$opcion-2])) {
             $modulo = $modulos[$opcion-2];
             $this->setModuleUrl($modulo);
-            return DIR_WEBSITE . '/Module/' . str_replace('.', '/Module/', $modulo);
+            return 'project:/src/website/Module/' . str_replace('.', '/Module/', $modulo);
         }
         // la ubicación está en una extensión
         else {
             $modulo = $extensiones_modulos[$opcion-2-count($modulos)];
             $this->setModuleUrl($modulo['module']);
             self::$extension = $modulo['extension'];
-            return DIR_PROJECT . '/extensions/' . $modulo['extension'] . '/Module/'
+            return 'project:/extensions/' . $modulo['extension'] . '/Module/'
                 . str_replace('.', '/Module/', $modulo['module']);
         }
     }
@@ -208,7 +208,7 @@ class Shell_Command_CodeGenerator extends \Shell_App
     {
         // si no se indicó directorio es el principal
         if (!$dir) {
-            $dir = DIR_WEBSITE.'/Module';
+            $dir = 'project:/src/website/Module';
         }
         // si no existe el directorio terminar de procesar
         if (!is_dir($dir)) {
@@ -248,7 +248,7 @@ class Shell_Command_CodeGenerator extends \Shell_App
     {
         $extensions = [];
         // buscar vendors (proveedores de extensiones)
-        $dir_vendors = DIR_PROJECT . '/extensions';
+        $dir_vendors = 'project:/extensions';
         if (!file_exists($dir_vendors)) {
             return $extensions;
         }

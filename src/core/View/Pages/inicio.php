@@ -9,5 +9,5 @@
 <div class="bg-body-tertiary rounded-3 border h-100 p-5 mb-4">
     <h2 class="mb-4">¡Listo para programar!</h2>
     <p>Ya tienes instalado SowerPHP, es hora de empezar a programar.</p>
-    <p>Primero, crea una página de inicio en <code><?=DIR_WEBSITE?>/View/Pages/inicio.php</code></p>
+    <p>Primero, crea una página de inicio en <code><?=app('layers')->getProjectDir('/src/app/View/Pages/inicio.php')?></code></p>
 </div>

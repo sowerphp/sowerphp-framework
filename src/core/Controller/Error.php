@@ -40,10 +40,17 @@ class Controller_Error extends \Controller_App
     {
         // agregar datos para la vista
         if ($this->error_reporting) {
+            $layersService = app('layers');
             $data['message'] = htmlspecialchars($data['message']);
             $data['trace'] = str_replace(
-                [DIR_FRAMEWORK, DIR_PROJECT],
-                ['DIR_FRAMEWORK', 'DIR_PROJECT'],
+                [
+                    $layersService->getFrameworkDir(),
+                    $layersService->getProjectDir(),
+                ],
+                [
+                    'framework:',
+                    'project:',
+                ],
                 $data['trace']
             );
         } else {

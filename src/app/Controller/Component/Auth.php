@@ -85,9 +85,15 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         // si hay sesión se obtiene el objeto del usuario
         if ($this->session) {
             $this->Cache = new \sowerphp\core\Cache();
-            $this->User = $this->Cache->get($this->settings['session']['key'].$this->session['id']);
+            $this->User = $this->Cache->get(
+                $this->settings['session']['key'] . $this->session['id']
+            );
             if (!$this->User) {
-                $this->User = new $this->settings['model']($this->session['id']);
+                try {
+                    $this->User = new $this->settings['model']($this->session['id']);
+                } catch (\Exception $e) {
+                    return;
+                }
             }
             $this->User->groups();
             $this->User->auths();

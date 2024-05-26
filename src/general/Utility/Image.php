@@ -250,7 +250,7 @@ class Utility_Image
     {
         // generar imagen desde el arreglo
         $src = imagecreatefromstring($file['data']);
-        $file['tmp_name'] = TMP.'/'.md5(date('U')).'-'.$file['name'];
+        $file['tmp_name'] = DIR_TMP.'/'.md5(date('U')).'-'.$file['name'];
         // guardar imagen en un archivo
         if ($file['type'] == 'image/jpeg') {
             imagejpeg($src, $file['tmp_name']);

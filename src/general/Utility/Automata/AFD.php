@@ -104,7 +104,6 @@ class Utility_Automata_AFD
      */
     public function getGraph()
     {
-        require_once DIR_FRAMEWORK.'/extensions/sowerphp/general/Vendor/autoload.php';
         $graph = new \Fhaculty\Graph\Graph();
         // crear estados y transiciones
         $vertexs = [];

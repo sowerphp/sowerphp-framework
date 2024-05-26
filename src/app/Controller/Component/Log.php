@@ -268,7 +268,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         }
         // adjuntar datos de POST
         if (!empty($_POST)) {
-            $_POST_file = TMP . '/_POST_' . $timestamp . '.txt';
+            $_POST_file = DIR_TMP . '/_POST_' . $timestamp . '.txt';
             file_put_contents($_POST_file, json_encode($_POST));
             $email->attach([
                 'tmp_name' => $_POST_file,
@@ -279,7 +279,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         // adjuntos
         if (!empty($_FILES)) {
             // archivo _FILES.txt con los datos del arreglo $_FILES
-            $_FILES_file = TMP . '/_FILES_' . $timestamp . '.txt';
+            $_FILES_file = DIR_TMP . '/_FILES_' . $timestamp . '.txt';
             file_put_contents($_FILES_file, json_encode($_FILES));
             $email->attach([
                 'tmp_name' => $_FILES_file,
@@ -378,7 +378,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      */
     private function reportFile($message, $facility, $severity)
     {
-        $log = TMP.'/log_'.$this->getFacility($facility).'_'.$this->getSeverity($severity).'_'.date('Ymd').'.log';
+        $log = DIR_TMP.'/log_'.$this->getFacility($facility).'_'.$this->getSeverity($severity).'_'.date('Ymd').'.log';
         if (is_array($message) || is_object($message) || is_bool($message)) {
             $message = json_encode($message);
         }

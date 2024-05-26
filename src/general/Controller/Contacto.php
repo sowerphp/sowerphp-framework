@@ -49,7 +49,7 @@ class Controller_Contacto extends \Controller_App
         // permirir cargar página de contacto
         if (config('email.default') === null) {
             \sowerphp\core\Model_Datasource_Session::message(
-                __('La página de contacto no se encuentra disponible'), 'error'
+                __('La página de contacto no se encuentra disponible.'), 'error'
             );
             $this->redirect('/');
         }

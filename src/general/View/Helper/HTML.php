@@ -87,7 +87,7 @@ class View_Helper_HTML
      */
     public static function linksFrom($dir, $recursive = false)
     {
-        $realdir = DIR_WEBSITE.'/webroot'.$dir;
+        $realdir = app('layers')->getProjectDir('/public' . $dir);
         if (!is_dir($realdir)) {
             echo '<p>No es posible leer el directorio de archivos.</p>';
             return;

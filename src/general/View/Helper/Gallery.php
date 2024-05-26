@@ -42,6 +42,7 @@ class View_Helper_Gallery
 
     public function generate($dir)
     {
+        $projectDir = app('layers')->getProjectDir();
         // buffer para ir dibujando la galería
         $buffer = '';
         // obtener cabecera
@@ -49,16 +50,16 @@ class View_Helper_Gallery
         // inicio de la galería
         $buffer .= '<div>'."\n";
         // obtener imagenes (si existen miniaturas se usan)
-        if(file_exists(DIR_WEBSITE.'/webroot'.$dir.'/miniaturas')) {
-            $imagenes = scandir(DIR_WEBSITE.'/webroot'.$dir.'/miniaturas');
+        if(file_exists($projectDir . '/public' . $dir . '/miniaturas')) {
+            $imagenes = scandir($projectDir . '/public' . $dir . '/miniaturas');
             $miniaturas = '/miniaturas';
         } else {
-            $imagenes = scandir(DIR_WEBSITE.'/webroot'.$dir);
+            $imagenes = scandir($projectDir . '/public' . $dir);
             $miniaturas = '';
         }
         // mostrar imagenes
         foreach($imagenes as &$imagen) {
-            if (!is_dir(DIR_WEBSITE.'/webroot'.$dir.$miniaturas.'/'.$imagen)) {
+            if (!is_dir($projectDir . '/public' . $dir . $miniaturas . '/' . $imagen)) {
                 $buffer .= '<a href="'.url($dir.'/'.$imagen).'" rel="prettyPhoto['.$this->_name.']"><img src="'.url($dir.$miniaturas.'/'.$imagen).'" alt="'.$imagen.'" class="pp-thumbnail" /></a>'."\n";
             }
         }
