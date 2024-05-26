@@ -79,10 +79,14 @@ class I18n
     public static function translate($string, $domain = 'master', $locale = null, $encoding = 'UTF-8')
     {
         if (!$locale) {
-            $locale = Model_Datasource_Session::read('config.language');
+            try {
+                $locale = app('session')->get('config.language');
+            } catch (\Exception $e) {
+                $locale = null;
+            }
         }
-        if (!strpos($locale, '_')) {
-            if (!isset(self::$locale[$locale])) {
+        if (!$locale || !strpos($locale, '_')) {
+            if (!$locale || !isset(self::$locale[$locale])) {
                 $locale = config('language');
             }
             $locale = self::$locale[$locale];

@@ -79,7 +79,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         // ejecutar el constructor padre
         parent::__construct($Components, $settings);
         // recuperar sesión
-        $this->session = \sowerphp\core\Model_Datasource_Session::read(
+        $this->session = app('session')->get(
             $this->settings['session']['key']
         );
         // si hay sesión se obtiene el objeto del usuario
@@ -222,7 +222,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
                     (new \sowerphp\core\Cache())->delete(
                         $this->settings['session']['key'].$this->session['id']
                     );
-                    \sowerphp\core\Model_Datasource_Session::destroy();
+                    app('session')->flush();
                     \sowerphp\core\Model_Datasource_Session::message(
                         sprintf(
                             $this->settings['messages']['error']['newlogin'],
@@ -352,8 +352,9 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         $this->log($msg);
         // si el usuario tiene layout personalizado se asigna
         if ($this->User->config_page_layout) {
-            \sowerphp\core\Model_Datasource_Session::write(
-                'config.page.layout', $this->User->config_page_layout
+            app('session')->put(
+                'config.page.layout',
+                $this->User->config_page_layout
             );
         }
         // redireccionar
@@ -377,8 +378,9 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
             'id' => $this->User->id,
             'hash' => $hash,
         ];
-        \sowerphp\core\Model_Datasource_Session::write(
-            $this->settings['session']['key'], $this->session
+        app('session')->put(
+            $this->settings['session']['key'],
+            $this->session
         );
     }
 
@@ -424,7 +426,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     public function logout()
     {
         (new \sowerphp\core\Cache())->delete($this->settings['session']['key'].$this->session['id']);
-        \sowerphp\core\Model_Datasource_Session::destroy();
+        app('session')->flush();
         \sowerphp\core\Model_Datasource_Session::message(
             sprintf(
                 $this->settings['messages']['ok']['logout'],

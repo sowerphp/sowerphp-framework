@@ -44,7 +44,7 @@ abstract class Controller
      * @param request Objeto con la solicitud realizada
      * @param response Objeto para la respuesta que se enviará al cliente
      */
-    public function __construct (Network_Request $request, Network_Response $response)
+    public function __construct(Network_Request $request, Network_Response $response)
     {
         // copiar objeto para solicitud y respuesta
         $this->request = $request;
@@ -62,14 +62,14 @@ abstract class Controller
             '_url' => $this->request->getFullUrlWithoutQuery(),
         ));
         // obtener layout por defecto (el de la sesión)
-        $this->layout = Model_Datasource_Session::read('config.page.layout');
+        $this->layout = app('session')->get('config.page.layout');
     }
 
     /**
      * Método que se ejecuta al iniciar la ejecución del controlador.
      * Wrapper de Controller::beforeFilter()
      */
-    public function startupProcess ()
+    public function startupProcess()
     {
         $this->beforeFilter();
     }
@@ -78,7 +78,7 @@ abstract class Controller
      * Método que se ejecuta al terminar la ejecución del controlador
      * Wrapper de Controller::afterFilter()
      */
-    public function shutdownProcess ()
+    public function shutdownProcess()
     {
         $this->afterFilter();
     }
@@ -86,7 +86,7 @@ abstract class Controller
     /**
      * Método que se ejecuta al iniciar la ejecución del controlador.
      */
-    public function beforeFilter ()
+    public function beforeFilter()
     {
         if ($this->Components) {
             $this->Components->trigger('beforeFilter');
@@ -96,7 +96,7 @@ abstract class Controller
     /**
      * Método que se ejecuta al terminar la ejecución del controlador
      */
-    public function afterFilter ()
+    public function afterFilter()
     {
         if ($this->redirect !== null) {
             if (!is_array($this->redirect)) {
@@ -118,7 +118,7 @@ abstract class Controller
     /**
      * Método que se ejecuta antes de renderizar la página
      */
-    public function beforeRender ()
+    public function beforeRender()
     {
         if ($this->Components) {
             $this->Components->trigger('beforeRender');
@@ -128,7 +128,7 @@ abstract class Controller
     /**
      * Método que se ejecuta antes de redirigir la página
      */
-    public function beforeRedirect ($params)
+    public function beforeRedirect($params)
     {
         if ($this->Components) {
             $this->Components->trigger('beforeRedirect', $params);
@@ -140,7 +140,7 @@ abstract class Controller
      * controlador
      * @param return Valor de retorno de la acción ejecutada
      */
-    public function invokeAction ()
+    public function invokeAction()
     {
         // Probar si el método existe
         try {
@@ -187,7 +187,7 @@ abstract class Controller
      * @param location Ubicación de la vista
      * @return Objeto Response con la página ya renderizada
      */
-    public function render ($view = null, $location = null)
+    public function render($view = null, $location = null)
     {
         // Ejecutar eventos que se deben realizar antes de renderizar
         $this->beforeRender();
@@ -210,7 +210,7 @@ abstract class Controller
      * @param one Nombre de la variable o arreglo asociativo
      * @param two Valor del variable o null si se paso un arreglo en one
      */
-    public function set ($one, $two = null)
+    public function set($one, $two = null)
     {
         // Si se paso como arreglo se usa
         if (is_array($one)) {

@@ -85,7 +85,11 @@ function url(string $resource = '/', ...$args): string
     $resource = vsprintf($resource, $args);
     $url = (string)config('app.url');
     if (!$url) {
-        $url = (new \sowerphp\core\Network_Request())->url;
+        try {
+            $url = request()->getFullUrlWithoutQuery();
+        } catch (\Exception $e) {
+            $url = null;
+        }
     }
     if (!$url) {
         throw new \Exception(__(

@@ -24,7 +24,7 @@
 namespace sowerphp\core;
 
 /**
- * Clase para realizar acciones de la sesión
+ * Clase para realizar acciones de la sesión.
  */
 class Controller_Session extends \Controller_App
 {
@@ -38,16 +38,16 @@ class Controller_Session extends \Controller_App
     }
 
     /**
-     * Acción para poder cambiar la configuración de la sesión a través de la
-     * URL
+     * Acción para poder cambiar la configuración de la sesión a través
+     * de la URL.
      */
     public function config($var, $val, $redirect = null)
     {
-        Model_Datasource_Session::write ('config.'.$var, $val);
+        app('session')->put('config.' . $var, $val);
         if (!$redirect) {
-            $this->redirect ('/');
+            $this->redirect('/');
         } else {
-            $this->redirect (base64_decode($redirect));
+            $this->redirect(base64_decode($redirect));
         }
     }
 

@@ -163,13 +163,13 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     $Usuario = new $class();
                 }
                 if (!$Usuario->exists()) {
-                    \sowerphp\core\Model_Datasource_Session::message (
+                    \sowerphp\core\Model_Datasource_Session::message(
                         'Usuario no válido. Recuerda que puedes buscar por tu nombre de usuario o correo.', 'error'
                     );
                     $this->render('Usuarios/contrasenia_recuperar_step1');
                 }
                 else if (!$Usuario->activo) {
-                    \sowerphp\core\Model_Datasource_Session::message (
+                    \sowerphp\core\Model_Datasource_Session::message(
                         'Usuario no activo. Primero deberás realizar la activación del usuario, luego podrás cambiar la contraseña.', 'error'
                     );
                     $this->render('Usuarios/contrasenia_recuperar_step1');
@@ -181,7 +181,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                         $Usuario->usuario,
                         md5(hash('sha256', $Usuario->contrasenia))
                     );
-                    \sowerphp\core\Model_Datasource_Session::message (
+                    \sowerphp\core\Model_Datasource_Session::message(
                         'Se ha enviado un email con las instrucciones para recuperar tu contraseña.',
                         'ok'
                     );
@@ -194,7 +194,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             // buscar usuario al que se desea cambiar la contraseña
             $Usuario = new $class(urldecode($usuario));
             if (!$Usuario->exists()) {
-                \sowerphp\core\Model_Datasource_Session::message (
+                \sowerphp\core\Model_Datasource_Session::message(
                     'Usuario inválido.', 'error'
                 );
                 $this->redirect ('/usuarios/contrasenia/recuperar');
@@ -220,13 +220,13 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 }
                 // cambiar la contraseña al usuario
                 if ($_POST['codigo'] != md5(hash('sha256', $Usuario->contrasenia))) {
-                    \sowerphp\core\Model_Datasource_Session::message (
+                    \sowerphp\core\Model_Datasource_Session::message(
                         'El enlace para recuperar su contraseña no es válido, solicite uno nuevo por favor.', 'error'
                     );
                     $this->redirect('/usuarios/contrasenia/recuperar');
                 }
                 else if (empty ($_POST['contrasenia1']) || empty ($_POST['contrasenia2']) || $_POST['contrasenia1'] != $_POST['contrasenia2']) {
-                    \sowerphp\core\Model_Datasource_Session::message (
+                    \sowerphp\core\Model_Datasource_Session::message(
                         'Contraseña nueva inválida (en blanco o no coinciden).', 'warning'
                     );
                     $this->set('usuario', $usuario);
@@ -235,7 +235,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 else {
                     $Usuario->savePassword($_POST['contrasenia1']);
                     $Usuario->savePasswordRetry($this->Auth->settings['maxLoginAttempts']);
-                    \sowerphp\core\Model_Datasource_Session::message (
+                    \sowerphp\core\Model_Datasource_Session::message(
                         'La contraseña para el usuario '.$usuario.' ha sido cambiada con éxito.',
                         'ok'
                     );
