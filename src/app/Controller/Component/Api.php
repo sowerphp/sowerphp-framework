@@ -328,7 +328,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         $auth = $this->controller->request->headers->get('Authorization');
         if ($auth === false) {
             if (!empty($_GET['api_hash'])) {
-                $auth = base64_encode($_GET['api_hash'] . ':X');
+                $auth = base64_encode('X:' . $_GET['api_hash']);
             }
             else if (!empty($_GET['api_key'])) {
                 $auth = $_GET['api_key'];
@@ -343,7 +343,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         } else {
             list($auth_type, $user_pass) = explode(' ', $auth);
             if ($auth_type == 'Bearer') {
-                $user_pass = base64_encode($user_pass.':X');
+                $user_pass = base64_encode('X:' . $user_pass);
             }
         }
         $aux = explode(':', (string)base64_decode($user_pass));
@@ -352,9 +352,12 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
             return $this->User;
         }
         list($user, $pass) = $aux;
+        if ($pass == 'X' && strlen($user) == 32) {
+            list($user, $pass) = [$pass, $user];
+        }
         // crear objeto del usuario
         try {
-            $User = new $this->settings['auth']['model']($user);
+            $User = new $this->settings['auth']['model']($user == 'X' ? $pass : $user);
         } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
             $this->User = $e->getMessage();
             return $this->User;
@@ -378,7 +381,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         // solo hacer las validaciones de contraseña y auth2 si se está
         // autenticando con usuario y contraseña, si se autentica con el hash
         // ignorar estas validaciones
-        if ($user != $User->hash) {
+        if ($pass != $User->hash) {
             // si el usuario tiene bloqueada su cuenta por intentos máximos -> error
             if (!$User->contrasenia_intentos) {
                 $this->User = sprintf(
