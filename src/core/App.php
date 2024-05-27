@@ -71,7 +71,11 @@ class App
     {
         if (!isset(self::$instance)) {
             self::$instance = new self();
-            self::$instance->bootstrap();
+            try {
+                self::$instance->bootstrap();
+            } catch (\Throwable $throwable) {
+                self::$instance->handleThrowable($throwable);
+            }
         }
         return self::$instance;
     }
@@ -113,7 +117,7 @@ class App
         $class = get_class($throwable);
         $message = $throwable->getMessage();
         $code = $throwable->getCode();
-        $severity = $throwable->severity;
+        $severity = $throwable->severity ?? LOG_ERR;
         $file = $throwable->getFile();
         $line = $throwable->getLine();
         $trace = $throwable->getTraceAsString();
@@ -128,7 +132,8 @@ class App
         );
         // Generar mensaje con el error o excepción.
         header('Content-Type: text/plain');
-        die($error);
+        echo $error;
+        exit($code);
     }
 
     /**
@@ -194,7 +199,12 @@ class App
         $this->registerService('layers', Service_Layers::class);
         $this->registerService('module', Service_Module::class);
         $this->registerService('config', Service_Config::class);
+        //$this->registerService('lang', Service_Lang::class);
         $this->registerService('storage', Service_Storage::class);
+        //$this->registerService('cache', Service_Cache::class);
+        //$this->registerService('database', Service_Database::class);
+        //$this->registerService('mail', Service_Mail::class);
+        //$this->registerService('http_client', Service_Http_Client::class);
 
         // Registrar servicios para ejecución en consola.
         if ($this->type == 'console') {
@@ -203,10 +213,12 @@ class App
 
         // Registrar servicios para solicitud HTTP
         else {
+            //$this->registerService('router', Service_Http_Router::class);
+            $this->registerService('session', Service_Http_Session::class);
+            //$this->registerService('auth', Service_Http_Auth::class);
+            $this->registerService('kernel', Service_Http_Kernel::class);
             $request = Network_Request::capture();
             $this->registerService('request', $request);
-            $this->registerService('session', Service_Http_Session::class);
-            $this->registerService('kernel', Service_Http_Kernel::class);
         }
 
         // Ejecutar método register() en cada servicio.

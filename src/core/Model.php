@@ -40,7 +40,7 @@ abstract class Model
     /**
      * Constructor de la clase abstracta
      */
-    public function __construct($pk=null)
+    public function __construct($pk = null)
     {
         // recuperar conexión a la base de datos
         $this->getDB();
@@ -50,10 +50,13 @@ abstract class Model
         }
         // setear atributos del objeto con lo que se haya pasado al
         // constructor como parámetros
-        if (func_num_args()>0) {
+        if (func_num_args() > 0) {
             $firstArg = func_get_arg(0);
             if (is_array($firstArg)) {
-                $this->set(array_combine($this->getPk(), $firstArg));
+                $attrs = array_combine($this->getPk(), $firstArg);
+                if ($attrs !== false) {
+                    $this->set($attrs);
+                }
             } else {
                 $args = func_get_args();
                 foreach ($this::$columnsInfo as $col => &$info) {

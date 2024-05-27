@@ -26,14 +26,76 @@ namespace sowerphp\core;
 class Service_Http_Kernel implements Interface_Service
 {
 
+    /**
+     * Servicio de capas.
+     *
+     * @var Service_Layers
+     */
     protected $layersService;
+
+    /**
+     * Servicio de módulos.
+     *
+     * @var Service_Module
+     */
     protected $moduleService;
+
+    /**
+     * Servicio de configuración.
+     *
+     * @var Service_Config
+     */
     protected $configService;
+
+    /**
+     * Servicio de sesiones.
+     *
+     * @var Service_Http_Session
+     */
     protected $sessionService;
 
+    /**
+     * Instancia de la solicitud.
+     *
+     * @var Network_Request
+     */
     protected $request;
+
+    /**
+     * Instancia de la respuesta.
+     *
+     * @var Network_Response
+     */
     protected $response;
 
+    /**
+     * Middlewares globales.
+     *
+     * @var array
+     */
+    protected $middlewares = [
+        //Middleware_Example::class,
+    ];
+
+    /**
+     * Middlewares específicos de rutas.
+     *
+     * @var array
+     */
+    protected $routeMiddlewares = [
+        //'auth' => Middleware_Auth::class,
+        //'throttle' => Middleware_Throttle::class,
+    ];
+
+    /**
+     * Constructor de Service_Http_Kernel.
+     *
+     * @param Service_Layers $layersService
+     * @param Service_Module $moduleService
+     * @param Service_Config $configService
+     * @param Service_Http_Session $sessionService
+     * @param Network_Request $request
+     */
     public function __construct(
         Service_Layers $layersService,
         Service_Module $moduleService,
@@ -49,13 +111,24 @@ class Service_Http_Kernel implements Interface_Service
         $this->request = $request;
     }
 
+    /**
+     * Registra el servicio HTTP kernel.
+     *
+     * @return void
+     */
     public function register()
     {
     }
 
+    /**
+     * Inicializa el servicio HTTP kernel.
+     *
+     * @return void
+     */
     public function boot()
     {
         // Cargar las rutas de la aplicación.
+        // TODO: mover a Service_Router.
         $this->layersService->loadFiles([
             '/App/routes.php',
         ]);
@@ -64,7 +137,7 @@ class Service_Http_Kernel implements Interface_Service
     /**
      * Obtener la instancia de Network_Request.
      *
-     * @return \sowerphp\core\Network_Request
+     * @return Network_Request
      */
     public function getRequest(): Network_Request
     {
@@ -74,7 +147,7 @@ class Service_Http_Kernel implements Interface_Service
     /**
      * Obtener la instancia de Network_Response.
      *
-     * @return \sowerphp\core\Network_Response
+     * @return Network_Response
      */
     public function getResponse(): Network_Response
     {
@@ -84,13 +157,123 @@ class Service_Http_Kernel implements Interface_Service
         return $this->response;
     }
 
+    /**
+     * Maneja la solicitud HTTP.
+     *
+     * @return int
+     */
     public function handle(): int
     {
         $request = $this->getRequest();
+        // Procesar middlewares antes de manejar la solicitud.
+        $request = $this->processMiddlewaresBefore(
+            $request,
+            function ($request) {
+                return $request;
+            }
+        );
+        // Manejar la solicitud
         $response = $this->handleRequest($request);
+        // Procesar middlewares después de manejar la solicitud.
+        $response = $this->processMiddlewaresAfter(
+            $request,
+            $response,
+            function ($request, $response) {
+                return $response;
+            }
+        );
+        // Enviar resultado y terminar la ejecución.
         $result = $response->send();
         $this->terminate($request, $response);
         return $result;
+    }
+
+    /**
+     * Procesa los middlewares antes de manejar la solicitud.
+     *
+     * @param Network_Request $request
+     * @param \Closure $next
+     * @return Network_Request
+     */
+    protected function processMiddlewaresBefore(
+        Network_Request $request,
+        \Closure $next
+    ): Network_Request
+    {
+        $middlewares = $this->getBeforeMiddlewares();
+        $pipeline = array_reduce(
+            array_reverse($middlewares),
+            function ($next, $middleware) {
+                return function ($request) use ($next, $middleware) {
+                    return (new $middleware)->handleBefore(
+                        $request,
+                        $next
+                    );
+                };
+            },
+            $next
+        );
+        return $pipeline($request);
+    }
+
+    /**
+     * Procesa los middlewares después de manejar la solicitud.
+     *
+     * @param Network_Request $request
+     * @param Network_Response $response
+     * @param \Closure $next
+     * @return Network_Response
+     */
+    protected function processMiddlewaresAfter(
+        Network_Request $request,
+        Network_Response $response,
+        \Closure $next
+    ): Network_Response
+    {
+        $middlewares = $this->getAfterMiddlewares();
+        $pipeline = array_reduce(
+            array_reverse($middlewares),
+            function ($next, $middleware) {
+                return function ($request, $response) use ($next, $middleware) {
+                    return (new $middleware)->handleAfter(
+                        $request,
+                        $response,
+                        $next
+                    );
+                };
+            },
+            $next
+        );
+        return $pipeline($request, $response);
+    }
+
+    /**
+     * Obtiene los middlewares a ejecutar antes de manejar la solicitud.
+     *
+     * @return array
+     */
+    protected function getBeforeMiddlewares(): array
+    {
+        $middlewares = [];
+        foreach ($this->middlewares as $middleware) {
+            $middlewares[] = new $middleware;
+        }
+        // TODO: crear condicionalmente según ruta parseada.
+        // Quizás va en otro lado, en el Router y se pasa al kernel luego.
+        /*foreach ($this->routeMiddlewares as $name => $middleware) {
+            $middlewares[] = new $middleware;
+        }*/
+        return $middlewares;
+    }
+
+    /**
+     * Obtiene los middlewares a ejecutar después de manejar la solicitud.
+     *
+     * @return array
+     */
+    protected function getAfterMiddlewares(): array
+    {
+        return array_reverse($this->getBeforeMiddlewares());
     }
 
     /**
@@ -99,7 +282,7 @@ class Service_Http_Kernel implements Interface_Service
      * @param Network_Request $request
      * @return Network_Response
      */
-    private function handleRequest(Network_Request $request): Network_Response
+    protected function handleRequest(Network_Request $request): Network_Response
     {
         // Revisar si la solicitud es por un archivo estático y procesarla.
         $response = $this->handleStaticFileRequest($request);
@@ -110,7 +293,15 @@ class Service_Http_Kernel implements Interface_Service
         return $this->handleControllerRequest($request);
     }
 
-    private function handleStaticFileRequest(Network_Request $request): ?Network_Response
+    /**
+     * Maneja la solicitud de archivos estáticos.
+     *
+     * @param Network_Request $request
+     * @return Network_Response|null
+     */
+    protected function handleStaticFileRequest(
+        Network_Request $request
+    ): ?Network_Response
     {
         $filepath = $this->getFilePath($request->getRequestUriDecoded());
         if (!$filepath) {
@@ -129,7 +320,7 @@ class Service_Http_Kernel implements Interface_Service
      * @param string $url Ruta de los que se está solicitando.
      * @return string Ruta del archivo estático o null si no se encontró.
      */
-    private function getFilePath(string $filename): ?string
+    protected function getFilePath(string $filename): ?string
     {
         // Si no hay archivo se retorna inmediatamente.
         if ($filename == '') {
@@ -175,7 +366,15 @@ class Service_Http_Kernel implements Interface_Service
         return $filepath;
     }
 
-    private function handleControllerRequest(Network_Request $request): Network_Response
+    /**
+     * Procesa la solicitud con un controlador y obtiene la respuesta.
+     *
+     * @param Network_Request $request
+     * @return Network_Response
+     */
+    protected function handleControllerRequest(
+        Network_Request $request
+    ): Network_Response
     {
         // Obtener instancia de reflexión del controlador.
         $reflection = $this->getControllerReflection(
@@ -212,9 +411,16 @@ class Service_Http_Kernel implements Interface_Service
     }
 
     /**
-     * Método que obtiene la instancia del controlador.
+     * Obtiene la instancia de reflexión del controlador.
+     *
+     * @param string $controller Nombre del controlador.
+     * @param string|null $module Nombre del módulo.
+     * @return \ReflectionClass|null
      */
-    private function getControllerReflection(string $controller, ?string $module): ?\ReflectionClass
+    protected function getControllerReflection(
+        string $controller,
+        ?string $module
+    ): ?\ReflectionClass
     {
         // Si se solicita un módulo tratar de cargar y verificar que quede
         // activo.
@@ -254,7 +460,10 @@ class Service_Http_Kernel implements Interface_Service
      * @param Network_Response $response
      * @return void
      */
-    private function terminate(Network_Request $request, Network_Response $response): void
+    protected function terminate(
+        Network_Request $request,
+        Network_Response $response
+    ): void
     {
         // Realizar cualquier limpieza necesaria después de enviar la respuesta.
         // TODO: buscar forma de ejecutar tareas después de enviar respuesta.
@@ -265,6 +474,12 @@ class Service_Http_Kernel implements Interface_Service
         // Incluir otras limpiezas que sean necesarias.
     }
 
+    /**
+     * Maneja las excepciones o errores capturados durante la ejecución.
+     *
+     * @param \Throwable $throwable
+     * @return void
+     */
     public function handleThrowable(\Throwable $throwable): void
     {
         if ($throwable instanceof \Error ) {
@@ -274,7 +489,13 @@ class Service_Http_Kernel implements Interface_Service
         }
     }
 
-    private function handleError(\Error $error): void
+    /**
+     * Maneja los errores de tipo \Error.
+     *
+     * @param \Error $error
+     * @return void
+     */
+    protected function handleError(\Error $error): void
     {
         $this->sessionService->close();
         if ($this->configService->get('error.exception')) {
@@ -298,7 +519,13 @@ class Service_Http_Kernel implements Interface_Service
         }
     }
 
-    private function handleException(\Exception $exception): void
+    /**
+     * Maneja las excepciones de tipo \Exception.
+     *
+     * @param \Exception $exception
+     * @return void
+     */
+    protected function handleException(\Exception $exception): void
     {
         ob_clean();
         $request = $this->getRequest();
