@@ -958,7 +958,7 @@ class Model_Usuario extends \Model_App
 
     /**
      * Método que entrega la URL del avatar del usuario
-     * @param size Tamaño de la imagen en pixeles (un sólo lado ya que es cuadrada)
+     * @param size Tamaño de la imagen en pixeles (un solo lado ya que es cuadrada)
      */
     public function getAvatar($size = 100)
     {

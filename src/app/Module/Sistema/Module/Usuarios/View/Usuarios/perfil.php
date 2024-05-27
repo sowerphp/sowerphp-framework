@@ -60,7 +60,7 @@ echo $form->input(array(
     'name' => 'api_key',
     'label' => 'API key',
     'value' => base64_encode($_Auth->User->hash.':X'),
-    'help' => 'Valor de la cabecera Authorization de HTTP para autenticar en la API usando sólo la API key, la cual está basada en el hash del usuario',
+    'help' => 'Valor de la cabecera Authorization de HTTP para autenticar en la API usando solo la API key, la cual está basada en el hash del usuario',
     'attr' => 'readonly="readonly" onclick="this.select()"',
 ));
 if ($_Auth->User->getLdapPerson() && $_Auth->User->getLdapPerson()->uid != $_Auth->User->usuario) {

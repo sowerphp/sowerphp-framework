@@ -76,10 +76,10 @@ class Network_Ftp
      */
     public function scandir($dir = '/')
     {
-        // método sólo funciona con FTP en sistemas like Unix
+        // método solo funciona con FTP en sistemas like Unix
         if ($this->systype() != 'UNIX') {
             throw new \sowerphp\core\Exception(
-                'Método '.__CLASS__.'::scandir() sólo funciona con sistemas like Unix.'
+                'Método '.__CLASS__.'::scandir() solo funciona con sistemas like Unix.'
             );
         }
         // obtener archivos

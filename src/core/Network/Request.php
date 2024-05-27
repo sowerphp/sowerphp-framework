@@ -54,6 +54,23 @@ class Network_Request extends Request
     private $parsedParams;
 
     /**
+     * Capturar el estado HTTP actual y entregar una instancia del objeto.
+     *
+     * @return Network_Request
+     */
+    public static function capture(): Network_Request
+    {
+        $request = parent::capture();
+        if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+            $request->headers->set(
+                'Authorization',
+                $_SERVER['REDIRECT_HTTP_AUTHORIZATION']
+            );
+        }
+        return $request;
+    }
+
+    /**
      * Método que determina la solicitud utilizada para acceder a la página.
      *
      * @return string Solicitud completa para la página consultada.

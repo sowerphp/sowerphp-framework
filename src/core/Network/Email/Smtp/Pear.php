@@ -128,8 +128,8 @@ class Network_Email_Smtp_Pear
         }
         if (!empty($header['replyTo'])) {
             $headers_data['Reply-To'] = is_array($header['replyTo']) ? ($header['replyTo']['name'].' <'.$header['replyTo']['email'].'>') : $header['replyTo'];
-            // WARNING Gmail requiere que se pase como arreglo pero amazon requiere sólo el email (?)
-            $headers_data['Reply-To'] = [$headers_data['Reply-To']]; // Esto se debería corregir de alguna forma para que sea compatible con ambos (por ahora, sólo gmail o similares)
+            // WARNING Gmail requiere que se pase como arreglo pero amazon requiere solo el email (?)
+            $headers_data['Reply-To'] = [$headers_data['Reply-To']]; // Esto se debería corregir de alguna forma para que sea compatible con ambos (por ahora, solo gmail o similares)
         }
         if (!empty($header['bcc'])) {
             $to = array_merge($to, $header['bcc']);

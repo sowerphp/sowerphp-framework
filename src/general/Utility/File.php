@@ -118,7 +118,7 @@ class Utility_File
      * Recupera los archivos/directorios desde una carpeta
      * @param string $dir Nombre del directorio a examinar
      * @return array Arreglo con los nombres de los archivos y/o directorios
-     * @todo Selección de sólo algunos archivos de la carpeta
+     * @todo Selección de solo algunos archivos de la carpeta
      */
     public static function browseDirectory($dir)
     {
@@ -164,7 +164,7 @@ class Utility_File
                 if (is_dir($filepath . DIRECTORY_SEPARATOR . $file)) {
                     // no recorre el dir padre ni el mismo recursivamente
                     if ($file != '.' && $file != '..') {
-                        // llamada recursiva sin unidad (ahora sólo sumando, unidad al finalizar recursividad)
+                        // llamada recursiva sin unidad (ahora solo sumando, unidad al finalizar recursividad)
                         $size += self::getSize($filepath . DIRECTORY_SEPARATOR . $file, false);
                     }
                 }

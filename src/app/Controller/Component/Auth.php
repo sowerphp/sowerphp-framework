@@ -178,8 +178,8 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
 
     /**
      * Método que permite determinar si la acción solicitada del controlador
-     * puede o no ser ejecutada sólo con tener una sesión activa
-     * @return bool =true si la acción del controlador se puede ejecutar sólo con tener sesión creada
+     * puede o no ser ejecutada solo con tener una sesión activa
+     * @return bool =true si la acción del controlador se puede ejecutar solo con tener sesión creada
      */
     public function allowedWithLogin($action = null)
     {
@@ -389,7 +389,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
      */
     public function preauth($token, $usuario = null, $auth2_token = null)
     {
-        // autenticar sólo con token (este será el hash del usuario)
+        // autenticar solo con token (este será el hash del usuario)
         if (!$usuario) {
             $this->User = new $this->settings['model']($token);
         }

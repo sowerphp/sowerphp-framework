@@ -102,7 +102,7 @@ class Controller_Maintainer extends \Controller_App
 
     /**
      * Método que permite forzar las opciones de búsqueda para la acción listar
-     * esto permite a cierto usuario mostrar sólo cierto listado de registros
+     * esto permite a cierto usuario mostrar solo cierto listado de registros
      * y no todos, esto evita tener que reprogramar la acción listar :-)
      */
     protected function forceSearch(array $data)
@@ -150,7 +150,7 @@ class Controller_Maintainer extends \Controller_App
                     continue;
                 }
                 list($var, $val) = explode(':', $filter);
-                // sólo procesar filtros donde el campo por el que se filtra esté en el modelo
+                // solo procesar filtros donde el campo por el que se filtra esté en el modelo
                 if (empty($model::$columnsInfo[$var])) {
                     continue;
                 }

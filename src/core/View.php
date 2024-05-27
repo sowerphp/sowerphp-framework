@@ -120,7 +120,7 @@ class View
         if (!empty($this->viewVars['__block_layout'])) {
             $this->layout = $this->viewVars['__block_layout'];
         }
-        // si no hay layout se debe entregar sólo el contenido
+        // si no hay layout se debe entregar solo el contenido
         if ($this->layout === null) {
             return $page_content;
         }

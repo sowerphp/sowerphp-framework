@@ -334,7 +334,7 @@ abstract class Model
         }
         $fkClasss = \sowerphp\core\Utility_Inflector::pluralize($fkClass);
         // tratar de recuperar con la clase plural (para usar caché)
-        // clase plural sólo existe al tener la extesión sowerphp\app
+        // clase plural solo existe al tener la extesión sowerphp\app
         if (class_exists($fkClasss)) {
             if (isset($args[0])) {
                 return (new $fkClasss)->get($args[0]);

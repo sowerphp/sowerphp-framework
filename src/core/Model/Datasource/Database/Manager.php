@@ -189,7 +189,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
 
     /**
      * Wrapper para comenzar una transacción (evita iniciar más de una transacción)
-     * @param serializable =true ejecutará la transacción de forma SERIALIZABLE (sólo MariaDB/MySQL y PostgreSQL)
+     * @param serializable =true ejecutará la transacción de forma SERIALIZABLE (solo MariaDB/MySQL y PostgreSQL)
      */
     public function beginTransaction($serializable = false)
     {

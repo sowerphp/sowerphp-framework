@@ -211,7 +211,7 @@ class Utility_Array
                 $item = [];
                 // armar cabecera del item, se van sacando los elementos de la
                 // cabecera del item, al final quedará en los datos del item
-                // original sólo el detalle
+                // original solo el detalle
                 $i = 0;
                 foreach ($d as $key => $value) {
                     $item[$key] = array_shift($d);
@@ -233,7 +233,7 @@ class Utility_Array
                 }
             }
             // el item es igual a uno previamente guardado
-            // en este caso se extrae sólo el detalle
+            // en este caso se extrae solo el detalle
             else if ($item[$id] == $d[$id]) {
                 $item[$detalle][] = array_slice($d, $camposEncabezado);
             }

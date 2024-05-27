@@ -46,7 +46,7 @@ class Exception_File_Upload extends \Exception {
                 break;
             }
             case \UPLOAD_ERR_PARTIAL: {
-                $message = __('El archivo pudo ser subido sólo parcialmente.');
+                $message = __('El archivo pudo ser subido solo parcialmente.');
                 break;
             }
             case \UPLOAD_ERR_NO_FILE: {

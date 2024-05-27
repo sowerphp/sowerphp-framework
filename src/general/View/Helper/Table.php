@@ -122,7 +122,7 @@ class View_Helper_Table
 
     /**
      * Asignar si se deben o no mostrar las columnas vacías de la tabla
-     * @param show =true se mostrarán todas las columnas =false sólo aquellas donde exista al menos una fila con un dato
+     * @param show =true se mostrarán todas las columnas =false solo aquellas donde exista al menos una fila con un dato
      */
     public function setShowEmptyCols($show = true)
     {

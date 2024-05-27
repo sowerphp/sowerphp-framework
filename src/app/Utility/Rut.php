@@ -64,7 +64,7 @@ class Utility_Rut
     }
 
     /**
-     * Transforma un RUT a un formato con sólo los números o formateado,
+     * Transforma un RUT a un formato con solo los números o formateado,
      * dependerá de como sea pasado el RUT
      * @param mixed $rut RUT que se quiere transformar
      * @param bool $quitarDV Si es true el dígito verificador se quita, sino se mantiene

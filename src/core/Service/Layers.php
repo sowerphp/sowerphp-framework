@@ -388,7 +388,7 @@ class Service_Layers implements Interface_Service
      * independientemente del namespace que tenga esa clase encontrada, o sea,
      * independientemente de la capa donde se haya encontrado. Esto entrega
      * ciertas ventajas y facilidades a la hora de programar (simplificaciones).
-     * Sólo se deben buscar clases donde su namespace (prefijo) sea:
+     * Solo se deben buscar clases donde su namespace (prefijo) sea:
      *   - No tengan prefijo. Esto es temporal mientras se migra al prefijo.
      *   - Partan con el prefijo: \sowerphp\magicload\
      *
