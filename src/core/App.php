@@ -41,7 +41,47 @@ class App
      *
      * @var App
      */
-    private static $instance;
+    protected static $instance;
+
+    /**
+     * Servicios del núcleo (comúnes) que son cargados por defecto.
+     *
+     * @var array
+     */
+    protected $defaultCoreServices = [
+        'layers' => Service_Layers::class,
+        'module' => Service_Module::class,
+        'config' => Service_Config::class,
+        //'lang' => Service_Lang::class,
+        'storage' => Service_Storage::class,
+        //'cache' => Service_Cache::class,
+        //'database' => Service_Database::class,
+        //'mail' => Service_Mail::class,
+        //'http_client' => Service_Http_Client::class,
+    ];
+
+    /**
+     * Servicios cuando la aplicación se ejecuta en modo consola que son
+     * cargados por defecto.
+     *
+     * @var array
+     */
+    protected $defaultConsoleServices = [
+        'kernel' => Service_Console_Kernel::class,
+    ];
+
+    /**
+     * Servicios cuando la aplicación se ejecuta en modo HTTP que son
+     * cargados por defecto.
+     *
+     * @var array
+     */
+    protected $defaultHttpServices = [
+        //'router' => Service_Http_Router::class,
+        'session' => Service_Http_Session::class,
+        //'auth' => Service_Http_Auth::class,
+        'kernel' => Service_Http_Kernel::class,
+    ];
 
     /**
      * Contenedor de servicios.
@@ -101,6 +141,25 @@ class App
     }
 
     /**
+     * Obtiene un servicio del contenedor.
+     *
+     * @param string $key Identificador del servicio.
+     * @param array $parameters Parámetros para la creación de instancias.
+     * @return mixed Retorna el servicio registrado bajo la clave especificada.
+     * @throws \Exception Si el servicio solicitado no existe.
+     */
+    public function getService(string $key, array $parameters = [])
+    {
+        if (!$this->container->bound($key)) {
+            throw new \Exception(sprintf(
+                'El servicio %s no está registrado en el contenedor.',
+                $key
+            ));
+        }
+        return $this->container->make($key, $parameters);
+    }
+
+    /**
      * Manejador de errores y excepciones cuando el kernel aún no está
      * disponible. Esto mostrará un error "feo", sin embargo, en producción
      * no debería ocurrir un error de este tipo ya que pruebas adecuadas hasta
@@ -110,7 +169,7 @@ class App
      * @param \Throwable $throwable
      * @return void
      */
-    private function handleThrowable(\Throwable $throwable): void
+    protected function handleThrowable(\Throwable $throwable): void
     {
         // Variables con los datos del error o excepción.
         $type = $throwable instanceof \Error ? 'error' : 'excepción';
@@ -137,28 +196,9 @@ class App
     }
 
     /**
-     * Obtiene un servicio del contenedor.
-     *
-     * @param string $key Identificador del servicio.
-     * @param array $parameters Parámetros para la creación de instancias.
-     * @return mixed Retorna el servicio registrado bajo la clave especificada.
-     * @throws \Exception Si el servicio solicitado no existe.
-     */
-    public function getService(string $key, array $parameters = [])
-    {
-        if (!$this->container->bound($key)) {
-            throw new \Exception(sprintf(
-                'El servicio %s no está registrado en el contenedor.',
-                $key
-            ));
-        }
-        return $this->container->make($key, $parameters);
-    }
-
-    /**
      * Inicializa la aplicación.
      */
-    private function bootstrap(): void
+    protected function bootstrap(): void
     {
         // Definir el tiempo de inicio del script.
         define('TIME_START', microtime(true));
@@ -191,37 +231,68 @@ class App
     /**
      * Registra todos los servicios obligatorios de la aplicación en
      * el contenedor de servicios.
-     * NOTE: el orden de registro de los servicios es MUY importante.
      */
-    private function registerServices(): void
+    protected function registerServices(): void
     {
-        // Registrar servicios del núcleo (compartidos).
-        $this->registerService('layers', Service_Layers::class);
-        $this->registerService('module', Service_Module::class);
-        $this->registerService('config', Service_Config::class);
-        //$this->registerService('lang', Service_Lang::class);
-        $this->registerService('storage', Service_Storage::class);
-        //$this->registerService('cache', Service_Cache::class);
-        //$this->registerService('database', Service_Database::class);
-        //$this->registerService('mail', Service_Mail::class);
-        //$this->registerService('http_client', Service_Http_Client::class);
-
-        // Registrar servicios para ejecución en consola.
+        $this->registerCoreServices();
         if ($this->type == 'console') {
-            $this->registerService('kernel', Service_Console_Kernel::class);
+            $this->registerConsoleServices();
+        } else {
+            $this->registerHttpServices();
         }
+        $this->execRegisterMethodOnAllServices();
+    }
 
-        // Registrar servicios para solicitud HTTP
-        else {
-            //$this->registerService('router', Service_Http_Router::class);
-            $this->registerService('session', Service_Http_Session::class);
-            //$this->registerService('auth', Service_Http_Auth::class);
-            $this->registerService('kernel', Service_Http_Kernel::class);
-            $request = Network_Request::capture();
-            $this->registerService('request', $request);
+    /**
+     * Registrar los servicios a partir de una configuración.
+     *
+     * @param array $services
+     */
+    protected function registerServicesFromConfig(array $services): void
+    {
+        foreach ($services as $key => $service) {
+            $key = is_string($key)
+                ? $key
+                : (is_object($service) ? get_class($service) : $service)
+            ;
+            $this->registerService($key, $service);
         }
+    }
 
-        // Ejecutar método register() en cada servicio.
+    /**
+     * Registrar servicios del núcleo (compartidos).
+     */
+    protected function registerCoreServices(): void
+    {
+        $config = $this->defaultCoreServices;
+        $this->registerServicesFromConfig($config);
+    }
+
+    /**
+     * Registrar servicios para ejecución en consola.
+     */
+    protected function registerConsoleServices(): void
+    {
+        $config = $this->defaultConsoleServices;
+        $this->registerServicesFromConfig($config);
+    }
+
+    /**
+     * Registrar servicios para solicitud HTTP.
+     */
+    protected function registerHttpServices(): void
+    {
+        $config = $this->defaultHttpServices;
+        $this->registerServicesFromConfig($config);
+        $request = Network_Request::capture();
+        $this->registerService('request', $request);
+    }
+
+    /**
+     * Ejecutar método register() en cada servicio.
+     */
+    protected function execRegisterMethodOnAllServices(): void
+    {
         $registered = [];
         foreach ($this->container->getBindings() as $key => $binding) {
             $service = $this->container->make($key);
@@ -236,7 +307,7 @@ class App
     /**
      * Inicializa todos los servicios necesarios después del registro.
      */
-    private function bootServices(): void
+    protected function bootServices(): void
     {
         $initialized = [];
         foreach ($this->container->getBindings() as $key => $binding) {
@@ -255,7 +326,7 @@ class App
      * @param string $key Identificador del servicio.
      * @param mixed $service Instancia del servicio o el nombre de la clase.
      */
-    private function registerService($key, $service): void
+    protected function registerService($key, $service): void
     {
         // Si el servicio ya está registrado no volver a registrarlo.
         if ($this->container->bound($key)) {
@@ -268,20 +339,26 @@ class App
                 $service->register();
             }
             $this->container->instance($key, $service);
-            $this->container->instance(get_class($service), $service);
+            $serviceClass = get_class($service);
+            if ($serviceClass != $key) {
+                $this->container->instance(get_class($service), $service);
+            }
         }
         // Si $service es una clase, usar singleton para registrar.
         else if (is_string($service)) {
             // Verificar que la clase del servicio exista.
             if (!class_exists($service)) {
                 throw new \InvalidArgumentException(sprintf(
-                    'La clase del servicio %s no existe.',
-                    $service
+                    'La clase "%s" del servicio "%s" no existe.',
+                    $service,
+                    $key
                 ));
             }
             // Registrar.
             $this->container->singleton($key, $service);
-            $this->container->singleton($service, $service);
+            if ($service != $key) {
+                $this->container->singleton($service, $service);
+            }
         }
         // Si $service es otra cosa, lanzar una excepción.
         else {

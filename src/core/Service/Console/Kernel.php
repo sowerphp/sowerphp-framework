@@ -57,7 +57,7 @@ class Service_Console_Kernel implements Interface_Service
      * @param array $args Argumentos que se pasarán al comando.
      * @return int Resultado de la ejecución del comando.
      */
-    private function dispatch(string $command, array $args): int
+    protected function dispatch(string $command, array $args): int
     {
         // Crear objeto
         $dot = strrpos($command, '.');
@@ -150,7 +150,7 @@ class Service_Console_Kernel implements Interface_Service
      * Método que entrega el listado de procesos en ejecución en el sistema
      * con sus argumentos y otros datos
      */
-    private function getCurrentProcesses(?string $filter = null)
+    protected function getCurrentProcesses(?string $filter = null)
     {
         $cols = [
             'pid',

@@ -260,7 +260,7 @@ class Service_Layers implements Interface_Service
      *
      * @return array Arreglo asociativo con las capas de la aplicación.
      */
-    private function getLayers(): array
+    protected function getLayers(): array
     {
         // Si las capas no están definidas se definen.
         if (!isset($this->layers)) {

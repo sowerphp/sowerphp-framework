@@ -52,7 +52,7 @@ class Service_Config implements Interface_Service
     /**
      * Cargar las variables de entorno desde el archivo .env
      */
-    private function loadEnvironmentVariables(): void
+    protected function loadEnvironmentVariables(): void
     {
         $env_file = $this->layersService->getProjectDir();
         $env = \Dotenv\Dotenv::createMutable($env_file, '.env');
@@ -68,23 +68,33 @@ class Service_Config implements Interface_Service
     /**
      * Cargar los archivos de configuración de la aplicación.
      */
-    private function loadConfigurations(): void
+    protected function loadConfigurations(): void
     {
+        // Cargar las configuraciones que existen en cada ruta.
         $paths = $this->layersService->getPathsReverse();
         foreach ($paths as $path) {
-            foreach (glob($path . '/App/config.php') as $filepath) {
+            $filepath = $path . '/App/config.php';
+            if (is_readable($filepath)) {
                 $this->loadConfiguration($filepath);
             }
+        }
+        // Cargar las configuraciones del directorio project:/config/
+        $configDir = $this->layersService->getProjectDir('/config');
+        foreach (glob($configDir . '/*.php') as $filepath) {
+            $this->loadConfiguration($filepath);
         }
     }
 
     /**
      * Cargar un archivo de configuración específico.
      */
-    public function loadConfiguration(string $filepath)
+    public function loadConfiguration(string $filepath): void
     {
         $key = basename($filepath, '.php');
         $config = require $filepath;
+        if ($config === false) {
+            return;
+        }
         if (!is_array($config)) {
             $message = sprintf(
                 'La configuración %s debe retornar un arreglo.',
@@ -96,13 +106,17 @@ class Service_Config implements Interface_Service
             $this->moduleService->registerModule($config['modules']);
             unset($config['modules']);
         }
-        $this->set($config);
+        if ($key != 'config') {
+            $this->set($key, $config);
+        } else {
+            $this->set($config);
+        }
     }
 
     /**
      * Método que configura la aplicación.
      */
-    private function configure(): void
+    protected function configure(): void
     {
         // Límites para ejecución (tiempo y memoria).
         if ($this->get('max_execution_time')) {
