@@ -43,7 +43,7 @@ class Controller_Session extends \Controller_App
      */
     public function config($var, $val, $redirect = null)
     {
-        app('session')->put('config.' . $var, $val);
+        session(['config.' . $var => $val]);
         if (!$redirect) {
             $this->redirect('/');
         } else {

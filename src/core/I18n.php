@@ -80,7 +80,7 @@ class I18n
     {
         if (!$locale) {
             try {
-                $locale = app('session')->get('config.language');
+                $locale = session('config.language');
             } catch (\Exception $e) {
                 $locale = null;
             }
@@ -93,7 +93,7 @@ class I18n
         }
         putenv("LANG=".$locale);
         setlocale(LC_MESSAGES, $locale);
-        bindtextdomain($domain, app('layers')->getProjectDir('/resources/locale'));
+        bindtextdomain($domain, app('layers')->getProjectPath('/resources/locale'));
         textdomain($domain);
         bind_textdomain_codeset($domain, $encoding);
         return gettext($string);
@@ -112,7 +112,7 @@ class I18n
         if (!strpos($locale, '_') && isset(self::$locale[$locale])) {
             $locale = self::$locale[$locale];
         }
-        return is_dir(app('layers')->getProjectDir('/resources/locale/' . $locale));
+        return is_dir(app('layers')->getProjectPath('/resources/locale/' . $locale));
     }
 
 }

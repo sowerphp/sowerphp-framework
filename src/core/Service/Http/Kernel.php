@@ -472,6 +472,9 @@ class Service_Http_Kernel implements Interface_Service
         // IDEA: Se podría pasar un callback al response con lo que se debe
         // ejecutar acá o ejecutar el shutdownProcess() (revisar bien la idea).
         // Incluir otras limpiezas que sean necesarias.
+
+        // Guardar y cerrar la sesión.
+        $this->sessionService->save();
     }
 
     /**
@@ -497,7 +500,8 @@ class Service_Http_Kernel implements Interface_Service
      */
     protected function handleError(\Error $error): void
     {
-        $this->sessionService->close();
+        header('Content-Type: text/plain; charset=UTF-8');
+        $this->sessionService->save();
         if ($this->configService->get('error.exception')) {
             $exception = new \ErrorException(
                 $error->getMessage(),

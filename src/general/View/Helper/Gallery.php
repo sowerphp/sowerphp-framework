@@ -42,7 +42,7 @@ class View_Helper_Gallery
 
     public function generate($dir)
     {
-        $projectDir = app('layers')->getProjectDir();
+        $projectDir = app('layers')->getProjectPath();
         // buffer para ir dibujando la galería
         $buffer = '';
         // obtener cabecera

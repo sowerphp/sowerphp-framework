@@ -207,7 +207,7 @@ class Controller_Maintainer extends \Controller_App
             // si hay algún error en la base de datos es porque los filtros están mal armados
             // si se llegó acá con el error, para que no falle la app se redirecciona al listado
             // con el error. Lo ideal es controlar esto antes con un "error más lindo".
-            \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+            \sowerphp\core\SessionMessage::write($e->getMessage(), 'error');
             $this->redirect($this->request->getRequestUriDecoded());
         }
         // paginar si es necesario
@@ -279,18 +279,18 @@ class Controller_Maintainer extends \Controller_App
                 try {
                     $Obj->checkAttributes();
                     if ($Obj->save()) {
-                        \sowerphp\core\Model_Datasource_Session::message('Registro creado.', 'ok');
+                        \sowerphp\core\SessionMessage::write('Registro creado.', 'ok');
                     } else {
-                        \sowerphp\core\Model_Datasource_Session::message('Registro no creado.', 'error');
+                        \sowerphp\core\SessionMessage::write('Registro no creado.', 'error');
                     }
                     $this->redirect(
                         $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
                     );
                 } catch (\Exception $e) {
-                    \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+                    \sowerphp\core\SessionMessage::write($e->getMessage(), 'error');
                 }
             } else {
-                \sowerphp\core\Model_Datasource_Session::message('Registro ya existe.', 'error');
+                \sowerphp\core\SessionMessage::write('Registro ya existe.', 'error');
             }
         }
         // setear variables
@@ -318,7 +318,7 @@ class Controller_Maintainer extends \Controller_App
         $Obj = new $this->model(array_map('urldecode', func_get_args()));
         // si el registro que se quiere editar no existe error
         if (!$Obj->exists()) {
-            \sowerphp\core\Model_Datasource_Session::message(
+            \sowerphp\core\SessionMessage::write(
                 'Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede editar.',
                 'error'
             );
@@ -343,11 +343,11 @@ class Controller_Maintainer extends \Controller_App
             try {
                 $Obj->checkAttributes();
                 if ($Obj->save()) {
-                    \sowerphp\core\Model_Datasource_Session::message(
+                    \sowerphp\core\SessionMessage::write(
                         'Registro ('.implode(', ', func_get_args()).') editado.', 'ok'
                     );
                 } else {
-                    \sowerphp\core\Model_Datasource_Session::message(
+                    \sowerphp\core\SessionMessage::write(
                         'Registro ('.implode(', ', func_get_args()).') no editado.', 'error'
                     );
                 }
@@ -355,7 +355,7 @@ class Controller_Maintainer extends \Controller_App
                     $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
                 );
             } catch (\Exception $e) {
-                \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+                \sowerphp\core\SessionMessage::write($e->getMessage(), 'error');
             }
         }
         // renderizar la vista
@@ -379,7 +379,7 @@ class Controller_Maintainer extends \Controller_App
     public function eliminar($pk)
     {
         if (!$this->deleteRecord) {
-            \sowerphp\core\Model_Datasource_Session::message(
+            \sowerphp\core\SessionMessage::write(
                 'No se permite el borrado de registros.', 'error'
             );
             $this->redirect(
@@ -390,7 +390,7 @@ class Controller_Maintainer extends \Controller_App
         $Obj = new $this->model(array_map('urldecode', func_get_args()));
         // si el registro que se quiere eliminar no existe error
         if(!$Obj->exists()) {
-            \sowerphp\core\Model_Datasource_Session::message(
+            \sowerphp\core\SessionMessage::write(
                 'Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede eliminar.',
                 'error'
             );
@@ -400,11 +400,11 @@ class Controller_Maintainer extends \Controller_App
         }
         try {
             $Obj->delete();
-            \sowerphp\core\Model_Datasource_Session::message(
+            \sowerphp\core\SessionMessage::write(
                 'Registro (' . implode(', ', func_get_args()) . ') eliminado.', 'ok'
             );
         } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
-            \sowerphp\core\Model_Datasource_Session::message(
+            \sowerphp\core\SessionMessage::write(
                 'No se pudo eliminar el registro (' . implode(', ', func_get_args()) . '): '.$e->getMessage(), 'error'
             );
         }
@@ -421,7 +421,7 @@ class Controller_Maintainer extends \Controller_App
         // si el campo que se solicita no existe error
         $model = $this->model;
         if (!isset($model::$columnsInfo[$campo . '_data'])) {
-            \sowerphp\core\Model_Datasource_Session::message(
+            \sowerphp\core\SessionMessage::write(
                 'Campo '.$campo.' no existe.', 'error'
             );
             $this->redirect(
@@ -432,7 +432,7 @@ class Controller_Maintainer extends \Controller_App
         $Obj = new $this->model($pks);
         // si el registro que se quiere eliminar no existe error
         if(!$Obj->exists()) {
-            \sowerphp\core\Model_Datasource_Session::message(
+            \sowerphp\core\SessionMessage::write(
                 'Registro (' . implode(', ', $pks) . ') no existe. No se puede obtener '.$campo.'.',
                 'error'
             );
@@ -441,7 +441,7 @@ class Controller_Maintainer extends \Controller_App
             );
         }
         if ((float)$Obj->{$campo.'_size'} == 0.0) {
-            \sowerphp\core\Model_Datasource_Session::message(
+            \sowerphp\core\SessionMessage::write(
                 'No hay datos para el campo ' . $campo . ' en el registro ('.implode(', ', $pks).').',
                 'error'
             );

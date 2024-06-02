@@ -44,8 +44,8 @@ class Controller_Error extends \Controller_App
             $data['message'] = htmlspecialchars($data['message']);
             $data['trace'] = str_replace(
                 [
-                    $layersService->getFrameworkDir(),
-                    $layersService->getProjectDir(),
+                    $layersService->getFrameworkPath(),
+                    $layersService->getProjectPath(),
                 ],
                 [
                     'framework:',

@@ -57,14 +57,14 @@ class Controller_Notificaciones extends \Controller_Maintainer
         // verificar que la notificación exista
         $Notificacion = new Model_Notificacion($notificacion);
         if (!$Notificacion->exists()) {
-            \sowerphp\core\Model_Datasource_Session::message(
+            \sowerphp\core\SessionMessage::write(
                 'Notificación solicitada no existe.', 'error'
             );
             $this->redirect('/sistema/notificaciones/notificaciones');
         }
         // si el usuario autenticado no es dueño de la notificación entonces error
         if ($this->Auth->User->id != $Notificacion->para) {
-            \sowerphp\core\Model_Datasource_Session::message(
+            \sowerphp\core\SessionMessage::write(
                 'Usuario autenticado no es destinatario de la notificación solicitada', 'error'
             );
             $this->redirect('/sistema/notificaciones/notificaciones');

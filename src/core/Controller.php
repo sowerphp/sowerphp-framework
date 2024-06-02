@@ -62,7 +62,7 @@ abstract class Controller
             '_url' => $this->request->getFullUrlWithoutQuery(),
         ));
         // obtener layout por defecto (el de la sesión)
-        $this->layout = app('session')->get('config.page.layout');
+        $this->layout = session('config.page.layout');
     }
 
     /**
@@ -103,7 +103,7 @@ abstract class Controller
                 $this->redirect($this->redirect);
             } else {
                 if (isset($this->redirect['msg'])) {
-                    \sowerphp\core\Model_Datasource_Session::message(
+                    \sowerphp\core\SessionMessage::write(
                         $this->redirect['msg']
                     );
                 }

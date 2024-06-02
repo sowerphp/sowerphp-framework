@@ -71,9 +71,29 @@ use League\Flysystem\Local\LocalFilesystemAdapter;
  * Descarga y respuesta:
  * - download($path, $name = null, $headers = [])
  * - response($path, $name = null, $headers = [], $disposition = 'inline')
+ *
+ * Además se tienen todos los métodos disponibles en la clase CustomFilesystem.
  */
 class Service_Storage implements Interface_Service
 {
+
+    /**
+     * Almacenamiento por defecto que usa el servicio de almacenamiento.
+     *
+     * @var string
+     */
+    protected $defaultStorage = 'local';
+
+    /**
+     * Listado de rutas de los dispositivos de almacenamient o ("discos") que
+     * se utilizan para acceder a los datos.
+     *
+     * Si son almacenamientos locales serán las rutas dentro del sistema de
+     * archivos.
+     *
+     * @var array
+     */
+    protected $paths = [];
 
     /**
      * Listado de conexiones a dispositivos de almacenamiento ("discos")
@@ -81,10 +101,10 @@ class Service_Storage implements Interface_Service
      *
      * @var array
      */
-    private $disks = [];
+    protected $disks = [];
 
     // Dependencias de otros servicios.
-    private $layersService;
+    protected $layersService;
 
     /**
      * Constructor del servicio con sus dependencias.
@@ -105,17 +125,20 @@ class Service_Storage implements Interface_Service
     {
         // Almacenamiento para todos los archivos (global).
         // Este almacenamiento debería contener a static y tmp.
-        $this->disks['local'] = new Filesystem(
-            new LocalFilesystemAdapter($this->layersService->getStorageDir())
+        $this->paths['local'] = $this->layersService->getStoragePath();
+        $this->disks['local'] = new CustomFilesystem(
+            new LocalFilesystemAdapter($this->paths['local'])
         );
         // Almacenamiento para archivos estáticos.
         // Estos archivos son accesibles mediante la URL.
-        $this->disks['static'] = new Filesystem(
-            new LocalFilesystemAdapter($this->layersService->getStaticDir())
+        $this->paths['static'] = $this->layersService->getStaticPath();
+        $this->disks['static'] = new CustomFilesystem(
+            new LocalFilesystemAdapter($this->paths['static'])
         );
         // Almacenamiento para archivos temporales.
-        $this->disks['tmp'] = new Filesystem(
-            new LocalFilesystemAdapter($this->layersService->getTmpDir())
+        $this->paths['tmp'] = $this->layersService->getTmpPath();
+        $this->disks['tmp'] = new CustomFilesystem(
+            new LocalFilesystemAdapter($this->paths['tmp'])
         );
     }
 
@@ -127,9 +150,7 @@ class Service_Storage implements Interface_Service
      */
     public function disk(?string $name = null): Filesystem
     {
-        if ($name === null) {
-            $name = 'local';
-        }
+        $name = $name ?? $this->defaultStorage;
         if (isset($this->disks[$name])) {
             return $this->disks[$name];
         }
@@ -137,6 +158,68 @@ class Service_Storage implements Interface_Service
             'El almacenamiento "%s" no está configurado para ser usado.',
             $name
         ));
+    }
+
+}
+
+/**
+ * Clase CustomFilesystem
+ *
+ * Extiende la funcionalidad del sistema de archivos Flysystem para incluir
+ * métodos personalizados específicos de la aplicación.
+ *
+ * Esta clase permite el uso de todas las operaciones estándar de Flysystem
+ * además de las personalizaciones adicionales definidas en la misma.
+ */
+class CustomFilesystem extends Filesystem
+{
+
+    /**
+     * Determina si una ruta es probablemente un directorio.
+     *
+     * @param string $path La ruta a verificar.
+     * @return bool True si la ruta es probablemente un directorio, de lo
+     * contrario False.
+     */
+    public function isLikelyDirectory(string $path): bool
+    {
+        // Verificar si la ruta ya existe y su tipo.
+        // 100% de certeza basada en que el directorio realmente existe.
+        if ($this->directoryExists($path)) {
+            return true;
+        }
+
+        // Verificar si la ruta termina con un slash.
+        // 100% de certeza basada en que todo $path que termina en "/" será un
+        // directorio.
+        if (substr($path, -1) === DIRECTORY_SEPARATOR) {
+            return true;
+        }
+
+        // Verificar si el nombre base tiene una extensión y es archivo.
+        // 75% de certeza basada en que la probabilidad de que el directorio
+        // tenga ".", en un lugar que no sea el inicio de su nombre, es baja.
+        $basename = basename($path);
+        if (strpos($basename, '.')) {
+            return false;
+        }
+
+        // Se asume directorio si no se logró determinar antes.
+        return true;
+    }
+
+    /**
+     * Verifica si una ruta es un directorio.
+     *
+     * @param string $path La ruta a verificar.
+     * @return bool True si la ruta es un directorio, de lo contrario False.
+     */
+    public function directoryExists(string $path): bool
+    {
+        return
+            $this->fileExists($path)
+            && $this->mimeType($path) === 'directory'
+        ;
     }
 
 }

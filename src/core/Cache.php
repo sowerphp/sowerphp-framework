@@ -73,7 +73,7 @@ class Cache
     public function setPrefix(?string $prefix = null)
     {
         if (!$prefix) {
-            $prefix = app('layers')->getProjectDir() . ':';
+            $prefix = app('layers')->getProjectPath() . ':';
         }
         $this->_prefix = $prefix;
     }

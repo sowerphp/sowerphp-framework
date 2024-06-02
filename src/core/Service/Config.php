@@ -23,19 +23,36 @@
 
 namespace sowerphp\core;
 
+use Illuminate\Config\Repository;
+
 class Service_Config implements Interface_Service
 {
 
-    protected $config = [];
+    /**
+     * Repositorio de configuración.
+     *
+     * @var \Illuminate\Config\Repository
+     */
+    protected $repository;
 
     // Dependencias de otros servicios.
     protected $layersService;
     protected $moduleService;
 
-    public function __construct(Service_Layers $layersService, Service_Module $moduleService)
+    /**
+     * Constructor de Service_Config.
+     *
+     * @param Service_Layers $layersService
+     * @param Service_Module $moduleService
+     */
+    public function __construct(
+        Service_Layers $layersService,
+        Service_Module $moduleService
+    )
     {
         $this->layersService = $layersService;
         $this->moduleService = $moduleService;
+        $this->repository = new Repository([]);
     }
 
     public function register()
@@ -54,7 +71,7 @@ class Service_Config implements Interface_Service
      */
     protected function loadEnvironmentVariables(): void
     {
-        $env_file = $this->layersService->getProjectDir();
+        $env_file = $this->layersService->getProjectPath();
         $env = \Dotenv\Dotenv::createMutable($env_file, '.env');
         try {
             $env->load();
@@ -79,7 +96,7 @@ class Service_Config implements Interface_Service
             }
         }
         // Cargar las configuraciones del directorio project:/config/
-        $configDir = $this->layersService->getProjectDir('/config');
+        $configDir = $this->layersService->getProjectPath('/config');
         foreach (glob($configDir . '/*.php') as $filepath) {
             $this->loadConfiguration($filepath);
         }
@@ -156,48 +173,58 @@ class Service_Config implements Interface_Service
     /**
      * Asignar un valor en la configuración.
      * Se puede pasar un arreglo con la configuración como un solo parámetro.
+     *
      * @param string|array $config Ubicación de la configuración o arreglo con
      * la configuración.
      * @param mixed $value Valor que se quiere guardar.
+     * @return void
      */
     public function set($config, $value = null): void
     {
         // Si config no es arreglo se crea como arreglo.
         if (!is_array($config)) {
-            $config = [$config => $value];
+            $this->repository->set($config, $value);
         }
         // Guardar cada una de las configuraciones pasadas.
-        foreach ($config as $selector => $value) {
-            $segments = explode('.', $selector);
-            $current = &$this->config;
-            foreach ($segments as $segment) {
-                if (!isset($current[$segment]) || !is_array($current[$segment])) {
-                    $current[$segment] = [];
-                }
-                $current = &$current[$segment];
+        else {
+            foreach ($config as $key => $val) {
+                $this->repository->set($key, $val);
             }
-            $current = $value;
         }
     }
 
     /**
      * Leer un valor desde la configuración.
+     *
      * @param string $selector Variable / parámetro que se desea leer.
      * @param mixed $default Valor por defecto de la variable buscada.
      * @return mixed Valor determinado de la variable (real, defecto o null).
      */
     public function get(string $selector, $default = null)
     {
-        $segments = explode('.', $selector);
-        $config = $this->config;
-        foreach ($segments as $segment) {
-            if (isset($config[$segment])) {
-                $config = $config[$segment];
-            } else {
-                return $default;
-            }
+        return $this->repository->get($selector, $default);
+    }
+
+    /**
+     * Entrega un repositorio con la configuración.
+     *
+     * Se puede entregar toda la configuración o bien una específica convertida
+     * a repositorio de configuración.
+     *
+     * @param string|null $selector Variable / parámetro que se desea leer.
+     * @param mixed $default Valor por defecto de la variable buscada.
+     * @return Repository Repositorio con la configuración buscada.
+     */
+    public function getRepository(?string $selector = null, $default = null)
+    {
+        // Si no se especificó una configuración se entrega todo el repositorio
+        // de la servicio de configuración.
+        if ($selector === null) {
+            return $this->repository;
         }
-        return $config;
+        // Entregar una configuración específica.
+        $value = $this->get($selector, $default);
+        return new Repository([$selector => $value]);
     }
 
 }

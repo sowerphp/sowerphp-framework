@@ -63,7 +63,7 @@ class Controller_Afdes extends \Controller_Maintainer
                 'hastas' => $_POST['hasta']
             ];
             $Afd->save();
-            \sowerphp\core\Model_Datasource_Session::message('AFD <em>'.$Afd->nombre.'</em> creado.', 'ok');
+            \sowerphp\core\SessionMessage::write('AFD <em>'.$Afd->nombre.'</em> creado.', 'ok');
             $this->redirect(
                 $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
             );
@@ -88,7 +88,7 @@ class Controller_Afdes extends \Controller_Maintainer
         $Afd = new Model_Afd($codigo);
         // si el registro que se quiere editar no existe error
         if(!$Afd->exists()) {
-            \sowerphp\core\Model_Datasource_Session::message(
+            \sowerphp\core\SessionMessage::write(
                 'AFD <em>'.$codigo.'</em> no existe, no se puede editar.',
                 'error'
             );
@@ -121,7 +121,7 @@ class Controller_Afdes extends \Controller_Maintainer
                 'hastas' => $_POST['hasta']
             ];
             $Afd->save();
-            \sowerphp\core\Model_Datasource_Session::message('AFD <em>'.$Afd->nombre.'</em> editado.', 'ok');
+            \sowerphp\core\SessionMessage::write('AFD <em>'.$Afd->nombre.'</em> editado.', 'ok');
             $this->redirect(
                 $this->module_url . $this->request->getParsedParams()['controller'] . '/editar/' . $codigo
                 . (!empty($_GET['listar']) ? '?listar='.$_GET['listar'] : '')

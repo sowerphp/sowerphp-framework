@@ -35,18 +35,34 @@ class Service_Layers implements Interface_Service
     /**
      * Arreglo con los archivos dentro de una ruta que representan puntos desde
      * donde se puede lanzar la aplicación.
+     *
      * Se utilizan para determinar el directorio del proyecto, aquel que
      * contiene al archivo que se encuentre en el backtrace.
      *
      * @var array
      */
-    private $start_files = [
-        'public/index.php',
-        'console/shell.php',
+    protected $startFiles = [
+        '/public/index.php',
+        '/console/shell.php',
     ];
 
     /**
+     * Arreglo con los archivos dentro de una ruta que contienen código PHP que
+     * no son clases y que deben ser importados.
+     *
+     * Por ejemplo archivos con funciones PHP (helpers.php).
+     *
+     * @var array
+     */
+    protected $importFiles = [
+        '/App/helpers.php',
+    ];
+
+    protected $configLayersFile = '/config/layers.php';
+
+    /**
      * Arreglo asociativo con los directorios (pueden tener una o más capas).
+     *
      * Estos son autodetectados y son fijos:
      *   - framework: directorio dónde se encuentra el framework.
      *   - proyect: directorio dónde se encuentra el proyecto construído.
@@ -56,10 +72,11 @@ class Service_Layers implements Interface_Service
      *
      * @var array
      */
-    private $directories;
+    protected $directories;
 
     /**
      * Arreglo asociativo con las capas de la aplicación.
+     *
      * Estas capas normalmente estarán en los directorios previamente
      * definidos, sin embargo no es una obligación y una capa podría estar en
      * cualquier directorio.
@@ -69,7 +86,7 @@ class Service_Layers implements Interface_Service
      *
      * @var array
      */
-    private $layers;
+    protected $layers;
 
     /**
      * Arreglo con las rutas de las capas ordenadas de mayor a menor
@@ -77,7 +94,7 @@ class Service_Layers implements Interface_Service
      *
      * @var array
      */
-    private $paths;
+    protected $paths;
 
     /**
      * Arreglo con las rutas en las capas ordenadas de menor a mayor
@@ -85,12 +102,12 @@ class Service_Layers implements Interface_Service
      *
      * @var array
      */
-    private $pathsReverse;
+    protected $pathsReverse;
 
     /**
      * Caché para las rutas de archivos que se han determinado.
      */
-    private $filepaths = [];
+    protected $filepaths = [];
 
     /**
      * Registrar el autocargador mágico de las clases.
@@ -118,9 +135,7 @@ class Service_Layers implements Interface_Service
         $this->getPathsReverse();
 
         // Cargar (importar) archivos PHP que no son clases.
-        $this->loadFiles([
-            '/App/helpers.php',
-        ]);
+        $this->loadFiles($this->importFiles);
     }
 
     /**
@@ -132,11 +147,11 @@ class Service_Layers implements Interface_Service
     {
         // Si no se han cargado los directorios se cargan.
         if (empty($this->directories)) {
-            $this->getFrameworkDir();
-            $this->getProjectDir();
-            $this->getStorageDir();
-            define('DIR_STATIC', $this->getStaticDir());
-            define('DIR_TMP', $this->getTmpDir());
+            $this->getFrameworkPath();
+            $this->getProjectPath();
+            $this->getStoragePath();
+            define('DIR_STATIC', $this->getStaticPath());
+            define('DIR_TMP', $this->getTmpPath());
         }
         // Entregar el arreglo asociativo de directorios.
         return $this->directories;
@@ -148,14 +163,14 @@ class Service_Layers implements Interface_Service
      * @param string $path Ruta que se desea obtener dentro del directorio.
      * @return string La ruta del directorio del framework.
      */
-    public function getFrameworkDir(?string $path = null): string
+    public function getFrameworkPath(?string $path = null): string
     {
         // Si el directorio ya está asignado se entrega.
         if (!isset($this->directories['framework'])) {
             $this->directories['framework'] = dirname(dirname(dirname(__DIR__)));
         }
         // Retornar el directorio determinado o la ruta dentro del directorio.
-        return $this->directories['framework'] . ($path ?? '');
+        return $this->directories['framework'] . $this->normalizePath($path);
     }
 
     /**
@@ -170,7 +185,7 @@ class Service_Layers implements Interface_Service
      * @param string $path Ruta que se desea obtener dentro del directorio.
      * @return string La ruta del directorio del proyecto.
      */
-    public function getProjectDir(?string $path = null): string
+    public function getProjectPath(?string $path = null): string
     {
         // Si el directorio no está asignado se asigna.
         if (!isset($this->directories['project'])) {
@@ -178,7 +193,7 @@ class Service_Layers implements Interface_Service
             // archivos.
             $pattern = '#(' . implode('|', array_map(function($file) {
                 return preg_quote($file, '#');
-            }, $this->start_files)) . ')$#';
+            }, $this->startFiles)) . ')$#';
             // Obtener el rastreo de depuración
             $backtrace = debug_backtrace();
             // Iterar a través del rastreo para encontrar una ruta de archivo
@@ -196,45 +211,52 @@ class Service_Layers implements Interface_Service
             }
         }
         // Retornar el directorio determinado o la ruta dentro del directorio.
-        return $this->directories['project'] . ($path ?? '');
+        return $this->directories['project'] . $this->normalizePath($path);
     }
 
     /**
      * Obtiene el directorio de almacenamiento de la aplicación.
+     *
      * Por defecto es el directorio /storage dentro del proyecto.
      *
      * @param string $path Ruta que se desea obtener dentro del directorio.
      * @return string La ruta del directorio de almacenamiento.
      */
-    public function getStorageDir(?string $path = null): string
+    public function getStoragePath(?string $path = null): string
     {
         // Si el directorio ya está asignado se entrega.
         if (!isset($this->directories['storage'])) {
-            $this->directories['storage'] = $this->getProjectDir('/storage');
+            $this->directories['storage'] = $this->getProjectPath(
+                DIRECTORY_SEPARATOR . 'storage'
+            );
         }
         // Retornar el directorio determinado o la ruta dentro del directorio.
-        return $this->directories['storage'] . ($path ?? '');
+        return $this->directories['storage'] . $this->normalizePath($path);
     }
 
     /**
      * Obtiene el directorio de archivos estáticos de la aplicación.
+     *
      * Por defecto es el directorio /storage/static dentro del proyecto.
      *
      * @param string $path Ruta que se desea obtener dentro del directorio.
      * @return string La ruta del directorio de archivos estáticos.
      */
-    public function getStaticDir(?string $path = null): string
+    public function getStaticPath(?string $path = null): string
     {
         // Si el directorio ya está asignado se entrega.
         if (!isset($this->directories['static'])) {
-            $this->directories['static'] = $this->getStorageDir('/static');
+            $this->directories['static'] = $this->getStoragePath(
+                DIRECTORY_SEPARATOR . 'static'
+            );
         }
         // Retornar el directorio determinado o la ruta dentro del directorio.
-        return $this->directories['static'] . ($path ?? '');
+        return $this->directories['static'] . $this->normalizePath($path);
     }
 
     /**
      * Obtiene el directorio de archivos temporales del proyecto.
+     *
      * Por defecto es el directorio /storage/tmp dentro del proyecto si existe
      * y tiene permisos de lectura, o bien el directorio de archivos temporales
      * del sistema operativo.
@@ -242,17 +264,39 @@ class Service_Layers implements Interface_Service
      * @param string $path Ruta que se desea obtener dentro del directorio.
      * @return string La ruta del directorio de archivos temporales.
      */
-    public function getTmpDir(?string $path = null): string
+    public function getTmpPath(?string $path = null): string
     {
         // Si el directorio ya está asignado se entrega.
         if (!isset($this->directories['tmp'])) {
-            $this->directories['tmp'] = $this->getStorageDir('/tmp');
+            $this->directories['tmp'] = $this->getStoragePath(
+                DIRECTORY_SEPARATOR . 'tmp'
+            );
             if (!is_writable($this->directories['tmp'])) {
                 $this->directories['tmp'] = sys_get_temp_dir();
             }
         }
         // Retornar el directorio determinado o la ruta dentro del directorio.
-        return $this->directories['tmp'] . ($path ?? '');
+        return $this->directories['tmp'] . $this->normalizePath($path);
+    }
+
+    /**
+     * Método que normaliza un path. Esto lo hace incorporando el "slash"
+     * inicial. Con esto el path quedará desde la "raíz". Y esa "raíz" podrá
+     * ser la raíz real del sistema de archivo o la raíz de uno de los
+     * directorios de las capas.
+     *
+     * @param string|null $path Path que se está buscando normalizar.
+     * @return string
+     */
+    protected function normalizePath(?string $path = null): string
+    {
+        if ($path) {
+            if ($path[0] != DIRECTORY_SEPARATOR) {
+                $path = DIRECTORY_SEPARATOR . $path;
+            }
+            return $path;
+        }
+        return '';
     }
 
     /**
@@ -264,13 +308,13 @@ class Service_Layers implements Interface_Service
     {
         // Si las capas no están definidas se definen.
         if (!isset($this->layers)) {
-            $layers = require $this->getProjectDir('/config/layers.php');
+            $layers = require $this->getProjectPath($this->configLayersFile);
             $this->layers = [];
             foreach ($layers as $layer) {
                 $this->layers[$layer['namespace']] = [
                     'path' => str_replace(
                         ['framework:', 'project:'],
-                        [$this->getFrameworkDir(), $this->getProjectDir()],
+                        [$this->getFrameworkPath(), $this->getProjectPath()],
                         $layer['directory']
                     )
                 ];
@@ -288,7 +332,7 @@ class Service_Layers implements Interface_Service
      */
     public function getLayer(string $layer): ?array
     {
-        $layer = str_replace('/', '\\', $layer);
+        $layer = str_replace(DIRECTORY_SEPARATOR, '\\', $layer);
         return $this->layers[$layer] ?? null;
     }
 
@@ -327,9 +371,11 @@ class Service_Layers implements Interface_Service
 
     /**
      * Obtener la ruta del archivo que tiene la máxima prioridad.
+     *
      * O sea, se obtiene la ruta completa del primer archivo que se encuentra
      * buscando en todas las rutas de la aplicación desde mayor a menor
      * prioridad.
+     *
      * Este método permite buscar cualquier archivo dentro de las capas de la
      * aplicación.
      *
@@ -338,7 +384,7 @@ class Service_Layers implements Interface_Service
      */
     public function getFilePath(string $filename): ?string
     {
-        $filename = ($filename[0] != '/' ? '/' : '') . $filename;
+        $filename = $this->normalizePath($filename);
         // Si la ruta absoluta al archivo no está determinada se busca.
         if (!isset($this->filepaths[$filename])) {
             $paths = $this->getPaths();
@@ -379,6 +425,7 @@ class Service_Layers implements Interface_Service
 
     /**
      * Método para autocarga de clases que no están cubiertas por composer.
+     *
      * Se requiere este autocargador porque el define que una clase puede estar
      * en cualquiera de las capas, y eso no se puede lograr con PSR4. Ya que
      * este necesariamente hace la búsqueda con el namespace. Acá el objetivo
@@ -388,6 +435,7 @@ class Service_Layers implements Interface_Service
      * independientemente del namespace que tenga esa clase encontrada, o sea,
      * independientemente de la capa donde se haya encontrado. Esto entrega
      * ciertas ventajas y facilidades a la hora de programar (simplificaciones).
+     *
      * Solo se deben buscar clases donde su namespace (prefijo) sea:
      *   - No tengan prefijo. Esto es temporal mientras se migra al prefijo.
      *   - Partan con el prefijo: \sowerphp\magicload\
@@ -422,23 +470,28 @@ class Service_Layers implements Interface_Service
         //   - Dev\Controller_Config
         //   - Sistema\Usuarios\Model_Usuario
         $magic_class_has_module = strpos($magic_class, '\\') !== false;
-        $magic_class_file = str_replace('_', '/', $magic_class) . '.php';
+        $magic_class_file = str_replace('_', DIRECTORY_SEPARATOR, $magic_class)
+            . '.php'
+        ;
         if ($magic_class_has_module) {
+            $module_dir_for_path =
+                DIRECTORY_SEPARATOR . 'Module' . DIRECTORY_SEPARATOR
+            ;
             $magic_class_file_parts = explode('\\', $magic_class_file);
             $magic_class_file_parts_count = count($magic_class_file_parts);
-            $magic_class_file = '/Module/'
+            $magic_class_file = $module_dir_for_path
                 . implode(
-                    '/Module/',
+                    $module_dir_for_path,
                     array_slice(
                         $magic_class_file_parts,
                         0,
                         $magic_class_file_parts_count - 1
                     )
-                ) . '/'
+                ) . DIRECTORY_SEPARATOR
                 . $magic_class_file_parts[$magic_class_file_parts_count-1]
             ;
         } else {
-            $magic_class_file = '/' . $magic_class_file;
+            $magic_class_file = DIRECTORY_SEPARATOR . $magic_class_file;
         }
         // Buscar la clase automágica.
         $real_class = null;

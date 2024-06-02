@@ -45,7 +45,7 @@ class Controller_Email extends \Controller_App
         ]);
         if (isset($_POST['submit'])) {
             if (!isset($_POST['grupos']) || empty($_POST['asunto']) || empty($_POST['mensaje'])) {
-                \sowerphp\core\Model_Datasource_Session::message(
+                \sowerphp\core\SessionMessage::write(
                     'Debe completar todos los campos del formulario', 'error'
                 );
             } else {
@@ -56,7 +56,7 @@ class Controller_Email extends \Controller_App
                 }
                 $n_emails = count($emails);
                 if (!$n_emails) {
-                    \sowerphp\core\Model_Datasource_Session::message(
+                    \sowerphp\core\SessionMessage::write(
                         'No hay destinatarios para el correo electrónico con los grupos seleccionados.', 'error'
                     );
                 } else {
@@ -119,11 +119,11 @@ class Controller_Email extends \Controller_App
                         }
                     }
                     if ($status === true) {
-                        \sowerphp\core\Model_Datasource_Session::message(
+                        \sowerphp\core\SessionMessage::write(
                             'Mensaje envíado a '.num($n_emails).' usuarios.', 'ok'
                         );
                     } else {
-                        \sowerphp\core\Model_Datasource_Session::message(
+                        \sowerphp\core\SessionMessage::write(
                             'Ha ocurrido un error al intentar enviar su mensaje, por favor intente nuevamente.<br /><em>'.$status['message'].'</em>', 'error'
                         );
                     }

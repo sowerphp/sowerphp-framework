@@ -31,7 +31,7 @@
  * @return mixed La instancia del servicio solicitado o la instancia de
  * la clase contenedora.
  */
-function app(string $key = null, array $parameters = [])
+function app(string $key = null, array $parameters = []): object
 {
     $instance = \sowerphp\core\App::getInstance();
     if ($key === null) {
@@ -44,6 +44,44 @@ function app(string $key = null, array $parameters = [])
 }
 
 /**
+ * Obtener una instancia de almacenamiento.
+ *
+ * @param string|null $disk Nombre del disco que se desea usar.
+ * @return \League\Flysystem\Filesystem
+ */
+function storage(?string $disk = null): \League\Flysystem\Filesystem
+{
+    return app('storage')->disk($disk);
+}
+
+/**
+ * Obtiene la ruta al directorio de almacenamiento.
+ *
+ * Este método utiliza el servicio 'layers' registrado en la aplicación para
+ * obtener el directorio de almacenamiento. Si se proporciona un camino
+ * adicional, se concatenará con el directorio de almacenamiento.
+ *
+ * Además, si la ruta se pasa y se determina que es un directorio se verificará
+ * si existe, si no existe se tratará de crear.
+ *
+ * @param string|null $path Ruta adicional para concatenar con el directorio
+ * de almacenamiento.
+ * @return string Ruta completa al directorio de almacenamiento, incluyendo la
+ * ruta adicional si se proporciona.
+ */
+function storage_path(?string $path = null): string
+{
+    if ($path !== null) {
+        $storage = storage();
+        $isDirectory = $storage->isLikelyDirectory($path);
+        if ($isDirectory && !$storage->directoryExists($path)) {
+            $storage->createDirectory($path);
+        }
+    }
+    return app('layers')->getStoragePath($path);
+}
+
+/**
  * Función global para acceder a la configuración de la aplicación.
  * @param string $selector Variable / parámetro que se desea leer.
  * @param mixed $default Valor por defecto de la variable buscada.
@@ -52,6 +90,37 @@ function app(string $key = null, array $parameters = [])
 function config(string $selector, $default = null)
 {
     return app('config')->get($selector, $default);
+}
+
+/**
+ * Función auxiliar para interactuar con la sesión.
+ *
+ * @param string|null $key
+ * @param mixed $default
+ * @return mixed
+ */
+function session($key = null, $default = null)
+{
+    // Obtener el servicio de la sesión desde el contenedor de la aplicación.
+    $sessionService = app('session');
+
+    // Si no se proporciona una clave, devolver el servicio de la sesión.
+    if (is_null($key)) {
+        return $sessionService;
+    }
+
+    // Si se proporciona un array, tratarlo como un conjunto de pares
+    // clave-valor para almacenar en la sesión.
+    if (is_array($key)) {
+        foreach ($key as $k => $v) {
+            $sessionService->put($k, $v);
+        }
+        return;
+    }
+
+    // De lo contrario, devolver el valor de la sesión para la clave
+    // proporcionada, con un posible valor por defecto.
+    return $sessionService->get($key, $default);
 }
 
 /**
@@ -101,17 +170,6 @@ function url(string $resource = '/', ...$args): string
 }
 
 /**
- * Obtener una instancia de almacenamiento.
- *
- * @param string|null $disk Nombre del disco que se desea usar.
- * @return \League\Flysystem\Filesystem
- */
-function storage(?string $disk = null): \League\Flysystem\Filesystem
-{
-    return app('storage')->disk($disk);
-}
-
-/**
  * Función para mostrar información relevante para depuración de una
  * variale.
  * @param mixed $var Variable que se desea mostrar.
@@ -124,7 +182,7 @@ function debug($var, ?string $label = null)
     $debug_caller = $backtrace[1];
 
     $data = [
-        'label' => $label,
+        'label' => $label ?? 'debug($var)',
         'type' => gettype($var),
         'length' => is_countable($var)
             ? count($var)
@@ -295,7 +353,7 @@ function shell_exec_async($cmd, $log = false, &$output = []): int
         return 255;
     }
     if ($cmd[0] != '/') {
-        $cmd = app('layers')->getProjectDir() . '/console/shell.php ' . $cmd;
+        $cmd = app('layers')->getProjectPath() . '/console/shell.php ' . $cmd;
     }
     $screen_cmd = 'screen -dm';
     if ($log) {

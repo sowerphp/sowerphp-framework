@@ -51,13 +51,13 @@ class App
     protected $defaultCoreServices = [
         'layers' => Service_Layers::class,
         'module' => Service_Module::class,
-        'config' => Service_Config::class,
-        //'lang' => Service_Lang::class,
         'storage' => Service_Storage::class,
+        'config' => Service_Config::class,
         //'cache' => Service_Cache::class,
         //'database' => Service_Database::class,
         //'mail' => Service_Mail::class,
         //'http_client' => Service_Http_Client::class,
+        //'lang' => Service_Lang::class,
     ];
 
     /**
@@ -183,7 +183,7 @@ class App
         // Armar mensaje con el detalle del error o excepción.
         $error = sprintf(
             'Se capturó %s (%s de nivel %s):' . "\n\n"
-                .' %s.' . "\n\n"
+                . ' %s' . "\n\n"
                 . 'En %s:%d.' . "\n\n"
                 . 'Traza completa:' . "\n\n"
                 . '%s'

@@ -48,7 +48,7 @@ class Controller_Contacto extends \Controller_App
         // si no hay datos para el envió del correo electrónico no
         // permirir cargar página de contacto
         if (config('email.default') === null) {
-            \sowerphp\core\Model_Datasource_Session::message(
+            \sowerphp\core\SessionMessage::write(
                 __('La página de contacto no se encuentra disponible.'), 'error'
             );
             $this->redirect('/');
@@ -59,7 +59,7 @@ class Controller_Contacto extends \Controller_App
             try {
                 \sowerphp\general\Utility_Google_Recaptcha::check();
             } catch (\Exception $e) {
-                \sowerphp\core\Model_Datasource_Session::message(
+                \sowerphp\core\SessionMessage::write(
                     __('Falló validación captcha: '.$e->getMessage()), 'error'
                 );
                 return;
@@ -80,17 +80,17 @@ class Controller_Contacto extends \Controller_App
                 $msg = $_POST['mensaje']."\n\n".'-- '."\n".$_POST['nombre']."\n".$_POST['correo'];
                 $status = $email->send($msg);
                 if ($status === true) {
-                    \sowerphp\core\Model_Datasource_Session::message(
+                    \sowerphp\core\SessionMessage::write(
                         __('Su mensaje ha sido enviado, se responderá a la brevedad.'), 'ok'
                     );
                     $this->redirect('/contacto');
                 } else {
-                    \sowerphp\core\Model_Datasource_Session::message(
+                    \sowerphp\core\SessionMessage::write(
                         __('Ha ocurrido un error al enviar su mensaje, por favor intente nuevamente.<br /><em>%s</em>', $status['message']), 'error'
                     );
                 }
             } else {
-                \sowerphp\core\Model_Datasource_Session::message(
+                \sowerphp\core\SessionMessage::write(
                     __('Por favor, completar todos los campos del formulario'), 'error'
                 );
             }

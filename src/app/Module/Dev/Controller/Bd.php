@@ -87,7 +87,7 @@ class Controller_Bd extends \Controller_App
         // procesar formulario si fue enviado
         if (isset($_POST['submit'])) {
             if (!isset($_FILES['file']) || $_FILES['file']['error']) {
-                \sowerphp\core\Model_Datasource_Session::message('No fue posible leer el archivo de carga de datos.', 'error');
+                \sowerphp\core\SessionMessage::write('No fue posible leer el archivo de carga de datos.', 'error');
                 return;
             }
             // cargar hojas del archivo
@@ -97,7 +97,7 @@ class Controller_Bd extends \Controller_App
                     throw new \Exception('No se encontraron hojas para procesar en el archivo de carga de datos (o bien no se logró leer el listado de hojas del archivo).');
                 }
             } catch (\Exception $e) {
-                \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+                \sowerphp\core\SessionMessage::write($e->getMessage(), 'error');
                 return;
             }
             // hacer todo en una transacción
@@ -204,7 +204,7 @@ class Controller_Bd extends \Controller_App
             }
             // terminar transacción
             $db->commit();
-            \sowerphp\core\Model_Datasource_Session::message(implode('<br />', $message));
+            \sowerphp\core\SessionMessage::write(implode('<br />', $message));
         }
     }
 
@@ -264,7 +264,7 @@ class Controller_Bd extends \Controller_App
             try {
                 $data = $db->getTableWithColsNames($_POST['query']);
             } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
-                \sowerphp\core\Model_Datasource_Session::message(
+                \sowerphp\core\SessionMessage::write(
                     $e->getMessage(), 'error'
                 );
             }
