@@ -24,6 +24,7 @@
 namespace sowerphp\core;
 
 use Illuminate\Container\Container;
+use Illuminate\Config\Repository;
 use Illuminate\Session\SessionManager;
 use Illuminate\Filesystem\Filesystem;
 // use Illuminate\Cache\CacheManager;
@@ -35,6 +36,26 @@ use Illuminate\Filesystem\Filesystem;
  */
 class Service_Http_Session implements Interface_Service
 {
+
+    /**
+     * Configuración por defecto de la sesión del usuario.
+     *
+     * @var array
+     */
+    protected $defaultConfig = [
+        'driver' => 'file',
+        'lifetime' => 10080, // en minutos. Por defecto: 1 semana.
+        'expire_on_close' => false,
+        'encrypt' => false,
+        'cookie' => 'sec_session_id',
+        'http_only' => true,
+        'same_site' => 'lax',
+        // NOTE: Estas opciones se asigan en el método por requerir alguna acción.
+        'files' => null,
+        'path' => null,
+        'domain' => null,
+        'secure' => null,
+    ];
 
     /**
      * Contenedor de servicios de la sesión.
@@ -116,6 +137,7 @@ class Service_Http_Session implements Interface_Service
             // y registrarla en el contenedor.
             $configRepository = $this->configService->getRepository();
             $container->instance('config', $configRepository);
+            $this->setDefaultConfig($configRepository);
 
             // Registrar el servicio de archivos (driver) en el contenedor.
             $container->singleton('files', Filesystem::class);
@@ -128,6 +150,48 @@ class Service_Http_Session implements Interface_Service
         }
         // Entregar el administrador de la sesión.
         return $this->sessionManager;
+    }
+
+    /**
+     * Asignar configuración por defecto para la sesión.
+     */
+    protected function setDefaultConfig(Repository $config): void
+    {
+        // Asignar configuración estándar (atributo de la clase).
+        foreach ($this->defaultConfig as $key => $value) {
+            $key = 'session.' . $key;
+            if (!$config->has($key)) {
+                $config->set($key, $value);
+            }
+        }
+
+        // Asignar ubicación de archivos si no existe.
+        if (!$config->has('session.files') || is_null($config->get('session.files'))) {
+            $config->set('session.files', storage_path('framework/sessions'));
+        }
+
+        // Asignar ruta por defecto.
+        if (!$config->has('session.path') || is_null($config->get('session.path'))) {
+            $path = request()->getBaseUrlWithoutSlash();
+            $config->set('session.path', $path != '' ? $path : '/');
+        }
+
+        // Asignar dominio por defecto.
+        if (!$config->has('session.domain') || is_null($config->get('session.domain'))) {
+            $domain = request()->headers->get('X-Forwarded-Host');
+            if (!$domain) {
+                $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+            }
+            if (strpos($domain, ':')) {
+                list($domain, $port) = explode(':', $domain);
+            }
+            $config->set('session.domain', $domain);
+        }
+
+        // Asignar cómo se provee la cookie de la sesión por defecto.
+        if (!$config->has('session.secure') || is_null($config->get('session.secure'))) {
+            $config->set('session.secure', isset($_SERVER['HTTPS']));
+        }
     }
 
     /**
