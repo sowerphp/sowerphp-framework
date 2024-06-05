@@ -24,6 +24,8 @@
 // namespace del controlador
 namespace sowerphp\app\Sistema\Usuarios;
 
+use \sowerphp\core\Facade_Session_Message as SessionMessage;
+
 /**
  * Controlador para el envío masivo de correos electrónicos a usuarios de la
  * aplicación
@@ -44,9 +46,13 @@ class Controller_Email extends \Controller_App
             'page_title' => $page_title,
         ]);
         if (isset($_POST['submit'])) {
-            if (!isset($_POST['grupos']) || empty($_POST['asunto']) || empty($_POST['mensaje'])) {
-                \sowerphp\core\SessionMessage::write(
-                    'Debe completar todos los campos del formulario', 'error'
+            if (
+                !isset($_POST['grupos'])
+                || empty($_POST['asunto'])
+                || empty($_POST['mensaje'])
+            ) {
+                SessionMessage::error(
+                    'Debe completar todos los campos del formulario.'
                 );
             } else {
                 $emails = $Grupos->emails($_POST['grupos']);
@@ -56,8 +62,8 @@ class Controller_Email extends \Controller_App
                 }
                 $n_emails = count($emails);
                 if (!$n_emails) {
-                    \sowerphp\core\SessionMessage::write(
-                        'No hay destinatarios para el correo electrónico con los grupos seleccionados.', 'error'
+                    SessionMessage::error(
+                        'No hay destinatarios para el correo electrónico con los grupos seleccionados.'
                     );
                 } else {
                     // preparar mensaje a enviar
@@ -119,12 +125,12 @@ class Controller_Email extends \Controller_App
                         }
                     }
                     if ($status === true) {
-                        \sowerphp\core\SessionMessage::write(
-                            'Mensaje envíado a '.num($n_emails).' usuarios.', 'ok'
+                        SessionMessage::success(
+                            'Mensaje envíado a '.num($n_emails).' usuarios.'
                         );
                     } else {
-                        \sowerphp\core\SessionMessage::write(
-                            'Ha ocurrido un error al intentar enviar su mensaje, por favor intente nuevamente.<br /><em>'.$status['message'].'</em>', 'error'
+                        SessionMessage::error(
+                            'Ha ocurrido un error al intentar enviar su mensaje, por favor intente nuevamente.<br /><em>'.$status['message'].'</em>'
                         );
                     }
                     $this->redirect($this->request->getRequestUriDecoded());

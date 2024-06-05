@@ -23,6 +23,8 @@
 
 namespace sowerphp\core;
 
+use \sowerphp\core\Facade_Session_Message as SessionMessage;
+
 /**
  * Clase base para los controladores de la aplicación
  */
@@ -94,7 +96,7 @@ abstract class Controller
     }
 
     /**
-     * Método que se ejecuta al terminar la ejecución del controlador
+     * Método que se ejecuta al terminar la ejecución del controlador.
      */
     public function afterFilter()
     {
@@ -103,9 +105,7 @@ abstract class Controller
                 $this->redirect($this->redirect);
             } else {
                 if (isset($this->redirect['msg'])) {
-                    \sowerphp\core\SessionMessage::write(
-                        $this->redirect['msg']
-                    );
+                    SessionMessage::info($this->redirect['msg']);
                 }
                 $this->redirect($this->redirect['page']);
             }

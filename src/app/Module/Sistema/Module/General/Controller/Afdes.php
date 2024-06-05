@@ -24,6 +24,8 @@
 // namespace del controlador
 namespace sowerphp\app\Sistema\General;
 
+use \sowerphp\core\Facade_Session_Message as SessionMessage;
+
 /**
  * Clase para el controlador asociado a la tabla afd de la base de
  * datos
@@ -63,7 +65,7 @@ class Controller_Afdes extends \Controller_Maintainer
                 'hastas' => $_POST['hasta']
             ];
             $Afd->save();
-            \sowerphp\core\SessionMessage::write('AFD <em>'.$Afd->nombre.'</em> creado.', 'ok');
+            SessionMessage::success('AFD <em>'.$Afd->nombre.'</em> creado.');
             $this->redirect(
                 $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
             );
@@ -88,9 +90,8 @@ class Controller_Afdes extends \Controller_Maintainer
         $Afd = new Model_Afd($codigo);
         // si el registro que se quiere editar no existe error
         if(!$Afd->exists()) {
-            \sowerphp\core\SessionMessage::write(
-                'AFD <em>'.$codigo.'</em> no existe, no se puede editar.',
-                'error'
+            SessionMessage::error(
+                'AFD <em>'.$codigo.'</em> no existe, no se puede editar.'
             );
             $this->redirect(
                 $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
@@ -121,7 +122,7 @@ class Controller_Afdes extends \Controller_Maintainer
                 'hastas' => $_POST['hasta']
             ];
             $Afd->save();
-            \sowerphp\core\SessionMessage::write('AFD <em>'.$Afd->nombre.'</em> editado.', 'ok');
+            SessionMessage::success('AFD <em>'.$Afd->nombre.'</em> editado.');
             $this->redirect(
                 $this->module_url . $this->request->getParsedParams()['controller'] . '/editar/' . $codigo
                 . (!empty($_GET['listar']) ? '?listar='.$_GET['listar'] : '')

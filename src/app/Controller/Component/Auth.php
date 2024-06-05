@@ -23,6 +23,8 @@
 
 namespace sowerphp\app;
 
+use \sowerphp\core\Facade_Session_Message as SessionMessage;
+
 /**
  * Componente para proveer de un sistema de autenticación y autorización
  */
@@ -119,10 +121,10 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     {
         if (!$this->isAuthorized()) {
             if (!$this->logged()) {
-                \sowerphp\core\SessionMessage::write(sprintf(
+                SessionMessage::error(sprintf(
                     $this->settings['messages']['error']['nologin'],
                     $this->controller->request->getRequestUriDecoded()
-                ), 'error');
+                ));
                 $this->controller->redirect(
                     $this->settings['redirect']['form'] . '/' .
                     base64_encode($this->controller->request->getRequestUriDecoded())
@@ -133,7 +135,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
                     $this->User->usuario,
                     $this->controller->request->getRequestUriDecoded()
                 );
-                \sowerphp\core\SessionMessage::write($msg, 'error');
+                SessionMessage::error($msg);
                 $this->log($msg, LOG_ERR);
                 $this->controller->redirect($this->settings['redirect']['error']);
             }
@@ -221,12 +223,10 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
                         $this->settings['session']['key'].$this->session['id']
                     );
                     session()->flush();
-                    \sowerphp\core\SessionMessage::write(
-                        sprintf(
-                            $this->settings['messages']['error']['newlogin'],
-                            $this->User->usuario
-                        ), 'error'
-                    );
+                    SessionMessage::error(sprintf(
+                        $this->settings['messages']['error']['newlogin'],
+                        $this->User->usuario
+                    ));
                     $this->__logged = false;
                 } else {
                     $this->__logged = true;
@@ -268,9 +268,10 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         }
         // si el usuario no existe -> error
         if (!$this->User->exists()) {
-            \sowerphp\core\SessionMessage::write(
-                sprintf($this->settings['messages']['error']['notexist'], $usuario), 'error'
-            );
+            SessionMessage::error(sprintf(
+                $this->settings['messages']['error']['notexist'],
+                $usuario
+            ));
             if (isset($this->settings['redirect']['notexist'])) {
                 $this->controller->redirect($this->settings['redirect']['notexist']);
             } else {
@@ -279,17 +280,18 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         }
         // si el usuario no está activo -> error
         if (!$this->User->isActive()) {
-            \sowerphp\core\SessionMessage::write(
-                sprintf($this->settings['messages']['error']['inactive'], $usuario), 'error'
-            );
+            SessionMessage::error(sprintf(
+                $this->settings['messages']['error']['inactive'],
+                $usuario
+            ));
             return;
         }
         // si la cuenta ya no tienen intentos de login -> error
         if (!$this->User->contrasenia_intentos) {
-            \sowerphp\core\SessionMessage::write(
-                sprintf($this->settings['messages']['error']['login_attempts_exceeded'], $usuario),
-                'error'
-            );
+            SessionMessage::error(sprintf(
+                $this->settings['messages']['error']['login_attempts_exceeded'],
+                $usuario
+            ));
             return;
         }
         // si ya hubo un intento de login fallido entonces se pedirá captcha
@@ -297,9 +299,10 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
             try {
                 \sowerphp\general\Utility_Google_Recaptcha::check();
             } catch (\Exception $e) {
-                \sowerphp\core\SessionMessage::write(
-                    sprintf($this->settings['messages']['error']['recaptcha_invalid'], $usuario).': '.$e->getMessage(), 'error'
-                );
+                SessionMessage::error(sprintf(
+                    $this->settings['messages']['error']['recaptcha_invalid'],
+                    $usuario
+                ) . ' ' . $e->getMessage());
                 return;
             }
         }
@@ -310,10 +313,10 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
             }
             if ($this->User->contrasenia_intentos) {
                 $msg = $this->settings['messages']['error']['invalid'];
-                \sowerphp\core\SessionMessage::write($msg, 'error');
+                SessionMessage::error($msg);
             } else {
                 $msg = sprintf($this->settings['messages']['error']['login_attempts_exceeded'], $usuario);
-                \sowerphp\core\SessionMessage::write($msg, 'error');
+                SessionMessage::error($msg);
             }
             $this->log($msg, LOG_ERR);
             return;
@@ -322,10 +325,11 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         try {
             $this->User->checkAuth2($auth2_token);
         } catch (\Exception $e) {
-            \sowerphp\core\SessionMessage::write(
-                sprintf($this->settings['messages']['error']['auth2'], $usuario, $e->getMessage()),
-                'error'
-            );
+            SessionMessage::error(sprintf(
+                $this->settings['messages']['error']['auth2'],
+                $usuario,
+                $e->getMessage()
+            ));
             return;
         }
         // si se pasaron toda las validaciones anteriores -> crear sesión
@@ -346,7 +350,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
             $this->settings['messages']['ok']['login'],
             $this->User->usuario
         ) . $lastlogin;
-        \sowerphp\core\SessionMessage::write($msg, 'ok');
+        SessionMessage::success($msg);
         $this->log($msg);
         // si el usuario tiene layout personalizado se asigna
         if ($this->User->config_page_layout) {
@@ -413,19 +417,16 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     }
 
     /**
-     * Método que termina la sesión del usuario
+     * Método que termina la sesión del usuario.
      */
     public function logout()
     {
         (new \sowerphp\core\Cache())->delete($this->settings['session']['key'].$this->session['id']);
         session()->flush();
-        \sowerphp\core\SessionMessage::write(
-            sprintf(
-                $this->settings['messages']['ok']['logout'],
-                $this->User->usuario
-            ),
-            'ok'
-        );
+        SessionMessage::success(sprintf(
+            $this->settings['messages']['ok']['logout'],
+            $this->User->usuario
+        ));
         $this->controller->redirect($this->settings['redirect']['logout']);
     }
 

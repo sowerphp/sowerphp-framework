@@ -23,6 +23,8 @@
 
 namespace sowerphp\general;
 
+use \sowerphp\core\Facade_Session_Message as SessionMessage;
+
 /**
  * Controlador para página de contacto
  */
@@ -48,9 +50,9 @@ class Controller_Contacto extends \Controller_App
         // si no hay datos para el envió del correo electrónico no
         // permirir cargar página de contacto
         if (config('email.default') === null) {
-            \sowerphp\core\SessionMessage::write(
-                __('La página de contacto no se encuentra disponible.'), 'error'
-            );
+            SessionMessage::error(__(
+                'La página de contacto no se encuentra disponible.'
+            ));
             $this->redirect('/');
         }
         // si se envió el formulario se procesa
@@ -59,9 +61,10 @@ class Controller_Contacto extends \Controller_App
             try {
                 \sowerphp\general\Utility_Google_Recaptcha::check();
             } catch (\Exception $e) {
-                \sowerphp\core\SessionMessage::write(
-                    __('Falló validación captcha: '.$e->getMessage()), 'error'
-                );
+                SessionMessage::error(__(
+                    'Falló validación captcha: %s',
+                    $e->getMessage()
+                ));
                 return;
             }
             // enviar email
@@ -80,19 +83,19 @@ class Controller_Contacto extends \Controller_App
                 $msg = $_POST['mensaje']."\n\n".'-- '."\n".$_POST['nombre']."\n".$_POST['correo'];
                 $status = $email->send($msg);
                 if ($status === true) {
-                    \sowerphp\core\SessionMessage::write(
-                        __('Su mensaje ha sido enviado, se responderá a la brevedad.'), 'ok'
-                    );
+                    SessionMessage::success(__(
+                        'Su mensaje ha sido enviado, se responderá a la brevedad.'
+                    ));
                     $this->redirect('/contacto');
                 } else {
-                    \sowerphp\core\SessionMessage::write(
-                        __('Ha ocurrido un error al enviar su mensaje, por favor intente nuevamente.<br /><em>%s</em>', $status['message']), 'error'
-                    );
+                    SessionMessage::error(__(
+                        'Ha ocurrido un error al enviar su mensaje, por favor intente nuevamente.<br /><em>%s</em>', $status['message']
+                    ));
                 }
             } else {
-                \sowerphp\core\SessionMessage::write(
-                    __('Por favor, completar todos los campos del formulario'), 'error'
-                );
+                SessionMessage::error(__(
+                    'Por favor, completar todos los campos del formulario.'
+                ));
             }
         }
     }

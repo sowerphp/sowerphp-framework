@@ -23,6 +23,8 @@
 
 namespace sowerphp\app\Dev;
 
+use \sowerphp\core\Facade_Session_Message as SessionMessage;
+
 /**
  * Controlador para las acciones relacionadas con la base de datos
  */
@@ -87,7 +89,7 @@ class Controller_Bd extends \Controller_App
         // procesar formulario si fue enviado
         if (isset($_POST['submit'])) {
             if (!isset($_FILES['file']) || $_FILES['file']['error']) {
-                \sowerphp\core\SessionMessage::write('No fue posible leer el archivo de carga de datos.', 'error');
+                SessionMessage::error('No fue posible leer el archivo de carga de datos.');
                 return;
             }
             // cargar hojas del archivo
@@ -97,7 +99,7 @@ class Controller_Bd extends \Controller_App
                     throw new \Exception('No se encontraron hojas para procesar en el archivo de carga de datos (o bien no se logró leer el listado de hojas del archivo).');
                 }
             } catch (\Exception $e) {
-                \sowerphp\core\SessionMessage::write($e->getMessage(), 'error');
+                SessionMessage::error($e->getMessage());
                 return;
             }
             // hacer todo en una transacción
@@ -204,7 +206,7 @@ class Controller_Bd extends \Controller_App
             }
             // terminar transacción
             $db->commit();
-            \sowerphp\core\SessionMessage::write(implode('<br />', $message));
+            SessionMessage::info(implode('<br />', $message));
         }
     }
 
@@ -264,9 +266,7 @@ class Controller_Bd extends \Controller_App
             try {
                 $data = $db->getTableWithColsNames($_POST['query']);
             } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
-                \sowerphp\core\SessionMessage::write(
-                    $e->getMessage(), 'error'
-                );
+                SessionMessage::error($e->getMessage());
             }
             if (isset($data)) {
                 if ($_POST['resultados'] == 'web') {

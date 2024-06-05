@@ -5,22 +5,7 @@
     </div>
     <div class="row">
         <div class="offset-md-3 col-md-6">
-<?php
-$messages = \sowerphp\core\SessionMessage::flush();
-foreach ($messages as $message) {
-    $icons = [
-        'success' => 'ok',
-        'info' => 'info-sign',
-        'warning' => 'warning-sign',
-        'danger' => 'exclamation-sign',
-    ];
-    echo '<div class="alert alert-',$message['type'],'" role="alert">',"\n";
-    echo '    <span class="glyphicon glyphicon-',$icons[$message['type']],'" aria-hidden="true"></span>',"\n";
-    echo '    <span class="visually-hidden">',$message['type'],': </span>',$message['text'],"\n";
-    echo '    <a href="#" class="btn-close" data-bs-dismiss="alert" aria-label="close" title="Cerrar">&times;</a>',"\n";
-    echo '</div>'."\n";
-}
-?>
+            <?=\sowerphp\core\Facade_Session_Message::getMessagesAsString()?>
             <div class="card">
                 <div class="card-body">
                     <h1 class="text-center mb-4">Ingresar</h1>

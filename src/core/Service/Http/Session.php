@@ -24,17 +24,16 @@
 namespace sowerphp\core;
 
 use Illuminate\Container\Container;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Session\Store;
 use Illuminate\Session\SessionManager;
-use Illuminate\Session\FileSessionHandler;
+use Illuminate\Filesystem\Filesystem;
+// use Illuminate\Cache\CacheManager;
 
 /**
  * Servicio de sesión HTTP.
  *
  * Gestiona las sesiones HTTP utilizando Illuminate Session Manager.
  */
-class Service_Http_Session implements Interface_Service, Interface_Service_Session
+class Service_Http_Session implements Interface_Service
 {
 
     /**
@@ -70,7 +69,10 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
      *
      * @param Service_Config $configService Servicio de configuración.
      */
-    public function __construct(Service_Config $configService, Network_Request $request)
+    public function __construct(
+        Service_Config $configService,
+        Network_Request $request
+    )
     {
         $this->configService = $configService;
         $this->request = $request;
@@ -96,37 +98,36 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
      */
     public function register(): void
     {
-        // Crear un contenedor de Illuminate.
-        $container = new Container();
+    }
 
-        // Registrar el servicio de archivos en el contenedor.
-        $container->singleton('files', function () {
-            return new Filesystem();
-        });
+    /**
+     * Método que obtiene el administrador de la sesión.
+     *
+     * @return void
+     */
+    protected function getSessionManager()
+    {
+        if (!isset($this->sessionManager)) {
+            // Crear un contenedor de servicios para el administrador de la
+            // sesión.
+            $container = new Container();
 
-        // Obtener toda la configuración desde el servicio de configuración.
-        $configRepository = $this->configService->getRepository();
-        $container->singleton('config', function () use ($configRepository) {
-            return $configRepository;
-        });
+            // Obtener toda la configuración desde el servicio de configuración
+            // y registrarla en el contenedor.
+            $configRepository = $this->configService->getRepository();
+            $container->instance('config', $configRepository);
 
-        // Registrar el almacenamiento de la sesión.
-        $container->singleton('session.store', function (Container $app) {
-            $fileHandler = new FileSessionHandler(
-                $app->make('files'),
-                $app->make('config')->get('session.files'),
-                $app->make('config')->get('session.lifetime')
-            );
-            return new Store('laravel_session', $fileHandler);
-        });
+            // Registrar el servicio de archivos (driver) en el contenedor.
+            $container->singleton('files', Filesystem::class);
+            // $container->singleton('cache', function ($app) {
+            //     return new CacheManager($app);
+            // });
 
-        // Registrar el administrador de la sesión.
-        $container->singleton('session', function ($app) {
-            return new SessionManager($app);
-        });
-
-        // Asignar el administrador de la sesión al servicio.
-        $this->sessionManager = $container->make('session');
+            // Asignar el administrador de la sesión.
+            $this->sessionManager = new SessionManager($container);
+        }
+        // Entregar el administrador de la sesión.
+        return $this->sessionManager;
     }
 
     /**
@@ -136,6 +137,9 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
      */
     public function boot(): void
     {
+        // Crear administrador de la sesión.
+        $this->getSessionManager();
+
         // Iniciar sesión
         $this->start();
 
@@ -153,8 +157,12 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
      */
     public function start(): void
     {
-        // Verificar si la cookie de sesión se está enviando correctamente
-        $sessionId = $_COOKIE['laravel_session'] ?? null;
+        // Configuración de la sesión.
+        $config = $this->sessionManager->getSessionConfig();
+
+        // Verificar si la cookie de sesión se está enviando correctamente.
+        $cookieName = $config['cookie'];
+        $sessionId = $_COOKIE[$cookieName] ?? null;
         if ($sessionId) {
             $this->sessionManager->setId($sessionId);
         }
@@ -164,10 +172,28 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
             throw new \Exception('No fue posible iniciar la sesión.');
         }
 
-        // Verificar nuevamente si la cookie de sesión se está enviando correctamente
+        // Verificar nuevamente si la cookie de sesión se está enviando
+        // correctamente. Si no hay cookie de sesión, establecerla.
         if (!$sessionId) {
-            // Si no hay cookie de sesión, establecerla
-            setcookie('laravel_session', $this->sessionManager->getId(), time() + 120 * 60, '/', null, false, true);
+            $cookieLifetime = $config['lifetime'] * 60;
+            $cookieExpires = time() + $cookieLifetime;
+            $result = setcookie(
+                $cookieName,
+                $this->sessionManager->getId(),
+                [
+                    'expires' => $cookieExpires,
+                    'path' => $config['path'],
+                    'domain' => $config['domain'],
+                    'secure' => $config['secure'],
+                    'httponly' => $config['http_only'],
+                    'samesite' => ucfirst($config['same_site'] ?? 'None'),
+                ]
+            );
+            if ($result === false) {
+                throw new \Exception(
+                    'No fue posible asignar la cookie de la sesión.'
+                );
+            }
         }
     }
 
@@ -183,7 +209,10 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
             $userLang = $this->request->headers->get('Accept-Language');
             if ($userLang) {
                 $userLang = explode(',', explode('-', $userLang)[0])[0];
-                if ($userLang === explode('_', $defaultLang)[0] || I18n::localeExists($userLang)) {
+                if (
+                    $userLang === explode('_', $defaultLang)[0]
+                    || I18n::localeExists($userLang)
+                ) {
                     $this->put('config.language', $userLang);
                 } else {
                     $this->put('config.language', $defaultLang);
@@ -224,162 +253,44 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
     }
 
     /**
-     * Guarda y finaliza la sesión.
-     *
-     * @return void
-     */
-    public function save(): void
-    {
-        if ($this->sessionManager->isStarted()) {
-            $this->sessionManager->save();
-        }
-    }
-
-    /**
-     * Obtiene un valor de la sesión.
-     *
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
-     */
-    public function get(string $key, $default = null)
-    {
-        return $this->sessionManager->get($key, $default);
-    }
-
-    /**
-     * Establece un valor en la sesión.
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return void
-     */
-    public function put(string $key, $value): void
-    {
-        $this->sessionManager->put($key, $value);
-    }
-
-    /**
-     * Verifica si una clave existe en la sesión.
-     *
-     * @param string $key
-     * @return bool
-     */
-    public function has(string $key): bool
-    {
-        return $this->sessionManager->has($key);
-    }
-
-    /**
-     * Elimina un valor de la sesión.
-     *
-     * @param string $key
-     * @return void
-     */
-    public function forget(string $key): void
-    {
-        $this->sessionManager->forget($key);
-    }
-
-    /**
-     * Obtiene todos los datos de la sesión.
+     * Obtener los parámetros de configuración de la cookie de la sesión.
      *
      * @return array
      */
-    public function all(): array
+    public function getCookieParams(): array
     {
-        return $this->sessionManager->all();
-    }
-
-    /**
-     * Destruye la sesión.
-     *
-     * @return void
-     */
-    public function flush(): void
-    {
-        $this->sessionManager->flush();
-    }
-
-}
-
-interface Interface_Service_Session
-{
-    public function start(): void;
-    public function get(string $key, $default = null);
-    public function put(string $key, $value): void;
-    public function forget(string $key): void;
-    public function flush(): void;
-}
-
-/**
- * Clase para escribir y recuperar mensajes desde una sesión.
- * @deprecated
- */
-class SessionMessage
-{
-
-    public static function info(string $message): void
-    {
-        self::write($message, 'info');
-    }
-
-    public static function success(string $message): void
-    {
-        self::write($message, 'success');
-    }
-
-    public static function ok(string $message): void
-    {
-        self::success($message);
-    }
-
-    public static function warning(string $message): void
-    {
-        self::write($message, 'warning');
-    }
-
-    public static function danger(string $message): void
-    {
-        self::write($message, 'danger');
-    }
-
-    public static function error(string $message): void
-    {
-        self::danger($message);
-    }
-
-    /**
-     * Método para escribir un mensaje en la sesión.
-     * @param string $message Mensaje que se desea escribir.
-     * @param string $type Tipo de mensaje: info, success (ok), warning o
-     * danger (error).
-     */
-    public static function write(string $message, string $type = 'info'): void
-    {
-        if ($type == 'ok') {
-            $type = 'success';
-        }
-        else if ($type == 'error') {
-            $type = 'danger';
-        }
-        $messages = self::flush();
-        $messages[] =  [
-            'text' => $message,
-            'type' => $type,
+        $config = $this->sessionManager->getSessionConfig();
+        return [
+            'lifetime' => $config['lifetime'],
+            'path' => $config['path'],
+            'domain' => $config['domain'],
+            'secure' => $config['secure'],
+            'httponly' => $config['http_only'],
+            'samesite' => $config['same_site'],
         ];
-        session(['session.messages' => $messages]);
     }
 
     /**
-     * Método para recuperar todos los mensajes de la sesión y limpiarlos de la
-     * misma.
+     * Cualquier método que no esté definido en el servicio será llamado en el
+     * administrador de la sesión.
+     *
+     * Ejemplos de métodos del administrador de la sesión que se usarán:
+     *   - save()
+     *   - put()
+     *   - get()
+     *   - forget()
+     *   - flush()
+     *   - flash()
      */
-    public static function flush(): array
+    public function __call($method, $parameters)
     {
-        $messages = session('session.messages');
-        session()->forget('session.messages');
-        return $messages ? (array)$messages : [];
+        return call_user_func_array(
+            [
+                $this->getSessionManager(),
+                $method
+            ],
+            $parameters
+        );
     }
 
 }

@@ -24,6 +24,8 @@
 // namespace del controlador
 namespace sowerphp\app\Sistema\Notificaciones;
 
+use \sowerphp\core\Facade_Session_Message as SessionMessage;
+
 /**
  * Clase para el controlador asociado a la tabla notificacion de la base de
  * datos
@@ -57,15 +59,13 @@ class Controller_Notificaciones extends \Controller_Maintainer
         // verificar que la notificación exista
         $Notificacion = new Model_Notificacion($notificacion);
         if (!$Notificacion->exists()) {
-            \sowerphp\core\SessionMessage::write(
-                'Notificación solicitada no existe.', 'error'
-            );
+            SessionMessage::error('Notificación solicitada no existe.');
             $this->redirect('/sistema/notificaciones/notificaciones');
         }
         // si el usuario autenticado no es dueño de la notificación entonces error
         if ($this->Auth->User->id != $Notificacion->para) {
-            \sowerphp\core\SessionMessage::write(
-                'Usuario autenticado no es destinatario de la notificación solicitada', 'error'
+            SessionMessage::error(
+                'Usuario autenticado no es destinatario de la notificación solicitada.'
             );
             $this->redirect('/sistema/notificaciones/notificaciones');
         }
