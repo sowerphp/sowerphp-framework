@@ -77,9 +77,9 @@ class App
      * @var array
      */
     protected $defaultHttpServices = [
-        //'router' => Service_Http_Router::class,
         'session' => Service_Http_Session::class,
         //'auth' => Service_Http_Auth::class,
+        'router' => Service_Http_Router::class,
         'kernel' => Service_Http_Kernel::class,
     ];
 
@@ -141,6 +141,24 @@ class App
     }
 
     /**
+     * Obtiene el contenedor de servicios de la aplicación.
+     *
+     * Permite pasar el contenedor a otros servicios o clases que lo requieran,
+     * evitando tener que crear un nuevo contenedor en cada clase. Esto asegura
+     * que todas las dependencias estén centralizadas y gestionadas desde un
+     * solo lugar. Garantizando que todas las partes de la aplicación usen las
+     * mismas instancias y configuraciones. Facilita la configuración, la
+     * inyección y la resolución de dependencias, haciendo que el sistema sea
+     * más fácil de mantener y escalar.
+     *
+     * @return Container
+     */
+    public function getContainer(): Container
+    {
+        return $this->container;
+    }
+
+    /**
      * Obtiene un servicio del contenedor.
      *
      * @param string $key Identificador del servicio.
@@ -190,7 +208,7 @@ class App
             , $class, $type, $severity, $message, $file, $line, $trace
         );
         // Generar mensaje con el error o excepción.
-        header('Content-Type: text/plain');
+        header('Content-Type: text/plain; charset=UTF-8');
         echo $error;
         exit($code);
     }
@@ -326,7 +344,7 @@ class App
      * @param string $key Identificador del servicio.
      * @param mixed $service Instancia del servicio o el nombre de la clase.
      */
-    protected function registerService($key, $service): void
+    public function registerService($key, $service): void
     {
         // Si el servicio ya está registrado no volver a registrarlo.
         if ($this->container->bound($key)) {

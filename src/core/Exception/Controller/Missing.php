@@ -24,11 +24,11 @@
 namespace sowerphp\core;
 
 /**
- * Excepción cuando no se encuentra un controlador (página no existe)
+ * Excepción cuando no se encuentra un controlador (página no existe).
  */
 class Exception_Controller_Missing extends Exception
 {
-    protected $_messageTemplate = 'Controlador %s no fue encontrado';
+    protected $_messageTemplate = 'Controlador %s no fue encontrado.';
     protected $severity = LOG_NOTICE;
 
     public function __construct($message, $code = 404)

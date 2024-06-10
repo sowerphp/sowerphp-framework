@@ -38,6 +38,8 @@
         "league/flysystem": "^2.5",
         "illuminate/database": "^8.83",
         "illuminate/mail": "^8.83",
-        "illuminate/config": "^8.83"
+        "illuminate/config": "^8.83",
+        "illuminate/routing": "^8.83",
+        "illuminate/events": "^8.83"
     }
 }

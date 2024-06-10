@@ -170,6 +170,16 @@ function url(string $resource = '/', ...$args): string
 }
 
 /**
+ * Función global para acceder al servicio de enrutamiento.
+ *
+ * @return \sowerphp\core\Service_Http_Router
+ */
+function router()
+{
+    return app('router');
+}
+
+/**
  * Función para mostrar información relevante para depuración de una
  * variale.
  * @param mixed $var Variable que se desea mostrar.

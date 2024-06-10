@@ -225,12 +225,13 @@ class Service_Module implements Interface_Service
     }
 
     /**
-     * Determinar si una URL corresponde a un módulo y cargarlo.
+     * Determinar si el recurso de una URL corresponde a un módulo y entregar
+     * el nombre del módulo determinado.
      *
      * @param string $url Solicitud realizada (sin la base de la aplicación).
-     * @return string Nombre del módulo si es que existe uno en la URL.
+     * @return string|null Nombre del módulo si es que existe uno en la URL.
      */
-    public function findModuleByUrl(string $url): string
+    public function findModuleByResource(string $url): ?string
     {
         // Separar por "/".
         $partes = explode('/', $url);
@@ -254,7 +255,8 @@ class Service_Module implements Interface_Service
                 $hasta = $i;
             }
         }
-        // Si $hasta es mayor a -1.
+        // Si $hasta es mayor a -1 existe un módulo, por lo que se determina
+        // su nombre y se entrega.
         if ($hasta >= 0) {
             // Armar nombre final del modulo (considerando hasta $hasta partes
             // del arreglo de partes).
@@ -262,12 +264,14 @@ class Service_Module implements Interface_Service
             for($i=0; $i<=$hasta; ++$i) {
                 $module[] = Utility_Inflector::camelize($partes[$i]);
             }
-            // cargar módulo
+            // Armar nombre del módulo como string.
             $module = implode('.', $module);
-            // retornar nombre del modulo
+            // Retornar nombre del modulo.
             return $module;
-        } else {
-            return '';
+        }
+        // No se encontró módulo, por lo que se retorna null.
+        else {
+            return null;
         }
     }
 

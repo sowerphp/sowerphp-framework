@@ -24,26 +24,41 @@
 namespace sowerphp\core;
 
 /**
- * Clase base para todas las excepciones
+ * Clase base para todas las excepciones.
  */
 class Exception extends \RuntimeException
 {
 
-    protected $_messageTemplate = '%s'; ///< Mensaje que se utilizará al renderizar el error
-    protected $severity = LOG_ERR; // Error conditions (http://en.wikipedia.org/wiki/Syslog#Severity_levels)
+    /**
+     * Mensaje que se utilizará al renderizar el error.
+     *
+     * @var string
+     */
+    protected $_messageTemplate = '%s';
 
     /**
-     * Constructor para la excepción
-     * @param message Un string con el error o bien un arreglo con atributos que son pasados al mensaje que se traducirá
-     * @param code string Código del error (default: 400)
+     * Error conditions.
+     *
+     * http://en.wikipedia.org/wiki/Syslog#Severity_levels
+     *
+     * @var int
+     */
+    protected $severity = LOG_ERR;
+
+    /**
+     * Constructor para la excepción.
+     *
+     * @param string|array $message Un string con el error o bien un arreglo
+     * con atributos que son pasados al mensaje que se traducirá.
+     * @param int $code Código del error (default: 400).
      */
     public function __construct($message, $code = 400)
     {
-        // si es un arreglo se utilizará junto a sprintf
+        // Si es un arreglo se utilizará junto a sprintf.
         if (is_array($message)) {
             $message = vsprintf($this->_messageTemplate, $message);
         }
-        // llamar al constructor con el error y el mensaje
+        // Llamar al constructor con el mensaje y código de error.
         parent::__construct($message, $code);
     }
 

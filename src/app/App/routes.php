@@ -21,24 +21,27 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// rutas para servicios web
-\sowerphp\core\Routing_Router::connect('/api/:controller/*', [
+// Instancia del servicio de enrutamiento.
+$router = router();
+
+// Rutas para servicios web.
+$router->connect('/api/:controller/*', [
     'action' => 'api',
 ]);
-\sowerphp\core\Routing_Router::connect('/api/sistema/logs/:controller/*', [
+$router->connect('/api/sistema/logs/:controller/*', [
     'module' => 'Sistema.Logs',
     'action' => 'api',
 ]);
-\sowerphp\core\Routing_Router::connect('/api/sistema/notificaciones/:controller/*', [
+$router->connect('/api/sistema/notificaciones/:controller/*', [
     'module' => 'Sistema.Notificaciones',
     'action' => 'api',
 ]);
-\sowerphp\core\Routing_Router::connect('/api/sistema/usuarios/:controller/*', [
+$router->connect('/api/sistema/usuarios/:controller/*', [
     'module' => 'Sistema.Usuarios',
     'action' => 'api',
 ]);
 if (app('module')->isModuleLoaded('Dev')) {
-    \sowerphp\core\Routing_Router::connect('/api/dev/:controller/*', [
+    $router->connect('/api/dev/:controller/*', [
         'module' => 'Dev',
         'action' => 'api',
     ]);

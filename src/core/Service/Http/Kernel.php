@@ -48,13 +48,6 @@ class Service_Http_Kernel implements Interface_Service
     protected $configService;
 
     /**
-     * Servicio de sesiones.
-     *
-     * @var Service_Http_Session
-     */
-    protected $sessionService;
-
-    /**
      * Instancia de la solicitud.
      *
      * @var Network_Request
@@ -93,21 +86,19 @@ class Service_Http_Kernel implements Interface_Service
      * @param Service_Layers $layersService
      * @param Service_Module $moduleService
      * @param Service_Config $configService
-     * @param Service_Http_Session $sessionService
      * @param Network_Request $request
      */
     public function __construct(
         Service_Layers $layersService,
         Service_Module $moduleService,
         Service_Config $configService,
-        Service_Http_Session $sessionService,
         Network_Request $request
+
     )
     {
         $this->layersService = $layersService;
         $this->moduleService = $moduleService;
         $this->configService = $configService;
-        $this->sessionService = $sessionService;
         $this->request = $request;
     }
 
@@ -127,11 +118,6 @@ class Service_Http_Kernel implements Interface_Service
      */
     public function boot()
     {
-        // Cargar las rutas de la aplicación.
-        // TODO: mover a Service_Router.
-        $this->layersService->loadFiles([
-            '/App/routes.php',
-        ]);
     }
 
     /**
@@ -289,8 +275,8 @@ class Service_Http_Kernel implements Interface_Service
         if ($response) {
             return $response;
         }
-        // Procesar la solicitud con un controlador.
-        return $this->handleControllerRequest($request);
+        // Procesar la solicitud a través del servicio de rutas.
+        return $this->handleRouterRequest($request);
     }
 
     /**
@@ -331,9 +317,9 @@ class Service_Http_Kernel implements Interface_Service
         $paths = null;
         $slashPos = strpos($filename, '/', 1);
         if ($slashPos) {
-            // Rutas de módulos
-            $module = $this->moduleService->findModuleByUrl($filename);
-            if (isset($module[0])) {
+            // Rutas de módulos.
+            $module = $this->moduleService->findModuleByResource($filename);
+            if ($module) {
                 $this->moduleService->loadModule($module);
                 $paths = $this->moduleService->getModulePaths($module);
             }
@@ -367,6 +353,28 @@ class Service_Http_Kernel implements Interface_Service
     }
 
     /**
+     * Procesa la solicitud usando el router y obtiene la respuesta.
+     *
+     * @param Network_Request $request
+     * @return Network_Response
+     */
+    protected function handleRouterRequest(
+        Network_Request $request
+    ): Network_Response
+    {
+        // Obtener configuración de la ruta de la solicitud.
+        $routeConfig = $request->getRouteConfig();
+        // Procesar la solicitud redirigiendo.
+        if (!empty($routeConfig['redirect'])) {
+            $response = $this->getResponse();
+            $response->header('Location', $routeConfig['redirect']);
+            return $response;
+        }
+        // Procesar la solicitud con un controlador.
+        return $this->handleControllerRequest($request);
+    }
+
+    /**
      * Procesa la solicitud con un controlador y obtiene la respuesta.
      *
      * @param Network_Request $request
@@ -376,24 +384,17 @@ class Service_Http_Kernel implements Interface_Service
         Network_Request $request
     ): Network_Response
     {
-        // Obtener instancia de reflexión del controlador.
-        $reflection = $this->getControllerReflection(
-            $request->getParsedParams()['controller'],
-            $request->getParsedParams()['module'] ?? null
-        );
-        if (!$reflection) {
-            throw new Exception_Controller_Missing(array(
-                'class' => 'Controller_'.Utility_Inflector::camelize(
-                    $request->getParsedParams()['controller']
-                )
-            ));
-        }
-        // Instanciar controlador.
+        $routeConfig = $request->getRouteConfig();
         $response = $this->getResponse();
-        $controller = $reflection->newInstance($request, $response);
-        // Despachar controlador y ejecutar su acción.
-        $controller->startupProcess();
-        $result = $controller->invokeAction();
+        // Instanciar el controlador.
+        $controller = new $routeConfig['class']($request, $response);
+        // Inicializar el controlador.
+        $controller->beforeFilter();
+        // Llamar al método del controlador con los parámetros.
+        $result = call_user_func_array(
+            [$controller, $routeConfig['action']],
+            $routeConfig['parameters']
+        );
         // Asignar respuesta de la acción invocada.
         // TODO: revisar si se debe verificar que body() ya esté asignado y si
         // lo está tener esa respuesta como prioridad (útil en respuesta que
@@ -405,52 +406,9 @@ class Service_Http_Kernel implements Interface_Service
         }
         // Terminar tareas controlador.
         // TODO: revisar si se debe mover a terminate()
-        $controller->shutdownProcess();
+        $controller->afterFilter();
         // Retornar respuesta al handler de la solicitud HTTP.
         return $response;
-    }
-
-    /**
-     * Obtiene la instancia de reflexión del controlador.
-     *
-     * @param string $controller Nombre del controlador.
-     * @param string|null $module Nombre del módulo.
-     * @return \ReflectionClass|null
-     */
-    protected function getControllerReflection(
-        string $controller,
-        ?string $module
-    ): ?\ReflectionClass
-    {
-        // Si se solicita un módulo tratar de cargar y verificar que quede
-        // activo.
-        if (!empty($module)) {
-            $this->moduleService->loadModule($module);
-            if (!$this->moduleService->isModuleLoaded($module)) {
-                throw new Exception_Module_Missing(array(
-                    'module' => $module
-                ));
-            }
-        }
-        // Determinar nombre de la clase que se cargará mágicamente.
-        $class = 'Controller_'.Utility_Inflector::camelize(
-            $controller
-        );
-        if ($module && $class != 'Controller_Module') {
-            $class = str_replace('.', '\\', $module) . '\\' . $class;
-        }
-        $class = '\\sowerphp\\magicload\\' . $class;
-        // Cargar clase del controlador.
-        if (!class_exists($class)) {
-            return null;
-        }
-        // Se verifica que la clase no sea abstracta
-        $reflection = new \ReflectionClass($class);
-        if ($reflection->isAbstract()) {
-            return null;
-        }
-        // Se retorna la instancia de reflexión del controlador.
-        return $reflection;
     }
 
     /**
@@ -470,11 +428,11 @@ class Service_Http_Kernel implements Interface_Service
         // Por ejemplo tareas como: borrar un archivo temporal creado en la
         // acción del controlador (ej: zip de PDF).
         // IDEA: Se podría pasar un callback al response con lo que se debe
-        // ejecutar acá o ejecutar el shutdownProcess() (revisar bien la idea).
+        // ejecutar acá o ejecutar el afterFilter() (revisar bien la idea).
         // Incluir otras limpiezas que sean necesarias.
 
         // Guardar y cerrar la sesión.
-        $this->sessionService->save();
+        $request->session()->save();
     }
 
     /**
@@ -500,8 +458,6 @@ class Service_Http_Kernel implements Interface_Service
      */
     protected function handleError(\Error $error): void
     {
-        header('Content-Type: text/plain; charset=UTF-8');
-        $this->sessionService->save();
         if ($this->configService->get('error.exception')) {
             $exception = new \ErrorException(
                 $error->getMessage(),
@@ -513,13 +469,17 @@ class Service_Http_Kernel implements Interface_Service
             );
             $this->handleException($exception);
         } else {
-            $message = sprintf(
+            $request = $this->getRequest();
+            $request->session()->save();
+            $response = $this->getResponse();
+            $response->header('Content-Type', 'text/plain; charset=UTF-8');
+            $response->body(sprintf(
                 '[Error] %s en %s:%s.',
-                $message = $error->getMessage(),
+                $error->getMessage(),
                 $error->getFile(),
                 $error->getLine()
-            );
-            echo $message , PHP_EOL;
+            ));
+            $response->send();
         }
     }
 
@@ -534,6 +494,7 @@ class Service_Http_Kernel implements Interface_Service
         ob_clean();
         $request = $this->getRequest();
         $response = $this->getResponse();
+        $request->session()->save();
         // Generar arreglo con los datos para la vista.
         $data = [
             'exception' => get_class($exception),
@@ -550,9 +511,9 @@ class Service_Http_Kernel implements Interface_Service
         }
         // Es una solicitud mediante la interfaz web.
         else {
-            $controller->error_reporting = config('debug');
+            $controller->error_reporting = $this->configService->get('debug');
             $controller->display($data);
-            $controller->shutdownProcess();
+            $controller->afterFilter();
             $response->status($data['code']);
             $response->send();
         }

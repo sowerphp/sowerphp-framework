@@ -28,6 +28,6 @@ namespace sowerphp\core;
  */
 class Exception_View_Helper_Missing extends Exception
 {
-    protected $_messageTemplate = 'Helper %s no fue encontrado';
+    protected $_messageTemplate = 'Helper %s no fue encontrado.';
     protected $severity = LOG_DEBUG;
 }

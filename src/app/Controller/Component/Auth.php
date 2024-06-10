@@ -171,7 +171,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     public function allowedWithoutLogin($action = null)
     {
         if (!$action) {
-            $action = $this->controller->request->getParsedParams()['action'];
+            $action = $this->controller->request->getRouteConfig()['action'];
         }
         return in_array($action, $this->allowedActions);
     }
@@ -184,7 +184,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     public function allowedWithLogin($action = null)
     {
         if (!$action) {
-            $action = $this->controller->request->getParsedParams()['action'];
+            $action = $this->controller->request->getRouteConfig()['action'];
         }
         return in_array($action, $this->allowedActionsWithLogin);
     }
@@ -195,7 +195,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     public function isAuthorized()
     {
         // Si la acción se encuentra dentro de las permitidas dejar pasar
-        if (in_array($this->controller->request->getParsedParams()['action'], $this->allowedActions)) {
+        if (in_array($this->controller->request->getRouteConfig()['action'], $this->allowedActions)) {
             return true;
         }
         // si el usuario no existe en la sesión se retorna falso
@@ -204,7 +204,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         }
         // si la acción se encuentra dentro de las que solo requieren un
         // usuario logueado se acepta
-        if (in_array($this->controller->request->getParsedParams()['action'], $this->allowedActionsWithLogin)) {
+        if (in_array($this->controller->request->getRouteConfig()['action'], $this->allowedActionsWithLogin)) {
             return true;
         }
         // Chequear permisos

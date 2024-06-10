@@ -202,14 +202,14 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
     }
 
     /**
-     * Método que entrega el recurso que se está accediendo a través de la API
+     * Método que entrega el recurso que se está accediendo a través de la API.
      */
     public function getResource()
     {
         if (!isset($this->resource)) {
-            $find = '/' . $this->controller->request->getParsedParams()['controller'] . '/' . (
-                !empty($this->controller->request->getParsedParams()['pass'][0])
-                    ? $this->controller->request->getParsedParams()['pass'][0]
+            $find = '/' . $this->controller->request->getRouteConfig()['controller'] . '/' . (
+                !empty($this->controller->request->getRouteConfig()['parameters'][0])
+                    ? $this->controller->request->getRouteConfig()['parameters'][0]
                     : ''
             );
             $pos = strrpos($this->controller->request->getRequestUriDecoded(), $find) + strlen($find);

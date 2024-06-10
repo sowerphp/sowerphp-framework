@@ -36,22 +36,29 @@ class Network_Request extends Request
      * URI usada para la consulta desde la aplicacion, o sea, sin base,
      * iniciando con "/".
      */
-    private $requestUriDecoded;
+    protected $requestUriDecoded;
 
     /**
      * Ruta base de la URL (base + uri arma el total del request).
      */
-    private $baseUrlWithoutSlash;
+    protected $baseUrlWithoutSlash;
 
     /**
      * URL completa, partiendo desde HTTP o HTTPS según corresponda.
      */
-    private $fullUrlWithoutQuery;
+    protected $fullUrlWithoutQuery;
 
     /**
-     * Parámetros pasados que definen que ejecutar.
+     * Configuración de la ruta de la solicitud HTTP.
      */
-    private $parsedParams;
+    protected $routeConfig;
+
+    /**
+     * Servicio de la sesión del usuario en la solicitud.
+     *
+     * @var Service_Http_Session
+     */
+    protected $sessionService;
 
     /**
      * Capturar el estado HTTP actual y entregar una instancia del objeto.
@@ -71,6 +78,19 @@ class Network_Request extends Request
     }
 
     /**
+     * Obtiene la instancia del servicio de sesión.
+     *
+     * @return Service_Http_Session
+     */
+    public function session()
+    {
+        if (!isset($this->sessionService)) {
+            $this->sessionService = session();
+        }
+        return $this->sessionService;
+    }
+
+    /**
      * Método que determina la solicitud utilizada para acceder a la página.
      *
      * @return string Solicitud completa para la página consultada.
@@ -81,26 +101,32 @@ class Network_Request extends Request
             if (!isset($_SERVER['QUERY_STRING'])) {
                 $request = '';
             } else {
-                // Obtener ruta que se uso sin "/" (base) inicial
-                $uri = (isset($_SERVER['QUERY_STRING'][0]) && $_SERVER['QUERY_STRING'][0] == '/')
+                // Obtener ruta que se uso sin "/" (base) inicial.
+                $uri = (
+                    isset($_SERVER['QUERY_STRING'][0])
+                    && $_SERVER['QUERY_STRING'][0] == '/'
+                )
                     ? substr($_SERVER['QUERY_STRING'], 1)
                     : $_SERVER['QUERY_STRING']
                 ;
                 if (strpos($_SERVER['REQUEST_URI'], '/?' . $uri) !== false) {
                     $uri = '';
                 }
-                // verificar si se pasaron variables GET
+                // Verificar si se pasaron variables GET.
                 $inicio_variables_get = strpos($uri, '&');
-                // Asignar uri
+                // Asignar URI.
                 $request = $inicio_variables_get === false
                     ? $uri
                     : substr($uri, 0, $inicio_variables_get)
                 ;
-                // Agregar slash inicial de la uri
-                if (!isset($request) || (isset($request[0]) && $request[0] != '/')) {
+                // Agregar slash inicial de la URI.
+                if (
+                    !isset($request)
+                    || (isset($request[0]) && $request[0] != '/')
+                ) {
                     $request = '/' . $request;
                 }
-                // Decodificar url
+                // Decodificar URL.
                 $request = urldecode($request);
             }
             $this->requestUriDecoded = $request;
@@ -153,7 +179,9 @@ class Network_Request extends Request
                 } else {
                     $scheme = 'http' . (isset($_SERVER['HTTPS']) ? 's' : null);
                 }
-                $url = $scheme . '://' . $_SERVER['HTTP_HOST'] . $this->getBaseUrlWithoutSlash();
+                $url = $scheme . '://' . $_SERVER['HTTP_HOST']
+                    . $this->getBaseUrlWithoutSlash()
+                ;
             }
             $this->fullUrlWithoutQuery = $url;
         }
@@ -166,12 +194,14 @@ class Network_Request extends Request
      * @param array|null $params
      * @return array
      */
-    public function getParsedParams(): array
+    public function getRouteConfig(): array
     {
-        if (!isset($this->parsedParams)) {
-            $this->parsedParams = Routing_Router::parse($this->getRequestUriDecoded());
+        if (!isset($this->routeConfig)) {
+            $router = router();
+            $this->routeConfig = $router->parse($this);
+            $router->checkRouteConfig($this->routeConfig); // Lanza excepción.
         }
-        return $this->parsedParams;
+        return $this->routeConfig;
     }
 
     /**

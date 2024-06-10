@@ -21,10 +21,11 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-namespace sowerphp\core;
+// Instancia del servicio de enrutamiento.
+$router = router();
 
-// Definir la página de inicio
-Routing_Router::connect('/', [
+// Definir la página de inicio.
+$router->connect('/', [
     'controller' => 'pages',
     'action' => 'display',
     config('homepage')

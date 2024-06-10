@@ -46,7 +46,7 @@ class Controller_Maintainer extends \Controller_App
     {
         parent::__construct($request, $response);
         $this->setModelName();
-        $this->module_url = $this->setModuleUrl($this->request->getParsedParams()['module']);
+        $this->module_url = $this->setModuleUrl($this->request->getRouteConfig()['module']);
     }
 
     /**
@@ -57,7 +57,7 @@ class Controller_Maintainer extends \Controller_App
     {
         if (!$this->models) {
             $this->models = \sowerphp\core\Utility_Inflector::camelize(
-                $this->request->getParsedParams()['controller']
+                $this->request->getRouteConfig()['controller']
             );
         }
         if (!$this->model) {
@@ -95,7 +95,7 @@ class Controller_Maintainer extends \Controller_App
     {
         $this->autoRender = false;
         list($namespace, $ControllerName) = explode('\Controller_', get_class($this));
-        if (\sowerphp\core\View::location($ControllerName.'/'.$view, $this->request->getParsedParams()['module'])) {
+        if (\sowerphp\core\View::location($ControllerName.'/'.$view, $this->request->getRouteConfig()['module'])) {
             return parent::render($ControllerName . '/' . $view, $location);
         } else {
             return parent::render('Maintainer/' . $view, 'sowerphp/app');
@@ -219,7 +219,7 @@ class Controller_Maintainer extends \Controller_App
             $Objs->setLimitStatement($registers_per_page, ($page-1)*$registers_per_page);
             if ($page != 1 && $page > $pages) {
                 $this->redirect(
-                    $this->module_url . $this->request->getParsedParams()['controller'] . '/listar/1'
+                    $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar/1'
                     . ($orderby ? ('/' . $orderby . '/' . $order) : '') . $searchUrl
                 );
             }
@@ -238,7 +238,7 @@ class Controller_Maintainer extends \Controller_App
         // setear variables
         $this->set(array(
             'module_url' => $this->module_url,
-            'controller' => $this->request->getParsedParams()['controller'],
+            'controller' => $this->request->getRouteConfig()['controller'],
             'page' => $page,
             'orderby' => $orderby,
             'order' => $order,
@@ -286,7 +286,7 @@ class Controller_Maintainer extends \Controller_App
                         SessionMessage::error('Registro no creado.');
                     }
                     $this->redirect(
-                        $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
+                        $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
                     );
                 } catch (\Exception $e) {
                     SessionMessage::error($e->getMessage());
@@ -303,7 +303,7 @@ class Controller_Maintainer extends \Controller_App
             'accion' => 'Crear',
             'columns' => $model::$columnsInfo,
             'contraseniaNames' => $this->contraseniaNames,
-            'listarUrl' => $this->module_url . $this->request->getParsedParams()['controller']
+            'listarUrl' => $this->module_url . $this->request->getRouteConfig()['controller']
                 . '/listar' . $filterListar,
         ));
         // renderizar
@@ -324,7 +324,7 @@ class Controller_Maintainer extends \Controller_App
                 'Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede editar.'
             );
             $this->redirect(
-                $this->module_url.$this->request->getParsedParams()['controller'].'/listar'.$filterListar
+                $this->module_url.$this->request->getRouteConfig()['controller'].'/listar'.$filterListar
             );
         }
         // si no se ha enviado el formulario se mostrará
@@ -353,7 +353,7 @@ class Controller_Maintainer extends \Controller_App
                     );
                 }
                 $this->redirect(
-                    $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
+                    $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
                 );
             } catch (\Exception $e) {
                 SessionMessage::error($e->getMessage());
@@ -366,7 +366,7 @@ class Controller_Maintainer extends \Controller_App
             'contraseniaNames' => $this->contraseniaNames,
             'fkNamespace' => $model::$fkNamespace,
             'accion' => 'Editar',
-            'listarUrl' => $this->module_url . $this->request->getParsedParams()['controller']
+            'listarUrl' => $this->module_url . $this->request->getRouteConfig()['controller']
                 . '/listar' . $filterListar,
         ));
         // renderizar
@@ -382,7 +382,7 @@ class Controller_Maintainer extends \Controller_App
         if (!$this->deleteRecord) {
             SessionMessage::error('No se permite el borrado de registros.');
             $this->redirect(
-                $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
+                $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
             );
         }
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
@@ -393,7 +393,7 @@ class Controller_Maintainer extends \Controller_App
                 'Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede eliminar.'
             );
             $this->redirect(
-                $this->module_url.$this->request->getParsedParams()['controller'].'/listar'.$filterListar
+                $this->module_url.$this->request->getRouteConfig()['controller'].'/listar'.$filterListar
             );
         }
         try {
@@ -407,7 +407,7 @@ class Controller_Maintainer extends \Controller_App
             );
         }
         $this->redirect(
-            $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
+            $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
         );
     }
 
@@ -421,7 +421,7 @@ class Controller_Maintainer extends \Controller_App
         if (!isset($model::$columnsInfo[$campo . '_data'])) {
             SessionMessage::error('Campo '.$campo.' no existe.');
             $this->redirect(
-                $this->module_url . $this->request->getParsedParams()['controller'] . '/listar'
+                $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar'
             );
         }
         $pks = array_slice(func_get_args(), 1);
@@ -432,7 +432,7 @@ class Controller_Maintainer extends \Controller_App
                 'Registro (' . implode(', ', $pks) . ') no existe. No se puede obtener '.$campo.'.'
             );
             $this->redirect(
-                $this->module_url . $this->request->getParsedParams()['controller'] . '/listar'
+                $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar'
             );
         }
         if ((float)$Obj->{$campo.'_size'} == 0.0) {
@@ -440,7 +440,7 @@ class Controller_Maintainer extends \Controller_App
                 'No hay datos para el campo ' . $campo . ' en el registro ('.implode(', ', $pks).').'
             );
             $this->redirect(
-                $this->module_url . $this->request->getParsedParams()['controller'] . '/listar'
+                $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar'
             );
         }
         // entregar archivo

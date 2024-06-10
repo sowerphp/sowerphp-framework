@@ -29,7 +29,7 @@ namespace sowerphp\core;
  */
 class Exception_Controller_Action_Missing extends Exception
 {
-    protected $_messageTemplate = 'Acción %s::%s() no fue encontrada';
+    protected $_messageTemplate = 'Acción %s::%s() no fue encontrada.';
     protected $severity = LOG_NOTICE;
 
     public function __construct($message, $code = 404)

@@ -65,24 +65,24 @@ class View
                 app('layers')->getLayer($location)['path'] . '/View/' . $page
             );
         } else {
-            $module = is_array($this->request->getParsedParams())
-                ? $this->request->getParsedParams()['module']
+            $module = is_array($this->request->getRouteConfig())
+                ? $this->request->getRouteConfig()['module']
                 : null
             ;
             $location = self::location($page, $module);
         }
         // si no se encontró error
         if (!$location) {
-            if (!empty($this->request->getParsedParams())) {
-                if ($this->request->getParsedParams()['controller'] == 'pages') {
+            if (!empty($this->request->getRouteConfig())) {
+                if ($this->request->getRouteConfig()['controller'] == 'pages') {
                     $this->render('/error/404');
                 } else {
                     throw new Exception_View_Missing(array(
                         'view' => $page,
                         'controller' => Utility_Inflector::camelize(
-                            $this->request->getParsedParams()['controller']
+                            $this->request->getRouteConfig()['controller']
                         ),
-                        'action' => $this->request->getParsedParams()['action'],
+                        'action' => $this->request->getRouteConfig()['action'],
                     ));
                 }
             } else {
@@ -143,8 +143,8 @@ class View
         }
         // determinar module breadcrumb
         $module_breadcrumb = [];
-        if (is_array($this->request->getParsedParams()) && $this->request->getParsedParams()['module']) {
-            $modulos = explode('.', $this->request->getParsedParams()['module']);
+        if (is_array($this->request->getRouteConfig()) && $this->request->getRouteConfig()['module']) {
+            $modulos = explode('.', $this->request->getRouteConfig()['module']);
             $url = '';
             foreach ($modulos as &$m) {
                 $link = Utility_Inflector::underscore($m);
