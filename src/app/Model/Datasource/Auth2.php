@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -38,10 +38,10 @@ class Model_Datasource_Auth2 extends Model_Datasource_Auth2_Base
     {
         $class = '\Model_Datasource_Auth2_'.$name;
         if (!class_exists($class)) {
-            throw new \Exception('Autenticación secundaria usando '.$name.' no está disponible');
+            throw new \Exception('Autenticación secundaria usando '.$name.' no está disponible.');
         }
         if (!$config) {
-            $config = config('auth2.'.$name);
+            $config = config('services.2fa.' . $name);
         }
         return new $class($config);
     }
@@ -52,7 +52,7 @@ class Model_Datasource_Auth2 extends Model_Datasource_Auth2_Base
     public static function getAll()
     {
         $auths2 = [];
-        $auth2 = (array)config('auth2');
+        $auth2 = (array)config('services.2fa');
         foreach ($auth2 as $name => $config) {
             $auths2[] = self::get($name, $config);
         }

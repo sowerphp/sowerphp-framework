@@ -1,4 +1,4 @@
-<?php $__block_title = 'Cambiar Contraseña'; ?>
+<?php $__view_title = 'Cambiar Contraseña'; ?>
 <div class="container">
     <div class="text-center mt-4 mb-4">
         <a href="<?=$_base?>/"><img src="<?=$_base?>/img/logo.png" alt="Logo" class="img-fluid" style="max-width: 200px" /></a>

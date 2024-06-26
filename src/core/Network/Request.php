@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -218,6 +218,28 @@ class Network_Request extends Request
         $accept_header = $this->headers->get('Accept');
         $accept_json = Str::contains($accept_header, 'application/json');
         return $api_prefix || $accept_json;
+    }
+
+    /**
+     * Método que entrega los valores de los parámetros solicitados por la URL.
+     * Se entregarán siempre y cuando estén presentes en la query de la URL
+     * (parámetros GET). Si no existen, se podrán entregar valores por defecto.
+     *
+     * @param array $params Arreglo con los parámetros, si es param => value,
+     * value será el valor por defecto, sino será null el valor por defecto.
+     * @return array Arreglo con los parámetros y sus valores.
+     */
+    public function queries(array $params): array
+    {
+        $vars = [];
+        foreach ($params as $param => $default) {
+            if (is_int($param)) {
+                $param = $default;
+                $default = null;
+            }
+            $vars[$param] = $this->query($param, $default);
+        }
+        return $vars;
     }
 
 }

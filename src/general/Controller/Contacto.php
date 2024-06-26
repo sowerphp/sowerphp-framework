@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -34,12 +34,12 @@ class Controller_Contacto extends \Controller_App
     /**
      * Método para autorizar la carga de index en caso que hay autenticación
      */
-    public function beforeFilter()
+    public function boot()
     {
         if (isset($this->Auth)) {
             $this->Auth->allow('index');
         }
-        parent::beforeFilter();
+        parent::boot();
     }
 
     /**
@@ -74,7 +74,7 @@ class Controller_Contacto extends \Controller_App
             if (!empty($_POST['nombre']) && !empty($_POST['correo']) && !empty($_POST['mensaje'])) {
                 $email = new \sowerphp\core\Network_Email();
                 $email->replyTo($_POST['correo'], $_POST['nombre']);
-                $email->to(config('email.default.to'));
+                $email->to(config('mail.to.address'));
                 $email->subject(
                     !empty($_POST['asunto'])
                     ? trim(strip_tags($_POST['asunto']))

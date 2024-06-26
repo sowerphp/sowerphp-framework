@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -158,7 +158,11 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         unset($reflectionMethod);
         // si se requiere autenticación se valida con el usuario que se haya pasado
         $this->resource = $this->getResource();
-        if (config('api.auth') && !$this->controller->Auth->allowedWithoutLogin($method) && !$this->controller->Auth->allowedWithLogin($method)) {
+        if (
+            config('app.api.auth.required')
+            && !$this->controller->Auth->allowedWithoutLogin($method)
+            && !$this->controller->Auth->allowedWithLogin($method)
+        ) {
             // obtener usuario autenticado y dar error si no hay uno
             $User = $this->getAuthUser();
             if (is_string($User)) {
@@ -280,7 +284,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
                 ;
                 $msg .= ' ' . round(microtime(true)-TIME_START, 2);
                 $msg .= ' ' . round(memory_get_usage()/1024/1024,2);
-                $msg .= ' ' . \sowerphp\core\Model_Datasource_Database_Manager::$querysCount;
+                $msg .= ' ' . database()->getQueriesCount();
                 $msg .= ' ' . \sowerphp\core\Cache::$setCount . ' ' . \sowerphp\core\Cache::$getCount;
                 $this->controller->Log->write($msg, LOG_INFO, $this->settings['log']);
             }
@@ -358,7 +362,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         // crear objeto del usuario
         try {
             $User = new $this->settings['auth']['model']($user == 'X' ? $pass : $user);
-        } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+        } catch (\sowerphp\core\Exception_Database $e) {
             $this->User = $e->getMessage();
             return $this->User;
         }

@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -49,15 +49,16 @@ class App
      * @var array
      */
     protected $defaultCoreServices = [
+        'invoker' => Service_Invoker::class,
         'layers' => Service_Layers::class,
         'module' => Service_Module::class,
         'storage' => Service_Storage::class,
         'config' => Service_Config::class,
-        //'cache' => Service_Cache::class,
-        //'database' => Service_Database::class,
+        'cache' => Service_Cache::class,
+        'database' => Service_Database::class,
+        //'lang' => Service_Lang::class,
         //'mail' => Service_Mail::class,
         //'http_client' => Service_Http_Client::class,
-        //'lang' => Service_Lang::class,
     ];
 
     /**
@@ -80,6 +81,7 @@ class App
         'session' => Service_Http_Session::class,
         //'auth' => Service_Http_Auth::class,
         'router' => Service_Http_Router::class,
+        'view' => Service_Http_View::class,
         'kernel' => Service_Http_Kernel::class,
     ];
 
@@ -123,12 +125,15 @@ class App
     /**
      * Método que ejecuta la aplicación web.
      * Se encarga de despachar la aplicación HTTP o lanzar la CLI.
+     *
+     * @return int Código de ejecución de la aplicación.
      */
     public function run(): int
     {
         try {
             $kernel = $this->container->make('kernel');
             $result = $kernel->handle();
+            $this->terminateServices();
             return $result;
         } catch (\Throwable $throwable) {
             if (isset($kernel)) {
@@ -258,7 +263,7 @@ class App
         } else {
             $this->registerHttpServices();
         }
-        $this->execRegisterMethodOnAllServices();
+        $this->executeRegisterMethodOnAllServices();
     }
 
     /**
@@ -302,20 +307,21 @@ class App
     {
         $config = $this->defaultHttpServices;
         $this->registerServicesFromConfig($config);
-        $request = Network_Request::capture();
-        $this->registerService('request', $request);
     }
 
     /**
      * Ejecutar método register() en cada servicio.
      */
-    protected function execRegisterMethodOnAllServices(): void
+    protected function executeRegisterMethodOnAllServices(): void
     {
         $registered = [];
         foreach ($this->container->getBindings() as $key => $binding) {
             $service = $this->container->make($key);
             $serviceClass = get_class($service);
-            if ($service instanceof Interface_Service && !isset($registered[$serviceClass])) {
+            if (
+                $service instanceof Interface_Service
+                && !isset($registered[$serviceClass])
+            ) {
                 $service->register();
                 $registered[$serviceClass] = true;
             }
@@ -331,9 +337,31 @@ class App
         foreach ($this->container->getBindings() as $key => $binding) {
             $service = $this->container->make($key);
             $serviceClass = get_class($service);
-            if ($service instanceof Interface_Service && !isset($initialized[$serviceClass])) {
+            if (
+                $service instanceof Interface_Service
+                && !isset($initialized[$serviceClass])
+            ) {
                 $service->boot();
                 $initialized[$serviceClass] = true;
+            }
+        }
+    }
+
+    /**
+     * Finaliza todos los servicios registrados al terminar la ejecución.
+     */
+    protected function terminateServices(): void
+    {
+        $terminated = [];
+        foreach ($this->container->getBindings() as $key => $binding) {
+            $service = $this->container->make($key);
+            $serviceClass = get_class($service);
+            if (
+                $service instanceof Interface_Service
+                && !isset($terminated[$serviceClass])
+            ) {
+                $service->terminate();
+                $terminated[$serviceClass] = true;
             }
         }
     }

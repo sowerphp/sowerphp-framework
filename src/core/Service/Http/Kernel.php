@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -25,6 +25,13 @@ namespace sowerphp\core;
 
 class Service_Http_Kernel implements Interface_Service
 {
+
+    /**
+     * Instancia de la aplicación.
+     *
+     * @var App
+     */
+    protected $app;
 
     /**
      * Servicio de capas.
@@ -46,6 +53,20 @@ class Service_Http_Kernel implements Interface_Service
      * @var Service_Config
      */
     protected $configService;
+
+    /**
+     * Servicio de invocación de métodos en clases.
+     *
+     * @var Service_Invoker
+     */
+    protected $invokerService;
+
+    /**
+     * Servicio de vistas.
+     *
+     * @var Service_Http_View
+     */
+    protected $viewService;
 
     /**
      * Instancia de la solicitud.
@@ -89,17 +110,20 @@ class Service_Http_Kernel implements Interface_Service
      * @param Network_Request $request
      */
     public function __construct(
+        App $app,
         Service_Layers $layersService,
         Service_Module $moduleService,
         Service_Config $configService,
-        Network_Request $request
-
+        Service_Invoker $invokerService,
+        Service_Http_View $viewService
     )
     {
+        $this->app = $app;
         $this->layersService = $layersService;
         $this->moduleService = $moduleService;
         $this->configService = $configService;
-        $this->request = $request;
+        $this->invokerService = $invokerService;
+        $this->viewService = $viewService;
     }
 
     /**
@@ -107,7 +131,7 @@ class Service_Http_Kernel implements Interface_Service
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
     }
 
@@ -116,8 +140,24 @@ class Service_Http_Kernel implements Interface_Service
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
+        $this->getRequest();
+        $this->getResponse();
+    }
+
+    /**
+     * Terminar el servicio HTTP kernel.
+     */
+    public function terminate(): void
+    {
+        // Realizar cualquier limpieza necesaria después de enviar la respuesta.
+        // TODO: buscar forma de ejecutar tareas después de enviar respuesta.
+        // Por ejemplo tareas como: borrar un archivo temporal creado en la
+        // acción del controlador (ej: zip de PDF).
+        // IDEA: Se podría pasar un callback al response con lo que se debe
+        // ejecutar acá o ejecutar el terminate() (revisar bien la idea).
+        // Incluir otras limpiezas que sean necesarias.
     }
 
     /**
@@ -127,6 +167,10 @@ class Service_Http_Kernel implements Interface_Service
      */
     public function getRequest(): Network_Request
     {
+        if (!isset($this->request)) {
+            $this->request = Network_Request::capture();
+            $this->app->registerService('request', $this->request);
+        }
         return $this->request;
     }
 
@@ -139,6 +183,7 @@ class Service_Http_Kernel implements Interface_Service
     {
         if (!isset($this->response)) {
             $this->response = new Network_Response();
+            $this->app->registerService('response', $this->response);
         }
         return $this->response;
     }
@@ -169,9 +214,7 @@ class Service_Http_Kernel implements Interface_Service
             }
         );
         // Enviar resultado y terminar la ejecución.
-        $result = $response->send();
-        $this->terminate($request, $response);
-        return $result;
+        return $response->send();
     }
 
     /**
@@ -384,55 +427,28 @@ class Service_Http_Kernel implements Interface_Service
         Network_Request $request
     ): Network_Response
     {
+        // Ejecutar acción del controlador.
         $routeConfig = $request->getRouteConfig();
-        $response = $this->getResponse();
-        // Instanciar el controlador.
-        $controller = new $routeConfig['class']($request, $response);
-        // Inicializar el controlador.
-        $controller->beforeFilter();
-        // Llamar al método del controlador con los parámetros.
-        $result = call_user_func_array(
-            [$controller, $routeConfig['action']],
+        list($controller, $result) = $this->invokerService->invoke(
+            $routeConfig['class'],
+            $routeConfig['action'],
             $routeConfig['parameters']
         );
-        // Asignar respuesta de la acción invocada.
-        // TODO: revisar si se debe verificar que body() ya esté asignado y si
-        // lo está tener esa respuesta como prioridad (útil en respuesta que
-        // terminan antes como archivos y ya dejan algo en el body).
+        // Determinar respuesta del controlador.
+        // Esto es necesario porque las acciones no retornan necesariamente
+        // un objeto Network_Response (que es el caso ideal). Y podrían solo
+        // haber asignado las variables para luego renderizar o bien haber
+        // retornado en el resultado lo que debe ir al cuerpo de la respuesta.
+        // TODO: se debe refactorizar para dejar de usar autoRender.
+        // IDEA: si no se retorna un Network_Response se debe autorenderizar.
+        $response = $this->getResponse();
         if ($controller->autoRender) {
             $response = $controller->render();
         } else if ($response->body() === null) {
             $response->body($result);
         }
-        // Terminar tareas controlador.
-        // TODO: revisar si se debe mover a terminate()
-        $controller->afterFilter();
-        // Retornar respuesta al handler de la solicitud HTTP.
+        // Retornar respuesta al handler de la solicitud HTTP.*/
         return $response;
-    }
-
-    /**
-     * Terminar la solicitud (realizar cualquier limpieza necesaria).
-     *
-     * @param Network_Request $request
-     * @param Network_Response $response
-     * @return void
-     */
-    protected function terminate(
-        Network_Request $request,
-        Network_Response $response
-    ): void
-    {
-        // Realizar cualquier limpieza necesaria después de enviar la respuesta.
-        // TODO: buscar forma de ejecutar tareas después de enviar respuesta.
-        // Por ejemplo tareas como: borrar un archivo temporal creado en la
-        // acción del controlador (ej: zip de PDF).
-        // IDEA: Se podría pasar un callback al response con lo que se debe
-        // ejecutar acá o ejecutar el afterFilter() (revisar bien la idea).
-        // Incluir otras limpiezas que sean necesarias.
-
-        // Guardar y cerrar la sesión.
-        $request->session()->save();
     }
 
     /**
@@ -458,7 +474,7 @@ class Service_Http_Kernel implements Interface_Service
      */
     protected function handleError(\Error $error): void
     {
-        if ($this->configService->get('error.exception')) {
+        if ($this->configService->get('app.php.error_as_exception')) {
             $exception = new \ErrorException(
                 $error->getMessage(),
                 $error->getCode(),
@@ -511,9 +527,9 @@ class Service_Http_Kernel implements Interface_Service
         }
         // Es una solicitud mediante la interfaz web.
         else {
-            $controller->error_reporting = $this->configService->get('debug');
+            $controller->error_reporting = $this->configService->get('app.debug');
             $controller->display($data);
-            $controller->afterFilter();
+            $controller->terminate();
             $response->status($data['code']);
             $response->send();
         }

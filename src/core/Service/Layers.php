@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -112,7 +112,7 @@ class Service_Layers implements Interface_Service
     /**
      * Registrar el autocargador mágico de las clases.
      */
-    public function register()
+    public function register(): void
     {
         spl_autoload_register([$this, 'loadClass']);
     }
@@ -136,6 +136,15 @@ class Service_Layers implements Interface_Service
 
         // Cargar (importar) archivos PHP que no son clases.
         $this->loadFiles($this->importFiles);
+    }
+
+    /**
+     * Finaliza el servicio de capas.
+     *
+     * @return void
+     */
+    public function terminate(): void
+    {
     }
 
     /**
@@ -463,8 +472,9 @@ class Service_Layers implements Interface_Service
         // Quitar el prefijo de carga automáfica de la clase
         $remove_prefix_count = 1;
         $magic_class = str_replace($prefix, '', $class, $remove_prefix_count);
-        // Armar el nombre de la clase buscada. Se considera la posibilidad que
-        // la clase venga con uno o más módulos, ejemplos:
+        // Armar el nombre de la clase buscada. Además, se consideran las
+        // posibilidad de que la clase venga con uno o más módulos o con uno o
+        // más subdirectorios dentro de la clase. Ejemplos:
         //   - Controller
         //   - Controller_App
         //   - Dev\Controller_Config
@@ -498,7 +508,7 @@ class Service_Layers implements Interface_Service
         foreach ($this->layers as $namespace => $layer) {
             $real_class_file = $layer['path'] . $magic_class_file;
             if (is_readable($real_class_file)) {
-                $real_class = $namespace . '\\' . $magic_class;
+                $real_class = '\\' . $namespace . '\\' . $magic_class;
                 break;
             }
         }

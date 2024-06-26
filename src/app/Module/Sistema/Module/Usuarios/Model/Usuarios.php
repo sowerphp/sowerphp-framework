@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -43,7 +43,7 @@ class Model_Usuarios extends \Model_Plural_App
     public function getList()
     {
         return $this->db->getTable('
-            SELECT id, '.$this->db->concat('usuario', ' - ', 'nombre').' AS glosa
+            SELECT id, usuario || \' - \' || nombre AS glosa
             FROM usuario
             WHERE activo = true
             ORDER BY nombre
@@ -57,7 +57,7 @@ class Model_Usuarios extends \Model_Plural_App
     public function getListInGroup($grupo)
     {
         return $this->db->getTable('
-            SELECT u.id, '.$this->db->concat('u.usuario', ' - ', 'u.nombre').' AS glosa
+            SELECT u.id, u.usuario || \' - \' || u.nombre AS glosa
             FROM usuario AS u, usuario_grupo AS ug, grupo AS g
             WHERE u.activo = true AND g.grupo = :grupo AND ug.grupo = g.id AND ug.usuario = u.id
             ORDER BY nombre
@@ -79,12 +79,12 @@ class Model_Usuarios extends \Model_Plural_App
     }
 
     /**
-     * Método que entrega una estadística mensual con los usuarios que iniciaron
-     * sesión por última vez
+     * Método que entrega una estadística mensual con los usuarios que
+     * iniciaron sesión por última vez.
      */
     public function getStatsLogin($limit = 12)
     {
-        $mes = $this->db->config['type'] == 'PostgreSQL'
+        $mes = $this->db->getDriverName() == 'pgsql'
             ? 'TO_CHAR(ultimo_ingreso_fecha_hora, \'YYYY-MM\')'
             : 'DATE_FORMAT(ultimo_ingreso_fecha_hora, "%Y-%m")'
         ;

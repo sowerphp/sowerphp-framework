@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -91,7 +91,7 @@ class Model_Afd extends \Model_App
      * @param estados Arreglo con arreglo de codigos y nombres de estados
      * @param transiciones Arreglo con arreglo de desdes, valor y hastas de las transiciones
      */
-    public function save()
+    public function save(): bool
     {
         $this->db->beginTransaction();
         parent::save();
@@ -104,8 +104,7 @@ class Model_Afd extends \Model_App
             $this->transiciones['valores'],
             $this->transiciones['hastas']
         );
-        $this->db->commit();
-
+        return $this->db->commit();
     }
 
     /**
@@ -116,7 +115,7 @@ class Model_Afd extends \Model_App
     private function saveEstados($codigos, $nombres)
     {
         $this->db->beginTransaction();
-        $this->db->query('
+        $this->db->executeRawQuery('
             DELETE FROM afd_estado
             WHERE afd = :afd
         ', [':afd' => $this->codigo]);
@@ -127,7 +126,7 @@ class Model_Afd extends \Model_App
             if (!isset($codigos[$i][0]) || !isset($nombres[$i][0])) {
                 continue;
             }
-            $this->db->query(
+            $this->db->executeRawQuery(
                 'INSERT INTO afd_estado VALUES (:afd, :codigo, :nombre)',
                 [':afd' => $this->codigo, ':codigo' => $codigos[$i], ':nombre' => $nombres[$i]]
             );
@@ -144,7 +143,7 @@ class Model_Afd extends \Model_App
     private function saveTransiciones($desdes, $valores, $hastas)
     {
         $this->db->beginTransaction();
-        $this->db->query('
+        $this->db->executeRawQuery('
             DELETE FROM afd_transicion
             WHERE afd = :afd
         ', [':afd' => $this->codigo]);

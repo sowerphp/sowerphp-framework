@@ -40,18 +40,23 @@ class Controller_Maintainer extends \Controller_App
     protected $extraActions = []; ///< iconos extra para la columna de acciones
 
     /**
-     * Constructor del controlador
+     * Constructor del controlador.
      */
-    public function __construct(\sowerphp\core\Network_Request $request, \sowerphp\core\Network_Response $response)
+    public function __construct(
+        \sowerphp\core\Network_Request $request,
+        \sowerphp\core\Network_Response $response
+    )
     {
         parent::__construct($request, $response);
         $this->setModelName();
-        $this->module_url = $this->setModuleUrl($this->request->getRouteConfig()['module']);
+        $this->module_url = $this->setModuleUrl(
+            $this->request->getRouteConfig()['module']
+        );
     }
 
     /**
      * Método que asigna los namespaces y nombres de los modelos tanto singular
-     * como plural usados por este controlador
+     * como plural usados por este controlador.
      */
     private function setModelName()
     {
@@ -72,11 +77,12 @@ class Controller_Maintainer extends \Controller_App
     }
 
     /**
-     * Método que asigna la url del módulo que se usa en el controlador
-     * @param modulo Nombre del módulo donde se generarán los archivos
-     * @return string URL que se usa para acceder al módulo
+     * Método que asigna la url del módulo que se usa en el controlador.
+     *
+     * @param string $modulo Nombre del módulo donde se generarán los archivos.
+     * @return string URL que se usa para acceder al módulo.
      */
-    private function setModuleUrl($modulo = '')
+    private function setModuleUrl(string $modulo = ''): string
     {
         $partes = explode('.', $modulo);
         $module_url = '';
@@ -87,34 +93,44 @@ class Controller_Maintainer extends \Controller_App
     }
 
     /**
-     * Método que busca la vista que se deberá renderizar
-     * @param view Vista que se desea renderizar
-     * @param location No se utiliza, esta por compatibilidad con método padre
+     * Método que busca la vista que se deberá renderizar.
+     *
+     * @param string $view Vista que se desea renderizar.
      */
-    protected function renderView($view = null, $location = null)
+    public function render(
+        ?string $view = null,
+        array $data = []
+    ): \sowerphp\core\Network_Response
     {
         $this->autoRender = false;
-        list($namespace, $ControllerName) = explode('\Controller_', get_class($this));
-        if (\sowerphp\core\View::location($ControllerName.'/'.$view, $this->request->getRouteConfig()['module'])) {
-            return parent::render($ControllerName . '/' . $view, $location);
+        list($namespace, $ControllerName) = explode(
+            '\Controller_',
+            get_class($this)
+        );
+        $filepath = app('view')->resolveViewRelative(
+            $ControllerName . '/' . $view,
+            (string)$this->request->getRouteConfig()['module']
+        );
+        if ($filepath) {
+            return parent::render($ControllerName . '/' . $view);
         } else {
-            return parent::render('Maintainer/' . $view, 'sowerphp/app');
+            return parent::render('Maintainer/' . $view);
         }
     }
 
     /**
      * Método que permite forzar las opciones de búsqueda para la acción listar
      * esto permite a cierto usuario mostrar solo cierto listado de registros
-     * y no todos, esto evita tener que reprogramar la acción listar :-)
+     * y no todos, esto evita tener que reprogramar la acción listar.
      */
     protected function forceSearch(array $data)
     {
-        // se asignan datos forzados para búsqueda
+        // Se asignan datos forzados para la búsqueda de registros.
         $search = [];
         foreach ($data as $var => $val) {
             $search[] = $var . ':' . $val;
         }
-        // se copian filtros extras, menos los forzados
+        // Se copian filtros extras, menos los forzados.
         if (!empty($_GET['search'])) {
             $vars = array_keys($data);
             $filters = explode(',', $_GET['search']);
@@ -127,19 +143,19 @@ class Controller_Maintainer extends \Controller_App
                 }
             }
         }
-        // se vuelve a armar la búsqueda
+        // Se vuelve a armar la búsqueda.
         $_GET['search'] = implode(',', $search);
     }
 
     /**
-     * Acción para listar los registros de la tabla
+     * Acción para listar los registros de la tabla.
      */
     public function listar($page = 1, $orderby = null, $order = 'A')
     {
         $model = $this->model;
-        // crear objeto
+        // Crear objeto plural.
         $Objs = new $this->models();
-        // si se debe buscar se agrega filtro
+        // Si se debe buscar se agrega filtro.
         $searchUrl = null;
         $search = [];
         if (!empty($_GET['search'])) {
@@ -152,45 +168,46 @@ class Controller_Maintainer extends \Controller_App
                     continue;
                 }
                 list($var, $val) = explode(':', $filter);
-                // solo procesar filtros donde el campo por el que se filtra esté en el modelo
+                // Solo procesar filtros donde el campo por el que se filtra
+                // esté en el modelo.
                 if (empty($model::$columnsInfo[$var])) {
                     continue;
                 }
                 $search[$var] = $val;
-                // si el valor es '!null' se compara contra IS NOT NULL
+                // Si el valor es '!null' se compara contra IS NOT NULL.
                 if ($val == '!null') {
                     $where[] = $var . ' IS NOT NULL';
                 }
-                // si el valor es null o 'null' se compara contra IS NULL
+                // Si el valor es null o 'null' se compara contra IS NULL.
                 else if ($val === null || $val == 'null') {
                     $where[] = $var . ' IS NULL';
                 }
-                // si es una FK se filtra con igualdad
+                // Si es una FK se filtra con igualdad.
                 else if (!empty($model::$columnsInfo[$var]['fk'])) {
                     $where[] = $var . ' = :' . $var;
                     $vars[':' . $var] = $val;
                 }
-                // si es un campo de texto se filtrará con LIKE
+                // Si es un campo de texto se filtrará con LIKE.
                 else if (in_array($model::$columnsInfo[$var]['type'], ['char', 'character varying', 'varchar', 'text'])) {
                     $where[] = 'LOWER(' . $var . ') LIKE :' . $var;
                     $vars[':' . $var] = '%' . strtolower($val) . '%';
                 }
-                // si es un tipo fecha con hora se usará like
+                // Si es un tipo fecha con hora se usará LIKE.
                 else if (in_array($model::$columnsInfo[$var]['type'], ['timestamp', 'timestamp without time zone'])) {
                     $where[] = 'CAST(' . $var . ' AS TEXT) LIKE :' . $var;
                     $vars[':' . $var] = $val . ' %';
                 }
-                // si es un campo número entero se castea
+                // Si es un campo número entero se castea.
                 else if (in_array($model::$columnsInfo[$var]['type'], ['smallint', 'integer', 'bigint', 'smallserial', 'serial', 'bigserial'])) {
                     $where[] = $var . ' = :' . $var;
                     $vars[':' . $var] = (int)$val;
                 }
-                // si es un campo número decimal se castea
+                // Si es un campo número decimal se castea.
                 else if (in_array($model::$columnsInfo[$var]['type'], ['decimal', 'numeric', 'real', 'double precision'])) {
                     $where[] = $var . ' = :' . $var;
                     $vars[':' . $var] = (float)$val;
                 }
-                // si es cualquier otro caso se comparará con una igualdad
+                // Si es cualquier otro caso se comparará con una igualdad.
                 else {
                     $where[] = $var . ' = :' . $var;
                     $vars[':' . $var] = $val;
@@ -198,25 +215,29 @@ class Controller_Maintainer extends \Controller_App
             }
             $Objs->setWhereStatement($where, $vars);
         }
-        // si se debe ordenar se agrega
+        // Si se debe ordenar se agrega.
         if (isset($model::$columnsInfo[$orderby])) {
             $Objs->setOrderByStatement([$orderby => ($order == 'D' ? 'DESC' : 'ASC')]);
         }
-        // total de registros
+        // Total de registros.
         try {
             $registers_total = $Objs->count();
-        } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
-            // si hay algún error en la base de datos es porque los filtros están mal armados
-            // si se llegó acá con el error, para que no falle la app se redirecciona al listado
-            // con el error. Lo ideal es controlar esto antes con un "error más lindo".
+        } catch (\sowerphp\core\Exception_Database $e) {
+            // Si hay algún error en la base de datos es porque los filtros
+            // están mal armados. Si se llegó acá con el error, para que no
+            // falle la app se redirecciona al listado con el error.
+            // Lo ideal es controlar esto antes con un "error más lindo".
             SessionMessage::error($e->getMessage());
             $this->redirect($this->request->getRequestUriDecoded());
         }
-        // paginar si es necesario
-        if ((integer)$page>0) {
-            $registers_per_page = config('app.registers_per_page');
-            $pages = ceil($registers_total/$registers_per_page);
-            $Objs->setLimitStatement($registers_per_page, ($page-1)*$registers_per_page);
+        // Paginar los resultados si es necesario.
+        if ((integer)$page > 0) {
+            $registers_per_page = config('app.ui.pagination.registers');
+            $pages = ceil($registers_total / $registers_per_page);
+            $Objs->setLimitStatement(
+                $registers_per_page,
+                ($page - 1) * $registers_per_page
+            );
             if ($page != 1 && $page > $pages) {
                 $this->redirect(
                     $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar/1'
@@ -224,7 +245,7 @@ class Controller_Maintainer extends \Controller_App
                 );
             }
         }
-        // crear variable con las columnas para la vista
+        // Crear variable con las columnas para la vista.
         if (!empty($this->columnsView['listar'])) {
             $columns = [];
             foreach ($model::$columnsInfo as $col => &$info) {
@@ -258,8 +279,8 @@ class Controller_Maintainer extends \Controller_App
             'actionsColsWidth' => $this->actionsColsWidth,
             'extraActions' => $this->extraActions,
         ));
-        // renderizar
-        $this->renderView('listar');
+        // Renderizar.
+        return $this->render('listar');
     }
 
     /**
@@ -307,7 +328,7 @@ class Controller_Maintainer extends \Controller_App
                 . '/listar' . $filterListar,
         ));
         // renderizar
-        $this->renderView('crear_editar');
+        return $this->render('crear_editar');
     }
 
     /**
@@ -370,7 +391,7 @@ class Controller_Maintainer extends \Controller_App
                 . '/listar' . $filterListar,
         ));
         // renderizar
-        $this->renderView('crear_editar');
+        return $this->render('crear_editar');
     }
 
     /**
@@ -401,7 +422,7 @@ class Controller_Maintainer extends \Controller_App
             SessionMessage::success(
                 'Registro (' . implode(', ', func_get_args()) . ') eliminado.'
             );
-        } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+        } catch (\sowerphp\core\Exception_Database $e) {
             SessionMessage::error(
                 'No se pudo eliminar el registro (' . implode(', ', func_get_args()) . '): '.$e->getMessage()
             );

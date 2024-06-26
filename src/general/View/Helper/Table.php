@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -37,7 +37,14 @@ class View_Helper_Table
     private $_height = null; ///< Altura de la tabla en pixeles
     private $_colsWidth = []; ///< Ancho de las columnas en pixeles
     private $_showEmptyCols = true; ///< Indica si se deben mostrar las columnas vacías de la tabla
-    private $extensions = ['ods'=>'OpenDocument', 'csv'=>'Planilla CSV', 'xls'=>'Planilla Excel', 'pdf'=>'Documento PDF', 'xml'=>'Archivo XML', 'json'=>'Archivo JSON']; ///< Formatos por defecto para exportar datos
+    private $extensions = [
+        'ods' => 'OpenDocument',
+        'csv' => 'Planilla CSV',
+        'xls' => 'Planilla Excel',
+        'pdf' => 'Documento PDF',
+        'xml' => 'Archivo XML',
+        'json' => 'Archivo JSON',
+    ]; ///< Formatos por defecto para exportar datos.
 
     /**
      * Constructor de la clase para crear una tabla
@@ -243,23 +250,29 @@ class View_Helper_Table
     }
 
     /**
-     * Crea los datos de la sesión de la tabla para poder exportarla
-     * @param table Tabla que se está exportando
+     * Crea los datos en la sesión de la tabla para poder exportarla en una
+     * siguiente llamada.
+     *
+     * @param array $table Tabla que se está exportando.
+     * @return string Buffer con las opciones para exportar.
      */
-    private function export(&$table)
+    private function export(&$table): string
     {
-        // si no se debe exportar retornar vacío
+        // Si no se debe exportar retornar vacío.
         if (!$this->_export) {
             return '';
         }
-        // generar datos para la exportación
+        // Generar datos para la exportación.
         $data = [];
         $nRow = 0;
         $nRows = count($table);
         foreach ($table as &$row) {
             $nRow++;
             if (isset($this->_exportRemove['rows'])) {
-                if (in_array($nRow, $this->_exportRemove['rows']) || in_array($nRow-$nRows-1, $this->_exportRemove['rows'])) {
+                if (
+                    in_array($nRow, $this->_exportRemove['rows'])
+                    || in_array($nRow - $nRows - 1, $this->_exportRemove['rows'])
+                ) {
                     continue;
                 }
             }
@@ -269,7 +282,10 @@ class View_Helper_Table
             foreach ($row as &$col) {
                 $nCol++;
                 if (isset($this->_exportRemove['cols'])) {
-                    if (in_array($nCol, $this->_exportRemove['cols']) || in_array($nCol-$nCols-1, $this->_exportRemove['cols'])) {
+                    if (
+                        in_array($nCol, $this->_exportRemove['cols'])
+                        || in_array($nCol - $nCols - 1, $this->_exportRemove['cols'])
+                    ) {
                         continue;
                     }
                 }
@@ -277,19 +293,25 @@ class View_Helper_Table
             }
             $data[] = $aux;
         }
-        // escribir datos para la exportación y colocar iconos si se logró
-        // guardar en la caché
-        $buffer = '';
-        $data_saved = (new \sowerphp\core\Cache())->set('session.'.session_id().'.export.'.$this->_id, $data);
-        if ($data_saved) {
-            $buffer = '<button type="button" class="btn btn-primary dropdown-toggle mb-2" data-bs-toggle="dropdown" role="button" aria-expanded="false" id="dropdown_'.$this->_id.'" title="Guardar como..."><i class="fas fa-download fa-fw"></i> Guardar como...</button>';
-            $buffer .= '<div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown_'.$this->_id.'">';
-            $extensions = config('app.tables.extensions') ? config('app.tables.extensions') : $this->extensions;
-            foreach ($extensions as $e => $n) {
-                $buffer .= '<a href="'.url('/exportar/'.$e.'/'.$this->_id).'" class="dropdown-item">'.$n.'</a>';
-            }
-            $buffer .= '</div>'."\n";
+        // Escribir datos para la exportación.
+        $key = 'session.' . session()->getId() . '.export.' . $this->_id;
+        $data_saved = (new \sowerphp\core\Cache())->set($key, $data);
+        // Si no fue posible guardar los datos en la caché no se podrá
+        // exportar, por lo que no se generan los iconos.
+        if (!$data_saved) {
+            return '';
         }
+        // Colocar iconos de exportación en el buffer.
+        $buffer = '<button type="button" class="btn btn-primary dropdown-toggle mb-2" data-bs-toggle="dropdown" role="button" aria-expanded="false" id="dropdown_'.$this->_id.'" title="Guardar como..."><i class="fas fa-download fa-fw"></i> Guardar como...</button>';
+        $buffer .= '<div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown_'.$this->_id.'">';
+        $extensions = config('app.ui.tables.extensions', $this->extensions);
+        foreach ($extensions as $e => $n) {
+            $buffer .= '<a href="' . url('/exportar/' . $e . '/' . $this->_id)
+                . '" class="dropdown-item">' . $n . '</a>'
+            ;
+        }
+        $buffer .= '</div>' . "\n";
+        // Entregar buffer con iconos.
         return $buffer;
     }
 

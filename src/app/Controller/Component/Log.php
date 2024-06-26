@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -76,7 +76,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      * Se registran automáticamente eventos que ocurrieron durante la ejecución
      * del controlador (incluyendo la renderización de la vista).
      */
-    public function afterFilter($url = null, $status = null)
+    public function terminate($url = null, $status = null)
     {
         if (get_class($this->controller) == 'sowerphp\core\Controller_Error') {
             $message = [
@@ -192,7 +192,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         $message .= ' from '.$this->controller->Auth->ip(true);
         // enviar mensaje a syslog
         openlog(
-            \sowerphp\core\Utility_String::normalize(config('page.header.title')).'_app',
+            \sowerphp\core\Utility_String::normalize(config('app.name')).'_app',
             LOG_ODELAY,
             $this->settings['syslog_facility']
         );
@@ -226,7 +226,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         $email->to($Grupos->emails($Grupos->getIDs($this->settings['report_email']['groups'])));
         $timestamp = microtime(true);
         // asunto
-        $email->subject('['.config('page.header.title').'] Log '.$this->getFacility($facility).'.'.$this->getSeverity($severity).' '.$timestamp);
+        $email->subject('['.config('app.name').'] Log '.$this->getFacility($facility).'.'.$this->getSeverity($severity).' '.$timestamp);
         // inicio mensaje
         $msg = "Estimad@s,\n\nSe ha registrado el siguiente evento en la aplicación:\n\n";
         // usuario

@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -25,7 +25,7 @@ namespace sowerphp\core;
 
 use Illuminate\Config\Repository;
 
-class Service_Config implements Interface_Service
+class Service_Config implements Interface_Service, \ArrayAccess
 {
 
     /**
@@ -55,15 +55,24 @@ class Service_Config implements Interface_Service
         $this->repository = new Repository([]);
     }
 
-    public function register()
+    public function register(): void
     {
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->loadEnvironmentVariables();
         $this->loadConfigurations();
         $this->configure();
+    }
+
+    /**
+     * Finaliza el servicio de configuración.
+     *
+     * @return void
+     */
+    public function terminate(): void
+    {
     }
 
     /**
@@ -107,6 +116,7 @@ class Service_Config implements Interface_Service
      */
     public function loadConfiguration(string $filepath): void
     {
+        // Leer configuración.
         $key = basename($filepath, '.php');
         $config = require $filepath;
         if ($config === false) {
@@ -119,10 +129,18 @@ class Service_Config implements Interface_Service
             );
             die($message);
         }
-        if (!empty($config['modules'])) {
-            $this->moduleService->registerModule($config['modules']);
-            unset($config['modules']);
+        // Si la configuración es de módulos se registran.
+        if ($key == 'modules') {
+            $config = $this->moduleService->normalizeModulesConfig($config);
+            $this->moduleService->registerModule($config);
         }
+        if (!empty($config['modules'])) {
+            $config['modules'] = $this->moduleService->normalizeModulesConfig(
+                $config['modules']
+            );
+            $this->moduleService->registerModule($config['modules']);
+        }
+        // Guardar configuración en repositorio.
         if ($key != 'config') {
             $this->set($key, $config);
         } else {
@@ -136,23 +154,23 @@ class Service_Config implements Interface_Service
     protected function configure(): void
     {
         // Límites para ejecución (tiempo y memoria).
-        if ($this->get('max_execution_time')) {
-            ini_set('max_execution_time', $this->get('max_execution_time'));
+        if ($this->get('app.php.max_execution_time')) {
+            ini_set('max_execution_time', $this->get('app.php.max_execution_time'));
         }
-        if ($this->get('memory_limit')) {
-            ini_set('memory_limit', $this->get('memory_limit'));
+        if ($this->get('app.php.memory_limit')) {
+            ini_set('memory_limit', $this->get('app.php.memory_limit'));
         }
 
         // Configuración de errores y su manejo en PHP.
-        ini_set('display_errors', $this->get('debug'));
-        error_reporting($this->get('error.level'));
+        ini_set('display_errors', $this->get('app.debug'));
+        error_reporting($this->get('app.php.error_reporting'));
 
         // Definir la zona horaria.
-        date_default_timezone_set($this->get('time.zone'));
+        date_default_timezone_set($this->get('app.timezone'));
 
         // Cargar reglas de Inflector para el idioma de la aplicación.
         $inflector_rules = (array)$this->get(
-            'inflector.' . $this->get('language')
+            'inflector.' . $this->get('app.locale')
         );
         foreach ($inflector_rules as $type => $rules) {
             Utility_Inflector::rules($type, $rules);
@@ -168,41 +186,6 @@ class Service_Config implements Interface_Service
     public function reconfigure(): void
     {
         $this->configure();
-    }
-
-    /**
-     * Asignar un valor en la configuración.
-     * Se puede pasar un arreglo con la configuración como un solo parámetro.
-     *
-     * @param string|array $config Ubicación de la configuración o arreglo con
-     * la configuración.
-     * @param mixed $value Valor que se quiere guardar.
-     * @return void
-     */
-    public function set($config, $value = null): void
-    {
-        // Si config no es arreglo se crea como arreglo.
-        if (!is_array($config)) {
-            $this->repository->set($config, $value);
-        }
-        // Guardar cada una de las configuraciones pasadas.
-        else {
-            foreach ($config as $key => $val) {
-                $this->repository->set($key, $val);
-            }
-        }
-    }
-
-    /**
-     * Leer un valor desde la configuración.
-     *
-     * @param string $selector Variable / parámetro que se desea leer.
-     * @param mixed $default Valor por defecto de la variable buscada.
-     * @return mixed Valor determinado de la variable (real, defecto o null).
-     */
-    public function get(string $selector, $default = null)
-    {
-        return $this->repository->get($selector, $default);
     }
 
     /**
@@ -225,6 +208,100 @@ class Service_Config implements Interface_Service
         // Entregar una configuración específica.
         $value = $this->get($selector, $default);
         return new Repository([$selector => $value]);
+    }
+
+    /**
+     * Asignar un valor en la configuración.
+     * Se puede pasar un arreglo con la configuración como un solo parámetro.
+     *
+     * @param string|array $config Ubicación de la configuración o arreglo con
+     * la configuración.
+     * @param mixed $value Valor que se quiere guardar.
+     * @return void
+     */
+    public function set($config, $value = null): void
+    {
+        // Si $config es un arreglo se considera cada una de las llaves del
+        // arreglo como la llave que se desea guardar y se vuelven a pasar al
+        // método set(). Es este caso $value no tendrá un valor que se use.
+        if (is_array($config)) {
+            foreach ($config as $key => $val) {
+                $this->set($key, $val);
+            }
+        }
+        // Guardar la configuración pasada mediante la llave $config.
+        else {
+            // Si $val es un arreglo, se obtiene su valor para hacer un merge.
+            if (is_array($value)) {
+                $value = array_merge((array)$this->get($config), $value);
+            }
+            $this->repository->set($config, $value);
+        }
+    }
+
+    /**
+     * Verifica si un índice existe en el repositorio.
+     *
+     * @param mixed $offset Índice a verificar.
+     * @return bool
+     */
+    public function offsetExists($offset): bool
+    {
+        return isset($this->repository[$offset]);
+    }
+
+    /**
+     * Obtiene el valor de un índice en el repositorio.
+     *
+     * @param mixed $offset Índice a obtener.
+     * @return mixed
+     */
+    public function offsetGet($offset)
+    {
+        return $this->repository[$offset];
+    }
+
+    /**
+     * Asigna un valor a un índice en el repositorio.
+     *
+     * @param mixed $offset Índice a asignar.
+     * @param mixed $value Valor a asignar.
+     * @return void
+     */
+    public function offsetSet($offset, $value): void
+    {
+        $this->repository[$offset] = $value;
+    }
+
+    /**
+     * Elimina un índice del repositorio.
+     *
+     * @param mixed $offset Índice a eliminar.
+     * @return void
+     */
+    public function offsetUnset($offset): void
+    {
+        unset($this->repository[$offset]);
+    }
+
+    /**
+     * Cualquier método que no esté definido en el servicio será llamado en el
+     * repositorio de la configuración.
+     *
+     * Ejemplos de métodos del repositorio que se usarán:
+     *
+     *   - has()
+     *   - get()
+     *   - prepend()
+     *   - push()
+     *   - all()
+     *
+     * El método set() está definido acá pues su implementación difiere a la
+     * del repositorio.
+     */
+    public function __call($method, $parameters)
+    {
+        return call_user_func_array([$this->repository, $method], $parameters);
     }
 
 }

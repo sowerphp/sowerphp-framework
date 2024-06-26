@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -52,9 +52,9 @@ class Shell_Command_CodeGenerator extends \Shell_App
             return 1;
         }
         // obtener conexión a la base de datos
-        self::$db = &\Model_Datasource_Database::get($database);
+        self::$db = database($database);
         // obtener tablas de la base de datos
-        $aux = self::$db->getTables();
+        $aux = self::$db->getTablesFromDatabase();
         $tables = [];
         foreach ($aux as &$t) {
             $tables[] = $t['name'];
@@ -111,13 +111,14 @@ class Shell_Command_CodeGenerator extends \Shell_App
     }
 
     /**
-     * Método para seleccionar una base de datos en caso de existir múltiples configuraciones
+     * Método para seleccionar una base de datos en caso de existir múltiples
+     * configuraciones.
      */
     private function selectDatabase()
     {
         $this->out('<info>Seleccionando base de datos para generar código</info>');
         // obtener bases de datos disponibles
-        $databases = (array)config('database');
+        $databases = (array)config('database.connections');
         $keys = array_keys($databases);
         $encontradas = count($keys);
         // si no hay
@@ -133,7 +134,7 @@ class Shell_Command_CodeGenerator extends \Shell_App
             // mostrar bases disponibles
             $this->out('Bases de datos disponibles:');
             $i = 1;
-            foreach ($databases as $name => &$config) {
+            foreach ($databases as $name => $config) {
                 $this->out($i.'.- '.$name);
                 ++$i;
             }

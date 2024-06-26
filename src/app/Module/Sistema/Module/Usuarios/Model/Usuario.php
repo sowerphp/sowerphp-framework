@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -223,7 +223,7 @@ class Model_Usuario extends \Model_App
     public function __construct($id = null)
     {
         if ($id !== null && !is_array($id) && !is_numeric($id)) {
-            $this->db = \sowerphp\core\Model_Datasource_Database::get($this->_database);
+            $this->db = database($this->_database);
             // se crea usuario a través de su correo electrónico
             if (strpos($id, '@')) {
                 $id = $this->getDB()->getValue('
@@ -264,9 +264,9 @@ class Model_Usuario extends \Model_App
         }
         if ($this->config === null) {
             if (!$this->db) {
-                $this->db = \sowerphp\core\Model_Datasource_Database::get($this->_database);
+                $this->db = database($this->_database);
             }
-            $config = $this->getDB()->getAssociativeArray('
+            $config = $this->getDB()->getTableWithAssociativeIndex('
                 SELECT configuracion, variable, valor, json
                 FROM usuario_config
                 WHERE usuario = :id
@@ -285,7 +285,7 @@ class Model_Usuario extends \Model_App
                     if (in_array($configuracion . '_' . $dato['variable'], $class::$config_encrypt)) {
                         $dato['valor'] = \sowerphp\core\Utility_Data::decrypt(
                             $dato['valor'],
-                            config('app.pkey')
+                            config('app.key')
                         );
                     }
                     $this->config[$configuracion][$dato['variable']] =
@@ -351,8 +351,8 @@ class Model_Usuario extends \Model_App
     }
 
     /**
-     * Método para setear los atributos del usuario
-     * @param array Arreglo con los datos que se deben asignar
+     * Método para setear los atributos del usuario.
+     * @param array Arreglo con los datos que se deben asignar.
      */
     public function set($array)
     {
@@ -365,23 +365,30 @@ class Model_Usuario extends \Model_App
     }
 
     /**
-     * Método que guarda el usuario y su configuración personalizada si existe
+     * Método que guarda el usuario y su configuración personalizada si existe.
      */
-    public function save()
+    public function save(): bool
     {
         if ($this->db === null) {
-            $this->db = \sowerphp\core\Model_Datasource_Database::get($this->_database);
+            $this->db = database($this->_database);
         }
-        // guardar usuario
+        // Guardar usuario.
         if (!parent::save()) {
             return false;
         }
         // guardar configuración
-        if ($this->config && class_exists('\sowerphp\app\Sistema\Usuarios\Model_UsuarioConfig')) {
-            $app_pkey = config('app.pkey');
+        if (
+            $this->config
+            && class_exists('\sowerphp\app\Sistema\Usuarios\Model_UsuarioConfig')
+        ) {
+            $app_pkey = config('app.key');
             foreach ($this->config as $configuracion => $datos) {
                 foreach ($datos as $variable => $valor) {
-                    $Config = new Model_UsuarioConfig($this->id, $configuracion, $variable);
+                    $Config = new Model_UsuarioConfig(
+                        $this->id,
+                        $configuracion,
+                        $variable
+                    );
                     if (!is_array($valor) && !is_object($valor)) {
                         $Config->json = 0;
                     } else {
@@ -389,13 +396,19 @@ class Model_Usuario extends \Model_App
                         $Config->json = 1;
                     }
                     $class = get_called_class();
-                    if (in_array($configuracion . '_' . $variable, $class::$config_encrypt) && $valor !== null) {
+                    if (
+                        in_array($configuracion . '_' . $variable, $class::$config_encrypt)
+                        && $valor !== null
+                    ) {
                         if (!$app_pkey) {
                             throw new \Exception(
                                 'No está definida la configuración app.pkey para encriptar configuración del usuario.'
                             );
                         }
-                        $valor = \sowerphp\core\Utility_Data::encrypt($valor, $app_pkey);
+                        $valor = \sowerphp\core\Utility_Data::encrypt(
+                            $valor,
+                            $app_pkey
+                        );
                     }
                     $Config->valor = $valor;
                     if ($valor !== null) {
@@ -411,12 +424,12 @@ class Model_Usuario extends \Model_App
     }
 
     /**
-     * Método que hace un UPDATE del usuario en la BD
+     * Método que hace un UPDATE del usuario en la base de datos,
      * Actualiza todos los campos, excepto: contrasenia, contrasenia_internos y
      * token, lo anterior ya que hay métodos especiales para actualizar dichas
      * columnas.
      */
-    protected function update($columns = null)
+    protected function update(array $columns = []): bool
     {
         if ($columns) {
             return parent::update($columns);
@@ -436,69 +449,92 @@ class Model_Usuario extends \Model_App
     }
 
     /**
-     * Método que revisa si el nombre de usuario ya existe en la base de datos
-     * @return bool =true si el nombre de usuario ya existe
+     * Método que revisa si el nombre de usuario ya existe en la base de datos.
+     * @return bool =true si el nombre de usuario ya existe.
      */
-    public function checkIfUserAlreadyExists()
+    public function checkIfUserAlreadyExists(): bool
     {
         if (empty($this->id)) {
             return (bool)$this->getDB()->getValue('
-                SELECT COUNT(*) FROM usuario WHERE LOWER(usuario) = :usuario
-            ', [':usuario' => strtolower($this->usuario)]);
+                SELECT COUNT(*)
+                FROM usuario
+                WHERE LOWER(usuario) = :usuario
+            ', [
+                ':usuario' => strtolower($this->usuario),
+            ]);
         } else {
             return (bool)$this->getDB()->getValue('
                 SELECT COUNT(*)
                 FROM usuario
                 WHERE id != :id AND LOWER(usuario) = :usuario
-            ', [':id' => $this->id, ':usuario' => strtolower($this->usuario)]);
+            ', [
+                ':id' => $this->id,
+                ':usuario' => strtolower($this->usuario),
+            ]);
         }
     }
 
     /**
-     * Método que revisa si el email ya existe en la base de datos
-     * @return bool =true si el correo ya existe
+     * Método que revisa si el email ya existe en la base de datos.
+     *
+     * @return bool =true si el correo ya existe.
      */
-    public function checkIfEmailAlreadyExists()
+    public function checkIfEmailAlreadyExists(): bool
     {
         if (empty($this->id)) {
             return (bool)$this->getDB()->getValue('
-                SELECT COUNT(*) FROM usuario WHERE email = :email
-            ', [':email' => $this->email]);
+                SELECT COUNT(*)
+                FROM usuario
+                WHERE email = :email
+            ', [
+                ':email' => $this->email,
+            ]);
         } else {
             return (bool)$this->getDB()->getValue('
                 SELECT COUNT(*)
                 FROM usuario
                 WHERE id != :id AND email = :email
-            ', [':id' => $this->id, ':email' => $this->email]);
+            ', [
+                ':id' => $this->id,
+                ':email' => $this->email,
+            ]);
         }
     }
 
     /**
-     * Método que revisa si el hash del usuario ya existe en la base de datos
-     * @return bool =true si el hash ya existe
+     * Método que revisa si el hash del usuario ya existe en la base de datos.
+     * @return bool =true si el hash ya existe.
      */
-    public function checkIfHashAlreadyExists()
+    public function checkIfHashAlreadyExists(): bool
     {
         if (empty($this->id)) {
             return (bool)$this->getDB()->getValue('
-                SELECT COUNT(*) FROM usuario WHERE hash = :hash
-            ', [':hash' => $this->hash]);
+                SELECT COUNT(*)
+                FROM usuario
+                WHERE hash = :hash
+            ', [
+                ':hash' => $this->hash,
+            ]);
         } else {
             return (bool)$this->getDB()->getValue('
                 SELECT COUNT(*)
                 FROM usuario
                 WHERE id != :id AND hash = :hash
-            ', [':id' => $this->id, ':hash' => $this->hash]);
+            ', [
+                ':id' => $this->id,
+                ':hash' => $this->hash,
+            ]);
         }
     }
 
     /**
-     * Método que cambia la contraseña del usuario
-     * @param new Contraseña nueva en texto plano
-     * @param old Contraseña actual en texto plano
-     * @return bool =true si la contraseña pudo ser cambiada
+     * Método que cambia la contraseña del usuario.
+     *
+     * @param string $new Contraseña nueva en texto plano.
+     * @param string|null $old Contraseña actual en texto plano.
+     * @return bool =true si la contraseña pudo ser cambiada.
      */
-    public function savePassword($new, $old = null)
+    public function savePassword(string $new, string $old = null): bool
     {
         if ($this->getLdapPerson()) {
             if (!$this->getLdapPerson()->savePassword($new, $old)) {
@@ -509,37 +545,45 @@ class Model_Usuario extends \Model_App
     }
 
     /**
-     * Método que cambia la contraseña del usuario en la base de datos
-     * @param new Contraseña nueva en texto plano
-     * @return bool =true si la contraseña pudo ser cambiada
+     * Método que cambia la contraseña del usuario en la base de datos.
+     *
+     * @param string $new Contraseña nueva en texto plano.
+     * @return bool =true si la contraseña pudo ser cambiada.
      */
-    private function savePasswordLocal($new)
+    private function savePasswordLocal(string $new): bool
     {
         $this->contrasenia = $this->hashPassword($new);
-        $this->getDB()->query('
-            UPDATE usuario SET contrasenia = :contrasenia WHERE id = :id
-        ', [':contrasenia' => $this->contrasenia, ':id' => $this->id]);
+        $this->getDB()->executeRawQuery('
+            UPDATE usuario
+            SET contrasenia = :contrasenia
+            WHERE id = :id
+        ', [
+            ':id' => $this->id,
+            ':contrasenia' => $this->contrasenia,
+        ]);
         return true;
     }
 
     /**
      * Método que calcula el hash para la contraseña según el algoritmo más
      * fuerte disponible en PHP y usando un salt automático.
-     * @param password Contraseña que se desea encriptar
-     * @return string Contraseña encriptada (su hash)
+     *
+     * @param string $password Contraseña que se desea encriptar.
+     * @return string Contraseña encriptada (su hash).
      */
-    public function hashPassword($password)
+    public function hashPassword(string $password): string
     {
         return password_hash($password, \PASSWORD_DEFAULT, ['cost' => 9]);
     }
 
     /**
      * Método que revisa si la contraseña entregada es igual a la contraseña del
-     * usuario almacenada en la base de datos
-     * @param password Contrasela que se desea verificar
-     * @return bool =true si la contraseña coincide con la de la base de datos
+     * usuario almacenada en la base de datos.
+     *
+     * @param string $password Contrasela que se desea verificar.
+     * @return bool =true si la contraseña coincide con la de la base de datos.
      */
-    public function checkPassword($password)
+    public function checkPassword(string $password): bool
     {
         if ($this->getLdapPerson()) {
             if ($this->getLdapPerson()->checkPassword($password)) {
@@ -561,19 +605,21 @@ class Model_Usuario extends \Model_App
 
     /**
      * Método que revisa si el hash indicado es igual al hash que tiene el
-     * usuario para su último ingreso (o sea si la sesión es aun válida)
+     * usuario para su último ingreso (o sea si la sesión es aun válida).
+     *
      * @return bool =true si el hash aun es válido
      */
-    public function checkLastLoginHash($hash)
+    public function checkLastLoginHash(string $hash): bool
     {
         return $this->ultimo_ingreso_hash == $hash;
     }
 
     /**
-     * Método que indica si el usuario está o no activo
-     * @return bool =true si el usuario está activo
+     * Método que indica si el usuario está o no activo.
+     *
+     * @return bool =true si el usuario está activo.
      */
-    public function isActive()
+    public function isActive(): bool
     {
         if ($this->getEmailAccount()) {
             return $this->getEmailAccount()->isActive();
@@ -582,10 +628,12 @@ class Model_Usuario extends \Model_App
     }
 
     /**
-     * Método que entrega un arreglo con los datos del último acceso del usuario
-     * @return array Arreglo con índices: fecha_hora, desde, hash
+     * Método que entrega un arreglo con los datos del último acceso del
+     * usuario.
+     *
+     * @return array Arreglo con índices: fecha_hora, desde y hash.
      */
-    public function lastLogin()
+    public function lastLogin(): array
     {
         return [
             'fecha_hora' => $this->ultimo_ingreso_fecha_hora,
@@ -595,16 +643,19 @@ class Model_Usuario extends \Model_App
     }
 
     /**
-     * Método que actualiza el último ingreso del usuario
+     * Método que actualiza el último ingreso del usuario.
      */
-    public function updateLastLogin($ip, $multipleLogins = false)
+    public function updateLastLogin(string $ip, bool $multipleLogins = false): string
     {
         if ($this->config_login_multiple !== null) {
             $multipleLogins = $this->config_login_multiple;
         }
         $timestamp = date('Y-m-d H:i:s');
-        $hash = md5($multipleLogins ? $this->contrasenia : ($ip . $timestamp . $this->contrasenia));
-        $this->update ([
+        $hash = md5($multipleLogins
+            ? $this->contrasenia
+            : ($ip . $timestamp . $this->contrasenia)
+        );
+        $this->update([
             'ultimo_ingreso_fecha_hora' => $timestamp,
             'ultimo_ingreso_desde' => $ip,
             'ultimo_ingreso_hash' => $hash
@@ -613,38 +664,44 @@ class Model_Usuario extends \Model_App
     }
 
     /**
-     * Método que entrega el listado de grupos a los que pertenece el usuario
-     * @return array Arreglo asociativo con el GID como clave y el nombre del grupo como valor
+     * Método que entrega el listado de grupos a los que pertenece el usuario.
+     *
+     * @return array Arreglo asociativo con el GID como clave y el nombre del
+     * grupo como valor.
      */
-    public function groups($forceGet = false)
+    public function groups(bool $forceGet = false): array
     {
         if ($this->groups === null || $forceGet) {
-            $this->groups = $this->getDB()->getAssociativeArray('
+            $this->groups = $this->getDB()->getTableWithAssociativeIndex('
                 SELECT g.id, g.grupo
                 FROM grupo AS g, usuario_grupo AS ug
                 WHERE ug.usuario = :usuario AND g.id = ug.grupo
                 ORDER BY g.grupo
-            ', [':usuario' => $this->id]);
+            ', [
+                ':usuario' => $this->id,
+            ]);
         }
         return $this->groups;
     }
 
     /**
-     * Método que fuerza los grupos de un usuario
+     * Método que fuerza los grupos de un usuario.
      */
-    public function setGroups(array $groups = [])
+    public function setGroups(array $groups = []): void
     {
         $this->groups = $groups ? $groups : null;
     }
 
     /**
      * Método que permite determinar si un usuario pertenece a cierto grupo.
+     *
      * Además se revisará si pertenece al grupo sysadmin, en cuyo caso también
-     * entregará la cantidad de grupos
-     * @param grupos Arreglo con los grupos que se desean revisar
-     * @return int La cantidad de grupos a los que el usuario pertenece
+     * entregará la cantidad de grupos.
+     *
+     * @param array|string $grupos Arreglo con los grupos que se desean revisar.
+     * @return int La cantidad de grupos a los que el usuario pertenece.
      */
-    public function inGroup($grupos = [])
+    public function inGroup($grupos = []): int
     {
         $grupos_usuario = $this->groups();
         if (!is_array($grupos)) {
@@ -665,11 +722,12 @@ class Model_Usuario extends \Model_App
 
     /**
      * Método que permite determinar si un usuario pertenece a todos los grupos
-     * que están en la consulta
-     * @param grupos Arreglo con los grupos que se desean revisar
-     * @return bool =true si pertenece a todos los grupos que se solicitaron
+     * que están en la consulta.
+     *
+     * @param array $grupos Arreglo con los grupos que se desean revisar.
+     * @return bool =true si pertenece a todos los grupos que se solicitaron.
      */
-    public function inAllGroups($grupos = [])
+    public function inAllGroups(array $grupos = []): bool
     {
         $n_grupos = count($grupos);
         $n_encontrados = $this->inGroup($grupos);
@@ -678,10 +736,12 @@ class Model_Usuario extends \Model_App
 
     /**
      * Método que asigna los grupos al usuario, eliminando otros que no están
-     * en el listado
-     * @param grupos Arreglo con los GIDs de los grupos que se deben asignar/mantener
+     * en el listado.
+     *
+     * @param array $grupos Arreglo con los GIDs de los grupos que se deben
+     * asignar/mantener.
      */
-    public function saveGroups($grupos)
+    public function saveGroups($grupos): bool
     {
         if (!$grupos) {
             return false;
@@ -698,7 +758,9 @@ class Model_Usuario extends \Model_App
                 WHERE
                     usuario = :usuario
                     AND grupo NOT IN ('.implode(', ', $grupos).')
-            ', [':usuario' => $this->id]);
+            ', [
+                ':usuario' => $this->id,
+            ]);
             foreach ($grupos as &$grupo) {
                 (new Model_UsuarioGrupo($this->id, $grupo))->save();
             }
@@ -706,15 +768,18 @@ class Model_Usuario extends \Model_App
             $this->getDB()->query ('
                 DELETE FROM usuario_grupo
                 WHERE usuario = :usuario
-            ', [':usuario' => $this->id]);
+            ', [
+                ':usuario' => $this->id,
+            ]);
         }
-        $this->getDB()->commit();
+        return $this->getDB()->commit();
     }
 
     /**
-     * Método que entrega los grupos a los que realmente pertenece un usuario dado determinados grupos
+     * Método que entrega los grupos a los que realmente pertenece un usuario
+     * dado determinados grupos.
      */
-    public function getGroups(array $groups = [])
+    public function getGroups(array $groups = []): array
     {
         $where = ['ug.usuario = :usuario', 'g.activo = :activo'];
         $vars = [':usuario' => $this->id, ':activo' => true];
@@ -728,7 +793,7 @@ class Model_Usuario extends \Model_App
             }
             $where[] = 'g.grupo IN (' . implode(', ', $grupos) . ')';
         }
-        return $this->getDB()->getAssociativeArray('
+        return $this->getDB()->getTableWithAssociativeIndex('
             SELECT g.id, g.grupo
             FROM usuario_grupo AS ug JOIN grupo AS g ON ug.grupo = g.id
             WHERE '.implode(' AND ', $where).'
@@ -738,9 +803,10 @@ class Model_Usuario extends \Model_App
     /**
      * Método que entrega el listado de recursos sobre los que el usuario tiene
      * permisos para acceder.
-     * @return array Listado de recursos a los que el usuario tiene acceso
+     *
+     * @return array Listado de recursos a los que el usuario tiene acceso.
      */
-    public function auths($forceGet = false)
+    public function auths($forceGet = false): array
     {
         if ($this->auths === null || $forceGet) {
             $this->auths = $this->getAuths();
@@ -749,9 +815,10 @@ class Model_Usuario extends \Model_App
     }
 
     /**
-     * Método que entrega los recursos a los que tiene acceso el usuario dado determinados grupos
+     * Método que entrega los recursos a los que tiene acceso el usuario dado
+     * determinados grupos.
      */
-    public function getAuths(array $groups = [])
+    public function getAuths(array $groups = []): array
     {
         $where = ['ug.usuario = :usuario', 'g.activo = :activo'];
         $vars = [':usuario' => $this->id, ':activo' => true];
@@ -766,19 +833,23 @@ class Model_Usuario extends \Model_App
             $where[] = 'g.grupo IN (' . implode(', ', $grupos) . ')';
         }
         if ($this->db === null) {
-            $this->db = \sowerphp\core\Model_Datasource_Database::get($this->_database);
+            $this->db = database($this->_database);
         }
         return $this->getDB()->getCol('
             SELECT a.recurso
             FROM auth AS a, usuario_grupo AS ug, grupo AS g
-            WHERE a.grupo = ug.grupo AND ug.grupo = g.id AND ' . implode(' AND ', $where) . '
+            WHERE
+                a.grupo = ug.grupo
+                AND ug.grupo = g.id
+                AND ' . implode(' AND ', $where) . '
         ', $vars);
     }
 
     /**
-     * Método que asigna manualmente un listado de recursos a los que el usuario tiene acceso
+     * Método que asigna manualmente un listado de recursos a los que el
+     * usuario tiene acceso.
      */
-    public function setAuths(array $auths = [])
+    public function setAuths(array $auths = []): void
     {
         $this->auths = $auths ? $auths : null;
     }
@@ -786,27 +857,33 @@ class Model_Usuario extends \Model_App
     /**
      * Método que verifica si el usuario tiene permiso para acceder a cierto
      * recurso.
-     * @return bool =true si tiene permiso
+     *
+     * @return bool =true si tiene permiso.
      */
-    public function auth($recurso)
+    public function auth($recurso): bool
     {
-        $recurso = is_string($recurso) ? $recurso : $recurso->getRequestUriDecoded();
+        if (!is_string($recurso)) {
+            $recurso = $recurso->getRequestUriDecoded();
+        }
         $permisos = $this->auths();
-        // buscar permiso de forma exacta
+        // Buscar permiso de forma exacta.
         if (in_array($recurso, $permisos)) {
             return true;
         }
-        // buscar si el usuario tiene permiso para acceder a todo
+        // Buscar si el usuario tiene permiso para acceder a todo.
         if (in_array('*', $permisos)) {
             return true;
         }
-        // revisar por cada permiso
+        // Revisar por cada permiso.
         foreach ($permisos as &$permiso) {
-            // buscar si el permiso es del tipo recurso*
-            if ($permiso[strlen($permiso)-1] == '*' && strpos($recurso, substr($permiso, 0, -1)) === 0) {
+            // Buscar si el permiso es del tipo recurso*.
+            if (
+                $permiso[strlen($permiso)-1] == '*'
+                && strpos($recurso, substr($permiso, 0, -1)) === 0
+            ) {
                 return true;
             }
-            // buscar por partes
+            // Buscar por partes.
             $partes = explode('/', $permiso);
             array_shift($partes);
             $aux = '';
@@ -823,24 +900,31 @@ class Model_Usuario extends \Model_App
                 }
             }
         }
-        // si no se encontró permiso => false
+        // Si no se encontró permiso => false.
         return false;
     }
 
     /**
-     * Método que asigna los intentos de contraseña
+     * Método que asigna los intentos de contraseña.
      */
-    public function savePasswordRetry($intentos)
+    public function savePasswordRetry(int $intentos): void
     {
         $this->contrasenia_intentos = $intentos;
-        $this->getDB()->query(
-            'UPDATE usuario SET contrasenia_intentos = :intentos WHERE id = :id'
-        , [':id' => $this->id, ':intentos' => $intentos]);
+        $this->getDB()->executeRawQuery('
+            UPDATE usuario
+            SET contrasenia_intentos = :intentos
+            WHERE id = :id
+        ', [
+            ':id' => $this->id,
+            ':intentos' => $intentos,
+        ]);
     }
 
     /**
-     * Método que entrega las autenticaciones secundarias que el usuario tiene habilitadas
-     * @return array Arreglo con listado de instancias de la auths2 habilitadas
+     * Método que entrega las autenticaciones secundarias que el usuario tiene
+     * habilitadas.
+     *
+     * @return array Arreglo con listado de instancias de la auth2 habilitadas.
      */
     public function getAuth2()
     {
@@ -855,11 +939,12 @@ class Model_Usuario extends \Model_App
     }
 
     /**
-     * Método que crea el token para el usuario
-     * @param codigo Código que se usará para crear el token
-     * @return bool =true si el token pudo ser creado
+     * Método que crea el token para el usuario.
+     *
+     * @param array $data Datos que se usarán para crear el token.
+     * @return bool =true si el token pudo ser creado.
      */
-    public function createAuth2(array $data = [])
+    public function createAuth2(array $data = []): bool
     {
         $Auth2 = \sowerphp\app\Model_Datasource_Auth2::get($data['auth2']);
         $user_data = $Auth2->create($data);
@@ -868,10 +953,11 @@ class Model_Usuario extends \Model_App
     }
 
     /**
-     * Método que destruye el token en la autorización secundaria
-     * @return bool =true si el token pudo ser destruído
+     * Método que destruye el token en la autorización secundaria.
+     *
+     * @return bool =true si el token pudo ser destruído.
      */
-    public function destroyAuth2(array $data = [])
+    public function destroyAuth2(array $data = []): bool
     {
         $Auth2 = \sowerphp\app\Model_Datasource_Auth2::get($data['auth2']);
         $Auth2->destroy($data + (array)($this->config['auth2'][$data['auth2']]));
@@ -881,22 +967,26 @@ class Model_Usuario extends \Model_App
 
     /**
      * Método que valida el estado de todas las autorizaciones secundarias
-     * que el usuario pudiese tener habilitadas
-     * @return bool =true si todo está ok o Exception con el error si falla
+     * que el usuario pudiese tener habilitadas.
+     *
+     * @return bool =true si todo está ok o Exception con el error si falla.
      */
-    public function checkAuth2($token)
+    public function checkAuth2($token): bool
     {
         $auths2 = $this->getAuth2();
         foreach($auths2 as $Auth2) {
-            $datos = ['token' => $token] + (array)($this->config['auth2'][$Auth2->getName()]);
+            $datos = ['token' => $token]
+                + (array)($this->config['auth2'][$Auth2->getName()])
+            ;
             $Auth2->check($datos);
         }
         return true;
     }
 
     /**
-     * Método que recupera la persona LDAP asociada al usuario
-     * @return Model_Datasource_Ldap_Person o Model_Datasource_Zimbra_Account
+     * Método que recupera la persona LDAP asociada al usuario.
+     *
+     * @return Model_Datasource_Ldap_Person o Model_Datasource_Zimbra_Account.
      */
     public function getLdapPerson()
     {
@@ -919,12 +1009,16 @@ class Model_Usuario extends \Model_App
     }
 
     /**
-     * Método que recupera la cuenta Zimbra asociada al usuario
+     * Método que recupera la cuenta Zimbra asociada al usuario.
+     *
      * @return Model_Datasource_Zimbra_Account
      */
     public function getEmailAccount()
     {
-        if ($this->LdapPerson && get_class($this->LdapPerson) != 'sowerphp\app\Model_Datasource_Zimbra_Account') {
+        if (
+            $this->LdapPerson
+            && get_class($this->LdapPerson) != 'sowerphp\app\Model_Datasource_Zimbra_Account'
+        ) {
             return false;
         }
         if ($this->LdapPerson === null && config('zimbra.default')) {
@@ -946,9 +1040,10 @@ class Model_Usuario extends \Model_App
      * Método que entrega el correo del usuario seleccionando el que tiene en
      * su cuenta o bien el de la cuenta de correo (Zimbra) si existe una
      * asociada.
-     * @return string Cuenta de correo oficial del usuario
+     *
+     * @return string Cuenta de correo oficial del usuario.
      */
-    public function getEmail()
+    public function getEmail(): string
     {
         if ($this->getEmailAccount()) {
             return $this->getEmailAccount()->getEmail();
@@ -957,16 +1052,21 @@ class Model_Usuario extends \Model_App
     }
 
     /**
-     * Método que entrega la URL del avatar del usuario
-     * @param size Tamaño de la imagen en pixeles (un solo lado ya que es cuadrada)
+     * Método que entrega la URL del avatar del usuario.
+     *
+     * @param int $size Tamaño de la imagen en pixeles (un solo lado ya que es
+     * cuadrada).
      */
-    public function getAvatar($size = 100)
+    public function getAvatar(int $size = 100)
     {
-        return 'https://gravatar.com/avatar/'.md5(strtolower(trim($this->email))).'?size='.(int)$size;
+        return 'https://gravatar.com/avatar/'
+            . md5(strtolower(trim($this->email)))
+            . '?size=' . (int)$size
+        ;
     }
 
     /**
-     * Método que envía un correo al usuario
+     * Método que envía un correo al usuario.
      */
     public function email($subject, $msg, $replyTo = null)
     {
@@ -975,8 +1075,8 @@ class Model_Usuario extends \Model_App
             $email->replyTo($replyTo);
         }
         $email->to($this->email);
-        $email->subject('['.config('page.body.title').'] '.$subject);
-        $msg = $msg."\n\n".'-- '."\n".config('page.body.title');
+        $email->subject('[' . config('app.name') . '] ' . $subject);
+        $msg = $msg . "\n\n" . '-- ' . "\n" . config('app.name');
         return $email->send($msg);
     }
 

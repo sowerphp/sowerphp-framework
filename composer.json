@@ -40,6 +40,9 @@
         "illuminate/mail": "^8.83",
         "illuminate/config": "^8.83",
         "illuminate/routing": "^8.83",
-        "illuminate/events": "^8.83"
+        "illuminate/events": "^8.83",
+        "predis/predis": "^2.2",
+        "illuminate/redis": "^8.83",
+        "twig/twig": "^3.10"
     }
 }

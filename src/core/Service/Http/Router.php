@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -93,10 +93,12 @@ class Service_Http_Router implements Interface_Service
     public function register(): void
     {
         $container = $this->app->getContainer();
+        // Registrar eventos en el contenedor de la aplicación si no existen.
         if (!$container->bound('events')) {
             $events = new Dispatcher($container);
             $this->app->registerService('events', $events);
         }
+        // Instanciar router.
         $this->router = new Router($events, $container);
     }
 
@@ -119,6 +121,15 @@ class Service_Http_Router implements Interface_Service
             $router->any('/', $this->catchAllHandler);
             $router->any('{any}', $this->catchAllHandler)->where('any', '.*');
         });
+    }
+
+    /**
+     * Finaliza el servicio de enrutamiento HTTP.
+     *
+     * @return void
+     */
+    public function terminate(): void
+    {
     }
 
     /**
@@ -472,8 +483,11 @@ class Service_Http_Router implements Interface_Service
     {
         $module = app('module')->findModuleByResource($resource);
         $page = $this->removeModuleFromResource($resource, $module);
-        $location = View::location('Pages' . $page, $module);
-        if (!$location) {
+        $filepath = app('view')->resolveViewRelative(
+            'Pages' . $page,
+            (string)$module
+        );
+        if (!$filepath) {
             return null;
         }
         return [
@@ -481,6 +495,7 @@ class Service_Http_Router implements Interface_Service
             'controller' => 'pages',
             'action' => 'display',
             'parameters' => [$page],
+            'view' => $filepath,
         ];
     }
 

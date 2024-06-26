@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -39,8 +39,8 @@ class Controller_Bd extends \Controller_App
     public function tablas()
     {
         if (isset($_POST['submit'])) {
-            $db = &\sowerphp\core\Model_Datasource_Database::get($_POST['database']);
-            $tables = $db->getTables();
+            $db = &database($_POST['database']);
+            $tables = $db->getTablesFromDatabase();
             $data = [];
             // procesar cada una de las tablas
             foreach ($tables as &$table) {
@@ -103,7 +103,7 @@ class Controller_Bd extends \Controller_App
                 return;
             }
             // hacer todo en una transacción
-            $db = &\sowerphp\core\Model_Datasource_Database::get($_POST['database']);
+            $db = &database($_POST['database']);
             $db->beginTransaction();
             // cada hoja del archivo son los datos de una tabla
             $message = [];
@@ -125,7 +125,7 @@ class Controller_Bd extends \Controller_App
                 );
                 // eliminar datos de la tabla en caso que se haya solicitado
                 if (isset($_POST['delete'])) {
-                    $db->query('DELETE FROM '.$table);
+                    $db->executeRawQuery('DELETE FROM '.$table);
                 }
                 // variable para almacenar el ID más alto (en caso que exista para luego alterar la secuencia/autoincremental)
                 $id = 0;
@@ -171,7 +171,7 @@ class Controller_Bd extends \Controller_App
                                 $values[] = '\''.$col.'\'';
                             }
                         }
-                        $db->query($insertQuery.' ('.implode(', ', $values).')');
+                        $db->executeRawQuery($insertQuery.' ('.implode(', ', $values).')');
                         $registros['insertados']++;
                     }
                     // ir guarando el ID más grande
@@ -191,8 +191,8 @@ class Controller_Bd extends \Controller_App
                         }
                     }
                     if ($es_serial) {
-                        if ($db == 'PostgreSQL') {
-                            $db->query('SELECT SETVAL (\''.$table.'_id_seq\', '.$id.');')->errorCode();
+                        if ($db->getDriverName() == 'pgsql') {
+                            $db->executeRawQuery('SELECT SETVAL (\''.$table.'_id_seq\', '.$id.');')->errorCode();
                         }
                     }
                 }
@@ -222,17 +222,17 @@ class Controller_Bd extends \Controller_App
         $this->autoRender = false;
         // en caos que se haya seleccionado una base de datos
         if (isset($_POST['step1'])) {
-            $db = &\sowerphp\core\Model_Datasource_Database::get($_POST['database']);
+            $db = &database($_POST['database']);
             $this->set(array(
                 'database' => $_POST['database'],
                 'type' => $_POST['type'],
-                'tables' => $db->getTables(),
+                'tables' => $db->getTablesFromDatabase(),
             ));
             $this->render('Bd/descargar_step2');
         }
         // en caso que se hayan seleccionado las tablas descargar datos
         else if (isset($_POST['step2'])) {
-            $db = &\sowerphp\core\Model_Datasource_Database::get($_POST['database']);
+            $db = &database($_POST['database']);
             $data = [];
             foreach ($_POST['tables'] as &$table) {
                 $data[$table] = $db->getTableWithColsNames ('
@@ -262,10 +262,10 @@ class Controller_Bd extends \Controller_App
     {
         if (isset($_POST['submit'])) {
             ini_set('memory_limit', '1024M');
-            $db = &\sowerphp\core\Model_Datasource_Database::get($_POST['database']);
+            $db = &database($_POST['database']);
             try {
                 $data = $db->getTableWithColsNames($_POST['query']);
-            } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+            } catch (\sowerphp\core\Exception_Database $e) {
                 SessionMessage::error($e->getMessage());
             }
             if (isset($data)) {
@@ -284,15 +284,18 @@ class Controller_Bd extends \Controller_App
     }
 
     /**
-     * Método que busca las bases de datos configuradas a través de
-     * Configure y las asigna para la vista como un arreglo asociativo
+     * Método que busca las bases de datos configuradas en la aplicación y las
+     * asigna para la vista como un arreglo asociativo.
      */
     private function _setDatabases()
     {
         $databases = [];
-        $aux = config('database');
-        foreach ($aux as $database => &$config) {
-            $databases[$database] = $database;
+        $connections = config('database.connections');
+        foreach ($connections as $database => $config) {
+            $databases[$database] = $config['username'] . '@' . $config['host']
+                . ':' . $config['database']
+                . ' (' . $database . ':' . $config['driver'] . ')'
+            ;
         }
         $this->set('databases', $databases);
     }

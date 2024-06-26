@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -215,6 +215,17 @@ class Service_Http_Session implements Interface_Service
     }
 
     /**
+     * Finaliza el servicio de Console kernel.
+     *
+     * @return void
+     */
+    public function terminate(): void
+    {
+        // Guardar y cerrar la sesión.
+        $this->save();
+    }
+
+    /**
      * Inicia la sesión.
      *
      * @return void
@@ -268,8 +279,8 @@ class Service_Http_Session implements Interface_Service
     {
         // Idioma por defecto de la aplicación será el del navegador web del
         // usuario si no está configurado.
-        if (!$this->get('config.language')) {
-            $defaultLang = config('language');
+        if (!$this->get('config.app.locale')) {
+            $defaultLang = config('app.locale');
             $userLang = $this->request->headers->get('Accept-Language');
             if ($userLang) {
                 $userLang = explode(',', explode('-', $userLang)[0])[0];
@@ -277,17 +288,17 @@ class Service_Http_Session implements Interface_Service
                     $userLang === explode('_', $defaultLang)[0]
                     || I18n::localeExists($userLang)
                 ) {
-                    $this->put('config.language', $userLang);
+                    $this->put('config.app.locale', $userLang);
                 } else {
-                    $this->put('config.language', $defaultLang);
+                    $this->put('config.app.locale', $defaultLang);
                 }
             } else {
-                $this->put('config.language', $defaultLang);
+                $this->put('config.app.locale', $defaultLang);
             }
         }
         // Layout por defecto de la aplicación.
-        if (!$this->get('config.page.layout')) {
-            $this->put('config.page.layout', config('page.layout'));
+        if (!$this->get('config.app.ui.layout')) {
+            $this->put('config.app.ui.layout', config('app.ui.layout'));
         }
     }
 

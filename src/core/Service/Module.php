@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -32,7 +32,7 @@ class Service_Module implements Interface_Service
     protected $configService;
 
     // Listado de modulos cargados.
-    private $modules = [];
+    protected $modules = [];
 
     public function __construct(App $app, Service_Layers $layersService)
     {
@@ -40,13 +40,22 @@ class Service_Module implements Interface_Service
         $this->layersService = $layersService;
     }
 
-    public function register()
+    public function register(): void
     {
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->configService = $this->app->getService('config');
+    }
+
+    /**
+     * Finaliza el servicio de módulos.
+     *
+     * @return void
+     */
+    public function terminate(): void
+    {
     }
 
     /**
@@ -68,32 +77,24 @@ class Service_Module implements Interface_Service
                 }
                 // Registrar el módulo.
                 else {
-                    // Si se paso solo el nombre del módulo y no su
-                    // configuración se convierte al formato requerido de
-                    // 'Modulo' => []
-                    if (!is_array($conf)) {
-                        $name = $conf;
-                        $conf = [];
-                    }
-                    // Registrar el módulo.
                     $this->registerModule($name, $conf);
                 }
             }
         }
         // Procesar un módulo con su configuración.
         else {
-            // Asignar opciones por defecto
+            // Asignar opciones por defecto.
             $config = array_merge([
-                // Ruta real del módulo.
-                'path' => [],
+                // Rutas del módulo donde puede ser encontrado (una o más).
+                'paths' => [],
                 // Si se debe cargar el módulo automáticamente.
-                'autoLoad' => false,
+                'autoload' => false,
                 // El módulo no se encuentra cargado.
                 'loaded' => false,
             ], $config);
             // Guardar configuración del modulo y cargar si es necesario.
             $this->modules[$module] = $config;
-            if ($config['autoLoad']) {
+            if ($config['autoload']) {
                 $this->loadModule($module);
             }
         }
@@ -129,59 +130,85 @@ class Service_Module implements Interface_Service
         // Si no se indicó el path donde se encuentra el módulo se
         // deberá determinar, se buscarán todos los paths donde el
         // módulo pueda existir.
-        if (!isset($this->modules[$module]['path'][0])) {
-            $this->modules[$module]['path'] = [];
+        if (!isset($this->modules[$module]['paths'][0])) {
+            $this->modules[$module]['paths'] = [];
             $paths = $this->layersService->getPaths();
             foreach ($paths as &$path) {
                 // Verificar que el directorio exista (el reemplazo es
-                // para los submódulos)
+                // para los submódulos).
                 $modulePath = $path . '/Module/'
                     . str_replace('.', '/Module/', $module)
                 ;
                 if (is_dir($modulePath)) {
-                    $this->modules[$module]['path'][] = $modulePath;
+                    $this->modules[$module]['paths'][] = $modulePath;
                 }
             }
         }
         // Si se indicó se verifica que exista y se agrega como único
-        // path para el modulo al arreglo.
+        // path para el módulo al arreglo.
         else {
-            // Si el directorio existe se agrega
-            if (is_dir($this->modules[$module]['path'])) {
-                $this->modules[$module]['path'] = [
-                    $this->modules[$module]['path'],
+            // Si el directorio existe se agrega.
+            if (is_dir($this->modules[$module]['paths'])) {
+                $this->modules[$module]['paths'] = [
+                    $this->modules[$module]['paths'],
                 ];
             }
             // Si no existe se elimina el path para generar error
             // posteriormente.
             else {
-                $this->modules[$module]['path'] = [];
+                $this->modules[$module]['paths'] = [];
             }
         }
         // Si el módulo no fue encontrado se crea una excepción.
-        if (!isset($this->modules[$module]['path'][0])) {
+        if (!isset($this->modules[$module]['paths'][0])) {
             throw new Exception_Module_Missing(['module' => $module]);
         }
+        // Cargar archivos del módulo desde todas sus capas.
+        $this->loadFiles($module);
+        // Indicar que el módulo fue cargado.
+        $this->modules[$module]['loaded'] = true;
+        return $this->modules[$module];
+    }
+
+    /**
+     * Cargar archivos del módulo.
+     *
+     * Se buscan los archivos en todas las rutas posibles del módulo. Las rutas
+     * se revisan en orden inverso. De tal forma que primero se cargan los
+     * archivos en módulos de capas más bajas y luego los de capas superiores.
+     * Esto permite sobrescribir rutas (routes) o configuraciones.
+     *
+     * @param string $module Módulo para el que se cargarán los archivos.
+     * @return void
+     */
+    protected function loadFiles(string $module): void
+    {
+        $paths = array_reverse($this->modules[$module]['paths']);
         // Verificar "archivos cargables", si existen se cargan.
         $files = [
             '/App/helpers.php',
             '/App/routes.php',
         ];
         foreach ($files as &$file) {
-            $filepath = $this->getFilePath($module, $file);
-            if ($filepath) {
-                include $filepath;
+            foreach ($paths as $path) {
+                $filepath = $path . $file;
+                if (file_exists($filepath)) {
+                    include $filepath;
+                }
             }
         }
         // Cargar configuraciones del módulo.
-        $filepath = $this->getFilePath($module, '/App/config.php');
-        if ($filepath) {
-            $this->configService->loadConfiguration($filepath);
+        $configLoaded = false;
+        foreach ($paths as $path) {
+            $filepath = $path . '/App/config.php';
+            if (file_exists($filepath)) {
+                $this->configService->loadConfiguration($filepath);
+                $configLoaded = true;
+            }
         }
-        $this->configService->reconfigure();
-        // Indicar que el módulo fue cargado.
-        $this->modules[$module]['loaded'] = true;
-        return $this->modules[$module];
+        if ($configLoaded) {
+            $this->configService->reconfigure();
+        }
     }
 
     /**
@@ -284,10 +311,54 @@ class Service_Module implements Interface_Service
     public function getModulePaths(string $module): ?array
     {
         if(isset($this->modules[$module])) {
-            return $this->modules[$module]['path'];
+            return $this->modules[$module]['paths'];
         } else {
             return null;
         }
+    }
+
+    /**
+     * Normalizador de la configuración de un módulo.
+     *
+     * Se preocupa de dejar la configuración posible de un módulo en el formato
+     * estándar utilizado al momento de configurarlo.
+     *
+     * Permite que un módulo se configure de las siguientes formas:
+     *
+     *   a) Indicando solo su nombre:
+     *      ['Sistema.Usuarios']
+     *   b) Indicando su nombre y su ruta exacta donde encontrarlo:
+     *      ['Sistema.Usuarios' => '/path/to/module']
+     *   c) Indicando su nombre y configuración:
+     *      ['Sistema.Usuarios' => ['autoload' => true]]
+     *   d) Indicando que un módulo debe ser descargado (si existe):
+     *      ['Sistema.Usuarios' => false]
+     *
+     * @param array $modules
+     * @return array
+     */
+    public function normalizeModulesConfig(array $modules): array
+    {
+        $normalizedModules = [];
+        foreach ($modules as $module => $config) {
+            // Solo se pasó nombre de módulo, sin config.
+            if (is_numeric($module)) {
+                $normalizedModules[$config] = [];
+            }
+            // Se pasó nombre de módulo como índice y su ruta como
+            // configuración.
+            else if (is_string($config)) {
+                $normalizedModules[$module]['paths'] = [$config];
+            }
+            // Se pasó nombre de módulo como índice y su configuración.
+            // La configuración podría ser:
+            //  - array: para registrar el módulo.
+            //  - false: para desregistrar el módulo.
+            else {
+                $normalizedModules[$module] = $config;
+            }
+        }
+        return $normalizedModules;
     }
 
 }

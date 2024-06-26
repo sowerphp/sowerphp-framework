@@ -26,16 +26,26 @@ namespace sowerphp\core;
 class Service_Console_Kernel implements Interface_Service
 {
 
-    public function register()
+    public function register(): void
     {
     }
 
-    public function boot()
+    public function boot(): void
+    {
+    }
+
+    /**
+     * Finaliza el servicio de Console kernel.
+     *
+     * @return void
+     */
+    public function terminate(): void
     {
     }
 
     /**
      * Método que ejecuta el comando solicitado.
+     *
      * @return int Resultado de la ejecución del comando.
      */
     public function handle(): int
@@ -53,13 +63,14 @@ class Service_Console_Kernel implements Interface_Service
 
     /**
      * Método que busca y ejecuta un comando.
+     *
      * @param string $command Comando a ejecutar.
      * @param array $args Argumentos que se pasarán al comando.
      * @return int Resultado de la ejecución del comando.
      */
     protected function dispatch(string $command, array $args): int
     {
-        // Crear objeto
+        // Crear instancia del comando que se debe ejecutar.
         $dot = strrpos($command, '.');
         if ($dot) {
             $module = substr($command, 0, $dot);
@@ -76,81 +87,98 @@ class Service_Console_Kernel implements Interface_Service
             return 1;
         }
         $shell = new $class();
-        // revisar posibles flags especiales
+        // Revisar posibles flags especiales que se pasaron al comando.
         $argc = count($args);
         for ($i=0; $i<$argc; $i++) {
-            // poner modo verbose que corresponda (de 1 a 5)
+            // Asignar el modo de "verbose" que corresponda (de 1 a 5).
             if (preg_match('/^\-v+$/', $args[$i])) {
                 $shell->verbose = strlen($args[$i]) - 1;
                 unset($args[$i]);
             }
-            // mostrar ayuda (y no ejecutar comando)
+            // Mostrar la ayuda del comando (y no ejecutar comando).
             else if ($args[$i] == '-h') {
                 $method = new \ReflectionMethod($shell, 'main');
                 echo '   Modo de uso: ',$command,' ';
                 foreach ($method->getParameters() as &$p) {
-                    echo ($p->isOptional() ? '['.$p->name.' = '.$p->getDefaultValue().']' : $p->name),' ';
+                    echo ($p->isOptional()
+                        ? '[' . $p->name . ' = ' . $p->getDefaultValue() . ']'
+                        : $p->name
+                    ) , ' ';
                 }
                 echo "\n";
                 exit;
             }
         }
-        // validar parámetros que se están pasando
+        // Validar los parámetros que se están pasando al comando.
         $method = new \ReflectionMethod($shell, 'main');
         if (count($args) < $method->getNumberOfRequiredParameters()) {
             echo 'SowerPHP shell: ',$command,': requiere al menos ',
                 $method->getNumberOfRequiredParameters(),' parámetro(s)',"\n";
             echo '   Modo de uso: ',$command,' ';
             foreach($method->getParameters() as &$p) {
-                echo ($p->isOptional() ? '['.$p->name.' = '.$p->getDefaultValue().']' : $p->name),' ';
+                echo ($p->isOptional()
+                    ? '[' . $p->name . ' = ' . $p->getDefaultValue() . ']'
+                    : $p->name
+                ) , ' ';
             }
             echo "\n";
             return 1;
         }
-        // validar que el proceso pueda ser ejecutado
+        // Validar que el proceso pueda ser ejecutado.
+        // Si ya hay un proceso en ejecución y no se permiten múltiples
+        // instancias del mismo proceso en ejecución se debe bloquear.
         if (!$shell->canHaveMultipleInstances()) {
-            // obtener procesos que tienen "/shell.php " en su comando
+            // Obtener procesos que tienen "/shell.php " en su comando.
             $procesos = $this->getCurrentProcesses('/shell.php ');
             if (is_numeric($procesos)) {
                 echo 'SowerPHP shell: no fue posible obtener los procesos en ejecución.' , "\n";
                 return $procesos;
             }
-            // buscar otros procesos que existan en ejecución con los mismos argumentos
+            // Buscar otros procesos que existan en ejecución con los mismos
+            // argumentos.
             global $argv;
             $cmd_actual = implode(' ', $argv);
-            $cmd_actual = trim(mb_substr($cmd_actual, strpos($cmd_actual, '/shell.php ') + 1));
+            $cmd_actual = trim(mb_substr(
+                $cmd_actual,
+                strpos($cmd_actual, '/shell.php ') + 1
+            ));
             $pid_actual = getmypid();
             $ppid_actual = posix_getppid();
             $otros_procesos = [];
             foreach ($procesos as $p) {
                 $cmd = $p['cmd'];
                 $cmd = trim(mb_substr($cmd, strpos($cmd, '/shell.php ') + 1));
-                if (!in_array($p['pid'], [$pid_actual, $ppid_actual]) && $cmd == $cmd_actual) {
+                if (
+                    !in_array($p['pid'], [$pid_actual, $ppid_actual])
+                    && $cmd == $cmd_actual
+                ) {
                     $otros_procesos[] = $p;
                 }
             }
             unset($procesos);
-            // mostrar error en caso de existir otros procesos en ejecución
+            // Mostrar error en caso de existir otros procesos en ejecución.
             if (!empty($otros_procesos)) {
-                echo 'SowerPHP shell: no es posible ejecutar el comando, existen otras instancias en',"\n";
-                echo 'ejecución que coinciden con: ',$cmd_actual,"\n";
+                echo 'SowerPHP shell: no es posible ejecutar el comando, existen otras instancias en' ,"\n";
+                echo 'ejecución que coinciden con: ' , $cmd_actual , "\n";
                 foreach ($otros_procesos as $p) {
-                    echo ' - PID ',$p['pid'],' ejecutándose desde ',$p['start_time'],"\n";
+                    echo ' - PID ' , $p['pid'] , ' ejecutándose desde '
+                        , $p['start_time'] , "\n"
+                    ;
                 }
                 return 1;
             }
         }
-        // invocar main
-        $return = $method->invokeArgs($shell, $args);
-        // Retornar estado
-        return $return ? $return : 0;
+        // Ejecutar el proceso invocando a Comando::main() con sus argumentos.
+        $return = (int)$method->invokeArgs($shell, $args);
+        // Retornar el estado de resultado del proceso.
+        return $return;
     }
 
     /**
      * Método que entrega el listado de procesos en ejecución en el sistema
-     * con sus argumentos y otros datos
+     * con sus argumentos y otros datos.
      */
-    protected function getCurrentProcesses(?string $filter = null)
+    protected function getCurrentProcesses(?string $filter = null): array
     {
         $cols = [
             'pid',
@@ -167,9 +195,9 @@ class Service_Console_Kernel implements Interface_Service
             'vsz',
             'cmd',
         ];
-        $cmd = 'ps -eo '.implode(',', $cols).' --sort -etimes --no-headers';
+        $cmd = 'ps -eo ' . implode(',', $cols) . ' --sort -etimes --no-headers';
         if ($filter !== null) {
-            $cmd .= ' | grep "'.$filter.'"';
+            $cmd .= ' | grep "' . $filter . '"';
         }
         exec($cmd, $lines, $rc);
         if ($rc) {
@@ -178,10 +206,7 @@ class Service_Console_Kernel implements Interface_Service
         $processes = [];
         foreach ($lines as $line) {
             $line = preg_replace('!\s+!', ' ', trim($line));
-            $processes[] = array_combine(
-                $cols,
-                explode(' ', $line, 13),
-            );
+            $processes[] = array_combine($cols, explode(' ', $line, 13));
         }
         return $processes;
     }
@@ -189,9 +214,9 @@ class Service_Console_Kernel implements Interface_Service
     public function handleThrowable(\Throwable $throwable): void
     {
         $stdout = new Shell_Output('php://stdout');
-        $stdout->write("\n".'<error>'.get_class($throwable).':</error>', 2);
-        $stdout->write('<error>'.$throwable->getMessage().'</error>', 2);
-        $stdout->write('<error>'.$throwable->getTraceAsString().'</error>', 2);
+        $stdout->write("\n" . '<error>' . get_class($throwable) . ':</error>', 2);
+        $stdout->write('<error>' . $throwable->getMessage() . '</error>', 2);
+        $stdout->write('<error>' . $throwable->getTraceAsString() . '</error>', 2);
         exit($throwable->getCode());
     }
 

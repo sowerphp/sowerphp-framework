@@ -5,19 +5,19 @@
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+ * Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
@@ -45,13 +45,13 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
 
     /**
      * Permitir ciertas acciones y luego ejecutar verificar permisos con
-     * parent::beforeFilter()
+     * parent::boot()
      */
-    public function beforeFilter()
+    public function boot()
     {
         $this->Auth->allow('ingresar', 'salir', 'contrasenia_recuperar', 'registrar', 'preauth', '_api_perfil_GET');
         $this->Auth->allowWithLogin('perfil', 'telegram_parear');
-        parent::beforeFilter();
+        parent::boot();
     }
 
     /**
@@ -68,8 +68,8 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         $this->layout .= '.min';
         $this->set([
             'redirect' => $redirect ? base64_decode ($redirect) : null,
-            'self_register' => (bool)config('app.self_register'),
-            'language' => config('language'),
+            'self_register' => (bool)config('app.users.self_register.enabled'),
+            'language' => config('app.locale'),
             'auth2_token_enabled' => \sowerphp\app\Model_Datasource_Auth2::tokenEnabled(),
         ]);
         // procesar inicio de sesión
@@ -156,7 +156,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 // buscar usuario y solicitar correo de recuperación
                 try {
                     $Usuario = new $class($_POST['id']);
-                } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+                } catch (\sowerphp\core\Exception_Database $e) {
                     $Usuario = new $class();
                 }
                 if (!$Usuario->exists()) {
@@ -656,8 +656,8 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 'changeUsername' => $this->changeUsername,
                 'qrcode' => base64_encode($this->request->getFullUrlWithoutQuery() . ';' . $this->Auth->User->hash),
                 'auths2' => \sowerphp\app\Model_Datasource_Auth2::getAll(),
-                'layouts' => (array)config('page.layouts'),
-                'layout' => $this->Auth->User->config_page_layout ? $this->Auth->User->config_page_layout : $this->layout,
+                'layouts' => (array)config('app.ui.layouts'),
+                'layout' => $this->Auth->User->config_app_ui_layout ?? $this->layout,
             ]);
         }
     }
@@ -678,8 +678,8 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             );
         }
         // si no se permite el registro se redirecciona
-        $config = config('app.self_register');
-        if (!$config) {
+        $config = config('app.users.self_register');
+        if (!$config['enabled']) {
             SessionMessage::error('El registro de usuarios está deshabilitado.');
             $this->redirect(
                 $this->Auth->settings['redirect']['login']
@@ -800,13 +800,13 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         }
         // buscar clave de preauth, si no existe se indica que la
         // preautenticación no está disponible
-        $enabled = config('preauth.enabled');
+        $enabled = config('app.users.preauth.enabled');
         if (!$enabled) {
             SessionMessage::error('La preautenticación no está disponible.');
             $this->redirect('/usuarios/ingresar');
         }
         if ($usuario) {
-            $key = config('preauth.key');
+            $key = config('app.key');
             if (!$key) {
                 SessionMessage::error('No hay clave global para preautenticación.');
                 $this->redirect('/usuarios/ingresar');
@@ -915,14 +915,14 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         }
         // cambiar layout
         $this->Auth->User->set([
-            'config_page_layout' => $layout,
+            'config_app_ui_layout' => $layout,
         ]);
         $this->Auth->User->save();
         $this->Auth->saveCache();
         SessionMessage::success(
             'Se modificó el diseño por defecto de su cuenta.'
         );
-        $this->redirect('/session/config/page.layout/'.$layout.'/'.base64_encode('/usuarios/perfil'));
+        $this->redirect('/session/config/app.ui.layout/'.$layout.'/'.base64_encode('/usuarios/perfil'));
     }
 
     /**
@@ -934,7 +934,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         if (is_string($User)) {
             $this->Api->send($User, 401);
         }
-        extract($this->getQuery([
+        extract($this->request->queries([
             'login' => false,
         ]));
         if ($login) {
