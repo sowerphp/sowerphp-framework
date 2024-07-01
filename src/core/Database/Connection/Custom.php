@@ -243,10 +243,6 @@ abstract class Database_Connection_Custom extends Connection
         try {
             $statement->execute();
         } catch (\PDOException $e) {
-            debug($query);
-            debug($bindings);
-            debug($e->getMessage());
-            exit;
             $this->error($e->getMessage());
         }
         if(!$statement || $statement->errorCode() !== '00000') {
@@ -487,6 +483,8 @@ abstract class Database_Connection_Custom extends Connection
      *
      * Este método es por compatibilidad, aquellas bases de datos que no
      * soportan este método entregarán NULL para cada PATH solicitado.
+     *
+     * @return array|string
      */
     public function xml(
         string $column,
@@ -494,7 +492,7 @@ abstract class Database_Connection_Custom extends Connection
         $namespace = null,
         bool $trim = true,
         $data_format = 'base64_ISO8859-1'
-    ): string
+    )
     {
         if (!is_array($path)) {
             $path = [$path];

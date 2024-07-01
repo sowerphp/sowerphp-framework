@@ -20,8 +20,7 @@
  * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
-
-// Namespace del modelo.
+.
 namespace {namespace};
 
 /**

@@ -275,7 +275,8 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
      * @param request Objeto con la solicitud a la aplicación
      * @param response Objeto con la respuesta de la API
      */
-    public function log() {
+    public function log()
+    {
         if (\sowerphp\core\Trigger::run('api_log', $this) !== true) {
             if ($this->settings['log']) {
                 $msg = $this->method . ' ' . $this->getResource() . ' '

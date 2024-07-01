@@ -140,12 +140,16 @@ class Service_Config implements Interface_Service, \ArrayAccess
             );
             $this->moduleService->registerModule($config['modules']);
         }
-        // Guardar configuración en repositorio.
+        // Estandarizar configuración (como si estuviese en config.php).
         if ($key != 'config') {
-            $this->set($key, $config);
-        } else {
-            $this->set($config);
+            $configOld = $config;
+            $config = [];
+            foreach($configOld as $var => $val) {
+                $config[$key . '.' . $var] = $val;
+            }
         }
+        // Guardar configuración en repositorio.
+        $this->set($config);
     }
 
     /**

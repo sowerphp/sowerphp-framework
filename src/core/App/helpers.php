@@ -138,9 +138,9 @@ function cache(?string $name = null): \Illuminate\Contracts\Cache\Repository
  * Obtiene una conexión a la base de datos.
  *
  * @param string|null $name Nombre de la conexión.
- * @return \Illuminate\Database\Connection
+ * @return \sowerphp\core\Database_Connection_Custom
  */
-function database(?string $name = null): \Illuminate\Database\Connection
+function database(?string $name = null): \sowerphp\core\Database_Connection_Custom
 {
     return app('database')->connection($name);
 }
@@ -184,11 +184,12 @@ function response(): \sowerphp\core\Network_Response
  *
  * @param string $view Nombre de la vista que se desea renderizar.
  * @param array $data Variables que se pasarán a la vista al renderizar.
- * @return Network_Response Objeto con la respuesta con la vista ya renderizada.
+ * @return \sowerphp\core\Network_Response  Objeto con la respuesta de la
+ * solicitud HTTP que contiene en el cuerpo (body) la vista renderizada.
  */
 function view(string $view, array $data = []): \sowerphp\core\Network_Response
 {
-    return app('view')->render($view, $data);
+    return app('view')->renderToResponse($view, $data);
 }
 
 /**

@@ -117,7 +117,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
      * Método que verifica si el usuario tiene permisos o bien da error
      * Wrapper para el método que hace la validación
      */
-    public function boot()
+    public function boot(): void
     {
         if (!$this->isAuthorized()) {
             if (!$this->logged()) {
@@ -214,7 +214,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     /**
      * Indica si existe una sesión de un usuario creada
      */
-    public function logged()
+    public function logged(): bool
     {
         if ($this->__logged === null) {
             if ($this->session && $this->User) {

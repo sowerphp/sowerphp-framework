@@ -105,10 +105,19 @@ class Service_Invoker
         $params = [];
         $i = 0;
         foreach ($method->getParameters() as $param) {
+            // Añadir parámetro inyectándolo.
             $type = $param->getType() ? $param->getType()->getName() : null;
             if ($type && class_exists($type)) {
                 $params[] = $this->container->make($type);
-            } else {
+            }
+            // Añadir todos los parámetros restantes si el parámetro es de
+            // largo variable.
+            else if ($param->isVariadic()) {
+                $params = array_merge($params, array_slice($parameters, $i));
+                break;
+            }
+            // Añadir parámetro por nombre, índice o valor por defecto.
+            else {
                 $params[] = $parameters[$param->getName()]
                             ?? $parameters[$i]
                             ?? (
@@ -118,8 +127,10 @@ class Service_Invoker
                             )
                 ;
             }
+            // Pasar al siguiente parámetro.
             $i++;
         }
+        // Entregar la lista de parámetros determinados.
         return $params;
     }
 

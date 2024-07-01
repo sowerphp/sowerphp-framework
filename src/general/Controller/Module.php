@@ -24,15 +24,15 @@
 namespace sowerphp\general;
 
 /**
- * Controlador para módulos
+ * Controlador para módulos.
  */
 class Controller_Module extends \Controller_App
 {
 
     /**
-     * Método para autorizar la carga de index en caso que hay autenticación
+     * Método para autorizar la carga de index en caso que hay autenticación.
      */
-    public function boot()
+    public function boot(): void
     {
         if (isset($this->Auth)) {
             $this->Auth->allow('index');
@@ -41,90 +41,66 @@ class Controller_Module extends \Controller_App
     }
 
     /**
-     * Renderizará (sin autenticación) el archivo en View/index
+     * Renderizará (sin autenticación) el archivo en View/index.
      */
     public function index()
     {
-        if ($this->autoRender) {
-            $this->autoRender = false;
-            $this->render('index');
-        }
+        return $this->render('index');
     }
 
     /**
-     * Mostrar la página principal para el módulo (con sus opciones de menú)
+     * Mostrar la página principal para el módulo (con sus opciones de menú).
      */
     public function display()
     {
-        if (!$this->autoRender) {
-            return;
-        }
-        // Desactivar renderizado automático.
-        $this->autoRender = false;
+        $module = $this->request->getRouteConfig()['module'];
         // Si existe una vista para el del modulo se usa.
-        if (app('module')->getFilePath($this->request->getRouteConfig()['module'], '/View/display.php')) {
-            $this->render('display');
+        if (app('module')->getFilePath($module, '/View/display.php')) {
+            return $this->render('display');
         }
-        // Si no se incluye el archivo con el título y el menú para el módulo
+        // Si no se incluye el archivo con el título y el menú para el módulo.
         else {
-            // menú del módulo
-            $nav_module = (array)config('nav.module');
-            // nombre del módulo para url
-            $module = str_replace(
+            // Menú del módulo.
+            $module_nav = (array)config('modules.' . $module . '.nav');
+            // Nombre del módulo para URL.
+            $module_url = str_replace(
                 '.',
                 '/',
-                \sowerphp\core\Utility_Inflector::underscore(
-                    $this->request->getRouteConfig()['module']
-                )
+                \sowerphp\core\Utility_Inflector::underscore($module)
             );
-            // verificar permisos
-            foreach ($nav_module as $link => &$info) {
-                // si info no es un arreglo es solo el nombre y se arma
+            // Verificar permisos.
+            foreach ($module_nav as $link => &$info) {
+                // Si info no es un arreglo es solo el nombre y se arma.
                 if (!is_array($info)) {
-                    $info = array(
+                    $info = [
                         'name' => $info,
                         'desc' => '',
                         'icon' => 'fa-solid fa-link',
-                    );
+                    ];
                 }
-                // si es un arreglo colocar opciones por defecto
+                // Si es un arreglo colocar opciones por defecto.
                 else {
-                    $info = array_merge(array(
+                    $info = array_merge([
                         'name' => $link,
                         'desc' => '',
                         'icon' => 'fa-solid fa-link',
-                    ), $info);
+                    ], $info);
                 }
-                // Verificar permisos para acceder al enlace
-                if(!$this->Auth->check('/'.$module.$link)) {
+                // Verificar permisos para acceder al enlace.
+                if(!$this->Auth->check('/' . $module_url . $link)) {
                     unset($nav_module[$link]);
                 }
             }
-            // setear variables para la vista
-            $module = str_replace(
-                '.',
-                '/',
-                \sowerphp\core\Utility_Inflector::underscore(
-                    $this->request->getRouteConfig()['module']
-                )
-            );
-            $key = 'modules.' . $this->request->getRouteConfig()['module'] . '.title';
-            $title = config($key);
-            if (!$title) {
-                $title = str_replace (
-                    '.',
-                    ' &raquo; ',
-                    $this->request->getRouteConfig()['module']
-                );
-            }
-            $this->set(array(
-                'title' => $title,
-                'nav' => $nav_module,
-                'module' => $module,
-            ));
-            unset($title, $nav_module, $module);
-            // renderizar
-            $this->render('Module/index');
+            // Asignar variables para la vista.
+            $this->set([
+                'title' => config('modules.' . $module . '.title')
+                    ?? str_replace ('.', ' &raquo; ', $module)
+                ,
+                'nav' => $module_nav,
+                'module' => $module_url,
+            ]);
+            // Renderizar la vista.
+            return $this->render('Module/index');
         }
     }
 

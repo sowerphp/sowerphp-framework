@@ -23,33 +23,40 @@
 
 return [
 
-    // Menú para el módulo
-    'nav.module' => [
-        '/usuarios/listar/1/ultimo_ingreso_fecha_hora/D?search=activo:1' => [
-            'name' => 'Usuarios',
-            'desc' => 'Usuarios del sistema',
-            'icon' => 'fa fa-user',
+    'modules.Sistema.Usuarios' => [
+
+        // Título del módulo.
+        'title' => 'Administración de usuarios',
+
+        // Menú para el módulo.
+        'nav' => [
+            '/usuarios/listar/1/ultimo_ingreso_fecha_hora/D?search=activo:1' => [
+                'name' => 'Usuarios',
+                'desc' => 'Usuarios del sistema',
+                'icon' => 'fa fa-user',
+            ],
+            '/grupos/listar' => [
+                'name' => 'Grupos',
+                'desc' => 'Grupos del sistema',
+                'icon' => 'fa fa-users',
+            ],
+            '/usuario_grupos/listar' => [
+                'name' => 'Usuarios y grupos',
+                'desc' => 'Pertenencia de usuarios a grupos',
+                'icon' => 'fa fa-users',
+            ],
+            '/auths/listar' => [
+                'name' => 'Autorización',
+                'desc' => 'Autorización y control de acceso sobre recursos',
+                'icon' => 'fa fa-lock',
+            ],
+            '/email/grupos' => [
+                'name' => 'Enviar email a grupos',
+                'desc' => 'Enviar correo electrónico a todos los usuarios de uno o varios grupos',
+                'icon' => 'fas fa-paper-plane',
+            ],
         ],
-        '/grupos/listar' => [
-            'name' => 'Grupos',
-            'desc' => 'Grupos del sistema',
-            'icon' => 'fa fa-users',
-        ],
-        '/usuario_grupos/listar' => [
-            'name' => 'Usuarios y grupos',
-            'desc' => 'Pertenencia de usuarios a grupos',
-            'icon' => 'fa fa-users',
-        ],
-        '/auths/listar' => [
-            'name' => 'Autorización',
-            'desc' => 'Autorización y control de acceso sobre recursos',
-            'icon' => 'fa fa-lock',
-        ],
-        '/email/grupos' => [
-            'name' => 'Enviar email a grupos',
-            'desc' => 'Enviar correo electrónico a todos los usuarios de uno o varios grupos',
-            'icon' => 'fas fa-paper-plane',
-        ],
+
     ],
 
 ];

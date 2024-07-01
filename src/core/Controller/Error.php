@@ -25,41 +25,37 @@ namespace sowerphp\core;
 
 /**
  * Clase para desplegar los errores que se generan en la ejecución de la
- * aplicación
+ * aplicación.
  */
 class Controller_Error extends \Controller_App
 {
 
-    public $error_reporting; ///< Si se debe o no mostrar los errores exactos de las páginas
-
     /**
-     * Renderizar error
-     * @param data Datos qye se deben pasar a la vista del error
+     * Renderizar error.
+     *
+     * @param array $data Datos que se deben pasar a la vista del error.
+     * @return Network_Response
      */
-    public function display($data)
+    public function display(array $data = []): Network_Response
     {
-        // agregar datos para la vista
-        if ($this->error_reporting) {
-            $layersService = app('layers');
-            $data['message'] = htmlspecialchars($data['message']);
-            $data['trace'] = str_replace(
-                [
-                    $layersService->getFrameworkPath(),
-                    $layersService->getProjectPath(),
-                ],
-                [
-                    'framework:',
-                    'project:',
-                ],
-                $data['trace']
-            );
-        } else {
-            unset($data['message'], $data['exception'], $data['trace']);
-        }
         $this->layout .= '.min';
-        $this->set($data);
-        $this->set('soporte', config('email.default') !== null);
-        $this->render('Error/error');
+        $data['error_reporting'] = config('app.debug');
+        $layersService = app('layers');
+        $data['message'] = htmlspecialchars($data['message']);
+        $data['trace'] = str_replace(
+            [
+                $layersService->getFrameworkPath(),
+                $layersService->getProjectPath(),
+            ],
+            [
+                'framework:',
+                'project:',
+            ],
+            $data['trace']
+        );
+        $data['soporte'] = config('email.default') !== null;
+        $this->set($data); // TODO: Quitar uso de $this->controller->viewVars en Log::terminate()
+        return $this->render('Error/error');
     }
 
 }

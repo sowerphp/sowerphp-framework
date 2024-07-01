@@ -219,16 +219,15 @@ class Controller_Bd extends \Controller_App
      */
     public function descargar()
     {
-        $this->autoRender = false;
         // en caos que se haya seleccionado una base de datos
         if (isset($_POST['step1'])) {
             $db = &database($_POST['database']);
-            $this->set(array(
+            $this->set([
                 'database' => $_POST['database'],
                 'type' => $_POST['type'],
                 'tables' => $db->getTablesFromDatabase(),
-            ));
-            $this->render('Bd/descargar_step2');
+            ]);
+            return $this->render('Bd/descargar_step2');
         }
         // en caso que se hayan seleccionado las tablas descargar datos
         else if (isset($_POST['step2'])) {
@@ -240,18 +239,18 @@ class Controller_Bd extends \Controller_App
                     FROM '.$table.'
                 ');
             }
-            $this->set(array(
+            $this->set([
                 'id' => 'database_' . $_POST['database'],
                 'type' => $_POST['type'],
                 'data' => $data,
-            ));
-            $this->render ('Bd/descargar_step3');
+            ]);
+            return $this->render('Bd/descargar_step3');
         }
         // en caso que no se haya seleccionado aun la bd
         else {
             // setear listado de bases de datos
             $this->_setDatabases();
-            $this->render ('Bd/descargar_step1');
+            return $this->render('Bd/descargar_step1');
         }
     }
 

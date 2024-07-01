@@ -86,7 +86,7 @@ abstract class Controller
     /**
      * Método que se ejecuta al iniciar la ejecución del controlador.
      */
-    public function boot()
+    public function boot(): void
     {
         if ($this->Components) {
             $this->Components->trigger('boot');
@@ -96,7 +96,7 @@ abstract class Controller
     /**
      * Método que se ejecuta al terminar la ejecución del controlador.
      */
-    public function terminate()
+    public function terminate(): void
     {
         if ($this->redirect !== null) {
             if (!is_array($this->redirect)) {
@@ -115,10 +115,10 @@ abstract class Controller
 
     /**
      * Guarda una(s) variable(s) para usarla en una vista.
-     * @param $one Nombre de la variable o arreglo asociativo con variables.
-     * @param $two Valor del variable o null si se paso un arreglo en one
+     * @param mixed $one Nombre de la variable o arreglo asociativo con variables.
+     * @param mixed $two Valor del variable o null si se paso un arreglo en $one.
      */
-    public function set($one, $two = null)
+    public function set($one, $two = null): void
     {
         // Si se pasó como arreglo se usa directamente.
         if (is_array($one)) {
@@ -126,16 +126,17 @@ abstract class Controller
         }
         // Si no se paso como arreglo se arma.
         else {
-            $data = array($one => $two);
+            $data = [$one => $two];
         }
-        // Agregar a las variables que se usarán en la vista
+        // Agregar a las variables que se usarán en la vista.
         $this->viewVars = array_merge($this->viewVars, $data);
     }
 
     /**
      * Método que renderiza la vista del controlador.
+     *
      * @param string $view Vista que se desea renderizar.
-     * @param string $location Ubicación de la vista.
+     * @param array $data Variables que se pasarán a la vista al renderizar.
      * @return Network_Response Respuesta con la página renderizada para enviar.
      */
     public function render(string $view = null, array $data = []): Network_Response

@@ -23,20 +23,27 @@
 
 return [
 
-    // Menú para el módulo.
-    'nav.module' => [
-        '/comunas/listar' => [
-            'name' => 'Comunas',
-            'icon' => 'fas fa-map-marker-alt',
+    'modules.Sistema.General.DivisionGeopolitica' => [
+
+        // Título del módulo.
+        'title' => 'División geopolítica',
+
+        // Menú para el módulo.
+        'nav' => [
+            '/comunas/listar' => [
+                'name' => 'Comunas',
+                'icon' => 'fas fa-map-marker-alt',
+            ],
+            '/provincias/listar' => [
+                'name' => 'Provincias',
+                'icon' => 'fa fa-map',
+            ],
+            '/regiones/listar' => [
+                'name' => 'Regiones',
+                'icon' => 'fa fa-globe',
+            ],
         ],
-        '/provincias/listar' => [
-            'name' => 'Provincias',
-            'icon' => 'fa fa-map',
-        ],
-        '/regiones/listar' => [
-            'name' => 'Regiones',
-            'icon' => 'fa fa-globe',
-        ],
+
     ],
 
 ];

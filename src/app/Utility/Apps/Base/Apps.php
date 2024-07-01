@@ -21,7 +21,6 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
 namespace sowerphp\app;
 
 /**
@@ -226,25 +225,25 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega el código de la aplicación de alguna parte de la página
+     * Método que entrega el código de la aplicación de alguna parte de la página.
      */
     public function getPageCode($page, array $vars = [])
     {
-        $plantilla = $this->directory.'/templates/'.$page.'.php';
+        $plantilla = $this->directory . '/templates/' . $page . '.php';
         if (!is_readable($plantilla)) {
             return '';
         }
         if (!empty($this->config)) {
             $vars['config'] = $this->config;
         }
-        return \sowerphp\core\View_Helper_Pages_Php::render($plantilla, $vars);
+        return app('view')->render($plantilla, $vars);
     }
 
     /**
      * Método que redirecciona una URL en la aplicación
      */
     protected function redirect($url) {
-        header('location: '.$url);
+        header('location: ' . $url);
         exit(0); // no hay otra opción, debe ser exit para que location funcione
     }
 

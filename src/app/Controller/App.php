@@ -56,7 +56,7 @@ class Controller_App extends \sowerphp\core\Controller
      * del controlador que se está ejecutando. Aquí no se validan permisos para
      * la funcionalidad, estos deberán ser validados en cada función.
      */
-    public function boot()
+    public function boot(): void
     {
         if (!empty($this->allowedActions)) {
             call_user_func_array(

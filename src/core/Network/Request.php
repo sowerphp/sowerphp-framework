@@ -33,23 +33,31 @@ class Network_Request extends Request
 {
 
     /**
-     * URI usada para la consulta desde la aplicacion, o sea, sin base,
-     * iniciando con "/".
-     */
-    protected $requestUriDecoded;
-
-    /**
-     * Ruta base de la URL (base + uri arma el total del request).
-     */
-    protected $baseUrlWithoutSlash;
-
-    /**
      * URL completa, partiendo desde HTTP o HTTPS según corresponda.
+     *
+     * @var string
      */
     protected $fullUrlWithoutQuery;
 
     /**
+     * Ruta base de la URL (base + uri arma el total del request).
+     *
+     * @var string
+     */
+    protected $baseUrlWithoutSlash;
+
+    /**
+     * URI usada para la consulta desde la aplicacion, o sea, sin base,
+     * iniciando con "/".
+     *
+     * @var string
+     */
+    protected $requestUriDecoded;
+
+    /**
      * Configuración de la ruta de la solicitud HTTP.
+     *
+     * @var array
      */
     protected $routeConfig;
 
@@ -88,6 +96,59 @@ class Network_Request extends Request
             $this->sessionService = session();
         }
         return $this->sessionService;
+    }
+
+    /**
+     * Método que determina la URL utiliza para acceder a la aplicación, esto
+     * es: protocolo/esquema, dominio y ruta base dentro del dominio).
+     *
+     * @return string URL completa para acceder a la aplicación web.
+     */
+    public function getFullUrlWithoutQuery(): string
+    {
+        if (!isset($this->fullUrlWithoutQuery)) {
+            if (empty($_SERVER['HTTP_HOST'])) {
+                $url = (string)config('app.url');
+            } else {
+                if ($this->headers->get('X-Forwarded-Proto') == 'https') {
+                    $scheme = 'https';
+                } else {
+                    $scheme = 'http' . (isset($_SERVER['HTTPS']) ? 's' : null);
+                }
+                $url = $scheme . '://' . $_SERVER['HTTP_HOST']
+                    . $this->getBaseUrlWithoutSlash()
+                ;
+            }
+            $this->fullUrlWithoutQuery = $url;
+        }
+        return $this->fullUrlWithoutQuery;
+    }
+
+    /**
+     * Método que determina la ruta base dentro del dominio.
+     *
+     * @return string Base de la URL.
+     */
+    public function getBaseUrlWithoutSlash(): string
+    {
+        if (!isset($this->baseUrlWithoutSlash)) {
+            if (!isset($_SERVER['REQUEST_URI'])) {
+                $base = '';
+            } else {
+                $parts = explode('?', urldecode($_SERVER['REQUEST_URI']));
+                $last = strrpos($parts[0], $this->getRequestUriDecoded());
+                $base = $last !== false
+                    ? substr($parts[0], 0, $last)
+                    : $parts[0]
+                ;
+                $position = strlen($base) - 1;
+                if ($position >= 0 && $base[$position] == '/') {
+                    $base = substr($base, 0, -1);
+                }
+            }
+            $this->baseUrlWithoutSlash = $base;
+        }
+        return $this->baseUrlWithoutSlash;
     }
 
     /**
@@ -133,59 +194,6 @@ class Network_Request extends Request
             unset($_GET[$this->requestUriDecoded]);
         }
         return $this->requestUriDecoded;
-    }
-
-    /**
-     * Método que determina los campos base y webroot.
-     *
-     * @return string Base de la URL.
-     */
-    public function getBaseUrlWithoutSlash(): string
-    {
-        if (!isset($this->baseUrlWithoutSlash)) {
-            if (!isset($_SERVER['REQUEST_URI'])) {
-                $base = '';
-            } else {
-                $parts = explode('?', urldecode($_SERVER['REQUEST_URI']));
-                $last = strrpos($parts[0], $this->getRequestUriDecoded());
-                $base = $last !== false
-                    ? substr($parts[0], 0, $last)
-                    : $parts[0]
-                ;
-                $position = strlen($base) - 1;
-                if ($position >= 0 && $base[$position] == '/') {
-                    $base = substr($base, 0, -1);
-                }
-            }
-            $this->baseUrlWithoutSlash = $base;
-        }
-        return $this->baseUrlWithoutSlash;
-    }
-
-    /**
-     * Método que determina la URL utiliza para acceder a la aplicación, esto
-     * es: protocolo/esquema, dominio y path base a contar del webroot).
-     *
-     * @return string URL completa para acceder a la la página.
-     */
-    public function getFullUrlWithoutQuery(): string
-    {
-        if (!isset($this->fullUrlWithoutQuery)) {
-            if (empty($_SERVER['HTTP_HOST'])) {
-                $url = (string)config('app.url');
-            } else {
-                if ($this->headers->get('X-Forwarded-Proto') == 'https') {
-                    $scheme = 'https';
-                } else {
-                    $scheme = 'http' . (isset($_SERVER['HTTPS']) ? 's' : null);
-                }
-                $url = $scheme . '://' . $_SERVER['HTTP_HOST']
-                    . $this->getBaseUrlWithoutSlash()
-                ;
-            }
-            $this->fullUrlWithoutQuery = $url;
-        }
-        return $this->fullUrlWithoutQuery;
     }
 
     /**

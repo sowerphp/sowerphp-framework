@@ -23,20 +23,20 @@
 
 return [
 
-    // Título del módulo.
-    'modules' => [
-        'Sistema' => [
-            'title' => 'Configuración del sistema',
-        ],
-    ],
+    'modules.Sistema' => [
 
-    // Menú para el módulo.
-    'nav.module' => [
-        '/usuarios' => [
-            'name' => 'Usuarios',
-            'desc' => 'Mantenedor de usuarios y grupos del sistema',
-            'icon' => 'fa-solid fa-users',
+        // Título del módulo.
+        'title' => 'Configuración del sistema',
+
+        // Menú para el módulo.
+        'nav' => [
+            '/usuarios' => [
+                'name' => 'Usuarios',
+                'desc' => 'Mantenedor de usuarios y grupos del sistema',
+                'icon' => 'fa-solid fa-users',
+            ],
         ],
+
     ],
 
 ];

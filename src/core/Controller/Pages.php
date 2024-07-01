@@ -32,7 +32,7 @@ class Controller_Pages extends \Controller_App
     /**
      * Método que se ejecuta antes de ejecutar la acción del controlador.
      */
-    public function boot()
+    public function boot(): void
     {
         if (isset($this->Auth)) {
             $this->Auth->allow('display');
@@ -48,10 +48,7 @@ class Controller_Pages extends \Controller_App
     public function display($page)
     {
         $page = $page ? $page : config('app.ui.homepage');
-        if ($this->autoRender) {
-            $this->autoRender = false;
-            $this->render('Pages' . $page);
-        }
+        return $this->render('Pages' . $page);
     }
 
 }

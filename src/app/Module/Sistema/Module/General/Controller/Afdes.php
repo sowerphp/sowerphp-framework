@@ -21,7 +21,6 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del controlador
 namespace sowerphp\app\Sistema\General;
 
 use \sowerphp\core\Facade_Session_Message as SessionMessage;
@@ -38,7 +37,7 @@ class Controller_Afdes extends \Controller_Maintainer
 
     protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
 
-    public function boot()
+    public function boot(): void
     {
         $this->Auth->allowWithLogin('grafo');
         parent::boot();
@@ -76,8 +75,7 @@ class Controller_Afdes extends \Controller_Maintainer
             'listarUrl' => $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar,
         ]);
         // renderizar
-        $this->autoRender = false;
-        $this->render('Afdes/crear_editar');
+        return $this->render('Afdes/crear_editar');
     }
 
     /**
@@ -105,8 +103,7 @@ class Controller_Afdes extends \Controller_Maintainer
                 'listarUrl' => $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar,
             ));
             // renderizar
-            $this->autoRender = false;
-            $this->render('Afdes/crear_editar');
+            return $this->render('Afdes/crear_editar');
         }
         // si se envió el formulario se procesa
         else {

@@ -73,6 +73,8 @@ class Database_Connection_Custom_Pgsql extends Database_Connection_Custom
      *
      * Este método es por compatibilidad, aquellas bases de datos que no
      * soportan este método entregarán NULL para cada PATH solicitado.
+     *
+     * @return array|string
      */
     public function xml(
         string $column,
@@ -81,7 +83,7 @@ class Database_Connection_Custom_Pgsql extends Database_Connection_Custom
         bool $trim =
         true,
         $data_format = 'base64_ISO8859-1'
-    ): string
+    )
     {
         if (!is_array($path)) {
             $path = [$path];
@@ -120,7 +122,7 @@ class Database_Connection_Custom_Pgsql extends Database_Connection_Custom
                 }
             }
         }
-        return count($select)>1 ? $select : array_shift($select);
+        return count($select) > 1 ? $select : array_shift($select);
     }
 
     /**

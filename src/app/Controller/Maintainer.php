@@ -26,7 +26,10 @@ namespace sowerphp\app;
 use \sowerphp\core\Facade_Session_Message as SessionMessage;
 
 /**
- * Clase que implementa los métodos básicos de un mantenedor, métodos CRUD.
+ * Clase que implementa los métodos básicos de un mantenedor de una tabla de la
+ * base de datos.
+ *
+ * Implementa los métodos del CRUD: create, read, update y delete.
  */
 class Controller_Maintainer extends \Controller_App
 {
@@ -96,13 +99,25 @@ class Controller_Maintainer extends \Controller_App
      * Método que busca la vista que se deberá renderizar.
      *
      * @param string $view Vista que se desea renderizar.
+     * @param array $data Variables que se pasarán a la vista al renderizar.
      */
     public function render(
         ?string $view = null,
         array $data = []
     ): \sowerphp\core\Network_Response
     {
-        $this->autoRender = false;
+        // Se debe determinar la vista automáticamente pues no fue indicada una
+        // específica. Se renderizará la vista del Controller::action().
+        if (!$view) {
+            return parent::render($view, $data);
+        }
+        // Si la vista tiene '/' es porque se pidió una específica. Ya sea
+        // mediante ruta absoluta o relativa y se deberá buscar esa.
+        if (strpos($view, '/') !== false) {
+            return parent::render($view, $data);
+        }
+        // Se indicó solo el nombre de la vista y no su ubicación (ni ruta
+        // absoluta ni relativa). Se deberá determinar su ubicación.
         list($namespace, $ControllerName) = explode(
             '\Controller_',
             get_class($this)
@@ -112,9 +127,9 @@ class Controller_Maintainer extends \Controller_App
             (string)$this->request->getRouteConfig()['module']
         );
         if ($filepath) {
-            return parent::render($ControllerName . '/' . $view);
+            return parent::render($ControllerName . '/' . $view, $data);
         } else {
-            return parent::render('Maintainer/' . $view);
+            return parent::render('Maintainer/' . $view, $data);
         }
     }
 
@@ -465,8 +480,7 @@ class Controller_Maintainer extends \Controller_App
             );
         }
         // entregar archivo
-        $this->autoRender = false;
-        $this->response->prepareFileResponse([
+        return $this->response->prepareFileResponse([
             'name' => $Obj->{$campo.'_name'},
             'type' => $Obj->{$campo.'_type'},
             'size' => $Obj->{$campo.'_size'},

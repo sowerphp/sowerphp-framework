@@ -29,7 +29,7 @@ namespace sowerphp\core;
 class Controller_Session extends \Controller_App
 {
 
-    public function boot()
+    public function boot(): void
     {
         if (isset($this->Auth)) {
             $this->Auth->allow('config');

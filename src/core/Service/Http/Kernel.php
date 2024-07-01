@@ -407,6 +407,7 @@ class Service_Http_Kernel implements Interface_Service
     {
         // Obtener configuración de la ruta de la solicitud.
         $routeConfig = $request->getRouteConfig();
+        //debug(app('config')->get('modules')); exit;
         // Procesar la solicitud redirigiendo.
         if (!empty($routeConfig['redirect'])) {
             $response = $this->getResponse();
@@ -434,20 +435,42 @@ class Service_Http_Kernel implements Interface_Service
             $routeConfig['action'],
             $routeConfig['parameters']
         );
-        // Determinar respuesta del controlador.
-        // Esto es necesario porque las acciones no retornan necesariamente
-        // un objeto Network_Response (que es el caso ideal). Y podrían solo
-        // haber asignado las variables para luego renderizar o bien haber
-        // retornado en el resultado lo que debe ir al cuerpo de la respuesta.
-        // TODO: se debe refactorizar para dejar de usar autoRender.
-        // IDEA: si no se retorna un Network_Response se debe autorenderizar.
+        // Recibir resultado de la ejecución de la acción del controlador.
         $response = $this->getResponse();
-        if ($controller->autoRender) {
-            $response = $controller->render();
-        } else if ($response->body() === null) {
-            $response->body($result);
+        // Se retorno algo desde el controlador:
+        //   - Objeto Network_Response.
+        //   - Datos para asignar al body.
+        if ($result) {
+            // La respuesta del controlador es un objeto Network_Response, esto
+            // significa que la respuesta ya está lista y su vista renderizada.
+            if (
+                is_object($result)
+                && get_class($result) == 'sowerphp\core\Network_Response'
+            ) {
+                $response = $result;
+            }
+            // La respuesta no es un objeto Network_Response. Se debe asignar
+            // al cuerpo de la respuesta. Solo se asignará si no hay datos
+            // previamente asignados al body de la respuesta.
+            else if ($response->body() === null) {
+                // Si el resultado es un string se asigna directamente, viene
+                // listo para pasar al body.
+                if (is_string($result)) {
+                    $response->body($result);
+                }
+                // Si no es string, se asume que se debe entregar como JSON.
+                else {
+                    $response->header('Content-Type', 'application/json');
+                    $response->body(json_encode($result));
+                }
+            }
         }
-        // Retornar respuesta al handler de la solicitud HTTP.*/
+        // No se retornó algo desde el controlador, entonces se deberá ejecutar
+        // el renderizado de la vista del controlador.
+        else {
+            $response = $controller->render();
+        }
+        // Retornar respuesta al handler de la solicitud HTTP.
         return $response;
     }
 
@@ -527,8 +550,8 @@ class Service_Http_Kernel implements Interface_Service
         }
         // Es una solicitud mediante la interfaz web.
         else {
-            $controller->error_reporting = $this->configService->get('app.debug');
-            $controller->display($data);
+            $controller->boot();
+            $response = $controller->display($data);
             $controller->terminate();
             $response->status($data['code']);
             $response->send();

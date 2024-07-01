@@ -24,7 +24,7 @@
 namespace sowerphp\core;
 
 /**
- * Clase base para todos los componentes
+ * Clase base para todos los componentes.
  */
 abstract class Controller_Component
 {
@@ -52,7 +52,7 @@ abstract class Controller_Component
      * Método llamado desde Controller::boot()
      * Deberá se sobreescrito en el componente si se quiere utilizar
      */
-    public function boot()
+    public function boot(): void
     {
     }
 
@@ -60,7 +60,7 @@ abstract class Controller_Component
      * Método llamado desde Controller::terminate()
      * Deberá se sobreescrito en el componente si se quiere utilizar
      */
-    public function terminate()
+    public function terminate(): void
     {
     }
 

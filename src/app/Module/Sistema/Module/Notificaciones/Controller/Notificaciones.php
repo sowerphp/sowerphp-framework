@@ -21,7 +21,6 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del controlador
 namespace sowerphp\app\Sistema\Notificaciones;
 
 use \sowerphp\core\Facade_Session_Message as SessionMessage;
@@ -41,7 +40,7 @@ class Controller_Notificaciones extends \Controller_Maintainer
         'listar'=>['id', 'fechahora', 'de', 'para', 'descripcion', 'leida']
     ]; ///< Columnas que se deben mostrar en las vistas
 
-    public function boot()
+    public function boot(): void
     {
         $this->Auth->allowWithLogin('index', 'abrir');
         parent::boot();

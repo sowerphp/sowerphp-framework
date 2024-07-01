@@ -76,7 +76,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
      * Se registran automáticamente eventos que ocurrieron durante la ejecución
      * del controlador (incluyendo la renderización de la vista).
      */
-    public function terminate($url = null, $status = null)
+    public function terminate(): void
     {
         if (get_class($this->controller) == 'sowerphp\core\Controller_Error') {
             $message = [

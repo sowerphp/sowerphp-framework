@@ -21,7 +21,6 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del controlador
 namespace sowerphp\app\Sistema\Usuarios;
 
 use \sowerphp\core\Facade_Session_Message as SessionMessage;
@@ -47,7 +46,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
      * Permitir ciertas acciones y luego ejecutar verificar permisos con
      * parent::boot()
      */
-    public function boot()
+    public function boot(): void
     {
         $this->Auth->allow('ingresar', 'salir', 'contrasenia_recuperar', 'registrar', 'preauth', '_api_perfil_GET');
         $this->Auth->allowWithLogin('perfil', 'telegram_parear');
@@ -136,12 +135,11 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
     public function contrasenia_recuperar($usuario = null, $codigo = null)
     {
         $this->layout .= '.min';
-        $this->autoRender = false;
         $class = $this->Auth->settings['model'];
         // pedir correo
         if ($usuario == null) {
             if (!isset($_POST['id'])) {
-                $this->render('Usuarios/contrasenia_recuperar_step1');
+                return $this->render('Usuarios/contrasenia_recuperar_step1');
             } else {
                 // validar captcha
                 try {
@@ -163,16 +161,16 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     SessionMessage::error(
                         'Usuario no válido. Recuerda que puedes buscar por tu nombre de usuario o correo.'
                     );
-                    $this->render('Usuarios/contrasenia_recuperar_step1');
+                    return $this->render('Usuarios/contrasenia_recuperar_step1');
                 }
                 else if (!$Usuario->activo) {
                     SessionMessage::error(
                         'Usuario no activo. Primero deberás realizar la activación del usuario, luego podrás cambiar la contraseña.'
                     );
-                    $this->render('Usuarios/contrasenia_recuperar_step1');
+                    return $this->render('Usuarios/contrasenia_recuperar_step1');
                 }
                 else {
-                    $this->contrasenia_recuperar_email (
+                    $this->contrasenia_recuperar_email(
                         $Usuario->email,
                         $Usuario->nombre,
                         $Usuario->usuario,
@@ -191,7 +189,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             $Usuario = new $class(urldecode($usuario));
             if (!$Usuario->exists()) {
                 SessionMessage::error('Usuario inválido.');
-                $this->redirect ('/usuarios/contrasenia/recuperar');
+                $this->redirect('/usuarios/contrasenia/recuperar');
             }
             // formulario de cambio de contraseña
             if (!isset($_POST['contrasenia1'])) {
@@ -199,7 +197,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     'usuario' => $Usuario->usuario,
                     'codigo' => $codigo,
                 ]);
-                $this->render('Usuarios/contrasenia_recuperar_step2');
+                return $this->render('Usuarios/contrasenia_recuperar_step2');
             }
             // procesar cambio de contraseña
             else {
@@ -229,7 +227,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                         'Contraseña nueva inválida (en blanco o no coinciden).'
                     );
                     $this->set('usuario', $usuario);
-                    $this->render ('Usuarios/contrasenia_recuperar_step2');
+                    return $this->render('Usuarios/contrasenia_recuperar_step2');
                 }
                 else {
                     $Usuario->savePassword($_POST['contrasenia1']);
@@ -254,12 +252,12 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
     private function contrasenia_recuperar_email($correo, $nombre, $usuario, $hash)
     {
         $this->layout = null;
-        $this->set (array(
-            'nombre'=>$nombre,
-            'usuario'=>$usuario,
-            'hash'=>$hash,
-            'ip'=>$this->Auth->ip(),
-        ));
+        $this->set([
+            'nombre' => $nombre,
+            'usuario' => $usuario,
+            'hash' => $hash,
+            'ip' => $this->Auth->ip(),
+        ]);
         $msg = $this->render('Usuarios/contrasenia_recuperar_email')->body();
         $email = new \sowerphp\core\Network_Email();
         $email->to($correo);
@@ -375,8 +373,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             'ldap' => config('ldap.default'),
         ));
         $this->setGruposAsignables();
-        $this->autoRender = false;
-        $this->render ('Usuarios/crear_editar');
+        return $this->render('Usuarios/crear_editar');
     }
 
     /**
@@ -418,8 +415,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 'listarUrl' => $redirect,
                 'ldap' => config('ldap.default'),
             ));
-            $this->autoRender = false;
-            $this->render ('Usuarios/crear_editar');
+            return $this->render('Usuarios/crear_editar');
         }
         // si se envió el formulario se procesa
         else {

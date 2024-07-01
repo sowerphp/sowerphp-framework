@@ -34,7 +34,7 @@ class Controller_Contacto extends \Controller_App
     /**
      * Método para autorizar la carga de index en caso que hay autenticación
      */
-    public function boot()
+    public function boot(): void
     {
         if (isset($this->Auth)) {
             $this->Auth->allow('index');

@@ -26,7 +26,7 @@ namespace sowerphp\general;
 class Controller_Exportar extends \Controller_App
 {
 
-    public function boot()
+    public function boot(): void
     {
     }
 

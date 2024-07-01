@@ -21,7 +21,6 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del controlador
 namespace sowerphp\app\Sistema\Usuarios;
 
 use \sowerphp\core\Facade_Session_Message as SessionMessage;
@@ -69,7 +68,7 @@ class Controller_Email extends \Controller_App
                     // preparar mensaje a enviar
                     $layout = $this->layout;
                     $this->layout = null;
-                    $this->set (array(
+                    $this->set(array(
                         'mensaje' => $_POST['mensaje'],
                         'n_emails' => $n_emails,
                         'grupos' => $Grupos->getGlosas($_POST['grupos']),

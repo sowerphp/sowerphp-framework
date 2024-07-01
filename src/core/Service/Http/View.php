@@ -64,6 +64,7 @@ class Service_Http_View implements Interface_Service
      * @var array
      */
     protected $specialViews = [
+        'Maintainer/listar',
         'Module/index',
         'Error/error',
     ];
@@ -135,24 +136,9 @@ class Service_Http_View implements Interface_Service
      *
      * @param string $view Vista que se desea renderizar.
      * @param array $data Variables que se pasarán a la vista al renderizar.
-     * @return Network_Response Objeto con la respuesta de la solicitud HTTP
-     * que contiene el el cuerpo (body) la vista renderizada.
-     */
-    public function render(string $view, array $data = []): Network_Response
-    {
-        $body = $this->renderAsString($view, $data);
-        $this->response->body($body);
-        return $this->response;
-    }
-
-    /**
-     * Método para renderizar una vista con su contexto (variables).
-     *
-     * @param string $view Vista que se desea renderizar.
-     * @param array $data Variables que se pasarán a la vista al renderizar.
      * @return string String con el contenido (cuerpo) de la vista renderizada.
      */
-    protected function renderAsString(string $view, array $data = []): string
+    public function render(string $view, array $data = []): string
     {
         // Buscar el archivo de la vista que se utilizará para renderizar.
         $filepath = $this->resolveView($view);
@@ -182,6 +168,21 @@ class Service_Http_View implements Interface_Service
             case 'markdown':
                 return $this->renderWithMarkdown($filepath, $data);
         }
+    }
+
+    /**
+     * Método para renderizar una vista con su contexto (variables).
+     *
+     * @param string $view Vista que se desea renderizar.
+     * @param array $data Variables que se pasarán a la vista al renderizar.
+     * @return Network_Response Objeto con la respuesta de la solicitud HTTP
+     * que contiene en el cuerpo (body) la vista renderizada.
+     */
+    public function renderToResponse(string $view, array $data = []): Network_Response
+    {
+        $body = $this->render($view, $data);
+        $this->response->body($body);
+        return $this->response;
     }
 
     /**
@@ -228,6 +229,9 @@ class Service_Http_View implements Interface_Service
     {
         if ($view[0] != '/') {
             return null;
+        }
+        if (is_readable($view)) {
+            return $view;
         }
         foreach($this->engines as $extension => $engine) {
             $filepath = $view . $extension;
@@ -314,9 +318,9 @@ class Service_Http_View implements Interface_Service
     protected function prepareData(array $data): array
     {
         // Agregar variables por defecto que se pasarán a la vista.
+        $data['_url'] = $this->request->getFullUrlWithoutQuery();
         $data['_base'] = $this->request->getBaseUrlWithoutSlash();
         $data['_request'] = $this->request->getRequestUriDecoded();
-        $data['_url'] = $this->request->getFullUrlWithoutQuery();
         // Página que se está viendo.
         if (!empty($data['_request'])) {
             $slash = strpos($data['_request'], '/', 1);
@@ -328,9 +332,8 @@ class Service_Http_View implements Interface_Service
             $data['_page'] = config('app.ui.homepage');
         }
         // Diferentes menús que se podrían utilizar.
-        $data['_nav_website'] = config('nav.website');
+        $data['_nav_website'] = (array)config('nav.website');
         $data['_nav_app'] = (array)config('nav.app');
-        $data['_nav_module'] = config('nav.module');
         // Asignar el título de la página si no está asignado.
         if (empty($data['__view_title'])) {
             $data['__view_title'] = config('app.name')
@@ -427,8 +430,8 @@ class Service_Http_View implements Interface_Service
      */
     protected function renderPhp(string $__filepath, array $__data): string
     {
+        ob_start(); // NOTE: obligatorio o se incluirá en la salida.
         extract($__data, EXTR_SKIP);
-        //ob_start();
         include $__filepath;
         $vars = get_defined_vars();
         foreach ($vars as $var => $val) {

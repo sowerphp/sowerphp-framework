@@ -4,13 +4,13 @@
 <div class="h-100 p-5 bg-body-tertiary border rounded-3 mb-4">
     <h2 class="mb-4">¡Lo sentimos!</h2>
     <p>Encontramos un problema y la aplicación dejó de ejecutarse.</p>
-    <?php if (!empty($exception) && !empty($message)): ?>
+    <?php if ($error_reporting && !empty($exception) && !empty($message)): ?>
         <div class="card mb-4">
             <div class="card-header text-muted"><?=$exception?></div>
             <div class="card-body"><pre class="text-dark"><?=$message?></pre></div>
         </div>
     <?php endif; ?>
-    <?php if (!empty($trace)): ?>
+    <?php if ($error_reporting && !empty($trace)): ?>
         <div class="card mb-4">
             <div class="card-header text-muted">Traza del error</div>
             <div class="card-body"><pre class="text-dark"><?=$trace?></pre></div>
