@@ -58,7 +58,7 @@ class Network_Email_Smtp_Pear
         }
         // si no están los campos mínimos necesarios error
         if (empty($config['host']) || empty($config['port']) || empty($config['user']) || empty($config['pass'])) {
-            throw new \sowerphp\core\Exception('Configuración del correo electrónico incompleta');
+            throw new \Exception('Configuración del correo electrónico incompleta.');
         }
         // Configuración para la conexión al servidor
         $this->config = [

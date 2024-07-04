@@ -61,7 +61,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
     {
         // si ya está logueado se redirecciona
         if ($this->Auth->logged()) {
-            $this->redirect($this->Auth->settings['redirect']['login']);
+            return redirect($this->Auth->settings['redirect']['login']);
         }
         // asignar variables para la vista
         $this->layout .= '.min';
@@ -94,7 +94,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             $this->Auth->logout();
         } else {
             SessionMessage::warning('No existe sesión de usuario abierta.');
-            $this->redirect('/');
+            return redirect('/');
         }
     }
 
@@ -109,7 +109,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             SessionMessage::error(
                 'Usuario no existe, no se puede forzar el cierre de la sesión.'
             );
-            $this->redirect('/sistema/usuarios/usuarios/listar');
+            return redirect('/sistema/usuarios/usuarios/listar');
         }
         $Usuario->ultimo_ingreso_hash = null;
         try {
@@ -125,7 +125,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 $e->getMessage()
             ));
         }
-        $this->redirect('/sistema/usuarios/usuarios/editar/'.$id);
+        return redirect('/sistema/usuarios/usuarios/editar/'.$id);
     }
 
     /**
@@ -149,12 +149,12 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                         'Falló validación captcha: %s',
                         $e->getMessage()
                     ));
-                    $this->redirect($this->request->getRequestUriDecoded());
+                    return redirect($this->request->getRequestUriDecoded());
                 }
                 // buscar usuario y solicitar correo de recuperación
                 try {
                     $Usuario = new $class($_POST['id']);
-                } catch (\sowerphp\core\Exception_Database $e) {
+                } catch (\Exception $e) {
                     $Usuario = new $class();
                 }
                 if (!$Usuario->exists()) {
@@ -179,7 +179,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     SessionMessage::success(
                         'Se ha enviado un email con las instrucciones para recuperar tu contraseña.'
                     );
-                    $this->redirect('/usuarios/ingresar');
+                    return redirect('/usuarios/ingresar');
                 }
             }
         }
@@ -189,7 +189,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             $Usuario = new $class(urldecode($usuario));
             if (!$Usuario->exists()) {
                 SessionMessage::error('Usuario inválido.');
-                $this->redirect('/usuarios/contrasenia/recuperar');
+                return redirect('/usuarios/contrasenia/recuperar');
             }
             // formulario de cambio de contraseña
             if (!isset($_POST['contrasenia1'])) {
@@ -209,14 +209,14 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                         'Falló validación captcha: %s',
                         $e->getMessage()
                     ));
-                    $this->redirect($this->request->getRequestUriDecoded());
+                    return redirect($this->request->getRequestUriDecoded());
                 }
                 // cambiar la contraseña al usuario
                 if ($_POST['codigo'] != md5(hash('sha256', $Usuario->contrasenia))) {
                     SessionMessage::error(
                         'El enlace para recuperar su contraseña no es válido, solicite uno nuevo por favor.'
                     );
-                    $this->redirect('/usuarios/contrasenia/recuperar');
+                    return redirect('/usuarios/contrasenia/recuperar');
                 }
                 else if (
                     empty ($_POST['contrasenia1'])
@@ -236,7 +236,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                         'La contraseña para el usuario %s ha sido cambiada con éxito.',
                         $usuario
                     ));
-                    $this->redirect('/usuarios/ingresar');
+                    return redirect('/usuarios/ingresar');
                 }
             }
         }
@@ -265,7 +265,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         $status = $email->send($msg);
         if ($status !== true && $status['type'] == 'error') {
             SessionMessage::error($status['message']);
-            $this->redirect('/usuarios/contrasenia/recuperar');
+            return redirect('/usuarios/contrasenia/recuperar');
         }
     }
 
@@ -359,7 +359,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                         'Registro no creado (hubo algún error).'
                     );
                 }
-                $this->redirect('/sistema/usuarios/usuarios/listar' . $filterListar);
+                return redirect('/sistema/usuarios/usuarios/listar' . $filterListar);
             }
         }
         // setear variables
@@ -400,7 +400,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             SessionMessage::error(
                 'Registro ('.implode(', ', func_get_args()).') no existe, no se puede editar.'
             );
-            $this->redirect($redirect);
+            return redirect($redirect);
         }
         // si no se ha enviado el formulario se mostrará
         if(!isset($_POST['submit'])) {
@@ -423,7 +423,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 SessionMessage::warning(
                     'Nombre de usuario no puede ser cambiado.'
                 );
-                $this->redirect('/sistema/usuarios/usuarios/editar/' . $id . $filterListarUrl);
+                return redirect('/sistema/usuarios/usuarios/editar/' . $id . $filterListarUrl);
             }
             $activo = $Usuario->activo;
             $Usuario->set($_POST);
@@ -433,15 +433,15 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 SessionMessage::warning(
                     'Nombre de usuario '.$Usuario->usuario.' ya está en uso.'
                 );
-                $this->redirect('/sistema/usuarios/usuarios/editar/'.$id.$filterListarUrl);
+                return redirect('/sistema/usuarios/usuarios/editar/'.$id.$filterListarUrl);
             }
             if ($Usuario->checkIfHashAlreadyExists ()) {
                 SessionMessage::warning('Hash seleccionado ya está en uso.');
-                $this->redirect('/sistema/usuarios/usuarios/editar/'.$id.$filterListarUrl);
+                return redirect('/sistema/usuarios/usuarios/editar/'.$id.$filterListarUrl);
             }
             if ($Usuario->checkIfEmailAlreadyExists ()) {
                 SessionMessage::warning('Email seleccionado ya está en uso.');
-                $this->redirect('/sistema/usuarios/usuarios/editar/'.$id.$filterListarUrl);
+                return redirect('/sistema/usuarios/usuarios/editar/'.$id.$filterListarUrl);
             }
             $Usuario->save();
             // enviar correo solo si el usuario estaba inactivo y ahora está activo
@@ -474,7 +474,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             SessionMessage::success(
                 'Registro Usuario('.implode(', ', func_get_args()).') editado.'
             );
-            $this->redirect($redirect);
+            return redirect($redirect);
         }
     }
 
@@ -526,7 +526,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 && $this->Auth->User->usuario != $_POST['usuario']
             ) {
                 SessionMessage::error('Nombre de usuario no puede ser cambiado.');
-                $this->redirect('/usuarios/perfil');
+                return redirect('/usuarios/perfil');
             }
             $this->Auth->User->nombre = $_POST['nombre'];
             if ($this->changeUsername && !empty($_POST['usuario'])) {
@@ -542,7 +542,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     SessionMessage::error(
                         'Hash del usuario debe ser de largo 32.'
                     );
-                    $this->redirect('/usuarios/perfil');
+                    return redirect('/usuarios/perfil');
                 }
             }
             if ($this->Auth->User->checkIfUserAlreadyExists()) {
@@ -550,18 +550,18 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     'Nombre de usuario %s ya está en uso.',
                     $this->Auth->User->usuario
                 ));
-                $this->redirect('/usuarios/perfil');
+                return redirect('/usuarios/perfil');
             }
             if ($this->Auth->User->checkIfHashAlreadyExists()) {
                 SessionMessage::error('Hash seleccionado ya está en uso.');
-                $this->redirect('/usuarios/perfil');
+                return redirect('/usuarios/perfil');
             }
             if ($this->Auth->User->checkIfEmailAlreadyExists()) {
                 SessionMessage::error(__(
                     'Correo electrónico %s ya está en uso.',
                     $this->Auth->User->email
                 ));
-                $this->redirect('/usuarios/perfil');
+                return redirect('/usuarios/perfil');
             }
             if (empty($this->Auth->User->hash)) {
                 do {
@@ -572,7 +572,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             $this->Auth->saveCache();
             // mensaje de ok y redireccionar
             SessionMessage::success('Perfil de usuario actualizado.');
-            $this->redirect('/usuarios/perfil');
+            return redirect('/usuarios/perfil');
         }
         // procesar cambio de contraseña
         else if (isset($_POST['cambiarContrasenia'])) {
@@ -581,21 +581,21 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 SessionMessage::error(
                     'Debe especificar su contraseña actual y escribir dos veces su nueva contraseña.'
                 );
-                $this->redirect('/usuarios/perfil');
+                return redirect('/usuarios/perfil');
             }
             // verificar que la contraseña actual sea correcta
             if (!$this->Auth->User->checkPassword($_POST['contrasenia'])) {
                 SessionMessage::error(
                     'La contraseña actual ingresada es incorrecta.'
                 );
-                $this->redirect('/usuarios/perfil');
+                return redirect('/usuarios/perfil');
             }
             // verificar que la contraseña nueva se haya escrito 2 veces de forma correcta
             if ($_POST['contrasenia1'] != $_POST['contrasenia2']) {
                 SessionMessage::error(
                     'La contraseña nueva no coincide con la confirmación de contraseña.'
                 );
-                $this->redirect('/usuarios/perfil');
+                return redirect('/usuarios/perfil');
             }
             // actualizar contraseña
             if ($this->Auth->User->savePassword($_POST['contrasenia1'], $_POST['contrasenia'])) {
@@ -606,7 +606,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             } else {
                 SessionMessage::error('No fue posible cambiar la contraseña.');
             }
-            $this->redirect('/usuarios/perfil');
+            return redirect('/usuarios/perfil');
         }
         // procesar creación de la autenticación secundaria
         else if (isset($_POST['crearAuth2'])) {
@@ -625,7 +625,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     $e->getMessage()
                 ));
             }
-            $this->redirect('/usuarios/perfil#auth');
+            return redirect('/usuarios/perfil#auth');
         }
         // procesar destrucción de la autenticación secundaria
         else if (isset($_POST['destruirAuth2'])) {
@@ -644,7 +644,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     $e->getMessage()
                 ));
             }
-            $this->redirect('/usuarios/perfil#auth');
+            return redirect('/usuarios/perfil#auth');
         }
         // mostrar formulario para edición
         else {
@@ -669,7 +669,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 'Usuario <em>%s</em> tiene su sesión iniciada. Para registrar un nuevo usuaro primero debe cerrar esta sesión.',
                 $this->Auth->User->usuario
             ));
-            $this->redirect(
+            return redirect(
                 $this->Auth->settings['redirect']['login']
             );
         }
@@ -677,7 +677,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         $config = config('app.users.self_register');
         if (!$config['enabled']) {
             SessionMessage::error('El registro de usuarios está deshabilitado.');
-            $this->redirect(
+            return redirect(
                 $this->Auth->settings['redirect']['login']
             );
         }
@@ -775,7 +775,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     'El registro de su usuario falló por algún motivo desconocido.'
                 );
             }
-            $this->redirect('/usuarios/ingresar');
+            return redirect('/usuarios/ingresar');
         }
     }
 
@@ -799,30 +799,30 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         $enabled = config('app.users.preauth.enabled');
         if (!$enabled) {
             SessionMessage::error('La preautenticación no está disponible.');
-            $this->redirect('/usuarios/ingresar');
+            return redirect('/usuarios/ingresar');
         }
         if ($usuario) {
             $key = config('app.key');
             if (!$key) {
                 SessionMessage::error('No hay clave global para preautenticación.');
-                $this->redirect('/usuarios/ingresar');
+                return redirect('/usuarios/ingresar');
             }
         }
         // definir url
         $url = $url ? base64_decode($url) : $this->Auth->settings['redirect']['login'];
         // si ya está logueado se redirecciona de forma silenciosa
         if ($this->Auth->logged()) {
-            $this->redirect($url);
+            return redirect($url);
         }
         // procesar inicio de sesión con preauth, si no se puede autenticar se
         // genera un error
         $auth2_token = !empty($_GET['auth2_token']) ? $_GET['auth2_token'] : null;
         if (!$this->Auth->preauth($token, $usuario, $auth2_token)) {
             SessionMessage::error('La preautenticación del usuario falló.');
-            $this->redirect('/usuarios/ingresar');
+            return redirect('/usuarios/ingresar');
         }
         // todo ok -> redirigir
-        $this->redirect($url);
+        return redirect($url);
     }
 
     /**
@@ -872,7 +872,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 }
             }
         }
-        $this->redirect('/usuarios/perfil#apps');
+        return redirect('/usuarios/perfil#apps');
     }
 
     /**
@@ -893,7 +893,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                 'Ocurrió un error al eliminar su cuenta de Telegram: '.$e->getMessage()
             );
         }
-        $this->redirect('/usuarios/perfil#apps');
+        return redirect('/usuarios/perfil#apps');
     }
 
     /**
@@ -904,10 +904,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         // verificar se haya indicado un layout
         $layout = !empty($_POST['layout']) ? $_POST['layout'] : $layout;
         if (!$layout) {
-            SessionMessage::error(
-                'Debe indicar el nuevo diseño que desea utilizar en la aplicación.'
-            );
-            $this->redirect('/usuarios/perfil');
+            return redirect('/usuarios/perfil')->withError('Debe indicar el nuevo diseño que desea utilizar en la aplicación.');
         }
         // cambiar layout
         $this->Auth->User->set([
@@ -915,10 +912,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         ]);
         $this->Auth->User->save();
         $this->Auth->saveCache();
-        SessionMessage::success(
-            'Se modificó el diseño por defecto de su cuenta.'
-        );
-        $this->redirect('/session/config/app.ui.layout/'.$layout.'/'.base64_encode('/usuarios/perfil'));
+        return redirect('/app/session/app.ui.layout/'.$layout.'/'.base64_encode('/usuarios/perfil'))->withSuccess('Se modificó el diseño por defecto de su cuenta.');
     }
 
     /**

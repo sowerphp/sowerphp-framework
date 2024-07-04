@@ -119,10 +119,10 @@ class Network_Response //extends Response
      * @param string $body Contenido a asignar al cuerpo.
      * @return string Contenido de la respuesta está asignado.
      */
-    public function body(?string $body = null): string
+    public function body(?string $body = ''): string
     {
-        if ($body !== null) {
-            $this->responseData['body'] = $body;
+        if ($body || $body === null) {
+            $this->responseData['body'] = (string)$body;
         }
         return $this->responseData['body'];
     }
@@ -135,10 +135,7 @@ class Network_Response //extends Response
      */
     public function length(): int
     {
-        return $this->responseData['body'] !== null
-            ? strlen($this->responseData['body'])
-            : -1
-        ;
+        return strlen($this->responseData['body']);
     }
 
     /**

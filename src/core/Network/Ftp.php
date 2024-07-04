@@ -78,9 +78,10 @@ class Network_Ftp
     {
         // método solo funciona con FTP en sistemas like Unix
         if ($this->systype() != 'UNIX') {
-            throw new \sowerphp\core\Exception(
-                'Método '.__CLASS__.'::scandir() solo funciona con sistemas like Unix.'
-            );
+            throw new \Exception(__(
+                'Método %s::scandir() solo funciona con sistemas like Unix.',
+                __CLASS__
+            ));
         }
         // obtener archivos
         $files = [];
@@ -112,20 +113,22 @@ class Network_Ftp
 
     /**
      * Método mágico para ejecutar funciones ftp_*
-     * @return string URI completa del servidor FTP
+     * @return string URI completa del servidor FTP.
      */
     public function __call($func, $args)
     {
-        // verificar que la función exista
-        if (!function_exists('ftp_'.$func)) {
-            throw new Exception_Object_Method_Missing([
-                'class' => __CLASS__,
-                'method' => $func,
-            ]);
+        $function = 'ftp_' . $func;
+        // Verificar que la función exista.
+        if (!function_exists($function)) {
+            throw new \Exception(__(
+                'Método %s::%s() no existe.',
+                __CLASS__,
+                $func
+            ));
         }
-        // ejecutar functión FTP correspondiente
+        // Ejecutar functión FTP correspondiente.
         array_unshift($args, $this->link);
-        return call_user_func_array('ftp_'.$func, $args);
+        return call_user_func_array($function, $args);
     }
 
 }

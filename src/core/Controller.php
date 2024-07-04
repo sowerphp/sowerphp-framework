@@ -23,8 +23,6 @@
 
 namespace sowerphp\core;
 
-use \sowerphp\core\Facade_Session_Message as SessionMessage;
-
 /**
  * Clase base para los controladores de la aplicación.
  */
@@ -50,13 +48,17 @@ abstract class Controller
      *
      * @var array
      */
-    public $viewVars = [];
+    protected $viewVars = [];
 
-    public $autoRender = true; ///< Autorenderizar una vista asociada a una acción.
+    /**
+     * Layout que se usará por defecto para renderizar.
+     *
+     * @var string
+     */
+    protected $layout;
+
     public $Components = null; ///< Colección de componentes que se cargarán.
     public $components = []; ///< Nombre de componentes que este controlador utiliza.
-    public $layout; ///< Layout que se usará por defecto para renderizar.
-    protected $redirect = null; ///< Donde redireccionar una vez que se ha terminado de ejecutar la acción (incluyendo renderizado de vista).
 
     /**
      * Constructor de la clase controlador.
@@ -98,16 +100,6 @@ abstract class Controller
      */
     public function terminate(): void
     {
-        if ($this->redirect !== null) {
-            if (!is_array($this->redirect)) {
-                $this->redirect($this->redirect);
-            } else {
-                if (isset($this->redirect['msg'])) {
-                    SessionMessage::info($this->redirect['msg']);
-                }
-                $this->redirect($this->redirect['page']);
-            }
-        }
         if ($this->Components) {
             $this->Components->trigger('terminate');
         }
@@ -115,6 +107,7 @@ abstract class Controller
 
     /**
      * Guarda una(s) variable(s) para usarla en una vista.
+     *
      * @param mixed $one Nombre de la variable o arreglo asociativo con variables.
      * @param mixed $two Valor del variable o null si se paso un arreglo en $one.
      */
@@ -149,28 +142,12 @@ abstract class Controller
             $view = $viewFolder . DIRECTORY_SEPARATOR . $viewAction;
         }
         // Preparar los datos que se pasarán a la vista para ser renderizada.
-        $data = $data ? $data : $this->viewVars;
-        $data['__view_layout'] = $data['__view_layout'] ?? $this->layout;
+        $this->viewVars = array_merge($this->viewVars, $data);
+        if (($this->viewVars['__view_layout'] ?? null) === null) {
+            $this->viewVars['__view_layout'] = $this->layout;
+        }
         // Renderizar vista y retornar.
-        return view($view, $data);
-    }
-
-    /**
-     * Redireccionar página.
-     * @param string $uri Recurso o dirección web a donde se debe redireccionar.
-     * @param int $status Estado de término del script PHP.
-     */
-    public function redirect(?string $uri = null, int $status = 0): void
-    {
-        if (!$uri) {
-            $uri = $this->request->getRequestUriDecoded();
-        }
-        if ($uri[0] == '/') {
-            header('location: ' . $this->request->getBaseUrlWithoutSlash() . $uri);
-        } else {
-            header('location: '.$uri);
-        }
-        exit($status);
+        return view($view, $this->viewVars);
     }
 
 }

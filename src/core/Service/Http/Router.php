@@ -25,27 +25,62 @@ namespace sowerphp\core;
 
 use Illuminate\Events\Dispatcher;
 use Illuminate\Routing\Router;
+use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\Str;
 use \Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use \Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 class Service_Http_Router implements Interface_Service
 {
 
     /**
-     * Acción para manejar las rutas que no se definieron de manera específica
-     * utilizando el autodescubrimiento de rutas del framework en base a la
-     * estructura estándar de la URL:
+     * Instancia de la aplicación.
      *
-     *  - /controller/action/parameters
-     *  - /module/controller/action/parameters
-     *  - /module/module.../controller/action/parameters
+     * @var App
+     */
+    protected $app;
+
+    /**
+     * Instancia del servicio de capas de la aplicación.
      *
-     * Donde los módulos pueden ser anidados en múltiples módulos y los
-     * parámetros son opcionales.
+     * @var Service_Layers
+     */
+    protected $layersService;
+
+    /**
+     * Instancia del servicio de módulos de la aplicación.
+     *
+     * @var Service_Module
+     */
+    protected $moduleService;
+
+    /**
+     * Instancia del servicio de vistas de la aplicación.
+     *
+     * @var Service_Http_View
+     */
+    protected $viewService;
+
+    /**
+     * Instancia del router.
+     *
+     * @var Router
+     */
+    protected $router;
+
+    /**
+     * Generador de URL a partir de una ruta.
+     *
+     * @var UrlGenerator
+     */
+    protected $urlGenerator;
+
+    /**
+     * Prefijo por defecto de las rutas.
      *
      * @var string
      */
-    protected $catchAllHandler = 'Service_Http_Router@handleCatchAll';
+    protected $prefix;
 
     /**
      * Rutas conectadas con el método Service_Http_Router::connect().
@@ -64,25 +99,19 @@ class Service_Http_Router implements Interface_Service
     ];
 
     /**
-     * Instancia de la aplicación.
-     *
-     * @var App
-     */
-    protected $app;
-
-    /**
-     * Instancia del router.
-     *
-     * @var Router
-     */
-    protected $router;
-
-    /**
      * Constructor del servicio.
      */
-    public function __construct(App $app)
+    public function __construct(
+        App $app,
+        Service_Layers $layersService,
+        Service_Module $moduleService,
+        Service_Http_View $viewService
+    )
     {
         $this->app = $app;
+        $this->layersService = $layersService;
+        $this->moduleService = $moduleService;
+        $this->viewService = $viewService;
     }
 
     /**
@@ -109,18 +138,39 @@ class Service_Http_Router implements Interface_Service
      */
     public function boot(): void
     {
+        $request = request();
+        $this->prefix = env('ROUTE_PREFIX', $request->getBaseUrlWithoutSlash());
+        $this->loadRoutes();
+    }
+
+    /**
+     * Definir las rutas de la aplicación.
+     *
+     * Este método define 3 grupos de rutas:
+     *   - Rutas del proyecto.
+     *   - Rutas de cada capa.
+     *   - Rutas de módulos.
+     *
+     * @return void
+     */
+    protected function loadRoutes(): void
+    {
+        // Cargar las rutas del directorio project:/routes/
+        $routesDir = $this->layersService->getProjectPath('/routes');
+        foreach (glob($routesDir . '/*.php') as $filepath) {
+            require_once $filepath;
+        }
         // Cargar las rutas de cada capa de la aplicación.
-        $this->app->getService('layers')->loadFiles([
+        $this->layersService->loadFiles([
             '/App/routes.php',
         ]);
-        // Definir las rutas genéricas "catch-all" para mantener el
-        // comportamiento original del router del framework SowerPHP.
-        $request = request();
-        $prefix = env('ROUTE_PREFIX', $request->getBaseUrlWithoutSlash());
-        $this->router->group(['prefix' => $prefix], function ($router) {
-            $router->any('/', $this->catchAllHandler);
-            $router->any('{any}', $this->catchAllHandler)->where('any', '.*');
-        });
+        // Cargar las rutas de cada módulo (en todos sus directorios).
+        $modules = $this->moduleService->getLoadedModules();
+        foreach ($modules as $module) {
+            $this->moduleService->loadFiles($module, [
+                '/App/routes.php',
+            ]);
+        }
     }
 
     /**
@@ -130,6 +180,38 @@ class Service_Http_Router implements Interface_Service
      */
     public function terminate(): void
     {
+    }
+
+    /**
+     * Obtener la instancia del generador de URL a partir de rutas.
+     *
+     * @return UrlGenerator
+     */
+    protected function getUrlGenerator(): UrlGenerator
+    {
+        if (!isset($this->urlGenerator)) {
+            $this->urlGenerator = new UrlGenerator(
+                $this->router->getRoutes(),
+                request()
+            );
+        }
+        return $this->urlGenerator;
+    }
+
+    /**
+     * Obtener la URL de una ruta definida.
+     *
+     * @param string $name El nombre de la ruta.
+     * @param array $parameters Los parámetros de la ruta.
+     * @return string|null
+     */
+    public function resolveRouteToUrl(string $name, array $parameters = []): ?string
+    {
+        try {
+            return $this->getUrlGenerator()->route($name, $parameters);
+        } catch (RouteNotFoundException $e) {
+            return null;
+        }
     }
 
     /**
@@ -166,35 +248,40 @@ class Service_Http_Router implements Interface_Service
         // Illuminate\Routing\Router.
         try {
             $route = $this->router->getRoutes()->match($request);
-        } catch (NotFoundHttpException $e) {
-            throw $e;
         }
-        $actionName = $route->getActionName();
+        // Resolver ruta usando el sistema de rutas antiguo de SowerPHP que
+        // se configuraron con Service_Http_Router::connect().
+        catch (NotFoundHttpException $e) {
+            return $this->getRouteConfig($request->getRequestUriDecoded());
+        }
+        // Si la ruta es de Illuminate\Routing\Router se procesa.
+        $actionName = explode('@', $route->getActionName());
+        $actionClass = $actionName[0];
+        $actionMethod = $actionName[1] ?? null;
         $parameters = $route->parameters();
-        list($actionClass, $actionMethod) = explode('@', $actionName);
-        // La ruta se debe procesar con un handler separado para obtener los
-        // datos de la ruta (módulo, controlador, acción y parámetros).
-        // Esto es lo que permite la carga mágica de controladores con el
-        // sistema de rutas original del framework SowerPHP.
-        if ($actionName == $this->catchAllHandler) {
-            $actionInstance = $this; // Asume que siempre es un método de $this
-            $config = call_user_func_array(
-                [$actionInstance, $actionMethod],
-                $parameters
-            );
+        // La ruta es una redirección de Illuminate.
+        if ($actionClass == '\Illuminate\Routing\RedirectController') {
+            return [
+                'controller' => 'app',
+                'action' => 'redirect',
+                'parameters' => $parameters,
+            ];
+        }
+        // La ruta es una función anónima que entrega la configuración.
+        else if ($actionClass == 'Closure') {
+            $action = $route->getAction('uses');
+            return call_user_func_array($action, $parameters);
         }
         // Se obtuvo una clase específica que se debe ejecutar, ya resuelta.
         // Esto ocurrirá cuando no se procesa con la ruta por defecto sino por
         // una que haya sido asignada por los métodos de $this->router.
         else {
-            $config = [
+            return [
                 'controller' => $actionClass,
                 'action' => $actionMethod,
                 'parameters' => $parameters,
             ];
         }
-        // Entregar la configuración determinada.
-        return $config;
     }
 
     /**
@@ -240,7 +327,10 @@ class Service_Http_Router implements Interface_Service
             $routeConfig['class'] = 'Controller_' . $routeConfig['class'];
             // Agregar módulo a la clase si existe.
             if (!empty($routeConfig['module'])) {
-                if ($routeConfig['class'] != 'Controller_Module') {
+                if (
+                    $routeConfig['class'] != 'Controller_App'
+                    && $routeConfig['action'] != 'module'
+                ) {
                     $routeConfig['class'] = str_replace(
                         '.',
                         '\\',
@@ -270,19 +360,20 @@ class Service_Http_Router implements Interface_Service
         // Si se solicita un módulo tratar de cargar y verificar que quede
         // activo.
         if (!empty($config['module'])) {
-            $moduleService = $this->app->getService('module');
-            $moduleService->loadModule($config['module']);
-            if (!$moduleService->isModuleLoaded($config['module'])) {
-                throw new Exception_Module_Missing([
-                    'module' => $config['module']
-                ]);
+            $this->moduleService->loadModule($config['module']);
+            if (!$this->moduleService->isModuleLoaded($config['module'])) {
+                throw new \Exception(__(
+                    'Módulo %s no fue encontrado.',
+                    $config['module']
+                ));
             }
         }
         // Cargar clase del controlador.
         if (!class_exists($config['class'])) {
-            throw new Exception_Controller_Missing([
-                'controller' => ucfirst(Str::camel($config['controller'])),
-            ]);
+            throw new \Exception(__(
+                'Controlador %s no fue encontrado.',
+                ucfirst(Str::camel($config['controller']))
+            ));
         }
         // Verificar que la acción (método del controlador) no sea privado.
         try {
@@ -290,16 +381,18 @@ class Service_Http_Router implements Interface_Service
         }
         // Si la acción (método del controlador) no existe se genera un error.
         catch (\ReflectionException $e) {
-            throw new Exception_Controller_Action_Missing([
-                'controller' => ucfirst(Str::camel($config['controller'])),
-                'action' => $config['action'],
-            ]);
+            throw new \Exception(__(
+                'Acción %s::%s() no fue encontrada.',
+                ucfirst(Str::camel($config['controller'])),
+                $config['action']
+            ));
         }
         if (!$method->isPublic() || $method->name[0] == '_') {
-            throw new Exception_Controller_Action_Private([
-                'controller' => ucfirst(Str::camel($config['controller'])),
-                'action' => $config['action'],
-            ]);
+            throw new \Exception(__(
+                'Acción %s::%s() es privada y no puede ser accedida mediante la URL.',
+                ucfirst(Str::camel($config['controller'])),
+                $config['action']
+            ));
         }
         // Verificar la cantidad de parámetros que se desean pasar a la acción.
         $n_args = count($config['parameters']);
@@ -308,11 +401,12 @@ class Service_Http_Router implements Interface_Service
             foreach($method->getParameters() as &$p) {
                 $args[] = $p->isOptional() ? '[' . $p->name .']' : $p->name;
             }
-            throw new Exception_Controller_Action_Args_Missing([
-                'controller' => ucfirst(Str::camel($config['controller'])),
-                'action' => $config['action'],
-                'args' => implode(', ', $args),
-            ]);
+            throw new \Exception(__(
+                'Argumentos insuficientes para la acción %s::%s(%s).',
+                ucfirst(Str::camel($config['controller'])),
+                $config['action'],
+                implode(', ', $args)
+            ));
         }
     }
 
@@ -376,39 +470,16 @@ class Service_Http_Router implements Interface_Service
         }
         // Si la ruta es estática se asigna la configuración normalizada.
         else {
-            if (isset($config['redirect'])) {
-                $normalizedConfig = [
-                    'redirect' => $config['redirect'],
-                ];
-            } else {
-                $normalizedConfig = [
-                    'module' => $config['module'] ?? null,
-                    'controller' => $config['controller'],
-                    'action' => $config['action'] ?? 'index',
-                ];
-                unset(
-                    $config['module'],
-                    $config['controller'],
-                    $config['action']
-                );
-                $normalizedConfig['parameters'] = $config;
-            }
+            $normalizedConfig = [
+                'module' => $config['module'] ?? null,
+                'controller' => $config['controller'],
+                'action' => $config['action'] ?? 'index',
+            ];
+            unset($config['module'], $config['controller'], $config['action']);
+            $normalizedConfig['parameters'] = $config;
             $this->routes['static'][$route] = $normalizedConfig;
             krsort($this->routes['static']);
         }
-    }
-
-    /**
-     * Manejar el recurso solicitado con las rutas genéricas de SowerPHP.
-     *
-     * Ya sean las rutas por defecto o las rutas conectadas.
-     *
-     * @param string $resource Recurso de la URL que se desea ejecutar.
-     */
-    protected function handleCatchAll(string $resource = '/'): array
-    {
-        $config = $this->getRouteConfig($resource);
-        return $config;
     }
 
     /**
@@ -481,9 +552,9 @@ class Service_Http_Router implements Interface_Service
      */
     protected function getRouteConfigStaticPage(string $resource): ?array
     {
-        $module = app('module')->findModuleByResource($resource);
+        $module = $this->moduleService->findModuleByResource($resource);
         $page = $this->removeModuleFromResource($resource, $module);
-        $filepath = app('view')->resolveViewRelative(
+        $filepath = $this->viewService->resolveViewRelative(
             'Pages' . $page,
             (string)$module
         );
@@ -492,8 +563,8 @@ class Service_Http_Router implements Interface_Service
         }
         return [
             'module' => $module,
-            'controller' => 'pages',
-            'action' => 'display',
+            'controller' => 'app',
+            'action' => 'page',
             'parameters' => [$page],
             'view' => $filepath,
         ];
@@ -710,7 +781,7 @@ class Service_Http_Router implements Interface_Service
         // Buscar si existe un módulo en el recurso de la URL y asignarlo a la
         // configuración base de la ruta.
         $config = [
-            'module' => app('module')->findModuleByResource($resource),
+            'module' => $this->moduleService->findModuleByResource($resource),
         ];
         // Obtener la página de la ruta (sin módulo si existiese), luego
         // obtener las partes de la página de la ruta y con eso su configuración.
@@ -722,8 +793,8 @@ class Service_Http_Router implements Interface_Service
         // Si no hay controlador y es un módulo se asigna un controlador
         // estándar para cargar la página con el menú del módulo.
         if (empty($config['controller']) && !empty($config['module'])) {
-            $config['controller'] = 'module';
-            $config['action'] = 'display';
+            $config['controller'] = 'app';
+            $config['action'] = 'module';
         }
         // Retornar configuración de la ruta determinada.
         return $config;
@@ -741,6 +812,12 @@ class Service_Http_Router implements Interface_Service
      */
     public function __call($method, $parameters)
     {
+        $routeMethods = ['get', 'post', 'put', 'delete', 'patch', 'options', 'any', 'redirect'];
+        if (in_array($method, $routeMethods)) {
+            if (!empty($this->prefix)) {
+                $parameters[0] = $this->prefix . $parameters[0];
+            }
+        }
         return call_user_func_array([$this->router, $method], $parameters);
     }
 

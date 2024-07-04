@@ -63,8 +63,9 @@ class Utility_Data_Validation
             }
             // si el tipo de chequeo no existe error
             else {
-                throw new \sowerphp\core\Exception(array(
-                    sprintf ('Regla %s para validar datos no existe', $rule)
+                throw new \Exception(__(
+                    'Regla %s para validar datos no existe.',
+                    $rule
                 ));
             }
         }

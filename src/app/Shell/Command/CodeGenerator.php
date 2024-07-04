@@ -171,7 +171,10 @@ class Shell_Command_CodeGenerator extends \Shell_App
         $extensiones_modulos = [];
         foreach ($extensiones as $extension => $extension_modulos) {
             foreach ($extension_modulos as $modulo) {
-                $extensiones_modulos[] = ['extension' => $extension, 'module' => $modulo];
+                $extensiones_modulos[] = [
+                    'extension' => $extension,
+                    'module' => $modulo,
+                ];
                 $this->out($i . '.- Extensión ' . $extension . ' módulo ' . $modulo);
                 ++$i;
             }

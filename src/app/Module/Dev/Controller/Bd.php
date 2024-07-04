@@ -28,7 +28,7 @@ use \sowerphp\core\Facade_Session_Message as SessionMessage;
 /**
  * Controlador para las acciones relacionadas con la base de datos
  */
-class Controller_Bd extends \Controller_App
+class Controller_Bd extends \Controller
 {
 
     /**
@@ -264,7 +264,7 @@ class Controller_Bd extends \Controller_App
             $db = &database($_POST['database']);
             try {
                 $data = $db->getTableWithColsNames($_POST['query']);
-            } catch (\sowerphp\core\Exception_Database $e) {
+            } catch (\Exception $e) {
                 SessionMessage::error($e->getMessage());
             }
             if (isset($data)) {

@@ -73,23 +73,6 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
     protected $User = null;
 
     /**
-     * Se registran automáticamente eventos que ocurrieron durante la ejecución
-     * del controlador (incluyendo la renderización de la vista).
-     */
-    public function terminate(): void
-    {
-        if (get_class($this->controller) == 'sowerphp\core\Controller_Error') {
-            $message = [
-                'exception' => $this->controller->viewVars['exception'],
-                'message' => $this->controller->viewVars['message'],
-                'trace' => $this->controller->viewVars['trace'],
-                'code' => $this->controller->viewVars['code'],
-            ];
-            $this->report($message, [0, $this->controller->viewVars['severity']]);
-        }
-    }
-
-    /**
      * Método que escribe un evento en el Log.
      * @param message Evento (mensaje) que se desea registrar.
      * @param severity Gravedad del evento (por defecto informativos).
@@ -216,7 +199,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         // crear reporte
         try {
             $email = new \sowerphp\core\Network_Email($config);
-        } catch (\sowerphp\core\Exception $e) {
+        } catch (\Exception $e) {
             return false;
         }
         if ($this->getUser()) {

@@ -23,7 +23,7 @@
 
 namespace sowerphp\general;
 
-class Controller_Exportar extends \Controller_App
+class Controller_Exportar extends \Controller
 {
 
     public function boot(): void
@@ -88,7 +88,10 @@ class Controller_Exportar extends \Controller_App
     {
         $data = (new \sowerphp\core\Cache())->get('session.'.session_id().'.export.'.$id);
         if (!$data) {
-            throw new Exception_Data_Missing(['id' => $id]);
+            throw new \Exception(__(
+                'No hay datos que exportar con el id <code>%s</code>',
+                $id
+            ));
         }
         return $data;
     }

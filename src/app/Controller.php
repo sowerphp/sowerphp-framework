@@ -27,7 +27,7 @@ namespace sowerphp\app;
  * Clase que sirve para extender la clase Controller, este archivo
  * deberá ser sobreescrito en cada una de las aplicaciones.
  */
-class Controller_App extends \sowerphp\core\Controller
+class Controller extends \sowerphp\core\Controller
 {
 
     // Componentes usados por el controlador.

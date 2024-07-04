@@ -91,12 +91,15 @@ class Network_Email
             if (!empty($this->default_methods[$protocol])) {
                 $method = $this->default_methods[$protocol];
             } else {
-                throw new \sowerphp\core\Exception('No existe un método por defecto para el protocolo '.$protocol);
+                throw new \Exception(__(
+                    'No existe un método por defecto para el protocolo %s.',
+                    $protocol
+                ));
             }
         }
         $protocol = \sowerphp\core\Utility_Inflector::camelize($protocol);
         $method = \sowerphp\core\Utility_Inflector::camelize($method);
-        $class = __NAMESPACE__.'\Network_Email_'.$protocol.'_'.$method;
+        $class = __NAMESPACE__ . '\Network_Email_' . $protocol . '_' . $method;
         // crear objeto que enviará los correos
         return new $class($config);
     }
@@ -242,7 +245,9 @@ class Network_Email
                 $this->to($this->to_default);
             }
             else if (empty($this->cc) && empty($this->bcc)) {
-                throw new \sowerphp\core\Exception('No existe destinatario del correo electrónico');
+                throw new \Exception(
+                    'No existe destinatario del correo electrónico.'
+                );
             }
         }
         // Crear datos (incluyendo adjuntos)

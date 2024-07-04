@@ -156,6 +156,27 @@ function router()
 }
 
 /**
+ * Redirecciona a una URL específica.
+ *
+ * @param string|null $to La URL a la que redirigir.
+ * @param int $status El código de estado HTTP de la redirección.
+ * @param array $headers Encabezados adicionales para la respuesta.
+ * @return \sowerphp\core\Service_Http_Redirect Objeto con servicio de redirección.
+ */
+function redirect(
+    ?string $to = null,
+    int $status = 302,
+    array $headers = []
+): \sowerphp\core\Service_Http_Redirect
+{
+    $redirectService = app('redirect');
+    if ($to === null) {
+        return $redirectService;
+    }
+    return $redirectService->to($to, $status, $headers);
+}
+
+/**
  * Función global para acceder a la solicitud HTTP en curso.
  *
  * @return \sowerphp\core\Network_Request

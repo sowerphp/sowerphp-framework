@@ -87,16 +87,12 @@ class Service_Module implements Interface_Service
             $config = array_merge([
                 // Rutas del módulo donde puede ser encontrado (una o más).
                 'paths' => [],
-                // Si se debe cargar el módulo automáticamente.
-                'autoload' => false,
                 // El módulo no se encuentra cargado.
                 'loaded' => false,
             ], $config);
-            // Guardar configuración del modulo y cargar si es necesario.
+            // Guardar configuración del modulo y cargarlo.
             $this->modules[$module] = $config;
-            if ($config['autoload']) {
-                $this->loadModule($module);
-            }
+            $this->loadModule($module);
         }
     }
 
@@ -159,12 +155,18 @@ class Service_Module implements Interface_Service
                 $this->modules[$module]['paths'] = [];
             }
         }
-        // Si el módulo no fue encontrado se crea una excepción.
+        // Si el módulo no fue encontrado se lanza una excepción.
         if (!isset($this->modules[$module]['paths'][0])) {
-            throw new Exception_Module_Missing(['module' => $module]);
+            throw new \Exception(__(
+                'Módulo %s no fue encontrado.',
+                $module
+            ));
         }
         // Cargar archivos del módulo desde todas sus capas.
-        $this->loadFiles($module);
+        $this->loadFiles($module, [
+            '/App/helpers.php',
+        ]);
+        $this->loadConfigurations($module);
         // Indicar que el módulo fue cargado.
         $this->modules[$module]['loaded'] = true;
         return $this->modules[$module];
@@ -179,16 +181,19 @@ class Service_Module implements Interface_Service
      * Esto permite sobrescribir rutas (routes) o configuraciones.
      *
      * @param string $module Módulo para el que se cargarán los archivos.
+     * @param array $files Archivos que se desean cargar.
      * @return void
      */
-    protected function loadFiles(string $module): void
+    public function loadFiles(
+        string $module,
+        array $files,
+        bool $reverse = false
+    ): void
     {
-        $paths = array_reverse($this->modules[$module]['paths']);
-        // Verificar "archivos cargables", si existen se cargan.
-        $files = [
-            '/App/helpers.php',
-            '/App/routes.php',
-        ];
+        $paths = $reverse
+            ? array_reverse($this->modules[$module]['paths'])
+            : $this->modules[$module]['paths']
+        ;
         foreach ($files as &$file) {
             foreach ($paths as $path) {
                 $filepath = $path . $file;
@@ -197,7 +202,23 @@ class Service_Module implements Interface_Service
                 }
             }
         }
-        // Cargar configuraciones del módulo.
+    }
+
+    /**
+     * Método que carga archivos de cada capa en el orden reverso en que las
+     * capas fueron definidas.
+     */
+    protected function loadFilesReverse(string $module, array $files): void
+    {
+        $this->loadFiles($module, $files, true);
+    }
+
+    /**
+     * Cargar los archivos de configuración del módulo.
+     */
+    protected function loadConfigurations(string $module): void
+    {
+        $paths = array_reverse($this->modules[$module]['paths']);
         $configLoaded = false;
         foreach ($paths as $path) {
             $filepath = $path . '/App/config.php';
@@ -318,6 +339,28 @@ class Service_Module implements Interface_Service
     }
 
     /**
+     * Obtener el menú de navegación del módulo.
+     *
+     * @param string $module Nombre del módulo.
+     * @return array Menú de navegación.
+     */
+    public function getModuleNav(string $module): array
+    {
+        $module_nav_config = config('modules.' . $module . '.nav');
+        if (is_string($module_nav_config)) {
+            $module_nav = config($module_nav_config);
+        } else if (is_callable($module_nav_config)) {
+            $module_nav = $module_nav_config();
+        } else {
+            $module_nav = (array)$module_nav_config;
+        }
+        if (!isset($module_nav[0])) {
+            $module_nav = [['menu' => $module_nav]];
+        }
+        return $module_nav;
+    }
+
+    /**
      * Normalizador de la configuración de un módulo.
      *
      * Se preocupa de dejar la configuración posible de un módulo en el formato
@@ -330,7 +373,7 @@ class Service_Module implements Interface_Service
      *   b) Indicando su nombre y su ruta exacta donde encontrarlo:
      *      ['Sistema.Usuarios' => '/path/to/module']
      *   c) Indicando su nombre y configuración:
-     *      ['Sistema.Usuarios' => ['autoload' => true]]
+     *      ['Sistema.Usuarios' => ['config1' => 'valor1']]
      *   d) Indicando que un módulo debe ser descargado (si existe):
      *      ['Sistema.Usuarios' => false]
      *

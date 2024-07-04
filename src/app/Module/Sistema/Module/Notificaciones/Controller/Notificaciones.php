@@ -59,18 +59,18 @@ class Controller_Notificaciones extends \Controller_Maintainer
         $Notificacion = new Model_Notificacion($notificacion);
         if (!$Notificacion->exists()) {
             SessionMessage::error('Notificación solicitada no existe.');
-            $this->redirect('/sistema/notificaciones/notificaciones');
+            return redirect('/sistema/notificaciones/notificaciones');
         }
         // si el usuario autenticado no es dueño de la notificación entonces error
         if ($this->Auth->User->id != $Notificacion->para) {
             SessionMessage::error(
                 'Usuario autenticado no es destinatario de la notificación solicitada.'
             );
-            $this->redirect('/sistema/notificaciones/notificaciones');
+            return redirect('/sistema/notificaciones/notificaciones');
         }
         // marcar como leída
         $Notificacion->leida();
-        $this->redirect($Notificacion->enlace);
+        return redirect($Notificacion->enlace);
     }
 
     public function enviar()

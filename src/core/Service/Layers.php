@@ -135,7 +135,7 @@ class Service_Layers implements Interface_Service
         $this->getPathsReverse();
 
         // Cargar (importar) archivos PHP que no son clases.
-        $this->loadFiles($this->importFiles);
+        $this->loadFilesReverse($this->importFiles);
     }
 
     /**
@@ -413,15 +413,12 @@ class Service_Layers implements Interface_Service
     }
 
     /**
-     * Método que carga los archivos del directorio App de cada capa.
+     * Método que carga archivos de cada capa, por defecto, en el orden que las
+     * capas fueron definidas.
      */
-    public function loadFiles(array $files): void
+    public function loadFiles(array $files, bool $reverse = false): void
     {
-        // Cargar los paths en orden reverso para poder sobrescribir
-        // con los archivos que se cargarán.
-        $paths = $this->getPathsReverse();
-
-        // Incluir los archivos que existen en cada capa.
+        $paths = $reverse ? $this->getPathsReverse() : $this->getPaths();
         foreach ($files as $file) {
             foreach ($paths as $path) {
                 $filepath = $path . $file;
@@ -430,6 +427,15 @@ class Service_Layers implements Interface_Service
                 }
             }
         }
+    }
+
+    /**
+     * Método que carga archivos de cada capa en el orden reverso en que las
+     * capas fueron definidas.
+     */
+    public function loadFilesReverse(array $files): void
+    {
+        $this->loadFiles($files, true);
     }
 
     /**

@@ -26,7 +26,7 @@ $router = router();
 
 // Definir la página de inicio.
 $router->connect('/', [
-    'controller' => 'pages',
-    'action' => 'display',
+    'controller' => 'app',
+    'action' => 'page',
     config('app.ui.homepage')
 ]);

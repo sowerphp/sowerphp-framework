@@ -27,7 +27,7 @@ namespace sowerphp\app\Dev;
  * Controlador para las acciones relacionadas con la configuración de la
  * aplicación
  */
-class Controller_Config extends \Controller_App
+class Controller_Config extends \Controller
 {
 
     /**

@@ -21,11 +21,12 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
- return [
+return [
 
-    // Menú para el módulo.
-    'nav' => [
-        'module' => [
+    'modules.Dev' => [
+
+        // Menú para el módulo.
+        'nav' => [
             '/bd/tablas' => [
                 'name' => 'Listado de tablas',
                 'desc' => 'Información de las tablas de la base de datos',
@@ -47,6 +48,7 @@
                 'icon' => 'fa fa-code',
             ],
         ],
+
     ],
 
 ];

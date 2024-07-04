@@ -62,9 +62,7 @@ class Model_Datasource_Ldap extends \sowerphp\core\Model_Datasource
     {
         $this->config = array_merge($this->config, $config);
         if (!$this->connect()) {
-            throw new \sowerphp\core\Exception (array(
-                'msg' => error_get_last()['message']
-            ));
+            throw new \Exception(error_get_last()['message']);
         }
     }
 

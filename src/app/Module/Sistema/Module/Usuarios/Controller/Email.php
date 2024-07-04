@@ -29,7 +29,7 @@ use \sowerphp\core\Facade_Session_Message as SessionMessage;
  * Controlador para el envío masivo de correos electrónicos a usuarios de la
  * aplicación
  */
-class Controller_Email extends \Controller_App
+class Controller_Email extends \Controller
 {
 
     /**
@@ -132,7 +132,7 @@ class Controller_Email extends \Controller_App
                             'Ha ocurrido un error al intentar enviar su mensaje, por favor intente nuevamente.<br /><em>'.$status['message'].'</em>'
                         );
                     }
-                    $this->redirect($this->request->getRequestUriDecoded());
+                    return redirect($this->request->getRequestUriDecoded());
                 }
             }
         }

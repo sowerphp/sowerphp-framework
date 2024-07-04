@@ -27,7 +27,6 @@ use Illuminate\Container\Container;
 use Illuminate\Config\Repository;
 use Illuminate\Session\SessionManager;
 use Illuminate\Filesystem\Filesystem;
-// use Illuminate\Cache\CacheManager;
 
 /**
  * Servicio de sesión HTTP.
@@ -109,7 +108,7 @@ class Service_Http_Session implements Interface_Service
     {
         // Guardar sesión, en el caso que no se haya guardado en flujo normal
         // de Service_Http_Kernel.
-        $this->save();
+        //$this->save();
     }
 
     /**
@@ -141,9 +140,6 @@ class Service_Http_Session implements Interface_Service
 
             // Registrar el servicio de archivos (driver) en el contenedor.
             $container->singleton('files', Filesystem::class);
-            // $container->singleton('cache', function ($app) {
-            //     return new CacheManager($app);
-            // });
 
             // Asignar el administrador de la sesión.
             $this->sessionManager = new SessionManager($container);

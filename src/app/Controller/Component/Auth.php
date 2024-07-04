@@ -125,10 +125,10 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
                     $this->settings['messages']['error']['nologin'],
                     $this->controller->request->getRequestUriDecoded()
                 ));
-                $this->controller->redirect(
+                redirect(
                     $this->settings['redirect']['form'] . '/' .
                     base64_encode($this->controller->request->getRequestUriDecoded())
-                );
+                )->now();
             } else {
                 $msg = sprintf(
                     $this->settings['messages']['error']['auth'],
@@ -137,7 +137,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
                 );
                 SessionMessage::error($msg);
                 $this->log($msg, LOG_ERR);
-                $this->controller->redirect($this->settings['redirect']['error']);
+                redirect($this->settings['redirect']['error'])->now();
             }
         }
     }
@@ -263,7 +263,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         // crear objeto del usuario con el nombre de usuario entregado
         try {
             $this->User = new $this->settings['model']($usuario);
-        } catch (\sowerphp\core\Exception_Database $e) {
+        } catch (\Exception $e) {
             $this->User = new $this->settings['model']();
         }
         // si el usuario no existe -> error
@@ -273,7 +273,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
                 $usuario
             ));
             if (isset($this->settings['redirect']['notexist'])) {
-                $this->controller->redirect($this->settings['redirect']['notexist']);
+                redirect($this->settings['redirect']['notexist'])->now();
             } else {
                 return;
             }
@@ -358,9 +358,9 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         }
         // redireccionar
         if (isset($_POST['redirect'][0])) {
-            $this->controller->redirect($_POST['redirect']);
+            redirect($_POST['redirect'])->now();
         } else {
-            $this->controller->redirect($this->settings['redirect']['login']);
+            redirect($this->settings['redirect']['login'])->now();
         }
     }
 
@@ -427,7 +427,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
             $this->settings['messages']['ok']['logout'],
             $this->User->usuario
         ));
-        $this->controller->redirect($this->settings['redirect']['logout']);
+        redirect($this->settings['redirect']['logout'])->now();
     }
 
     /**

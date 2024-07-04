@@ -203,7 +203,7 @@ class Service_Http_Kernel implements Interface_Service
                 return $request;
             }
         );
-        // Manejar la solicitud
+        // Manejar la solicitud.
         $response = $this->handleRequest($request);
         // Procesar middlewares después de manejar la solicitud.
         $response = $this->processMiddlewaresAfter(
@@ -405,17 +405,8 @@ class Service_Http_Kernel implements Interface_Service
         Network_Request $request
     ): Network_Response
     {
-        // Obtener configuración de la ruta de la solicitud.
         $routeConfig = $request->getRouteConfig();
-        //debug(app('config')->get('modules')); exit;
-        // Procesar la solicitud redirigiendo.
-        if (!empty($routeConfig['redirect'])) {
-            $response = $this->getResponse();
-            $response->header('Location', $routeConfig['redirect']);
-            return $response;
-        }
-        // Procesar la solicitud con un controlador.
-        return $this->handleControllerRequest($request);
+        return $this->invokeControllerAction($routeConfig);
     }
 
     /**
@@ -424,16 +415,13 @@ class Service_Http_Kernel implements Interface_Service
      * @param Network_Request $request
      * @return Network_Response
      */
-    protected function handleControllerRequest(
-        Network_Request $request
-    ): Network_Response
+    protected function invokeControllerAction(array $config): Network_Response
     {
         // Ejecutar acción del controlador.
-        $routeConfig = $request->getRouteConfig();
         list($controller, $result) = $this->invokerService->invoke(
-            $routeConfig['class'],
-            $routeConfig['action'],
-            $routeConfig['parameters']
+            $config['class'],
+            $config['action'],
+            $config['parameters']
         );
         // Recibir resultado de la ejecución de la acción del controlador.
         $response = $this->getResponse();
@@ -443,16 +431,13 @@ class Service_Http_Kernel implements Interface_Service
         if ($result) {
             // La respuesta del controlador es un objeto Network_Response, esto
             // significa que la respuesta ya está lista y su vista renderizada.
-            if (
-                is_object($result)
-                && get_class($result) == 'sowerphp\core\Network_Response'
-            ) {
+            if (is_object($result) && $result instanceof Network_Response) {
                 $response = $result;
             }
             // La respuesta no es un objeto Network_Response. Se debe asignar
             // al cuerpo de la respuesta. Solo se asignará si no hay datos
             // previamente asignados al body de la respuesta.
-            else if ($response->body() === null) {
+            else if (!$response->body()) {
                 // Si el resultado es un string se asigna directamente, viene
                 // listo para pasar al body.
                 if (is_string($result)) {
@@ -475,87 +460,70 @@ class Service_Http_Kernel implements Interface_Service
     }
 
     /**
-     * Maneja las excepciones o errores capturados durante la ejecución.
+     * Maneja los errores o excepciones capturadas durante la ejecución de la
+     * aplicación una vez que el $kernel está cargado y operativo.
      *
      * @param \Throwable $throwable
-     * @return void
+     * @return int
      */
-    public function handleThrowable(\Throwable $throwable): void
+    public function handleThrowable(\Throwable $throwable): int
     {
-        if ($throwable instanceof \Error ) {
-            $this->handleError($throwable);
+        if ($throwable instanceof \Error) {
+            $response = $this->handleError($throwable);
         } else {
-            $this->handleException($throwable);
+            $response = $this->handleException($throwable);
         }
+        return $response->send();
     }
 
     /**
      * Maneja los errores de tipo \Error.
      *
      * @param \Error $error
-     * @return void
+     * @return Network_Response
      */
-    protected function handleError(\Error $error): void
+    protected function handleError(\Error $error): Network_Response
     {
+        $message = sprintf(
+            '[Error] %s in %s:%s.',
+            $error->getMessage(),
+            $error->getFile(),
+            $error->getLine()
+        );
         if ($this->configService->get('app.php.error_as_exception')) {
             $exception = new \ErrorException(
-                $error->getMessage(),
+                $message,
                 $error->getCode(),
                 \E_ERROR, // $severity siempre asignada como E_ERROR
                 $error->getFile(),
                 $error->getLine(),
                 $error
             );
-            $this->handleException($exception);
+            return $this->handleException($exception);
         } else {
             $request = $this->getRequest();
             $request->session()->save();
             $response = $this->getResponse();
             $response->header('Content-Type', 'text/plain; charset=UTF-8');
-            $response->body(sprintf(
-                '[Error] %s en %s:%s.',
-                $error->getMessage(),
-                $error->getFile(),
-                $error->getLine()
-            ));
-            $response->send();
+            $response->body($message);
+            return $response;
         }
     }
 
     /**
-     * Maneja las excepciones de tipo \Exception.
+     * Maneja las excepciones de tipo \Exception o las que hereden de esta.
      *
      * @param \Exception $exception
-     * @return void
+     * @return Network_Response
      */
-    protected function handleException(\Exception $exception): void
+    protected function handleException(\Exception $exception): Network_Response
     {
-        ob_clean();
-        $request = $this->getRequest();
-        $response = $this->getResponse();
-        $request->session()->save();
-        // Generar arreglo con los datos para la vista.
-        $data = [
-            'exception' => get_class($exception),
-            'message' => $exception->getMessage(),
-            'trace' => $exception->getTraceAsString(),
-            'code' => $exception->getCode(),
-            'severity' => $exception->severity ?? LOG_ERR,
-        ];
-        // Renderizar la excepción a través del controlador de errores.
-        $controller = new Controller_Error($request, $response);
-        // Es una solicitud mediante un servicio web.
-        if ($request->isApiRequest()) {
-            $controller->Api->sendException($exception);
-        }
-        // Es una solicitud mediante la interfaz web.
-        else {
-            $controller->boot();
-            $response = $controller->display($data);
-            $controller->terminate();
-            $response->status($data['code']);
-            $response->send();
-        }
+        $response = $this->invokeControllerAction([
+            'class' => 'Controller_App',
+            'action' => 'error',
+            'parameters' => ['exception' => $exception],
+        ]);
+        return $response;
     }
 
 }

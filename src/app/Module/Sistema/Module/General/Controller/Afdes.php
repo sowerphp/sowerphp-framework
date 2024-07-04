@@ -65,7 +65,7 @@ class Controller_Afdes extends \Controller_Maintainer
             ];
             $Afd->save();
             SessionMessage::success('AFD <em>'.$Afd->nombre.'</em> creado.');
-            $this->redirect(
+            return redirect(
                 $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
             );
         }
@@ -91,7 +91,7 @@ class Controller_Afdes extends \Controller_Maintainer
             SessionMessage::error(
                 'AFD <em>'.$codigo.'</em> no existe, no se puede editar.'
             );
-            $this->redirect(
+            return redirect(
                 $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
             );
         }
@@ -120,7 +120,7 @@ class Controller_Afdes extends \Controller_Maintainer
             ];
             $Afd->save();
             SessionMessage::success('AFD <em>'.$Afd->nombre.'</em> editado.');
-            $this->redirect(
+            return redirect(
                 $this->module_url . $this->request->getRouteConfig()['controller'] . '/editar/' . $codigo
                 . (!empty($_GET['listar']) ? '?listar='.$_GET['listar'] : '')
             );

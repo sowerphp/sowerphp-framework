@@ -63,7 +63,6 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
      */
     private function init()
     {
-        $this->controller->autoRender = false;
         $this->method = strtoupper($_SERVER['REQUEST_METHOD']);
         $input = file_get_contents('php://input');
         if ($this->settings['data']['keep-raw']) {
@@ -363,7 +362,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         // crear objeto del usuario
         try {
             $User = new $this->settings['auth']['model']($user == 'X' ? $pass : $user);
-        } catch (\sowerphp\core\Exception_Database $e) {
+        } catch (\Exception $e) {
             $this->User = $e->getMessage();
             return $this->User;
         }

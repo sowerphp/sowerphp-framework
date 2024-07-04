@@ -115,12 +115,13 @@ class Controller_Component_Collection
     }
 
     /**
-     * Función que carga y construye el componente
-     * @param component Componente que se quiere cargar
-     * @param settins Opciones para el componente
-     * @return Componente cargado
+     * Función que carga y construye el componente.
+     *
+     * @param string $component Componente que se quiere cargar.
+     * @param array $settins Opciones para el componente.
+     * @return object Componente cargado.
      */
-    public function load($component, $settings = [])
+    public function load(string $component, array $settings = [])
     {
         // si ya se cargó solo se retorna
         if (isset($this->_loaded[$component])) {
@@ -129,8 +130,9 @@ class Controller_Component_Collection
         // cargar clase para el componente, si no existe error
         $componentClass = 'Controller_Component_' . $component;
         if (!class_exists($componentClass)) {
-            throw new Exception_Controller_Component_Missing(array(
-                'class' => $componentClass
+            throw new \Exception(__(
+                'Componente %s no fue encontrado.',
+                $componentClass
             ));
         }
         // cargar componente

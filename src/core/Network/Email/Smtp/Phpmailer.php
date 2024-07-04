@@ -40,7 +40,7 @@ class Network_Email_Smtp_Phpmailer
     {
         // verificar soporte PHPMailer
         if (!class_exists('\PHPMailer\PHPMailer\PHPMailer')) {
-            throw new \sowerphp\core\Exception('No hay soporte para PHPMailer');
+            throw new \Exception('No hay soporte para PHPMailer.');
         }
         // valores por defecto para conexión vía SMTP usando Pear
         $config = array_merge([
@@ -57,7 +57,7 @@ class Network_Email_Smtp_Phpmailer
         }
         // si no están los campos mínimos necesarios error
         if (empty($config['host']) || empty($config['port']) || empty($config['user']) || empty($config['pass'])) {
-            throw new \sowerphp\core\Exception('Configuración del correo electrónico incompleta');
+            throw new \Exception('Configuración del correo electrónico incompleta.');
         }
         // determinar host y seguridad si existe
         if (strpos($config['host'], '://')) {

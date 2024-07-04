@@ -80,9 +80,10 @@ class App
     protected $defaultHttpServices = [
         'session' => Service_Http_Session::class,
         //'auth' => Service_Http_Auth::class,
-        'router' => Service_Http_Router::class,
         'view' => Service_Http_View::class,
+        'router' => Service_Http_Router::class,
         'kernel' => Service_Http_Kernel::class,
+        'redirect' => Service_Http_Redirect::class,
     ];
 
     /**
@@ -109,7 +110,7 @@ class App
     /**
      * Método que se asegura de entregar una única instancia de la clase.
      */
-    public static function getInstance(): self
+    public static function getInstance(): ?self
     {
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -117,6 +118,7 @@ class App
                 self::$instance->bootstrap();
             } catch (\Throwable $throwable) {
                 self::$instance->handleThrowable($throwable);
+                return null;
             }
         }
         return self::$instance;
@@ -132,17 +134,20 @@ class App
     {
         try {
             $kernel = $this->container->make('kernel');
-            $result = $kernel->handle();
-            $this->terminateServices();
-            return $result;
         } catch (\Throwable $throwable) {
-            if (isset($kernel)) {
-                $kernel->handleThrowable($throwable);
-            } else {
-                $this->handleThrowable($throwable);
-            }
-            return 1;
+            $result = $this->handleThrowable($throwable);
         }
+        try {
+            $result = $kernel->handle();
+        } catch (\Throwable $throwable) {
+            $result = $kernel->handleThrowable($throwable);
+        }
+        try {
+            $this->terminateServices();
+        } catch (\Throwable $throwable) {
+            $result = $kernel->handleThrowable($throwable);
+        }
+        return $result;
     }
 
     /**
@@ -190,9 +195,9 @@ class App
      * kernel de una manera más amigable con el usuario.
      *
      * @param \Throwable $throwable
-     * @return void
+     * @return int
      */
-    protected function handleThrowable(\Throwable $throwable): void
+    protected function handleThrowable(\Throwable $throwable): int
     {
         // Variables con los datos del error o excepción.
         $type = $throwable instanceof \Error ? 'error' : 'excepción';
@@ -215,7 +220,7 @@ class App
         // Generar mensaje con el error o excepción.
         header('Content-Type: text/plain; charset=UTF-8');
         echo $error;
-        exit($code);
+        return $code ? 1 : 0;
     }
 
     /**
@@ -246,7 +251,7 @@ class App
         $this->bootServices();
 
         // Inicializar cada capa con su archivo bootstrap personalizado.
-        $this->getService('layers')->loadFiles([
+        $this->getService('layers')->loadFilesReverse([
             '/App/bootstrap.php',
         ]);
     }

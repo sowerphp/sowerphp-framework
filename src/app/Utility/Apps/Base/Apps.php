@@ -227,7 +227,7 @@ abstract class Utility_Apps_Base_Apps
     /**
      * Método que entrega el código de la aplicación de alguna parte de la página.
      */
-    public function getPageCode($page, array $vars = [])
+    public function getPageCode(string $page, array $vars = []): string
     {
         $plantilla = $this->directory . '/templates/' . $page . '.php';
         if (!is_readable($plantilla)) {
@@ -237,14 +237,6 @@ abstract class Utility_Apps_Base_Apps
             $vars['config'] = $this->config;
         }
         return app('view')->render($plantilla, $vars);
-    }
-
-    /**
-     * Método que redirecciona una URL en la aplicación
-     */
-    protected function redirect($url) {
-        header('location: ' . $url);
-        exit(0); // no hay otra opción, debe ser exit para que location funcione
     }
 
 }

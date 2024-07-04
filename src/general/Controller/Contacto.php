@@ -28,7 +28,7 @@ use \sowerphp\core\Facade_Session_Message as SessionMessage;
 /**
  * Controlador para página de contacto
  */
-class Controller_Contacto extends \Controller_App
+class Controller_Contacto extends \Controller
 {
 
     /**
@@ -53,7 +53,7 @@ class Controller_Contacto extends \Controller_App
             SessionMessage::error(__(
                 'La página de contacto no se encuentra disponible.'
             ));
-            $this->redirect('/');
+            return redirect('/');
         }
         // si se envió el formulario se procesa
         if (isset($_POST['submit'])) {
@@ -86,7 +86,7 @@ class Controller_Contacto extends \Controller_App
                     SessionMessage::success(__(
                         'Su mensaje ha sido enviado, se responderá a la brevedad.'
                     ));
-                    $this->redirect('/contacto');
+                    return redirect('/contacto');
                 } else {
                     SessionMessage::error(__(
                         'Ha ocurrido un error al enviar su mensaje, por favor intente nuevamente.<br /><em>%s</em>', $status['message']

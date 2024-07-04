@@ -345,10 +345,11 @@ abstract class Model
             }
         }
         // Si el método no existe se genera una excepción.
-        throw new Exception_Object_Method_Missing([
-            'class' => get_class($this),
-            'method' => $method,
-        ]);
+        throw new \Exception(__(
+            'Método %s::%s() no existe.',
+            get_class($this),
+            $method
+        ));
     }
 
     /**
@@ -363,9 +364,10 @@ abstract class Model
         $fkClass = $this::$fkNamespace['Model_' . $fk] . '\Model_' . $fk;
         // Si la clase de la FK no existe, entonces error.
         if (!class_exists($fkClass)) {
-            throw new Exception_Model_Missing([
-                'model' => $fkClass,
-            ]);
+            throw new \Exception(__(
+                'Modelo %s no fue encontrado.',
+                $fkClass
+            ));
         }
         $fkClasss = Utility_Inflector::pluralize($fkClass);
         $fkClasssExists = class_exists($fkClasss);

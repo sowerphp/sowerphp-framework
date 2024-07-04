@@ -42,18 +42,27 @@ class Network_Email_Api_Mailgun
     {
         // verificar soporte Mailgun
         if (!class_exists('\Mailgun\Mailgun')) {
-            throw new \sowerphp\core\Exception('No hay soporte para Mailgun');
+            throw new \Exception('No hay soporte para Mailgun.');
         }
         // valores por defecto para conexión vía Mailgun
         $this->config = array_merge([
             'endpoint' => 'api.mailgun.net',
         ], $config);
         // si no están los campos mínimos necesarios error
-        if (empty($this->config['domain']) || empty($this->config['secret']) || empty($this->config['endpoint'])) {
-            throw new \sowerphp\core\Exception('Configuración del correo electrónico incompleta');
+        if (
+            empty($this->config['domain'])
+            || empty($this->config['secret'])
+            || empty($this->config['endpoint'])
+        ) {
+            throw new \Exception(
+                'Configuración del correo electrónico incompleta.'
+            );
         }
         // crar objeto mg
-        $this->mg = \Mailgun\Mailgun::create($this->config['secret'], 'https://'.$this->config['endpoint']);
+        $this->mg = \Mailgun\Mailgun::create(
+            $this->config['secret'],
+            'https://' . $this->config['endpoint']
+        );
     }
 
     /**

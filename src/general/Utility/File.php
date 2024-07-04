@@ -115,12 +115,50 @@ class Utility_File
     }
 
     /**
-     * Recupera los archivos/directorios desde una carpeta
-     * @param string $dir Nombre del directorio a examinar
-     * @return array Arreglo con los nombres de los archivos y/o directorios
-     * @todo Selección de solo algunos archivos de la carpeta
+     * Entrega una glosa descriptiva a partir del código de error de subida del
+     * archivo mediante POST.
+     *
+     * @param int $code Código del error.
+     * @return string Mensaje del error.
      */
-    public static function browseDirectory($dir)
+    public static function uploadErrorCodeToMessage($code): string
+    {
+        switch ($code) {
+            case \UPLOAD_ERR_INI_SIZE: {
+                return __('El archivo excede el tamaño máximo permitido por el servidor (opción: upload_max_filesize).');
+            }
+            case \UPLOAD_ERR_FORM_SIZE: {
+                return __('El archivo excede el tamaño máximo permitido por el formulario (opción: MAX_FILE_SIZE).');
+            }
+            case \UPLOAD_ERR_PARTIAL: {
+                return __('El archivo pudo ser subido solo parcialmente.');
+            }
+            case \UPLOAD_ERR_NO_FILE: {
+                return __('No se subió el archivo.');
+            }
+            case \UPLOAD_ERR_NO_TMP_DIR: {
+                return __('No fue posible encontrar una carpeta temporal para subir el archivo en el servidor.');
+            }
+            case \UPLOAD_ERR_CANT_WRITE: {
+                return __('Ocurrió un problema al tratar de guardar el archivo en el sistema de archivos del servidor.');
+            }
+            case \UPLOAD_ERR_EXTENSION: {
+                return __('La subida del archivo fue detenida por una extensión de PHP en uso.');
+            }
+            default: {
+                return __('Ocurrió un error desconocido al subir el archivo.');
+            }
+        }
+    }
+
+    /**
+     * Recupera los archivos/directorios desde una carpeta.
+     *
+     * @todo Selección de solo algunos archivos de la carpeta
+     * @param string $dir Nombre del directorio a examinar.
+     * @return array Arreglo con los nombres de los archivos y/o directorios.
+     */
+    public static function browseDirectory(string $dir): array
     {
         $filesAux = scandir($dir);
         $files = [];

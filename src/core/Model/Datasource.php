@@ -54,8 +54,10 @@ abstract class Model_Datasource
         // se crea configuración
         $config = array_merge((array)config($datasource.'.'.$name), $config);
         if (empty($config)) {
-            throw new Exception_Database (array(
-                'msg' => 'No se encontró configuración '.$datasource.'.'.$name
+            throw new \Exception(__(
+                'No se encontró configuración del origen de datos %s.%s',
+                $datasource,
+                $name
             ));
         }
         // si no está el nombre de la configuración se asigna

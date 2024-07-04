@@ -65,8 +65,9 @@ class Service_Http_View implements Interface_Service
      */
     protected $specialViews = [
         'Maintainer/listar',
-        'Module/index',
-        'Error/error',
+        'Maintainer/crear_editar',
+        'App/module',
+        'App/error',
     ];
 
     /**
@@ -143,15 +144,20 @@ class Service_Http_View implements Interface_Service
         // Buscar el archivo de la vista que se utilizará para renderizar.
         $filepath = $this->resolveView($view);
         if (!$filepath) {
-            throw new \Exception('Vista ' . $view . ' no ha sido encontrada.');
+            throw new \Exception(__(
+                'Vista %s no ha sido encontrada.',
+                $view
+            ));
         }
 
         // Obtener motor de renderizado para la vista.
         $engine = $this->getEngineByExtension($filepath);
         if (!$engine) {
-            throw new \Exception(
-                'No fue posible renderizar la vista: ' . $filepath
-            );
+            throw new \Exception(__(
+                'El archivo %s de la vista %s no se pudo renderizar.',
+                $filepath,
+                $view
+            ));
         }
 
         // Preparar los datos que se utilizarán para el renderizado de la vista.

@@ -31,7 +31,7 @@ use \sowerphp\core\Facade_Session_Message as SessionMessage;
  *
  * Implementa los métodos del CRUD: create, read, update y delete.
  */
-class Controller_Maintainer extends \Controller_App
+class Controller_Maintainer extends \Controller
 {
 
     protected $model = false; ///< Atributo con el namespace y clase del modelo singular
@@ -237,13 +237,13 @@ class Controller_Maintainer extends \Controller_App
         // Total de registros.
         try {
             $registers_total = $Objs->count();
-        } catch (\sowerphp\core\Exception_Database $e) {
+        } catch (\Exception $e) {
             // Si hay algún error en la base de datos es porque los filtros
             // están mal armados. Si se llegó acá con el error, para que no
             // falle la app se redirecciona al listado con el error.
             // Lo ideal es controlar esto antes con un "error más lindo".
             SessionMessage::error($e->getMessage());
-            $this->redirect($this->request->getRequestUriDecoded());
+            return redirect($this->request->getRequestUriDecoded());
         }
         // Paginar los resultados si es necesario.
         if ((integer)$page > 0) {
@@ -254,7 +254,7 @@ class Controller_Maintainer extends \Controller_App
                 ($page - 1) * $registers_per_page
             );
             if ($page != 1 && $page > $pages) {
-                $this->redirect(
+                return redirect(
                     $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar/1'
                     . ($orderby ? ('/' . $orderby . '/' . $order) : '') . $searchUrl
                 );
@@ -321,7 +321,7 @@ class Controller_Maintainer extends \Controller_App
                     } else {
                         SessionMessage::error('Registro no creado.');
                     }
-                    $this->redirect(
+                    return redirect(
                         $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
                     );
                 } catch (\Exception $e) {
@@ -359,7 +359,7 @@ class Controller_Maintainer extends \Controller_App
             SessionMessage::error(
                 'Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede editar.'
             );
-            $this->redirect(
+            return redirect(
                 $this->module_url.$this->request->getRouteConfig()['controller'].'/listar'.$filterListar
             );
         }
@@ -388,7 +388,7 @@ class Controller_Maintainer extends \Controller_App
                         'Registro ('.implode(', ', func_get_args()).') no editado.'
                     );
                 }
-                $this->redirect(
+                return redirect(
                     $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
                 );
             } catch (\Exception $e) {
@@ -417,7 +417,7 @@ class Controller_Maintainer extends \Controller_App
     {
         if (!$this->deleteRecord) {
             SessionMessage::error('No se permite el borrado de registros.');
-            $this->redirect(
+            return redirect(
                 $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
             );
         }
@@ -428,7 +428,7 @@ class Controller_Maintainer extends \Controller_App
             SessionMessage::error(
                 'Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede eliminar.'
             );
-            $this->redirect(
+            return redirect(
                 $this->module_url.$this->request->getRouteConfig()['controller'].'/listar'.$filterListar
             );
         }
@@ -437,12 +437,12 @@ class Controller_Maintainer extends \Controller_App
             SessionMessage::success(
                 'Registro (' . implode(', ', func_get_args()) . ') eliminado.'
             );
-        } catch (\sowerphp\core\Exception_Database $e) {
+        } catch (\Exception $e) {
             SessionMessage::error(
                 'No se pudo eliminar el registro (' . implode(', ', func_get_args()) . '): '.$e->getMessage()
             );
         }
-        $this->redirect(
+        return redirect(
             $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
         );
     }
@@ -456,7 +456,7 @@ class Controller_Maintainer extends \Controller_App
         $model = $this->model;
         if (!isset($model::$columnsInfo[$campo . '_data'])) {
             SessionMessage::error('Campo '.$campo.' no existe.');
-            $this->redirect(
+            return redirect(
                 $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar'
             );
         }
@@ -467,7 +467,7 @@ class Controller_Maintainer extends \Controller_App
             SessionMessage::error(
                 'Registro (' . implode(', ', $pks) . ') no existe. No se puede obtener '.$campo.'.'
             );
-            $this->redirect(
+            return redirect(
                 $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar'
             );
         }
@@ -475,7 +475,7 @@ class Controller_Maintainer extends \Controller_App
             SessionMessage::error(
                 'No hay datos para el campo ' . $campo . ' en el registro ('.implode(', ', $pks).').'
             );
-            $this->redirect(
+            return redirect(
                 $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar'
             );
         }

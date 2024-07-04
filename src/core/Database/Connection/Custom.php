@@ -176,7 +176,7 @@ abstract class Database_Connection_Custom extends Connection
      *
      * @param string $message El mensaje de error que será incluido en la
      * excepción lanzada.
-     * @throws Exception_Database Excepción personalizada que se lanza para
+     * @throws \Exception Excepción que se lanza para
      * indicar el error.
      */
     protected function error(string $message): void
@@ -186,9 +186,7 @@ abstract class Database_Connection_Custom extends Connection
             $this->rollBack();
         }
         // Lanzar una excepción con el mensaje de error proporcionado.
-        throw new Exception_Database([
-            'msg' => $message
-        ]);
+        throw new \Exception($message);
     }
 
     /**
@@ -205,7 +203,7 @@ abstract class Database_Connection_Custom extends Connection
      * @param array $bindings Parámetros que se deben enlazar a la consulta.
      * @param bool $useReadPdo Indica que se use una conexión de solo lectura.
      * @return \PDOStatement Objeto statement después de ejecutar la consulta.
-     * @throws Exception_Database Si la consulta no puede ser preparada o si
+     * @throws \Exception Si la consulta no puede ser preparada o si
      * falla la ejecución.
      */
     public function executeRawQuery(
