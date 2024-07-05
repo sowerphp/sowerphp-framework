@@ -141,14 +141,13 @@ function session($key = null, $default = null)
 }
 
 /**
- * Obtiene un almacén de caché.
+ * Obtiene el servicio de caché.
  *
- * @param string|null $name Nombre del almacén.
- * @return \Illuminate\Contracts\Cache\Repository
+ * @return \sowerphp\core\Service_Cache
  */
-function cache(?string $name = null): \Illuminate\Contracts\Cache\Repository
+function cache(): \sowerphp\core\Service_Cache
 {
-    return app('cache')->store($name);
+    return app('cache');
 }
 
 /**

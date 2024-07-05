@@ -70,7 +70,6 @@ class Service_Lang implements Interface_Service
     {
         $this->configLocale = config('app.locale', 'es');
         $this->locale = session('config.app.locale', $this->configLocale);
-        $this->locale = 'en';
         $this->loadTranslations($this->locale);
     }
 

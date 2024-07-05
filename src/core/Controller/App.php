@@ -205,6 +205,7 @@ class Controller_App extends \sowerphp\app\Controller
      */
     public function redirect(string $destination, int $status = 302): Network_Response
     {
+        session()->reflash();
         return redirect($destination, $status);
     }
 

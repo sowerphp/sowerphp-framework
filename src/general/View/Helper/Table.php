@@ -295,7 +295,7 @@ class View_Helper_Table
         }
         // Escribir datos para la exportación.
         $key = 'session.' . session()->getId() . '.export.' . $this->_id;
-        $data_saved = (new \sowerphp\core\Cache())->set($key, $data);
+        $data_saved = cache()->set($key, $data);
         // Si no fue posible guardar los datos en la caché no se podrá
         // exportar, por lo que no se generan los iconos.
         if (!$data_saved) {

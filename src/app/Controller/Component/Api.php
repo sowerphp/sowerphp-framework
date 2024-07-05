@@ -278,14 +278,15 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
     {
         if (\sowerphp\core\Trigger::run('api_log', $this) !== true) {
             if ($this->settings['log']) {
+                $cacheStats = cache()->getStats();
                 $msg = $this->method . ' ' . $this->getResource() . ' '
                     . $this->controller->response->status() . ' '
                     . $this->controller->response->length()
                 ;
                 $msg .= ' ' . round(microtime(true)-TIME_START, 2);
                 $msg .= ' ' . round(memory_get_usage()/1024/1024,2);
-                $msg .= ' ' . database()->getQueriesCount();
-                $msg .= ' ' . \sowerphp\core\Cache::$setCount . ' ' . \sowerphp\core\Cache::$getCount;
+                $msg .= ' ' . database()->getStats()['queries'];
+                $msg .= ' ' . $cacheStats['assigned'] . ' ' . $cacheStats['retrieved'];
                 $this->controller->Log->write($msg, LOG_INFO, $this->settings['log']);
             }
         }

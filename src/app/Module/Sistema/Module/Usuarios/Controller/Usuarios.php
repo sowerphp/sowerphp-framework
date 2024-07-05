@@ -141,7 +141,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         $Usuario->ultimo_ingreso_hash = null;
         try {
             $Usuario->save();
-            (new \sowerphp\core\Cache())->delete($this->Auth->settings['session']['key'] . $id);
+            cache()->forget($this->Auth->settings['session']['key'] . $id);
             SessionMessage::success(__(
                 'Sesión del usuario %s cerrada.',
                 $Usuario->usuario
@@ -886,7 +886,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     try {
                         $this->Auth->User->save();
                         $this->Auth->saveCache();
-                        $this->Cache->delete('telegram.pairing.'.$token);
+                        $this->Cache->forget('telegram.pairing.'.$token);
                         SessionMessage::success(__(
                             'Usuario @%s pareado con éxito.',
                             $telegram_user['username']

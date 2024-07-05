@@ -40,29 +40,26 @@ abstract class Database_Connection_Custom extends Connection
 {
 
     /**
-     * Contador de consultas ejecutadas durante la vida de la conexión.
+     * Estadísticas de las llamadas a los métodos de la conexión a la base de
+     * datos.
      *
-     * Esta propiedad almacena el número total de consultas ejecutadas a través
-     * de esta conexión desde su creación. Es útil para depuración y para
-     * monitorear la actividad de la base de datos durante una sesión.
+     * Define:
+     *   - queries: cantidad de consultas SQL realizadas.
      *
-     * @var int
+     * @var array
      */
-    protected $queriesCount = 0;
+    protected $stats = [
+        'queries' => 0,
+    ];
 
     /**
-     * Obtiene el número de consultas ejecutadas a través de esta conexión.
+     * Entrega las estadísticas del uso de la conexión de la base de datos.
      *
-     * Este método proporciona un acceso público al conteo interno de
-     * consultas, permitiendo a los consumidores de la clase obtener una
-     * métrica de cuántas consultas SQL han sido ejecutadas a través de esta
-     * instancia de conexión desde que fue creada.
-     *
-     * @return int El número de consultas ejecutadas.
+     * @return array Arreglo con las estadísticas del uso de la base de datos.
      */
-    public function getQueriesCount(): int
+    public function getStats(): array
     {
-        return $this->queriesCount;
+        return $this->stats;
     }
 
     /**
@@ -217,7 +214,7 @@ abstract class Database_Connection_Custom extends Connection
             $this->error('¡Consulta SQL no puede estar vacía!');
         }
         // Contabilizar la consulta SQL de esta conexión.
-        $this->queriesCount++;
+        $this->stats['queries']++;
         // Decidir si se usará PDO de solo lectura o lectura/escritura.
         $pdo = $useReadPdo ? $this->getPdoForSelect() : $this->getPdo();
         // Preparar la consulta SQL.

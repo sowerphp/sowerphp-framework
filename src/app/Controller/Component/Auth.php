@@ -80,11 +80,11 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         $this->settings['session']['cache'] = config('session.lifetime') * 60;
         // ejecutar el constructor padre
         parent::__construct($Components, $settings);
-        // recuperar sesión
-        $this->session = session($this->settings['session']['key']);
+        // asignar objeto de caché.
+        $this->Cache = cache();
         // si hay sesión se obtiene el objeto del usuario
+        $this->session = session($this->settings['session']['key']);
         if ($this->session) {
-            $this->Cache = new \sowerphp\core\Cache();
             $this->User = $this->Cache->get(
                 $this->settings['session']['key'] . $this->session['id']
             );
@@ -219,7 +219,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         if ($this->__logged === null) {
             if ($this->session && $this->User) {
                 if (!$this->User->checkLastLoginHash($this->session['hash'])) {
-                    (new \sowerphp\core\Cache())->delete(
+                    $this->Cache->forget(
                         $this->settings['session']['key'].$this->session['id']
                     );
                     session()->flush();
@@ -421,7 +421,7 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
      */
     public function logout()
     {
-        (new \sowerphp\core\Cache())->delete($this->settings['session']['key'].$this->session['id']);
+        $this->Cache->forget($this->settings['session']['key'].$this->session['id']);
         session()->flush();
         SessionMessage::success(sprintf(
             $this->settings['messages']['ok']['logout'],

@@ -86,10 +86,11 @@ class Controller_Exportar extends \Controller
 
     private function _getData($id)
     {
-        $data = (new \sowerphp\core\Cache())->get('session.'.session_id().'.export.'.$id);
+        $key = 'session.' . session()->getId() . '.export.' . $id;
+        $data = cache()->get($key);
         if (!$data) {
             throw new \Exception(__(
-                'No hay datos que exportar con el id <code>%s</code>',
+                'No hay datos que exportar con el id "%s".',
                 $id
             ));
         }

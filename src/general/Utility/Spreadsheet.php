@@ -104,7 +104,7 @@ class Utility_Spreadsheet
         // crear objeto DOM (Document Object Model)
         $dom = new \DOMDocument();
         @$dom->loadHTML($html);
-        // crear objeto para hacer querys al documento
+        // crear objeto para hacer queries al documento
         $xpath = new \DOMXPath($dom);
         // si se pidió una tabla por número se sacan todas las tablas y se
         // saca la de la posición (número) requerida
