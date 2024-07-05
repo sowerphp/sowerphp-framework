@@ -37,7 +37,14 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
 
     protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
     protected $columnsView = [
-        'listar'=>['id', 'nombre', 'usuario', 'email', 'activo', 'ultimo_ingreso_fecha_hora']
+        'listar' => [
+            'id',
+            'nombre',
+            'usuario',
+            'email',
+            'activo',
+            'ultimo_ingreso_fecha_hora',
+        ],
     ]; ///< Columnas que se deben mostrar en las vistas
     protected $deleteRecord = false; ///< Indica si se permite o no borrar registros
     protected $changeUsername = true; ///< Indica si se permite que se cambie el nombre de usuario
@@ -48,22 +55,34 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
      */
     public function boot(): void
     {
-        $this->Auth->allow('ingresar', 'salir', 'contrasenia_recuperar', 'registrar', 'preauth', '_api_perfil_GET');
-        $this->Auth->allowWithLogin('perfil', 'telegram_parear');
+        $this->Auth->allow(
+            'ingresar',
+            'salir',
+            'contrasenia_recuperar',
+            'registrar',
+            'preauth',
+            '_api_perfil_GET',
+        );
+        $this->Auth->allowWithLogin(
+            'perfil',
+            'telegram_parear',
+        );
         parent::boot();
     }
 
     /**
-     * Acción para que un usuario ingrese al sistema (inicie sesión)
-     * @param redirect Ruta (en base64) de hacia donde hay que redireccionar una vez se autentica el usuario
+     * Acción para que un usuario ingrese al sistema (inicie sesión).
+     *
+     * @param string $redirect Ruta (en base64) de hacia donde hay que
+     * redireccionar una vez se autentica el usuario.
      */
-    public function ingresar($redirect = null)
+    public function ingresar(?string $redirect = null)
     {
-        // si ya está logueado se redirecciona
+        // Si ya está logueado se redirecciona.
         if ($this->Auth->logged()) {
             return redirect($this->Auth->settings['redirect']['login']);
         }
-        // asignar variables para la vista
+        // Asignar variables para la vista.
         $this->layout .= '.min';
         $this->set([
             'redirect' => $redirect ? base64_decode ($redirect) : null,
@@ -71,41 +90,49 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             'language' => config('app.locale'),
             'auth2_token_enabled' => \sowerphp\app\Model_Datasource_Auth2::tokenEnabled(),
         ]);
-        // procesar inicio de sesión
+        // Procesar inicio de sesión.
         if (isset($_POST['usuario'])) {
-            // si el usuario o contraseña es vacio mensaje de error
+            // Si el usuario o contraseña es vacio mensaje de error.
             if (empty($_POST['usuario']) || empty($_POST['contrasenia'])) {
                 SessionMessage::warning('Debe especificar usuario y clave.');
             }
-            // realizar proceso de validación de datos
+            // Realizar proceso de validación de datos.
             else {
-                $auth2_token = !empty($_POST['auth2_token']) ? $_POST['auth2_token'] : null;
-                $this->Auth->login($_POST['usuario'], $_POST['contrasenia'], $auth2_token);
+                $auth2_token = !empty($_POST['auth2_token'])
+                    ? $_POST['auth2_token']
+                    : null
+                ;
+                $this->Auth->login(
+                    $_POST['usuario'],
+                    $_POST['contrasenia'],
+                    $auth2_token
+                );
             }
         }
     }
 
     /**
-     * Acción para que un usuario cierra la sesión
+     * Acción para que un usuario cierra la sesión.
      */
     public function salir()
     {
         if ($this->Auth->logged()) {
             $this->Auth->logout();
         } else {
-            SessionMessage::warning('No existe sesión de usuario abierta.');
-            return redirect('/');
+            return redirect('/')
+                ->withWarning('No existe sesión de usuario abierta.')
+            ;
         }
     }
 
-     /**
+    /**
      * Acción que fuerza el cierre de sesión de un usuario eliminando su hash
      */
     public function salir_forzar($id)
     {
         $class = $this->Auth->settings['model'];
         $Usuario = new $class($id);
-        if(!$Usuario->exists()) {
+        if (!$Usuario->exists()) {
             SessionMessage::error(
                 'Usuario no existe, no se puede forzar el cierre de la sesión.'
             );

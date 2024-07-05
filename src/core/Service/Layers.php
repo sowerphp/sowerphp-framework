@@ -159,6 +159,7 @@ class Service_Layers implements Interface_Service
             $this->getFrameworkPath();
             $this->getProjectPath();
             $this->getStoragePath();
+            $this->getResourcePath();
             define('DIR_STATIC', $this->getStaticPath());
             define('DIR_TMP', $this->getTmpPath());
         }
@@ -233,7 +234,7 @@ class Service_Layers implements Interface_Service
      */
     public function getStoragePath(?string $path = null): string
     {
-        // Si el directorio ya está asignado se entrega.
+        // Si el directorio no está asignado se asigna.
         if (!isset($this->directories['storage'])) {
             $this->directories['storage'] = $this->getProjectPath(
                 DIRECTORY_SEPARATOR . 'storage'
@@ -241,6 +242,26 @@ class Service_Layers implements Interface_Service
         }
         // Retornar el directorio determinado o la ruta dentro del directorio.
         return $this->directories['storage'] . $this->normalizePath($path);
+    }
+
+    /**
+     * Obtiene el directorio de recursos de la aplicación.
+     *
+     * Por defecto es el directorio /resources dentro del proyecto.
+     *
+     * @param string $path Ruta que se desea obtener dentro del directorio.
+     * @return string La ruta del directorio de recursos.
+     */
+    public function getResourcePath(?string $path = null): string
+    {
+        // Si el directorio no está asignado se asigna.
+        if (!isset($this->directories['resource'])) {
+            $this->directories['resource'] = $this->getProjectPath(
+                DIRECTORY_SEPARATOR . 'resources'
+            );
+        }
+        // Retornar el directorio determinado o la ruta dentro del directorio.
+        return $this->directories['resource'] . $this->normalizePath($path);
     }
 
     /**

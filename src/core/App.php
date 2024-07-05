@@ -56,7 +56,7 @@ class App
         'config' => Service_Config::class,
         'cache' => Service_Cache::class,
         'database' => Service_Database::class,
-        //'lang' => Service_Lang::class,
+        'lang' => Service_Lang::class,
         //'mail' => Service_Mail::class,
         //'http_client' => Service_Http_Client::class,
     ];

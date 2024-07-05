@@ -82,6 +82,23 @@ function storage_path(?string $path = null): string
 }
 
 /**
+ * Obtiene la ruta al directorio de recursos.
+ *
+ * Este método utiliza el servicio 'layers' registrado en la aplicación para
+ * obtener el directorio de recursos. Si se proporciona un camino
+ * adicional, se concatenará con el directorio de recursos.
+ *
+ * @param string|null $path Ruta adicional para concatenar con el directorio
+ * de recursos.
+ * @return string Ruta completa al directorio de recursos, incluyendo la
+ * ruta adicional si se proporciona.
+ */
+function resource_path(?string $path = null): string
+{
+    return app('layers')->getResourcePath($path);
+}
+
+/**
  * Función global para acceder a la configuración de la aplicación.
  * @param string $selector Variable / parámetro que se desea leer.
  * @param mixed $default Valor por defecto de la variable buscada.
@@ -143,6 +160,22 @@ function cache(?string $name = null): \Illuminate\Contracts\Cache\Repository
 function database(?string $name = null): \sowerphp\core\Database_Connection_Custom
 {
     return app('database')->connection($name);
+}
+
+/**
+ * Función para traducción de strings mediante le servicio de lenguages con
+ * soporte de interpolación mixta. Permite utilizar tanto el formato de
+ * placeholders de Python (%(name)s) como el de sprintf (%s, %d).
+ *
+ * @param string $string Texto que se desea traducir.
+ * @param mixed ...$args Argumentos para reemplazar en el string, pueden
+ * ser un arreglo asociativo o valores individuales.
+ * @return string Texto traducido con los placeholders reemplazados.
+ */
+function __(string $string, ...$args): string
+{
+    $locale = null; // Se usará la configuración por defecto del servicio.
+    return app('lang')->translate($locale, $string, ...$args);
 }
 
 /**
@@ -336,81 +369,6 @@ function num($n, $d = 0, $language = null)
     $formatter->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, $d);
 
     return $formatter->format($n);
-}
-
-/**
- * Función para traducción de string singulares en dominio master con
- * soporte de interpolación mixta. Permite utilizar tanto el formato de
- * placeholders de Python (%(name)s) como el de sprintf (%s, %d).
- *
- * @param string $string Texto que se desea traducir.
- * @param mixed ...$args Argumentos para reemplazar en el string, pueden
- * ser un arreglo asociativo o valores individuales.
- * @return string Texto traducido con los placeholders reemplazados.
- */
-function __(string $string, ...$args): string
-{
-    return __d('master', $string, ...$args);
-}
-
-/**
- * Función para traducción de string singulares, eligiendo dominio con
- * soporte de interpolación mixta. Permite utilizar tanto el formato de
- * placeholders de Python (%(name)s) como el formato clásico (%s, %d, %f)
- * y el formato simulado de parámetros SQL (:name) para uniformidad en
- * la definición de strings. Además, la función automáticamente ajusta
- * los placeholders que no incluyen el formato específico (%( )s).
- *
- * @param string $domain Dominio del lenguaje al que se traducirá el texto.
- * @param string $string Texto que se desea traducir.
- * @param mixed ...$args Argumentos para reemplazar en el string, pueden
- * ser un arreglo asociativo o valores individuales.
- * @return string Texto traducido con los placeholders reemplazados.
- *
- * Ejemplos de uso:
- * 1. Interpolación al estilo Python con formato completo:
- *    echo __(
- *        'Hello %(name)s, your balance is %(balance).2f',
- *        ['%(name)s' => 'John', '%(balance).2f' => 1234.56]
- *    );
- *
- * 2. Interpolación al estilo Python sin formato específico en los placeholders:
- *    echo __(
- *        'Hello %(name)s, your balance is %(balance).2f',
- *        ['name' => 'John', 'balance' => 1234.56]
- *    );
- *
- * 3. Uso con formato clásico de sprintf:
- *    echo __('Hello %s, you have %d new messages', 'Alice', 5);
- *
- * 4. Uso del formato simulado de parámetros SQL (no para consultas SQL):
- *    echo __(
- *        'Your username is :name and your ID is :id',
- *        [':name' => 'Alice', ':id' => '123']
- *    );
- */
-function __d(string $domain, string $string, ...$args): string
-{
-    $translated = \sowerphp\core\I18n::translate($string, $domain);
-    if (empty($args)) {
-        return $translated;
-    }
-
-    // Verificar si se usó un array asociativo o valores individuales
-    $firstArg = $args[0];
-    if (is_array($firstArg) && Utility_Array::isAssoc($firstArg)) {
-        $placeholders = [];
-        foreach ($firstArg as $key => $value) {
-            if (in_array($key[0], ['%(', ':'])) {
-                $placeholders[$key] = $value;
-            } else {
-                $placeholders['%(' . $key . ')s'] = $value;
-            }
-        }
-        return strtr($translated, $placeholders);
-    } else {
-        return vsprintf($translated, $args);
-    }
 }
 
 /**

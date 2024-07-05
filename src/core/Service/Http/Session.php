@@ -108,7 +108,7 @@ class Service_Http_Session implements Interface_Service
     {
         // Guardar sesión, en el caso que no se haya guardado en flujo normal
         // de Service_Http_Kernel.
-        //$this->save();
+        $this->save();
     }
 
     /**
@@ -218,7 +218,9 @@ class Service_Http_Session implements Interface_Service
     public function terminate(): void
     {
         // Guardar y cerrar la sesión.
-        $this->save();
+        // NOTE: el ideal sería acá y no en el destructor, pero mientras
+        // existan "exit;" en la aplicación debe ir en el destructor.
+        //$this->save();
     }
 
     /**

@@ -30,17 +30,6 @@ class Utility_Array
 {
 
     /**
-     * Determina si un arreglo es asociativo.
-     *
-     * @param array $arr El arreglo a verificar.
-     * @return bool Retorna true si el arreglo es asociativo, false si no.
-     */
-    public static function isAssoc(array $arr): bool
-    {
-        return array_keys($arr) !== range(0, count($arr) - 1);
-    }
-
-    /**
      * Une dos o más arrays recursivamente.
      * @param array $array1
      * @param array $array2
