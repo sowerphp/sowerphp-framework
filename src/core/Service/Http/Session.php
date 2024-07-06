@@ -344,11 +344,25 @@ class Service_Http_Session implements Interface_Service
     }
 
     /**
+     * Método que guarda la sesión.
+     *
+     * Se utiliza un método propio para controlar que se guarde sólo si existe
+     * el sesión manager.
+     *
+     * @return void
+     */
+    protected function save(): void
+    {
+        if (isset($this->sessionManager)) {
+            $this->sessionManager->save();
+        }
+    }
+
+    /**
      * Cualquier método que no esté definido en el servicio será llamado en el
      * administrador de la sesión.
      *
      * Ejemplos de métodos del administrador de la sesión que se usarán:
-     *   - save()
      *   - put()
      *   - get()
      *   - forget()

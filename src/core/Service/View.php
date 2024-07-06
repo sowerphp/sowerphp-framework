@@ -23,6 +23,8 @@
 
 namespace sowerphp\core;
 
+use Illuminate\Support\Str;
+
 /**
  * Servicio para manejar las vistas de las solicitudes HTTP.
  */
@@ -30,25 +32,18 @@ class Service_View implements Interface_Service
 {
 
     /**
+     * Instancia de la aplicación.
+     *
+     * @var App
+     */
+    protected $app;
+
+    /**
      * Servicio de capas de la aplicación.
      *
      * @var Service_Layers
      */
     protected $layersService;
-
-    /**
-     * Instancia de la solicitud.
-     *
-     * @var Network_Request
-     */
-    protected $request;
-
-    /**
-     * Instancia de la respuesta.
-     *
-     * @var Network_Response
-     */
-    protected $response;
 
     /**
      * Vistas que ya han sido resueltas por el servicio.
@@ -76,10 +71,10 @@ class Service_View implements Interface_Service
      * @var array
      */
     protected $engines = [
-        //'.blade.php' => 'blade',
-        '.php' => 'php',
-        '.twig' => 'twig',
-        '.md' => 'markdown',
+        //'.blade.php' => View_Engine_Blade::class,
+        '.php' => View_Engine_Php::class,
+        '.twig' => View_Engine_Twig::class,
+        '.md' => View_Engine_Markdown::class,
     ];
 
     /**
@@ -92,15 +87,10 @@ class Service_View implements Interface_Service
     /**
      * Constructor del servicio con sus dependencias.
      */
-    public function __construct(
-        Service_Layers $layersService,
-        Network_Request $request,
-        Network_Response $response
-    )
+    public function __construct(App $app, Service_Layers $layersService)
     {
+        $this->app = $app;
         $this->layersService = $layersService;
-        $this->request = $request;
-        $this->response = $response;
     }
 
     /**
@@ -119,7 +109,13 @@ class Service_View implements Interface_Service
      */
     public function boot(): void
     {
-        $this->engines = config('app.ui.view_engines', $this->engines);
+        $engines = config('app.ui.view_engines', $this->engines);
+        foreach ($engines as $extension => $class) {
+            $aux = explode('_', $class);
+            $key = 'view_engine_' . Str::snake(end($aux));
+            $this->app->registerService($key, $class);
+            $this->engines[$extension] = app($key);
+        }
         $this->defaultLayout = config('app.ui.layout', $this->defaultLayout);
     }
 
@@ -149,7 +145,6 @@ class Service_View implements Interface_Service
                 $view
             ));
         }
-
         // Obtener motor de renderizado para la vista.
         $engine = $this->getEngineByExtension($filepath);
         if (!$engine) {
@@ -159,21 +154,11 @@ class Service_View implements Interface_Service
                 $view
             ));
         }
-
-        // Preparar los datos que se utilizarán para el renderizado de la vista.
-        $data = $this->prepareData($data);
-
+        // Normalizar los datos que se utilizarán para el renderizado de la
+        // vista y, eventualmente, del layout.
+        $data = $this->normalizeData($data);
         // Renderizar la vista con el motor encontrado.
-        switch ($engine) {
-            case 'blade':
-                return $this->renderWithBlade($filepath, $data);
-            case 'php':
-                return $this->renderWithPhp($filepath, $data);
-            case 'twig':
-                return $this->renderWithTwig($filepath, $data);
-            case 'markdown':
-                return $this->renderWithMarkdown($filepath, $data);
-        }
+        return $engine->render($filepath, $data);
     }
 
     /**
@@ -186,9 +171,10 @@ class Service_View implements Interface_Service
      */
     public function renderToResponse(string $view, array $data = []): Network_Response
     {
+        $response = response();
         $body = $this->render($view, $data);
-        $this->response->body($body);
-        return $this->response;
+        $response->body($body);
+        return $response;
     }
 
     /**
@@ -305,7 +291,7 @@ class Service_View implements Interface_Service
     }
 
     /**
-     * Preparar los datos que se pasarán al motor de renderizado de la vista.
+     * Normalizar los datos que se pasarán al motor de renderizado de la vista.
      *
      * Se preocupa de que existan las siguientes variables para la vista:
      *   - _base: si la aplicación está en un subdirectorio esto lo tendrá.
@@ -321,12 +307,21 @@ class Service_View implements Interface_Service
      * @param array $data Datos que se pasarán a la vista sin preparar.
      * @return array Datos preparados para pasar a la vista.
      */
-    protected function prepareData(array $data): array
+    protected function normalizeData(array $data): array
     {
+        $request = $this->app->getContainer()->bound('request')
+            ? request()
+            : null
+        ;
+        // Diferentes menús que se podrían utilizar.
+        $data['_nav_website'] = (array)config('nav.website');
+        $data['_nav_app'] = (array)config('nav.app');
         // Agregar variables por defecto que se pasarán a la vista.
-        $data['_url'] = $this->request->getFullUrlWithoutQuery();
-        $data['_base'] = $this->request->getBaseUrlWithoutSlash();
-        $data['_request'] = $this->request->getRequestUriDecoded();
+        $data['_url'] = url();
+        if ($request) {
+            $data['_base'] = $request->getBaseUrlWithoutSlash();
+            $data['_request'] = $request->getRequestUriDecoded();
+        }
         // Página que se está viendo.
         if (!empty($data['_request'])) {
             $slash = strpos($data['_request'], '/', 1);
@@ -337,13 +332,10 @@ class Service_View implements Interface_Service
         } else {
             $data['_page'] = config('app.ui.homepage');
         }
-        // Diferentes menús que se podrían utilizar.
-        $data['_nav_website'] = (array)config('nav.website');
-        $data['_nav_app'] = (array)config('nav.app');
         // Asignar el título de la página si no está asignado.
         if (empty($data['__view_title'])) {
             $data['__view_title'] = config('app.name')
-                . ($data['_request'] ? (': ' . $data['_request']) : '')
+                . (($data['_request']??null) ? (': ' . $data['_request']) : '')
             ;
         }
         // Preparar __view_header pues viene como arreglo y debe ser string.
@@ -352,7 +344,7 @@ class Service_View implements Interface_Service
             if (isset($data['__view_header']['css'])) {
                 foreach ($data['__view_header']['css'] as &$css) {
                     $__view_header .= '<link type="text/css" href="'
-                        . $this->request->getBaseUrlWithoutSlash()
+                        . $request->getBaseUrlWithoutSlash()
                         . $css . '" rel="stylesheet" />' . "\n"
                     ;
                 }
@@ -360,7 +352,7 @@ class Service_View implements Interface_Service
             if (isset($data['__view_header']['js'])) {
                 foreach ($data['__view_header']['js'] as &$js) {
                     $__view_header .= '<script type="text/javascript" src="'
-                        . $this->request->getBaseUrlWithoutSlash()
+                        . $request->getBaseUrlWithoutSlash()
                         . $js . '"></script>' . "\n"
                     ;
                 }
@@ -376,10 +368,10 @@ class Service_View implements Interface_Service
      * archivo.
      *
      * @param string $filename Nombre del archivo de la vista.
-     * @return string|null Retorna el motor de renderizado o null si no hay
+     * @return object|null Retorna el motor de renderizado o null si no hay
      * coincidencia.
      */
-    protected function getEngineByExtension(string $filename): ?string
+    protected function getEngineByExtension(string $filename): ?object
     {
         foreach ($this->engines as $extension => $engine) {
             if (substr($filename, -strlen($extension)) === $extension) {
@@ -390,6 +382,72 @@ class Service_View implements Interface_Service
     }
 
     /**
+     * Determinar layout que se debe usar para el contenido renderizado.
+     *
+     * @param string $layout Nombre del layout que se desea utilizar.
+     * @return string Ruta absoluta al layout que se desea utilizar.
+     */
+    public function resolveLayout(string $layout): string
+    {
+        if ($layout[0] != '/') {
+            $layout = 'Layouts/' . $layout;
+        }
+        $filepath = $this->resolveView($layout, '');
+        if (!$filepath) {
+            $layout = 'Layouts/' . $this->defaultLayout;
+            $filepath = $this->resolveView($layout, '');
+        }
+        return $filepath;
+    }
+
+}
+
+/**
+ * Clase base para los motores de renderizado de plantillas HTML.
+ */
+abstract class View_Engine
+{
+
+    /**
+     * Servicio de capas de la aplicación.
+     *
+     * @var Service_Layers
+     */
+    protected $layersService;
+
+    /**
+     * Servicio de vistas de la aplicación.
+     *
+     * @var Service_View
+     */
+    protected $viewService;
+
+    /**
+     * Constructor del motor de renderizado de las vistas.
+     */
+    public function __construct(
+        Service_Layers $layersService,
+        Service_View $viewService
+    )
+    {
+        $this->layersService = $layersService;
+        $this->viewService = $viewService;
+        $this->boot();
+    }
+
+    protected function boot(): void
+    {
+    }
+
+}
+
+/**
+ * Motor de renderizado de plantilla HTML utilizando Blade de Laravel.
+ */
+class View_Engine_Blade extends View_Engine
+{
+
+    /**
      * Renderizar una plantilla blade y devolver el resultado como una cadena.
      *
      * @param string $filepath Ruta a la plantilla blade que se va a renderizar.
@@ -397,10 +455,18 @@ class Service_View implements Interface_Service
      * dentro de la vista.
      * @return string El contenido HTML generado por la plantilla blade.
      */
-    protected function renderWithBlade(string $filepath, array $data): string
+    public function render(string $filepath, array $data): string
     {
         throw new \Exception('Plantillas blade actualmente no soportadas.');
     }
+
+}
+
+/**
+ * Motor de renderizado de plantilla HTML utilizando PHP puro.
+ */
+class View_Engine_Php extends View_Engine
+{
 
     /**
      * Renderizar un archivo PHP y devolver el resultado como una cadena.
@@ -412,7 +478,7 @@ class Service_View implements Interface_Service
      * dentro de la vista.
      * @return string El contenido HTML generado por el archivo PHP.
      */
-    protected function renderWithPhp(string $filepath, array $data): string
+    public function render(string $filepath, array $data): string
     {
         // Renderizar contenido del archivo PHP.
         $content = $this->renderPhp($filepath, $data);
@@ -422,7 +488,7 @@ class Service_View implements Interface_Service
         $data['_content'] = $content;
         // Renderizar el layout solicitado con el contenido previamente
         // determinado ya incluído en los datos del layout.
-        $layout = $this->resolveLayout($data['__view_layout']);
+        $layout = $this->viewService->resolveLayout($data['__view_layout']);
         return $this->renderPhp($layout, $data);
     }
 
@@ -434,7 +500,7 @@ class Service_View implements Interface_Service
      * @param array $__data Variables que se desean reemplazar.
      * @return string El contenido del archivo ya renderizado.
      */
-    protected function renderPhp(string $__filepath, array $__data): string
+    public function renderPhp(string $__filepath, array $__data): string
     {
         ob_start(); // NOTE: obligatorio o se incluirá en la salida.
         extract($__data, EXTR_SKIP);
@@ -448,37 +514,57 @@ class Service_View implements Interface_Service
         return ob_get_clean();
     }
 
+}
+
+/**
+ * Motor de renderizado de plantilla HTML utilizando Twig.
+ */
+class View_Engine_Twig extends View_Engine
+{
+
+    protected $path;
+    protected $twig;
+
     /**
-     * Determinar layout que se debe usar para el contenido renderizado.
+     * Inicialización de Twig.
      *
-     * @param string $layout Nombre del layout que se desea utilizar.
-     * @return string Ruta absoluta al layout que se desea utilizar.
+     * @return void
      */
-    protected function resolveLayout(string $layout): string
+    protected function boot(): void
     {
-        if ($layout[0] != '/') {
-            $layout = 'Layouts/' . $layout;
-        }
-        $filepath = $this->resolveView($layout, '');
-        if (!$filepath) {
-            $layout = 'Layouts/' . $this->defaultLayout;
-            $filepath = $this->resolveView($layout, '');
-        }
-        return $filepath;
+        // Crear el FilesystemLoader con el directorio registrado para vistas.
+        $this->path = $this->layersService->getProjectPath();
+        $loader = new \Twig\Loader\FilesystemLoader($this->path);
+        // Configurar el entorno de Twig con caché en el directorio estándar.
+        $this->twig = new \Twig\Environment($loader, [
+            'cache' => storage_path('framework/views/twig'),
+        ]);
     }
 
     /**
-     * Renderizar una plantilla twig y devolver el resultado como una cadena.
+     * Renderizar una plantilla Twig y devolver el resultado como una cadena.
      *
-     * @param string $filepath Ruta a la plantilla twig que se va a renderizar.
-     * @param array $data Datos que se pasarán a la plantilla twig para su uso
+     * @param string $filepath Ruta a la plantilla Twig que se va a renderizar.
+     * @param array $data Datos que se pasarán a la plantilla Twig para su uso
      * dentro de la vista.
-     * @return string El contenido HTML generado por la plantilla twig.
+     * @return string El contenido HTML generado por la plantilla Twig.
      */
-    protected function renderWithTwig(string $filepath, array $data): string
+    public function render(string $filepath, array $data): string
     {
-        throw new \Exception('Plantillas twig actualmente no soportadas.');
+        // Convertir la ruta absoluta a relativa.
+        $relativePath = substr($filepath, strlen($this->path) + 1);
+        // Renderizar la plantilla.
+        return $this->twig->render($relativePath, $data);
     }
+
+}
+
+/**
+ * Motor de renderizado de plantilla HTML utilizando Markdown para el contenido
+ * principal de la vista y PHP puro para el Layout de la página con markdown.
+ */
+class View_Engine_Markdown extends View_Engine
+{
 
     /**
      * Renderizar una plantilla markdown y devolver el resultado como una
@@ -491,7 +577,7 @@ class Service_View implements Interface_Service
      * uso dentro de la vista.
      * @return string El contenido HTML generado por la plantilla markdown.
      */
-    protected function renderWithMarkdown(string $filepath, array $data): string
+    public function render(string $filepath, array $data): string
     {
         // Renderizar contenido del archivo Markdown.
         $content = file_get_contents($filepath);
@@ -518,8 +604,8 @@ class Service_View implements Interface_Service
         $data['_content'] = $content;
         // Renderizar el layout solicitado con el contenido previamente
         // determinado ya incluído en los datos del layout.
-        $layout = $this->resolveLayout($data['__view_layout']);
-        return $this->renderPhp($layout, $data);
+        $layout = $this->viewService->resolveLayout($data['__view_layout']);
+        return app('view_engine_php')->renderPhp($layout, $data);
     }
 
 }

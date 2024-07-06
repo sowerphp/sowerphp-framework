@@ -133,6 +133,12 @@ class Service_Http_Kernel implements Interface_Service
      */
     public function register(): void
     {
+        // Registrar request de la solicitud HTTP.
+        $this->request = Network_Request::capture();
+        $this->app->registerService('request', $this->request);
+        // Registrar response de la solicitud HTTP.
+        $this->response = new Network_Response();
+        $this->app->registerService('response', $this->response);
     }
 
     /**
@@ -142,8 +148,6 @@ class Service_Http_Kernel implements Interface_Service
      */
     public function boot(): void
     {
-        $this->getRequest();
-        $this->getResponse();
     }
 
     /**
@@ -161,41 +165,13 @@ class Service_Http_Kernel implements Interface_Service
     }
 
     /**
-     * Obtener la instancia de Network_Request.
-     *
-     * @return Network_Request
-     */
-    public function getRequest(): Network_Request
-    {
-        if (!isset($this->request)) {
-            $this->request = Network_Request::capture();
-            $this->app->registerService('request', $this->request);
-        }
-        return $this->request;
-    }
-
-    /**
-     * Obtener la instancia de Network_Response.
-     *
-     * @return Network_Response
-     */
-    public function getResponse(): Network_Response
-    {
-        if (!isset($this->response)) {
-            $this->response = new Network_Response();
-            $this->app->registerService('response', $this->response);
-        }
-        return $this->response;
-    }
-
-    /**
      * Maneja la solicitud HTTP.
      *
      * @return int
      */
     public function handle(): int
     {
-        $request = $this->getRequest();
+        $request = $this->request;
         // Procesar middlewares antes de manejar la solicitud.
         $request = $this->processMiddlewaresBefore(
             $request,
@@ -336,8 +312,7 @@ class Service_Http_Kernel implements Interface_Service
         if (!$filepath) {
             return null;
         }
-        $response = $this->getResponse();
-        return $response->prepareFileResponse($filepath);
+        return $this->response->prepareFileResponse($filepath);
     }
 
     /**
@@ -363,7 +338,6 @@ class Service_Http_Kernel implements Interface_Service
             // Rutas de módulos.
             $module = $this->moduleService->findModuleByResource($filename);
             if ($module) {
-                $this->moduleService->loadModule($module);
                 $paths = $this->moduleService->getPaths($module);
             }
             // Si existe el módulo en las rutas entonces si es un módulo lo que
@@ -424,7 +398,7 @@ class Service_Http_Kernel implements Interface_Service
             $config['parameters']
         );
         // Recibir resultado de la ejecución de la acción del controlador.
-        $response = $this->getResponse();
+        $response = $this->response;
         // Se retorno algo desde el controlador:
         //   - Objeto Network_Response.
         //   - Datos para asignar al body.
@@ -501,12 +475,9 @@ class Service_Http_Kernel implements Interface_Service
             );
             return $this->handleException($exception);
         } else {
-            $request = $this->getRequest();
-            $request->session()->save();
-            $response = $this->getResponse();
-            $response->header('Content-Type', 'text/plain; charset=UTF-8');
-            $response->body($message);
-            return $response;
+            $this->response->header('Content-Type', 'text/plain; charset=UTF-8');
+            $this->response->body($message);
+            return $this->response;
         }
     }
 
