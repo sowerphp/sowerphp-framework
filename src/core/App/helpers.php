@@ -215,7 +215,7 @@ function redirect(
  */
 function request(): \sowerphp\core\Network_Request
 {
-    return app('kernel')->getRequest();
+    return app('request');
 }
 
 /**
@@ -225,7 +225,7 @@ function request(): \sowerphp\core\Network_Request
  */
 function response(): \sowerphp\core\Network_Response
 {
-    return app('kernel')->getResponse();
+    return app('response');
 }
 
 /**

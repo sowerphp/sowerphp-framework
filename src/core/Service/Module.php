@@ -324,18 +324,27 @@ class Service_Module implements Interface_Service
     }
 
     /**
-     * Obtener las rutas donde se encuentra un módulo.
+     * Obtener las rutas donde se encuentran los módulos o un módulo en
+     * específico solicitado.
      *
      * @param string $module Nombre del módulo.
-     * @return array|null Rutas donde el módulo existe.
+     * @return array|null Rutas de los módulos o del módulo solicitado.
      */
-    public function getModulePaths(string $module): ?array
+    public function getPaths(?string $module = null): array
     {
-        if(isset($this->modules[$module])) {
-            return $this->modules[$module]['paths'];
-        } else {
-            return null;
+        // Si se pidieron los paths de un módulo específico se entregan.
+        if ($module !== null) {
+            if (isset($this->modules[$module])) {
+                return $this->modules[$module]['paths'];
+            }
+            return [];
         }
+        // Si se pidieron todos los paths se determinan.
+        $paths = [];
+        foreach ($this->modules as $module => $config) {
+            $paths[$module] = $config['paths'];
+        }
+        return $paths;
     }
 
     /**

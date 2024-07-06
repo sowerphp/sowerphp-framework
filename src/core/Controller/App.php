@@ -147,13 +147,12 @@ class Controller_App extends \sowerphp\app\Controller
     /**
      * Renderizar error.
      *
-     * @param array $exception Excepción con el error que se renderizará.
+     * @param \Exception $exception Excepción con el error que se renderizará.
      * @return Network_Response
      */
     public function error($exception): Network_Response
     {
         ob_clean();
-        $this->request->session()->save();
         // Es una solicitud mediante un servicio web.
         if ($this->request->isApiRequest()) {
             return $this->Api->sendException($exception);

@@ -57,7 +57,7 @@ class Service_Http_Router implements Interface_Service
     /**
      * Instancia del servicio de vistas de la aplicación.
      *
-     * @var Service_Http_View
+     * @var Service_View
      */
     protected $viewService;
 
@@ -105,7 +105,7 @@ class Service_Http_Router implements Interface_Service
         App $app,
         Service_Layers $layersService,
         Service_Module $moduleService,
-        Service_Http_View $viewService
+        Service_View $viewService
     )
     {
         $this->app = $app;
@@ -357,17 +357,6 @@ class Service_Http_Router implements Interface_Service
      */
     public function checkRouteConfig(array $config): void
     {
-        // Si se solicita un módulo tratar de cargar y verificar que quede
-        // activo.
-        if (!empty($config['module'])) {
-            $this->moduleService->loadModule($config['module']);
-            if (!$this->moduleService->isModuleLoaded($config['module'])) {
-                throw new \Exception(__(
-                    'Módulo %s no fue encontrado.',
-                    $config['module']
-                ));
-            }
-        }
         // Cargar clase del controlador.
         if (!class_exists($config['class'])) {
             throw new \Exception(__(

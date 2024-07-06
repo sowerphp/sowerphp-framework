@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Servicio para manejar las vistas de las solicitudes HTTP.
  */
-class Service_Http_View implements Interface_Service
+class Service_View implements Interface_Service
 {
 
     /**

@@ -32,13 +32,6 @@ class Service_Http_Redirect extends Network_Response implements Interface_Servic
 {
 
     /**
-     * Instancia de la solicitud.
-     *
-     * @var Network_Request
-     */
-    protected $request;
-
-    /**
      * Servicio de enrutamiento.
      *
      * @var Service_Http_Router
@@ -48,7 +41,8 @@ class Service_Http_Redirect extends Network_Response implements Interface_Servic
     /**
      * Constructor del servicio.
      *
-     * @param Network_Request $request Instancia con la solicitud realizada.
+     * @param Service_Http_Router $routerService Instancia con el servicio de
+     * enrutamiento.
      */
     public function __construct(Service_Http_Router $routerService)
     {
@@ -71,7 +65,6 @@ class Service_Http_Redirect extends Network_Response implements Interface_Servic
      */
     public function boot(): void
     {
-        $this->request = request();
     }
 
     /**
@@ -115,7 +108,7 @@ class Service_Http_Redirect extends Network_Response implements Interface_Servic
      */
     public function back(int $status = 302, array $headers = []): self
     {
-        $url = $this->request->headers->get('referer') ?? '/';
+        $url = request()->headers->get('referer') ?? '/';
         return $this->to($url, $status, $headers);
     }
 

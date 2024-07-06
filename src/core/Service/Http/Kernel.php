@@ -64,7 +64,7 @@ class Service_Http_Kernel implements Interface_Service
     /**
      * Servicio de vistas.
      *
-     * @var Service_Http_View
+     * @var Service_View
      */
     protected $viewService;
 
@@ -115,7 +115,7 @@ class Service_Http_Kernel implements Interface_Service
         Service_Module $moduleService,
         Service_Config $configService,
         Service_Invoker $invokerService,
-        Service_Http_View $viewService
+        Service_View $viewService
     )
     {
         $this->app = $app;
@@ -364,7 +364,7 @@ class Service_Http_Kernel implements Interface_Service
             $module = $this->moduleService->findModuleByResource($filename);
             if ($module) {
                 $this->moduleService->loadModule($module);
-                $paths = $this->moduleService->getModulePaths($module);
+                $paths = $this->moduleService->getPaths($module);
             }
             // Si existe el módulo en las rutas entonces si es un módulo lo que
             // se está pidiendo, y es un módulo ya cargado. Si este no fuera el

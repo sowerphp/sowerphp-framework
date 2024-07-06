@@ -29,17 +29,12 @@ class Service_Lang implements Interface_Service
 {
 
     /**
-     * Lenguaje de la configuración. Es el lenguaje en el que se espera que
-     * estén los textos cuando no se utilizan claves y se usa directamente el
-     * texto al solicitar la traducción. Además, es el lenguaje por defecto si
-     * no está definido uno en la sesión.
-     *
-     * @var string
-     */
-    protected $configLocale;
-
-    /**
      * Lenguaje que se utilizará para las traducciones.
+     *
+     * Es el lenguaje de la configuración. En el que se espera que estén los
+     * textos cuando no se utilizan claves y se usa directamente el texto al
+     * solicitar la traducción. Además, es el lenguaje por defecto si no está
+     * definido uno en la sesión.
      *
      * @var string
      */
@@ -68,23 +63,38 @@ class Service_Lang implements Interface_Service
      */
     public function boot(): void
     {
-        $this->configLocale = config('app.locale', 'es');
-        $this->locale = session('config.app.locale', $this->configLocale);
-        $this->loadTranslations($this->locale);
+        $this->locale = config('app.locale', 'es');
     }
 
     /**
-     * Carga las traducciones para un locale desde archivos.
+     * Método que carga un locale.
      *
-     * @param string $locale El locale para cargar las traducciones, por
-     * ejemplo 'es' para español.
+     * Se determina el locale que se usará (se puede llamar al método sin
+     * parámetros) y se cargarán las traducciones del locale.
+     *
+     * @param string|null $locale Locale que se desea cargar. Puede ser null y
+     * se tratará de determinar en base a un valor por defecto o de manera
+     * automática.
+     * @param string|null $default Locale que se cargará como segunda opción si
+     * el locale principal es un valor null.
+     * @return string Locale que se cargó.
      */
-    protected function loadTranslations(string $locale): void
+    protected function loadLocale(?string $locale = null, ?string $default = null): string
     {
-        if (!isset($this->translations[$locale])) {
-            $path = resource_path("lang/{$locale}");
-            $this->translations[$locale] = $this->loadTranslationsFile($path);
+        if ($locale === null) {
+            if ($default === null) {
+                if (app()->getContainer()->bound('session')) {
+                    $default = session('config.app.locale', $this->locale);
+                } else {
+                    $default = $this->locale;
+                }
+            }
+            $locale = $default;
         }
+        if (!isset($this->translations[$locale])) {
+            $this->translations[$locale] = $this->loadTranslations($locale);
+        }
+        return $locale;
     }
 
     /**
@@ -100,8 +110,9 @@ class Service_Lang implements Interface_Service
      * @return array Devuelve un array asociativo con todas las traducciones
      * cargadas de los archivos en el directorio especificado.
      */
-    protected function loadTranslationsFile(string $path): array
+    protected function loadTranslations(string $locale): array
     {
+        $path = resource_path("lang/{$locale}");
         $translations = [];
         foreach (glob("{$path}/*.php") as $file) {
             $translations[basename($file, '.php')] = require $file;
@@ -128,7 +139,7 @@ class Service_Lang implements Interface_Service
      */
     public function get(string $key, array $replace = [], string $locale = null)
     {
-        $locale = $locale ?: $this->locale;
+        $locale = $this->loadLocale($locale);
         // Buscar la traducción por llave.
         $default = null;
         $translation = Arr::get($this->translations[$locale], $key, $default);
@@ -160,9 +171,9 @@ class Service_Lang implements Interface_Service
      *
      * @param string $string El texto que se desea traducir.
      * @param string|null $toLocale El locale al que se traducirá el texto. Si
-     * no se especifica, se usa el valor de $this->locale.
+     * no se especifica, se usa el valor de $this->loadLocale().
      * @param string|null $fromLocale El locale desde el que se traducirá el
-     * texto. Si no se especifica, se usa el valor de $this->configLocale.
+     * texto. Si no se especifica, se usa el valor de $this->locale.
      * @param string|null $default El valor predeterminado que se devolverá si
      * no se encuentra la traducción. Si no se proporciona, se devolverá null.
      * @return string|null La traducción del texto, el texto original si los
@@ -176,8 +187,8 @@ class Service_Lang implements Interface_Service
         ?string $default = null
     ): ?string
     {
-        $toLocale = $toLocale ?? $this->locale;
-        $fromLocale = $fromLocale ?? $this->configLocale;
+        $toLocale = $this->loadLocale($toLocale);
+        $fromLocale = $fromLocale ?? $this->locale;
         // Si el lenguage al que se desea traducir es el mismo de origen se
         // entrega el texto directamente (no es necesario traducir).
         if ($toLocale == $fromLocale) {
@@ -186,7 +197,7 @@ class Service_Lang implements Interface_Service
         // Si los lenguajes son diferentes se debe buscar la llave del texto en
         // el lenguaje de origen y luego buscar el texto con esa llave en el
         // lenguaje de destino.
-        $this->loadTranslations($fromLocale);
+        $this->loadLocale($fromLocale);
         $keyFrom = $this->findKeyByValue(
             $this->translations[$fromLocale],
             $string
@@ -285,7 +296,7 @@ class Service_Lang implements Interface_Service
      */
     public function has(string $key, ?string $locale = null): bool
     {
-        $locale = $locale ?: $this->locale;
+        $locale = $this->loadLocale($locale);
         return isset($this->translations[$locale][$key]);
     }
 

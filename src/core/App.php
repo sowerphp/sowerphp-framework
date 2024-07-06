@@ -59,6 +59,7 @@ class App
         'lang' => Service_Lang::class,
         //'mail' => Service_Mail::class,
         //'http_client' => Service_Http_Client::class,
+        'view' => Service_View::class,
     ];
 
     /**
@@ -78,12 +79,11 @@ class App
      * @var array
      */
     protected $defaultHttpServices = [
+        'kernel' => Service_Http_Kernel::class,
+        'router' => Service_Http_Router::class,
+        'redirect' => Service_Http_Redirect::class,
         'session' => Service_Http_Session::class,
         //'auth' => Service_Http_Auth::class,
-        'view' => Service_Http_View::class,
-        'router' => Service_Http_Router::class,
-        'kernel' => Service_Http_Kernel::class,
-        'redirect' => Service_Http_Redirect::class,
     ];
 
     /**
