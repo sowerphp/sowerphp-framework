@@ -40,6 +40,21 @@ class Service_Config implements Interface_Service, \ArrayAccess
     protected $moduleService;
 
     /**
+     * Configuración mínima por defecto para la aplicación.
+     *
+     * @var array
+     */
+    protected $defaultConfig = [
+        'app.env' => 'local',
+        'app.debug' => true,
+        'app.php.error_reporting' => E_ALL,
+        'app.timezone' => 'America/Santiago',
+        'app.locale' => 'es',
+        'app.ui.layout' => 'bootstrap',
+        'app.ui.homepage' => '/inicio',
+    ];
+
+    /**
      * Constructor de Service_Config.
      *
      * @param Service_Layers $layersService
@@ -59,8 +74,14 @@ class Service_Config implements Interface_Service, \ArrayAccess
     {
     }
 
+    /**
+     * Inicializar servicio de configuración.
+     *
+     * @return void
+     */
     public function boot(): void
     {
+        $this->set($this->defaultConfig);
         $this->loadEnvironmentVariables();
         $this->loadConfigurations();
         $this->configure();

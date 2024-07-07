@@ -73,7 +73,7 @@ class Controller_App extends \sowerphp\app\Controller
      * @param string $page Vista que se desea renderizar ubicada en View/Pages.
      * @return Network_Response
      */
-    public function page(string $page): Network_Response
+    public function page(?string $page = null): Network_Response
     {
         $page = $page ? $page : config('app.ui.homepage');
         return $this->render('Pages' . $page);

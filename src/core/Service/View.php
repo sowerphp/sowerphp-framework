@@ -72,9 +72,9 @@ class Service_View implements Interface_Service
      */
     protected $engines = [
         //'.blade.php' => View_Engine_Blade::class,
-        '.php' => View_Engine_Php::class,
         '.twig' => View_Engine_Twig::class,
-        '.md' => View_Engine_Markdown::class,
+        '.php' => View_Engine_Php::class,
+        //'.md' => View_Engine_Markdown::class,
     ];
 
     /**
@@ -522,7 +522,29 @@ class View_Engine_Php extends View_Engine
 class View_Engine_Twig extends View_Engine
 {
 
-    protected $path;
+    /**
+     * Posibles rutas para la búsqueda de vistas.
+     *
+     * Se configurará con las rutas de cada capa. Por lo que las vistas se
+     * buscarán en cada una de las capas de la aplicación desde su base.
+     *
+     * @var array
+     */
+    protected $viewPaths;
+
+    /**
+     * Ruta, dentro del directorio de almacenamiento, para el caché de las
+     * vistas ya procesadas de Twig.
+     *
+     * @var string
+     */
+    protected $cachePath = 'framework/views/twig';
+
+    /**
+     * Instancia del objeto de Twig para el renderizado.
+     *
+     * @var \Twig\Environment
+     */
     protected $twig;
 
     /**
@@ -532,13 +554,19 @@ class View_Engine_Twig extends View_Engine
      */
     protected function boot(): void
     {
-        // Crear el FilesystemLoader con el directorio registrado para vistas.
-        $this->path = $this->layersService->getProjectPath();
-        $loader = new \Twig\Loader\FilesystemLoader($this->path);
-        // Configurar el entorno de Twig con caché en el directorio estándar.
-        $this->twig = new \Twig\Environment($loader, [
-            'cache' => storage_path('framework/views/twig'),
-        ]);
+        // Crear el FilesystemLoader con los posibles directorios para las
+        // vistas.
+        $this->viewPaths = array_values($this->layersService->getPaths());
+        $loader = new \Twig\Loader\FilesystemLoader($this->viewPaths);
+        // Configurar el entorno de Twig:
+        //   - Definir el caché en el directorio estándar si es producción.
+        //   - Cargar la extensión por defecto de Twig.
+        $config = [];
+        if (config('app.env') != 'local') {
+            $config['cache'] = storage_path($this->cachePath);
+        }
+        $this->twig = new \Twig\Environment($loader, $config);
+        $this->twig->addExtension(new View_Engine_Twig_Extension());
     }
 
     /**
@@ -552,9 +580,105 @@ class View_Engine_Twig extends View_Engine
     public function render(string $filepath, array $data): string
     {
         // Convertir la ruta absoluta a relativa.
-        $relativePath = substr($filepath, strlen($this->path) + 1);
+        $relativePath = substr(str_replace($this->viewPaths, '', $filepath), 1);
         // Renderizar la plantilla.
         return $this->twig->render($relativePath, $data);
+    }
+
+    /**
+     * Registrar una función en el motor de renderizado Twig.
+     *
+     * Permite registrar una función mediante:
+     *   - Función anónima.
+     *   - Función.
+     *   - Método de una clase.
+     *
+     * Ejemplos de uso de una función:
+     *   {{ greet() }}
+     *   {{ greet('Alice') }}
+     *   {{ greet('Bob', 'Hi') }}
+     *
+     * @param string $name Nombre de la función que estará disponible en Twig.
+     * @param Closure|string|array $function Función o llamada a la misma.
+     * @return void
+     */
+    public function addFunction(string $name, $function): void
+    {
+        $this->twig->addFunction(
+            new \Twig\TwigFunction($name, $function)
+        );
+    }
+
+    /**
+     * Registrar un filtro en el motor de renderizado Twig.
+     *
+     * Permite registrar un filtro mediante:
+     *   - Función anónima.
+     *   - Función.
+     *   - Método de una clase.
+     *
+     * Ejemplos de uso de un filtro:
+     *   {{ 'text' | my_filter('prefix_', '_suffix') }}
+     *   {{ 'text' | my_filter('prefix_') }}
+     *   {{ 'text' | my_filter }}
+     *
+     * @param string $name Nombre del filtro que estará disponible en Twig.
+     * @param Closure|string|array $filter Función o llamada a la misma.
+     * @return void
+     */
+    public function addFilter($name, $filter): void
+    {
+        $this->twig->addFilter(
+            new \Twig\TwigFilter($name, $filter)
+        );
+    }
+
+    /**
+     * Cualquier método que no esté definido en el motor de renderizado será
+     * llamado en la instancia de Twig.
+     *
+     * Ejemplos de métodos de la instancia de Twig que se usarán:
+     *   - addExtension()
+     */
+    public function __call($method, $parameters)
+    {
+        return call_user_func_array([$this->twig, $method], $parameters);
+    }
+
+}
+
+/**
+ * Extensión por defecto con funciones y filtros para Twig.
+ */
+class View_Engine_Twig_Extension extends \Twig\Extension\AbstractExtension
+{
+
+    public function getFunctions()
+    {
+        return [
+            new \Twig\TwigFunction('project_path', [$this, 'function_project_path']),
+            new \Twig\TwigFunction('session_messages', [$this, 'function_session_messages']),
+        ];
+    }
+
+    public function function_project_path(?string $path = null): string
+    {
+        return app('layers')->getProjectPath($path);
+    }
+
+    public function function_session_messages()
+    {
+        return new \Twig\Markup(
+            \sowerphp\core\Facade_Session_Message::getMessagesAsString(),
+            'UTF-8'
+        );
+    }
+
+    public function getFilters()
+    {
+        return [
+            new \Twig\TwigFilter('num', 'num'),
+        ];
     }
 
 }

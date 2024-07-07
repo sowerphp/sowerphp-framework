@@ -282,17 +282,11 @@ class Service_Http_Session implements Interface_Service
             $userLang = $this->request->headers->get('Accept-Language');
             if ($userLang) {
                 $userLang = explode(',', explode('-', $userLang)[0])[0];
-                if (
-                    $userLang === explode('_', $defaultLang)[0]
-                    || I18n::localeExists($userLang)
-                ) {
-                    $this->put('config.app.locale', $userLang);
-                } else {
-                    $this->put('config.app.locale', $defaultLang);
-                }
+                $locale = $userLang;
             } else {
-                $this->put('config.app.locale', $defaultLang);
+                $locale = $defaultLang;
             }
+            $this->put('config.app.locale', $locale);
         }
         // Layout por defecto de la aplicación.
         if (!$this->get('config.app.ui.layout')) {
