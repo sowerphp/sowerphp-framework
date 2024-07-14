@@ -36,7 +36,7 @@ class Model_Datasource_Auth2 extends Model_Datasource_Auth2_Base
      */
     public static function get($name = '2FA', array $config = [])
     {
-        $class = '\Model_Datasource_Auth2_'.$name;
+        $class = '\sowerphp\autoload\Model_Datasource_Auth2_'.$name;
         if (!class_exists($class)) {
             throw new \Exception('Autenticación secundaria usando '.$name.' no está disponible.');
         }

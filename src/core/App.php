@@ -54,11 +54,17 @@ class App
         'module' => Service_Module::class,
         'storage' => Service_Storage::class,
         'config' => Service_Config::class,
+        'autoload' => Service_Autoload::class,
+        'inflector' => Service_Inflector::class,
+        'translator' => Service_Translator::class,
         'cache' => Service_Cache::class,
         'database' => Service_Database::class,
-        'lang' => Service_Lang::class,
+        'events' => Service_Events::class,
+        'model' => Service_Model::class,
         //'mail' => Service_Mail::class,
         //'http_client' => Service_Http_Client::class,
+        //'log' => Service_Log::class,
+        //'notification' => Service_Notification::class,
         'view' => Service_View::class,
     ];
 
@@ -83,7 +89,7 @@ class App
         'router' => Service_Http_Router::class,
         'redirect' => Service_Http_Redirect::class,
         'session' => Service_Http_Session::class,
-        //'auth' => Service_Http_Auth::class,
+        'auth' => Service_Http_Auth::class,
     ];
 
     /**
@@ -104,7 +110,7 @@ class App
     protected function __construct()
     {
         // NOTE: ¡este método debe estar vacío siempre!
-        // Cualquier lógica de inicialización deber ir en bootstrap()
+        // Cualquier lógica de inicialización deber ir en init()
     }
 
     /**
@@ -115,7 +121,7 @@ class App
         if (!isset(self::$instance)) {
             self::$instance = new self();
             try {
-                self::$instance->bootstrap();
+                self::$instance->init();
             } catch (\Throwable $throwable) {
                 self::$instance->handleThrowable($throwable);
                 return null;
@@ -143,7 +149,7 @@ class App
             $result = $kernel->handleThrowable($throwable);
         }
         try {
-            $this->terminateServices();
+            $this->executeTerminateMethodOnServices();
         } catch (\Throwable $throwable) {
             $result = $kernel->handleThrowable($throwable);
         }
@@ -226,7 +232,7 @@ class App
     /**
      * Inicializa la aplicación.
      */
-    protected function bootstrap(): void
+    protected function init(): void
     {
         // Definir el tiempo de inicio del script.
         define('TIME_START', microtime(true));
@@ -246,11 +252,14 @@ class App
         $this->container = new Container();
         $this->registerService('app', $this); // No es un servicio realmente.
 
-        // Registrar e inicializar el resto de servicios de la aplicación.
+        // Registrar e inicializar los servicios estándares de la aplicación.
         $this->registerServices();
-        $this->bootServices();
+        $this->executeBootMethodOnServices();
 
-        // Inicializar cada capa con su archivo bootstrap personalizado.
+        // Registrar e inicializar los servicios configurados de la aplicación.
+        $this->registerConfigServices();
+
+        // Inicializar cada capa con su archivo de inicialización personalizado.
         $this->getService('layers')->loadFilesReverse([
             '/App/bootstrap.php',
         ]);
@@ -268,7 +277,7 @@ class App
         } else {
             $this->registerHttpServices();
         }
-        $this->executeRegisterMethodOnAllServices();
+        $this->executeRegisterMethodOnServices();
     }
 
     /**
@@ -315,12 +324,32 @@ class App
     }
 
     /**
+     * Registrar servicios que están configurados en el proyecto (variables).
+     */
+    protected function registerConfigServices(): void
+    {
+        $services = $this->getService('config')['services'] ?? [];
+        $servicesRegistered = [];
+        foreach ($services as $service => $config) {
+            if (isset($config['class'])) {
+                $servicesRegistered[] = $service;
+                $this->registerService($service, $config['class']);
+            }
+        }
+        $this->executeRegisterMethodOnServices($servicesRegistered);
+        $this->executeBootMethodOnServices($servicesRegistered);
+    }
+
+    /**
      * Ejecutar método register() en cada servicio.
      */
-    protected function executeRegisterMethodOnAllServices(): void
+    protected function executeRegisterMethodOnServices(?array $services = []): void
     {
+        if (empty($services)) {
+            $services = array_keys($this->container->getBindings());
+        }
         $registered = [];
-        foreach ($this->container->getBindings() as $key => $binding) {
+        foreach ($services as $key) {
             $service = $this->container->make($key);
             $serviceClass = get_class($service);
             if (
@@ -336,10 +365,13 @@ class App
     /**
      * Inicializa todos los servicios necesarios después del registro.
      */
-    protected function bootServices(): void
+    protected function executeBootMethodOnServices(?array $services = []): void
     {
+        if (empty($services)) {
+            $services = array_keys($this->container->getBindings());
+        }
         $initialized = [];
-        foreach ($this->container->getBindings() as $key => $binding) {
+        foreach ($services as $key) {
             $service = $this->container->make($key);
             $serviceClass = get_class($service);
             if (
@@ -355,10 +387,12 @@ class App
     /**
      * Finaliza todos los servicios registrados al terminar la ejecución.
      */
-    protected function terminateServices(): void
+    protected function executeTerminateMethodOnServices(): void
     {
+        $services = array_keys($this->container->getBindings());
+        $services = array_reverse($services);
         $terminated = [];
-        foreach ($this->container->getBindings() as $key => $binding) {
+        foreach ($services as $key) {
             $service = $this->container->make($key);
             $serviceClass = get_class($service);
             if (

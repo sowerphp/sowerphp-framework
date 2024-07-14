@@ -28,7 +28,7 @@ namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
  * Comentario de la tabla: Comunas de cada provincia del país
  * Esta clase permite trabajar sobre un conjunto de registros de la tabla comuna
  */
-class Model_Comunas extends \Model_Plural_App
+class Model_Comunas extends \sowerphp\autoload\Model_Plural_App
 {
 
     // Datos para la conexión a la base de datos

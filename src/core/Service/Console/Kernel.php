@@ -78,7 +78,7 @@ class Service_Console_Kernel implements Interface_Service
             if ($module) {
                 $class = str_replace('.', '\\', $module) . '\\' . $class;
             }
-            $class = '\\sowerphp\\magicload\\' . $class;
+            $class = '\\sowerphp\\autoload\\' . $class;
         } else {
             $class = 'Shell_Command_' . $command;
         }

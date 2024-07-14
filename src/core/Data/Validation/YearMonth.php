@@ -23,37 +23,46 @@
 
 namespace sowerphp\core;
 
-/**
- * Clase para sistema de triggers
- *
- * Permite desencadenar acciones bajo ciertos eventos que se ejecutan en la
- * aplicación.
- */
-class Trigger
+use Illuminate\Contracts\Validation\Rule;
+
+class Data_Validation_YearMonth implements Rule
 {
 
-    private static $handler; ///< Handler para los trigger que se ejecutarán
-
     /**
-     * Método que asigna el handler para los triggers
+     * Determina si el valor es un periodo válido en formato YYYYMM.
+     *
+     * @param string $attribute
+     * @param mixed $value
+     * @return bool
      */
-    public static function setHandler($handler)
+    public function passes($attribute, $value): bool
     {
-        self::$handler = $handler;
+        // Comprobar si el valor tiene exactamente 6 caracteres y es numérico.
+        if (!$value || strlen($value) != 6 || !is_numeric($value)) {
+            return false;
+        }
+
+        // Validar el mes.
+        $month = (int)substr($value, 4, 2);
+        if ($month < 1 || $month > 12) {
+            return false;
+        }
+
+        // Todo ok.
+        return true;
     }
 
     /**
-     * Método que lanza el handler de los triggers o falla silenciosamente
-     * en caso que no exista uno asociado
+     * Obtiene el mensaje de error de validación.
+     *
+     * @return string
      */
-    public static function run($trigger, $args = null)
+    public function message(): string
     {
-        // si no hay handler para los triggers definido se omite ejecución
-        if (!isset(self::$handler)) {
-            return null;
-        }
-        // lanzar handler para el trigger
-        return call_user_func_array(self::$handler, func_get_args());
+        return __(
+            'El campo :attribute debe tener el formato AAAAMM. Ejemplo %s para el año y mes actual.',
+            date('Ym')
+        );
     }
 
 }

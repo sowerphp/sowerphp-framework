@@ -21,79 +21,264 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-namespace sowerphp\app;
+namespace sowerphp\core;
 
+use \sowerphp\core\Network_Request as Request;
 use \sowerphp\core\Facade_Session_Message as SessionMessage;
 
 /**
- * Clase que implementa los métodos básicos de un mantenedor de una tabla de la
- * base de datos.
- *
- * Implementa los métodos del CRUD: create, read, update y delete.
+ * Clase que implementa los métodos para interacturar con recursos de modelos
+ * de la base de datos.
  */
-class Controller_Maintainer extends \Controller
+abstract class Controller_Model extends \sowerphp\autoload\Controller
 {
 
-    protected $model = false; ///< Atributo con el namespace y clase del modelo singular
-    protected $models = false; ///< Atributo con el namespace y clase del modelo plural
-    protected $module_url; ///< Atributo con la url para acceder el módulo
-    protected $deleteRecord = true; ///< Indica si se permite o no borrar registros
-    protected $contraseniaNames = ['contrasenia', 'clave', 'password', 'pass']; ///< Posibles nombres de campo tipo contraseña
-    protected $actionsColsWidth = 170; ///< Ancho de la columna de acciónes en acción listar
-    protected $extraActions = []; ///< iconos extra para la columna de acciones
+    /**
+     * Servicio de modelos.
+     *
+     * @var Service_Model
+     */
+    protected $modelService;
 
     /**
-     * Constructor del controlador.
+     * Información del modelo asociado al controlador.
+     *
+     * Arreglo con índices: database, table, namespace, singular y plural.
+     *
+     * @var array
      */
-    public function __construct(
-        \sowerphp\core\Network_Request $request,
-        \sowerphp\core\Network_Response $response
-    )
+    protected $model;
+
+    /**
+     * Inicializar el controlador.
+     */
+    public function boot(): void
     {
-        parent::__construct($request, $response);
-        $this->setModelName();
-        $this->module_url = $this->setModuleUrl(
-            $this->request->getRouteConfig()['module']
+        $this->modelService = model();
+        $this->model = $this->modelService->getModelInfoFromController(
+            get_class($this),
+            $this->model ?? []
         );
     }
 
     /**
-     * Método que asigna los namespaces y nombres de los modelos tanto singular
-     * como plural usados por este controlador.
+     * Muestra una lista de recursos.
      */
-    private function setModelName()
+    public function index(Request $request)
     {
-        if (!$this->models) {
-            $this->models = \sowerphp\core\Utility_Inflector::camelize(
-                $this->request->getRouteConfig()['controller']
-            );
-        }
-        if (!$this->model) {
-            $this->model = \sowerphp\core\Utility_Inflector::singularize(
-                $this->models
-            );
-        }
-        $this->set('models', $this->models);
-        $this->set('model', $this->model);
-        $this->model = '\\' . $this->namespace . '\Model_' . $this->model;
-        $this->models = '\\' . $this->namespace . '\Model_' . $this->models;
+        return $this->render('index');
     }
 
     /**
-     * Método que asigna la url del módulo que se usa en el controlador.
-     *
-     * @param string $modulo Nombre del módulo donde se generarán los archivos.
-     * @return string URL que se usa para acceder al módulo.
+     * Muestra el formulario para crear un nuevo recurso.
      */
-    private function setModuleUrl(string $modulo = ''): string
+    public function create(Request $request)
     {
-        $partes = explode('.', $modulo);
-        $module_url = '';
-        foreach ($partes as &$p) {
-            $module_url .= \sowerphp\core\Utility_Inflector::underscore($p) . '/';
-        }
-        return $module_url != '/' ? ('/' . $module_url) : $module_url;
     }
+
+    /**
+     * Almacena un recurso recién creado en el almacenamiento.
+     */
+    public function store(Request $request)
+    {
+    }
+
+    /**
+     * Muestra el recurso especificado.
+     */
+    public function show(Request $request, ...$id)
+    {
+    }
+
+    /**
+     * Muestra el formulario para editar el recurso especificado.
+     */
+    public function edit(Request $request, ...$id)
+    {
+    }
+
+    /**
+     * Actualiza el recurso especificado en el almacenamiento.
+     */
+    public function update(Request $request, ...$id)
+    {
+    }
+
+    /**
+     * Elimina el recurso especificado del almacenamiento.
+     */
+    public function destroy(Request $request, ...$id)
+    {
+    }
+
+    /**
+     * Retorna una lista de recursos.
+     */
+    public function _api_index_GET(Request $request)
+    {
+        // Obtener registros.
+        $parameters = $request->getModelParametersFromUrl();
+        $results = $this->modelService->filter(
+            $this->model,
+            $parameters,
+            $parameters['stdClass']
+        );
+        // Preparar respuesta formato estándar.
+        if ($parameters['format'] == 'standard') {
+            $metaTotal = $this->modelService->count($this->model, [
+                'filters' => $parameters['filters'],
+            ]);
+            $metaCount = count($results);
+            $metaPaginationTotalPages = ceil(
+                $metaTotal / $parameters['pagination']['limit']
+            );
+            $currentUrl = $request->getFullUrlWithoutQuery()
+                . $request->getRequestUriDecoded()
+            ;
+            $aux = ['pagination' => ['page' => 1]];
+            $linksFirst = $currentUrl . '?' . $this->modelService->buildUrlParameters(
+                Utility_Array::mergeRecursiveDistinct($parameters, $aux)
+            );
+            $aux = ['pagination' => ['page' => $parameters['pagination']['page'] - 1]];
+            $linksPrev = $parameters['pagination']['page'] > 1
+                ? $currentUrl . '?' . $this->modelService->buildUrlParameters(
+                    Utility_Array::mergeRecursiveDistinct($parameters, $aux)
+                )
+                : null
+            ;
+            $linksSelf = $currentUrl . '?' . $this->modelService->buildUrlParameters($parameters);
+            $aux = ['pagination' => ['page' => $parameters['pagination']['page'] + 1]];
+            $linksNext = $parameters['pagination']['page'] < $metaPaginationTotalPages
+                ? $currentUrl . '?' . $this->modelService->buildUrlParameters(
+                    Utility_Array::mergeRecursiveDistinct($parameters, $aux)
+                )
+                : null
+            ;
+            $aux = ['pagination' => ['page' => $metaPaginationTotalPages]];
+            $linksLast = $currentUrl . '?' . $this->modelService->buildUrlParameters(
+                Utility_Array::mergeRecursiveDistinct($parameters, $aux)
+            );
+            $body = [
+                'meta' => [
+                    'total' => $metaTotal,
+                    'count' => $metaCount,
+                    'pagination' => [
+                        'current_page' => (int)$parameters['pagination']['page'],
+                        'total_pages' => $metaPaginationTotalPages,
+                        'per_page' => (int)$parameters['pagination']['limit'],
+                    ]
+                ],
+                'links' => [
+                    'first' => $linksFirst,
+                    'prev' => $linksPrev,
+                    'self' => $linksSelf,
+                    'next' => $linksNext,
+                    'last' => $linksLast,
+                ],
+                'data' => $results,
+            ];
+        }
+        // Preparar respuesta formato Datatables.
+        else if ($parameters['format'] == 'datatables') {
+            $recordsTotal = $this->modelService->count($this->model, []);
+            $recordsFiltered = count($results);
+            $body = [
+                'draw' => (int)$request->input('draw'),
+                'recordsTotal' => $recordsTotal,
+                'recordsFiltered' => $recordsFiltered,
+                'data' => $results,
+            ];
+        }
+        // Entregar respuesta.
+        return response()->json($body, 200);
+    }
+
+    /**
+     * Muestra la estructura para crear un recurso.
+     */
+    public function _api_create_GET(Request $request)
+    {
+        // Obtener los datos necesarios para la creación.
+        // Por ejemplo, opciones de selección, listas de valores predefinidos, etc.
+        $data = $this->modelService->getCreationData($this->model);
+        return response()->json(['data' => $data], 200);
+    }
+
+    /**
+     * Almacena un nuevo recurso y retorna la respuesta.
+     */
+    public function _api_store_POST(Request $request)
+    {
+        // Validar los datos de entrada.
+        $validatedData = $request->validate($this->model['validation_rules']);
+        // Crear el nuevo recurso.
+        $newResource = $this->modelService->create($this->model, $validatedData);
+        return response()->json(['data' => $newResource], 201);
+    }
+
+    /**
+     * Retorna el recurso especificado.
+     */
+    public function _api_show_GET(Request $request, ...$id)
+    {
+        $stdClass = (bool)$request->input('stdClass', false);
+        try {
+            $result = $this->modelService->retrieve($this->model, $id, $stdClass);
+            return response()->json(['data' => $result], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status_code' => $e->getCode() ?: 500,
+                'message' => $e->getMessage(),
+            ], $e->getCode() ?: 500);
+        }
+    }
+
+    /**
+     * Muestra la estructura para editar un recurso.
+     */
+    public function _api_edit_GET(Request $request, ...$id)
+    {
+        // Obtener el recurso especificado.
+        $resource = $this->modelService->retrieve($this->model, $id);
+        // Obtener los datos necesarios para la edición, similares a la creación.
+        $data = $this->modelService->getEditData($this->model, $resource);
+        return response()->json(['data' => $data], 200);
+    }
+
+    /**
+     * Actualiza el recurso especificado y retorna la respuesta.
+     */
+    public function _api_update_PUT(Request $request, ...$id)
+    {
+        // Validar los datos de entrada.
+        $validatedData = $request->validate($this->model['validation_rules']);
+        // Actualizar el recurso.
+        $updatedResource = $this->modelService->update($this->model, $id, $validatedData);
+        return response()->json(['data' => $updatedResource], 200);
+    }
+
+    /**
+     * Elimina el recurso especificado y retorna la respuesta.
+     */
+    public function _api_destroy_DELETE(Request $request, ...$id)
+    {
+        // Eliminar el recurso.
+        $this->modelService->delete($this->model, $id);
+        return response()->json(['message' => 'Resource deleted successfully.'], 200);
+    }
+
+
+
+
+
+
+
+
+
+    protected $deleteRecord = true; ///< Indica si se permite o no borrar registros
+    protected $contraseniaNames = ['contrasenia', 'clave', 'password', 'pass']; ///< Posibles nombres de campo tipo contraseña
+    protected $actionsColsWidth = 170; ///< Ancho de la columna de acciónes en acción listar
+    protected $extraActions = []; ///< iconos extra para la columna de acciones
 
     /**
      * Método que busca la vista que se deberá renderizar.
@@ -106,6 +291,7 @@ class Controller_Maintainer extends \Controller
         array $data = []
     ): \sowerphp\core\Network_Response
     {
+        $request = request();
         // Se debe determinar la vista automáticamente pues no fue indicada una
         // específica. Se renderizará la vista del Controller::action().
         if (!$view) {
@@ -124,12 +310,12 @@ class Controller_Maintainer extends \Controller
         );
         $filepath = app('view')->resolveViewRelative(
             $ControllerName . '/' . $view,
-            (string)$this->request->getRouteConfig()['module']
+            (string)$request->getRouteConfig()['module']
         );
         if ($filepath) {
             return parent::render($ControllerName . '/' . $view, $data);
         } else {
-            return parent::render('Maintainer/' . $view, $data);
+            return parent::render('Model/' . $view, $data);
         }
     }
 
@@ -167,9 +353,9 @@ class Controller_Maintainer extends \Controller
      */
     public function listar($page = 1, $orderby = null, $order = 'A')
     {
-        $model = $this->model;
+        $request = request();
         // Crear objeto plural.
-        $Objs = new $this->models();
+        $Objs = new $this->model['plural']();
         // Si se debe buscar se agrega filtro.
         $searchUrl = null;
         $search = [];
@@ -185,7 +371,7 @@ class Controller_Maintainer extends \Controller
                 list($var, $val) = explode(':', $filter);
                 // Solo procesar filtros donde el campo por el que se filtra
                 // esté en el modelo.
-                if (empty($model::$columnsInfo[$var])) {
+                if (empty($this->model['singular']::$columnsInfo[$var])) {
                     continue;
                 }
                 $search[$var] = $val;
@@ -198,27 +384,27 @@ class Controller_Maintainer extends \Controller
                     $where[] = $var . ' IS NULL';
                 }
                 // Si es una FK se filtra con igualdad.
-                else if (!empty($model::$columnsInfo[$var]['fk'])) {
+                else if (!empty($this->model['singular']::$columnsInfo[$var]['fk'])) {
                     $where[] = $var . ' = :' . $var;
                     $vars[':' . $var] = $val;
                 }
                 // Si es un campo de texto se filtrará con LIKE.
-                else if (in_array($model::$columnsInfo[$var]['type'], ['char', 'character varying', 'varchar', 'text'])) {
+                else if (in_array($this->model['singular']::$columnsInfo[$var]['type'], ['char', 'character varying', 'varchar', 'text'])) {
                     $where[] = 'LOWER(' . $var . ') LIKE :' . $var;
                     $vars[':' . $var] = '%' . strtolower($val) . '%';
                 }
                 // Si es un tipo fecha con hora se usará LIKE.
-                else if (in_array($model::$columnsInfo[$var]['type'], ['timestamp', 'timestamp without time zone'])) {
+                else if (in_array($this->model['singular']::$columnsInfo[$var]['type'], ['timestamp', 'timestamp without time zone'])) {
                     $where[] = 'CAST(' . $var . ' AS TEXT) LIKE :' . $var;
                     $vars[':' . $var] = $val . ' %';
                 }
                 // Si es un campo número entero se castea.
-                else if (in_array($model::$columnsInfo[$var]['type'], ['smallint', 'integer', 'bigint', 'smallserial', 'serial', 'bigserial'])) {
+                else if (in_array($this->model['singular']::$columnsInfo[$var]['type'], ['smallint', 'integer', 'bigint', 'smallserial', 'serial', 'bigserial'])) {
                     $where[] = $var . ' = :' . $var;
                     $vars[':' . $var] = (int)$val;
                 }
                 // Si es un campo número decimal se castea.
-                else if (in_array($model::$columnsInfo[$var]['type'], ['decimal', 'numeric', 'real', 'double precision'])) {
+                else if (in_array($this->model['singular']::$columnsInfo[$var]['type'], ['decimal', 'numeric', 'real', 'double precision'])) {
                     $where[] = $var . ' = :' . $var;
                     $vars[':' . $var] = (float)$val;
                 }
@@ -231,7 +417,7 @@ class Controller_Maintainer extends \Controller
             $Objs->setWhereStatement($where, $vars);
         }
         // Si se debe ordenar se agrega.
-        if (isset($model::$columnsInfo[$orderby])) {
+        if (isset($this->model['singular']::$columnsInfo[$orderby])) {
             $Objs->setOrderByStatement([$orderby => ($order == 'D' ? 'DESC' : 'ASC')]);
         }
         // Total de registros.
@@ -243,7 +429,7 @@ class Controller_Maintainer extends \Controller
             // falle la app se redirecciona al listado con el error.
             // Lo ideal es controlar esto antes con un "error más lindo".
             SessionMessage::error($e->getMessage());
-            return redirect($this->request->getRequestUriDecoded());
+            return redirect($request->getRequestUriDecoded());
         }
         // Paginar los resultados si es necesario.
         if ((integer)$page > 0) {
@@ -255,7 +441,7 @@ class Controller_Maintainer extends \Controller
             );
             if ($page != 1 && $page > $pages) {
                 return redirect(
-                    $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar/1'
+                    $request->getControllerUrl() . '/listar/1'
                     . ($orderby ? ('/' . $orderby . '/' . $order) : '') . $searchUrl
                 );
             }
@@ -263,39 +449,39 @@ class Controller_Maintainer extends \Controller
         // Crear variable con las columnas para la vista.
         if (!empty($this->columnsView['listar'])) {
             $columns = [];
-            foreach ($model::$columnsInfo as $col => &$info) {
+            foreach ($this->model['singular']::$columnsInfo as $col => &$info) {
                 if (in_array($col, $this->columnsView['listar'])) {
                     $columns[$col] = $info;
                 }
             }
         } else {
-            $columns = $model::$columnsInfo;
+            $columns = $this->model['singular']::$columnsInfo;
         }
-        // setear variables
-        $this->set(array(
-            'module_url' => $this->module_url,
-            'controller' => $this->request->getRouteConfig()['controller'],
+        // Renderizar la vista.
+        return $this->render('listar', [
+            'model' => $this->model['singular'],
+            'models' => $this->model['plural'],
+            'module_url' => $request->getModuleUrl() . '/',
+            'controller' => $request->getRouteConfig()['controller'],
             'page' => $page,
             'orderby' => $orderby,
             'order' => $order,
             'searchUrl' => $searchUrl,
             'search' => $search,
-            'Objs' => $Objs->getObjects($this->model),
+            'Objs' => $Objs->getObjects($this->model['singular']),
             'columns' => $columns,
             'registers_total' => $registers_total,
             'pages' => isset($pages) ? $pages : 0,
             'linkEnd' => ($orderby ? ('/' . $orderby . '/' . $order) : '') . $searchUrl,
-            'fkNamespace' => $model::$fkNamespace,
-            'comment' => $model::$tableComment,
+            'fkNamespace' => $this->model['singular']::$fkNamespace,
+            'comment' => $this->model['singular']::$tableComment,
             'listarFilterUrl' => '?listar=' . base64_encode(
                 '/' . $page . ($orderby ? ('/' . $orderby . '/' . $order) : '') . $searchUrl
             ),
             'deleteRecord' => $this->deleteRecord,
             'actionsColsWidth' => $this->actionsColsWidth,
             'extraActions' => $this->extraActions,
-        ));
-        // Renderizar.
-        return $this->render('listar');
+        ]);
     }
 
     /**
@@ -303,10 +489,11 @@ class Controller_Maintainer extends \Controller
      */
     public function crear()
     {
+        $request = request();
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         // si se envió el formulario se procesa
         if (isset($_POST['submit'])) {
-            $Obj = new $this->model();
+            $Obj = new $this->model['singular']();
             $Obj->set($_POST);
             if (!$Obj->exists()) {
                 foreach($_FILES as $name => &$file) {
@@ -322,7 +509,7 @@ class Controller_Maintainer extends \Controller
                         SessionMessage::error('Registro no creado.');
                     }
                     return redirect(
-                        $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
+                        $request->getControllerUrl() . '/listar' . $filterListar
                     );
                 } catch (\Exception $e) {
                     SessionMessage::error($e->getMessage());
@@ -331,19 +518,16 @@ class Controller_Maintainer extends \Controller
                 SessionMessage::error('Registro ya existe.');
             }
         }
-        // setear variables
-        $model = $this->model;
-        $this->set(array(
-            'columnsInfo' => $model::$columnsInfo,
-            'fkNamespace' => $model::$fkNamespace,
+        // Renderizar la vista
+        return $this->render('crear_editar', [
+            'columnsInfo' => $this->model['singular']::$columnsInfo,
+            'fkNamespace' => $this->model['singular']::$fkNamespace,
             'accion' => 'Crear',
-            'columns' => $model::$columnsInfo,
+            'columns' => $this->model['singular']::$columnsInfo,
             'contraseniaNames' => $this->contraseniaNames,
-            'listarUrl' => $this->module_url . $this->request->getRouteConfig()['controller']
+            'listarUrl' => $request->getControllerUrl()
                 . '/listar' . $filterListar,
-        ));
-        // renderizar
-        return $this->render('crear_editar');
+        ]);
     }
 
     /**
@@ -352,21 +536,21 @@ class Controller_Maintainer extends \Controller
      */
     public function editar($pk)
     {
+        $request = request();
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
-        $Obj = new $this->model(array_map('urldecode', func_get_args()));
+        $Obj = new $this->model['singular'](array_map('urldecode', func_get_args()));
         // si el registro que se quiere editar no existe error
         if (!$Obj->exists()) {
             SessionMessage::error(
                 'Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede editar.'
             );
             return redirect(
-                $this->module_url.$this->request->getRouteConfig()['controller'].'/listar'.$filterListar
+                $request->getControllerUrl() . '/listar'.$filterListar
             );
         }
         // si no se ha enviado el formulario se mostrará
-        $model = $this->model;
         if (isset($_POST['submit'])) {
-            foreach ($model::$columnsInfo as $col => &$info) {
+            foreach ($this->model['singular']::$columnsInfo as $col => &$info) {
                 if (in_array($col, $this->contraseniaNames) && empty($_POST[$col])) {
                     $_POST[$col] = $Obj->$col;
                 }
@@ -389,24 +573,22 @@ class Controller_Maintainer extends \Controller
                     );
                 }
                 return redirect(
-                    $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
+                    $request->getControllerUrl() . '/listar' . $filterListar
                 );
             } catch (\Exception $e) {
                 SessionMessage::error($e->getMessage());
             }
         }
-        // renderizar la vista
-        $this->set(array(
+        // Renderizar la vista.
+        return $this->render('crear_editar', [
             'Obj' => $Obj,
-            'columns' => $model::$columnsInfo,
+            'columns' => $this->model['singular']::$columnsInfo,
             'contraseniaNames' => $this->contraseniaNames,
-            'fkNamespace' => $model::$fkNamespace,
+            'fkNamespace' => $this->model['singular']::$fkNamespace,
             'accion' => 'Editar',
-            'listarUrl' => $this->module_url . $this->request->getRouteConfig()['controller']
+            'listarUrl' => $request->getControllerUrl()
                 . '/listar' . $filterListar,
-        ));
-        // renderizar
-        return $this->render('crear_editar');
+        ]);
     }
 
     /**
@@ -415,21 +597,22 @@ class Controller_Maintainer extends \Controller
      */
     public function eliminar($pk)
     {
+        $request = request();
+        $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         if (!$this->deleteRecord) {
             SessionMessage::error('No se permite el borrado de registros.');
             return redirect(
-                $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
+                $request->getControllerUrl() . '/listar' . $filterListar
             );
         }
-        $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
-        $Obj = new $this->model(array_map('urldecode', func_get_args()));
+        $Obj = new $this->model['singular'](array_map('urldecode', func_get_args()));
         // si el registro que se quiere eliminar no existe error
         if(!$Obj->exists()) {
             SessionMessage::error(
                 'Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede eliminar.'
             );
             return redirect(
-                $this->module_url.$this->request->getRouteConfig()['controller'].'/listar'.$filterListar
+                $request->getControllerUrl() . '/listar'.$filterListar
             );
         }
         try {
@@ -443,7 +626,7 @@ class Controller_Maintainer extends \Controller
             );
         }
         return redirect(
-            $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
+            $request->getControllerUrl() . '/listar' . $filterListar
         );
     }
 
@@ -452,23 +635,23 @@ class Controller_Maintainer extends \Controller
      */
     public function d($campo, $pk)
     {
+        $request = request();
         // si el campo que se solicita no existe error
-        $model = $this->model;
-        if (!isset($model::$columnsInfo[$campo . '_data'])) {
+        if (!isset($this->model['singular']::$columnsInfo[$campo . '_data'])) {
             SessionMessage::error('Campo '.$campo.' no existe.');
             return redirect(
-                $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar'
+                $request->getControllerUrl() . '/listar'
             );
         }
         $pks = array_slice(func_get_args(), 1);
-        $Obj = new $this->model($pks);
+        $Obj = new $this->model['singular']($pks);
         // si el registro que se quiere eliminar no existe error
         if(!$Obj->exists()) {
             SessionMessage::error(
                 'Registro (' . implode(', ', $pks) . ') no existe. No se puede obtener '.$campo.'.'
             );
             return redirect(
-                $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar'
+                $request->getControllerUrl() . '/listar'
             );
         }
         if ((float)$Obj->{$campo.'_size'} == 0.0) {
@@ -476,11 +659,11 @@ class Controller_Maintainer extends \Controller
                 'No hay datos para el campo ' . $campo . ' en el registro ('.implode(', ', $pks).').'
             );
             return redirect(
-                $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar'
+                $request->getControllerUrl() . '/listar'
             );
         }
         // entregar archivo
-        return $this->response->prepareFileResponse([
+        return response()->file([
             'name' => $Obj->{$campo.'_name'},
             'type' => $Obj->{$campo.'_type'},
             'size' => $Obj->{$campo.'_size'},

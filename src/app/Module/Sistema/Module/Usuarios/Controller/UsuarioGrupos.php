@@ -30,15 +30,14 @@ namespace sowerphp\app\Sistema\Usuarios;
  * Esta clase permite controlar las acciones entre el modelo y vista para la
  * tabla usuario_grupo
  */
-class Controller_UsuarioGrupos extends \sowerphp\app\Controller_Maintainer
+class Controller_UsuarioGrupos extends \sowerphp\autoload\Controller_Model
 {
 
-    protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
     protected $deleteRecord = false; ///< Indica si se permite o no borrar registros
 
     public function editar($usuario)
     {
-        $listar = base64_encode($this->request->getFullUrlWithoutQuery().$this->request->getBaseUrlWithoutSlash().'/sistema/usuarios/usuario_grupos/listar'.base64_decode($_GET['listar']));
+        $listar = base64_encode(url($this->request->getBaseUrlWithoutSlash().'/sistema/usuarios/usuario_grupos/listar'.base64_decode($_GET['listar'])));
         return redirect('/sistema/usuarios/usuarios/editar/'.$usuario.'?listar='.$listar);
     }
 

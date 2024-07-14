@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Middleware para limitar la tasa de solicitudes.
  */
-class Middleware_Throttle  implements Interface_Middleware
+class Middleware_Throttle implements Interface_Middleware
 {
 
     /**
@@ -42,6 +42,7 @@ class Middleware_Throttle  implements Interface_Middleware
     ): Network_Request
     {
         // TODO: implementar.
+        // Pasar al siguiente middleware.
         return $next($request);
     }
 
@@ -60,6 +61,7 @@ class Middleware_Throttle  implements Interface_Middleware
         \Closure $next
     ): Network_Response
     {
+        // Pasar al siguiente middleware.
         return $next($request, $response);
     }
 

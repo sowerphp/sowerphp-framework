@@ -29,7 +29,7 @@ use \sowerphp\core\Facade_Session_Message as SessionMessage;
  * Controlador para el envío masivo de correos electrónicos a usuarios de la
  * aplicación
  */
-class Controller_Email extends \Controller
+class Controller_Email extends \sowerphp\autoload\Controller
 {
 
     /**

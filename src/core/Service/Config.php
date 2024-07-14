@@ -47,11 +47,11 @@ class Service_Config implements Interface_Service, \ArrayAccess
     protected $defaultConfig = [
         'app.env' => 'local',
         'app.debug' => true,
-        'app.php.error_reporting' => E_ALL,
         'app.timezone' => 'America/Santiago',
         'app.locale' => 'es',
         'app.ui.layout' => 'bootstrap',
         'app.ui.homepage' => '/inicio',
+        'app.php.error_reporting' => E_ALL,
     ];
 
     /**
@@ -192,17 +192,6 @@ class Service_Config implements Interface_Service, \ArrayAccess
 
         // Definir la zona horaria.
         date_default_timezone_set($this->get('app.timezone'));
-
-        // Cargar reglas de Inflector para el idioma de la aplicación.
-        $inflector_rules = (array)$this->get(
-            'inflector.' . $this->get('app.locale')
-        );
-        foreach ($inflector_rules as $type => $rules) {
-            Utility_Inflector::rules($type, $rules);
-        }
-
-        // Asignar handler para triggers de la aplicación.
-        Trigger::setHandler($this->get('app.trigger_handler'));
     }
 
     /**

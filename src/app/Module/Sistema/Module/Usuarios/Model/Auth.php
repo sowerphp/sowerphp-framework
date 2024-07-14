@@ -28,7 +28,7 @@ namespace sowerphp\app\Sistema\Usuarios;
  * Comentario de la tabla: Permisos de grupos para acceder a recursos
  * Esta clase permite trabajar sobre un registro de la tabla auth
  */
-class Model_Auth extends \Model_App
+class Model_Auth extends \sowerphp\autoload\Model_App
 {
 
     // Datos para la conexión a la base de datos

@@ -73,8 +73,8 @@ class View_Helper_Gallery
     {
         return '
             <link rel="stylesheet" href="'.url('/css/prettyPhoto.css').'" type="text/css" media="screen" charset="utf-8" />
-            <script src="'.url('/js/jquery.browser.min.js').'" type="text/javascript" charset="utf-8"></script>
-            <script src="'.url('/js/jquery.prettyPhoto.js').'" type="text/javascript" charset="utf-8"></script>
+            <script src="'.url('/js/jquery.browser.min.js').'"></script>
+            <script src="'.url('/js/jquery.prettyPhoto.js').'"></script>
             <style type="text/css">
             img.pp-thumbnail {
                 margin: 5px;
@@ -87,7 +87,7 @@ class View_Helper_Gallery
                 max-height: 120px;
             }
             </style>
-            <script type="text/javascript" charset="utf-8">
+            <script charset="utf-8">
                 $(document).ready(function(){
                     $("a[rel^=\'prettyPhoto\']").prettyPhoto();
                 });

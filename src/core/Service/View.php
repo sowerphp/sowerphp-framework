@@ -59,10 +59,17 @@ class Service_View implements Interface_Service
      * @var array
      */
     protected $specialViews = [
-        'Maintainer/listar',
-        'Maintainer/crear_editar',
+        // Vistas Controller_App.
         'App/module',
         'App/error',
+        // Vistas Controller_Model.
+        'Model/index',
+        'Model/create',
+        'Model/show',
+        'Model/edit',
+        // Vistas Controller_Model (obsoletas).
+        'Model/listar',
+        'Model/crear_editar',
     ];
 
     /**
@@ -316,6 +323,9 @@ class Service_View implements Interface_Service
         // Diferentes menús que se podrían utilizar.
         $data['_nav_website'] = (array)config('nav.website');
         $data['_nav_app'] = (array)config('nav.app');
+        // Agregar variables de autenticación y usuario.
+        $data['auth'] = app('auth');
+        $data['user'] = user();
         // Agregar variables por defecto que se pasarán a la vista.
         $data['_url'] = url();
         if ($request) {
@@ -351,7 +361,7 @@ class Service_View implements Interface_Service
             }
             if (isset($data['__view_header']['js'])) {
                 foreach ($data['__view_header']['js'] as &$js) {
-                    $__view_header .= '<script type="text/javascript" src="'
+                    $__view_header .= '<script src="'
                         . $request->getBaseUrlWithoutSlash()
                         . $js . '"></script>' . "\n"
                     ;

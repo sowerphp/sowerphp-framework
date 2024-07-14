@@ -30,9 +30,7 @@ namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
  * Esta clase permite controlar las acciones entre el modelo y vista para la
  * tabla comuna
  */
-class Controller_Comunas extends \Controller_Maintainer
+class Controller_Comunas extends \sowerphp\autoload\Controller_Model
 {
-
-    protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
 
 }

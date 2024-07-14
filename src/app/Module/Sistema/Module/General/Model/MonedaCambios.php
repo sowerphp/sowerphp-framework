@@ -28,7 +28,7 @@ namespace sowerphp\app\Sistema\General;
  * Comentario de la tabla:
  * Esta clase permite trabajar sobre un conjunto de registros de la tabla moneda_cambio
  */
-class Model_MonedaCambios extends \Model_Plural_App
+class Model_MonedaCambios extends \sowerphp\autoload\Model_Plural_App
 {
 
     // Datos para la conexión a la base de datos

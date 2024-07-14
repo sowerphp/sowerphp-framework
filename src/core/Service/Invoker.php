@@ -48,12 +48,35 @@ class Service_Invoker
 
     /**
      * Resuelve las dependencias de un método y lo ejecuta dinámicamente en
-     * una instancia de clase.
+     * una la instancia de la clase proporcionada.
+     *
+     * @param object $instance Instancia de la clase que contiene el método.
+     * @param string $method Nombre del método a invocar en la clase.
+     * @param array $parameters Parámetros para resolver los del método.
+     * @return mixed Resultado de la invocación del método.
+     */
+    public function call(object $instance, string $method, array $parameters = [])
+    {
+        // Obtener método solicitado y parámetros.
+        $instanceMethod = new \ReflectionMethod($instance, $method);
+        $params = $this->resolveParameters($instanceMethod, $parameters);
+
+        // Ejecutar método solicitado.
+        $result = $instanceMethod->invokeArgs($instance, $params);
+
+        // Entregar resultado de la ejecución del método solicitado.
+        return $result;
+    }
+
+    /**
+     * Resuelve las dependencias de un método y lo ejecuta dinámicamente en
+     * una instancia de clase junto con los métodos boot() y terminate() si
+     * existen en la clase.
      *
      * @param string $class Nombre completo de la clase que contiene el método.
      * @param string $method Nombre del método a invocar en la clase.
      * @param array $parameters Parámetros para resolver los del método.
-     * @return mixed Resultado de la invocación del método.
+     * @return array Instancia y resultado de la invocación del método.
      */
     public function invoke(string $class, string $method, array $parameters = [])
     {
@@ -126,9 +149,9 @@ class Service_Invoker
                                     : null
                             )
                 ;
+                // Pasar al siguiente parámetro.
+                $i++;
             }
-            // Pasar al siguiente parámetro.
-            $i++;
         }
         // Entregar la lista de parámetros determinados.
         return $params;

@@ -26,7 +26,7 @@ namespace sowerphp\core;
 /**
  * Middleware para autenticación.
  */
-class Middleware_Auth  implements Interface_Middleware
+class Middleware_Auth implements Interface_Middleware
 {
 
     /**
@@ -41,7 +41,16 @@ class Middleware_Auth  implements Interface_Middleware
         \Closure $next
     ): Network_Request
     {
-        // TODO: implementar.
+        // TODO: se debe refactorizar cómo se hace actualmente.
+        // El problema, es que se definen unos permisos previos para acceder
+        // sin autenticación o solo estando logueado en los métodos boot() de
+        // los controladores, que se ejecutan después que los métodos
+        // handleBefore() de los middlewares (o sea este). Y esa definición de
+        // permisos se requiere acá (si se mueve la lógica) para poder validar
+        // el acceso con esos 2 métodos (sin login o solo con login) antes de
+        // pasar a corroborar la autorización específica con el usuario (que si
+        // se podría hacer "fácil" acá).
+        // Pasar al siguiente middleware.
         return $next($request);
     }
 
@@ -60,6 +69,7 @@ class Middleware_Auth  implements Interface_Middleware
         \Closure $next
     ): Network_Response
     {
+        // Pasar al siguiente middleware.
         return $next($request, $response);
     }
 

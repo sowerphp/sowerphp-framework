@@ -24,18 +24,25 @@
 namespace sowerphp\general;
 
 /**
- * Esta clase permite leer y generar archivos csv
+ * Esta clase permite leer y generar archivos CSV.
  */
 final class Utility_Spreadsheet_CSV
 {
 
     /**
-     * Lee un archivo CSV
-     * @param archivo archivo a leer (ejemplo índice tmp_name de un arreglo $_FILES)
-     * @param delimiter separador a utilizar para diferenciar entre una columna u otra
-     * @param enclosure Un caracter para rodear el dato
+     * Lee un archivo CSV.
+     *
+     * @param string $archivo Archivo a leer (ejemplo índice tmp_name de un
+     * arreglo $_FILES).
+     * @param string|null $delimiter Separador a utilizar para diferenciar
+     * entre una columna u otra.
+     * @param string $enclosure Un caracter para rodear el dato.
      */
-    public static function read($archivo = null, $delimiter = null, $enclosure = '"')
+    public static function read(
+        string $archivo,
+        ?string $delimiter = null,
+        string $enclosure = '"'
+    ): array
     {
         $delimiter = self::setDelimiter($delimiter);
         if (($handle = fopen($archivo, 'r')) !== false) {
@@ -54,18 +61,31 @@ final class Utility_Spreadsheet_CSV
     }
 
     /**
-     * Crea un archivo CSV a partir de un arreglo entregándolo vía HTTP
-     * @param data Arreglo utilizado para generar la planilla
-     * @param id Identificador de la planilla
-     * @param delimiter separador a utilizar para diferenciar entre una columna u otra
-     * @param enclosure Un caracter para rodear el dato
-     * @param size_mib Tamaño máximo del archivo temporal en memoria que se usará (si excede, se escribe archivo real en sistema de archivos)
+     * Crea un archivo CSV a partir de un arreglo entregándolo vía HTTP.
+     *
+     * @param array $data Arreglo utilizado para generar la planilla.
+     * @param string $id Identificador de la planilla.
+     * @param string|null $delimiter separador a utilizar para diferenciar
+     * entre una columna u otra.
+     * @param string $enclosure Un caracter para rodear el dato
+     * @param string $extension Extensión del archivo que se generará.
+     * @param int $size_mib Tamaño máximo del archivo temporal en memoria que
+     * se usará. Si excede, se escribe archivo real en sistema de archivos.
+     * @return void
      */
-    public static function generate($data, $id, $delimiter = null, $enclosure = '"', $extension = 'csv', $size_mib = 2)
+    public static function generate(
+        array $data,
+        string $id,
+        ?string $delimiter = null,
+        string $enclosure = '"',
+        string $extension = 'csv',
+        int $size_mib = 2
+    ): void
     {
         $csv = self::get($data, $delimiter, $enclosure, $size_mib);
+        $filename = $id . '.' . $extension;
         header('Content-type: text/csv');
-        header('Content-Disposition: attachment; filename='.$id.'.'.$extension);
+        header('Content-Disposition: attachment; filename=' . $filename);
         header('Pragma: no-cache');
         header('Expires: 0');
         echo $csv;
@@ -73,15 +93,30 @@ final class Utility_Spreadsheet_CSV
     }
 
     /**
-     * Crea un archivo CSV a partir de un arreglo retornando su contenido
-     * @param data Arreglo utilizado para generar la planilla
-     * @param delimiter separador a utilizar para diferenciar entre una columna u otra
-     * @param enclosure Un caracter para rodear el dato
-     * @param size_mib Tamaño máximo del archivo temporal en memoria que se usará (si excede, se escribe archivo real en sistema de archivos)
+     * Crea un archivo CSV a partir de un arreglo retornando su contenido.
+     *
+     * @param array $data Arreglo utilizado para generar la planilla.
+     * @param string|null $delimiter separador a utilizar para diferenciar
+     * entre una columna u otra.
+     * @param string $enclosure Un caracter para rodear el dato
+     * @param int $size_mib Tamaño máximo del archivo temporal en memoria que
+     * se usará. Si excede, se escribe archivo real en sistema de archivos.
+     * @return string Contenido del archivo CSV que se creó.
      */
-    public static function get($data, $delimiter = null, $enclosure = '"', $size_mib = 2)
+    public static function get(
+        array $data,
+        ?string $delimiter = null,
+        string $enclosure = '"',
+        int $size_mib = 2
+    ): string
     {
-        $fd = self::save($data, 'php://temp/maxmemory:'.(string)($size_mib*1024*2014), $delimiter, $enclosure, false);
+        $fd = self::save(
+            $data,
+            'php://temp/maxmemory:' . (string)($size_mib*1024*2014),
+            $delimiter,
+            $enclosure,
+            false
+        );
         rewind($fd);
         $csv = stream_get_contents($fd);
         fclose($fd);
@@ -89,14 +124,25 @@ final class Utility_Spreadsheet_CSV
     }
 
     /**
-     * Crea un archivo CSV a partir de un arreglo guardándolo en el sistema de archivos
-     * @param data Arreglo utilizado para generar la planilla
-     * @param archivo Nombre del archivo que se debe generar
-     * @param delimiter separador a utilizar para diferenciar entre una columna u otra
-     * @param enclosure Un caracter para rodear el dato
-     * @param close =false permite obtener el descriptor de archivo para ser usado en otro lado
+     * Crea un archivo CSV a partir de un arreglo guardándolo en el sistema de
+     * archivos. Opcionalmente, si $archivo es 'php://temp/maxmemory' se creará
+     * el archivo CSV en memoria en vez de en el sistema real de archivos.
+     *
+     * @param array $data Arreglo utilizado para generar la planilla.
+     * @param string $archivo Nombre del archivo que se debe generar.
+     * @param string|null $delimiter Separador a utilizar para diferenciar
+     * entre una columna u otra.
+     * @param string $enclosure Un caracter para rodear el dato.
+     * @param bool $close =false permite obtener el descriptor de archivo para
+     * ser usado en otro lado.
      */
-    public static function save($data, $archivo, $delimiter = null, $enclosure = '"', $close = true)
+    public static function save(
+        array $data,
+        string $archivo,
+        ?string $delimiter = null,
+        string $enclosure = '"',
+        bool $close = true
+    )
     {
         ob_clean();
         $delimiter = self::setDelimiter($delimiter);
@@ -120,11 +166,14 @@ final class Utility_Spreadsheet_CSV
 
     /**
      * Método que determina el delimitador que se deberá usar para trabajar con
-     * el archivo CSV
-     * @param delimiter Delimitador en caso que se quiera tratar de forzar uno
-     * @return string Delimitador que se debe usar, podría ser: el forzado, el configurado en la APP o el por defecto (',')
+     * el archivo CSV.
+     *
+     * @param string|null $delimiter Delimitador en caso que se quiera tratar
+     * de forzar uno.
+     * @return string Delimitador que se debe usar, podría ser: el forzado, el
+     * configurado en la APP o el por defecto (',').
      */
-    private static function setDelimiter($delimiter = null)
+    protected static function setDelimiter(?string $delimiter = null): string
     {
         if ($delimiter !== null) {
             return $delimiter;

@@ -57,9 +57,6 @@ abstract class Controller
      */
     protected $layout;
 
-    public $Components = null; ///< Colección de componentes que se cargarán.
-    public $components = []; ///< Nombre de componentes que este controlador utiliza.
-
     /**
      * Constructor de la clase controlador.
      *
@@ -77,12 +74,6 @@ abstract class Controller
         $this->response = $response;
         // Obtener layout por defecto (el de la sesión).
         $this->layout = session('config.app.ui.layout');
-        // Crear colección de componentes, las clases e iniciar los atributos
-        // del controlador con los componentes.
-        if (count($this->components)) {
-            $this->Components = new Controller_Component_Collection();
-            $this->Components->init($this);
-        }
     }
 
     /**
@@ -90,8 +81,29 @@ abstract class Controller
      */
     public function boot(): void
     {
-        if ($this->Components) {
-            $this->Components->trigger('boot');
+        // Determinar el método real que se desea ejecutar.
+        // Se debe determinar porque si es de API no es la acción lanzada en el
+        // controlador. Sino una con un formato de nombre diferente (de API).
+        $routeConfig = $this->request->getRouteConfig();
+        $action = $routeConfig['action'];
+        if ($action == 'api' && !empty($routeConfig['parameters'][0])) {
+            $action = '_api_'
+                . $routeConfig['parameters'][0]
+                . '_' . $this->request->method()
+            ;
+        }
+        // Validar permisos para acceder a la acción del controlador que se
+        // desea ejecutar (invocar).
+        if (!app('auth')->checkFullAuthorization($action)) {
+            $message = __(
+                'Usuario no está autorizado para acceder a %s.',
+                $this->request->getRequestUriDecoded()
+            );
+            if ($this->request->isApiRequest()) {
+                throw new \Exception($message, 401);
+            } else {
+                redirect('/')->withError($message)->now();
+            }
         }
     }
 
@@ -100,9 +112,6 @@ abstract class Controller
      */
     public function terminate(): void
     {
-        if ($this->Components) {
-            $this->Components->trigger('terminate');
-        }
     }
 
     /**
@@ -148,6 +157,78 @@ abstract class Controller
         }
         // Renderizar vista y retornar.
         return view($view, $this->viewVars);
+    }
+
+    /**
+     * Método que lanza el servicio web (API) que se ha solicitado.
+     *
+     * @param string $resource Recurso de la API que se desea consumir.
+     * @param array $args Argumentos variables que se pasaron a la API.
+     * @return Network_Response Respuesta con la respuesta de la API para enviar.
+     */
+    public function api(string $resource, ...$args): Network_Response
+    {
+        $request = request();
+        $method = '_api_' . $resource . '_' . $request->method();
+        // Verificar si el método de la API existe.
+        if (!method_exists($this, $method)) {
+            return $this->response->json(
+                __(
+                    'La API de %s no tiene disponible el recurso %s mediante %s.',
+                    $request->getRouteConfig()['controller'],
+                    $resource,
+                    $request->method()
+                ),
+                405
+            );
+        }
+        // Ejecutar la acción de la API.
+        $result = app('invoker')->call($this, $method, $args);
+        // Generar respuesta del servicio web ejecutado.
+        if (is_object($result) && $result instanceof Network_Response) {
+            $response = $result;
+        } else {
+            $response = $this->response->json($result);
+        }
+        // Entregar respuesta de la API.
+        return $response;
+    }
+
+    /**
+     * Método que permite consumir por POST o GET un recurso de la misma
+     * aplicación.
+     */
+    protected function consume(string $recurso, $datos = [], bool $assoc = true)
+    {
+        $user = user();
+        $hash = $user ? $user->hash : config('auth.api.default_token');
+        $rest = new \sowerphp\core\Network_Http_Rest();
+        $rest->setAuth($hash);
+        $rest->setAssoc($assoc);
+        $url = url($recurso);
+        if ($datos) {
+            $response = $rest->post($url, $datos);
+        } else {
+            $response = $rest->get($url);
+        }
+        if ($response === false) {
+            throw new \Exception(
+                'Error al consumir internamente el recurso ' . $recurso
+                    . ': ' . implode(' / ', $rest->getErrors())
+            );
+        }
+        return $response;
+    }
+
+    /**
+     * Método que permite ejecutar un comando en la terminal.
+     */
+    protected function shell($cmd, $log = false, &$output = [])
+    {
+        if ($log && !is_string($log)) {
+            $log = DIR_TMP . '/screen_' . $this->request->fromIp() . '_' . date('YmdHis') . '.log';
+        }
+        return shell_exec_async($cmd, $log, $output);
     }
 
 }

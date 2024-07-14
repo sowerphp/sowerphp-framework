@@ -24,17 +24,25 @@
 namespace sowerphp\core;
 
 use Illuminate\Support\Arr;
+use Illuminate\Contracts\Translation\Translator;
 
-class Service_Lang implements Interface_Service
+class Service_Translator implements Interface_Service, Translator
 {
 
     /**
-     * Lenguaje que se utilizará para las traducciones.
+     * Lenguaje por defecto.
      *
      * Es el lenguaje de la configuración. En el que se espera que estén los
      * textos cuando no se utilizan claves y se usa directamente el texto al
      * solicitar la traducción. Además, es el lenguaje por defecto si no está
      * definido uno en la sesión.
+     *
+     * @var string
+     */
+    protected $fallbackLocale;
+
+    /**
+     * Lenguaje en uso.
      *
      * @var string
      */
@@ -45,7 +53,15 @@ class Service_Lang implements Interface_Service
      *
      * @var array
      */
-    protected $translations;
+    protected $translations = [];
+
+    /**
+     * Espacios de nombres para las traducciones.
+     *
+     * @var array
+     * @todo Implementar uso de namespaces para traducciones en paquetes.
+     */
+    protected $namespaces = [];
 
     /**
      * Registra el servicio de internacionalización.
@@ -63,7 +79,9 @@ class Service_Lang implements Interface_Service
      */
     public function boot(): void
     {
-        $this->locale = config('app.locale', 'es');
+        $this->setFallback('es');
+        $this->setLocale(config('app.locale', $this->getFallback()));
+        $this->loadLocale($this->getLocale());
     }
 
     /**
@@ -79,17 +97,10 @@ class Service_Lang implements Interface_Service
      * el locale principal es un valor null.
      * @return string Locale que se cargó.
      */
-    protected function loadLocale(?string $locale = null, ?string $default = null): string
+    protected function loadLocale(?string $locale = null): string
     {
         if ($locale === null) {
-            if ($default === null) {
-                if (app()->getContainer()->bound('session')) {
-                    $default = session('config.app.locale', $this->locale);
-                } else {
-                    $default = $this->locale;
-                }
-            }
-            $locale = $default;
+            $locale = $this->getLocale();
         }
         if (!isset($this->translations[$locale])) {
             $this->translations[$locale] = $this->loadTranslations($locale);
@@ -130,14 +141,71 @@ class Service_Lang implements Interface_Service
     }
 
     /**
-     * Obtiene la traducción de una cadena.
+     * Determina si existe una traducción para una clave dada.
+     *
+     * @param string $key
+     * @param string|null $locale
+     * @return bool
+     */
+    public function has(string $key, ?string $locale = null): bool
+    {
+        $locale = $this->loadLocale($locale);
+        return isset($this->translations[$locale][$key]);
+    }
+
+    /**
+     * Alias para el método get, para obtener la traducción de una cadena.
      *
      * @param string $key
      * @param array $replace
      * @param string|null $locale
      * @return string|array|null
      */
-    public function get(string $key, array $replace = [], string $locale = null)
+    public function trans(string $key, array $replace = [], string $locale = null)
+    {
+        return $this->get($key, $replace, $locale);
+    }
+
+    /**
+     * Obtiene la traducción de una cadena.
+     *
+     * Función para traducción de strings mediante le servicio de lenguages con
+     * soporte de interpolación mixta. Permite utilizar tanto el formato de
+     * placeholders de Python (%(name)s) como el formato clásico (%s, %d, %f)
+     * y el formato simulado de parámetros SQL (:name) para uniformidad en
+     * la definición de strings. Además, la función automáticamente ajusta
+     * los placeholders que no incluyen el formato específico (%( )s).
+     *
+     * Ejemplos de uso:
+     *
+     * 1. Interpolación al estilo Python con formato completo:
+     *    echo __(
+     *        'Hello %(name)s, your balance is %(balance).2f',
+     *        ['%(name)s' => 'John', '%(balance).2f' => 1234.56]
+     *    );
+     *
+     * 2. Interpolación al estilo Python sin formato específico en los placeholders:
+     *    echo __(
+     *        'Hello %(name)s, your balance is %(balance).2f',
+     *        ['name' => 'John', 'balance' => 1234.56]
+     *    );
+     *
+     * 3. Uso con formato clásico de sprintf:
+     *    echo __('Hello %s, you have %d new messages', 'Alice', 5);
+     *
+     * 4. Uso del formato simulado de parámetros SQL (no para consultas SQL):
+     *    echo __(
+     *        'Your username is :name and your ID is :id',
+     *        [':name' => 'Alice', ':id' => '123']
+     *    );
+     *
+     * @param string $key Texto que se desea traducir.
+     * @param array $replace Arreglo asociativo para reemplazar en el string.
+     * @param string|null $locale Lenguaje al que se traducirá el texto.
+     * @return string|array Texto traducido con los placeholders reemplazados.
+     * @todo Implementar retorno de arreglos traducidos.
+     */
+    public function get($key, array $replace = [], $locale = null)
     {
         $locale = $this->loadLocale($locale);
         // Buscar la traducción por llave.
@@ -147,11 +215,6 @@ class Service_Lang implements Interface_Service
         // el string que se desea traducir.
         if ($translation === null) {
             $translation = $this->searchAndTranslate($key, $locale);
-            // Por defecto se entrega el mismo texto si no se encontró
-            // traducción.
-            if ($translation == null) {
-                return $key;
-            }
         }
         // Si no hay atributos para reemplazar se retorna lo traducido.
         if (empty($replace)) {
@@ -180,32 +243,30 @@ class Service_Lang implements Interface_Service
      * locales son iguales, o el valor predeterminado si no se encuentra la
      * traducción.
      */
-    protected function searchAndTranslate(
-        string $string,
-        ?string $toLocale = null,
-        ?string $fromLocale = null,
-        ?string $default = null
-    ): ?string
+    protected function searchAndTranslate(string $string, string $toLocale): string
     {
-        $toLocale = $this->loadLocale($toLocale);
-        $fromLocale = $fromLocale ?? $this->locale;
+        $fallbackLocale = $this->getFallback();
         // Si el lenguage al que se desea traducir es el mismo de origen se
         // entrega el texto directamente (no es necesario traducir).
-        if ($toLocale == $fromLocale) {
+        if ($toLocale == $fallbackLocale) {
             return $string;
         }
         // Si los lenguajes son diferentes se debe buscar la llave del texto en
         // el lenguaje de origen y luego buscar el texto con esa llave en el
         // lenguaje de destino.
-        $this->loadLocale($fromLocale);
+        $translation = null;
+        $this->loadLocale($fallbackLocale);
         $keyFrom = $this->findKeyByValue(
-            $this->translations[$fromLocale],
+            $this->translations[$fallbackLocale],
             $string
         );
-        if ($keyFrom === null) {
-            return $default;
+        if ($keyFrom !== null) {
+            $translation = Arr::get($this->translations[$toLocale], $keyFrom);
         }
-        return Arr::get($this->translations[$toLocale], $keyFrom, $default);
+        if ($translation === null) {
+            $translation = Arr::get($this->translations[$fallbackLocale], $string);
+        }
+        return $translation ?? $string;
     }
 
     /**
@@ -288,65 +349,81 @@ class Service_Lang implements Interface_Service
     }
 
     /**
-     * Determina si existe una traducción para una clave dada.
+     * Establece el idioma actual.
      *
-     * @param string $key
-     * @param string|null $locale
-     * @return bool
+     * @param string $locale
+     * @return void
      */
-    public function has(string $key, ?string $locale = null): bool
+    public function setLocale($locale)
     {
-        $locale = $this->loadLocale($locale);
-        return isset($this->translations[$locale][$key]);
+        $this->locale = $locale;
     }
 
     /**
-     * Función para traducción de strings mediante le servicio de lenguages con
-     * soporte de interpolación mixta. Permite utilizar tanto el formato de
-     * placeholders de Python (%(name)s) como el formato clásico (%s, %d, %f)
-     * y el formato simulado de parámetros SQL (:name) para uniformidad en
-     * la definición de strings. Además, la función automáticamente ajusta
-     * los placeholders que no incluyen el formato específico (%( )s).
+     * Obtiene el idioma actual.
      *
-     * @param string $locale Lenguaje al que se traducirá el texto.
-     * @param string $string Texto que se desea traducir.
-     * @param mixed ...$args Argumentos para reemplazar en el string, pueden
-     * ser un arreglo asociativo o valores individuales.
-     * @return string Texto traducido con los placeholders reemplazados.
-     *
-     * Ejemplos de uso:
-     * 1. Interpolación al estilo Python con formato completo:
-     *    echo __(
-     *        'Hello %(name)s, your balance is %(balance).2f',
-     *        ['%(name)s' => 'John', '%(balance).2f' => 1234.56]
-     *    );
-     *
-     * 2. Interpolación al estilo Python sin formato específico en los placeholders:
-     *    echo __(
-     *        'Hello %(name)s, your balance is %(balance).2f',
-     *        ['name' => 'John', 'balance' => 1234.56]
-     *    );
-     *
-     * 3. Uso con formato clásico de sprintf:
-     *    echo __('Hello %s, you have %d new messages', 'Alice', 5);
-     *
-     * 4. Uso del formato simulado de parámetros SQL (no para consultas SQL):
-     *    echo __(
-     *        'Your username is :name and your ID is :id',
-     *        [':name' => 'Alice', ':id' => '123']
-     *    );
+     * @return string
      */
-    public function translate(?string $locale, string $string, ...$args): string
+    public function getLocale(): string
     {
-        // Determinar valores que se usarán para reemplazar. Necesario porque
-        // $this->get() recibe siempre un arreglo y la implementación original
-        // del framework permite argumentos variables (obsoleto) o arreglos (lo
-        // nuevo que se debería usar).
-        $replace = is_array($args[0] ?? null)
-            ? $args[0]
-            : array_slice(func_get_args(), 2)
-        ;
-        return $this->get($string, $replace, $locale);
+        return $this->locale;
+    }
+
+    /**
+     * Establece el idioma de respaldo.
+     *
+     * @param string $fallback
+     * @return void
+     */
+    public function setFallback(string $fallback)
+    {
+        $this->fallbackLocale = $fallback;
+    }
+
+    /**
+     * Obtiene el idioma de respaldo.
+     *
+     * @return string
+     */
+    public function getFallback(): string
+    {
+        return $this->fallbackLocale;
+    }
+
+    /**
+     * Obtiene la traducción para una clave dada basada en una cantidad.
+     *
+     * @param string $key
+     * @param \Countable|int|array $number
+     * @param array $replace
+     * @param string|null $locale
+     * @return string
+     */
+    public function choice($key, $number, array $replace = [], $locale = null)
+    {
+        $locale = $this->loadLocale($locale);
+        $translation = $this->getPluralTranslation($key, $number, $locale);
+        return $this->replaceAttributes($translation, $replace);
+    }
+
+    /**
+     * Obtiene la traducción plural para la clave dada y la cantidad.
+     *
+     * @param string $key
+     * @param \Countable|int|array $number
+     * @param string $locale
+     * @return string
+     */
+    protected function getPluralTranslation($key, $number, $locale)
+    {
+        $translations = $this->translations[$locale][$key] ?? null;
+        if (!$translations) {
+            return $key;
+        }
+        if (is_array($translations)) {
+            return $translations[$number > 1 ? 'plural' : 'singular'] ?? $key;
+        }
+        return $translations;
     }
 
 }

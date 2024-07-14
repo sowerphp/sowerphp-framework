@@ -28,7 +28,7 @@ namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
  * Comentario de la tabla: Provincias de cada región del país
  * Esta clase permite trabajar sobre un conjunto de registros de la tabla provincia
  */
-class Model_Provincias extends \Model_Plural_App
+class Model_Provincias extends \sowerphp\autoload\Model_Plural_App
 {
 
     // Datos para la conexión a la base de datos

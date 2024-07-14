@@ -23,12 +23,14 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
+use \Illuminate\Contracts\Auth\Authenticatable;
+
 /**
  * Clase para mapear la tabla usuario de la base de datos
  * Comentario de la tabla: Usuarios de la aplicación
  * Esta clase permite trabajar sobre un registro de la tabla usuario
  */
-class Model_Usuario extends \Model_App
+class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticatable
 {
 
     // Datos para la conexión a la base de datos
@@ -41,7 +43,6 @@ class Model_Usuario extends \Model_App
     public $id; ///< Identificador (serial): integer(32) NOT NULL DEFAULT 'nextval('usuario_id_seq'::regclass)' AUTO PK
     public $nombre; ///< Nombre real del usuario: character varying(50) NOT NULL DEFAULT ''
     public $usuario; ///< Nombre de usuario: character varying(30) NOT NULL DEFAULT ''
-    public $usuario_ldap; ///< Nombre de usuario de LDAP: character varying(30) NOT NULL DEFAULT ''
     public $email; ///< Correo electrónico del usuario: character varying(50) NOT NULL DEFAULT ''
     public $contrasenia; ///< Contraseña del usuario: character(255) NOT NULL DEFAULT ''
     public $contrasenia_intentos; ///< Intentos de inicio de sesión antes de bloquear cuenta: SMALLINT(6) NOT NULL DEFAULT '3'
@@ -82,17 +83,6 @@ class Model_Usuario extends \Model_App
             'type'      => 'character varying',
             'length'    => 30,
             'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-        'usuario_ldap' => array(
-            'name'      => 'Usuario LDAP',
-            'comment'   => 'Nombre de usuario de LDAP',
-            'type'      => 'character varying',
-            'length'    => 30,
-            'null'      => true,
             'default'   => "",
             'auto'      => false,
             'pk'        => false,
@@ -207,7 +197,6 @@ class Model_Usuario extends \Model_App
     // atributos para caché
     protected $groups = null; ///< Grupos a los que pertenece el usuario
     protected $auths = null; ///< Permisos que tiene el usuario
-    protected $LdapPerson = null; ///< Caché para objeto Model_Datasource_Ldap_Person (y para Model_Datasource_Zimbra_Account)
 
     // configuración asociada a la tabla usuario_config (configuración extendida y personalizada según la app)
     public static $config_encrypt = []; ///< columnas de la configuración que se deben encriptar para guardar en la base de datos
@@ -436,7 +425,6 @@ class Model_Usuario extends \Model_App
             return parent::update([
                 'nombre' => $this->nombre,
                 'usuario' => $this->usuario,
-                'usuario_ldap' => $this->usuario_ldap,
                 'email' => $this->email,
                 'hash' => $this->hash,
                 'activo' => $this->activo,
@@ -535,11 +523,6 @@ class Model_Usuario extends \Model_App
      */
     public function savePassword(string $new, string $old = null): bool
     {
-        if ($this->getLdapPerson()) {
-            if (!$this->getLdapPerson()->savePassword($new, $old)) {
-                return false;
-            }
-        }
         return $this->savePasswordLocal($new);
     }
 
@@ -576,41 +559,22 @@ class Model_Usuario extends \Model_App
     }
 
     /**
-     * Método que revisa si la contraseña entregada es igual a la contraseña del
-     * usuario almacenada en la base de datos.
+     * Método que revisa si la contraseña entregada es igual a la contraseña
+     * del usuario almacenada en la base de datos.
      *
      * @param string $password Contrasela que se desea verificar.
      * @return bool =true si la contraseña coincide con la de la base de datos.
      */
     public function checkPassword(string $password): bool
     {
-        if ($this->getLdapPerson()) {
-            if ($this->getLdapPerson()->checkPassword($password)) {
+        if ($this->contrasenia[0] != '$') {
+            $status = $this->contrasenia == hash('sha256', $password);
+            if ($status) {
                 $this->savePasswordLocal($password);
-                return true;
             }
-            return false;
-        } else {
-            if ($this->contrasenia[0] != '$') {
-                $status = $this->contrasenia == hash('sha256', $password);
-                if ($status) {
-                    $this->savePasswordLocal($password);
-                }
-                return $status;
-            }
-            return password_verify($password, $this->contrasenia);
+            return $status;
         }
-    }
-
-    /**
-     * Método que revisa si el hash indicado es igual al hash que tiene el
-     * usuario para su último ingreso (o sea si la sesión es aun válida).
-     *
-     * @return bool =true si el hash aun es válido
-     */
-    public function checkLastLoginHash(string $hash): bool
-    {
-        return $this->ultimo_ingreso_hash == $hash;
+        return password_verify($password, $this->contrasenia);
     }
 
     /**
@@ -620,9 +584,6 @@ class Model_Usuario extends \Model_App
      */
     public function isActive(): bool
     {
-        if ($this->getEmailAccount()) {
-            return $this->getEmailAccount()->isActive();
-        }
         return (bool)$this->activo;
     }
 
@@ -644,22 +605,26 @@ class Model_Usuario extends \Model_App
     /**
      * Método que actualiza el último ingreso del usuario.
      */
-    public function updateLastLogin(string $ip, bool $multipleLogins = false): string
+    public function createRememberToken(string $ip): string
     {
         if ($this->config_login_multiple !== null) {
             $multipleLogins = $this->config_login_multiple;
+        } else {
+            $multipleLogins = config('auth.multiple_logins', false);
         }
         $timestamp = date('Y-m-d H:i:s');
-        $hash = md5($multipleLogins
-            ? $this->contrasenia
-            : ($ip . $timestamp . $this->contrasenia)
-        );
+        $sessionHash = md5(hash(
+            'sha256',
+            $multipleLogins
+                ? $this->contrasenia
+                : ($ip . $timestamp . $this->contrasenia)
+        ));
         $this->update([
             'ultimo_ingreso_fecha_hora' => $timestamp,
             'ultimo_ingreso_desde' => $ip,
-            'ultimo_ingreso_hash' => $hash
+            'ultimo_ingreso_hash' => $sessionHash
         ]);
-        return $hash;
+        return $sessionHash;
     }
 
     /**
@@ -983,70 +948,12 @@ class Model_Usuario extends \Model_App
     }
 
     /**
-     * Método que recupera la persona LDAP asociada al usuario.
-     *
-     * @return Model_Datasource_Ldap_Person o Model_Datasource_Zimbra_Account.
-     */
-    public function getLdapPerson()
-    {
-        if ($this->getEmailAccount() !== null) {
-            return $this->LdapPerson;
-        }
-        if ($this->LdapPerson === null && config('ldap.default')) {
-            try {
-                $this->LdapPerson = \sowerphp\app\Model_Datasource_Ldap::get()->getPerson(
-                    $this->{\sowerphp\app\Model_Datasource_Ldap::get()->config['person_uid']}
-                );
-                if (!$this->LdapPerson->exists()) {
-                    $this->LdapPerson = false;
-                }
-            } catch (\Exception $e) {
-                $this->LdapPerson = false;
-            }
-        }
-        return $this->LdapPerson;
-    }
-
-    /**
-     * Método que recupera la cuenta Zimbra asociada al usuario.
-     *
-     * @return Model_Datasource_Zimbra_Account
-     */
-    public function getEmailAccount()
-    {
-        if (
-            $this->LdapPerson
-            && get_class($this->LdapPerson) != 'sowerphp\app\Model_Datasource_Zimbra_Account'
-        ) {
-            return false;
-        }
-        if ($this->LdapPerson === null && config('zimbra.default')) {
-            try {
-                $this->LdapPerson = \sowerphp\app\Model_Datasource_Zimbra::get()->getAccount(
-                    $this->{\sowerphp\app\Model_Datasource_Ldap::get()->config['person_uid']}
-                );
-                if (!$this->LdapPerson->exists()) {
-                    $this->LdapPerson = false;
-                }
-            } catch (\Exception $e) {
-                $this->LdapPerson = false;
-            }
-        }
-        return $this->LdapPerson;
-    }
-
-    /**
-     * Método que entrega el correo del usuario seleccionando el que tiene en
-     * su cuenta o bien el de la cuenta de correo (Zimbra) si existe una
-     * asociada.
+     * Método que entrega el correo del usuario.
      *
      * @return string Cuenta de correo oficial del usuario.
      */
     public function getEmail(): string
     {
-        if ($this->getEmailAccount()) {
-            return $this->getEmailAccount()->getEmail();
-        }
         return $this->email;
     }
 
@@ -1077,6 +984,68 @@ class Model_Usuario extends \Model_App
         $email->subject('[' . config('app.name') . '] ' . $subject);
         $msg = $msg . "\n\n" . '-- ' . "\n" . config('app.name');
         return $email->send($msg);
+    }
+
+    /**
+     * Obtener la llave única identificable para el usuario.
+     *
+     * @return string
+     */
+    public function getAuthIdentifierName(): string
+    {
+        return 'id';
+    }
+
+    /**
+     * Obtener el valor clave único identificable del usuario.
+     *
+     * @return int
+     */
+    public function getAuthIdentifier(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * Obtener el valor de la contraseña para el usuario.
+     *
+     * @return string
+     */
+    public function getAuthPassword(): string
+    {
+        return $this->contrasenia;
+    }
+
+    /**
+     * Obtener el token de "recuérdame" del usuario.
+     *
+     * @return string
+     */
+    public function getRememberToken(): string
+    {
+        return $this->ultimo_ingreso_hash;
+    }
+
+    /**
+     * Establecer el token de "recuérdame" para el usuario.
+     *
+     * @param string $value
+     * @return void
+     */
+    public function setRememberToken($value): void
+    {
+        $this->ultimo_ingreso_hash = $value;
+        $this->save();
+    }
+
+    /**
+     * Obtener el nombre de la columna que se usa para el token de "recuérdame".
+     *
+     * @return string
+     */
+    public function getRememberTokenName(): string
+    {
+        return 'ultimo_ingreso_hash';
     }
 
 }

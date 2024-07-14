@@ -26,19 +26,17 @@ namespace sowerphp\general;
 use \sowerphp\core\Facade_Session_Message as SessionMessage;
 
 /**
- * Controlador para página de contacto
+ * Controlador para página de contacto.
  */
-class Controller_Contacto extends \Controller
+class Controller_Contacto extends \sowerphp\autoload\Controller
 {
 
     /**
-     * Método para autorizar la carga de index en caso que hay autenticación
+     * Inicializar controlador.
      */
     public function boot(): void
     {
-        if (isset($this->Auth)) {
-            $this->Auth->allow('index');
-        }
+        app('auth')->allowActionsWithoutLogin('index');
         parent::boot();
     }
 
@@ -47,17 +45,17 @@ class Controller_Contacto extends \Controller
      */
     public function index()
     {
-        // si no hay datos para el envió del correo electrónico no
+        // Si no hay datos para el envió del correo electrónico no
         // permirir cargar página de contacto
-        if (config('email.default') === null) {
+        if (config('mail.default') === null) {
             SessionMessage::error(__(
                 'La página de contacto no se encuentra disponible.'
             ));
             return redirect('/');
         }
-        // si se envió el formulario se procesa
+        // Si se envió el formulario se procesa.
         if (isset($_POST['submit'])) {
-            // validar captcha
+            // Validar captcha.
             try {
                 \sowerphp\general\Utility_Google_Recaptcha::check();
             } catch (\Exception $e) {
@@ -67,26 +65,29 @@ class Controller_Contacto extends \Controller
                 ));
                 return;
             }
-            // enviar email
+            // Enviar email.
             $_POST['nombre'] = trim(strip_tags($_POST['nombre']));
             $_POST['correo'] = trim(strip_tags($_POST['correo']));
             $_POST['mensaje'] = trim(strip_tags($_POST['mensaje']));
-            if (!empty($_POST['nombre']) && !empty($_POST['correo']) && !empty($_POST['mensaje'])) {
+            if (
+                !empty($_POST['nombre'])
+                && !empty($_POST['correo'])
+                && !empty($_POST['mensaje'])
+            ) {
                 $email = new \sowerphp\core\Network_Email();
                 $email->replyTo($_POST['correo'], $_POST['nombre']);
                 $email->to(config('mail.to.address'));
                 $email->subject(
                     !empty($_POST['asunto'])
                     ? trim(strip_tags($_POST['asunto']))
-                    : __('Contacto desde %s #%d', $this->request->getFullUrlWithoutQuery(), date('YmdHis'))
+                    : __('Contacto desde %s #%d', url(), date('YmdHis'))
                 );
                 $msg = $_POST['mensaje']."\n\n".'-- '."\n".$_POST['nombre']."\n".$_POST['correo'];
                 $status = $email->send($msg);
                 if ($status === true) {
-                    SessionMessage::success(__(
+                    return redirect('/contacto')->withSuccess(__(
                         'Su mensaje ha sido enviado, se responderá a la brevedad.'
                     ));
-                    return redirect('/contacto');
                 } else {
                     SessionMessage::error(__(
                         'Ha ocurrido un error al enviar su mensaje, por favor intente nuevamente.<br /><em>%s</em>', $status['message']

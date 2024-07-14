@@ -26,7 +26,7 @@ namespace sowerphp\app;
 /**
  * Clase que implementa los servicios web para subir archivos a la aplicación
  */
-class Controller_Upload extends \Controller
+class Controller_Upload extends \sowerphp\autoload\Controller
 {
 
     /**

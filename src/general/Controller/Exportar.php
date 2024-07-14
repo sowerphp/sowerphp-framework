@@ -23,34 +23,59 @@
 
 namespace sowerphp\general;
 
-class Controller_Exportar extends \Controller
+/**
+ * Controlador con acciones para exportar datos en diferentes formatos.
+ *
+ * Se definen 2 formas de pasar los datos que se exportarán:
+ *   - Tablas mediante la sesión: ods, xls, csv, xml, json y pdf.
+ *   - Códigos como imágenes PNG: barcode, qrcode y pdf417.
+ *
+ * Son métodos estándares que entregan los datos de manera estándar. No es la
+ * manera más "linda" de exportar los datos, pero es una manera rápida que
+ * permite pasar fácilmente los datos a diferentes formatos. En muchos casos
+ * suele ser suficiente con estos métodos para diversas aplicaciones.
+ *
+ */
+class Controller_Exportar extends \sowerphp\autoload\Controller
 {
 
     public function boot(): void
     {
     }
 
-    public function ods($id)
+    public function ods(string $id)
     {
-        $data = $this->_getData($id);
+        $data = $this->getExportDataFromSession($id);
         \sowerphp\general\Utility_Spreadsheet_ODS::generate($data, $id);
     }
 
-    public function xls($id)
+    public function xls(string $id)
     {
-        $data = $this->_getData($id);
+        $data = $this->getExportDataFromSession($id);
         \sowerphp\general\Utility_Spreadsheet_XLS::generate($data, $id);
     }
 
-    public function csv($id)
+    public function csv(string $id)
     {
-        $data = $this->_getData($id);
+        $data = $this->getExportDataFromSession($id);
         \sowerphp\general\Utility_Spreadsheet_CSV::generate($data, $id);
     }
 
-    public function pdf($id)
+    public function xml(string $id)
     {
-        $data = $this->_getData($id);
+        $data = $this->getExportDataFromSession($id);
+        \sowerphp\general\Utility_Spreadsheet_XML::generate($data, $id);
+    }
+
+    public function json(string $id)
+    {
+        $data = $this->getExportDataFromSession($id);
+        \sowerphp\general\Utility_Spreadsheet_JSON::generate($data, $id);
+    }
+
+    public function pdf(string $id)
+    {
+        $data = $this->getExportDataFromSession($id);
         error_reporting(false);
         $title = config('app.name');
         if (empty($title)) {
@@ -68,23 +93,24 @@ class Controller_Exportar extends \Controller
         );
         $pdf->AddPage();
         $pdf->addTable(array_shift($data), $data, [], true);
-        $pdf->Output($id.'.pdf', 'D');
-        exit(0);
+        ob_start();
+        $pdf->Output($id.'.pdf', 'D'); // WARNING: esto asigna cabeceras.
+        $content = ob_get_clean();
+        return $content;
     }
 
-    public function xml($id)
-    {
-        $data = $this->_getData($id);
-        \sowerphp\general\Utility_Spreadsheet_XML::generate($data, $id);
-    }
-
-    public function json($id)
-    {
-        $data = $this->_getData($id);
-        \sowerphp\general\Utility_Spreadsheet_JSON::generate($data, $id);
-    }
-
-    private function _getData($id)
+    /**
+     * Obtener datos que se deben exportar desde la sesión.
+     *
+     * Los datos se guardan en la sesión por la funcionalidad que los desee
+     * exportar, de esta forma se pueden pasar a este controlador y ser
+     * descargados por la misma sesión (usuario) que los haya solicitado.
+     *
+     * @param string $id Identificador de los datos que se desean exportar.
+     * @return mixed Datos que estaban en la sesión para ser exportados.
+     * @throws \Exception Si no existen datos para exportar en la sesión.
+     */
+    protected function getExportDataFromSession(string $id)
     {
         $key = 'session.' . session()->getId() . '.export.' . $id;
         $data = cache()->get($key);
@@ -97,25 +123,55 @@ class Controller_Exportar extends \Controller
         return $data;
     }
 
-    public function barcode($string, $type = 'C128')
+    /**
+     * Acción que genera una imagen PNG de un código de barras a partir de un
+     * texto en un string codificado en base64.
+     *
+     * @param string $string Texto codificado en base64.
+     * @param string $type Tipo de código de barras que se generará.
+     * @return string Contenido de la imagen PNG del código de barras.
+     */
+    public function barcode(string $string, string $type = 'C128'): string
     {
         $barcodeobj = new \TCPDFBarcode(base64_decode($string), $type);
+        ob_start();
         $barcodeobj->getBarcodePNG();
-        exit(0);
+        $content = ob_get_clean();
+        return $content;
     }
 
-    public function qrcode($string, $size = 3, $color = '0,0,0')
+    /**
+     * Acción que genera una imagen PNG de un código QR a partir de un
+     * texto en un string codificado en base64.
+     *
+     * @param string $string Texto codificado en base64.
+     * @param int $size Tamaño del código QR.
+     * @param string $color Color del código QR. Formato: R,G,B.
+     * @return string Contenido de la imagen PNG del código QR.
+     */
+    public function qrcode(string $string, int $size = 5, string $color = '0,0,0'): string
     {
         $barcodeobj = new \TCPDF2DBarcode(base64_decode($string), 'QRCode');
+        ob_start();
         $barcodeobj->getBarcodePNG($size, $size, explode(',', $color));
-        exit(0);
+        $content = ob_get_clean();
+        return $content;
     }
 
-    public function pdf417($string)
+    /**
+     * Acción que genera una imagen PNG de un código PDF417 a partir de un
+     * texto en un string codificado en base64.
+     *
+     * @param string $string Texto codificado en base64.
+     * @return string Contenido de la imagen PNG del código PDF417.
+     */
+    public function pdf417(string $string): string
     {
         $barcodeobj = new \TCPDF2DBarcode(base64_decode($string), 'PDF417');
+        ob_start();
         $barcodeobj->getBarcodePNG();
-        exit(0);
+        $content = ob_get_clean();
+        return $content;
     }
 
 }

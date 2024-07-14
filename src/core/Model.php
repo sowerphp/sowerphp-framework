@@ -27,7 +27,7 @@ namespace sowerphp\core;
  * Clase abstracta para todos los modelos.
  * Permite trabajar con un registro de la tabla.
  */
-abstract class Model
+abstract class Model implements \JsonSerializable
 {
 
     use Trait_Object;
@@ -539,6 +539,22 @@ abstract class Model
     public function __wakeup()
     {
         $this->db = database($this->_database);
+    }
+
+    /**
+     * Método que se llamará cuando se quiera serializar el objeto con
+     * json_encode() permite especificar qué atributos se deben serializar y
+     * cómomo se debe realizar dicha serialización.
+     *
+     * @return array
+     */
+    public function jsonSerialize(): array
+    {
+        $data = [];
+        foreach (static::$columnsInfo as $column => $info) {
+            $data[$column] = $this->$column ?? null;
+        }
+        return $data;
     }
 
 }

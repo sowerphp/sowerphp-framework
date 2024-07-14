@@ -28,7 +28,7 @@ use \sowerphp\core\Facade_Session_Message as SessionMessage;
 /**
  * Controlador para las acciones relacionadas con la base de datos
  */
-class Controller_Bd extends \Controller
+class Controller_Bd extends \sowerphp\autoload\Controller
 {
 
     /**

@@ -1,4 +1,4 @@
-<div class="page-header"><h1>Mi perfil de usuario (<?=$_Auth->User->usuario?>)</h1></div>
+<div class="page-header"><h1>Mi perfil de usuario (<?=$user->usuario?>)</h1></div>
 
 <script>
 $(function() { __.tabs_init(); });
@@ -24,7 +24,7 @@ echo $form->begin(array(
 echo $form->input(array(
     'name' => 'nombre',
     'label' => 'Nombre',
-    'value' => $_Auth->User->nombre,
+    'value' => $user->nombre,
     'help' => 'Nombre real del usuario',
     'check' => 'notempty',
     'attr' => 'maxlength="50"',
@@ -33,7 +33,7 @@ if ($changeUsername) {
     echo $form->input(array(
         'name' => 'usuario',
         'label' => 'Usuario',
-        'value' => $_Auth->User->usuario,
+        'value' => $user->usuario,
         'help' => 'Nombre de usuario',
         'check' => 'notempty',
         'attr' => 'maxlength="30"',
@@ -42,7 +42,7 @@ if ($changeUsername) {
 echo $form->input(array(
     'name' => 'email',
     'label' => 'Email',
-    'value' => $_Auth->User->email,
+    'value' => $user->email,
     'help' => 'Correo electrónico para uso dentro del sistema',
     'check' => 'notempty email',
     'attr' => 'maxlength="50"',
@@ -51,7 +51,7 @@ echo $form->input(array(
     'type' => 'password',
     'name' => 'hash',
     'label' => 'Hash',
-    'value' => $_Auth->User->hash,
+    'value' => $user->hash,
     'help' => 'Código único para identificar el usuario (32 caracteres).<br />Si desea uno nuevo, borrar este y automáticamente se generará uno nuevo al guardar los cambios',
     'attr' => 'maxlength="32" autocomplete="off" onclick="this.select()"',
 ));
@@ -59,26 +59,10 @@ echo $form->input(array(
     'type' => 'password',
     'name' => 'api_key',
     'label' => 'API key',
-    'value' => base64_encode($_Auth->User->hash.':X'),
+    'value' => base64_encode($user->hash.':X'),
     'help' => 'Valor de la cabecera Authorization de HTTP para autenticar en la API usando solo la API key, la cual está basada en el hash del usuario',
     'attr' => 'readonly="readonly" onclick="this.select()"',
 ));
-if ($_Auth->User->getLdapPerson() && $_Auth->User->getLdapPerson()->uid != $_Auth->User->usuario) {
-    echo $form->input(array(
-        'type' => 'div',
-        'label' => 'Usuario LDAP',
-        'value' => $_Auth->User->getLdapPerson()->uid,
-        'help' => 'Usuario LDAP asociado a la cuenta de usuario',
-    ));
-}
-if ($_Auth->User->getEmailAccount() && $_Auth->User->getEmailAccount()->getEmail() != $_Auth->User->email) {
-    echo $form->input(array(
-        'type' => 'div',
-        'label' => 'Email oficial',
-        'value' => $_Auth->User->getEmailAccount()->getEmail(),
-        'help' => 'Correo electrónico oficial del usuario',
-    ));
-}
 echo $form->end(array(
     'name' => 'datosUsuario',
     'value' => 'Guardar cambios',
@@ -87,7 +71,7 @@ echo $form->end(array(
                 </div>
                 <div class="col-sm-3 text-center">
                     <a href="https://gravatar.com" title="Cambiar imagen en Gravatar">
-                        <img src="<?=$_Auth->User->getAvatar(200)?>" alt="Avatar" class="img-fluid img-thumbnail" />
+                        <img src="<?=$user->getAvatar(200)?>" alt="Avatar" class="img-fluid img-thumbnail" />
                     </a>
                     <div class="small" style="margin-top:0.5em">
                         <a href="https://gravatar.com" title="Cambiar imagen en Gravatar">[cambiar imagen]</a>
@@ -136,7 +120,7 @@ echo $form->end(array(
                 <div class="card-body">
 <?php
 $method = $Auth2->getName();
-if (!$_Auth->User->{'config_auth2_'.$method}) {
+if (!$user->{'config_auth2_'.$method}) {
     echo '<p>Aquí podrá activar <a href="',$Auth2->getUrl(),'" target="_blank">',$Auth2->getName(),'</a> para proteger el acceso a su cuenta.</p>',"\n";
     echo $form->begin([
         'id' => 'crearToken'.$Auth2->getName(),
@@ -147,7 +131,7 @@ if (!$_Auth->User->{'config_auth2_'.$method}) {
         'name' => 'auth2',
         'value' => $Auth2->getName(),
     ));
-    $secret = $Auth2->createSecret($_Auth->User->usuario);
+    $secret = $Auth2->createSecret($user->usuario);
     if ($secret) {
         echo $form->input(array(
             'type' => 'hidden',
@@ -207,7 +191,7 @@ if (!$_Auth->User->{'config_auth2_'.$method}) {
                 <div class="card-header">Grupos y permisos</div>
                 <div class="card-body">
 <?php
-$grupos = $_Auth->User->groups();
+$grupos = $user->groups();
 if ($grupos) {
     echo '<p>Los siguientes son los grupos a los que usted pertenece:</p>',"\n";
     echo '<ul>',"\n";
@@ -216,7 +200,7 @@ if ($grupos) {
     echo '</ul>',"\n";
     echo '<p>A través de estos grupos, tiene acceso a los siguientes recursos:</p>',"\n";
     echo '<ul>',"\n";
-    foreach ($_Auth->User->auths() as &$auth)
+    foreach ($user->auths() as &$auth)
         echo '<li>',$auth,'</li>';
     echo '</ul>',"\n";
 } else {

@@ -74,7 +74,7 @@ abstract class Utility_Apps_Base_Apps
      */
     protected function getNamespacePHP()
     {
-        $class = '\Utility_Apps_'.\sowerphp\core\Utility_Inflector::camelize($this->getCodigo());
+        $class = '\sowerphp\autoload\Utility_Apps_'.\sowerphp\core\Utility_Inflector::camelize($this->getCodigo());
         return str_replace($class, '', get_class($this));
     }
 

@@ -28,7 +28,7 @@ namespace sowerphp\app\Sistema\Usuarios;
  * Comentario de la tabla: Usuarios de la aplicación
  * Esta clase permite trabajar sobre un conjunto de registros de la tabla usuario
  */
-class Model_Usuarios extends \Model_Plural_App
+class Model_Usuarios extends \sowerphp\autoload\Model_Plural_App
 {
 
     // Datos para la conexión a la base de datos
@@ -102,16 +102,22 @@ class Model_Usuarios extends \Model_Plural_App
     }
 
     /**
-     * Método que entrega el objeto del Usuario a partir del ID de telegram
+     * Método que entrega el objeto del Usuario a partir del ID de Telegram.
      */
-    public function getUserByTelegramID($telegram_id, $model)
+    public function getUserByTelegramID(int $telegram_id)
     {
         $id = $this->db->getValue('
             SELECT usuario
             FROM usuario_config
-            WHERE configuracion = \'telegram\' AND variable = \'id\' AND valor = :telegram_id
-        ', ['telegram_id' => $telegram_id]);
-        return $id ? new $model($id) : false;
+            WHERE
+                configuracion = \'telegram\'
+                AND variable = \'id\'
+                AND valor = :telegram_id
+        ', [
+            'telegram_id' => $telegram_id
+        ]);
+        $class = config('auth.providers.users.model');
+        return $id ? new $class($id) : null;
     }
 
 }

@@ -25,6 +25,7 @@ namespace sowerphp\core;
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Connection;
+use Illuminate\Database\Query\Builder;
 
 /**
  * Servicio de base de datos.
@@ -77,8 +78,18 @@ class Service_Database implements Interface_Service
      */
     public function boot(): void
     {
-        // Configurar el resolver para usar la clase personalizada según cada
-        // uno de los drivers.
+        $this->configureResolvers();
+        $this->registerMacros();
+    }
+
+    /**
+     * Configurar el resolver para usar la clase personalizada según cada uno
+     * de los drivers.
+     *
+     * @return void
+     */
+    protected function configureResolvers(): void
+    {
         $drivers = ['pgsql', 'mysql', 'sqlite'];
         foreach ($drivers as $driver) {
             $customClass = '\sowerphp\core\Database_Connection_Custom_'
@@ -96,6 +107,52 @@ class Service_Database implements Interface_Service
                 }
             );
         }
+    }
+
+    /**
+     * Método que crea y registra macros en el query builder.
+     *
+     * @return void
+     */
+    protected function registerMacros(): void
+    {
+        // Registrar la macro whereIlike.
+        Builder::macro('whereIlike', function($column, $value) {
+            $value = '%' . strtolower($value) . '%';
+            return $this->whereRaw('LOWER('.$column.') LIKE ?', [$value]);
+        });
+        // Registrar la macro whereSmartFilter.
+        Builder::macro('whereSmartFilter', function(string $column, $value, $type = null) {
+            // Si el valor es '!null' se compara contra IS NOT NULL.
+            if ($value == '!null') {
+                return $this->whereNotNull($column);
+            }
+            // Si el valor es null o 'null' se compara contra IS NULL.
+            else if ($value === null || $value == 'null') {
+                return $this->whereNull($column);
+            }
+            // Si es un campo de texto se filtrará con la macro ILIKE (que usa LIKE)
+            else if (in_array($type, ['char', 'character varying', 'varchar', 'text'])) {
+                return $this->whereIlike($column, $value);
+            }
+            // Si es un tipo fecha con hora se usará LIKE.
+            else if (in_array($type, ['timestamp', 'timestamp without time zone'])) {
+                $value = $value . '%';
+                return $this->whereRaw('CAST('.$column.' AS TEXT) LIKE ?', [$value]);
+            }
+            // Si es un campo número entero se castea.
+            else if (in_array($type, ['smallint', 'integer', 'bigint', 'smallserial', 'serial', 'bigserial'])) {
+                return $this->where($column, '=', (int)$value);
+            }
+            // Si es un campo número decimal se castea.
+            else if (in_array($type, ['decimal', 'numeric', 'real', 'double precision'])) {
+                return $this->where($column, '=', (float)$value);
+            }
+            // Si es cualquier otro caso se comparará con una igualdad.
+            else {
+                return $this->where($column, '=', $value);
+            }
+        });
     }
 
     /**

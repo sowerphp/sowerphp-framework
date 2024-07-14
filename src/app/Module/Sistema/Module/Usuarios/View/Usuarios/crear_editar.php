@@ -30,20 +30,6 @@ echo $form->input([
     'check' => (!$columns['usuario']['null']?['notempty']:[]),
     'attr' => 'maxlength="'.$columns['usuario']['length'].'"',
 ]);
-if (is_array($ldap) && isset($ldap['person_uid']) && $ldap['person_uid']=='usuario_ldap') {
-    echo $form->input([
-        'name' => 'usuario_ldap',
-        'label' => $columns['usuario_ldap']['name'],
-        'value' => isset($Obj) ? $Obj->usuario_ldap : '',
-        'help'  => $columns['usuario_ldap']['comment'],
-        'attr' => 'maxlength="'.$columns['usuario_ldap']['length'].'"',
-    ]);
-} else {
-    echo $form->input([
-        'type' => 'hidden',
-        'name' => 'usuario_ldap',
-    ]);
-}
 echo $form->input([
     'name' => 'email',
     'label' => $columns['email']['name'],

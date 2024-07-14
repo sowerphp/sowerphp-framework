@@ -78,6 +78,13 @@ class Service_Http_Session implements Interface_Service
     protected $configService;
 
     /**
+     * Instancia de Service_Translator.
+     *
+     * @var Service_Translator
+     */
+    protected $translatorService;
+
+    /**
      * Instancia de Network_Request.
      *
      * @var Network_Request
@@ -91,10 +98,12 @@ class Service_Http_Session implements Interface_Service
      */
     public function __construct(
         Service_Config $configService,
+        Service_Translator $translatorService,
         Network_Request $request
     )
     {
         $this->configService = $configService;
+        $this->translatorService = $translatorService;
         $this->request = $request;
     }
 
@@ -288,6 +297,10 @@ class Service_Http_Session implements Interface_Service
             }
             $this->put('config.app.locale', $locale);
         }
+        $this->translatorService->setLocale($this->get(
+            'config.app.locale',
+            $this->translatorService->getFallback()
+        ));
         // Layout por defecto de la aplicación.
         if (!$this->get('config.app.ui.layout')) {
             $this->put('config.app.ui.layout', config('app.ui.layout'));

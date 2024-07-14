@@ -23,7 +23,6 @@
 
 namespace sowerphp\core;
 
-use Illuminate\Events\Dispatcher;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\Str;
@@ -122,12 +121,7 @@ class Service_Http_Router implements Interface_Service
     public function register(): void
     {
         $container = $this->app->getContainer();
-        // Registrar eventos en el contenedor de la aplicación si no existen.
-        if (!$container->bound('events')) {
-            $events = new Dispatcher($container);
-            $this->app->registerService('events', $events);
-        }
-        // Instanciar router.
+        $events = $container->make('events');
         $this->router = new Router($events, $container);
     }
 
@@ -339,10 +333,10 @@ class Service_Http_Router implements Interface_Service
                 }
             }
         }
-        // Si la clase no es un FQCN se agrega la autocarga mágica.
+        // Si la clase no es un FQCN se agrega el namespace de autocarga.
         if ($routeConfig['class'][0] != '\\') {
             $routeConfig['class'] =
-                '\\sowerphp\\magicload\\' . $routeConfig['class']
+                '\\sowerphp\\autoload\\' . $routeConfig['class']
             ;
         }
         // Entregar configuración normalizada.
@@ -362,7 +356,7 @@ class Service_Http_Router implements Interface_Service
             throw new \Exception(__(
                 'Controlador %s no fue encontrado.',
                 ucfirst(Str::camel($config['controller']))
-            ));
+            ), 404);
         }
         // Verificar que la acción (método del controlador) no sea privado.
         try {
@@ -374,28 +368,42 @@ class Service_Http_Router implements Interface_Service
                 'Acción %s::%s() no fue encontrada.',
                 ucfirst(Str::camel($config['controller'])),
                 $config['action']
-            ));
+            ), 404);
         }
         if (!$method->isPublic() || $method->name[0] == '_') {
             throw new \Exception(__(
                 'Acción %s::%s() es privada y no puede ser accedida mediante la URL.',
                 ucfirst(Str::camel($config['controller'])),
                 $config['action']
-            ));
+            ), 405);
         }
-        // Verificar la cantidad de parámetros que se desean pasar a la acción.
-        $n_args = count($config['parameters']);
-        if ($n_args < $method->getNumberOfRequiredParameters()) {
-            $args = [];
-            foreach($method->getParameters() as &$p) {
-                $args[] = $p->isOptional() ? '[' . $p->name .']' : $p->name;
+        // Verificar la cantidad de parámetros que se deben pasar a la acción.
+        $n_requestArgs = count($config['parameters']);
+        $n_requiredArgs = 0;
+        $args = [];
+        foreach($method->getParameters() as $param) {
+            $type = $param->getType() ? $param->getType()->getName() : null;
+            if ($type && class_exists($type)) {
+                // El parámetro es una dependencia que se inyectará de manera
+                // automática. Por lo que se omite de la lista de argumentos
+                // requeridos de la acción del controlador.
+                continue;
             }
+            $args[] = $param->isOptional()
+                ? '[' . $param->name .']'
+                : $param->name
+            ;
+            if (!$param->isOptional()) {
+                $n_requiredArgs++;
+            }
+        }
+        if ($n_requestArgs < $n_requiredArgs) {
             throw new \Exception(__(
                 'Argumentos insuficientes para la acción %s::%s(%s).',
                 ucfirst(Str::camel($config['controller'])),
                 $config['action'],
                 implode(', ', $args)
-            ));
+            ), 400);
         }
     }
 

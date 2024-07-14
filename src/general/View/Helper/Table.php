@@ -324,7 +324,7 @@ class View_Helper_Table
         if ($this->_display !== null) {
             $buffer .= '<button type="button" class="btn btn-primary" onclick="$(\'#'.$this->_id.'\').show(); $(\'#tableShow'.$this->_id.'\').hide(); $(\'#tableHide'.$this->_id.'\').show();" id="tableShow'.$this->_id.'" title="Mostrar tabla"><i class="far fa-plus-square fa-fw"></i></button>';
             $buffer .= '<button type="button" class="btn btn-primary" onclick="$(\'#'.$this->_id.'\').hide(); $(\'#tableHide'.$this->_id.'\').hide(); $(\'#tableShow'.$this->_id.'\').show();" id="tableHide'.$this->_id.'" title="Ocultar tabla"><i class="far fa-minus-square fa-fw"></i></button>';
-            $buffer .= '<script type="text/javascript"> $(function() { ';
+            $buffer .= '<script> $(function() { ';
             if ($this->_display) {
                 $buffer .= '$(\'#tableShow'.$this->_id.'\').hide();';
             } else {

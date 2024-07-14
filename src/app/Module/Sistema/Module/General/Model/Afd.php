@@ -28,7 +28,7 @@ namespace sowerphp\app\Sistema\General;
  * Comentario de la tabla:
  * Esta clase permite trabajar sobre un registro de la tabla afd
  */
-class Model_Afd extends \Model_App
+class Model_Afd extends \sowerphp\autoload\Model_App
 {
 
     // Datos para la conexión a la base de datos

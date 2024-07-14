@@ -162,9 +162,36 @@ function database(?string $name = null): \sowerphp\core\Database_Connection_Cust
 }
 
 /**
+ * Obtiene la guard de autenticación solicitada o del contexto de la llamada.
+ *
+ * @param string|null $guard La guard que se está autenticando (web o api).
+ * @return \sowerphp\core\Auth_Guard
+ */
+function auth(?string $guard = null): \sowerphp\core\Auth_Guard
+{
+    return app('auth')->guard($guard);
+}
+
+/**
+ * Obtiene al usuario autenticado en la aplicación.
+ *
+ * @param \Illuminate\Contracts\Auth\Authenticatable|null $guard
+ */
+function user(?string $guard = null): ?\Illuminate\Contracts\Auth\Authenticatable
+{
+    return auth($guard)->check() ? auth($guard)->user() : null;
+}
+
+/**
  * Función para traducción de strings mediante le servicio de lenguages con
  * soporte de interpolación mixta. Permite utilizar tanto el formato de
  * placeholders de Python (%(name)s) como el de sprintf (%s, %d).
+ *
+ * Esta función determina los valores que se usarán para reemplazar.
+ * Es necesario hacer esto porque app('translator')->get() recibe siempre un
+ * arreglo y la implementación original del framework (por ende su uso actual)
+ * permite argumentos variables (obsoleto) o arreglos (lo nuevo que se debería
+ * usar en el futuro).
  *
  * @param string $string Texto que se desea traducir.
  * @param mixed ...$args Argumentos para reemplazar en el string, pueden
@@ -173,8 +200,98 @@ function database(?string $name = null): \sowerphp\core\Database_Connection_Cust
  */
 function __(string $string, ...$args): string
 {
-    $locale = null; // Se usará la configuración por defecto del servicio.
-    return app('lang')->translate($locale, $string, ...$args);
+    $replace = is_array($args[0] ?? null)
+        ? $args[0]
+        : array_slice(func_get_args(), 1)
+    ;
+    return app('translator')->get($string, $replace);
+}
+
+/**
+ * Despacha un evento y llama a los listeners.
+ *
+ * @param string|object $event El evento que se va a despachar. Puede ser una
+ * cadena que represente el nombre del evento o un objeto que encapsule los
+ * datos del evento.
+ * @param mixed $payload Los datos adicionales que se pasarán a los listeners
+ * del evento. Este parámetro es opcional y por defecto es un arreglo vacío.
+ * @param bool $halt Indica si se debe detener la ejecución tras la primera
+ * respuesta válida de un listener. Este parámetro es opcional y por defecto es
+ * false.
+ * @return array|null Retorna un arreglo con las respuestas de los listeners.
+ * Si el parámetro $halt es true, retorna la primera respuesta válida.
+ */
+function event($event, $payload = [], $halt = false)
+{
+    return app('events')->dispatch($event, $payload, $halt);
+}
+
+/**
+ * Función global para trabajar con el servicio de modelos de la aplicación.
+ *
+ * Si se pasa un modelo se obtendrá la instancia en vez del servicio.
+ * Normalmente se pasará el modelo y la identificación del modelo (llave
+ * primaria) para obtener una instancia del modelo (registro de la base de
+ * datos).
+ *
+ * @param string|null $model Nombre del modelo que se desea obtener.
+ * @param int|string|array $pk Llave primaria del modelo en la base de datos.
+ * Si lla llave es compuesta, se debe pasar como un arreglo.
+ * @return Service_Model|Model
+ */
+function model(?string $model = null, $pk = null)
+{
+    $modelService = app('model');
+    if ($model === null) {
+        return $modelService;
+    }
+    return $modelService->instantiate($model, $pk);
+}
+
+/**
+ * Obtiene un remitente de correo.
+ *
+ * @param string|null $name Nombre del remitente.
+ * @return Mailer
+ */
+function mailer(?string $name = null): \Illuminate\Mail\Mailer
+{
+    return app('mail')->mailer($name);
+}
+
+/**
+ * Obtiene una instancia del cliente HTTP.
+ *
+ * @return \sowerphp\core\Service_Http_Client
+ */
+function http_client(): \sowerphp\core\Service_Http_Client
+{
+    return app('http_client');
+}
+
+/**
+ * Registra un mensaje en el logger.
+ *
+ * @param string $level El nivel del log (ej: info, error, warning).
+ * @param string $message El mensaje a registrar.
+ * @param array $context Contexto adicional para el mensaje de log.
+ * @return void
+ */
+function log_message(string $level, string $message, array $context = []): void
+{
+    app('log')->log($level, $message, $context);
+}
+
+/**
+ * Envía una notificación a las entidades notificables dadas.
+ *
+ * @param mixed $notifiables Entidades que recibirán la notificación.
+ * @param mixed $notification Instancia de la notificación a enviar.
+ * @return void
+ */
+function send_notification($notifiables, $notification): void
+{
+    app('notification')->send($notifiables, $notification);
 }
 
 /**

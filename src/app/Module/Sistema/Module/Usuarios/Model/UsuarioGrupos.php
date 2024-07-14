@@ -28,7 +28,7 @@ namespace sowerphp\app\Sistema\Usuarios;
  * Comentario de la tabla: Relación entre usuarios y los grupos a los que pertenecen
  * Esta clase permite trabajar sobre un conjunto de registros de la tabla usuario_grupo
  */
-class Model_UsuarioGrupos extends \Model_Plural_App
+class Model_UsuarioGrupos extends \sowerphp\autoload\Model_Plural_App
 {
 
     // Datos para la conexión a la base de datos

@@ -187,7 +187,7 @@ class Utility_Spreadsheet
             $sheets = array($options['sheet']=>$sheets[$options['sheet']]);
         }
         // agregar títulos de la pestaña
-        $buffer = '<script type="text/javascript"> $(function(){ var url = document.location.toString(); if (url.match(\'#\')) $(\'.nav-tabs a[href=#\'+url.split(\'#\')[1]+\']\').tab(\'show\'); else $(\'.nav-tabs > li:first-child > a\').tab(\'show\'); }); </script>'."\n";
+        $buffer = '<script> $(function(){ var url = document.location.toString(); if (url.match(\'#\')) $(\'.nav-tabs a[href=#\'+url.split(\'#\')[1]+\']\').tab(\'show\'); else $(\'.nav-tabs > li:first-child > a\').tab(\'show\'); }); </script>'."\n";
         $buffer .= '<div role="tabpanel">'."\n";
         $buffer .= '<ul class="nav nav-tabs" role="tablist">'."\n";
         foreach ($sheets as $id => &$name) {

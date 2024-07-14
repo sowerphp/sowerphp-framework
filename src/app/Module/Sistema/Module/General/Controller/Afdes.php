@@ -32,24 +32,25 @@ use \sowerphp\core\Facade_Session_Message as SessionMessage;
  * Esta clase permite controlar las acciones entre el modelo y vista para la
  * tabla afd
  */
-class Controller_Afdes extends \Controller_Maintainer
+class Controller_Afdes extends \sowerphp\autoload\Controller_Model
 {
 
-    protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
-
+    /**
+     * Inicializar controlador.
+     */
     public function boot(): void
     {
-        $this->Auth->allowWithLogin('grafo');
+        app('auth')->allowActionsWithLogin('grafo');
         parent::boot();
     }
 
     /**
-     * Acción para crear un AFD
+     * Acción para crear un AFD.
      */
     public function crear()
     {
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
-        // si se envió el formulario se procesa
+        // Si se envió el formulario se procesa.
         if (isset($_POST['submit'])) {
             $Afd = new Model_Afd();
             $Afd->codigo = $_POST['codigo'];
@@ -65,45 +66,40 @@ class Controller_Afdes extends \Controller_Maintainer
             ];
             $Afd->save();
             SessionMessage::success('AFD <em>'.$Afd->nombre.'</em> creado.');
-            return redirect(
-                $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
-            );
+            return redirect('/sistema/general/afdes/listar' . $filterListar);
         }
-        // setear variables
-        $this->set([
+        // Renderizar vista.
+        return $this->render('Afdes/crear_editar', [
             'accion' => 'Crear',
-            'listarUrl' => $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar,
+            'listarUrl' => '/sistema/general/afdes/listar' . $filterListar,
         ]);
-        // renderizar
-        return $this->render('Afdes/crear_editar');
     }
 
     /**
-     * Acción para editar un AFD
-     * @param codigo Código del AFD a editar
+     * Acción para editar un AFD.
+     *
+     * @param string $codigo Código del AFD a editar.
      */
     public function editar($codigo)
     {
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         $Afd = new Model_Afd($codigo);
-        // si el registro que se quiere editar no existe error
+        // Si el registro que se quiere editar no existe error.
         if(!$Afd->exists()) {
-            SessionMessage::error(
-                'AFD <em>'.$codigo.'</em> no existe, no se puede editar.'
-            );
-            return redirect(
-                $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar
-            );
+            return redirect('/sistema/general/afdes/listar' . $filterListar)
+                ->withError(
+                    'AFD <em>'.$codigo.'</em> no existe, no se puede editar.'
+                )
+            ;
         }
-        // si no se ha enviado el formulario se mostrará
+        // Si no se ha enviado el formulario se mostrará.
         if(!isset($_POST['submit'])) {
-            $this->set(array(
+            // Renderizar vista.
+            return $this->render('Afdes/crear_editar', [
                 'Afd' => $Afd,
                 'accion' => 'Editar',
-                'listarUrl' => $this->module_url . $this->request->getRouteConfig()['controller'] . '/listar' . $filterListar,
-            ));
-            // renderizar
-            return $this->render('Afdes/crear_editar');
+                'listarUrl' => '/sistema/general/afdes/listar' . $filterListar,
+            ]);
         }
         // si se envió el formulario se procesa
         else {
@@ -119,11 +115,10 @@ class Controller_Afdes extends \Controller_Maintainer
                 'hastas' => $_POST['hasta']
             ];
             $Afd->save();
-            SessionMessage::success('AFD <em>'.$Afd->nombre.'</em> editado.');
             return redirect(
-                $this->module_url . $this->request->getRouteConfig()['controller'] . '/editar/' . $codigo
+                '/sistema/general/afdes/editar/' . $codigo
                 . (!empty($_GET['listar']) ? '?listar='.$_GET['listar'] : '')
-            );
+            )->withSuccess('AFD <em>'.$Afd->nombre.'</em> editado.');
         }
     }
 

@@ -24,13 +24,16 @@
 namespace sowerphp\core;
 
 /**
- * Clase genérica con método para trabajar con cualquier objeto.
+ * Trait genérico con métodos para trabajar con objetos (instancias) de
+ * cualquier tipo.
  */
 trait Trait_Object
 {
 
     /**
-     * Método para convertir el objeto a un string.
+     * Permite utilizar el objeto (instancia) como string y obtener el nombre
+     * de la clase.
+     *
      * @return string Nombre de la clase con que se instancio el objeto.
      */
     public function __toString(): string
@@ -39,21 +42,32 @@ trait Trait_Object
     }
 
     /**
-     * Método para setear los atributos de la clase.
-     * @param array Arreglo con los datos que se deben asignar.
+     * Asignación de atributos públicos a la instancia mediante un arreglo.
+     *
+     * @param array $attributes Arreglo con los datos que se deben asignar.
+     * @return self Instancia para encadenamiento de llamadas a métodos.
      */
-    public function set(array $array)
+    public function fill(array $attributes): self
     {
-        $props = (new \ReflectionClass($this))->getProperties(
-            \ReflectionProperty::IS_PUBLIC
-        );
-        foreach ($props as &$prop) {
-            $name = $prop->getName();
-            if (isset($array[$name])) {
-                $this->$name = $array[$name];
+        $publicAttributes = array_keys(get_object_vars($this));
+        foreach ($attributes as $attribute => $value) {
+            if (in_array($attribute, $publicAttributes)) {
+                $this->$attribute = $value;
             }
         }
         return $this;
+    }
+
+    /**
+     * Asignación de atributos públicos a la instancia mediante un arreglo.
+     *
+     * @param array $attributes Arreglo con los datos que se deben asignar.
+     * @return self Instancia para encadenamiento de llamadas a métodos.
+     * @deprecated Utilizar fill()
+     */
+    public function set(array $attributes)
+    {
+        return $this->fill($attributes);
     }
 
 }

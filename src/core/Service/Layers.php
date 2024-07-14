@@ -64,11 +64,13 @@ class Service_Layers implements Interface_Service
      * Arreglo asociativo con los directorios (pueden tener una o más capas).
      *
      * Estos son autodetectados y son fijos:
+     *
      *   - framework: directorio dónde se encuentra el framework.
      *   - proyect: directorio dónde se encuentra el proyecto construído.
      *   - storage: directorio para almacenamiento de archivos.
      *   - static: directorio para archivos estáticos accesibles por HTTP.
      *   - tmp: directorio para archivos temporales.
+     *   - resource: directorio de recursos (como traducciones).
      *
      * @var array
      */
@@ -110,11 +112,10 @@ class Service_Layers implements Interface_Service
     protected $filepaths = [];
 
     /**
-     * Registrar el autocargador mágico de las clases.
+     * Registrar el servicio de capas.
      */
     public function register(): void
     {
-        spl_autoload_register([$this, 'loadClass']);
     }
 
     /**
@@ -334,7 +335,7 @@ class Service_Layers implements Interface_Service
      *
      * @return array Arreglo asociativo con las capas de la aplicación.
      */
-    protected function getLayers(): array
+    public function getLayers(): array
     {
         // Si las capas no están definidas se definen.
         if (!isset($this->layers)) {
@@ -457,95 +458,6 @@ class Service_Layers implements Interface_Service
     public function loadFilesReverse(array $files): void
     {
         $this->loadFiles($files, true);
-    }
-
-    /**
-     * Método para autocarga de clases que no están cubiertas por composer.
-     *
-     * Se requiere este autocargador porque el define que una clase puede estar
-     * en cualquiera de las capas, y eso no se puede lograr con PSR4. Ya que
-     * este necesariamente hace la búsqueda con el namespace. Acá el objetivo
-     * es poder tener una autocarga que buscará una clase en diferentes capas
-     * (en orden de prioridad) y en la primera capa que encuentre la clase, la
-     * utilizará como la clase solicitada a través de la autocarga. Lo anterior
-     * independientemente del namespace que tenga esa clase encontrada, o sea,
-     * independientemente de la capa donde se haya encontrado. Esto entrega
-     * ciertas ventajas y facilidades a la hora de programar (simplificaciones).
-     *
-     * Solo se deben buscar clases donde su namespace (prefijo) sea:
-     *   - No tengan prefijo. Esto es temporal mientras se migra al prefijo.
-     *   - Partan con el prefijo: \sowerphp\magicload\
-     *
-     * @param string $class Clase que se desea cargar.
-     * @return bool =true si se encontró y cargó la clase.
-     */
-    public function loadClass(string $class): bool
-    {
-        // Clases que está en un namespace que no sea el prefijo no se
-        // procesarán, pues su carga se deberá hacer con composer.
-        $prefix = 'sowerphp\\magicload\\';
-        $prefix_len = 19; // strlen($prefix) -> 19
-        $class_has_prefix = strpos($class, '\\') !== false;
-        if ($class_has_prefix && substr($class, 0, $prefix_len) != $prefix) {
-            return class_exists($class);
-        }
-        // Si no se han cargado las capas (caso raro) retornar false, pues no
-        // se puede buscar aun con este método la clase.
-        // Sería un caso de borde cuando se pida por error una clase antes que
-        // se haya completado la inicialización del servicio de capas.
-        if (empty($this->layers)) {
-            return false;
-        }
-        // Quitar el prefijo de carga automáfica de la clase
-        $remove_prefix_count = 1;
-        $magic_class = str_replace($prefix, '', $class, $remove_prefix_count);
-        // Armar el nombre de la clase buscada. Además, se consideran las
-        // posibilidad de que la clase venga con uno o más módulos o con uno o
-        // más subdirectorios dentro de la clase. Ejemplos:
-        //   - Controller
-        //   - Controller_App
-        //   - Dev\Controller_Config
-        //   - Sistema\Usuarios\Model_Usuario
-        $magic_class_has_module = strpos($magic_class, '\\') !== false;
-        $magic_class_file = str_replace('_', DIRECTORY_SEPARATOR, $magic_class)
-            . '.php'
-        ;
-        if ($magic_class_has_module) {
-            $module_dir_for_path =
-                DIRECTORY_SEPARATOR . 'Module' . DIRECTORY_SEPARATOR
-            ;
-            $magic_class_file_parts = explode('\\', $magic_class_file);
-            $magic_class_file_parts_count = count($magic_class_file_parts);
-            $magic_class_file = $module_dir_for_path
-                . implode(
-                    $module_dir_for_path,
-                    array_slice(
-                        $magic_class_file_parts,
-                        0,
-                        $magic_class_file_parts_count - 1
-                    )
-                ) . DIRECTORY_SEPARATOR
-                . $magic_class_file_parts[$magic_class_file_parts_count-1]
-            ;
-        } else {
-            $magic_class_file = DIRECTORY_SEPARATOR . $magic_class_file;
-        }
-        // Buscar la clase automágica.
-        $real_class = null;
-        foreach ($this->layers as $namespace => $layer) {
-            $real_class_file = $layer['path'] . $magic_class_file;
-            if (is_readable($real_class_file)) {
-                $real_class = '\\' . $namespace . '\\' . $magic_class;
-                break;
-            }
-        }
-        // Cargar la clase automágica.
-        if ($real_class && class_exists($real_class)) {
-            class_alias($real_class, $class);
-            return true;
-        }
-        // Si no se encontró la clase con la carga automágica retornar false.
-        return false;
     }
 
 }

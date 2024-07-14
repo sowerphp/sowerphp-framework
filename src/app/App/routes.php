@@ -28,14 +28,6 @@ $router = router();
 $router->connect('/api/:controller/*', [
     'action' => 'api',
 ]);
-$router->connect('/api/sistema/logs/:controller/*', [
-    'module' => 'Sistema.Logs',
-    'action' => 'api',
-]);
-$router->connect('/api/sistema/notificaciones/:controller/*', [
-    'module' => 'Sistema.Notificaciones',
-    'action' => 'api',
-]);
 $router->connect('/api/sistema/usuarios/:controller/*', [
     'module' => 'Sistema.Usuarios',
     'action' => 'api',

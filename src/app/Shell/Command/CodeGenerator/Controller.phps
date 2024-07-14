@@ -30,10 +30,6 @@ namespace {namespace};
  * Esta clase permite controlar las acciones entre el modelo y vista para la
  * tabla {table}.
  */
-class Controller_{classs} extends \Controller_Maintainer
+class Controller_{classs} extends \sowerphp\autoload\Controller_Model
 {
-
-    // Namespace del controlador y modelos asociados.
-    protected $namespace = __NAMESPACE__;
-
 }

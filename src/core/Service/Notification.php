@@ -23,42 +23,33 @@
 
 namespace sowerphp\core;
 
-/**
- * Clase base para todos los componentes.
- */
-abstract class Controller_Component
+use Illuminate\Notifications\ChannelManager;
+
+class Service_Notification extends ChannelManager implements Interface_Service
 {
 
-    public $settings = []; ///< Opciones del componente
-    public $controller; ///< Controlador que está cargando el componente
-    protected $components = []; ///< Nombre de componentes que este componente utiliza
-    protected $Components = null; ///< Colección de componentes que se cargarán
-
     /**
-     * Constructor de la clase
-     * @todo Cargar componentes que este componente utilice
-     * @param Components Colección de componentes
-     * @param settings Opciones para la carga de componentes
+     * Registra el servicio de notificaciones.
+     *
+     * @return void
      */
-    public function __construct(Controller_Component_Collection $Components, $settings = [])
+    public function register(): void
     {
-        $this->Components = $Components;
-        $this->settings = Utility_Array::mergeRecursiveDistinct(
-            $this->settings, $settings
-        );
     }
 
     /**
-     * Método llamado desde Controller::boot()
-     * Deberá se sobreescrito en el componente si se quiere utilizar
+     * Inicializa el servicio de notificaciones.
+     *
+     * @return void
      */
     public function boot(): void
     {
     }
 
     /**
-     * Método llamado desde Controller::terminate()
-     * Deberá se sobreescrito en el componente si se quiere utilizar
+     * Finaliza el servicio de notificaciones.
+     *
+     * @return void
      */
     public function terminate(): void
     {

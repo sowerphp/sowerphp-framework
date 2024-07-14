@@ -28,7 +28,7 @@ namespace sowerphp\core;
  * ejecutar una acción o bien esta es parametrizable y se ejecuta en base a
  * configuraciones.
  */
-class Controller_App extends \sowerphp\app\Controller
+class Controller_App extends \sowerphp\autoload\Controller
 {
 
     /**
@@ -36,15 +36,19 @@ class Controller_App extends \sowerphp\app\Controller
      */
     public function boot(): void
     {
-        if (isset($this->Auth)) {
-            $this->Auth->allow(
-                'page',
-                'error',
-                'redirect',
-            );
-            $this->Auth->allowWithLogin('session');
+        // Asignar permisos para las acciones.
+        app('auth')->allowActionsWithoutLogin(
+            'page',
+            'redirect',
+        );
+        app('auth')->allowActionsWithLogin('session');
+        // Sólo se inicializa el controlador padre si el método método (acción)
+        // que se ejecutará no es error(). Pues al ser un error ya viene de un
+        // controlador que inicializó previamente el controlador padre.
+        $method = func_get_args()[0] ?? null;
+        if ($method != 'error') {
+            parent::boot();
         }
-        parent::boot();
     }
 
     /**
@@ -103,6 +107,7 @@ class Controller_App extends \sowerphp\app\Controller
                 \sowerphp\core\Utility_Inflector::underscore($module)
             );
             // Verificar permisos.
+            $auth = app('auth');
             foreach ($module_nav as $category_id => &$category) {
                 foreach ($category['menu'] as $link => &$info) {
                     // Si info no es un arreglo es solo el nombre y se arma.
@@ -122,7 +127,7 @@ class Controller_App extends \sowerphp\app\Controller
                         ], $info);
                     }
                     // Verificar permisos para acceder al enlace.
-                    if (!$this->Auth->check('/' . $module_url . $link)) {
+                    if (!$auth->checkResourcePermission('/' . $module_url . $link)) {
                         unset($module_nav[$category_id]['menu'][$link]);
                     }
                 }
@@ -145,6 +150,19 @@ class Controller_App extends \sowerphp\app\Controller
     }
 
     /**
+     * Redireccionar a una ruta nueva o a una URL completa (incluso externa).
+     *
+     * @param string $destination Ruta a la que se quiere redireccionar.
+     * @param int $status Código de redireccionamiento (3xx).
+     * @return Network_Response
+     */
+    public function redirect(string $destination, int $status = 302): Network_Response
+    {
+        session()->reflash();
+        return redirect($destination, $status);
+    }
+
+    /**
      * Renderizar error.
      *
      * @param \Exception $exception Excepción con el error que se renderizará.
@@ -155,7 +173,11 @@ class Controller_App extends \sowerphp\app\Controller
         ob_clean();
         // Es una solicitud mediante un servicio web.
         if ($this->request->isApiRequest()) {
-            return $this->Api->sendException($exception);
+            $status = $exception->getCode() < 400 ? 400 : $exception->getCode();
+            return response()->json(
+                $exception->getMessage(),
+                $status
+            );
         }
         // Es una solicitud mediante la interfaz web.
         $data = [
@@ -182,30 +204,10 @@ class Controller_App extends \sowerphp\app\Controller
             $data['trace']
         );
         $data['soporte'] = config('mail.to.address') !== null;
-        // Registrar log con el error.
-        $this->Log->write([
-            'exception' => $data['exception'],
-            'message' => $data['message'],
-            'trace' => $data['trace'],
-            'code' => $data['code'],
-        ], $data['severity']);
         // Renderizar página de error.
         $response = $this->render('App/error', $data);
         $response->status($data['code']);
         return $response;
-    }
-
-    /**
-     * Redireccionar a una ruta nueva o a una URL completa (incluso externa).
-     *
-     * @param string $destination Ruta a la que se quiere redireccionar.
-     * @param int $status Código de redireccionamiento (3xx).
-     * @return Network_Response
-     */
-    public function redirect(string $destination, int $status = 302): Network_Response
-    {
-        session()->reflash();
-        return redirect($destination, $status);
     }
 
 }

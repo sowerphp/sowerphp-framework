@@ -88,7 +88,9 @@ class Service_Http_Kernel implements Interface_Service
      * @var array
      */
     protected $middlewares = [
-        //Middleware_Example::class,
+        Middleware_Auth::class,
+        Middleware_Throttle::class,
+        Middleware_Log::class,
     ];
 
     /**
@@ -97,8 +99,7 @@ class Service_Http_Kernel implements Interface_Service
      * @var array
      */
     protected $routeMiddlewares = [
-        //'auth' => Middleware_Auth::class,
-        //'throttle' => Middleware_Throttle::class,
+        // NOTE: sin definir ni usar (ver abajo).
     ];
 
     /**
@@ -312,7 +313,7 @@ class Service_Http_Kernel implements Interface_Service
         if (!$filepath) {
             return null;
         }
-        return $this->response->prepareFileResponse($filepath);
+        return response()->file($filepath);
     }
 
     /**
@@ -419,8 +420,7 @@ class Service_Http_Kernel implements Interface_Service
                 }
                 // Si no es string, se asume que se debe entregar como JSON.
                 else {
-                    $response->header('Content-Type', 'application/json');
-                    $response->body(json_encode($result));
+                    $response->json($result);
                 }
             }
         }
@@ -490,7 +490,7 @@ class Service_Http_Kernel implements Interface_Service
     protected function handleException(\Exception $exception): Network_Response
     {
         $response = $this->invokeControllerAction([
-            'class' => 'Controller_App',
+            'class' => '\sowerphp\autoload\Controller_App',
             'action' => 'error',
             'parameters' => ['exception' => $exception],
         ]);

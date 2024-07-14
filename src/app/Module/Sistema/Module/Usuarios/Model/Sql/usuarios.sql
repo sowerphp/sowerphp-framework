@@ -17,7 +17,6 @@ CREATE TABLE usuario (
     id INTEGER NOT NULL DEFAULT nextval('usuario_id_seq') PRIMARY KEY,
     nombre CHARACTER VARYING (50) NOT NULL,
     usuario CHARACTER VARYING (30) NOT NULL,
-    usuario_ldap CHARACTER VARYING (30),
     email CHARACTER VARYING (50) NOT NULL,
     contrasenia VARCHAR(255) NOT NULL,
     contrasenia_intentos SMALLINT NOT NULL DEFAULT 3,
@@ -29,14 +28,12 @@ CREATE TABLE usuario (
     ultimo_ingreso_hash CHAR(32)
 );
 CREATE UNIQUE INDEX ON usuario (usuario);
-CREATE UNIQUE INDEX ON usuario (usuario_ldap);
 CREATE UNIQUE INDEX ON usuario (email);
 CREATE UNIQUE INDEX ON usuario (hash);
 COMMENT ON TABLE usuario IS 'Usuarios de la aplicación';
 COMMENT ON COLUMN usuario.id IS 'Identificador (serial)';
 COMMENT ON COLUMN usuario.nombre IS 'Nombre real del usuario';
 COMMENT ON COLUMN usuario.usuario IS 'Nombre de usuario';
-COMMENT ON COLUMN usuario.usuario IS 'Nombre de usuario de LDAP';
 COMMENT ON COLUMN usuario.email IS 'Correo electrónico del usuario';
 COMMENT ON COLUMN usuario.contrasenia IS 'Contraseña del usuario';
 COMMENT ON COLUMN usuario.contrasenia_intentos IS

@@ -30,9 +30,7 @@ namespace sowerphp\app\Sistema\Usuarios;
  * Esta clase permite controlar las acciones entre el modelo y vista para la
  * tabla auth
  */
-class Controller_Auths extends \sowerphp\app\Controller_Maintainer
+class Controller_Auths extends \sowerphp\autoload\Controller_Model
 {
-
-    protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
 
 }

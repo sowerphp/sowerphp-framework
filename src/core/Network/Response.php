@@ -67,11 +67,38 @@ class Network_Response //extends Response
      * Asigna el código de estado de la respuesta HTTP que se enviará o lo
      * recupera.
      *
-     * @param int $status Estado HTTP que se desea asignar a la respuesta.
+     * @param int|null $status Estado HTTP que se desea asignar a la respuesta.
+     * @return int Código HTTP asignado (puede haber sido ajustado del original).
      */
     public function status(?int $status = null): int
     {
         if ($status !== null) {
+            // Si no hay código (es 0), se asigna 200 por defecto.
+            if ($status === 0) {
+                $status = 200;
+            }
+            // Si el código es menor que 200, se asume que es un código de
+            // error no estándar y se reasigna a 409, con el código original en
+            // una cabecera.
+            else if ($status < 200) {
+                $this->header('X-Original-Error-Code', $status);
+                // Error 409 (Conflict): Este código indica que hay un problema
+                // con el estado de la solicitud o del recurso que impide su
+                // procesamiento.
+                $status = 409;
+            }
+            // Si el código es mayor o igual que 500 se cambia a un código del
+            // rango 400, porque no se pueden devolver este tipo de códigos en
+            // AWS (por el Health Status de los Load Balancer, ej en AWS EB).
+            else if ($status >= 500) {
+                $this->header('X-Original-Error-Code', $status);
+                // Error 422 (Unprocessable Entity): Este código indica que el
+                // servidor entiende el tipo de contenido de la solicitud, y la
+                // sintaxis de la solicitud es correcta, pero no pudo procesar
+                // las instrucciones contenidas.
+                $status = 422;
+            }
+            // Asignar el código de estado HTTP pasado o determinado.
             $this->responseData['status'] = $status;
         }
         return $this->responseData['status'];
@@ -175,7 +202,7 @@ class Network_Response //extends Response
      * @param array $options Arreglo de opciones. Índices: name, charset,
      * disposition y exit).
      */
-    public function prepareFileResponse($file, array $options = []): self
+    public function file($file, array $options = []): self
     {
         // Opciones del archivo para la respuesta.
         $options = array_merge([
@@ -251,7 +278,11 @@ class Network_Response //extends Response
      * @param array $options Arreglo de opciones. Índices: mimetype, charset,
      * disposition y exit.
      */
-    public function sendAndExit(?string $content = null, ?string $filename = null, array $options = [])
+    public function sendAndExit(
+        ?string $content = null,
+        ?string $filename = null,
+        array $options = []
+    )
     {
         // Determinar opciones por defecto.
         if (is_string($options)) {
@@ -294,6 +325,35 @@ class Network_Response //extends Response
         }
         $this->send();
         exit(); // TODO: refactorizar para no cerrar acá pues detiene controlador.
+    }
+
+    /**
+     * Envía una respuesta JSON.
+     *
+     * @param mixed $data Los datos a codificar como JSON.
+     * @param int $status El código de estado HTTP.
+     * @param array $headers Encabezados adicionales a enviar con la respuesta.
+     * @param int $options Opciones de codificación JSON.
+     * @return void
+     */
+    public function json(
+        $data = [],
+        int $status = 200,
+        array $headers = [],
+        int $options = 0
+    ): self
+    {
+        // Armar respuesta HTTP JSON.
+        $this->status($status);
+        if (!$this->type()) {
+            $this->type('application/json', 'utf-8');
+        }
+        foreach ($headers as $header => $value) {
+            $this->header($header, $value);
+        }
+        $this->body(json_encode($data, $options) . "\n");
+        // Retornar objeto de la respuesta.
+        return $this;
     }
 
 }

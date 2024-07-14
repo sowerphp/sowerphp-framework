@@ -30,10 +30,8 @@ namespace sowerphp\app\Sistema\General;
  * Esta clase permite controlar las acciones entre el modelo y vista para la
  * tabla moneda_cambio
  */
-class Controller_MonedaCambios extends \Controller_Maintainer
+class Controller_MonedaCambios extends \sowerphp\autoload\Controller_Model
 {
-
-    protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
 
     /**
      * Recurso que entrega el tipo de cambio para cierta moneda en cierto día
