@@ -51,13 +51,6 @@ abstract class Controller
     protected $viewVars = [];
 
     /**
-     * Layout que se usará por defecto para renderizar.
-     *
-     * @var string
-     */
-    protected $layout;
-
-    /**
      * Constructor de la clase controlador.
      *
      * @param Network_Request $request Instancia con la solicitud realizada.
@@ -69,11 +62,8 @@ abstract class Controller
         Network_Response $response
     )
     {
-        // Guardar instancias de la solicitud y respuesta.
         $this->request = $request;
         $this->response = $response;
-        // Obtener layout por defecto (el de la sesión).
-        $this->layout = session('config.app.ui.layout');
     }
 
     /**
@@ -119,6 +109,7 @@ abstract class Controller
      *
      * @param mixed $one Nombre de la variable o arreglo asociativo con variables.
      * @param mixed $two Valor del variable o null si se paso un arreglo en $one.
+     * @deprecated Se debe construir un arreglo con las variables y pasar a view().
      */
     public function set($one, $two = null): void
     {
@@ -140,6 +131,7 @@ abstract class Controller
      * @param string $view Vista que se desea renderizar.
      * @param array $data Variables que se pasarán a la vista al renderizar.
      * @return Network_Response Respuesta con la página renderizada para enviar.
+     * @deprecated Se debe llamar a view($view, $data) con la vista y datos.
      */
     public function render(string $view = null, array $data = []): Network_Response
     {
@@ -151,12 +143,9 @@ abstract class Controller
             $view = $viewFolder . DIRECTORY_SEPARATOR . $viewAction;
         }
         // Preparar los datos que se pasarán a la vista para ser renderizada.
-        $this->viewVars = array_merge($this->viewVars, $data);
-        if (($this->viewVars['__view_layout'] ?? null) === null) {
-            $this->viewVars['__view_layout'] = $this->layout;
-        }
+        $data = array_merge($this->viewVars, $data);
         // Renderizar vista y retornar.
-        return view($view, $this->viewVars);
+        return view($view, $data);
     }
 
     /**
@@ -197,6 +186,7 @@ abstract class Controller
     /**
      * Método que permite consumir por POST o GET un recurso de la misma
      * aplicación.
+     * @deprecated Se debe usar http_client()->consume();
      */
     protected function consume(string $recurso, $datos = [], bool $assoc = true)
     {
@@ -222,6 +212,7 @@ abstract class Controller
 
     /**
      * Método que permite ejecutar un comando en la terminal.
+     * @deprecated Se debe usar servicio de jobs.
      */
     protected function shell($cmd, $log = false, &$output = [])
     {

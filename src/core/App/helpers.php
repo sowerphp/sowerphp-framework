@@ -227,6 +227,30 @@ function event($event, $payload = [], $halt = false)
 }
 
 /**
+ * Encriptar los datos con el encriptador configurado en la aplicación.
+ *
+ * @param mixed $value Datos que se desean encriptar.
+ * @param boolean $serialize Indica si se deben serializar los datos.
+ * @return string Datos encriptados.
+ */
+function encrypt($value, $serialize = true): string
+{
+    return app('encryption')->encrypt($value, $serialize);
+}
+
+/**
+ * Desencripta los datos con el encriptador configurado en la aplicación.
+ *
+ * @param mixed $value Datos que se desean desencriptar.
+ * @param boolean $unserialize Indica si se deben deserializar los datos.
+ * @return string Datos desencriptados.
+ */
+function decrypt($payload, $unserialize = true)
+{
+    return app('encryption')->decrypt($payload, $unserialize);
+}
+
+/**
  * Función global para trabajar con el servicio de modelos de la aplicación.
  *
  * Si se pasa un modelo se obtendrá la instancia en vez del servicio.
@@ -354,12 +378,15 @@ function response(): \sowerphp\core\Network_Response
  *
  * @param string $view Nombre de la vista que se desea renderizar.
  * @param array $data Variables que se pasarán a la vista al renderizar.
- * @return \sowerphp\core\Network_Response  Objeto con la respuesta de la
- * solicitud HTTP que contiene en el cuerpo (body) la vista renderizada.
+ * @return \sowerphp\core\Service_View|\sowerphp\core\Network_Response
  */
-function view(string $view, array $data = []): \sowerphp\core\Network_Response
+function view(?string $view = null, array $data = [])
 {
-    return app('view')->renderToResponse($view, $data);
+    $viewService = app('view');
+    if ($view === null) {
+        return $viewService;
+    }
+    return $viewService->renderToResponse($view, $data);
 }
 
 /**
@@ -568,4 +595,59 @@ function message_format(string $string, bool $html = true): string
     }
     // entregar string modificado con los enlaces correspondientes
     return $string;
+}
+
+/**
+ * Determinar si un valor puede ser serializado.
+ *
+ * @param mixed $value Valor que se desea saber si puede ser serializado.
+ * @return bool =true si el valor puede ser serializado.
+ */
+function is_serializable($value): bool
+{
+    // Tipos que necesitan ser serializados.
+    if (is_array($value) || is_object($value)) {
+        return true;
+    }
+
+    // Los tipos escalares no necesitan ser serializados.
+    if (is_scalar($value) || is_null($value)) {
+        return false;
+    }
+
+    // Por defecto, cualquier otro tipo necesitaría ser serializado.
+    return true;
+}
+
+/**
+ * Determinar si los datos están serializados.
+ *
+ * @param mixed $data Datos que se desea saber si están serializados.
+ * @return bool =true si los datos están serialiados.
+ */
+function is_serialized($data): bool
+{
+    // Si no es una cadena, no está serializado.
+    if (!is_string($data)) {
+        return false;
+    }
+    // Si es "N;", está serializado (valor NULL).
+    if ($data === 'N;') {
+        return true;
+    }
+    // Verificar si es un valor serializado más complejo.
+    if (preg_match('/^([adObis]):/', $data, $matches)) {
+        switch ($matches[1]) {
+            case 'a':
+            case 'O':
+            case 's':
+                return (bool)preg_match("/^{$matches[1]}:[0-9]+:/s", $data);
+            case 'b':
+            case 'i':
+            case 'd':
+                return (bool)preg_match("/^{$matches[1]}:[0-9.E-]+;$/", $data);
+        }
+    }
+    // Otros casos no se consideran serializados.
+    return false;
 }

@@ -2,7 +2,7 @@
 
 Se ha creado una cuenta para usted en la aplicación web disponible en:
 
-    <?=$_url."\n"?>
+    <?=url()."\n"?>
 
 Sus datos de acceso son:
 
@@ -11,12 +11,12 @@ Sus datos de acceso son:
 
 El enlace directo para iniciar sesión es el siguiente:
 
-    <?=$_url?>/usuarios/ingresar
+    <?=url('/usuarios/ingresar')."\n"?>
 
 Una vez ingrese al sistema puede editar su perfil, cambiar su contraseña y
 modificar otros datos básicos de su cuenta en:
 
-    <?=$_url?>/usuarios/perfil
+    <?=url('/usuarios/perfil')."\n"?>
 
 atte,
 

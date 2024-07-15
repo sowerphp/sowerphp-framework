@@ -301,6 +301,8 @@ class Service_View implements Interface_Service
      * Normalizar los datos que se pasarán al motor de renderizado de la vista.
      *
      * Se preocupa de que existan las siguientes variables para la vista:
+     *   - auth: servicio de autenticación.
+     *   - user: usuario autenticado si existe.
      *   - _base: si la aplicación está en un subdirectorio esto lo tendrá.
      *   - _request: solicitud que se hizo a la aplicación.
      *   - _url: dirección web completa de la aplicación.
@@ -308,6 +310,7 @@ class Service_View implements Interface_Service
      *   - _nav_website: menú de la página web (público).
      *   - _nav_app: menú de la aplicación web (privado).
      *   - _nav_module: menú del módulo que se está ejecutando.
+     *   - __view_layout: layout que se debe usar para el renderizado.
      *   - __view_title: título para tag title.
      *   - __view_header: tags para JS y CSS en el header.
      *
@@ -316,16 +319,17 @@ class Service_View implements Interface_Service
      */
     protected function normalizeData(array $data): array
     {
+        // Obtener objeto request (si existe).
         $request = $this->app->getContainer()->bound('request')
             ? request()
             : null
         ;
-        // Diferentes menús que se podrían utilizar.
-        $data['_nav_website'] = (array)config('nav.website');
-        $data['_nav_app'] = (array)config('nav.app');
         // Agregar variables de autenticación y usuario.
         $data['auth'] = app('auth');
         $data['user'] = user();
+        // Diferentes menús que se podrían utilizar.
+        $data['_nav_website'] = (array)config('nav.website');
+        $data['_nav_app'] = (array)config('nav.app');
         // Agregar variables por defecto que se pasarán a la vista.
         $data['_url'] = url();
         if ($request) {
@@ -342,10 +346,14 @@ class Service_View implements Interface_Service
         } else {
             $data['_page'] = config('app.ui.homepage');
         }
+        // Asignar el layout por defecto para el renderizado.
+        if (($data['__view_layout'] ?? null) === null) {
+            $data['__view_layout'] = $this->getLayout();
+        }
         // Asignar el título de la página si no está asignado.
         if (empty($data['__view_title'])) {
             $data['__view_title'] = config('app.name')
-                . (($data['_request']??null) ? (': ' . $data['_request']) : '')
+                . (($data['_request'] ?? null) ? (': ' . $data['_request']) : '')
             ;
         }
         // Preparar __view_header pues viene como arreglo y debe ser string.
@@ -371,6 +379,24 @@ class Service_View implements Interface_Service
         $data['__view_header'] = $__view_header;
         // Entregar los datos preparados.
         return $data;
+    }
+
+    /**
+     * Entregar el layout que se está utilizando para el renderizado de vistas.
+     *
+     * @return string|null
+     */
+    public function getLayout(): ?string
+    {
+        $request = $this->app->getContainer()->bound('request')
+            ? request()
+            : null
+        ;
+        $session = $request ? $request->session() : null;
+        if ($session) {
+            return $session->get('config.app.ui.layout', $this->defaultLayout);
+        }
+        return $this->defaultLayout;
     }
 
     /**
@@ -506,15 +532,15 @@ class View_Engine_Php extends View_Engine
      * Método que toma un archivo PHP y lo renderiza reemplazando las variables
      * que existan en dicho archivo.
      *
-     * @param string $__filepath Ruta absoluta al archivo PHP.
+     * @param string $__view_filepath Ruta absoluta al archivo PHP.
      * @param array $__data Variables que se desean reemplazar.
      * @return string El contenido del archivo ya renderizado.
      */
-    public function renderPhp(string $__filepath, array $__data): string
+    public function renderPhp(string $__view_filepath, array &$__data): string
     {
         ob_start(); // NOTE: obligatorio o se incluirá en la salida.
         extract($__data, EXTR_SKIP);
-        include $__filepath;
+        include $__view_filepath;
         $vars = get_defined_vars();
         foreach ($vars as $var => $val) {
             if (substr($var, 0, 7) === '__view_') {

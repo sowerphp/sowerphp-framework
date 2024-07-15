@@ -44,6 +44,7 @@
         "illuminate/validation": "^8.0",
         "predis/predis": "^2.2",
         "illuminate/redis": "^8.83",
-        "twig/twig": "^3.10"
+        "twig/twig": "^3.10",
+        "illuminate/encryption": "^8.83"
     }
 }

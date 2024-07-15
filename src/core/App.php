@@ -60,6 +60,7 @@ class App
         'cache' => Service_Cache::class,
         'database' => Service_Database::class,
         'events' => Service_Events::class,
+        'encryption' => Service_Encryption::class,
         'model' => Service_Model::class,
         //'mail' => Service_Mail::class,
         //'http_client' => Service_Http_Client::class,

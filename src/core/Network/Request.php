@@ -109,10 +109,14 @@ class Network_Request extends Request
      *
      * @return Service_Http_Session
      */
-    public function session()
+    public function session(): ?Service_Http_Session
     {
         if (!isset($this->sessionService)) {
-            $this->sessionService = session();
+            try {
+                $this->sessionService = session();
+            } catch (\Exception $e) {
+                $this->sessionService = null;
+            }
         }
         return $this->sessionService;
     }

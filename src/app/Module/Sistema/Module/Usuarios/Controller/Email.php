@@ -66,17 +66,13 @@ class Controller_Email extends \sowerphp\autoload\Controller
                     );
                 } else {
                     // preparar mensaje a enviar
-                    $layout = $this->layout;
-                    $this->layout = null;
-                    $this->set(array(
+                    $msg = view()->render('Email/grupos_email', [
                         'mensaje' => $_POST['mensaje'],
                         'n_emails' => $n_emails,
                         'grupos' => $Grupos->getGlosas($_POST['grupos']),
                         'de_nombre' => $this->Auth->User->nombre,
                         'de_email' => $this->Auth->User->email,
-                    ));
-                    $msg = $this->render('Email/grupos_email')->body();
-                    $this->layout = $layout;
+                    ]);
                     // agrupar
                     if ($_POST['agrupar']) {
                         $grupo = -1;

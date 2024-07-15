@@ -271,10 +271,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
                 foreach ($datos as $dato) {
                     $class = get_called_class();
                     if (in_array($configuracion . '_' . $dato['variable'], $class::$config_encrypt)) {
-                        $dato['valor'] = \sowerphp\core\Utility_Data::decrypt(
-                            $dato['valor'],
-                            config('app.key')
-                        );
+                        $dato['valor'] = decrypt($dato['valor']);
                     }
                     $this->config[$configuracion][$dato['variable']] =
                         $dato['json'] ? json_decode($dato['valor']) : $dato['valor']
@@ -393,10 +390,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
                                 'No está definida la configuración app.pkey para encriptar configuración del usuario.'
                             );
                         }
-                        $valor = \sowerphp\core\Utility_Data::encrypt(
-                            $valor,
-                            $app_pkey
-                        );
+                        $valor = encrypt($valor);
                     }
                     $Config->valor = $valor;
                     if ($valor !== null) {

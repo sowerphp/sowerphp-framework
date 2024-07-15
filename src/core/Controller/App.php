@@ -172,7 +172,8 @@ class Controller_App extends \sowerphp\autoload\Controller
     {
         ob_clean();
         // Es una solicitud mediante un servicio web.
-        if ($this->request->isApiRequest()) {
+        $request = request();
+        if ($request->isApiRequest()) {
             $status = $exception->getCode() < 400 ? 400 : $exception->getCode();
             return response()->json(
                 $exception->getMessage(),
@@ -188,7 +189,6 @@ class Controller_App extends \sowerphp\autoload\Controller
             'severity' => $exception->severity ?? LOG_ERR,
         ];
         // Armar datos para la vista HTML (web).
-        $this->layout .= '.min';
         $data['error_reporting'] = config('app.debug');
         $layersService = app('layers');
         $data['message'] = htmlspecialchars($data['message']);

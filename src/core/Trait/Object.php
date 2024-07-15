@@ -67,7 +67,16 @@ trait Trait_Object
      */
     public function set(array $attributes)
     {
-        return $this->fill($attributes);
+        $props = (new \ReflectionClass($this))->getProperties(
+            \ReflectionProperty::IS_PUBLIC
+        );
+        foreach ($props as &$prop) {
+            $name = $prop->getName();
+            if (isset($attributes[$name])) {
+                $this->$name = $attributes[$name];
+            }
+        }
+        return $this;
     }
 
 }

@@ -82,7 +82,6 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
             return redirect('/');
         }
         // Asignar variables para la vista.
-        $this->layout .= '.min';
         $this->set([
             'redirect' => $redirect ? base64_decode ($redirect) : null,
             'self_register' => (bool)config('auth.self_register.enabled'),
@@ -180,50 +179,68 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
      * Acción para recuperar la contraseña
      * @param usuario Usuario al que se desea recuperar su contraseña
      */
-    public function contrasenia_recuperar($usuario = null, $codigo = null)
+    public function contrasenia_recuperar(
+        Request $request,
+        $usuario = null,
+        $codigo = null
+    )
     {
-        $this->layout .= '.min';
-        $class = $this->Auth->settings['model'];
-        // pedir correo
+        // Pedir correo.
         if ($usuario == null) {
             if (!isset($_POST['id'])) {
                 return $this->render('Usuarios/contrasenia_recuperar_step1');
             } else {
-                // validar captcha
+                // Validar captcha.
                 try {
                     \sowerphp\general\Utility_Google_Recaptcha::check();
                 } catch (\Exception $e) {
-                    SessionMessage::error(__(
-                        'Falló validación captcha: %s',
-                        $e->getMessage()
-                    ));
-                    return redirect($this->request->getRequestUriDecoded());
+                    return redirect($request->getRequestUriDecoded())
+                        ->withError(__(
+                            'Falló validación captcha: %s',
+                            $e->getMessage()
+                        )
+                    );
                 }
-                // buscar usuario y solicitar correo de recuperación
+                // Buscar usuario y solicitar correo de recuperación.
                 try {
-                    $Usuario = new $class($_POST['id']);
+                    $Usuario = model()->getUser($_POST['id']);
                 } catch (\Exception $e) {
-                    $Usuario = new $class();
+                    $Usuario = model()->getUser();
                 }
                 if (!$Usuario->exists()) {
-                    SessionMessage::error(
-                        'Usuario no válido. Recuerda que puedes buscar por tu nombre de usuario o correo.'
-                    );
-                    return $this->render('Usuarios/contrasenia_recuperar_step1');
+                    return $this->render('Usuarios/contrasenia_recuperar_step1')
+                        ->withError(
+                            'Usuario no válido. Recuerda que puedes buscar por tu nombre de usuario o correo.'
+                        )
+                    ;
                 }
                 else if (!$Usuario->activo) {
-                    SessionMessage::error(
-                        'Usuario no activo. Primero deberás realizar la activación del usuario, luego podrás cambiar la contraseña.'
-                    );
-                    return $this->render('Usuarios/contrasenia_recuperar_step1');
+                    return $this->render('Usuarios/contrasenia_recuperar_step1')
+                        ->withError(
+                            'Usuario no activo. Primero deberás realizar la activación del usuario, luego podrás cambiar la contraseña.'
+                        )
+                    ;
                 }
                 else {
-                    $this->contrasenia_recuperar_email(
-                        $Usuario->email,
-                        $Usuario->nombre,
-                        $Usuario->usuario,
-                        md5(hash('sha256', $Usuario->contrasenia))
-                    );
+                    // Renderizar mensaje de correo electrónico.
+                    $msg = view()->render('Usuarios/contrasenia_recuperar_email', [
+                        'nombre' => $Usuario->nombre,
+                        'usuario' => $Usuario->usuario,
+                        'hash' => md5(hash('sha256', $Usuario->contrasenia)),
+                        'ip' => $request->fromIp(),
+                    ]);
+                    // Enviar correo electrónico.
+                    $email = new \sowerphp\core\Network_Email();
+                    $email->to($Usuario->email);
+                    $email->subject('Recuperación de contraseña.');
+                    $status = $email->send($msg);
+                    // Redireccionar con error.
+                    if ($status !== true && $status['type'] == 'error') {
+                        return redirect('/usuarios/contrasenia/recuperar')->withError(
+                            $status['message']
+                        );
+                    }
+                    // Redireccionar ok.
                     return redirect('/usuarios/ingresar')->withSuccess(
                         'Se ha enviado un email con las instrucciones para recuperar tu contraseña.'
                     );
@@ -233,18 +250,18 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
         // cambiar contraseña
         else {
             // buscar usuario al que se desea cambiar la contraseña
-            $Usuario = new $class(urldecode($usuario));
+            $Usuario = model()->getUser(urldecode($usuario));
             if (!$Usuario->exists()) {
-                SessionMessage::error('Usuario inválido.');
-                return redirect('/usuarios/contrasenia/recuperar');
+                return redirect('/usuarios/contrasenia/recuperar')->withError(
+                    'Usuario inválido.'
+                );
             }
             // formulario de cambio de contraseña
             if (!isset($_POST['contrasenia1'])) {
-                $this->set([
+                return $this->render('Usuarios/contrasenia_recuperar_step2', [
                     'usuario' => $Usuario->usuario,
                     'codigo' => $codigo,
                 ]);
-                return $this->render('Usuarios/contrasenia_recuperar_step2');
             }
             // procesar cambio de contraseña
             else {
@@ -252,29 +269,31 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                 try {
                     \sowerphp\general\Utility_Google_Recaptcha::check();
                 } catch (\Exception $e) {
-                    SessionMessage::error(__(
-                        'Falló validación captcha: %s',
-                        $e->getMessage()
-                    ));
-                    return redirect($this->request->getRequestUriDecoded());
+                    return redirect($request->getRequestUriDecoded())
+                        ->withError(__(
+                            'Falló validación captcha: %s',
+                            $e->getMessage()
+                        ))
+                    ;
                 }
                 // cambiar la contraseña al usuario
                 if ($_POST['codigo'] != md5(hash('sha256', $Usuario->contrasenia))) {
-                    SessionMessage::error(
-                        'El enlace para recuperar su contraseña no es válido, solicite uno nuevo por favor.'
-                    );
-                    return redirect('/usuarios/contrasenia/recuperar');
+                    return redirect('/usuarios/contrasenia/recuperar')
+                        ->withError(
+                            'El enlace para recuperar su contraseña no es válido, solicite uno nuevo por favor.'
+                        )
+                    ;
                 }
                 else if (
                     empty ($_POST['contrasenia1'])
                     || empty ($_POST['contrasenia2'])
                     || $_POST['contrasenia1'] != $_POST['contrasenia2']
                 ) {
-                    SessionMessage::warning(
+                    return $this->render('Usuarios/contrasenia_recuperar_step2', [
+                        'usuario' => $usuario,
+                    ])->withWarning(
                         'Contraseña nueva inválida (en blanco o no coinciden).'
                     );
-                    $this->set('usuario', $usuario);
-                    return $this->render('Usuarios/contrasenia_recuperar_step2');
                 }
                 else {
                     $Usuario->savePassword($_POST['contrasenia1']);
@@ -285,34 +304,6 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                     ));
                 }
             }
-        }
-    }
-
-    /**
-     * Método que envía el correo con los datos para poder recuperar la contraseña
-     * @param correo Donde enviar el email
-     * @param nombre Nombre "real" del usuario
-     * @param usuario Nombre de usuario
-     * @param hash Hash para identificar que el usuario es quien dice ser y cambiar su contraseña
-     */
-    private function contrasenia_recuperar_email($correo, $nombre, $usuario, $hash)
-    {
-        $this->layout = null;
-        $this->set([
-            'nombre' => $nombre,
-            'usuario' => $usuario,
-            'hash' => $hash,
-            'ip' => $this->Auth->ip(),
-        ]);
-        $msg = $this->render('Usuarios/contrasenia_recuperar_email')->body();
-        $email = new \sowerphp\core\Network_Email();
-        $email->to($correo);
-        $email->subject('Recuperación de contraseña');
-        $status = $email->send($msg);
-        if ($status !== true && $status['type'] == 'error') {
-            return redirect('/usuarios/contrasenia/recuperar')->withError(
-                $status['message']
-            );
         }
     }
 
@@ -328,12 +319,13 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
             $filterListarUrl = '';
             $filterListar = '';
         }
-        $class = $this->Auth->settings['model'];
         // si se envió el formulario se procesa
         if (isset($_POST['submit'])) {
-            $Usuario = new $class();
-            $Usuario->set($_POST);
-            $Usuario->usuario = \sowerphp\core\Utility_String::normalize($Usuario->usuario);
+            $Usuario = model()->getUser();
+            $Usuario->fill($_POST);
+            $Usuario->usuario = \sowerphp\core\Utility_String::normalize(
+                $Usuario->usuario
+            );
             $Usuario->email = mb_strtolower($Usuario->email);
             $ok = true;
             if ($Usuario->checkIfUserAlreadyExists()) {
@@ -373,18 +365,16 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                     // enviar correo
                     $emailConfig = config('email.default');
                     if (!empty($emailConfig['type']) && !empty($emailConfig['from'])) {
-                        $layout = $this->layout;
-                        $this->layout = null;
-                        $this->set(array(
-                            'nombre'=>$Usuario->nombre,
-                            'usuario'=>$Usuario->usuario,
-                            'contrasenia'=>$contrasenia,
-                        ));
-                        $msg = $this->render('Usuarios/crear_email')->body();
-                        $this->layout = $layout;
+                        // Renderizar correo electrónico.
+                        $msg = view()->render('Usuarios/crear_email', [
+                            'nombre' => $Usuario->nombre,
+                            'usuario' => $Usuario->usuario,
+                            'contrasenia' => $contrasenia,
+                        ]);
+                        // Enviar correo electrónico.
                         $email = new \sowerphp\core\Network_Email();
                         $email->to($Usuario->email);
-                        $email->subject('Cuenta de usuario creada');
+                        $email->subject('Cuenta de usuario creada.');
                         $email->send($msg);
                         SessionMessage::success(__(
                             'Registro creado. Se envió email a %s con los datos de acceso.',
@@ -403,17 +393,16 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                 return redirect('/sistema/usuarios/usuarios/listar' . $filterListar);
             }
         }
-        // setear variables
-        $class::$columnsInfo['contrasenia']['null'] = true;
-        $class::$columnsInfo['hash']['null'] = true;
-        $this->set([
+        // Asignar variables para la vista y renderizar.
+        $this->model['singular']::$columnsInfo['contrasenia']['null'] = true;
+        $this->model['singular']::$columnsInfo['hash']['null'] = true;
+        $this->setGruposAsignables();
+        return $this->render('Usuarios/crear_editar', [
             'accion' => 'Crear',
-            'columns' => $class::$columnsInfo,
+            'columns' => $this->model['singular']::$columnsInfo,
             'grupos_asignados' => (isset($_POST['grupos']) ? $_POST['grupos'] : []),
             'listarUrl' => '/sistema/usuarios/usuarios/listar' . $filterListar,
         ]);
-        $this->setGruposAsignables();
-        return $this->render('Usuarios/crear_editar');
     }
 
     /**
@@ -443,17 +432,16 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
         }
         // si no se ha enviado el formulario se mostrará
         if (!isset($_POST['submit'])) {
-            $class::$columnsInfo['contrasenia']['null'] = true;
+            $this->model['singular']::$columnsInfo['contrasenia']['null'] = true;
             $grupos_asignados = $Usuario->groups();
             $this->setGruposAsignables();
-            $this->set([
+            return $this->render('Usuarios/crear_editar', [
                 'accion' => 'Editar',
                 'Obj' => $Usuario,
-                'columns' => $class::$columnsInfo,
+                'columns' => $this->model['singular']::$columnsInfo,
                 'grupos_asignados' => array_keys($grupos_asignados),
                 'listarUrl' => $redirect,
             ]);
-            return $this->render('Usuarios/crear_editar');
         }
         // si se envió el formulario se procesa
         else {
@@ -490,17 +478,15 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                     && !empty($emailConfig['user'])
                     && !empty($emailConfig['pass'])
                 ) {
-                    $layout = $this->layout;
-                    $this->layout = null;
-                    $this->set([
+                    // Renderizar correo.
+                    $msg = view()->render('Usuarios/activo_email', [
                         'nombre' => $Usuario->nombre,
                         'usuario' => $Usuario->usuario,
                     ]);
-                    $msg = $this->render('Usuarios/activo_email')->body();
-                    $this->layout = $layout;
+                    // Enviar correo.
                     $email = new \sowerphp\core\Network_Email();
                     $email->to($Usuario->email);
-                    $email->subject('Cuenta de usuario habilitada');
+                    $email->subject('Cuenta de usuario habilitada.');
                     $email->send($msg);
                 }
             }
@@ -521,10 +507,11 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
      */
     private function setGruposAsignables()
     {
+        $user = request()->user();
         $grupos = (new Model_Grupos())->getList();
         // si el usuario no pertenece al grupo sysadmin quitar los grupos
         // sysadmin y appadmin del listado para evitar que los asignen
-        if (!$this->Auth->User->inGroup('sysadmin')) {
+        if (!$user->inGroup('sysadmin')) {
             $prohibidos = ['sysadmin', 'appadmin', 'passwd', 'soporte', 'mantenedores', 'webservices'];
             $aux = $grupos;
             $grupos = [];
@@ -535,7 +522,7 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
             }
             unset ($aux);
         }
-        $this->set('grupos', $grupos);
+        $this->set(['grupos' => $grupos]);
     }
 
     /**
@@ -692,40 +679,36 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                 'qrcode' => base64_encode(url() . ';' . $user->hash),
                 'auths2' => \sowerphp\app\Model_Datasource_Auth2::getAll(),
                 'layouts' => (array)config('app.ui.layouts'),
-                'layout' => $user->config_app_ui_layout ?? $this->layout,
+                'layout' => $user->config_app_ui_layout ?? view()->getLayout(),
             ]);
         }
     }
 
     /**
-     * Acción que permite registrar un nuevo usuario en la aplicación
+     * Acción que permite registrar un nuevo usuario en la aplicación.
      */
-    public function registrar()
+    public function registrar(Request $request)
     {
-        // si ya está logueado se redirecciona
-        if ($this->Auth->logged()) {
-            SessionMessage::info(sprintf(
+        $user = $request->user();
+        // Si ya está autenticado se redirecciona.
+        if ($user) {
+            return redirect('/')->withInfo(__(
                 'Usuario <em>%s</em> tiene su sesión iniciada. Para registrar un nuevo usuaro primero debe cerrar esta sesión.',
-                $this->Auth->User->usuario
+                $user->usuario
             ));
-            return redirect(
-                $this->Auth->settings['redirect']['login']
-            );
         }
-        // si no se permite el registro se redirecciona
+        // Si no se permite el registro se redirecciona.
         $config = config('auth.self_register');
         if (!$config['enabled']) {
-            SessionMessage::error('El registro de usuarios está deshabilitado.');
-            return redirect(
-                $this->Auth->settings['redirect']['login']
+            return redirect('/')->withError(
+                'El registro de usuarios está deshabilitado.'
             );
         }
-        // colocar variable para terminos si está configurado
+        // Colocar variable para terminos y condicines si está configurada.
         if (!empty($config['terms'])) {
-            $this->set('terms', $config['terms']);
+            $this->set(['terms' => $config['terms']]);
         }
-        $this->layout .= '.min';
-        // si se envió formulario se procesa
+        // Si se envió formulario se procesa.
         if (isset($_POST['usuario'])) {
             // verificar que campos no sean vacios
             if (empty($_POST['nombre']) || empty($_POST['usuario']) || empty($_POST['email'])) {
@@ -752,10 +735,11 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                 return;
             }
             // validar que el usuario y/o correo no exista previamente
-            $class = $this->Auth->settings['model'];
-            $Usuario = new $class();
+            $Usuario = model()->getUser();
             $Usuario->nombre = $_POST['nombre'];
-            $Usuario->usuario = \sowerphp\core\Utility_String::normalize($_POST['usuario']);
+            $Usuario->usuario = \sowerphp\core\Utility_String::normalize(
+                $_POST['usuario']
+            );
             $Usuario->email = mb_strtolower($_POST['email']);
             if ($Usuario->checkIfUserAlreadyExists()) {
                 SessionMessage::warning(__(
@@ -786,15 +770,12 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                 // enviar correo
                 $emailConfig = config('email.default');
                 if (!empty($emailConfig['type']) && !empty($emailConfig['from'])) {
-                    $layout = $this->layout;
-                    $this->layout = null;
-                    $this->set([
-                        'nombre'=>$Usuario->nombre,
-                        'usuario'=>$Usuario->usuario,
-                        'contrasenia'=>$contrasenia,
+                    $msg = view()->render('Usuarios/crear_email', [
+                        'nombre' => $Usuario->nombre,
+                        'usuario' => $Usuario->usuario,
+                        'contrasenia' => $contrasenia,
                     ]);
-                    $msg = $this->render('Usuarios/crear_email')->body();
-                    $this->layout = $layout;
+                    // Enviar correo electrónico.
                     $email = new \sowerphp\core\Network_Email();
                     $email->to($Usuario->email);
                     $email->subject('Cuenta de usuario creada.');
@@ -873,8 +854,9 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
     /**
      * Acción que verifica el token ingresado y hace el pareo con telegram.
      */
-    public function telegram_parear()
+    public function telegram_parear(Request $request)
     {
+        $user = $request()->user();
         if (!empty($_POST['telegram_token'])) {
             $token = $_POST['telegram_token'];
             $telegram_user = cache()->get('telegram.pairing.'.$token);
@@ -897,13 +879,13 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                 }
                 // cuenta de telegram no está pareada, guardar
                 else {
-                    $this->Auth->User->set([
+                    $user->fill([
                         'config_telegram_id' => $telegram_user['id'],
                         'config_telegram_username' => $telegram_user['username'],
                     ]);
                     try {
-                        $this->Auth->User->save();
-                        $this->Auth->saveCache();
+                        $user->save();
+                        auth()->save();
                         cache()->forget('telegram.pairing.'.$token);
                         SessionMessage::success(__(
                             'Usuario @%s pareado con éxito.',
@@ -923,15 +905,16 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
     /**
      * Acción que desparea al usuario de Telegram.
      */
-    public function telegram_desparear()
+    public function telegram_desparear(Request $request)
     {
-        $this->Auth->User->set([
+        $user = $request->user();
+        $user->fill([
             'config_telegram_id' => null,
             'config_telegram_username' => null,
         ]);
         try {
-            $this->Auth->User->save();
-            $this->Auth->saveCache();
+            $user->save();
+            auth()->save();
             SessionMessage::success('Su cuenta ya no está asociada a Telegram.');
         } catch (\Exception $e) {
             SessionMessage::error(
@@ -953,7 +936,7 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
             return redirect('/usuarios/perfil')->withError('Debe indicar el nuevo diseño que desea utilizar en la aplicación.');
         }
         // cambiar layout
-        $user->set([
+        $user->fill([
             'config_app_ui_layout' => $layout,
         ]);
         $user->save();

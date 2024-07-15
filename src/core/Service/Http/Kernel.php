@@ -492,7 +492,9 @@ class Service_Http_Kernel implements Interface_Service
         $response = $this->invokeControllerAction([
             'class' => '\sowerphp\autoload\Controller_App',
             'action' => 'error',
-            'parameters' => ['exception' => $exception],
+            'parameters' => [
+                'exception' => $exception,
+            ],
         ]);
         return $response;
     }

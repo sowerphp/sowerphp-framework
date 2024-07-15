@@ -1,3 +1,5 @@
+<?php $__view_layout .= '.min'; ?>
+<?php $__view_title = 'Ha ocurrido un error'; ?>
 <div class="text-center mt-4 mb-4">
     <a href="<?=$_base?>/"><img src="<?=$_base?>/img/logo.png" alt="Logo" class="img-fluid" style="max-width: 200px" /></a>
 </div>

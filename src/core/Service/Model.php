@@ -122,6 +122,8 @@ class Service_Model implements Interface_Service
         $cacheKey = $this->getCacheKey($id, $pk);
         if (!isset($this->cache[$cacheKey])) {
             $modelClass = $this->getModelClass($id);
+            // TODO: refactorizar modelos para recibir arreglo con la PK.
+            // Con eso se deja de usar ReflectionClass (que es más costosa).
             $this->cache[$cacheKey] = (new \ReflectionClass($modelClass))
                 ->newInstanceArgs($pk)
             ;
