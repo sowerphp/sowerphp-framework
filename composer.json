@@ -16,7 +16,7 @@
         "source": "https://github.com/sascocl/sowerphp"
     },
     "autoload": {
-        "classmap": ["src"],
+        "classmap": ["src/"],
         "exclude-from-classmap": [
             "src/**/App/"
         ]

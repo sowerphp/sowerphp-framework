@@ -111,7 +111,7 @@ class App
     protected function __construct()
     {
         // NOTE: ¡este método debe estar vacío siempre!
-        // Cualquier lógica de inicialización deber ir en boot()
+        // Cualquier lógica de inicialización deber ir en bootstrap()
     }
 
     /**
@@ -123,7 +123,7 @@ class App
             self::$instance = new self();
             try {
                 self::$instance->setType($type);
-                self::$instance->boot($fullBoot);
+                self::$instance->bootstrap($fullBoot);
             } catch (\Throwable $throwable) {
                 self::$instance->handleThrowable($throwable);
                 return null;
@@ -249,13 +249,12 @@ class App
     /**
      * Inicializa la aplicación completa, con todos sus componentes y servicios.
      */
-    protected function boot(bool $fullBoot = true): void
+    protected function bootstrap(bool $fullBoot = true): void
     {
-        $this->bootCore();
+        $this->bootstrapCore();
         if ($fullBoot) {
             ob_start();
-            $this->bootServices();
-            $this->bootLayers();
+            $this->bootstrapServices();
         }
     }
 
@@ -266,7 +265,7 @@ class App
      *   - Preparar el entorno mínimo (tiempo inicio, errores y buffer de salida).
      *   - Crear el contenedor de servicios y registrar la aplicación en este.
      */
-    protected function bootCore(): void
+    protected function bootstrapCore(): void
     {
         // Definir el tiempo de inicio del script.
         define('TIME_START', microtime(true));
@@ -291,22 +290,11 @@ class App
      *
      * @return void
      */
-    protected function bootServices(): void
+    protected function bootstrapServices(): void
     {
         $this->registerServices();
         $this->executeBootMethodOnServices();
         $this->registerConfigServices();
-    }
-
-    /**
-     * Inicializar las capas de la aplicación.
-     */
-    protected function bootLayers(): void
-    {
-        // Inicializar cada capa con su archivo de inicialización personalizado.
-        $this->getService('layers')->loadFilesReverse([
-            '/App/bootstrap.php',
-        ]);
     }
 
     /**

@@ -34,7 +34,7 @@ class Service_Http_Auth implements Interface_Service
     protected $app;
     protected $configService;
     protected $request;
-    protected $guards;
+    protected $guards = [];
     protected $authorization;
 
     public function __construct(
@@ -81,7 +81,7 @@ class Service_Http_Auth implements Interface_Service
      */
     protected function loadGuards(): void
     {
-        $guards = $this->configService['auth.guards'];
+        $guards = (array)$this->configService['auth.guards'];
         foreach ($guards as $guard => $config) {
             $this->configService['auth.guards.' . $guard . '.name'] = $guard;
             if (!isset($config['class'])) {
@@ -123,6 +123,9 @@ class Service_Http_Auth implements Interface_Service
             } else {
                 $name = $this->configService['auth.defaults.guard'];
             }
+        }
+        if (!isset($this->guards[$name])) {
+            throw new \Exception(__('Guard %s no está configurada.', $name));
         }
         return $this->guards[$name];
     }

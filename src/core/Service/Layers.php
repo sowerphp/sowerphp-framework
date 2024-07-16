@@ -57,6 +57,11 @@ class Service_Layers implements Interface_Service
         '/App/helpers.php',
     ];
 
+    /**
+     * Archivo de configuración de las capas de la aplicación.
+     *
+     * @var string
+     */
     protected $configLayersFile = '/config/layers.php';
 
     /**
