@@ -43,7 +43,6 @@ class Service_Layers implements Interface_Service
      */
     protected $startFiles = [
         '/public/index.php',
-        '/console/shell.php',
     ];
 
     /**

@@ -35,8 +35,18 @@ class Service_Config implements Interface_Service, \ArrayAccess
      */
     protected $repository;
 
-    // Dependencias de otros servicios.
+    /**
+     * Servicio de capas.
+     *
+     * @var Service_Layers
+     */
     protected $layersService;
+
+    /**
+     * Servicio de módulos.
+     *
+     * @var Service_Module
+     */
     protected $moduleService;
 
     /**
@@ -70,12 +80,15 @@ class Service_Config implements Interface_Service, \ArrayAccess
         $this->repository = new Repository([]);
     }
 
+    /**
+     * Registra el servicio de configuración.
+     */
     public function register(): void
     {
     }
 
     /**
-     * Inicializar servicio de configuración.
+     * Inicializa el servicio de configuración.
      *
      * @return void
      */
@@ -101,14 +114,24 @@ class Service_Config implements Interface_Service, \ArrayAccess
      */
     protected function loadEnvironmentVariables(): void
     {
+        // Si el entorno está definido como testing que el archivo de variables
+        // de entorno exista será opcional. Pues se pueden pasar las variables
+        // mediante el archivo phpunit.xml (u otro método) y no usar el archivo
+        // de configuración normal .env
+        $this->set(['app.env' => $_ENV['APP_ENV'] ?? $this->get('app.env')]);
+        // Cargar variables desde archivo de variables de entorno.
         $env_file = $this->layersService->getProjectPath();
         $env = \Dotenv\Dotenv::createMutable($env_file, '.env');
         try {
             $env->load();
         } catch (\Dotenv\Exception\InvalidPathException $e) {
-            die($e->getMessage());
+            if ($this->get('app.env') !== 'testing') {
+                die('InvalidPathException: ' . $e->getMessage() . "\n");
+            }
         } catch (\Dotenv\Exception\InvalidFileException $e) {
-            die($e->getMessage());
+            if ($this->get('app.env') !== 'testing') {
+                die('InvalidFileException:' . $e->getMessage() . "\n");
+            }
         }
     }
 

@@ -16,7 +16,13 @@
         "source": "https://github.com/sascocl/sowerphp"
     },
     "autoload": {
-        "classmap": ["src/"]
+        "classmap": ["src"],
+        "exclude-from-classmap": [
+            "src/**/App/"
+        ]
+    },
+    "autoload-dev": {
+        "classmap": ["tests/"]
     },
     "require": {
         "php": "^7.3 || ^8.0",
@@ -25,12 +31,12 @@
         "graphp/graphviz": "~0.2.2",
         "guzzlehttp/guzzle": "^7.8",
         "libchart/libchart": "~1.5.0",
-        "michelf/php-markdown": "1.9.1",
+        "michelf/php-markdown": "^1.9.1",
         "phpmailer/phpmailer": "^6.9.1",
-        "phpoffice/phpspreadsheet": "1.25.2",
-        "robthree/twofactorauth": "1.8.2",
+        "phpoffice/phpspreadsheet": "^1.25.2",
+        "robthree/twofactorauth": "^1.8.2",
         "vlucas/phpdotenv": "^5.6.0",
-        "tecnickcom/tcpdf": "6.7.5",
+        "tecnickcom/tcpdf": "^6.7.5",
         "illuminate/container": "^8.83",
         "illuminate/session": "^8.83",
         "illuminate/cache": "^8.83",
@@ -46,5 +52,10 @@
         "illuminate/redis": "^8.83",
         "twig/twig": "^3.10",
         "illuminate/encryption": "^8.83"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6",
+        "mockery/mockery": "^1.6",
+        "fzaninotto/faker": "^1.9"
     }
 }

@@ -111,24 +111,40 @@ class App
     protected function __construct()
     {
         // NOTE: ¡este método debe estar vacío siempre!
-        // Cualquier lógica de inicialización deber ir en init()
+        // Cualquier lógica de inicialización deber ir en boot()
     }
 
     /**
      * Método que se asegura de entregar una única instancia de la clase.
      */
-    public static function getInstance(): ?self
+    public static function getInstance(?string $type = null, bool $fullBoot = true): ?self
     {
         if (!isset(self::$instance)) {
             self::$instance = new self();
             try {
-                self::$instance->init();
+                self::$instance->setType($type);
+                self::$instance->boot($fullBoot);
             } catch (\Throwable $throwable) {
                 self::$instance->handleThrowable($throwable);
                 return null;
             }
         }
         return self::$instance;
+    }
+
+    /**
+     * Definir tipo de aplicación que se está ejecutando.
+     *
+     * @return string
+     */
+    protected function setType(?string $type = null): string
+    {
+        if ($type !== null) {
+            $this->type = $type;
+        } else {
+            $this->type = php_sapi_name() === 'cli' ? 'console' : 'http';
+        }
+        return $this->type;
     }
 
     /**
@@ -231,18 +247,29 @@ class App
     }
 
     /**
-     * Inicializa la aplicación.
+     * Inicializa la aplicación completa, con todos sus componentes y servicios.
      */
-    protected function init(): void
+    protected function boot(bool $fullBoot = true): void
+    {
+        $this->bootCore();
+        if ($fullBoot) {
+            ob_start();
+            $this->bootServices();
+            $this->bootLayers();
+        }
+    }
+
+    /**
+     * Inicializar el núcleo de la aplicación.
+     *
+     * Se realizan 2 acciones principales:
+     *   - Preparar el entorno mínimo (tiempo inicio, errores y buffer de salida).
+     *   - Crear el contenedor de servicios y registrar la aplicación en este.
+     */
+    protected function bootCore(): void
     {
         // Definir el tiempo de inicio del script.
         define('TIME_START', microtime(true));
-
-        // Definir tipo de aplicación que se está ejecutando.
-        $this->type = php_sapi_name() === 'cli' ? 'console' : 'http';
-
-        // Iniciar buffer.
-        ob_start();
 
         // Asignar nivel de error máximo (para reportes previo a que se
         // asigne el valor real con la configuración).
@@ -252,14 +279,30 @@ class App
         // Crear el contenedor de servicios y registrar la aplicación.
         $this->container = new Container();
         $this->registerService('app', $this); // No es un servicio realmente.
+    }
 
-        // Registrar e inicializar los servicios estándares de la aplicación.
+    /**
+     * Inicializar los servicios.
+     *
+     * Acciones que se realizan:
+     *
+     *   - Se Registran e inicializan los servicios estándares de la aplicación.
+     *   - Se registran e inicializan los servicios configurados de la aplicación.
+     *
+     * @return void
+     */
+    protected function bootServices(): void
+    {
         $this->registerServices();
         $this->executeBootMethodOnServices();
-
-        // Registrar e inicializar los servicios configurados de la aplicación.
         $this->registerConfigServices();
+    }
 
+    /**
+     * Inicializar las capas de la aplicación.
+     */
+    protected function bootLayers(): void
+    {
         // Inicializar cada capa con su archivo de inicialización personalizado.
         $this->getService('layers')->loadFilesReverse([
             '/App/bootstrap.php',

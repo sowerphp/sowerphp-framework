@@ -1,0 +1,80 @@
+<!--
+
+SowerPHP: Framework PHP hecho en Chile.
+Copyright (C) SowerPHP <https://www.sowerphp.org>
+
+Configuración en tag phpunit:
+  - Inicialización.
+  - Tratar errores y warnings como fallos en los tests.
+
+-->
+<phpunit
+    bootstrap="vendor/autoload.php"
+    stopOnError="true"
+    stopOnFailure="true"
+    stopOnWarning="true"
+    stopOnRisky="true"
+    stopOnIncomplete="true"
+    stopOnSkipped="true"
+    verbose="true"
+    failOnWarning="true"
+    failOnRisky="true"
+>
+
+    <!-- Organización de tests -->
+    <testsuites>
+        <!-- Para pruebas unitarias de clases y métodos específicos. -->
+        <testsuite name="Unit">
+            <directory suffix="Test.php">./tests/Unit</directory>
+        </testsuite>
+        <!-- Probar funcionalidades completas del sistema desde la perspectiva
+        del usuario final. -->
+        <testsuite name="Feature">
+            <directory suffix="Test.php">./tests/Feature</directory>
+        </testsuite>
+        <!-- Probar la interacción entre múltiples componentes o sistemas para
+        asegurar que funcionen bien juntos (ejemplo: base de datos o API). -->
+        <testsuite name="Integration">
+            <directory suffix="Test.php">./tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+
+    <!-- Informes de cobertura de código. Solo se incluyen archivo PHP dentro
+    del directorio ./src en el análisis de cobertura de código. -->
+    <!--<coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">./src</directory>
+        </include>
+        <exclude>
+            <directory suffix=".php">./src/app/App/</directory>
+            <directory suffix=".php">./src/core/App/</directory>
+            <directory suffix=".php">./src/general/App/</directory>
+        </exclude>
+        <report>
+            <html outputDirectory="build/coverage" />
+            <clover outputFile="build/logs/clover.xml" />
+        </report>
+    </coverage>-->
+
+    <!--  Configurar la generación de logs y reportes de las pruebas
+    ejecutadas. -->
+    <logging>
+        <!-- Generar un informe en formato XML siguiendo el esquema JUnit, que
+        es un estándar comúnmente utilizado en entornos de integración continua
+        (CI) como Jenkins, GitLab CI, y otros. -->
+        <junit outputFile="build/logs/junit.xml" />
+        <!-- Generar un informe en formato HTML con un estilo legible para los
+        humanos, describiendo los tests en un formato de tipo "documentación"
+        (TestDox). -->
+        <testdoxHtml outputFile="build/logs/testdox.html" />
+        <!-- Genera un informe en formato de texto plano con el mismo estilo de
+        documentación que el testdox-html. -->
+        <testdoxText outputFile="build/logs/testdox.txt" />
+    </logging>
+
+    <!-- Variables de entorno específicas para los tests. -->
+    <php>
+        <env name="APP_ENV" value="testing" />
+    </php>
+
+</phpunit>

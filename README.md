@@ -10,3 +10,20 @@ siempre, teniendo como principal uso LibreDTE.
 
 Todo el código fuente de SowerPHP se encuentra liberado utilizando la
 [licencia AGPL v3 o superior](https://github.com/sascocl/sowerphp/blob/master/COPYING).
+
+Ambiente DEV o QA (no producción)
+---------------------------------
+
+### Instalación
+
+```shell
+git clone git@github.com:sascocl/sowerphp.git sowerphp-framework
+cd sowerphp-framework
+composer install
+```
+
+### Ejecución de pruebas
+
+```shell
+XDEBUG_MODE=coverage ./vendor/bin/phpunit
+```
