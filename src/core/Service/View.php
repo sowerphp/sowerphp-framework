@@ -250,6 +250,8 @@ class Service_View implements Interface_Service
      */
     public function resolveViewRelative(string $view, string $module = null): ?string
     {
+        // Determinar el nombre base de la vista (incluyendo el caso si tiene
+        // módulo(s)).
         if ($module === null) {
             $routeConfig = request()->getRouteConfig();
             $module = $routeConfig['module'] ?? null;
@@ -261,13 +263,17 @@ class Service_View implements Interface_Service
             )
             . '/View/' . $view
         ;
-        foreach($this->engines as $extension => $engine) {
-            $filename = $baseFilepath . $extension;
-            $filepath = $this->layersService->getFilePath($filename);
-            if ($filepath) {
-                return $filepath;
+        // Se busca la vista por cada extensión en las rutas de las capas.
+        $paths = $this->layersService->getPaths();
+        foreach ($paths as $path) {
+            foreach($this->engines as $extension => $engine) {
+                $filepath = $path . $baseFilepath . $extension;
+                if (is_readable($filepath)) {
+                    return $filepath;
+                }
             }
         }
+        // No se encontró la vista, se retorna NULL.
         return null;
     }
 

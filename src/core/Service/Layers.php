@@ -449,7 +449,7 @@ class Service_Layers implements Interface_Service
             foreach ($paths as $path) {
                 $filepath = $path . $file;
                 if (is_readable($filepath)) {
-                    include $filepath;
+                    include_once $filepath;
                 }
             }
         }

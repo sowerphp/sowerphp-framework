@@ -375,9 +375,9 @@ class App
     /**
      * Ejecutar método register() en cada servicio.
      */
-    protected function executeRegisterMethodOnServices(?array $services = []): void
+    protected function executeRegisterMethodOnServices(?array $services = null): void
     {
-        if (empty($services)) {
+        if ($services === null) {
             $services = array_keys($this->container->getBindings());
         }
         $registered = [];
@@ -397,9 +397,9 @@ class App
     /**
      * Inicializa todos los servicios necesarios después del registro.
      */
-    protected function executeBootMethodOnServices(?array $services = []): void
+    protected function executeBootMethodOnServices(?array $services = null): void
     {
-        if (empty($services)) {
+        if ($services === null) {
             $services = array_keys($this->container->getBindings());
         }
         $initialized = [];
