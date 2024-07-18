@@ -17,6 +17,8 @@ Ambiente DEV o QA (no producción)
 ### Instalación
 
 ```shell
+mkdir -p $HOME/dev/www
+cd $HOME/dev/www
 git clone git@github.com:sascocl/sowerphp.git sowerphp-framework
 cd sowerphp-framework
 composer install
