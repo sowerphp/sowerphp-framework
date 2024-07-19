@@ -179,9 +179,10 @@ class Service_Cache implements Interface_Service
     public function getStats(): array
     {
         $this->stats['hitsRatio'] = $this->stats['get']
-            ? round($this->stats['retrieved'] / $this->stats['get'], 2)
+            ? round($this->stats['retrieved'] / $this->stats['get'], 6)
             : 0
         ;
+        $this->stats['hitsPercentage'] = round($this->stats['hitsRatio'] * 100, 2);
         return $this->stats;
     }
 

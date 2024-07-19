@@ -507,13 +507,13 @@ class Service_Http_Router implements Interface_Service
         if ($config) {
             return $config;
         }
-        // Buscar configuración de página estática.
-        $config = $this->getRouteConfigStaticPage($resource);
+        // Buscar configuración de ruta conectada dinámica.
+        $config = $this->getRouteConfigConnectedDynamic($resource);
         if ($config) {
             return $config;
         }
-        // Buscar configuración de ruta conectada dinámica.
-        $config = $this->getRouteConfigConnectedDynamic($resource);
+        // Buscar configuración de página estática.
+        $config = $this->getRouteConfigStaticPage($resource);
         if ($config) {
             return $config;
         }

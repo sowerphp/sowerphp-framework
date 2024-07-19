@@ -86,7 +86,8 @@ abstract class Shell
     {
         $out = new Shell_Output($stream);
         // tiempo que tomó la ejecución del comando
-        $time = microtime(true) - TIME_START;
+        $stats = app()->getStats();
+        $time = $stats['time']['duration'];
         if ($time < 60) {
             $out->write('Proceso ejecutado en '.num($time,1).' segundos.'."\n");
         } else if ($time < 3600) {

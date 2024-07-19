@@ -24,6 +24,7 @@
 namespace sowerphp\core;
 
 use Illuminate\Container\Container;
+use stdClass;
 
 /**
  * Clase principal de la aplicación.
@@ -104,6 +105,17 @@ class App
      * Tipo de aplicación que se está ejecutando.
      */
     protected $type;
+
+    /**
+     * Estadísticas globales de la aplicación.
+     *
+     * @var array
+     */
+    protected $stats = [
+        'time' => [
+            'start' => null,
+        ]
+    ];
 
     /**
      * Constructor protegido para evitar la instanciación directa.
@@ -268,7 +280,7 @@ class App
     protected function bootstrapCore(): void
     {
         // Definir el tiempo de inicio del script.
-        define('TIME_START', microtime(true));
+        $this->stats['time']['start'] = microtime(true);
 
         // Asignar nivel de error máximo (para reportes previo a que se
         // asigne el valor real con la configuración).
@@ -484,6 +496,40 @@ class App
                 $key
             ));
         }
+    }
+
+    /**
+     * Entrega las estadísticas globales de la aplicación.
+     *
+     * Las estadísticas incluyen:
+     *   - time: tiempo de inicio, fin y duración en segundos.
+     *   - memory: memoria usada en MiB.
+     *   - database: cantidad de consultas realizadas a la base de datos principal.
+     *   - cache: estadísticas de sets, gets y hits de la caché principal.
+     *
+     * @return array Arreglo con las estadísticas globales del uso de la caché.
+     */
+    public function getStats(): array
+    {
+        // Si las estadísticas no se han calculado se calculan.
+        if (!isset($this->stats['time']['end'])) {
+            $timeStart = $this->stats['time']['start'];
+            $timeEnd = microtime(true);
+            $this->stats = [
+                'time' => [
+                    'start' => $timeStart,
+                    'end' => $timeEnd,
+                    'duration' => round($timeEnd - $timeStart, 2),
+                ],
+                'memory' => [
+                    'used' => round(memory_get_usage() / 1024 / 1024, 2),
+                ],
+                'database' => database()->getStats(),
+                'cache' => cache()->getStats(),
+            ];
+        }
+        // Entregar estadísticas.
+        return $this->stats;
     }
 
 }

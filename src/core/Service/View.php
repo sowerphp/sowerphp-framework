@@ -263,11 +263,23 @@ class Service_View implements Interface_Service
             )
             . '/View/' . $view
         ;
+        // Armar listado de archivos que se podrían buscar según la extensión
+        // que se haya incluído en la vista o, si no se incluyó, las
+        // extensiones de los motores de renderizado.
+        $extension = $this->getViewExtension($baseFilepath);
+        $viewFiles = [];
+        if ($extension) {
+            $viewFiles[] = $baseFilepath;
+        } else {
+            foreach($this->engines as $extension => $engine) {
+                $viewFiles[] = $baseFilepath  . $extension;
+            }
+        }
         // Se busca la vista por cada extensión en las rutas de las capas.
         $paths = $this->layersService->getPaths();
         foreach ($paths as $path) {
-            foreach($this->engines as $extension => $engine) {
-                $filepath = $path . $baseFilepath . $extension;
+            foreach($viewFiles as $viewFile) {
+                $filepath = $path . $viewFile;
                 if (is_readable($filepath)) {
                     return $filepath;
                 }
@@ -410,17 +422,31 @@ class Service_View implements Interface_Service
      * archivo.
      *
      * @param string $filename Nombre del archivo de la vista.
+     * @return string|null Retorna la extensión del motor de renderizado o null
+     * si no hay coincidencia.
+     */
+    protected function getViewExtension(string $filename): ?string
+    {
+        foreach ($this->engines as $extension => $engine) {
+            if (substr($filename, -strlen($extension)) === $extension) {
+                return $extension;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Busca el motor de renderizado basado en la extensión del nombre del
+     * archivo.
+     *
+     * @param string $filename Nombre del archivo de la vista.
      * @return object|null Retorna el motor de renderizado o null si no hay
      * coincidencia.
      */
     protected function getEngineByExtension(string $filename): ?object
     {
-        foreach ($this->engines as $extension => $engine) {
-            if (substr($filename, -strlen($extension)) === $extension) {
-                return $engine;
-            }
-        }
-        return null;
+        $extension = $this->getViewExtension($filename);
+        return $extension ? $this->engines[$extension] : null;
     }
 
     /**
@@ -530,7 +556,9 @@ class View_Engine_Php extends View_Engine
         $data['_content'] = $content;
         // Renderizar el layout solicitado con el contenido previamente
         // determinado ya incluído en los datos del layout.
-        $layout = $this->viewService->resolveLayout($data['__view_layout']);
+        $layout = $this->viewService->resolveLayout(
+            $data['__view_layout'] . '.php'
+        );
         return $this->renderPhp($layout, $data);
     }
 
@@ -700,6 +728,7 @@ class View_Engine_Twig_Extension extends \Twig\Extension\AbstractExtension
         return [
             new \Twig\TwigFunction('project_path', [$this, 'function_project_path']),
             new \Twig\TwigFunction('session_messages', [$this, 'function_session_messages']),
+            new \Twig\TwigFunction('app_stats', [app(), 'getStats']),
         ];
     }
 
@@ -770,7 +799,9 @@ class View_Engine_Markdown extends View_Engine
         $data['_content'] = $content;
         // Renderizar el layout solicitado con el contenido previamente
         // determinado ya incluído en los datos del layout.
-        $layout = $this->viewService->resolveLayout($data['__view_layout']);
+        $layout = $this->viewService->resolveLayout(
+            $data['__view_layout'] . '.php'
+        );
         return app('view_engine_php')->renderPhp($layout, $data);
     }
 
