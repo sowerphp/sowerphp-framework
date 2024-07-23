@@ -31,7 +31,18 @@ use Doctrine\Inflector\InflectorFactory;
 class Service_Inflector  implements Interface_Service
 {
 
+    /**
+     * Servicio de configuración.
+     *
+     * @var Service_Config
+     */
     protected $configService;
+
+    /**
+     * Instancia del inflector de Doctrine.
+     *
+     * @var \Doctrine\Inflector\InflectorFactory
+     */
     protected $inflector;
 
     public function __construct(Service_Config $configService)
@@ -56,6 +67,8 @@ class Service_Inflector  implements Interface_Service
      */
     public function boot(): void
     {
+        // Asignar el estado inicial.
+        Utility_Inflector::reset();
         // Cargar reglas de Inflector para el idioma de la aplicación.
         $inflector_rules = (array)$this->configService->get(
             'inflector.' . $this->configService->get('app.locale')
@@ -72,6 +85,28 @@ class Service_Inflector  implements Interface_Service
      */
     public function terminate(): void
     {
+    }
+
+    /**
+     * Pasar un string de plural a singular.
+     *
+     * @param string $string String en formato plural.
+     * @return string String en formato singular.
+     */
+    public function singularize(string $string): string
+    {
+        return Utility_Inflector::singularize($string);
+    }
+
+    /**
+     * Pasar un string de singular a plural.
+     *
+     * @param string $string String en formato singular.
+     * @return string String en formato plural.
+     */
+    public function pluralize(string $string): string
+    {
+        return Utility_Inflector::pluralize($string);
     }
 
     /**

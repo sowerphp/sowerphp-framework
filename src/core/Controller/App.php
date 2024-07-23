@@ -192,17 +192,7 @@ class Controller_App extends \sowerphp\autoload\Controller
         $data['error_reporting'] = config('app.debug');
         $layersService = app('layers');
         $data['message'] = htmlspecialchars($data['message']);
-        $data['trace'] = str_replace(
-            [
-                $layersService->getFrameworkPath(),
-                $layersService->getProjectPath(),
-            ],
-            [
-                'framework:',
-                'project:',
-            ],
-            $data['trace']
-        );
+        $data['trace'] = $layersService->obfuscatePath($data['trace']);
         $data['soporte'] = config('mail.to.address') !== null;
         // Renderizar página de error.
         $response = $this->render('App/error', $data);

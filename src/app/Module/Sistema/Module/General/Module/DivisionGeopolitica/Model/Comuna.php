@@ -24,65 +24,52 @@
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
 /**
- * Clase para mapear la tabla comuna de la base de datos
- * Comentario de la tabla: Comunas de cada provincia del país
- * Esta clase permite trabajar sobre un registro de la tabla comuna
+ * Modelo singular de la tabla "comuna" de la base de datos.
+ *
+ * Permite interactuar con un registro de la tabla.
  */
-class Model_Comuna extends \sowerphp\autoload\Model_App
+class Model_Comuna extends \sowerphp\autoload\Model
 {
 
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'comuna'; ///< Tabla del modelo
+    /**
+     * Metadatos del modelo.
+     *
+     * @var array
+     */
+    protected $meta = [
+        'model' => [
+            'ordering' => ['comuna'],
+        ],
+        'fields' => [
+            'codigo' => [
+                'type' => self::TYPE_STRING,
+                'primary_key' => true,
+                'length' => 5,
+                'verbose_name' => 'Código',
+                'help_text' => 'Código asignado por el gobierno de Chile a la comuna.',
+            ],
+            'comuna' => [
+                'type' => self::TYPE_STRING,
+                'null' => false,
+                'blank' => false,
+                'max_length' => 40,
+                'verbose_name' => 'Comuna',
+                'help_text' => 'Nombre de la comuna.',
+            ],
+            'provincia' => [
+                'type' => self::TYPE_STRING,
+                'null' => false,
+                'blank' => false,
+                'foreign_key' => Model_Provincia::class,
+                'to_table' => 'provincia',
+                'to_field' => 'codigo',
+                'length' => 3,
+                'verbose_name' => 'Provincia',
+                'help_text' => 'Provincia a la que pertenece la comuna.',
+            ],
+        ],
+    ];
 
-    // Atributos de la clase (columnas en la base de datos)
-    public $codigo; ///< Código de la comuna: character(5) NOT NULL DEFAULT '' PK
-    public $comuna; ///< Nombre de la comuna: character varying(40) NOT NULL DEFAULT ''
-    public $provincia; ///< Provincia a la que pertenece la comuna: character(3) NOT NULL DEFAULT '' FK:provincia.codigo
-
-    // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'codigo' => array(
-            'name'      => 'Codigo',
-            'comment'   => 'Código de la comuna',
-            'type'      => 'character',
-            'length'    => 5,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => true,
-            'fk'        => null
-        ),
-        'comuna' => array(
-            'name'      => 'Comuna',
-            'comment'   => 'Nombre de la comuna',
-            'type'      => 'character varying',
-            'length'    => 40,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-        'provincia' => array(
-            'name'      => 'Provincia',
-            'comment'   => 'Provincia a la que pertenece la comuna',
-            'type'      => 'character',
-            'length'    => 3,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => array('table' => 'provincia', 'column' => 'codigo')
-        ),
-
-    );
-
-    // Comentario de la tabla en la base de datos
-    public static $tableComment = 'Comunas de cada provincia del país';
-
-    public static $fkNamespace = array(
-        'Model_Provincia' => 'sowerphp\app\Sistema\General\DivisionGeopolitica'
-    ); ///< Namespaces que utiliza esta clase
+    protected $fillable = ['*'];
 
 }

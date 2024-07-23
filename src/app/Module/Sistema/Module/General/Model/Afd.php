@@ -28,7 +28,7 @@ namespace sowerphp\app\Sistema\General;
  * Comentario de la tabla:
  * Esta clase permite trabajar sobre un registro de la tabla afd
  */
-class Model_Afd extends \sowerphp\autoload\Model_App
+class Model_Afd extends \sowerphp\autoload\Model
 {
 
     // Datos para la conexión a la base de datos
@@ -90,9 +90,9 @@ class Model_Afd extends \sowerphp\autoload\Model_App
      * @param estados Arreglo con arreglo de codigos y nombres de estados
      * @param transiciones Arreglo con arreglo de desdes, valor y hastas de las transiciones
      */
-    public function save(): bool
+    public function save(array $options = []): bool
     {
-        $this->db->beginTransaction();
+        $this->getDatabaseConnection()->beginTransaction();
         parent::save();
         $this->saveEstados(
             $this->estados['codigos'],
@@ -103,7 +103,7 @@ class Model_Afd extends \sowerphp\autoload\Model_App
             $this->transiciones['valores'],
             $this->transiciones['hastas']
         );
-        return $this->db->commit();
+        return $this->getDatabaseConnection()->commit();
     }
 
     /**
@@ -113,8 +113,8 @@ class Model_Afd extends \sowerphp\autoload\Model_App
      */
     private function saveEstados($codigos, $nombres)
     {
-        $this->db->beginTransaction();
-        $this->db->executeRawQuery('
+        $this->getDatabaseConnection()->beginTransaction();
+        $this->getDatabaseConnection()->executeRawQuery('
             DELETE FROM afd_estado
             WHERE afd = :afd
         ', [':afd' => $this->codigo]);
@@ -125,12 +125,12 @@ class Model_Afd extends \sowerphp\autoload\Model_App
             if (!isset($codigos[$i][0]) || !isset($nombres[$i][0])) {
                 continue;
             }
-            $this->db->executeRawQuery(
+            $this->getDatabaseConnection()->executeRawQuery(
                 'INSERT INTO afd_estado VALUES (:afd, :codigo, :nombre)',
                 [':afd' => $this->codigo, ':codigo' => $codigos[$i], ':nombre' => $nombres[$i]]
             );
         }
-        $this->db->commit();
+        $this->getDatabaseConnection()->commit();
     }
 
     /**
@@ -141,8 +141,8 @@ class Model_Afd extends \sowerphp\autoload\Model_App
      */
     private function saveTransiciones($desdes, $valores, $hastas)
     {
-        $this->db->beginTransaction();
-        $this->db->executeRawQuery('
+        $this->getDatabaseConnection()->beginTransaction();
+        $this->getDatabaseConnection()->executeRawQuery('
             DELETE FROM afd_transicion
             WHERE afd = :afd
         ', [':afd' => $this->codigo]);
@@ -161,7 +161,7 @@ class Model_Afd extends \sowerphp\autoload\Model_App
             $AfdTransicion->hasta = $hastas[$i];
             $AfdTransicion->save();
         }
-        $this->db->commit();
+        $this->getDatabaseConnection()->commit();
     }
 
     /**
@@ -171,7 +171,7 @@ class Model_Afd extends \sowerphp\autoload\Model_App
      */
     public function getEstados($prefix = '')
     {
-        return $this->db->getTable('
+        return $this->getDatabaseConnection()->getTable('
             SELECT codigo AS '.$prefix.'codigo, nombre AS '.$prefix.'nombre
             FROM afd_estado
             WHERE afd = :afd
@@ -185,7 +185,7 @@ class Model_Afd extends \sowerphp\autoload\Model_App
      */
     public function getTransicionesTabla()
     {
-        return $this->db->getTable('
+        return $this->getDatabaseConnection()->getTable('
             SELECT desde, valor, hasta
             FROM afd_transicion
             WHERE afd = :afd

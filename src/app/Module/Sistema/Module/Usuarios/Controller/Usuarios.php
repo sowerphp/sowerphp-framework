@@ -394,12 +394,12 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
             }
         }
         // Asignar variables para la vista y renderizar.
-        $this->model['singular']::$columnsInfo['contrasenia']['null'] = true;
-        $this->model['singular']::$columnsInfo['hash']['null'] = true;
+        $this->getModelClass()::$columnsInfo['contrasenia']['null'] = true;
+        $this->getModelClass()::$columnsInfo['hash']['null'] = true;
         $this->setGruposAsignables();
         return $this->render('Usuarios/crear_editar', [
             'accion' => 'Crear',
-            'columns' => $this->model['singular']::$columnsInfo,
+            'columns' => $this->getModelClass()::$columnsInfo,
             'grupos_asignados' => (isset($_POST['grupos']) ? $_POST['grupos'] : []),
             'listarUrl' => '/sistema/usuarios/usuarios/listar' . $filterListar,
         ]);
@@ -432,13 +432,13 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
         }
         // si no se ha enviado el formulario se mostrará
         if (!isset($_POST['submit'])) {
-            $this->model['singular']::$columnsInfo['contrasenia']['null'] = true;
+            $this->getModelClass()::$columnsInfo['contrasenia']['null'] = true;
             $grupos_asignados = $Usuario->groups();
             $this->setGruposAsignables();
             return $this->render('Usuarios/crear_editar', [
                 'accion' => 'Editar',
                 'Obj' => $Usuario,
-                'columns' => $this->model['singular']::$columnsInfo,
+                'columns' => $this->getModelClass()::$columnsInfo,
                 'grupos_asignados' => array_keys($grupos_asignados),
                 'listarUrl' => $redirect,
             ]);

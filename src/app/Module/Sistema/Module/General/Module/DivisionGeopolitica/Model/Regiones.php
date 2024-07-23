@@ -24,28 +24,10 @@
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
 /**
- * Clase para mapear la tabla region de la base de datos
- * Comentario de la tabla: Regiones del país
- * Esta clase permite trabajar sobre un conjunto de registros de la tabla region
+ * Modelo plural de la tabla "region" de la base de datos.
+ *
+ * Permite interactuar con varios registros de la tabla.
  */
-class Model_Regiones extends \sowerphp\autoload\Model_Plural_App
+class Model_Regiones extends \sowerphp\autoload\Model_Plural
 {
-
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'region'; ///< Tabla del modelo
-
-    /**
-     * Método que entrega la lista de regiones ordenadas por código
-     * @return array Tabla con los códigos y regiones
-     */
-    public function getList()
-    {
-        return $this->db->getTable('
-            SELECT codigo AS id, codigo || \' - \' || region AS glosa
-            FROM region
-            ORDER BY codigo
-        ');
-    }
-
 }

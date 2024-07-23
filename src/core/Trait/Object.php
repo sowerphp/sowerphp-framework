@@ -31,6 +31,13 @@ trait Trait_Object
 {
 
     /**
+     * Objeto ReflectionClass para la clase actual.
+     *
+     * @var \ReflectionClass
+     */
+    protected $reflector;
+
+    /**
      * Permite utilizar el objeto (instancia) como string y obtener el nombre
      * de la clase.
      *
@@ -42,6 +49,31 @@ trait Trait_Object
     }
 
     /**
+     * Obtiene el objeto ReflectionClass para la clase actual.
+     *
+     * @return \ReflectionClass
+     */
+    protected function getReflector()
+    {
+        if (!isset($this->reflector)) {
+            $this->reflector = new \ReflectionClass($this);
+        }
+        return $this->reflector;
+    }
+
+    /**
+     * Entrega las propiedades públicas de la clase.
+     *
+     * @return array
+     */
+    protected function getPublicProperties(): array
+    {
+        return $this->getReflector()->getProperties(
+            \ReflectionProperty::IS_PUBLIC
+        );
+    }
+
+    /**
      * Asignación de atributos públicos a la instancia mediante un arreglo.
      *
      * @param array $attributes Arreglo con los datos que se deben asignar.
@@ -49,10 +81,10 @@ trait Trait_Object
      */
     public function fill(array $attributes): self
     {
-        $publicAttributes = array_keys(get_object_vars($this));
-        foreach ($attributes as $attribute => $value) {
-            if (in_array($attribute, $publicAttributes)) {
-                $this->$attribute = $value;
+        $properties = array_keys(get_object_vars($this));
+        foreach ($properties as $property) {
+            if (isset($attributes[$property])) {
+                $this->$property = $attributes[$property];
             }
         }
         return $this;
@@ -67,11 +99,9 @@ trait Trait_Object
      */
     public function set(array $attributes)
     {
-        $props = (new \ReflectionClass($this))->getProperties(
-            \ReflectionProperty::IS_PUBLIC
-        );
-        foreach ($props as &$prop) {
-            $name = $prop->getName();
+        $properties = $this->getPublicProperties();
+        foreach ($properties as $property) {
+            $name = $property->getName();
             if (isset($attributes[$name])) {
                 $this->$name = $attributes[$name];
             }

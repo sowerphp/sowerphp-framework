@@ -24,24 +24,22 @@
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
 /**
- * Clase para mapear la tabla comuna de la base de datos
- * Comentario de la tabla: Comunas de cada provincia del país
- * Esta clase permite trabajar sobre un conjunto de registros de la tabla comuna
+ * Modelo plural de la tabla "comuna" de la base de datos.
+ *
+ * Permite interactuar con varios registros de la tabla.
  */
-class Model_Comunas extends \sowerphp\autoload\Model_Plural_App
+class Model_Comunas extends \sowerphp\autoload\Model_Plural
 {
 
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'comuna'; ///< Tabla del modelo
-
     /**
-     * Método que entrega la lista de comunas agrupadas por regiones
-     * @return array Arreglo con índice el código de región y una tabla con los códigos y glosas de comunas
+     * Entrega la lista de comunas agrupadas por regiones.
+     *
+     * @return array Arreglo con índice el código de región y una tabla con los
+     * códigos y glosas de comunas.
      */
-    public function getListByRegion()
+    public function getListByRegion(): array
     {
-        return $this->db->getTableWithAssociativeIndex('
+        return $this->getDatabaseConnection()->getTableWithAssociativeIndex('
             SELECT r.codigo AS region, c.codigo AS id, c.comuna AS glosa
             FROM region AS r, provincia AS p, comuna AS c
             WHERE
@@ -52,7 +50,7 @@ class Model_Comunas extends \sowerphp\autoload\Model_Plural_App
     }
 
     /**
-     * Método que recupera el código de una comuna a partir de su nombre
+     * Buscar el código de una comuna a partir de su nombre
      */
     public function getComunaByName($nombre)
     {

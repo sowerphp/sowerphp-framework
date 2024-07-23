@@ -334,7 +334,7 @@ class Network_Response //extends Response
      * @param int $status El código de estado HTTP.
      * @param array $headers Encabezados adicionales a enviar con la respuesta.
      * @param int $options Opciones de codificación JSON.
-     * @return void
+     * @return Network_Response
      */
     public function json(
         $data = [],
@@ -354,6 +354,40 @@ class Network_Response //extends Response
         $this->body(json_encode($data, $options) . "\n");
         // Retornar objeto de la respuesta.
         return $this;
+    }
+
+    /**
+     * Envía una respuesta JSON con una excepción que se haya atrapado.
+     *
+     * @param \Exception $e Excepción que se desea enviar como respuesta.
+     * @return Network_Response
+     */
+    public function jsonException(\Exception $e): self
+    {
+        // Asignar valores predeterminados para la respuesta JSON  basada en
+        // una excepción.
+        $status_code = $e->getCode() ?: 500;
+        $body = [
+            'status_code' => $status_code,
+            'message' => $e->getMessage(),
+        ];
+        // Agregar datos que son para ambiente no productivo.
+        if (config('app.env') != 'production') {
+            $body['trace'] = array_filter(array_map(function($caller) {
+                $file = $caller['file'] ?? null;
+                if ($file === null) {
+                    return null;
+                }
+                return [
+                    'file' => app('layers')->obfuscatePath($file),
+                    'line' => $caller['line'] ?? null,
+                ];
+            }, $e->getTrace()), function($trace) {
+                return $trace !== null;
+            });
+        }
+        // Entregar respuesta JSON de la excepción.
+        return $this->json($body, $status_code);
     }
 
 }

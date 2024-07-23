@@ -41,24 +41,63 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     protected $modelService;
 
     /**
-     * Información del modelo asociado al controlador.
+     * Clase del modelo singular asociado al controlador.
      *
-     * Arreglo con índices: database, table, namespace, singular y plural.
-     *
-     * @var array
+     * @var string
      */
-    protected $model;
+    protected $modelClass;
 
     /**
-     * Inicializar el controlador.
+     * Versión de la API actualmente vigente.
+     *
+     * @var string
      */
+    protected $apiVersion = '2.0.0';
+
+    /**
+     * Constructor del controlador.
+     */
+    public function __construct(
+        Service_Model $modelService,
+        Network_Request $request,
+        Network_Response $response
+    )
+    {
+        $this->modelService = $modelService;
+        parent::__construct($request, $response);
+    }
+
     public function boot(): void
     {
-        $this->modelService = model();
-        $this->model = $this->modelService->getModelInfoFromController(
-            get_class($this),
-            $this->model ?? []
-        );
+        // TODO: eliminar al terminar pruebas (pedirá permisos).
+    }
+
+    /**
+     * Obtiene el nombre de la clase del modelo singular asociada al
+     * controlador.
+     *
+     * @return string
+     */
+    protected function getModelClass(): string
+    {
+        if (!isset($this->modelClass)) {
+            $this->modelClass = $this->modelService->getModelFromController(
+                get_class($this)
+            );
+        }
+        return $this->modelClass;
+    }
+
+    /**
+     * Obtiene la instancia del modelo plural asociado al controlador.
+     *
+     * @return Model_Plural
+     */
+    protected function getModelPluralInstance(): Model_Plural
+    {
+        $modelClass = $this->getModelClass();
+        $pluralInstance = (new $modelClass())->getPluralInstance();
+        return $pluralInstance;
     }
 
     /**
@@ -74,6 +113,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function create(Request $request)
     {
+        return $this->render('create');
     }
 
     /**
@@ -88,6 +128,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function show(Request $request, ...$id)
     {
+        return $this->render('show');
     }
 
     /**
@@ -95,6 +136,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function edit(Request $request, ...$id)
     {
+        return $this->render('edit');
     }
 
     /**
@@ -112,20 +154,43 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     }
 
     /**
+     * Entrega los metadatos de la consulta a la API.
+     *
+     * @param string $action Acción de la API que se realizó.
+     * @param array $meta Metadatos que se deben incluir en la respuesta.
+     * @return array Arreglo con los metadatos de la respuesta de la API.
+     */
+    protected function getApiMeta(string $action, array $meta = []): array
+    {
+        $request = request();
+        return array_merge([
+            'action' => $action,
+            'version' => $this->apiVersion,
+            //'url' => $request->fullUrl(),
+            'url' => $request->url(),
+            'generated_by' => get_class($this),
+            'generated_at' => date('c'),
+            //'expires_at' => date('c', strtotime('+1 day')),
+            'locale' => app('translator')->getLocale(),
+            'user' => $request->user(),
+        ], $meta);
+    }
+
+    /**
      * Retorna una lista de recursos.
      */
     public function _api_index_GET(Request $request)
     {
+        $pluralInstance = $this->getModelPluralInstance();
         // Obtener registros.
         $parameters = $request->getModelParametersFromUrl();
-        $results = $this->modelService->filter(
-            $this->model,
+        $results = $pluralInstance->filter(
             $parameters,
             $parameters['stdClass']
         );
         // Preparar respuesta formato estándar.
         if ($parameters['format'] == 'standard') {
-            $metaTotal = $this->modelService->count($this->model, [
+            $metaTotal = $pluralInstance->count([
                 'filters' => $parameters['filters'],
             ]);
             $metaCount = count($results);
@@ -159,7 +224,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 Utility_Array::mergeRecursiveDistinct($parameters, $aux)
             );
             $body = [
-                'meta' => [
+                'meta' => $this->getApiMeta('index',[
                     'total' => $metaTotal,
                     'count' => $metaCount,
                     'pagination' => [
@@ -167,7 +232,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                         'total_pages' => $metaPaginationTotalPages,
                         'per_page' => (int)$parameters['pagination']['limit'],
                     ]
-                ],
+                ]),
                 'links' => [
                     'first' => $linksFirst,
                     'prev' => $linksPrev,
@@ -180,7 +245,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         }
         // Preparar respuesta formato Datatables.
         else if ($parameters['format'] == 'datatables') {
-            $recordsTotal = $this->modelService->count($this->model, []);
+            $recordsTotal = $pluralInstance->count([]);
             $recordsFiltered = count($results);
             $body = [
                 'draw' => (int)$request->input('draw'),
@@ -195,13 +260,24 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
 
     /**
      * Muestra la estructura para crear un recurso.
+     *
+     * Permite obtener los datos necesarios para la creación. Por ejemplo,
+     * opciones de selección, listas de valores predefinidos, etc.
      */
     public function _api_create_GET(Request $request)
     {
-        // Obtener los datos necesarios para la creación.
-        // Por ejemplo, opciones de selección, listas de valores predefinidos, etc.
-        $data = $this->modelService->getCreationData($this->model);
-        return response()->json(['data' => $data], 200);
+        try {
+            $instance = $this->modelService->instantiate(
+                $this->getModelClass()
+            );
+            $data = $instance->getSaveDataCreate();
+            return response()->json([
+                'meta' => $this->getApiMeta('create'),
+                'data' => $data,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->jsonException($e);
+        }
     }
 
     /**
@@ -209,11 +285,36 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function _api_store_POST(Request $request)
     {
-        // Validar los datos de entrada.
-        $validatedData = $request->validate($this->model['validation_rules']);
-        // Crear el nuevo recurso.
-        $newResource = $this->modelService->create($this->model, $validatedData);
-        return response()->json(['data' => $newResource], 201);
+        try {
+            $instance = $this->modelService->instantiate(
+                $this->getModelClass()
+            );
+            $rules = $instance->getValidationRulesCreate('data.');
+            $validatedData = $request->validate($rules);
+            $instance->fill($validatedData['data']);
+            if (!$instance->save()) {
+                throw new \Exception(__(
+                    'No fue posible crear el recurso %s.',
+                    (string)$instance
+                ), 422);
+            }
+            return response()->json([
+                'meta' => $this->getApiMeta('store'),
+                'message' => __(
+                    'Recurso %s creado correctamente.',
+                    (string)$instance
+                ),
+                'data' => $instance,
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status_code' => 422,
+                'message' => __('Los datos proporcionados no son válidos.'),
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->jsonException($e);
+        }
     }
 
     /**
@@ -223,13 +324,17 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     {
         $stdClass = (bool)$request->input('stdClass', false);
         try {
-            $result = $this->modelService->retrieve($this->model, $id, $stdClass);
-            return response()->json(['data' => $result], 200);
-        } catch (\Exception $e) {
+            $instance = $this->modelService->instantiate(
+                $this->getModelClass(),
+                ...$id
+            );
+            $result = $stdClass ? $instance->toStdClass() : $instance->toArray();
             return response()->json([
-                'status_code' => $e->getCode() ?: 500,
-                'message' => $e->getMessage(),
-            ], $e->getCode() ?: 500);
+                'meta' => $this->getApiMeta('show'),
+                'data' => $result
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->jsonException($e);
         }
     }
 
@@ -238,11 +343,19 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function _api_edit_GET(Request $request, ...$id)
     {
-        // Obtener el recurso especificado.
-        $resource = $this->modelService->retrieve($this->model, $id);
-        // Obtener los datos necesarios para la edición, similares a la creación.
-        $data = $this->modelService->getEditData($this->model, $resource);
-        return response()->json(['data' => $data], 200);
+        try {
+            $instance = $this->modelService->instantiate(
+                $this->getModelClass(),
+                ...$id
+            );
+            $data = $instance->getSaveDataEdit();
+            return response()->json([
+                'meta' => $this->getApiMeta('edit'),
+                'data' => $data,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->jsonException($e);
+        }
     }
 
     /**
@@ -250,11 +363,37 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function _api_update_PUT(Request $request, ...$id)
     {
-        // Validar los datos de entrada.
-        $validatedData = $request->validate($this->model['validation_rules']);
-        // Actualizar el recurso.
-        $updatedResource = $this->modelService->update($this->model, $id, $validatedData);
-        return response()->json(['data' => $updatedResource], 200);
+        try {
+            $instance = $this->modelService->instantiate(
+                $this->getModelClass(),
+                ...$id
+            );
+            $rules = $instance->getValidationRulesEdit('data.');
+            $validatedData = $request->validate($rules);
+            $instance->fill($validatedData['data']);
+            if (!$instance->save()) {
+                throw new \Exception(__(
+                    'No fue posible editar el recurso %s.',
+                    (string)$instance
+                ), 422);
+            }
+            return response()->json([
+                'meta' => $this->getApiMeta('update'),
+                'message' => __(
+                    'Recurso %s editado correctamente.',
+                    (string)$instance
+                ),
+                'data' => $instance,
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status_code' => 422,
+                'message' => __('Los datos proporcionados no son válidos.'),
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->jsonException($e);
+        }
     }
 
     /**
@@ -262,18 +401,39 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function _api_destroy_DELETE(Request $request, ...$id)
     {
-        // Eliminar el recurso.
-        $this->modelService->delete($this->model, $id);
-        return response()->json(['message' => 'Resource deleted successfully.'], 200);
+        try {
+            $instance = $this->modelService->instantiate(
+                $this->getModelClass(),
+                ...$id
+            );
+            $status = $instance->delete();
+            if ($status) {
+                $message = __(
+                    'Recurso %s eliminado correctamente.',
+                    (string)$instance
+                );
+                $code = 200;
+            } else {
+                $message = __(
+                    'No fue posible eliminar el recurso %s.',
+                    (string)$instance
+                );
+                $code = 500;
+            }
+            return response()->json([
+                'meta' => $this->getApiMeta('destroy'),
+                'message' => $message,
+            ], $code);
+        } catch (\Exception $e) {
+            return response()->jsonException($e);
+        }
     }
 
-
-
-
-
-
-
-
+    /*
+    |--------------------------------------------------------------------------
+    | DESDE AQUÍ HACIA ABAJO ESTÁ OBSOLETO Y DEBE SER REFACTORIZADO Y ELIMINAR.
+    |--------------------------------------------------------------------------
+    */
 
     protected $deleteRecord = true; ///< Indica si se permite o no borrar registros
     protected $contraseniaNames = ['contrasenia', 'clave', 'password', 'pass']; ///< Posibles nombres de campo tipo contraseña
@@ -355,7 +515,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     {
         $request = request();
         // Crear objeto plural.
-        $Objs = new $this->model['plural']();
+        $Objs = $this->getModelPluralInstance();
         // Si se debe buscar se agrega filtro.
         $searchUrl = null;
         $search = [];
@@ -371,7 +531,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 list($var, $val) = explode(':', $filter);
                 // Solo procesar filtros donde el campo por el que se filtra
                 // esté en el modelo.
-                if (empty($this->model['singular']::$columnsInfo[$var])) {
+                if (empty($this->getModelClass()::$columnsInfo[$var])) {
                     continue;
                 }
                 $search[$var] = $val;
@@ -384,27 +544,27 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                     $where[] = $var . ' IS NULL';
                 }
                 // Si es una FK se filtra con igualdad.
-                else if (!empty($this->model['singular']::$columnsInfo[$var]['fk'])) {
+                else if (!empty($this->getModelClass()::$columnsInfo[$var]['fk'])) {
                     $where[] = $var . ' = :' . $var;
                     $vars[':' . $var] = $val;
                 }
                 // Si es un campo de texto se filtrará con LIKE.
-                else if (in_array($this->model['singular']::$columnsInfo[$var]['type'], ['char', 'character varying', 'varchar', 'text'])) {
+                else if (in_array($this->getModelClass()::$columnsInfo[$var]['type'], ['char', 'character varying', 'varchar', 'text'])) {
                     $where[] = 'LOWER(' . $var . ') LIKE :' . $var;
                     $vars[':' . $var] = '%' . strtolower($val) . '%';
                 }
                 // Si es un tipo fecha con hora se usará LIKE.
-                else if (in_array($this->model['singular']::$columnsInfo[$var]['type'], ['timestamp', 'timestamp without time zone'])) {
+                else if (in_array($this->getModelClass()::$columnsInfo[$var]['type'], ['timestamp', 'timestamp without time zone'])) {
                     $where[] = 'CAST(' . $var . ' AS TEXT) LIKE :' . $var;
                     $vars[':' . $var] = $val . ' %';
                 }
                 // Si es un campo número entero se castea.
-                else if (in_array($this->model['singular']::$columnsInfo[$var]['type'], ['smallint', 'integer', 'bigint', 'smallserial', 'serial', 'bigserial'])) {
+                else if (in_array($this->getModelClass()::$columnsInfo[$var]['type'], ['smallint', 'integer', 'bigint', 'smallserial', 'serial', 'bigserial'])) {
                     $where[] = $var . ' = :' . $var;
                     $vars[':' . $var] = (int)$val;
                 }
                 // Si es un campo número decimal se castea.
-                else if (in_array($this->model['singular']::$columnsInfo[$var]['type'], ['decimal', 'numeric', 'real', 'double precision'])) {
+                else if (in_array($this->getModelClass()::$columnsInfo[$var]['type'], ['decimal', 'numeric', 'real', 'double precision'])) {
                     $where[] = $var . ' = :' . $var;
                     $vars[':' . $var] = (float)$val;
                 }
@@ -417,7 +577,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $Objs->setWhereStatement($where, $vars);
         }
         // Si se debe ordenar se agrega.
-        if (isset($this->model['singular']::$columnsInfo[$orderby])) {
+        if (isset($this->getModelClass()::$columnsInfo[$orderby])) {
             $Objs->setOrderByStatement([$orderby => ($order == 'D' ? 'DESC' : 'ASC')]);
         }
         // Total de registros.
@@ -428,8 +588,9 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             // están mal armados. Si se llegó acá con el error, para que no
             // falle la app se redirecciona al listado con el error.
             // Lo ideal es controlar esto antes con un "error más lindo".
-            SessionMessage::error($e->getMessage());
-            return redirect($request->getRequestUriDecoded());
+            return redirect($request->getRequestUriDecoded())->withError(
+                $e->getMessage()
+            );
         }
         // Paginar los resultados si es necesario.
         if ((integer)$page > 0) {
@@ -449,18 +610,18 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         // Crear variable con las columnas para la vista.
         if (!empty($this->columnsView['listar'])) {
             $columns = [];
-            foreach ($this->model['singular']::$columnsInfo as $col => &$info) {
+            foreach ($this->getModelClass()::$columnsInfo as $col => &$info) {
                 if (in_array($col, $this->columnsView['listar'])) {
                     $columns[$col] = $info;
                 }
             }
         } else {
-            $columns = $this->model['singular']::$columnsInfo;
+            $columns = $this->getModelClass()::$columnsInfo;
         }
         // Renderizar la vista.
         return $this->render('listar', [
-            'model' => $this->model['singular'],
-            'models' => $this->model['plural'],
+            'model' => $this->getModelClass(),
+            'models' => app('inflector')->pluralize($this->getModelClass()),
             'module_url' => $request->getModuleUrl() . '/',
             'controller' => $request->getRouteConfig()['controller'],
             'page' => $page,
@@ -468,13 +629,13 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             'order' => $order,
             'searchUrl' => $searchUrl,
             'search' => $search,
-            'Objs' => $Objs->getObjects($this->model['singular']),
+            'Objs' => $Objs->getObjects($this->getModelClass()),
             'columns' => $columns,
             'registers_total' => $registers_total,
             'pages' => isset($pages) ? $pages : 0,
             'linkEnd' => ($orderby ? ('/' . $orderby . '/' . $order) : '') . $searchUrl,
-            'fkNamespace' => $this->model['singular']::$fkNamespace,
-            'comment' => $this->model['singular']::$tableComment,
+            'fkNamespace' => $this->getModelClass()::$fkNamespace,
+            'comment' => $this->getModelClass()::$tableComment,
             'listarFilterUrl' => '?listar=' . base64_encode(
                 '/' . $page . ($orderby ? ('/' . $orderby . '/' . $order) : '') . $searchUrl
             ),
@@ -493,7 +654,8 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         // si se envió el formulario se procesa
         if (isset($_POST['submit'])) {
-            $Obj = new $this->model['singular']();
+            $modelClass = $this->getModelClass();
+            $Obj = new $modelClass();
             $Obj->set($_POST);
             if (!$Obj->exists()) {
                 foreach($_FILES as $name => &$file) {
@@ -520,10 +682,10 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         }
         // Renderizar la vista
         return $this->render('crear_editar', [
-            'columnsInfo' => $this->model['singular']::$columnsInfo,
-            'fkNamespace' => $this->model['singular']::$fkNamespace,
+            'columnsInfo' => $this->getModelClass()::$columnsInfo,
+            'fkNamespace' => $this->getModelClass()::$fkNamespace,
             'accion' => 'Crear',
-            'columns' => $this->model['singular']::$columnsInfo,
+            'columns' => $this->getModelClass()::$columnsInfo,
             'contraseniaNames' => $this->contraseniaNames,
             'listarUrl' => $request->getControllerUrl()
                 . '/listar' . $filterListar,
@@ -538,19 +700,17 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     {
         $request = request();
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
-        $Obj = new $this->model['singular'](array_map('urldecode', func_get_args()));
+        $modelClass = $this->getModelClass();
+        $Obj = new $modelClass(array_map('urldecode', func_get_args()));
         // si el registro que se quiere editar no existe error
         if (!$Obj->exists()) {
-            SessionMessage::error(
-                'Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede editar.'
-            );
             return redirect(
                 $request->getControllerUrl() . '/listar'.$filterListar
-            );
+            )->withError('Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede editar.');
         }
         // si no se ha enviado el formulario se mostrará
         if (isset($_POST['submit'])) {
-            foreach ($this->model['singular']::$columnsInfo as $col => &$info) {
+            foreach ($this->getModelClass()::$columnsInfo as $col => &$info) {
                 if (in_array($col, $this->contraseniaNames) && empty($_POST[$col])) {
                     $_POST[$col] = $Obj->$col;
                 }
@@ -582,9 +742,9 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         // Renderizar la vista.
         return $this->render('crear_editar', [
             'Obj' => $Obj,
-            'columns' => $this->model['singular']::$columnsInfo,
+            'columns' => $this->getModelClass()::$columnsInfo,
             'contraseniaNames' => $this->contraseniaNames,
-            'fkNamespace' => $this->model['singular']::$fkNamespace,
+            'fkNamespace' => $this->getModelClass()::$fkNamespace,
             'accion' => 'Editar',
             'listarUrl' => $request->getControllerUrl()
                 . '/listar' . $filterListar,
@@ -600,20 +760,17 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         $request = request();
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         if (!$this->deleteRecord) {
-            SessionMessage::error('No se permite el borrado de registros.');
             return redirect(
                 $request->getControllerUrl() . '/listar' . $filterListar
-            );
+            )->withError('No se permite el borrado de registros.');
         }
-        $Obj = new $this->model['singular'](array_map('urldecode', func_get_args()));
+        $modelClass = $this->getModelClass();
+        $Obj = new $modelClass(array_map('urldecode', func_get_args()));
         // si el registro que se quiere eliminar no existe error
         if(!$Obj->exists()) {
-            SessionMessage::error(
-                'Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede eliminar.'
-            );
             return redirect(
                 $request->getControllerUrl() . '/listar'.$filterListar
-            );
+            )->withError('Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede eliminar.');
         }
         try {
             $Obj->delete();
@@ -637,30 +794,25 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     {
         $request = request();
         // si el campo que se solicita no existe error
-        if (!isset($this->model['singular']::$columnsInfo[$campo . '_data'])) {
+        if (!isset($this->getModelClass()::$columnsInfo[$campo . '_data'])) {
             SessionMessage::error('Campo '.$campo.' no existe.');
             return redirect(
                 $request->getControllerUrl() . '/listar'
             );
         }
         $pks = array_slice(func_get_args(), 1);
-        $Obj = new $this->model['singular']($pks);
+        $modelClass = $this->getModelClass();
+        $Obj = new $modelClass($pks);
         // si el registro que se quiere eliminar no existe error
         if(!$Obj->exists()) {
-            SessionMessage::error(
-                'Registro (' . implode(', ', $pks) . ') no existe. No se puede obtener '.$campo.'.'
-            );
             return redirect(
                 $request->getControllerUrl() . '/listar'
-            );
+            )->withError('Registro (' . implode(', ', $pks) . ') no existe. No se puede obtener '.$campo.'.');
         }
         if ((float)$Obj->{$campo.'_size'} == 0.0) {
-            SessionMessage::error(
-                'No hay datos para el campo ' . $campo . ' en el registro ('.implode(', ', $pks).').'
-            );
             return redirect(
                 $request->getControllerUrl() . '/listar'
-            );
+            )->withError('No hay datos para el campo ' . $campo . ' en el registro ('.implode(', ', $pks).').');
         }
         // entregar archivo
         return response()->file([

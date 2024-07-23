@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-namespace sowerphp\core;
+namespace sowerphp\app;
 
 /**
  * Clase base para las fuentes de datos, permite obtener la configuración de las

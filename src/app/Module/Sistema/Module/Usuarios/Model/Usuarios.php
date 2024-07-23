@@ -28,7 +28,7 @@ namespace sowerphp\app\Sistema\Usuarios;
  * Comentario de la tabla: Usuarios de la aplicación
  * Esta clase permite trabajar sobre un conjunto de registros de la tabla usuario
  */
-class Model_Usuarios extends \sowerphp\autoload\Model_Plural_App
+class Model_Usuarios extends \sowerphp\autoload\Model_Plural
 {
 
     // Datos para la conexión a la base de datos
@@ -41,7 +41,7 @@ class Model_Usuarios extends \sowerphp\autoload\Model_Plural_App
      */
     public function getList()
     {
-        return $this->db->getTable('
+        return $this->getDatabaseConnection()->getTable('
             SELECT id, usuario || \' - \' || nombre AS glosa
             FROM usuario
             WHERE activo = true
@@ -55,7 +55,7 @@ class Model_Usuarios extends \sowerphp\autoload\Model_Plural_App
      */
     public function getListInGroup($grupo)
     {
-        return $this->db->getTable('
+        return $this->getDatabaseConnection()->getTable('
             SELECT u.id, u.usuario || \' - \' || u.nombre AS glosa
             FROM usuario AS u, usuario_grupo AS ug, grupo AS g
             WHERE u.activo = true AND g.grupo = :grupo AND ug.grupo = g.id AND ug.usuario = u.id
@@ -69,7 +69,7 @@ class Model_Usuarios extends \sowerphp\autoload\Model_Plural_App
      */
     public function getEmailsInGroup($grupo)
     {
-        return $this->db->getCol('
+        return $this->getDatabaseConnection()->getCol('
             SELECT u.email
             FROM usuario AS u, usuario_grupo AS ug, grupo AS g
             WHERE u.activo = true AND g.grupo = :grupo AND ug.grupo = g.id AND ug.usuario = u.id
@@ -83,11 +83,11 @@ class Model_Usuarios extends \sowerphp\autoload\Model_Plural_App
      */
     public function getStatsLogin($limit = 12)
     {
-        $mes = $this->db->getDriverName() == 'pgsql'
+        $mes = $this->getDatabaseConnection()->getDriverName() == 'pgsql'
             ? 'TO_CHAR(ultimo_ingreso_fecha_hora, \'YYYY-MM\')'
             : 'DATE_FORMAT(ultimo_ingreso_fecha_hora, "%Y-%m")'
         ;
-        return $this->db->getTable('
+        return $this->getDatabaseConnection()->getTable('
             SELECT mes, usuarios
             FROM (
                 SELECT '.$mes.' AS mes, COUNT(*) AS usuarios
@@ -106,7 +106,7 @@ class Model_Usuarios extends \sowerphp\autoload\Model_Plural_App
      */
     public function getUserByTelegramID(int $telegram_id)
     {
-        $id = $this->db->getValue('
+        $id = $this->getDatabaseConnection()->getValue('
             SELECT usuario
             FROM usuario_config
             WHERE

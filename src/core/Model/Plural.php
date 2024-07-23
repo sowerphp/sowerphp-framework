@@ -21,25 +21,261 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-namespace sowerphp\app;
+namespace sowerphp\core;
+
+use Illuminate\Config\Repository;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
- * Clase abstracta para todos los modelos
- * Permite trabajar con varios registros de una tabla
+ * Clase abstracta para todos los modelos.
+ *
+ * Permite trabajar con varios registros de la tabla.
  */
 abstract class Model_Plural
 {
 
-    use \sowerphp\core\Trait_Object;
+    /**
+     * Se utiliza el trait de objetos para las funcionalidades básicas de un
+     * objeto del modelo.
+     */
+    use Trait_Object;
 
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table; ///< Tabla del modelo
-    protected $_class; ///< Clase singular de la clase plural
-    protected $db; ///< Conexión a base de datos
+    /**
+     * Todos los metadatos del modelo y de los campos (atributos) del modelo.
+     *
+     * @var Repository
+     */
+    protected $meta = [];
 
-    // caché
-    private static $objects = []; ///< caché para objetos singulares
+    /**
+     * Conexión a la base de datos asociada al modelo.
+     *
+     * @var Database_Connection_Custom
+     */
+    protected $db;
+
+    /**
+     * Constructor del modelo plural.
+     */
+    public function __construct(?Repository $meta = null)
+    {
+        // Asignar la configuración del modelo (metadatos) si no fue pasada.
+        if ($meta === null) {
+            $singularClass = app('inflector')->singularize(
+                $this->getReflector()->getName()
+            );
+            $singularInstance = new $singularClass();
+            $meta = $singularInstance->getMeta();
+        }
+        $this->meta = $meta;
+        // Asignar la conexión a la base de datos.
+        $this->db = $this->getDatabaseConnection();
+    }
+
+    /**
+     * Recupera la conexión a la base de datos asociada al modelo.
+     *
+     * Si la conexión no existe se obtiene desde el servicio de bases de
+     * datos.
+     *
+     * @return Database_Connection_Custom
+     */
+    public function getDatabaseConnection(): Database_Connection_Custom
+    {
+        if (!isset($this->db)) {
+            $this->db = database($this->meta['model.db_name']);
+        }
+        return $this->db;
+    }
+
+    /**
+     * Arma el query builder y lo retorna según los parámetros pasados.
+     *
+     * @param array $parameters Parámetros de búsqueda y obtención de registros.
+     * @return Illuminate\Database\Query\Builder
+     */
+    public function query(array $parameters = []): QueryBuilder
+    {
+        // Inicializar el query builder para el modelo.
+        $query = $this->getDatabaseConnection()->table(
+            $this->meta['model.db_table']
+        );
+        if (empty($parameters)) {
+            return $query;
+        }
+        // Aplicar filtros.
+        $filters = $parameters['filters'] ?? [];
+        if (!empty($filters)) {
+            $fields = array_keys($this->meta['fields']);
+            foreach ($filters as $field => $value) {
+                if (!in_array($field, $fields)) {
+                    continue;
+                }
+                $query->whereSmartFilter(
+                    $field,
+                    $value,
+                    $this->meta['fields'][$field]['type']
+                );
+            }
+        }
+        // Aplicar ordenamiento.
+        if (empty($parameters['sort'])) {
+            $parameters['sort'] = [];
+            foreach ($this->meta['model.ordering'] as $ordering) {
+                $column = $ordering;
+                $order = 'asc';
+                if ($column[0] == '-') {
+                    $column = substr($column, 1);
+                    $order = 'desc';
+                }
+                $parameters['sort'][] = [
+                    'column' => $column,
+                    'order' => $order,
+                ];
+            }
+        }
+        if (!empty($parameters['sort'])) {
+            foreach ($parameters['sort'] as $sort) {
+                $column = $sort['column'];
+                $order = strtolower($sort['order']) == 'desc' ? 'desc' : 'asc';
+                $query->orderBy($column, $order);
+            }
+        }
+        // Aplicar paginación.
+        if (
+            isset($parameters['pagination']['page'])
+            && isset($parameters['pagination']['limit'])
+        ) {
+            $page = $parameters['pagination']['page'];
+            $limit = $parameters['pagination']['limit'];
+            $query->skip(($page - 1) * $limit)->take($limit);
+        }
+        // Seleccionar las columnas deseadas si están especificadas.
+        if (!empty($parameters['fields'])) {
+            $query->select($parameters['fields']);
+        }
+        // Entregar query builder.
+        return $query;
+    }
+
+    /**
+     * Entrega el listado de registros que sirven como opciones para una lista
+     * desplegable (campo select) en un formulario o similar.
+     *
+     * @param array $parameters Parámetros de búsqueda y obtención de registros.
+     * @return array Arreglo con el listado de opciones.
+     */
+    public function choices(array $parameters = []): array
+    {
+        $choices = $this->filter($parameters);
+        return $choices;
+    }
+
+    /**
+     * Realiza una búsqueda y cuenta los recursos del.
+     *
+     * @param array $parameters Parámetros de búsqueda y obtención de registros.
+     * @return int Cantidad de recursos encontrados.
+     */
+    public function count(array $parameters): int
+    {
+        $query = $this->query($parameters);
+        return $query->count();
+    }
+
+    /**
+     * Entrega la cantidad de registros que hay en la tabla, hará uso
+     * del whereStatement si no es null también de groupByStatement y
+     * havingStatement.
+     * @return int Cantidad de registros encontrados.
+     */
+    /*public function count(): int
+    {
+        // armar consulta
+        $query = '
+            SELECT COUNT(*)
+            FROM ' . $this->getMeta()['model.db_table']
+        ;
+        // si hay where se usa
+        if ($this->whereStatement) {
+            $query .= $this->whereStatement;
+        }
+        // en caso que se quiera usar el group by se hace una subconsulta
+        if ($this->groupByStatement) {
+            $query .= $this->groupByStatement;
+            if ($this->havingStatement) {
+                $query .= $this->havingStatement;
+            }
+            $query = "SELECT COUNT(*) FROM ($query) AS t";
+        }
+        // entregar resultados
+        return (int)$this->getDatabaseConnection()->getValue($query, $this->queryVars);
+    }*/
+
+    /**
+     * Realiza una búsqueda y obtiene recursos del modelo.
+     *
+     * @param array $parameters Parámetros de búsqueda y obtención de registros.
+     * @param bool $stdClass =true se entregará un objeto stdClass.
+     * @return \Illuminate\Support\Collection|array
+     */
+    public function filter(array $parameters, $stdClass = false)
+    {
+        $query = $this->query($parameters);
+        // Obtener los resultados.
+        $results = $query->get();
+        if ($stdClass) {
+            return $results;
+        }
+        // Crear instancias del modelo para retornar.
+        $class = $this->meta['model.singular'];
+        $instances = [];
+        foreach ($results as $result) {
+            $instance = new $class();
+            $instance->forceFill((array)$result);
+            $instances[] = $instance;
+        }
+        return $instances;
+    }
+
+    /**
+     * Obtener un recurso (registro) desde el modelo (base de datos).
+     *
+     * @param array $filters Filtros con la clave primaria del modelo.
+     * @param bool $stdClass =true se entregará un objeto stdClass.
+     * @return \stdClass|Model
+     */
+    public function retrieve(array $filters, bool $stdClass = false)
+    {
+        // Generar filtros con la PK.
+        $results = $this->filter(['filters' => $filters], $stdClass);
+        $n_results = count($results);
+        // DoesNotExist
+        if ($n_results === 0) {
+            throw new \Exception(__(
+                'No se encontró un registro para %s::retrieve(%s).',
+                $this->meta['model.label'],
+                implode(', ', array_values($filters))
+            ), 404);
+        }
+        // MultipleObjectsReturned
+        else if ($n_results > 1) {
+            throw new \Exception(__(
+                'Se obtuvo más de un registro para %s::retrieve(%s).',
+                $this->meta['model.label'],
+                implode(', ', array_values($filters))
+            ), 409);
+        }
+        // Se encontró exactamente un resultado (como se espera para una PK).
+        return $results[0];
+    }
+
+
+
+
+
+
+
 
     // Atributo con configuración para generar consultas SQL
     protected $selectStatement; ///< Columnas a consultar
@@ -50,41 +286,6 @@ abstract class Model_Plural
     protected $limitStatementRecords; ///< Registros que se seleccionarán
     protected $limitStatementOffset; ///< Desde que fila se seleccionarán
     protected $queryVars = []; ///< Variables que se utilizarán en la query
-
-    /**
-     * Constructor de la clase abstracta
-     */
-    public function __construct()
-    {
-        // crear statement vacío
-        $this->clear();
-        // recuperar conexión a la base de datos
-        $this->getDB();
-        // setear nombre de la clase y de la tabla según la clase que se está usando
-        if (empty($this->_class)) {
-            $this->_class = \sowerphp\core\Utility_Inflector::singularize(get_class($this));
-            /*if (!class_exists($this->_class)) {
-                throw new \Exception('Clase '.$this->_class.' no existe (especificar singular de '.get_class($this).' manualmente)');
-            }*/
-        }
-        if (empty($this->_table)) {
-            $this->_table = \sowerphp\core\Utility_Inflector::underscore (
-                $this->_class
-            );
-        }
-    }
-
-    /**
-     * Método que recupera la conexión a la base de datos del objeto.
-     * Si la conexión no existe se conecta.
-     */
-    protected function getDB()
-    {
-        if (!isset($this->db)) {
-            $this->db = database($this->_database);
-        }
-        return $this->db;
-    }
 
     /**
      * Método para limpiar los atributos que contienen las opciones para
@@ -197,35 +398,6 @@ abstract class Model_Plural
     }
 
     /**
-     * Entrega la cantidad de registros que hay en la tabla, hará uso
-     * del whereStatement si no es null también de groupByStatement y
-     * havingStatement.
-     * @return int Cantidad de registros encontrados.
-     */
-    public function count(): int
-    {
-        // armar consulta
-        $query = '
-            SELECT COUNT(*)
-            FROM ' . $this->_table
-        ;
-        // si hay where se usa
-        if ($this->whereStatement) {
-            $query .= $this->whereStatement;
-        }
-        // en caso que se quiera usar el group by se hace una subconsulta
-        if ($this->groupByStatement) {
-            $query .= $this->groupByStatement;
-            if ($this->havingStatement) {
-                $query .= $this->havingStatement;
-            }
-            $query = "SELECT COUNT(*) FROM ($query) AS t";
-        }
-        // entregar resultados
-        return (int)$this->db->getValue($query, $this->queryVars);
-    }
-
-    /**
      * Entrega el valor máximo del campo solicitado, hará uso del
      * whereStatement si no es null.
      * @param campo Campo que se consultará
@@ -233,11 +405,11 @@ abstract class Model_Plural
      */
     public function getMax($campo)
     {
-        $query = 'SELECT MAX('.$campo.') FROM '.$this->_table;
+        $query = 'SELECT MAX('.$campo.') FROM '.$this->getMeta()['model.db_table'];
         if ($this->whereStatement) {
             $query .= $this->whereStatement;
         }
-        return $this->db->getValue($query, $this->queryVars);
+        return $this->getDatabaseConnection()->getValue($query, $this->queryVars);
     }
 
     /**
@@ -248,11 +420,11 @@ abstract class Model_Plural
      */
     public function getMin($campo)
     {
-        $query = 'SELECT MIN('.$campo.') FROM '.$this->_table;
+        $query = 'SELECT MIN('.$campo.') FROM '.$this->getMeta()['model.db_table'];
         if ($this->whereStatement) {
             $query .= $this->whereStatement;
         }
-        return $this->db->getValue($query, $this->queryVars);
+        return $this->getDatabaseConnection()->getValue($query, $this->queryVars);
     }
 
     /**
@@ -263,11 +435,11 @@ abstract class Model_Plural
      */
     public function getSum ($campo)
     {
-        $query = 'SELECT SUM('.$campo.') FROM '.$this->_table;
+        $query = 'SELECT SUM('.$campo.') FROM '.$this->getMeta()['model.db_table'];
         if ($this->whereStatement) {
             $query .= $this->whereStatement;
         }
-        return $this->db->getValue($query, $this->queryVars);
+        return $this->getDatabaseConnection()->getValue($query, $this->queryVars);
     }
 
     /**
@@ -278,11 +450,11 @@ abstract class Model_Plural
      */
     public function getAvg($campo)
     {
-        $query = 'SELECT AVG('.$campo.') FROM '.$this->_table;
+        $query = 'SELECT AVG('.$campo.') FROM '.$this->getMeta()['model.db_table'];
         if ($this->whereStatement) {
             $query .= $this->whereStatement;
         }
-        return $this->db->getValue($query, $this->queryVars);
+        return $this->getDatabaseConnection()->getValue($query, $this->queryVars);
     }
 
     /**
@@ -297,9 +469,9 @@ abstract class Model_Plural
     {
         // preparar consulta inicial
         if ($this->selectStatement) {
-            $query = 'SELECT '.$this->selectStatement.' FROM '.$this->_table;
+            $query = 'SELECT '.$this->selectStatement.' FROM '.$this->getMeta()['model.db_table'];
         } else {
-            $query = 'SELECT * FROM '.$this->_table;
+            $query = 'SELECT * FROM '.$this->getMeta()['model.db_table'];
         }
         // agregar where
         if ($this->whereStatement) {
@@ -319,7 +491,7 @@ abstract class Model_Plural
         }
         // agregar limit
         if ($this->limitStatementRecords) {
-            $query = $this->db->setLimit(
+            $query = $this->getDatabaseConnection()->setLimit(
                 $query,
                 $this->limitStatementRecords,
                 $this->limitStatementOffset
@@ -327,7 +499,7 @@ abstract class Model_Plural
         }
         // ejecutar
         if ($solicitado == 'objects' || $solicitado == 'table') {
-            $tabla = $this->db->getTable($query, $this->queryVars);
+            $tabla = $this->getDatabaseConnection()->getTable($query, $this->queryVars);
             if ($solicitado == 'objects') {
                 // procesar tabla y asignar valores al objeto
                 $objetos = [];
@@ -335,7 +507,7 @@ abstract class Model_Plural
                 if ($class === null) {
                     $aux = \sowerphp\core\Utility_Inflector::singularize(get_class($this));
                     $namespace = substr($aux, 0, strrpos($aux, '\\'));
-                    $class = $namespace.'\Model_'.\sowerphp\core\Utility_Inflector::camelize($this->_table);
+                    $class = $namespace.'\Model_'.\sowerphp\core\Utility_Inflector::camelize($this->getMeta()['model.db_table']);
                 }
                 // iterar creando objetos
                 foreach ($tabla as &$fila) {
@@ -352,11 +524,11 @@ abstract class Model_Plural
                 return $tabla;
             }
         } else if ($solicitado == 'row') {
-            return $this->db->getRow($query, $this->queryVars);
+            return $this->getDatabaseConnection()->getRow($query, $this->queryVars);
         } else if ($solicitado == 'col') {
-            return $this->db->getCol($query, $this->queryVars);
+            return $this->getDatabaseConnection()->getCol($query, $this->queryVars);
         } else if ($solicitado == 'value') {
-            return $this->db->getValue($query, $this->queryVars);
+            return $this->getDatabaseConnection()->getValue($query, $this->queryVars);
         }
     }
 
@@ -424,17 +596,7 @@ abstract class Model_Plural
      */
     public function get($pk)
     {
-        $args = func_get_args();
-        $key = implode('/', $args);
-        if (!isset(self::$objects[$this->_class])) {
-            self::$objects[$this->_class] = [];
-        }
-        if (!isset(self::$objects[$this->_class][$key])) {
-            self::$objects[$this->_class][$key] =
-                (new \ReflectionClass($this->_class))->newInstanceArgs($args)
-            ;
-        }
-        return self::$objects[$this->_class][$key];
+        return model($this->getMeta()['model.singular'], func_get_args());
     }
 
     /**
@@ -446,13 +608,12 @@ abstract class Model_Plural
      */
     public function getList()
     {
-        $class = $this->_class;
-        $cols = array_keys($class::$columnsInfo);
+        $cols = array_keys($this->meta['model.singular']::$columnsInfo);
         $id = $cols[0];
-        $glosa = in_array($this->_table, $cols) ? $this->_table : $cols[1];
-        return $this->db->getTable('
+        $glosa = in_array($this->getMeta()['model.db_table'], $cols) ? $this->getMeta()['model.db_table'] : $cols[1];
+        return $this->getDatabaseConnection()->getTable('
             SELECT '.$id.' AS id, '.$glosa.' AS glosa
-            FROM '.$this->_table.'
+            FROM '.$this->getMeta()['model.db_table'].'
             ORDER BY '.$glosa
         );
     }

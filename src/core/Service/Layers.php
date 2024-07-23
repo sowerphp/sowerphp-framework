@@ -347,16 +347,42 @@ class Service_Layers implements Interface_Service
             $this->layers = [];
             foreach ($layers as $layer) {
                 $this->layers[$layer['namespace']] = [
-                    'path' => str_replace(
-                        ['framework:', 'project:'],
-                        [$this->getFrameworkPath(), $this->getProjectPath()],
-                        $layer['directory']
-                    )
+                    'path' => $this->deobfuscatePath($layer['directory']),
                 ];
             }
         }
         // Entregar listado de capas.
         return $this->layers;
+    }
+
+    /**
+     * Muestra la ruta completa de un path, sin ocultar la ruta.
+     *
+     * @param string $path
+     * @return string
+     */
+    public function deobfuscatePath(string $path): string
+    {
+        return str_replace(
+            ['framework:', 'project:'],
+            [$this->getFrameworkPath(), $this->getProjectPath()],
+            $path
+        );
+    }
+
+    /**
+     * Oculta parte de la ruta de un path, ocultando la ruta real.
+     *
+     * @param string $path
+     * @return string
+     */
+    public function obfuscatePath(string $path): string
+    {
+        return str_replace(
+            [$this->getFrameworkPath(), $this->getProjectPath(),],
+            ['framework:', 'project:',],
+            $path
+        );
     }
 
     /**

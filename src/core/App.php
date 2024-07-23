@@ -63,6 +63,7 @@ class App
         'events' => Service_Events::class,
         'encryption' => Service_Encryption::class,
         'model' => Service_Model::class,
+        'validator' => Service_Validator::class,
         //'mail' => Service_Mail::class,
         //'http_client' => Service_Http_Client::class,
         //'log' => Service_Log::class,

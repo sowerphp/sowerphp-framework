@@ -30,7 +30,7 @@ use \Illuminate\Contracts\Auth\Authenticatable;
  * Comentario de la tabla: Usuarios de la aplicación
  * Esta clase permite trabajar sobre un registro de la tabla usuario
  */
-class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticatable
+class Model_Usuario extends \sowerphp\autoload\Model implements Authenticatable
 {
 
     // Datos para la conexión a la base de datos
@@ -211,10 +211,9 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
     public function __construct($id = null)
     {
         if ($id !== null && !is_array($id) && !is_numeric($id)) {
-            $this->db = database($this->_database);
             // se crea usuario a través de su correo electrónico
             if (strpos($id, '@')) {
-                $id = $this->getDB()->getValue('
+                $id = $this->getDatabaseConnection()->getValue('
                     SELECT id
                     FROM usuario
                     WHERE email = :email
@@ -222,7 +221,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
             }
             // se crea usuario a través de su nombre de usuario
             else if (!isset($id[31])) {
-                $id = $this->getDB()->getValue('
+                $id = $this->getDatabaseConnection()->getValue('
                     SELECT id
                     FROM usuario
                     WHERE usuario = :usuario
@@ -230,7 +229,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
             }
             // se crea usuario a través de su hash
             else {
-                $id = $this->getDB()->getValue('
+                $id = $this->getDatabaseConnection()->getValue('
                     SELECT id
                     FROM usuario
                     WHERE hash = :hash
@@ -251,10 +250,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
             return null;
         }
         if ($this->config === null) {
-            if (!$this->db) {
-                $this->db = database($this->_database);
-            }
-            $config = $this->getDB()->getTableWithAssociativeIndex('
+            $config = $this->getDatabaseConnection()->getTableWithAssociativeIndex('
                 SELECT configuracion, variable, valor, json
                 FROM usuario_config
                 WHERE usuario = :id
@@ -308,7 +304,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
     /**
      * Método mágico para asignar una configuración del usuario
      */
-    public function __set($name, $value)
+    public function __set(string $name, $value): void
     {
         if (strpos($name, 'config_') === 0 && class_exists('\sowerphp\app\Sistema\Usuarios\Model_UsuarioConfig')) {
             $key = str_replace('config_', '', $name);
@@ -329,9 +325,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
             $this->config[$c][$v] = (!is_string($value) || isset($value[0])) ? $value : null;
             $this->$name = $this->config[$c][$v];
         } else {
-            throw new \Exception(
-                'Atributo '.$name.' del usuario no existe (no se puede asignar).'
-            );
+            parent::__set($name, $value);
         }
     }
 
@@ -352,11 +346,8 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
     /**
      * Método que guarda el usuario y su configuración personalizada si existe.
      */
-    public function save(): bool
+    public function save(array $options = []): bool
     {
-        if ($this->db === null) {
-            $this->db = database($this->_database);
-        }
         // Guardar usuario.
         if (!parent::save()) {
             return false;
@@ -436,7 +427,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
     public function checkIfUserAlreadyExists(): bool
     {
         if (empty($this->id)) {
-            return (bool)$this->getDB()->getValue('
+            return (bool)$this->getDatabaseConnection()->getValue('
                 SELECT COUNT(*)
                 FROM usuario
                 WHERE LOWER(usuario) = :usuario
@@ -444,7 +435,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
                 ':usuario' => strtolower($this->usuario),
             ]);
         } else {
-            return (bool)$this->getDB()->getValue('
+            return (bool)$this->getDatabaseConnection()->getValue('
                 SELECT COUNT(*)
                 FROM usuario
                 WHERE id != :id AND LOWER(usuario) = :usuario
@@ -463,7 +454,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
     public function checkIfEmailAlreadyExists(): bool
     {
         if (empty($this->id)) {
-            return (bool)$this->getDB()->getValue('
+            return (bool)$this->getDatabaseConnection()->getValue('
                 SELECT COUNT(*)
                 FROM usuario
                 WHERE email = :email
@@ -471,7 +462,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
                 ':email' => $this->email,
             ]);
         } else {
-            return (bool)$this->getDB()->getValue('
+            return (bool)$this->getDatabaseConnection()->getValue('
                 SELECT COUNT(*)
                 FROM usuario
                 WHERE id != :id AND email = :email
@@ -489,7 +480,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
     public function checkIfHashAlreadyExists(): bool
     {
         if (empty($this->id)) {
-            return (bool)$this->getDB()->getValue('
+            return (bool)$this->getDatabaseConnection()->getValue('
                 SELECT COUNT(*)
                 FROM usuario
                 WHERE hash = :hash
@@ -497,7 +488,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
                 ':hash' => $this->hash,
             ]);
         } else {
-            return (bool)$this->getDB()->getValue('
+            return (bool)$this->getDatabaseConnection()->getValue('
                 SELECT COUNT(*)
                 FROM usuario
                 WHERE id != :id AND hash = :hash
@@ -529,7 +520,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
     private function savePasswordLocal(string $new): bool
     {
         $this->contrasenia = $this->hashPassword($new);
-        $this->getDB()->executeRawQuery('
+        $this->getDatabaseConnection()->executeRawQuery('
             UPDATE usuario
             SET contrasenia = :contrasenia
             WHERE id = :id
@@ -613,11 +604,12 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
                 ? $this->contrasenia
                 : ($ip . $timestamp . $this->contrasenia)
         ));
-        $this->update([
+        $this->forceFill([
             'ultimo_ingreso_fecha_hora' => $timestamp,
             'ultimo_ingreso_desde' => $ip,
             'ultimo_ingreso_hash' => $sessionHash
         ]);
+        $this->save();
         return $sessionHash;
     }
 
@@ -630,7 +622,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
     public function groups(bool $forceGet = false): array
     {
         if ($this->groups === null || $forceGet) {
-            $this->groups = $this->getDB()->getTableWithAssociativeIndex('
+            $this->groups = $this->getDatabaseConnection()->getTableWithAssociativeIndex('
                 SELECT g.id, g.grupo
                 FROM grupo AS g, usuario_grupo AS ug
                 WHERE ug.usuario = :usuario AND g.id = ug.grupo
@@ -709,9 +701,9 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
             $grupos = (new Model_Grupos())->getIDs($grupos);
         }
         $grupos = array_map('intval', $grupos);
-        $this->getDB()->beginTransaction();
+        $this->getDatabaseConnection()->beginTransaction();
         if ($grupos) {
-            $this->getDB()->query ('
+            $this->getDatabaseConnection()->query ('
                 DELETE FROM usuario_grupo
                 WHERE
                     usuario = :usuario
@@ -723,14 +715,14 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
                 (new Model_UsuarioGrupo($this->id, $grupo))->save();
             }
         } else {
-            $this->getDB()->query ('
+            $this->getDatabaseConnection()->query ('
                 DELETE FROM usuario_grupo
                 WHERE usuario = :usuario
             ', [
                 ':usuario' => $this->id,
             ]);
         }
-        return $this->getDB()->commit();
+        return $this->getDatabaseConnection()->commit();
     }
 
     /**
@@ -751,7 +743,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
             }
             $where[] = 'g.grupo IN (' . implode(', ', $grupos) . ')';
         }
-        return $this->getDB()->getTableWithAssociativeIndex('
+        return $this->getDatabaseConnection()->getTableWithAssociativeIndex('
             SELECT g.id, g.grupo
             FROM usuario_grupo AS ug JOIN grupo AS g ON ug.grupo = g.id
             WHERE '.implode(' AND ', $where).'
@@ -790,10 +782,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
             }
             $where[] = 'g.grupo IN (' . implode(', ', $grupos) . ')';
         }
-        if ($this->db === null) {
-            $this->db = database($this->_database);
-        }
-        return $this->getDB()->getCol('
+        return $this->getDatabaseConnection()->getCol('
             SELECT a.recurso
             FROM auth AS a, usuario_grupo AS ug, grupo AS g
             WHERE
@@ -868,7 +857,7 @@ class Model_Usuario extends \sowerphp\autoload\Model_App implements Authenticata
     public function savePasswordRetry(int $intentos): void
     {
         $this->contrasenia_intentos = $intentos;
-        $this->getDB()->executeRawQuery('
+        $this->getDatabaseConnection()->executeRawQuery('
             UPDATE usuario
             SET contrasenia_intentos = :intentos
             WHERE id = :id

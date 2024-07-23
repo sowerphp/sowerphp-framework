@@ -28,7 +28,7 @@ namespace sowerphp\app\Sistema\General;
  * Comentario de la tabla:
  * Esta clase permite trabajar sobre un conjunto de registros de la tabla moneda_cambio
  */
-class Model_MonedaCambios extends \sowerphp\autoload\Model_Plural_App
+class Model_MonedaCambios extends \sowerphp\autoload\Model_Plural
 {
 
     // Datos para la conexión a la base de datos
@@ -67,7 +67,7 @@ class Model_MonedaCambios extends \sowerphp\autoload\Model_Plural_App
             $i++;
         }
         $where[] = 'desde IN ('.implode(', ', $in).')';
-        return $this->db->getTableWithAssociativeIndex('
+        return $this->getDatabaseConnection()->getTableWithAssociativeIndex('
             SELECT desde AS moneda, valor
             FROM moneda_cambio
             WHERE '.implode(' AND ', $where).'
@@ -101,7 +101,7 @@ class Model_MonedaCambios extends \sowerphp\autoload\Model_Plural_App
             $i++;
         }
         $where[] = 'desde IN (' . implode(', ', $in) . ')';
-        return $this->db->getTableWithAssociativeIndex('
+        return $this->getDatabaseConnection()->getTableWithAssociativeIndex('
             SELECT desde AS moneda, fecha, valor
             FROM moneda_cambio
             WHERE ' . implode(' AND ', $where) . '

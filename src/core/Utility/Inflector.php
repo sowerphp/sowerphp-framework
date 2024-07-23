@@ -556,6 +556,3 @@ class Utility_Inflector
 		return preg_replace(array_keys($map), array_values($map), $string);
 	}
 }
-
-// Store the initial state
-Utility_Inflector::reset();

@@ -28,7 +28,7 @@ namespace sowerphp\app\Sistema\Usuarios;
  * Comentario de la tabla: Grupos de la aplicación
  * Esta clase permite trabajar sobre un conjunto de registros de la tabla grupo
  */
-class Model_Grupos extends \sowerphp\autoload\Model_Plural_App
+class Model_Grupos extends \sowerphp\autoload\Model_Plural
 {
 
     // Datos para la conexión a la base de datos
@@ -44,7 +44,7 @@ class Model_Grupos extends \sowerphp\autoload\Model_Plural_App
     {
         $ids = [];
         foreach ($grupos as &$grupo) {
-            $id = $this->db->getValue(
+            $id = $this->getDatabaseConnection()->getValue(
                 'SELECT id FROM grupo WHERE grupo = :grupo',
                 [':grupo' => $grupo]
             );
@@ -72,7 +72,7 @@ class Model_Grupos extends \sowerphp\autoload\Model_Plural_App
             $vars[':grupo' . $i] = $g;
             $i++;
         }
-        return $this->db->getCol('
+        return $this->getDatabaseConnection()->getCol('
             SELECT DISTINCT grupo
             FROM grupo
             WHERE id IN (' . implode(', ', $where) . ')
@@ -98,7 +98,7 @@ class Model_Grupos extends \sowerphp\autoload\Model_Plural_App
             $vars[':grupo' . $i] = $g;
             $i++;
         }
-        return $this->db->getCol('
+        return $this->getDatabaseConnection()->getCol('
             SELECT DISTINCT u.email
             FROM usuario AS u JOIN usuario_grupo AS ug ON u.id = ug.usuario
             WHERE ug.grupo IN (' . implode(', ', $where) . ') AND u.activo

@@ -24,65 +24,50 @@
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
 /**
- * Clase para mapear la tabla provincia de la base de datos
- * Comentario de la tabla: Provincias de cada región del país
- * Esta clase permite trabajar sobre un registro de la tabla provincia
+ * Modelo singular de la tabla "provincia" de la base de datos.
+ *
+ * Permite interactuar con un registro de la tabla.
  */
-class Model_Provincia extends \sowerphp\autoload\Model_App
+class Model_Provincia extends \sowerphp\autoload\Model
 {
 
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'provincia'; ///< Tabla del modelo
-
-    // Atributos de la clase (columnas en la base de datos)
-    public $codigo; ///< Código de la provincia: character(3) NOT NULL DEFAULT '' PK
-    public $provincia; ///< Nombre de la provincia: character varying(30) NOT NULL DEFAULT ''
-    public $region; ///< Región a la que pertenece la provincia: character(2) NOT NULL DEFAULT '' FK:region.codigo
-
-    // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'codigo' => array(
-            'name'      => 'Codigo',
-            'comment'   => 'Código de la provincia',
-            'type'      => 'character',
-            'length'    => 3,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => true,
-            'fk'        => null
-        ),
-        'provincia' => array(
-            'name'      => 'Provincia',
-            'comment'   => 'Nombre de la provincia',
-            'type'      => 'character varying',
-            'length'    => 30,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-        'region' => array(
-            'name'      => 'Region',
-            'comment'   => 'Región a la que pertenece la provincia',
-            'type'      => 'character',
-            'length'    => 2,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => array('table' => 'region', 'column' => 'codigo')
-        ),
-
-    );
-
-    // Comentario de la tabla en la base de datos
-    public static $tableComment = 'Provincias de cada región del país';
-
-    public static $fkNamespace = array(
-        'Model_Region' => 'sowerphp\app\Sistema\General\DivisionGeopolitica'
-    ); ///< Namespaces que utiliza esta clase
+    /**
+     * Metadatos del modelo.
+     *
+     * @var array
+     */
+    protected $meta = [
+        'model' => [
+            'ordering' => ['provincia'],
+        ],
+        'fields' => [
+            'codigo' => [
+                'type' => self::TYPE_STRING,
+                'primary_key' => true,
+                'length' => 3,
+                'verbose_name' => 'Código',
+                'help_text' => 'Código asignado por el gobierno de Chile a la provincia.',
+            ],
+            'provincia' => [
+                'type' => self::TYPE_STRING,
+                'null' => false,
+                'blank' => false,
+                'max_length' => 30,
+                'verbose_name' => 'Provincia',
+                'help_text' => 'Nombre de la provincia.',
+            ],
+            'region' => [
+                'type' => self::TYPE_STRING,
+                'null' => false,
+                'blank' => false,
+                'foreign_key' => Model_Region::class,
+                'to_table' => 'region',
+                'to_field' => 'codigo',
+                'length' => 2,
+                'verbose_name' => 'Región',
+                'help_text' => 'Región a la que pertenece la provincia.',
+            ],
+        ],
+    ];
 
 }

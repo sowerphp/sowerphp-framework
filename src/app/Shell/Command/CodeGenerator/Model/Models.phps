@@ -20,19 +20,14 @@
  * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
-.
+
 namespace {namespace};
 
 /**
- * Clase para mapear la tabla {table} de la base de datos.
- * Comentario de la tabla: {comment}
- * Esta clase permite trabajar sobre un conjunto de registros de la tabla {table}.
+ * Modelo singular de la tabla "{table}" de la base de datos.
+ *
+ * Permite interactuar con varios registros de la tabla.
  */
-class Model_{classs} extends \Model_Plural_App
+class Model_{classs} extends \sowerphp\autoload\Model_Plural
 {
-
-    // Datos para la conexión a la base de datos.
-    protected $_database = '{database}'; ///< Base de datos del modelo.
-    protected $_table = '{table}'; ///< Tabla del modelo.
-
 }

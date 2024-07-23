@@ -23,6 +23,7 @@
 
 namespace sowerphp\core;
 
+use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Builder;
@@ -193,11 +194,24 @@ class Service_Database implements Interface_Service
         }
         // Cerrar todas las conexiones.
         else {
-            $connections = $this->capsule->getDatabaseManager()->getConnections();
+            $connections = $this->getDatabaseManager()->getConnections();
             foreach ($connections as $connection) {
                 $connection->disconnect();
             }
         }
+    }
+
+    /**
+     * Entrega el administrador principal de conexiones a la base de datos.
+     *
+     * Es el objeto que gestiona las conexiones y proporciona métodos para
+     * acceder a ellas.
+     *
+     * @return \Illuminate\Database\DatabaseManager
+     */
+    public function getDatabaseManager(): DatabaseManager
+    {
+        return $this->capsule->getDatabaseManager();
     }
 
 }

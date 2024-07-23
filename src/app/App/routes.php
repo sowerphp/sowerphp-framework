@@ -32,6 +32,10 @@ $router->connect('/api/sistema/usuarios/:controller/*', [
     'module' => 'Sistema.Usuarios',
     'action' => 'api',
 ]);
+$router->connect('/api/sistema/general/division_geopolitica/:controller/*', [
+    'module' => 'Sistema.General.DivisionGeopolitica',
+    'action' => 'api',
+]);
 if (app('module')->isModuleLoaded('Dev')) {
     $router->connect('/api/dev/:controller/*', [
         'module' => 'Dev',

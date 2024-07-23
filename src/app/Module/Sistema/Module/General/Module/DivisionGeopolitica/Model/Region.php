@@ -28,59 +28,38 @@ namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
  * Comentario de la tabla: Regiones del país
  * Esta clase permite trabajar sobre un registro de la tabla region
  */
-class Model_Region extends \sowerphp\autoload\Model_App
+class Model_Region extends \sowerphp\autoload\Model
 {
 
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'region'; ///< Tabla del modelo
-
-    // Atributos de la clase (columnas en la base de datos)
-    public $codigo; ///< Código de la región: character(2) NOT NULL DEFAULT '' PK
-    public $region; ///< Nombre de la región: character varying(60) NOT NULL DEFAULT ''
-    public $orden; ///< smallint(16) NOT NULL DEFAULT '0'
-
-    // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'codigo' => array(
-            'name'      => 'Codigo',
-            'comment'   => 'Código de la región',
-            'type'      => 'character',
-            'length'    => 2,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => true,
-            'fk'        => null
-        ),
-        'region' => array(
-            'name'      => 'Region',
-            'comment'   => 'Nombre de la región',
-            'type'      => 'character varying',
-            'length'    => 60,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-        'orden' => array(
-            'name'      => 'Orden',
-            'comment'   => '',
-            'type'      => 'smallint',
-            'length'    => 16,
-            'null'      => false,
-            'default'   => '0',
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-
-    );
-
-    // Comentario de la tabla en la base de datos
-    public static $tableComment = 'Regiones del país';
-
-    public static $fkNamespace = []; ///< Namespaces que utiliza esta clase
+    /**
+     * Metadatos del modelo.
+     *
+     * @var array
+     */
+    protected $meta = [
+        'model' => [
+            'ordering' => ['orden'],
+        ],
+        'fields' => [
+            'codigo' => [
+                'type' => self::TYPE_STRING,
+                'primary_key' => true,
+                'length' => 2,
+                'verbose_name' => 'Código',
+                'help_text' => 'Código asignado por el gobierno de Chile a la región.',
+            ],
+            'region' => [
+                'type' => self::TYPE_STRING,
+                'max_length' => 60,
+                'verbose_name' => 'Región',
+                'help_text' => 'Nombre de la región.',
+            ],
+            'orden' => [
+                'type' => self::TYPE_SMALL_INTEGER,
+                'verbose_name' => 'Orden',
+                'help_text' => 'Orden en el que se deben listar las regiones.',
+            ],
+        ],
+    ];
 
 }

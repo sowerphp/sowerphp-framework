@@ -23,8 +23,6 @@
 
 namespace sowerphp\core;
 
-use Illuminate\Database\Query\Builder as QueryBuilder;
-
 /**
  * Servicio para trabajar con modelos de la base de datos.
  *
@@ -101,32 +99,23 @@ class Service_Model implements Interface_Service
     /**
      * Obtiene una instancia de un modelo.
      *
-     * @param string $id Identificador de la clase del modelo.
-     * @param mixed ...$pk Clave primaria del modelo.
-     * @return mixed Instancia del modelo.
+     * @param string $model Identificador de la clase del modelo.
+     * @param array ...$id Clave primaria del modelo.
+     * @return Model Instancia del modelo.
      */
-    public function instantiate(string $id, $pk = null)
+    public function instantiate(string $model, ...$id): Model
     {
+        $modelClass = $this->getModelClass($model);
         // Si no hay PK, entonces se está pidiendo una instancia sin ir a la
         // base de datos (objeto sin datos).
-        if ($pk === null) {
-            $modelClass = $this->getModelClass($id);
+        if (empty($id)) {
             return new $modelClass();
-        }
-        // Se normaliza la PK a un arreglo si no lo es.
-        if (!is_array($pk)) {
-            $pk = [$pk];
         }
         // Si hay PK, es una instancia de un modelo con datos de la base de
         // datos. En este caso se busca en caché primero.
-        $cacheKey = $this->getCacheKey($id, $pk);
+        $cacheKey = $this->getCacheKey($model, $id);
         if (!isset($this->cache[$cacheKey])) {
-            $modelClass = $this->getModelClass($id);
-            // TODO: refactorizar modelos para recibir arreglo con la PK.
-            // Con eso se deja de usar ReflectionClass (que es más costosa).
-            $this->cache[$cacheKey] = (new \ReflectionClass($modelClass))
-                ->newInstanceArgs($pk)
-            ;
+            $this->cache[$cacheKey] = new $modelClass(...$id);
         }
         // Entregar la instancia de la caché.
         return $this->cache[$cacheKey];
@@ -194,213 +183,19 @@ class Service_Model implements Interface_Service
     }
 
     /**
-     * Método que determina la información del modelo a partir del nombre de la
-     * clase del controlador.
-     *
-     * Se pueden especificar los datos ya conocidos en $model y no se
-     * sobrescribirán (se mantendrán al retornar).
+     * Método que determina el nombre del modelo asociado a un controlador.
      *
      * @param string $controller Clase FQCN del controlador.
-     * @param array $model Datos ya conocidos del modelo (no se sobrescribirán).
-     * @return array Arreglo con índices: table, singular y plural.
+     * @return string Clase del modelo singular asociado al controlador.
      */
-    public function getModelInfoFromController(string $controller, array $model = [])
+    public function getModelFromController(string $controller): string
     {
         $pos = strrpos($controller, '\\');
         $class = str_replace('Controller_', '', substr($controller, $pos + 1));
         $singular = \sowerphp\core\Utility_Inflector::singularize($class);
-        if (empty($model['database'])) {
-            $model['database'] = 'default';
-        }
-        if (empty($model['table'])) {
-            $model['table'] = \Illuminate\Support\Str::snake($singular);
-        }
-        if (empty($model['namespace'])) {
-            $model['namespace'] = '\\' . substr($controller, 0, $pos);
-        }
-        if (empty($model['singular'])) {
-            $model['singular'] = $model['namespace'] . '\Model_' . $singular;
-        }
-        if (empty($model['plural'])) {
-            $model['plural'] = $model['namespace'] . '\Model_' . $class;
-        }
+        $namespace = '\\' . substr($controller, 0, $pos);
+        $model = $namespace . '\Model_' . $singular;
         return $model;
-    }
-
-    /**
-     * Entrega la información de las columnas de un modelo.
-     *
-     * @param string $model Modelo para el cual se quiere obtener su información.
-     * @return array Arreglo con la información de las columnas del modelo.
-     */
-    public function columns(string $model): array
-    {
-        return $model::$columnsInfo ?? [];
-    }
-
-    /**
-     * Entrega las columnas que forman la PK del modelo.
-     *
-     * @return array Arreglo con las columnas que son la PK.
-     */
-    public function pk(string $model): array
-    {
-        $pk = [];
-        foreach ($this->columns($model) as $column => $info) {
-            if (!empty($info['pk'])) {
-                $pk[] = $column;
-            }
-        }
-        return $pk;
-    }
-
-    /**
-     * Arma los filtros para la llave primaria de un modelo.
-     *
-     * @param string $model
-     * @param array $id
-     * @return array
-     */
-    public function buildPkFilters(string $model, array $id = []): array
-    {
-        $filters = [];
-        $columns = $this->pk($model);
-        foreach ($columns as $i => $column) {
-            $value = $id[$column] ?? $id[$i] ?? null;
-            if ($value !== null) {
-                $filters[$column] = $value;
-            }
-        }
-        return $filters;
-    }
-
-    /**
-     * Arma el query builder y lo retorna según los parámetros pasados.
-     *
-     * @param array $model Arreglo con índices: database, table y singular.
-     * @param array $parameters Parámetros de búsqueda y obtención de registros.
-     * @return Illuminate\Database\Query\Builder
-     */
-    public function query(array $model, array $parameters): QueryBuilder
-    {
-        // Inicializar el query builder para el modelo.
-        $query = $this->databaseService->connection($model['database'])
-            ->table($model['table'])
-        ;
-        // Obtener la información de las columnas.
-        $columnsInfo = $this->columns($model['singular']);
-        // Aplicar filtros.
-        $filters = array_merge(
-            $parameters['filters'] ?? [],
-            $model['filters'] ?? []
-        );
-        if (!empty($filters)) {
-            foreach ($filters as $column => $value) {
-                if (empty($columnsInfo[$column])) {
-                    continue;
-                }
-                $query->whereSmartFilter(
-                    $column,
-                    $value,
-                    $columnsInfo[$column]['type']
-                );
-            }
-        }
-        // Aplicar ordenamiento.
-        if (!empty($parameters['sort'])) {
-            foreach ($parameters['sort'] as $sort) {
-                $query->orderBy($sort['column'], $sort['order']);
-            }
-        }
-        // Aplicar paginación.
-        if (
-            isset($parameters['pagination']['page'])
-            && isset($parameters['pagination']['limit'])
-        ) {
-            $page = $parameters['pagination']['page'];
-            $limit = $parameters['pagination']['limit'];
-            $query->skip(($page - 1) * $limit)->take($limit);
-        }
-        // Seleccionar las columnas deseadas si están especificadas.
-        if (!empty($parameters['fields'])) {
-            $query->select($parameters['fields']);
-        }
-        // Entregar query builder.
-        return $query;
-    }
-
-    /**
-     * Realiza una búsqueda y cuenta los recursos de un modelo en específico.
-     *
-     * @param array $model Arreglo con índices: database, table y singular.
-     * @param array $parameters Parámetros de búsqueda y obtención de registros.
-     * @return int Cantidad de recursos encontrados.
-     */
-    public function count(array $model, array $parameters): int
-    {
-        $query = $this->query($model, $parameters);
-        return $query->count();
-    }
-
-    /**
-     * Realiza una búsqueda y obtiene recursos de un modelo en específico.
-     *
-     * @param array $model Arreglo con índices: database, table y singular.
-     * @param array $parameters Parámetros de búsqueda y obtención de registros.
-     * @param bool $stdClass =true se entregará un objeto stdClass.
-     * @return \Illuminate\Support\Collection|array
-     */
-    public function filter(array $model, array $parameters, $stdClass = false)
-    {
-        $query = $this->query($model, $parameters);
-        // Obtener los resultados.
-        $results = $query->get();
-        if ($stdClass) {
-            return $results;
-        }
-        // Crear instancias del modelo para retornar.
-        $instances = [];
-        foreach ($results as $result) {
-            $instance = new $model['singular'];
-            $instance->fill((array)$result);
-            $instances[] = $instance;
-        }
-        return $instances;
-    }
-
-    /**
-     * Obtener un recurso (registro) desde el modelo (base de datos).
-     *
-     * @param array $model Arreglo con índices: database, table y singular.
-     * @param array $id Valores de la llave primaria del recurso que se desea
-     * recuperar desde la base de datos.
-     * @param bool $stdClass =true se entregará un objeto stdClass.
-     * @return stdClass|Model
-     */
-    public function retrieve(array $model, array $id, bool $stdClass = false)
-    {
-        // Generar filtros con la PK.
-        $filters = $this->buildPkFilters($model['singular'], $id);
-        $results = $this->filter($model, ['filters' => $filters], $stdClass);
-        $n_results = count($results);
-        // DoesNotExist
-        if ($n_results === 0) {
-            throw new \Exception(__(
-                'No se encontró un registro para %s::retrieve(%s).',
-                $model['table'],
-                implode(', ', array_values($filters))
-            ), 404);
-        }
-        // MultipleObjectsReturned
-        else if ($n_results > 1) {
-            throw new \Exception(__(
-                'Se obtuvo más de un registro para %s::retrieve(%s).',
-                $model['table'],
-                implode(', ', array_values($filters))
-            ), 409);
-        }
-        // Se encontró exactamente un resultado (como se espera para una PK).
-        return $results[0];
     }
 
     /**

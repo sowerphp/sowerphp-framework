@@ -26,24 +26,60 @@ namespace sowerphp\core;
 class Service_Module implements Interface_Service
 {
 
-    // Dependencias de otros servicios.
+    /**
+     * Aplicación.
+     *
+     * @var App
+     */
     protected $app;
+
+    /**
+     * Servicio de capas de la aplicación.
+     *
+     * @var Service_Layers
+     */
     protected $layersService;
+
+    /**
+     * Servicio de configuración.
+     *
+     * @var Service_Config
+     */
     protected $configService;
 
-    // Listado de modulos cargados.
+    /**
+     * Listado de modulos cargados.
+     *
+     * @var array
+     */
     protected $modules = [];
 
+    /**
+     * Contructor del servicio.
+     *
+     * @param App $app
+     * @param Service_Layers $layersService
+     */
     public function __construct(App $app, Service_Layers $layersService)
     {
         $this->app = $app;
         $this->layersService = $layersService;
     }
 
+    /**
+     * Registra el servicio de modulos.
+     *
+     * @return void
+     */
     public function register(): void
     {
     }
 
+    /**
+     * Inicializa el servicio de modulos.
+     *
+     * @return void
+     */
     public function boot(): void
     {
         $this->configService = $this->app->getService('config');
@@ -321,6 +357,33 @@ class Service_Module implements Interface_Service
         else {
             return null;
         }
+    }
+
+    /**
+     * Determinar si la clase tiene un módulo en su namespace y entregar
+     * el nombre del módulo determinado.
+     *
+     * @param string $class Clase que se desea saber si tiene un módulo.
+     * @return string|null Nombre del módulo si es que existe uno en la clase.
+     */
+    public function findModuleByClass(string $class): ?string
+    {
+        // Se busca el namespace de la clas y con eso se determina si tiene o
+        // no modelo.
+        foreach ($this->layersService->getPaths() as $namespace => $path) {
+            if (strpos($class, $namespace) === 0) {
+                $count = 1;
+                $string = substr(str_replace($namespace, '', $class, $count), 1);
+                $lastSlashPosition = strrpos($string, '\\');
+                $module = str_replace('\\', '.', substr($string, 0, $lastSlashPosition));
+                if ($module) {
+                    return $module;
+                }
+            }
+        }
+        // No se encontró un namespace que coincidera con la clase o no
+        // contenía un módulo la clase a partir del namespace de la capa.
+        return null;
     }
 
     /**
