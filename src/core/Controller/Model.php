@@ -308,10 +308,10 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
-                'status_code' => 422,
-                'message' => __('Los datos proporcionados no son válidos.'),
-                'errors' => $e->errors(),
-            ], 422);
+                    'status_code' => 422,
+                    'message' => __('Los datos proporcionados no son válidos.'),
+                    'errors' => $e->errors(),
+                ], 422);
         } catch (\Exception $e) {
             return response()->jsonException($e);
         }
@@ -330,9 +330,9 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             );
             $result = $stdClass ? $instance->toStdClass() : $instance->toArray();
             return response()->json([
-                'meta' => $this->getApiMeta('show'),
-                'data' => $result
-            ], 200);
+                    'meta' => $this->getApiMeta('show'),
+                    'data' => $result
+                ], 200);
         } catch (\Exception $e) {
             return response()->jsonException($e);
         }
@@ -350,9 +350,9 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             );
             $data = $instance->getSaveDataEdit();
             return response()->json([
-                'meta' => $this->getApiMeta('edit'),
-                'data' => $data,
-            ], 200);
+                    'meta' => $this->getApiMeta('edit'),
+                    'data' => $data,
+                ], 200);
         } catch (\Exception $e) {
             return response()->jsonException($e);
         }
@@ -588,9 +588,14 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             // están mal armados. Si se llegó acá con el error, para que no
             // falle la app se redirecciona al listado con el error.
             // Lo ideal es controlar esto antes con un "error más lindo".
-            return redirect($request->getRequestUriDecoded())->withError(
-                $e->getMessage()
-            );
+            return redirect($request->getRequestUriDecoded())
+                ->withError(
+                    __('%(error_message)s',
+                        [
+                            'error_message' => $e->getMessage()
+                        ]
+                    )
+                );
         }
         // Paginar los resultados si es necesario.
         if ((integer)$page > 0) {
@@ -666,18 +671,23 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 try {
                     $Obj->checkAttributes();
                     if ($Obj->save()) {
-                        SessionMessage::success('Registro creado.');
+                        return redirect($request->getControllerUrl() . '/listar' . $filterListar)
+                            ->withSuccess(
+                                __('Registro creado.')
+                            );
                     } else {
-                        SessionMessage::error('Registro no creado.');
+                        return redirect($request->getControllerUrl() . '/listar' . $filterListar)
+                            ->withError(
+                                __('Registro no creado.')
+                            );
                     }
-                    return redirect(
-                        $request->getControllerUrl() . '/listar' . $filterListar
-                    );
                 } catch (\Exception $e) {
                     SessionMessage::error($e->getMessage());
                 }
             } else {
-                SessionMessage::error('Registro ya existe.');
+                SessionMessage::error(__(
+                    'Registro ya existe.'
+                ));
             }
         }
         // Renderizar la vista
@@ -706,7 +716,13 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         if (!$Obj->exists()) {
             return redirect(
                 $request->getControllerUrl() . '/listar'.$filterListar
-            )->withError('Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede editar.');
+            )->withError(
+                __('Registro (%(args)s) no existe, no se puede editar.',
+                    [
+                        'args' => implode(', ', func_get_args())
+                    ]
+                )
+            );
         }
         // si no se ha enviado el formulario se mostrará
         if (isset($_POST['submit'])) {
@@ -724,17 +740,24 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             try {
                 $Obj->checkAttributes();
                 if ($Obj->save()) {
-                    SessionMessage::success(
-                        'Registro ('.implode(', ', func_get_args()).') editado.'
-                    );
+                    return redirect($request->getControllerUrl() . '/listar' . $filterListar)
+                        ->withSuccess(
+                            __('Registro (%(args)s) editado.',
+                                [
+                                    'args' => implode(', ', func_get_args())
+                                ]
+                            )
+                        );
                 } else {
-                    SessionMessage::error(
-                        'Registro ('.implode(', ', func_get_args()).') no editado.'
-                    );
+                    return redirect($request->getControllerUrl() . '/listar' . $filterListar)
+                        ->withError(
+                            __('Registro (%(args)s) no editado.',
+                                [
+                                    'args' => implode(', ', func_get_args())
+                                ]
+                            )
+                        );
                 }
-                return redirect(
-                    $request->getControllerUrl() . '/listar' . $filterListar
-                );
             } catch (\Exception $e) {
                 SessionMessage::error($e->getMessage());
             }
@@ -762,7 +785,9 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         if (!$this->deleteRecord) {
             return redirect(
                 $request->getControllerUrl() . '/listar' . $filterListar
-            )->withError('No se permite el borrado de registros.');
+            )->withError(
+                __('No se permite el borrado de registros.')
+            );
         }
         $modelClass = $this->getModelClass();
         $Obj = new $modelClass(array_map('urldecode', func_get_args()));
@@ -770,21 +795,34 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         if(!$Obj->exists()) {
             return redirect(
                 $request->getControllerUrl() . '/listar'.$filterListar
-            )->withError('Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede eliminar.');
+            )->withError(
+                __('Registro (%(args)s) no existe, no se puede eliminar.',
+                    [
+                        'args' => implode(', ', func_get_args())
+                    ]
+                )
+            );
         }
         try {
             $Obj->delete();
-            SessionMessage::success(
-                'Registro (' . implode(', ', func_get_args()) . ') eliminado.'
-            );
+            return redirect($request->getControllerUrl() . '/listar' . $filterListar)
+                ->withSuccess(
+                    __('Registro (%(args)s) eliminado.'.
+                        [
+                            'args' => implode(', ', func_get_args())
+                        ])
+                );
         } catch (\Exception $e) {
-            SessionMessage::error(
-                'No se pudo eliminar el registro (' . implode(', ', func_get_args()) . '): '.$e->getMessage()
-            );
+            return redirect($request->getControllerUrl() . '/listar' . $filterListar)
+                ->withError(
+                    __('No se pudo eliminar el registro (%(args)s): %(error_message)s',
+                        [
+                            'args' => implode(', ', func_get_args()),
+                            'error_message' => $e->getMessage()
+                        ]
+                    )
+                );
         }
-        return redirect(
-            $request->getControllerUrl() . '/listar' . $filterListar
-        );
     }
 
     /**
@@ -795,9 +833,14 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         $request = request();
         // si el campo que se solicita no existe error
         if (!isset($this->getModelClass()::$columnsInfo[$campo . '_data'])) {
-            SessionMessage::error('Campo '.$campo.' no existe.');
             return redirect(
                 $request->getControllerUrl() . '/listar'
+            )->withError(
+                __('Campo %(field)s no existe.',
+                    [
+                        'field' => $campo
+                    ]
+                )
             );
         }
         $pks = array_slice(func_get_args(), 1);
@@ -807,12 +850,26 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         if(!$Obj->exists()) {
             return redirect(
                 $request->getControllerUrl() . '/listar'
-            )->withError('Registro (' . implode(', ', $pks) . ') no existe. No se puede obtener '.$campo.'.');
+            )->withError(
+                __('Registro (%(pks)s) no existe. No se puede obtener %(field)s.',
+                    [
+                        'pks' => implode(', ', $pks),
+                        'field' => $campo
+                    ]
+                )
+            );
         }
         if ((float)$Obj->{$campo.'_size'} == 0.0) {
             return redirect(
                 $request->getControllerUrl() . '/listar'
-            )->withError('No hay datos para el campo ' . $campo . ' en el registro ('.implode(', ', $pks).').');
+            )->withError(
+                __('No hay datos para el campo %(field)s en el registro (%(pks)s).',
+                    [
+                        'field' => $campo,
+                        'pks' => implode(', ', $pks)
+                    ]
+                )
+            );
         }
         // entregar archivo
         return response()->file([

@@ -43,7 +43,10 @@ class Controller_Config extends \sowerphp\autoload\Controller
      */
     public function _api_nav_app_GET()
     {
-        $this->Api->send(config('nav.app'), 200);
+        return response()->json(
+            config('nav.app'),
+            200
+        );
     }
 
     /**
@@ -61,7 +64,9 @@ class Controller_Config extends \sowerphp\autoload\Controller
      */
     public function _api_modules_GET()
     {
-        $this->Api->send(app('module')->getLoadedModules());
+        return response()->json(
+            app('module')->getLoadedModules()
+        );
     }
 
 }

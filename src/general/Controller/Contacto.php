@@ -48,10 +48,10 @@ class Controller_Contacto extends \sowerphp\autoload\Controller
         // Si no hay datos para el envió del correo electrónico no
         // permirir cargar página de contacto
         if (config('mail.default') === null) {
-            SessionMessage::error(__(
-                'La página de contacto no se encuentra disponible.'
-            ));
-            return redirect('/');
+            return redirect('/')
+                ->withError(
+                    __('La página de contacto no se encuentra disponible.')
+                );
         }
         // Si se envió el formulario se procesa.
         if (isset($_POST['submit'])) {

@@ -65,8 +65,14 @@ class Controller_Afdes extends \sowerphp\autoload\Controller_Model
                 'hastas' => $_POST['hasta']
             ];
             $Afd->save();
-            SessionMessage::success('AFD <em>'.$Afd->nombre.'</em> creado.');
-            return redirect('/sistema/general/afdes/listar' . $filterListar);
+            return redirect('/sistema/general/afdes/listar' . $filterListar)
+                ->withSuccess(
+                    __('AFD <em>%(name)s</em> creado.',
+                        [
+                            'name' => $Afd->nombre
+                        ]
+                    )
+                );
         }
         // Renderizar vista.
         return $this->render('Afdes/crear_editar', [

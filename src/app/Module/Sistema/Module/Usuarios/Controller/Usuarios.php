@@ -92,7 +92,9 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
         if (isset($_POST['usuario'])) {
             // Si el usuario o contraseña es vacio mensaje de error.
             if (empty($_POST['usuario']) || empty($_POST['contrasenia'])) {
-                SessionMessage::warning('Debe especificar usuario y clave.');
+                SessionMessage::warning(__(
+                    'Debe especificar usuario y clave.'
+                ));
             }
             // Realizar proceso de validación de datos.
             else {
@@ -152,9 +154,9 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
         // Buscar usuario al que se desea cerrar la sesión.
         $Usuario = model()->getUser($id);
         if (!$Usuario->exists()) {
-            return redirect('/sistema/usuarios/usuarios/listar')->withError(
+            return redirect('/sistema/usuarios/usuarios/listar')->withError(__(
                 'Usuario no existe, no se puede forzar el cierre de la sesión.'
-            );
+            ));
         }
         // Cerrar sesión del usuario.
         try {
@@ -162,17 +164,24 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
             $Usuario->save();
             $cacheKey = 'session.auth' . '.' . $Usuario->id;
             cache()->forget($cacheKey);
-            SessionMessage::success(__(
-                'Sesión del usuario %s cerrada.',
-                $Usuario->usuario
-            ));
+            return redirect('/sistema/usuarios/usuarios/editar/'.$id)
+                ->withSuccess(
+                    __('Sesión del usuario %(user)s cerrada.',
+                        [
+                            'user' => $Usuario->usuario
+                        ]
+                    )
+                );
         } catch (\Exception $e) {
-            SessionMessage::error(__(
-                'No fue posible forzar el cierre de la sesión: %s',
-                $e->getMessage()
-            ));
+            return redirect('/sistema/usuarios/usuarios/editar/'.$id)
+                ->withError(
+                    __('No fue posible forzar el cierre de la sesión: %(error_message)s',
+                        [
+                            'error_message' => $e->getMessage()
+                        ]
+                    )
+                );
         }
-        return redirect('/sistema/usuarios/usuarios/editar/'.$id);
     }
 
     /**
@@ -252,9 +261,9 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
             // buscar usuario al que se desea cambiar la contraseña
             $Usuario = model()->getUser(urldecode($usuario));
             if (!$Usuario->exists()) {
-                return redirect('/usuarios/contrasenia/recuperar')->withError(
+                return redirect('/usuarios/contrasenia/recuperar')->withError(__(
                     'Usuario inválido.'
-                );
+                ));
             }
             // formulario de cambio de contraseña
             if (!isset($_POST['contrasenia1'])) {
@@ -279,10 +288,9 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                 // cambiar la contraseña al usuario
                 if ($_POST['codigo'] != md5(hash('sha256', $Usuario->contrasenia))) {
                     return redirect('/usuarios/contrasenia/recuperar')
-                        ->withError(
+                        ->withError(__(
                             'El enlace para recuperar su contraseña no es válido, solicite uno nuevo por favor.'
-                        )
-                    ;
+                        ));
                 }
                 else if (
                     empty ($_POST['contrasenia1'])
@@ -329,14 +337,16 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
             $Usuario->email = mb_strtolower($Usuario->email);
             $ok = true;
             if ($Usuario->checkIfUserAlreadyExists()) {
-                SessionMessage::warning(
+                SessionMessage::warning(__(
                     'Nombre de usuario %s ya está en uso.',
                     $Usuario->usuario
-                );
+                ));
                 $ok = false;
             }
             if ($ok && $Usuario->checkIfHashAlreadyExists()) {
-                SessionMessage::warning('Hash seleccionado ya está en uso.');
+                SessionMessage::warning(__(
+                    'Hash seleccionado ya está en uso.'
+                ));
                 $ok = false;
             }
             if ($ok && $Usuario->checkIfEmailAlreadyExists()) {
@@ -376,21 +386,26 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                         $email->to($Usuario->email);
                         $email->subject('Cuenta de usuario creada.');
                         $email->send($msg);
-                        SessionMessage::success(__(
-                            'Registro creado. Se envió email a %s con los datos de acceso.',
-                            $Usuario->email
-                        ));
+                        return redirect('/sistema/usuarios/usuarios/listar' . $filterListar)
+                            ->withSuccess(
+                                __('Registro creado. Se envió email a %(user_email)s con los datos de acceso.',
+                                    [
+                                        'user_email' => $Usuario->email
+                                    ]
+                                )
+                            );
                     } else {
-                        SessionMessage::warning(
-                            'Registro creado. No se pudo enviar el correo.'
-                        );
+                        return redirect('/sistema/usuarios/usuarios/listar' . $filterListar)
+                            ->withWarning(
+                                __('Registro creado. No se pudo enviar el correo.')
+                            );
                     }
                 } else {
-                    SessionMessage::error(
-                        'Registro no creado (hubo algún error).'
-                    );
+                    return redirect('/sistema/usuarios/usuarios/listar' . $filterListar)
+                        ->withError(
+                            __('Registro no creado (hubo algún error).')
+                        );
                 }
-                return redirect('/sistema/usuarios/usuarios/listar' . $filterListar);
             }
         }
         // Asignar variables para la vista y renderizar.
@@ -425,10 +440,14 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
         $Usuario = model()->getUser($id);
         // si el registro que se quiere editar no existe error
         if(!$Usuario->exists()) {
-            SessionMessage::error(
-                'Registro ('.implode(', ', func_get_args()).') no existe, no se puede editar.'
-            );
-            return redirect($redirect);
+            return redirect($redirect)
+                ->withError(
+                    __('Registro (%(args)s) no existe, no se puede editar.',
+                        [
+                            'args' => implode(', ', func_get_args())
+                        ]
+                    )
+                );
         }
         // si no se ha enviado el formulario se mostrará
         if (!isset($_POST['submit'])) {
@@ -446,28 +465,36 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
         // si se envió el formulario se procesa
         else {
             if (isset($_POST['usuario']) && !$this->changeUsername && $Usuario->usuario != $_POST['usuario']) {
-                SessionMessage::warning(
-                    'Nombre de usuario no puede ser cambiado.'
-                );
-                return redirect('/sistema/usuarios/usuarios/editar/' . $id . $filterListarUrl);
+                return redirect('/sistema/usuarios/usuarios/editar/' . $id . $filterListarUrl)
+                    ->withWarning(
+                        __('Nombre de usuario no puede ser cambiado.')
+                    );
             }
             $activo = $Usuario->activo;
             $Usuario->set($_POST);
             $Usuario->usuario = \sowerphp\core\Utility_String::normalize($Usuario->usuario);
             $Usuario->email = mb_strtolower($Usuario->email);
             if ($Usuario->checkIfUserAlreadyExists()) {
-                SessionMessage::warning(
-                    'Nombre de usuario '.$Usuario->usuario.' ya está en uso.'
-                );
-                return redirect('/sistema/usuarios/usuarios/editar/'.$id.$filterListarUrl);
+                return redirect('/sistema/usuarios/usuarios/editar/'.$id.$filterListarUrl)
+                    ->withWarning(
+                        __('Nombre de usuario %(user)s ya está en uso.',
+                            [
+                                'user' => $Usuario->usuario
+                            ]
+                        )
+                    );
             }
             if ($Usuario->checkIfHashAlreadyExists ()) {
-                SessionMessage::warning('Hash seleccionado ya está en uso.');
-                return redirect('/sistema/usuarios/usuarios/editar/'.$id.$filterListarUrl);
+                return redirect('/sistema/usuarios/usuarios/editar/'.$id.$filterListarUrl)
+                    ->withWarning(
+                        __('Hash seleccionado ya está en uso.')
+                    );
             }
             if ($Usuario->checkIfEmailAlreadyExists ()) {
-                SessionMessage::warning('Email seleccionado ya está en uso.');
-                return redirect('/sistema/usuarios/usuarios/editar/'.$id.$filterListarUrl);
+                return redirect('/sistema/usuarios/usuarios/editar/'.$id.$filterListarUrl)
+                    ->withWarning(
+                        __('Email seleccionado ya está en uso.')
+                    );
             }
             $Usuario->save();
             // enviar correo solo si el usuario estaba inactivo y ahora está activo
@@ -550,8 +577,10 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                 && !$this->changeUsername
                 && $user->usuario != $_POST['usuario']
             ) {
-                SessionMessage::error('Nombre de usuario no puede ser cambiado.');
-                return redirect('/usuarios/perfil');
+                return redirect('/usuarios/perfil')
+                    ->withError(
+                        __('Nombre de usuario no puede ser cambiado.')
+                    );
             }
             $user->nombre = $_POST['nombre'];
             if ($this->changeUsername && !empty($_POST['usuario'])) {
@@ -564,29 +593,37 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                     !empty($user->hash)
                     && strlen($user->hash) != 32
                 ) {
-                    SessionMessage::error(
-                        'Hash del usuario debe ser de largo 32.'
-                    );
-                    return redirect('/usuarios/perfil');
+                    return redirect('/usuarios/perfil')
+                        ->withError(
+                            __('Hash del usuario debe ser de largo 32.')
+                        );
                 }
             }
             if ($user->checkIfUserAlreadyExists()) {
-                SessionMessage::error(__(
-                    'Nombre de usuario %s ya está en uso.',
-                    $user->usuario
-                ));
-                return redirect('/usuarios/perfil');
+                return redirect('/usuarios/perfil')
+                    ->withError(
+                        __('Nombre de usuario %(user)s ya está en uso.',
+                            [
+                                'user' => $user->usuario
+                            ]
+                        )
+                    );
             }
             if ($user->checkIfHashAlreadyExists()) {
-                SessionMessage::error('Hash seleccionado ya está en uso.');
-                return redirect('/usuarios/perfil');
+                return redirect('/usuarios/perfil')
+                    ->withError(
+                        __('Hash seleccionado ya está en uso.')
+                    );
             }
             if ($user->checkIfEmailAlreadyExists()) {
-                SessionMessage::error(__(
-                    'Correo electrónico %s ya está en uso.',
-                    $user->email
-                ));
-                return redirect('/usuarios/perfil');
+                return redirect('/usuarios/perfil')
+                    ->withError(
+                        __('Correo electrónico %(user_email)s ya está en uso.',
+                            [
+                                'user_email' => $user->email
+                            ]
+                        )
+                    );
             }
             if (empty($user->hash)) {
                 do {
@@ -596,43 +633,47 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
             $user->save();
             auth()->save();
             // mensaje de ok y redireccionar
-            return redirect('/usuarios/perfil')->withSuccess(
-                'Perfil de usuario actualizado.'
-            );
+            return redirect('/usuarios/perfil')
+                ->withSuccess(
+                    __('Perfil de usuario actualizado.')    
+                );
         }
         // procesar cambio de contraseña
         else if (isset($_POST['cambiarContrasenia'])) {
             // verificar que las contraseñas no sean vacías
             if (empty($_POST['contrasenia']) || empty(trim($_POST['contrasenia1'])) || empty($_POST['contrasenia2'])) {
-                SessionMessage::error(
-                    'Debe especificar su contraseña actual y escribir dos veces su nueva contraseña.'
-                );
-                return redirect('/usuarios/perfil');
+                return redirect('/usuarios/perfil')
+                    ->withError(
+                        __('Debe especificar su contraseña actual y escribir dos veces su nueva contraseña.')
+                    );
             }
             // verificar que la contraseña actual sea correcta
             if (!$user->checkPassword($_POST['contrasenia'])) {
-                SessionMessage::error(
-                    'La contraseña actual ingresada es incorrecta.'
-                );
-                return redirect('/usuarios/perfil');
+                return redirect('/usuarios/perfil')
+                    ->withError(
+                        __('La contraseña actual ingresada es incorrecta.')
+                    );
             }
             // verificar que la contraseña nueva se haya escrito 2 veces de forma correcta
             if ($_POST['contrasenia1'] != $_POST['contrasenia2']) {
-                SessionMessage::error(
-                    'La contraseña nueva no coincide con la confirmación de contraseña.'
-                );
-                return redirect('/usuarios/perfil');
+                return redirect('/usuarios/perfil')
+                    ->withError(
+                        __('La contraseña nueva no coincide con la confirmación de contraseña.')
+                    );
             }
             // actualizar contraseña
             if ($user->savePassword($_POST['contrasenia1'], $_POST['contrasenia'])) {
                 auth()->save();
-                SessionMessage::success(
-                    'La contraseña del usuario ha sido actualizada.'
-                );
+                return redirect('/usuarios/perfil')
+                    ->withSuccess(
+                        __('La contraseña del usuario ha sido actualizada.')
+                    );
             } else {
-                SessionMessage::error('No fue posible cambiar la contraseña.');
+                return redirect('/usuarios/perfil')
+                    ->withError(
+                        __('No fue posible cambiar la contraseña.')
+                    );
             }
-            return redirect('/usuarios/perfil');
         }
         // procesar creación de la autenticación secundaria
         else if (isset($_POST['crearAuth2'])) {
@@ -640,18 +681,25 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
             try {
                 $user->createAuth2($_POST);
                 auth()->save();
-                SessionMessage::success(__(
-                    'Desde ahora la cuenta está protegida con %s.',
-                    $_POST['auth2']
-                ));
+                return redirect('/usuarios/perfil#auth')
+                    ->withSuccess(
+                        __('Desde ahora la cuenta está protegida con %(auth2)s.',
+                            [
+                                'auth2' =>$_POST['auth2']  
+                            ]
+                        )
+                    );
             } catch (\Exception $e) {
-                SessionMessage::error(__(
-                    'No fue posible proteger la cuenta con %s: %s',
-                    $_POST['auth2'],
-                    $e->getMessage()
-                ));
+                return redirect('/usuarios/perfil#auth')
+                    ->withError(
+                        __('No fue posible proteger la cuenta con %(auth2)s: %(error_message)s',
+                            [
+                                'auth2' => $_POST['auth2'],
+                                'error_message' => $e->getMessage()
+                            ]
+                        )
+                    );
             }
-            return redirect('/usuarios/perfil#auth');
         }
         // procesar destrucción de la autenticación secundaria
         else if (isset($_POST['destruirAuth2'])) {
@@ -659,18 +707,25 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
             try {
                 $user->destroyAuth2($_POST);
                 auth()->save();
-                SessionMessage::success(__(
-                    'Su cuenta ya no está protegida con %s.',
-                    $_POST['auth2']
-                ));
+                return redirect('/usuarios/perfil#auth')
+                    ->withSuccess(
+                        __('Su cuenta ya no está protegida con %(auth2)s.',
+                            [
+                                'auth2' => $_POST['auth2']
+                            ]
+                        )
+                    );
             } catch (\Exception $e) {
-                SessionMessage::error(__(
-                    'No fue posible eliminar la protección con %s: %s',
-                    $_POST['auth2'],
-                    $e->getMessage()
-                ));
+                return redirect('/usuarios/perfil#auth')
+                    ->withError(
+                        __('No fue posible eliminar la protección con %(auth2)s: %(error_message)s',
+                            [
+                                'auth2' => $_POST['auth2'],
+                                'error_message' => $e->getMessage()
+                            ]
+                        )
+                    );
             }
-            return redirect('/usuarios/perfil#auth');
         }
         // mostrar formulario para edición
         else {
@@ -700,9 +755,9 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
         // Si no se permite el registro se redirecciona.
         $config = config('auth.self_register');
         if (!$config['enabled']) {
-            return redirect('/')->withError(
+            return redirect('/')->withError(__(
                 'El registro de usuarios está deshabilitado.'
-            );
+            ));
         }
         // Colocar variable para terminos y condicines si está configurada.
         if (!empty($config['terms'])) {
@@ -712,9 +767,9 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
         if (isset($_POST['usuario'])) {
             // verificar que campos no sean vacios
             if (empty($_POST['nombre']) || empty($_POST['usuario']) || empty($_POST['email'])) {
-                SessionMessage::warning(
+                SessionMessage::warning(__(
                     'Debe completar todos los campos del formulario.'
-                );
+                ));
                 return;
             }
             // validar captcha
@@ -729,9 +784,9 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
             }
             // si existen términos y no se aceptaron se redirecciona
             if (!empty($config['terms']) && empty($_POST['terms_ok'])) {
-                SessionMessage::warning(
+                SessionMessage::warning(__(
                     'Debe aceptar los términos y condiciones de uso.'
-                );
+                ));
                 return;
             }
             // validar que el usuario y/o correo no exista previamente
@@ -780,22 +835,30 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                     $email->to($Usuario->email);
                     $email->subject('Cuenta de usuario creada.');
                     $email->send($msg);
-                    SessionMessage::success(__(
-                        'Registro de usuario realizado, se envió su contraseña al correo %s',
-                        $Usuario->email
-                    ));
+                    return redirect('/usuarios/ingresar')
+                        ->withSuccess(
+                            __('Registro de usuario realizado, se envió su contraseña al correo %s',
+                                [
+                                    'user_email' => $Usuario->email
+                                ]
+                            )
+                        );
                 } else {
-                    SessionMessage::success(__(
-                        'Registro de usuario realizado, su contraseña es <em>%s</em>',
-                        $contrasenia
-                    ));
+                    return redirect('/usuarios/ingresar')
+                        ->withSuccess(
+                            __('Registro de usuario realizado, su contraseña es <em>%(contrasenia)s</em>',
+                                [
+                                    'contrasenia' => $contrasenia
+                                ]
+                            )
+                        );
                 }
             } else {
-                SessionMessage::error(
-                    'El registro de su usuario falló por algún motivo desconocido.'
-                );
+                return redirect('/usuarios/ingresar')
+                    ->withError(
+                        __('El registro de su usuario falló por algún motivo desconocido.')
+                    );
             }
-            return redirect('/usuarios/ingresar');
         }
     }
 
@@ -824,14 +887,18 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
         // preautenticación no está disponible.
         $enabled = config('auth.preauth.enabled');
         if (!$enabled) {
-            SessionMessage::error('La preautenticación no está disponible.');
-            return redirect('/usuarios/ingresar');
+            return redirect('/usuarios/ingresar')
+                ->withError(
+                    __('La preautenticación no está disponible.')
+                );
         }
         if ($usuario) {
             $key = config('app.key');
             if (!$key) {
-                SessionMessage::error('No hay clave global para preautenticación.');
-                return redirect('/usuarios/ingresar');
+                return redirect('/usuarios/ingresar')
+                    ->withError(
+                        __('No hay clave global para preautenticación.')
+                    );
             }
         }
         // Definir URL de redirección.
@@ -844,8 +911,13 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
         // genera un error.
         $auth2_token = !empty($_GET['auth2_token']) ? $_GET['auth2_token'] : null;
         if (!auth()->preauth($token, $usuario, $auth2_token)) {
-            SessionMessage::error('La preautenticación del usuario falló.');
-            return redirect('/usuarios/ingresar');
+            SessionMessage::error(__(
+                'La preautenticación del usuario falló.'
+            ));
+            return redirect('/usuarios/ingresar')
+                ->withError(
+                    __('La preautenticación del usuario falló.')
+                );
         }
         // todo ok -> redirigir
         return redirect($url);
@@ -862,7 +934,9 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
             $telegram_user = cache()->get('telegram.pairing.'.$token);
             // si no se encontró el usuario el token no es válido o expiró
             if (!$telegram_user) {
-                SessionMessage::error('Token no válido o expiró, por favor, solicite uno nuevo al Bot con <strong><em>/token</em></strong>');
+                SessionMessage::error(__(
+                    'Token no válido o expiró, por favor, solicite uno nuevo al Bot con <strong><em>/token</em></strong>'
+                ));
             }
             // se encontró el usuario, entonces guardar los datos del usuario de Telegram en el usuario de la aplicación web
             else {
@@ -892,9 +966,9 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                             $telegram_user['username']
                         ));
                     } catch (\Exception $e) {
-                        SessionMessage::error(
+                        SessionMessage::error(__(
                             'Ocurrió un error al parear con Telegram: '.$e->getMessage()
-                        );
+                        ));
                     }
                 }
             }
@@ -915,13 +989,19 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
         try {
             $user->save();
             auth()->save();
-            SessionMessage::success('Su cuenta ya no está asociada a Telegram.');
+            return redirect('/usuarios/perfil#apps')
+                ->withSuccess(
+                    __('Su cuenta ya no está asociada a Telegram.')
+                );
         } catch (\Exception $e) {
-            SessionMessage::error(
-                'Ocurrió un error al eliminar su cuenta de Telegram: '.$e->getMessage()
-            );
+            return redirect('/usuarios/perfil#apps')
+                ->withError(
+                    __('Ocurrió un error al eliminar su cuenta de Telegram: %(error_message)s',
+                        [
+                            'error_message' => $e->getMessage()
+                        ])
+                );
         }
-        return redirect('/usuarios/perfil#apps');
     }
 
     /**
@@ -933,7 +1013,9 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
         // verificar se haya indicado un layout
         $layout = !empty($_POST['layout']) ? $_POST['layout'] : $layout;
         if (!$layout) {
-            return redirect('/usuarios/perfil')->withError('Debe indicar el nuevo diseño que desea utilizar en la aplicación.');
+            return redirect('/usuarios/perfil')->withError(__(
+                'Debe indicar el nuevo diseño que desea utilizar en la aplicación.'
+            ));
         }
         // cambiar layout
         $user->fill([

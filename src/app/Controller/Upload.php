@@ -35,15 +35,27 @@ class Controller_Upload extends \sowerphp\autoload\Controller
     public function _api_image_POST($method = 'imgur')
     {
         if (empty($_FILES['file'])) {
-            $this->Api->send('Debe enviar la imagen', 400);
+            return response()->json(
+                __('Debe enviar la imagen'), 
+                400
+            );
         }
         $class = 'Utility_Upload_Image_' . \sowerphp\core\Utility_Inflector::camelize($method);
         if (!class_exists($class)) {
-            $this->Api->send('No se encontró el método "'.$method.'" para subir la imagen', 400);
+            return response()->json(
+                __('No se encontró el método "%(method)s" para subir la imagen',
+                    [
+                        'method' => $method
+                    ]
+                ),
+                400
+            );
         }
         $Method = new $class();
         $location = $Method->upload($_FILES['file']);
-        $this->Api->send(['location' => $location]);
+        return response()->json(
+            ['location' => $location]
+        );
     }
 
 }

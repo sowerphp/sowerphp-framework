@@ -23,6 +23,7 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
+use \sowerphp\core\Network_Request as Request;
 use \sowerphp\core\Facade_Session_Message as SessionMessage;
 
 /**
@@ -36,8 +37,9 @@ class Controller_Email extends \sowerphp\autoload\Controller
      * Acción que permite enviar correos masivos a los usuarios de ciertos
      * grupos de la aplicación
      */
-    public function grupos()
+    public function grupos(Request $request)
     {
+        $user = $request->user();
         $Grupos = new Model_Grupos();
         $page_title = config('app.name');
         $this->set([
@@ -51,18 +53,18 @@ class Controller_Email extends \sowerphp\autoload\Controller
                 || empty($_POST['mensaje'])
             ) {
                 SessionMessage::error(
-                    'Debe completar todos los campos del formulario.'
+                    __('Debe completar todos los campos del formulario.')
                 );
             } else {
                 $emails = $Grupos->emails($_POST['grupos']);
-                if(($key = array_search($this->Auth->User->email, $emails)) !== false) {
+                if(($key = array_search($user->email, $emails)) !== false) {
                     unset($emails[$key]);
                     sort($emails);
                 }
                 $n_emails = count($emails);
                 if (!$n_emails) {
                     SessionMessage::error(
-                        'No hay destinatarios para el correo electrónico con los grupos seleccionados.'
+                        __('No hay destinatarios para el correo electrónico con los grupos seleccionados.')
                     );
                 } else {
                     // preparar mensaje a enviar
@@ -70,8 +72,8 @@ class Controller_Email extends \sowerphp\autoload\Controller
                         'mensaje' => $_POST['mensaje'],
                         'n_emails' => $n_emails,
                         'grupos' => $Grupos->getGlosas($_POST['grupos']),
-                        'de_nombre' => $this->Auth->User->nombre,
-                        'de_email' => $this->Auth->User->email,
+                        'de_nombre' => $user->nombre,
+                        'de_email' => $user->email,
                     ]);
                     // agrupar
                     if ($_POST['agrupar']) {
@@ -90,10 +92,10 @@ class Controller_Email extends \sowerphp\autoload\Controller
                     $primero = true;
                     foreach ($destinatarios as $correos) {
                         $email = new \sowerphp\core\Network_Email();
-                        $email->from($this->Auth->User->email, $this->Auth->User->nombre);
-                        $email->replyTo($this->Auth->User->email, $this->Auth->User->nombre);
+                        $email->from($user->email, $user->nombre);
+                        $email->replyTo($user->email, $user->nombre);
                         if ($primero) {
-                            $email->to($this->Auth->User->email);
+                            $email->to($user->email);
                             $primero = false;
                         }
                         if ($_POST['enviar_como'] == 'cc') {
@@ -120,15 +122,24 @@ class Controller_Email extends \sowerphp\autoload\Controller
                         }
                     }
                     if ($status === true) {
-                        SessionMessage::success(
-                            'Mensaje envíado a '.num($n_emails).' usuarios.'
-                        );
+                        return redirect($this->request->getRequestUriDecoded())
+                            ->withSuccess(
+                                __('Mensaje envíado a %(num_emails)s usuarios.',
+                                    [
+                                        'num_emails' => num($n_emails)
+                                    ]
+                                )
+                            );
                     } else {
-                        SessionMessage::error(
-                            'Ha ocurrido un error al intentar enviar su mensaje, por favor intente nuevamente.<br /><em>'.$status['message'].'</em>'
-                        );
+                        return redirect($this->request->getRequestUriDecoded())
+                            ->withError(
+                                __('Ha ocurrido un error al intentar enviar su mensaje, por favor intente nuevamente.<br /><em>%(status_message)s</em>',
+                                    [
+                                        'status_message' => $status['message']
+                                    ]
+                                )
+                            );
                     }
-                    return redirect($this->request->getRequestUriDecoded());
                 }
             }
         }
