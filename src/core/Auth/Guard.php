@@ -97,7 +97,11 @@ abstract class Auth_Guard implements Guard
      */
     public function check(): bool
     {
-        return (bool)$this->user();
+        $user = $this->user();
+        if ($user === null) {
+            return false;
+        }
+        return true;
     }
 
     /**

@@ -45,7 +45,7 @@ abstract class Model_Plural
      *
      * @var Repository
      */
-    protected $meta = [];
+    protected $meta;
 
     /**
      * Conexión a la base de datos asociada al modelo.
@@ -194,7 +194,7 @@ abstract class Model_Plural
         // armar consulta
         $query = '
             SELECT COUNT(*)
-            FROM ' . $this->getMeta()['model.db_table']
+            FROM ' . $this->meta['model.db_table']
         ;
         // si hay where se usa
         if ($this->whereStatement) {
@@ -269,8 +269,6 @@ abstract class Model_Plural
         // Se encontró exactamente un resultado (como se espera para una PK).
         return $results[0];
     }
-
-
 
 
 
@@ -405,7 +403,7 @@ abstract class Model_Plural
      */
     public function getMax($campo)
     {
-        $query = 'SELECT MAX('.$campo.') FROM '.$this->getMeta()['model.db_table'];
+        $query = 'SELECT MAX('.$campo.') FROM '.$this->meta['model.db_table'];
         if ($this->whereStatement) {
             $query .= $this->whereStatement;
         }
@@ -420,7 +418,7 @@ abstract class Model_Plural
      */
     public function getMin($campo)
     {
-        $query = 'SELECT MIN('.$campo.') FROM '.$this->getMeta()['model.db_table'];
+        $query = 'SELECT MIN('.$campo.') FROM '.$this->meta['model.db_table'];
         if ($this->whereStatement) {
             $query .= $this->whereStatement;
         }
@@ -435,7 +433,7 @@ abstract class Model_Plural
      */
     public function getSum ($campo)
     {
-        $query = 'SELECT SUM('.$campo.') FROM '.$this->getMeta()['model.db_table'];
+        $query = 'SELECT SUM('.$campo.') FROM '.$this->meta['model.db_table'];
         if ($this->whereStatement) {
             $query .= $this->whereStatement;
         }
@@ -450,7 +448,7 @@ abstract class Model_Plural
      */
     public function getAvg($campo)
     {
-        $query = 'SELECT AVG('.$campo.') FROM '.$this->getMeta()['model.db_table'];
+        $query = 'SELECT AVG('.$campo.') FROM '.$this->meta['model.db_table'];
         if ($this->whereStatement) {
             $query .= $this->whereStatement;
         }
@@ -469,9 +467,9 @@ abstract class Model_Plural
     {
         // preparar consulta inicial
         if ($this->selectStatement) {
-            $query = 'SELECT '.$this->selectStatement.' FROM '.$this->getMeta()['model.db_table'];
+            $query = 'SELECT '.$this->selectStatement.' FROM '.$this->meta['model.db_table'];
         } else {
-            $query = 'SELECT * FROM '.$this->getMeta()['model.db_table'];
+            $query = 'SELECT * FROM '.$this->meta['model.db_table'];
         }
         // agregar where
         if ($this->whereStatement) {
@@ -507,7 +505,7 @@ abstract class Model_Plural
                 if ($class === null) {
                     $aux = \sowerphp\core\Utility_Inflector::singularize(get_class($this));
                     $namespace = substr($aux, 0, strrpos($aux, '\\'));
-                    $class = $namespace.'\Model_'.\sowerphp\core\Utility_Inflector::camelize($this->getMeta()['model.db_table']);
+                    $class = $namespace.'\Model_'.\sowerphp\core\Utility_Inflector::camelize($this->meta['model.db_table']);
                 }
                 // iterar creando objetos
                 foreach ($tabla as &$fila) {
@@ -594,9 +592,9 @@ abstract class Model_Plural
      * recuperado no se vuelve a hacer la consulta a la base de datos.
      * @param pk Clave primaria del objeto (pueden ser varios parámetros)
      */
-    public function get($pk)
+    public function get(...$id)
     {
-        return model($this->getMeta()['model.singular'], func_get_args());
+        return model($this->meta['model.singular'], ...$id);
     }
 
     /**
@@ -610,10 +608,10 @@ abstract class Model_Plural
     {
         $cols = array_keys($this->meta['model.singular']::$columnsInfo);
         $id = $cols[0];
-        $glosa = in_array($this->getMeta()['model.db_table'], $cols) ? $this->getMeta()['model.db_table'] : $cols[1];
+        $glosa = in_array($this->meta['model.db_table'], $cols) ? $this->meta['model.db_table'] : $cols[1];
         return $this->getDatabaseConnection()->getTable('
             SELECT '.$id.' AS id, '.$glosa.' AS glosa
-            FROM '.$this->getMeta()['model.db_table'].'
+            FROM '.$this->meta['model.db_table'].'
             ORDER BY '.$glosa
         );
     }

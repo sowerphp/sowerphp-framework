@@ -23,12 +23,14 @@
 
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
+use \sowerphp\autoload\Model;
+
 /**
- * Clase para mapear la tabla region de la base de datos
- * Comentario de la tabla: Regiones del país
- * Esta clase permite trabajar sobre un registro de la tabla region
+ * Modelo singular de la tabla "region" de la base de datos.
+ *
+ * Permite interactuar con un registro de la tabla.
  */
-class Model_Region extends \sowerphp\autoload\Model
+class Model_Region extends Model
 {
 
     /**

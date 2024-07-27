@@ -23,377 +23,134 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
+use \stdClass;
+use \sowerphp\autoload\Model;
 use \Illuminate\Contracts\Auth\Authenticatable;
 
 /**
- * Clase para mapear la tabla usuario de la base de datos
- * Comentario de la tabla: Usuarios de la aplicación
- * Esta clase permite trabajar sobre un registro de la tabla usuario
+ * Modelo singular de la tabla "usuario" de la base de datos.
+ *
+ * Permite interactuar con un registro de la tabla.
  */
-class Model_Usuario extends \sowerphp\autoload\Model implements Authenticatable
+class Model_Usuario extends Model implements Authenticatable
 {
 
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'usuario'; ///< Tabla del modelo
-
-    public static $fkNamespace = []; ///< Namespaces que utiliza esta clase
-
-    // Atributos de la clase (columnas en la base de datos)
-    public $id; ///< Identificador (serial): integer(32) NOT NULL DEFAULT 'nextval('usuario_id_seq'::regclass)' AUTO PK
-    public $nombre; ///< Nombre real del usuario: character varying(50) NOT NULL DEFAULT ''
-    public $usuario; ///< Nombre de usuario: character varying(30) NOT NULL DEFAULT ''
-    public $email; ///< Correo electrónico del usuario: character varying(50) NOT NULL DEFAULT ''
-    public $contrasenia; ///< Contraseña del usuario: character(255) NOT NULL DEFAULT ''
-    public $contrasenia_intentos; ///< Intentos de inicio de sesión antes de bloquear cuenta: SMALLINT(6) NOT NULL DEFAULT '3'
-    public $hash; ///< Hash único del usuario (32 caracteres): character(32) NOT NULL DEFAULT ''
-    public $token; ///< Token para servicio secundario de autorización: character(64) NULL DEFAULT ''
-    public $activo; ///< Indica si el usuario está o no activo en la aplicación: boolean() NOT NULL DEFAULT 'true'
-    public $ultimo_ingreso_fecha_hora; ///< Fecha y hora del último ingreso del usuario: timestamp without time zone() NULL DEFAULT ''
-    public $ultimo_ingreso_desde; ///< Dirección IP del último ingreso del usuario: character varying(45) NULL DEFAULT ''
-    public $ultimo_ingreso_hash; ///< Hash del último ingreso del usuario: character(32) NULL DEFAULT ''
-
-    // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'id' => array(
-            'name'      => 'ID',
-            'comment'   => 'Identificador (serial)',
-            'type'      => 'integer',
-            'length'    => 32,
-            'null'      => false,
-            'default'   => "nextval('usuario_id_seq'::regclass)",
-            'auto'      => true,
-            'pk'        => true,
-            'fk'        => null
-        ),
-        'nombre' => array(
-            'name'      => 'Nombre',
-            'comment'   => 'Nombre real del usuario',
-            'type'      => 'character varying',
-            'length'    => 50,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-        'usuario' => array(
-            'name'      => 'Usuario',
-            'comment'   => 'Nombre de usuario',
-            'type'      => 'character varying',
-            'length'    => 30,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-        'email' => array(
-            'name'      => 'Email',
-            'comment'   => 'Correo electrónico del usuario',
-            'type'      => 'character varying',
-            'length'    => 50,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null,
-            'check'     => ['email'],
-        ),
-        'contrasenia' => array(
-            'name'      => 'Contraseña',
-            'comment'   => 'Contraseña del usuario',
-            'type'      => 'character',
-            'length'    => 255,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-        'contrasenia_intentos' => array(
-            'name'      => 'Contraseña Intentos',
-            'comment'   => 'Intentos de inicio de sesión antes de bloquear cuenta',
-            'type'      => 'smallint',
-            'length'    => 6,
-            'null'      => false,
-            'default'   => "3",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-        'hash' => array(
-            'name'      => 'Hash',
-            'comment'   => 'Hash único del usuario (32 caracteres)',
-            'type'      => 'character',
-            'length'    => 32,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-        'token' => array(
-            'name'      => 'Token',
-            'comment'   => 'Token para servicio secundario de autorización',
-            'type'      => 'character',
-            'length'    => 64,
-            'null'      => true,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-        'activo' => array(
-            'name'      => 'Activo',
-            'comment'   => 'Indica si el usuario está o no activo en la aplicación',
-            'type'      => 'boolean',
-            'length'    => null,
-            'null'      => false,
-            'default'   => "true",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-        'ultimo_ingreso_fecha_hora' => array(
-            'name'      => 'Último ingreso',
-            'comment'   => 'Fecha y hora del último ingreso del usuario',
-            'type'      => 'timestamp without time zone',
-            'length'    => null,
-            'null'      => true,
-            'default'   => "",
-            'auto'      => true,
-            'pk'        => false,
-            'fk'        => null
-        ),
-        'ultimo_ingreso_desde' => array(
-            'name'      => 'Última IP',
-            'comment'   => 'Dirección IP del último ingreso del usuario',
-            'type'      => 'character varying',
-            'length'    => 45,
-            'null'      => true,
-            'default'   => "",
-            'auto'      => true,
-            'pk'        => false,
-            'fk'        => null
-        ),
-        'ultimo_ingreso_hash' => array(
-            'name'      => 'Último hash',
-            'comment'   => 'Hash del último ingreso del usuario',
-            'type'      => 'character',
-            'length'    => 32,
-            'null'      => true,
-            'default'   => "",
-            'auto'      => true,
-            'pk'        => false,
-            'fk'        => null
-        ),
-
-    );
-
-    // Comentario de la tabla en la base de datos
-    public static $tableComment = 'Usuarios de la aplicación';
+    /**
+     * Metadatos del modelo.
+     *
+     * @var array
+     */
+    protected $meta = [
+        'model' => [
+            'db_table_comment' => 'Usuarios de la aplicación.',
+            'ordering' => ['-ultimo_ingreso_fecha_hora'],
+        ],
+        'fields' => [
+            'id' => [
+                'type' => self::TYPE_INCREMENTS,
+                'primary_key' => true,
+                'verbose_name' => 'ID',
+                'help_text' => 'Identificador (serial).',
+            ],
+            'nombre' => [
+                'type' => self::TYPE_STRING,
+                'max_length' => 50,
+                'verbose_name' => 'Nombre',
+                'help_text' => 'Nombre real del usuario.',
+            ],
+            'usuario' => [
+                'type' => self::TYPE_STRING,
+                'unique' => true,
+                'max_length' => 30,
+                'verbose_name' => 'Usuario',
+                'help_text' => 'Nombre de usuario.',
+            ],
+            'email' => [
+                'type' => self::TYPE_STRING,
+                'unique' => true,
+                'max_length' => 50,
+                'verbose_name' => 'Email',
+                'help_text' => 'Correo electrónico del usuario.',
+                'validation' => ['email'],
+                'sanitize' => ['strip_tags', 'spaces', 'trim', 'email'],
+            ],
+            'contrasenia' => [
+                'type' => self::TYPE_STRING,
+                'max_length' => 255,
+                'verbose_name' => 'Contraseña',
+                'help_text' => 'Contraseña del usuario.',
+            ],
+            'contrasenia_intentos' => [
+                'type' => self::TYPE_SMALL_INTEGER,
+                'default' => 3,
+                'verbose_name' => 'Contraseña Intentos.',
+                'help_text' => 'Intentos de inicio de sesión antes de bloquear cuenta.',
+            ],
+            'hash' => [
+                'type' => self::TYPE_CHAR,
+                'blank' => true,
+                'unique' => true,
+                'length' => 32,
+                'verbose_name' => 'Hash',
+                'help_text' => 'Hash único del usuario (32 caracteres).',
+            ],
+            'token' => [
+                'type' => self::TYPE_CHAR,
+                'length' => 64,
+                'verbose_name' => 'Token',
+                'help_text' => 'Token para servicio secundario de autorización.',
+            ],
+            'activo' => [
+                'type' => self::TYPE_BOOLEAN,
+                'blank' => true,
+                'default' => true,
+                'verbose_name' => 'Activo',
+                'help_text' => 'Indica si el usuario está o no activo en la aplicación.',
+            ],
+            'ultimo_ingreso_fecha_hora' => [
+                'type' => self::TYPE_DATE_TIME,
+                'auto' => true,
+                'verbose_name' => 'Último ingreso',
+                'help_text' => 'Fecha y hora del último ingreso del usuario.',
+            ],
+            'ultimo_ingreso_desde' => [
+                'type' => self::TYPE_STRING,
+                'auto' => true,
+                'max_length' => 45,
+                'verbose_name' => 'Última IP',
+                'help_text' => 'Dirección IP del último ingreso del usuario',
+            ],
+            'ultimo_ingreso_hash' => [
+                'type' => self::TYPE_CHAR,
+                'auto' => true,
+                'length' => 32,
+                'verbose_name' => 'Último hash',
+                'help_text' => 'Hash del último ingreso del usuario.',
+            ],
+        ],
+        'configurations' => [
+            'fields' => [
+            ],
+        ],
+    ];
 
     // atributos para caché
     protected $groups = null; ///< Grupos a los que pertenece el usuario
     protected $auths = null; ///< Permisos que tiene el usuario
 
-    // configuración asociada a la tabla usuario_config (configuración extendida y personalizada según la app)
-    public static $config_encrypt = []; ///< columnas de la configuración que se deben encriptar para guardar en la base de datos
-    public static $config_default = []; ///< valores por defecto para columnas de la configuración en caso que no estén especificadas
-    protected $config = null; ///< Caché para configuraciones
-
     /**
-     * Constructor de la clase usuario
-     * Permite crear el objeto usuario ya sea recibiendo el id del usuario, el
-     * email, el nombre de usuario o el hash de usuario.
+     * Obtiene el usuario solicitado.
+     *
+     * @param array $id Clave primaria del modelo.
+     * @return stdClass|null
      */
-    public function __construct($id = null)
+    public function retrieve(array $id): ?stdClass
     {
-        if ($id !== null && !is_array($id) && !is_numeric($id)) {
-            // se crea usuario a través de su correo electrónico
-            if (strpos($id, '@')) {
-                $id = $this->getDatabaseConnection()->getValue('
-                    SELECT id
-                    FROM usuario
-                    WHERE email = :email
-                ', [':email' => mb_strtolower($id)]);
-            }
-            // se crea usuario a través de su nombre de usuario
-            else if (!isset($id[31])) {
-                $id = $this->getDatabaseConnection()->getValue('
-                    SELECT id
-                    FROM usuario
-                    WHERE usuario = :usuario
-                ', [':usuario' => $id]);
-            }
-            // se crea usuario a través de su hash
-            else {
-                $id = $this->getDatabaseConnection()->getValue('
-                    SELECT id
-                    FROM usuario
-                    WHERE hash = :hash
-                ', [':hash' => $id]);
-            }
-        }
-        parent::__construct((int)$id);
-        $this->getConfig();
-    }
-
-    /**
-     * Método que entrega las configuraciones y parámetros extras para el
-     * usuario
-     */
-    public function getConfig()
-    {
-        if ($this->config === false || !$this->id || !class_exists('\sowerphp\app\Sistema\Usuarios\Model_UsuarioConfig')) {
+        $realId = $this->getPluralInstance()->getIdFromCredentials($id);
+        if ($realId === null) {
             return null;
         }
-        if ($this->config === null) {
-            $config = $this->getDatabaseConnection()->getTableWithAssociativeIndex('
-                SELECT configuracion, variable, valor, json
-                FROM usuario_config
-                WHERE usuario = :id
-            ', [':id' => $this->id]);
-            if (!$config) {
-                $this->config = false;
-                return null;
-            }
-            foreach ($config as $configuracion => $datos) {
-                if (!isset($datos[0])) {
-                    $datos = [$datos];
-                }
-                $this->config[$configuracion] = [];
-                foreach ($datos as $dato) {
-                    $class = get_called_class();
-                    if (in_array($configuracion . '_' . $dato['variable'], $class::$config_encrypt)) {
-                        $dato['valor'] = decrypt($dato['valor']);
-                    }
-                    $this->config[$configuracion][$dato['variable']] =
-                        $dato['json'] ? json_decode($dato['valor']) : $dato['valor']
-                    ;
-                }
-            }
-        }
-        return $this->config;
-    }
-
-    /**
-     * Método mágico para obtener configuraciones del usuario
-     */
-    public function __get($name)
-    {
-        if (strpos($name, 'config_') === 0 && class_exists('\sowerphp\app\Sistema\Usuarios\Model_UsuarioConfig')) {
-            $this->getConfig();
-            $key = str_replace('config_', '', $name);
-            $c = substr($key, 0, strpos($key, '_'));
-            $v = substr($key, strpos($key, '_') + 1);
-            if (!isset($this->config[$c][$v])) {
-                $class = get_called_class();
-                return isset($class::$config_default[$c . '_' . $v]) ? $class::$config_default[$c . '_' . $v] : null;
-            }
-            $this->$name = $this->config[$c][$v];
-            return $this->$name;
-        } else {
-            throw new \Exception(
-                'Atributo '.$name.' del usuario no existe (no se puede obtener).'
-            );
-        }
-    }
-
-    /**
-     * Método mágico para asignar una configuración del usuario
-     */
-    public function __set(string $name, $value): void
-    {
-        if (strpos($name, 'config_') === 0 && class_exists('\sowerphp\app\Sistema\Usuarios\Model_UsuarioConfig')) {
-            $key = str_replace('config_', '', $name);
-            $c = substr($key, 0, strpos($key, '_'));
-            $v = substr($key, strpos($key, '_') + 1);
-            $value = ($value === false || $value === 0)
-                ? '0'
-                : (
-                    (!is_array($value) && !is_object($value))
-                        ? (string)$value
-                        : (
-                            (is_array($value) && empty($value))
-                                ? null
-                                : $value
-                        )
-                )
-            ;
-            $this->config[$c][$v] = (!is_string($value) || isset($value[0])) ? $value : null;
-            $this->$name = $this->config[$c][$v];
-        } else {
-            parent::__set($name, $value);
-        }
-    }
-
-    /**
-     * Método para setear los atributos del usuario.
-     * @param array Arreglo con los datos que se deben asignar.
-     */
-    public function set($array)
-    {
-        parent::set($array);
-        foreach($array as $name => $value) {
-            if (strpos($name, 'config_') === 0) {
-                $this->__set($name, $value);
-            }
-        }
-    }
-
-    /**
-     * Método que guarda el usuario y su configuración personalizada si existe.
-     */
-    public function save(array $options = []): bool
-    {
-        // Guardar usuario.
-        if (!parent::save()) {
-            return false;
-        }
-        // guardar configuración
-        if (
-            $this->config
-            && class_exists('\sowerphp\app\Sistema\Usuarios\Model_UsuarioConfig')
-        ) {
-            $app_pkey = config('app.key');
-            foreach ($this->config as $configuracion => $datos) {
-                foreach ($datos as $variable => $valor) {
-                    $Config = new Model_UsuarioConfig(
-                        $this->id,
-                        $configuracion,
-                        $variable
-                    );
-                    if (!is_array($valor) && !is_object($valor)) {
-                        $Config->json = 0;
-                    } else {
-                        $valor = json_encode($valor);
-                        $Config->json = 1;
-                    }
-                    $class = get_called_class();
-                    if (
-                        in_array($configuracion . '_' . $variable, $class::$config_encrypt)
-                        && $valor !== null
-                    ) {
-                        if (!$app_pkey) {
-                            throw new \Exception(
-                                'No está definida la configuración app.pkey para encriptar configuración del usuario.'
-                            );
-                        }
-                        $valor = encrypt($valor);
-                    }
-                    $Config->valor = $valor;
-                    if ($valor !== null) {
-                        $Config->save();
-                    } else {
-                        $Config->delete();
-                    }
-                }
-            }
-        }
-        // todo ok
-        return true;
+        return parent::retrieve(['id' => $realId]);
     }
 
     /**

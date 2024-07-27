@@ -635,7 +635,7 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
             // mensaje de ok y redireccionar
             return redirect('/usuarios/perfil')
                 ->withSuccess(
-                    __('Perfil de usuario actualizado.')    
+                    __('Perfil de usuario actualizado.')
                 );
         }
         // procesar cambio de contraseña
@@ -685,7 +685,7 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                     ->withSuccess(
                         __('Desde ahora la cuenta está protegida con %(auth2)s.',
                             [
-                                'auth2' =>$_POST['auth2']  
+                                'auth2' =>$_POST['auth2']
                             ]
                         )
                     );

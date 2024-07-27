@@ -23,11 +23,13 @@
 
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
+use \sowerphp\autoload\Model_Plural;
+
 /**
  * Modelo plural de la tabla "provincia" de la base de datos.
  *
  * Permite interactuar con varios registros de la tabla.
  */
-class Model_Provincias extends \sowerphp\autoload\Model_Plural
+class Model_Provincias extends Model_Plural
 {
 }

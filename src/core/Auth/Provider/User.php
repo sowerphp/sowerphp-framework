@@ -95,44 +95,12 @@ class Auth_Provider_User implements UserProvider
      */
     public function retrieveByCredentials(array $credentials): ?Authenticatable
     {
-        // Determinar un campo ID a partir de diferentes datos que podrían
-        // venir en las credenciales.
-        $id = $credentials['id']
-            ?? $credentials['email']
-            ?? $credentials['username']
-            ?? $credentials['hash']
-            ?? null
-        ;
-        // Si el $id es una 'X' y viene $credentials['password'] entonces se
-        // está pasando el hash de un usuario.
-        if ($id == 'X' && !empty($credentials['password'])) {
-            $id = $credentials['password'];
-        }
-        // Si no viene ID se entrega NULL (no se pudo buscar el usuario).
+        // Obtener el ID a partir de las credenciales pasadas.
+        $class = $this->model;
+        $user = new $class();
+        $id = $user->getPluralInstance()->getIdFromCredentials($credentials);
         if ($id === null) {
             return null;
-        }
-        // Si viene ID y no es numérico, se debe determinar el ID del usuario.
-        if (!is_numeric($id)) {
-            $users = database()->table('usuario');
-            // Se busca el ID a partir del correo electrónico.
-            if (strpos($id, '@')) {
-                $user = $users->where('email', mb_strtolower($id))->first();
-            }
-            // Se busca el ID a partir del nombre de usuario.
-            else if (!isset($id[31])) {
-                $user = $users->where('usuario', $id)->first();
-            }
-            // Se busca el ID a partir del hash del usuario.
-            else {
-                $user = $users->where('hash', $id)->first();
-            }
-            // Si no se encontró usuario se retorna NULL.
-            if ($user === null) {
-                return null;
-            }
-            // El usuario existe y se recuperó su ID numérico (ID real).
-            $id = $user->id;
         }
         // Instanciar el objeto del usuario.
         return $this->retrieveById($id);

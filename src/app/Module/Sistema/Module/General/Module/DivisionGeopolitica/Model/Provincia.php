@@ -23,12 +23,14 @@
 
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
+use \sowerphp\autoload\Model;
+
 /**
  * Modelo singular de la tabla "provincia" de la base de datos.
  *
  * Permite interactuar con un registro de la tabla.
  */
-class Model_Provincia extends \sowerphp\autoload\Model
+class Model_Provincia extends Model
 {
 
     /**
@@ -50,16 +52,12 @@ class Model_Provincia extends \sowerphp\autoload\Model
             ],
             'provincia' => [
                 'type' => self::TYPE_STRING,
-                'null' => false,
-                'blank' => false,
                 'max_length' => 30,
                 'verbose_name' => 'Provincia',
                 'help_text' => 'Nombre de la provincia.',
             ],
             'region' => [
                 'type' => self::TYPE_STRING,
-                'null' => false,
-                'blank' => false,
                 'foreign_key' => Model_Region::class,
                 'to_table' => 'region',
                 'to_field' => 'codigo',

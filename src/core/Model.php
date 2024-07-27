@@ -23,10 +23,10 @@
 
 namespace sowerphp\core;
 
-use stdClass;
+use \stdClass;
 use \Carbon\Carbon;
-use Illuminate\Config\Repository;
-use Illuminate\Support\Str;
+use \Illuminate\Config\Repository;
+use \Illuminate\Support\Str;
 
 /**
  * Clase abstracta para todos los modelos.
@@ -485,7 +485,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos de Fecha y Hora.
      *
-     * Este tipo representa una columna de tipo timestamp con zona horaria en la base de datos.
+     * Este tipo representa una columna de tipo timestamp con zona horaria en
+     * la base de datos.
      *
      * @param string $column Nombre de la columna.
      * @example timestampTz('created_at')
@@ -899,9 +900,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Acción a realizar al eliminar la llave foránea.
         'on_delete' => self::PROTECT,
         // Permite valores nulos en la base de datos.
-        'null' => true,
+        'null' => false,
         // Permite valores vacíos en formularios (no siempre igual a null).
-        'blank' => true,
+        'blank' => false,
         // Longitud mínima permitida para el campo.
         'min_length' => null,
         // Longitud máxima permitida para el campo.
@@ -932,6 +933,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'readonly' => false,
         // Indica si el campo se puede asignar masivamente.
         'fillable' => null,
+        // Indica si el campo se almacena encriptado en la base de datos.
+        'encrypt' => false,
     ];
 
     /**
@@ -947,8 +950,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'input_type' => self::INPUT_NUMBER,
             'primary_key' => true,
             'unique' => true,
-            'null' => false,
-            'blank' => false,
             'editable' => false,
             'verbose_name' => 'ID',
         ],
@@ -974,8 +975,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'input_type' => self::INPUT_NUMBER,
             'primary_key' => true,
             'unique' => true,
-            'null' => false,
-            'blank' => false,
             'editable' => false,
             'verbose_name' => 'ID',
         ],
@@ -989,8 +988,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'input_type' => self::INPUT_NUMBER,
             'primary_key' => true,
             'unique' => true,
-            'null' => false,
-            'blank' => false,
             'editable' => false,
             'verbose_name' => 'ID',
         ],
@@ -1004,8 +1001,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'input_type' => self::INPUT_NUMBER,
             'primary_key' => true,
             'unique' => true,
-            'null' => false,
-            'blank' => false,
             'editable' => false,
             'verbose_name' => 'ID',
         ],
@@ -1019,8 +1014,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'input_type' => self::INPUT_NUMBER,
             'primary_key' => true,
             'unique' => true,
-            'null' => false,
-            'blank' => false,
             'editable' => false,
             'verbose_name' => 'ID',
         ],
@@ -1228,6 +1221,16 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected $attributes = [];
 
     /**
+     * Almacena la configuración extendida del modelo.
+     *
+     * Son atributos adicionales que estarán disponible a través de atributos
+     * del modelo usando el prefijo `config_`.
+     *
+     * @var Repository
+     */
+    protected $configurations;
+
+    /**
      * Los atributos que se pueden asignar masivamente.
      *
      * Para permitirlos todos, asignar '*' a $fillable;
@@ -1341,14 +1344,27 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     protected function bootstrap(): void
     {
-        $this->meta = $this->getMeta($this->meta);
+        if (!is_object($this->meta)) {
+            $this->meta = $this->getMeta($this->meta);
+        }
         $this->pluralInstance = $this->getPluralInstance();
         self::$columnsInfo = $this->getColumnsInfo(); // TODO: eliminar al refactorizar.
     }
 
+    protected function getUniqueFields(): array
+    {
+        $fields = [];
+        foreach ($this->getMeta()['fields'] as $name => $config) {
+            if ($config['unique']) {
+                $fields[] = $name;
+            }
+        }
+        return $fields;
+    }
+
     /**
      * Obtiene los datos del modelo desde la base de datos mediante su llave
-     * primaria.
+     * primaria u otras columnas que sean valores únicos si están disponibles.
      *
      * @param array $id Clave primaria del modelo.
      * @return stdClass|null
@@ -1358,9 +1374,29 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if (empty($id)) {
             return null;
         }
-        $filters = $this->getPrimaryKey($id);
-        $result = $this->getPluralInstance()->retrieve($filters, true);
-        $this->forceFill((array)$result);
+        try {
+            $filters = $this->getPrimaryKeyValues($id);
+        } catch (\Exception $e) {
+            $fields = $this->getUniqueFields();
+            $filters = $this->toArray($fields, $id, false);
+            $filters = array_filter($filters, function ($filter) {
+                return $filter !== null;
+            });
+        }
+        if (empty($filters)) {
+            return null;
+        }
+        try {
+            $result = $this->getPluralInstance()->retrieve($filters, true);
+            $this->forceFill((array)$result);
+            $this->exists = true;
+        } catch (\Exception $e) {
+            if ($e->getCode() != 404) {
+                throw $e;
+            }
+            $result = null;
+            $this->exists = false;
+        }
         return $result;
     }
 
@@ -1387,16 +1423,42 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
 
     /**
      * Acciones que se ejecutan antes de serializar la instancia del modelo.
+     *
+     * Este método es llamado cuando se usa serialize() en un objeto.
+     *
+     * Permite realizar tareas de limpieza antes de que el objeto sea
+     * serializado. Además, se puede usar para especificar qué propiedades del
+     * objeto deben ser serializadas.
      */
-    public function __sleep()
+    public function __sleep(): array
     {
-        // Sin acciones (por ahora).
+        $unsetAttributes = [
+            'defaultModelConfig',
+            'defaultFieldConfig',
+            'defaultFieldConfigByType',
+            'filters',
+            'fillable',
+            'guarded',
+            'casts',
+            'variantFields',
+            'reflector',
+            'pluralInstance'
+        ];
+        foreach ($unsetAttributes as $attribute) {
+            unset($this->$attribute);
+        }
+        return array_keys(get_object_vars($this));
     }
 
     /**
      * Acciones que se ejecutan después de deserializar la instancia del modelo.
+     *
+     * Este método es llamado cuando se usa unserialize() en un objeto.
+     *
+     * Permite restaurar cualquier recurso que el objeto pueda necesitar
+     * después de ser deserializado.
      */
-    public function __wakeup()
+    public function __wakeup(): void
     {
         $this->bootstrap();
     }
@@ -1416,16 +1478,31 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Obtiene el valor de un atributo utilizando la sobrecarga de propiedades.
      *
+     * Este método permite recuperar valores de:
+     *
+     *   - Atributos del modelo.
+     *   - Configuraciones del modelo (opciones extendidas en otra tabla).
+     *
      * @param string $key El nombre del atributo.
      * @return mixed|null El valor del atributo o null si no existe.
      */
     public function __get(string $key)
     {
+        // Se solicita una opción de la configuración del modelo.
+        if ($this->isConfigurationField($key)) {
+            return $this->getConfiguration($key);
+        }
+        // Se solicita, probablemente, un atributo del modelo.
         return $this->getAttribute($key);
     }
 
     /**
      * Asigna el valor de un atributo utilizando la sobrecarga de propiedades.
+     *
+     * Este método permite asignar valores de:
+     *
+     *   - Atributos del modelo.
+     *   - Configuraciones del modelo (opciones extendidas en otra tabla).
      *
      * @param string $key El nombre del atributo.
      * @param mixed $value El valor del atributo.
@@ -1433,7 +1510,30 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function __set(string $key, $value): void
     {
+        // Se asigna una opción de la configuración del modelo.
+        if ($this->isConfigurationField($key)) {
+            $this->setConfiguration($key, $value);
+        }
+        // Se asigna, probablemente, un atributo del modelo.
         $this->setAttribute($key, $value);
+    }
+
+    /**
+     * Entrega el label de un atributo del modelo.
+     *
+     * @param string $attribute Atributo del objeto que generará el label.
+     * @return string Label del atributo (desde configuración o generado).
+     */
+    protected function getAttributeLabel(string $attribute): string
+    {
+        $label = $this->meta['fields.' . $attribute . '.label'];
+        if (strpos($label, ':')) {
+            list($module, $label) = explode(':', $label);
+        }
+        if ($label === null) {
+            $label = ucfirst(Str::camel($attribute));
+        }
+        return $label;
     }
 
     /**
@@ -1444,10 +1544,22 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function getAttribute(string $key)
     {
-        $value = $this->attributes[$key] ?? null;
-        if ($this->hasCast($key)) {
-            return $this->castAttributeForGet($key, $value);
+        // Obtener con accessor (no se realiza cast automático).
+        $label = $this->getAttributeLabel($key);
+        $accessor = 'get' . $label . 'Attribute';
+        if ($label && method_exists($this, $accessor)) {
+            return $this->$accessor();
         }
+        // Obtener el valor desde el arreglo de atributos del modelo.
+        $value = $this->attributes[$key]
+            ?? $this->getMeta()['fields.' . $key . '.default']
+            ?? null
+        ;
+        // Realizar casteo si corresponde.
+        if ($this->hasCast($key)) {
+            return $this->castForGet($key, $value);
+        }
+        // Entregar valor del atributo.
         return $value;
     }
 
@@ -1462,10 +1574,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         // Sanitizar el valor del atributo si es necesario.
         if ($this->hasSanitization($key)) {
-            $value = $this->sanitizeAttributeForSet($key, $value);
+            $value = $this->sanitizeForSet($key, $value);
         }
         // Asignar con mutador (no se realiza cast automático).
-        $label = $this->meta['fields.' . $key . '.label'];
+        $label = $this->getAttributeLabel($key);
         $mutator = 'set' . $label . 'Attribute';
         if ($label && method_exists($this, $mutator)) {
             $this->$mutator($value);
@@ -1473,7 +1585,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Asignar directamente haciendo cast si es necesario.
         else {
             if ($this->hasCast($key)) {
-                $value = $this->castAttributeForSet($key, $value);
+                $value = $this->castForSet($key, $value);
             }
             $this->attributes[$key] = $value;
         }
@@ -1482,30 +1594,47 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Determina si se debe sanitizar el valor del atributo.
+     * Obtiene los métodos de sanitización que se deben aplicar sobre el campo.
      *
-     * @param string $key El nombre del atributo.
-     * @return bool `true` si el atributo tiene sanitización definida, `false`
+     * @param string $key Llave del campo (atributo o configuración).
+     * @return array|null Arreglo con los métodos de sanitización o `null`si no
+     * tiene ninguno definido.
+     */
+    protected function getSanitization(string $key): ?array
+    {
+        if ($this->isConfigurationField($key)) {
+            $name = $this->getConfigurationName($key);
+            return $this->meta['configurations.fields.' . $name . '.sanitize'];
+        } else {
+            return $this->meta['fields.' . $key . '.sanitize'];
+        }
+    }
+
+    /**
+     * Determina si se debe sanitizar el valor del campo.
+     *
+     * @param string $key Llave del campo (atributo o configuración).
+     * @return bool `true` si el campo tiene sanitización definida, `false`
      * en caso contrario.
      */
     protected function hasSanitization(string $key): bool
     {
-        return (bool)$this->meta['fields.' . $key . '.sanitize'];
+        return (bool)$this->getSanitization($key);
     }
 
     /**
-     * Sanitiza el valor de un atributo al asignarlo.
+     * Sanitiza el valor de un campo al asignarlo.
      *
-     * @param string $key El nombre del atributo.
-     * @param mixed $value El valor del atributo.
-     * @return mixed El valor sanitizado.
+     * @param string $key Llave del campo (atributo o configuración).
+     * @param mixed $value El valor del campo que se desea sanitizar.
+     * @return mixed El valor del campo sanitizado.
      */
-    protected function sanitizeAttributeForSet(string $key, $value)
+    protected function sanitizeForSet(string $key, $value)
     {
         if ($value === null) {
             return $value;
         }
-        $sanitize = $this->meta['fields.' . $key . '.sanitize'];
+        $sanitize = $this->getSanitization($key);
         if (!$sanitize) {
             return $value;
         }
@@ -1573,30 +1702,47 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Determina si existe un cast para un atributo específico.
+     * Obtiene el método de casteo que se debe aplicar sobre el campo.
      *
-     * @param string $key El nombre del atributo.
-     * @return bool `true` si el atributo tiene un cast definido, `false` en
+     * @param string $key Llave del campo (atributo o configuración).
+     * @return string|null Método de casteo o `null`si no tiene ninguno
+     * definido.
+     */
+    protected function getCast(string $key): ?string
+    {
+        if ($this->isConfigurationField($key)) {
+            $name = $this->getConfigurationName($key);
+            return $this->meta['configurations.fields.' . $name . '.cast'];
+        } else {
+            return $this->meta['fields.' . $key . '.cast'];
+        }
+    }
+
+    /**
+     * Determina si existe un cast para un campo específico.
+     *
+     * @param string $key Llave del campo (atributo o configuración).
+     * @return bool `true` si el campo tiene un cast definido, `false` en
      * caso contrario.
      */
     protected function hasCast(string $key): bool
     {
-        return (bool)$this->meta['fields.' . $key . '.cast'];
+        return (bool)$this->getCast($key);
     }
 
     /**
-     * Castea el valor de un atributo al obtenerlo.
+     * Castea el valor de un campo al obtenerlo.
      *
-     * @param string $key El nombre del atributo.
-     * @param mixed $value El valor del atributo.
-     * @return mixed El valor casteado.
+     * @param string $key Llave del campo (atributo o configuración).
+     * @param mixed $value El valor del campo.
+     * @return mixed El valor casteado del campo.
      */
-    protected function castAttributeForGet(string $key, $value)
+    protected function castForGet(string $key, $value)
     {
         if ($value === null) {
             return $value;
         }
-        $cast = $this->meta['fields.' . $key . '.cast'] ?? null;
+        $cast = $this->getCast($key);
         if (!$cast) {
             return $value;
         }
@@ -1621,9 +1767,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 return json_decode($value);
             case 'array':
             case 'json':
-                return json_decode($value, true);
+                return is_string($value) ? json_decode($value, true) : $value;
             case 'collection':
-                return collect(json_decode($value, true));
+                return collect(
+                    is_string($value) ? json_decode($value, true) : $value
+                );
             case 'date':
                 return Carbon::parse($value)->startOfDay();
             case 'datetime':
@@ -1636,18 +1784,18 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Castea el valor de un atributo al establecerlo.
+     * Castea el valor de un campo al establecerlo.
      *
-     * @param string $key El nombre del atributo.
-     * @param mixed $value El valor del atributo.
-     * @return mixed El valor casteado.
+     * @param string $key Llave del campo (atributo o configuración).
+     * @param mixed $value El valor del campo.
+     * @return mixed El valor casteado del campo.
      */
-    protected function castAttributeForSet(string $key, $value)
+    protected function castForSet(string $key, $value)
     {
         if ($value === null) {
             return $value;
         }
-        $cast = $this->meta['fields.' . $key . '.cast'] ?? null;
+        $cast = $this->getCast($key);
         if (!$cast) {
             return $value;
         }
@@ -1680,6 +1828,23 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 return Carbon::parse($value)->timestamp;
             default:
                 return $value;
+        }
+    }
+
+    /**
+     * Determina si un campo específico usa encriptación.
+     *
+     * @param string $key Llave del campo (atributo o configuración).
+     * @return bool `true` si el campo usa encriptación, `false` en caso
+     * contrario.
+     */
+    protected function hasEncryption(string $key): bool
+    {
+        if ($this->isConfigurationField($key)) {
+            $name = $this->getConfigurationName($key);
+            return (bool)$this->meta['configurations.fields.' . $name . '.encrypt'];
+        } else {
+            return (bool)$this->meta['fields.' . $key . '.encrypt'];
         }
     }
 
@@ -1739,7 +1904,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         foreach ($attributes as $key => $value) {
             if ($this->isFillable($key)) {
-                $this->setAttribute($key, $value);
+                if ($this->isConfigurationField($key)) {
+                    $this->setConfiguration($key, $value);
+                } else {
+                    $this->setAttribute($key, $value);
+                }
             } else {
                 throw new \Exception(__(
                     'El atributo %s no es asignable masivamente.',
@@ -1802,7 +1971,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public function forceFill(array $attributes): self
     {
         foreach ($attributes as $key => $value) {
-            $this->setAttribute($key, $value);
+            if ($this->isConfigurationField($key)) {
+                $this->setConfiguration($key, $value);
+            } else {
+                $this->setAttribute($key, $value);
+            }
         }
         return $this;
     }
@@ -1845,13 +2018,36 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Entrega los atributos del modelo (campos de la tabla) como un arreglo.
      *
-     * @return array
+     * @param array $fields Campos que se requieren obtener como arreglo. Si no
+     * se especifican se obtendrán todos los campos (atributos) del modelo.
+     * @param array $values Valores que se deben usar para los campos. Si no se
+     * especifica en $values alguno de los campos que están en $fields se
+     * obtendrán los valores de los campos actuales en el modelo.
+     * @param bool $resolveForeignKey Obtendrá los valores de llaves foráneas
+     * con la instancia de los modelos asociados.
+     * @return array Arreglo con los campos solicitados y sus valores.
      */
-    public function toArray(): array
+    public function toArray(
+        array $fields = [],
+        array $values = [],
+        bool $resolveForeignKey = true
+    ): array
     {
+        if (!isset($fields[0])) {
+            $fields = array_keys((array)$this->attributes);
+        }
         $array = [];
-        foreach ($this->attributes as $key => $value) {
-            $array[$key] = $this->getField($key);
+        foreach ($fields as $i => $field) {
+            if ($resolveForeignKey) {
+                $value = $this->getField($field);
+            } else {
+                $value = $values[$field]
+                    ?? $values[$i]
+                    ?? $this->getAttribute($field)
+                    ?? null
+                ;
+            }
+            $array[$field] = $value;
         }
         return $array;
     }
@@ -2073,33 +2269,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Entrega los campos que forman la PK del modelo.
      *
-     * Si se pasa un $id se entregará un arreglo asociativo con:
-     *   - Índice: nombre del campo de la PK.
-     *   - Valor: valor de la PK para dicho campo.
-     *
-     * @param array $id Clave primaria del modelo.
      * @return array Arreglo con las columnas que son la PK.
      */
-    public function getPrimaryKey(array $id = []): array
+    public function getPrimaryKey(): array
     {
-        // Buscar campos que son de la PK.
-        $fields = $this->meta['model.primary_key'];
-        if (empty($id)) {
-            return $fields;
-        }
-        // Armar arreglo asociativo con la PK (campos y valores).
-        $array = [];
-        foreach ($fields as $i => $field) {
-            $value = $id[$field] ?? $id[$i] ?? null;
-            if ($value === null) {
-                throw new \Exception(__(
-                    'El campo %s debe tener un valor asignado para construir la llave primaria (PK).',
-                    $field
-                ));
-            }
-            $array[$field] = $value;
-        }
-        return $array;
+        return $this->meta['model.primary_key'];
     }
 
     /**
@@ -2108,12 +2282,31 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Se entregan en el arreglo los índices con los nombres de los campos
      * (atributos) y los valores del modelo.
      *
+     * Si se pasa un $id se usará ese arreglo para armar los valores de la
+     * llave primaria (y no los atributos del objeto).
+     *
+     * Se entregará un arreglo asociativo con:
+     *   - Índice: nombre del campo de la PK.
+     *   - Valor: valor de la PK para dicho campo.
+     *
+     * @param array $id Clave primaria del modelo.
      * @return array Arreglo con los campos y valores que forman la llave
      * primaria del modelo.
+     * @throws \Exception Si no se logró definir todos los valores de la PK.
      */
-    public function getPrimaryKeyValues(): array
+    public function getPrimaryKeyValues(array $id = []): array
     {
-        return $this->getPrimaryKey($this->toArray());
+        $fields = $this->getPrimaryKey();
+        $values = $this->toArray($fields, $id);
+        foreach ($values as $key => $value) {
+            if ($value === null) {
+                throw new \Exception(__(
+                    'El campo %s debe tener un valor asignado para construir la llave primaria (PK).',
+                    $key
+                ));
+            }
+        }
+        return $values;
     }
 
     /**
@@ -2536,7 +2729,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function __call(string $method, $args)
     {
-        // Si es un "accessor" se procesa.
+        // Si es un "accessor" getXyzField() se procesa.
         $pattern = '/^get([A-Z][a-zA-Z]*)Field$/';
         if (preg_match($pattern, $method, $matches)) {
             $field = Str::snake($matches[1]);
@@ -2544,12 +2737,349 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 return $this->getField($field);
             }
         }
+        // Si es un "accessor" getXyz() se procesa como getXyzField().
+        // NOTE: esto debería ser temporal ya que la opción sin "Field" está
+        // obsoleta y podría ser removida en el futuro. Se recomienda usar
+        // los "accessors" con el sufijo Field siempre.
+        $pattern = '/^get([A-Z][a-zA-Z]*)$/';
+        if (preg_match($pattern, $method, $matches)) {
+            return $this->__call($method . 'Field', $args);
+        }
         // Si el método no existe se genera una excepción.
         throw new \Exception(__(
             'Método %s::%s() no existe.',
             get_class($this),
             $method
         ));
+    }
+
+    /**
+     * Entrega el atributo con el arreglo de configuraciones del modelo.
+     *
+     * Es un accessor para el atributo Model::$config.
+     *
+     * @return void
+     */
+    public function getConfigAttribute(): Repository
+    {
+        if (!isset($this->configurations)) {
+            $configurations = $this->loadConfigurations();
+            $this->configurations = new Repository();
+            foreach ($configurations as $category => $keys) {
+                foreach ($keys as $key => $value) {
+                    $attribute = 'config_' . $category . '_' . $key;
+                    $this->setConfiguration($attribute, $value);
+                }
+            }
+        }
+        return $this->configurations;
+    }
+
+    /**
+     * Entrega los metadatos del modelo de configuraciones asociado al modelo.
+     *
+     * @return array Arreglo con los metadatos del modelo de configuraciones.
+     */
+    protected function getConfigurationsMeta(): array
+    {
+        $modelDbTable = $this->getMeta()['model.db_table'];
+        $configModelDefaultMeta = [
+            'db_table' => $modelDbTable . '_config',
+            'primary_key' => [
+                $modelDbTable => 'id',
+            ],
+            'fields' => [
+                'category' => 'configuracion',
+                'key' => 'variable',
+                'value' => 'valor',
+                'is_json' => 'json',
+            ],
+        ];
+        $configModelMeta = array_merge(
+            $configModelDefaultMeta,
+            $this->getMeta()['configurations.model'] ?? []
+        );
+        return $configModelMeta;
+    }
+
+    /**
+     * Obtiene las configuraciones desde la base de datos y las entrega en un
+     * arreglo estandarizado.
+     *
+     * @return array
+     */
+    protected function loadConfigurations(): array
+    {
+        // Obtener metadatos del modelo de consiguración.
+        $configModelMeta = $this->getConfigurationsMeta();
+        $query = $this->getPluralInstance()
+            ->getDatabaseConnection()
+            ->table($configModelMeta['db_table'])
+        ;
+        // Asignar la llave primaria del modelo de configuración y determinar
+        // si están los datos necesarios para ser consultado.
+        $canBeQueried = true;
+        foreach ($configModelMeta['primary_key'] as $configModelField => $modelField) {
+            $modelValue = $this->getAttribute($modelField);
+            if ($modelValue === null) {
+                $canBeQueried = false;
+                break;
+            }
+            $query->where($configModelField, '=', $modelValue);
+        }
+        if (!$canBeQueried) {
+            return [];
+        }
+        // Realizar consulta para obtener las configuraciones dle modelo desde
+        // la base de datos.
+        $configCols = array_values($configModelMeta['fields']);
+        $results = $query->get($configCols);
+        foreach ($results as $row) {
+            // Obtener valores desde la base de datos.
+            $category = $row->{$configModelMeta['fields']['category']};
+            $key = $row->{$configModelMeta['fields']['key']};
+            $value = $row->{$configModelMeta['fields']['value']};
+            $is_json = $row->{$configModelMeta['fields']['is_json']};
+            // Desencriptar y decodificar JSON si es necesario.
+            $attribute = 'config_' . $category . '_' . $key;
+            if ($this->hasEncryption($attribute)) {
+                $value = decrypt($value);
+            }
+            if ($is_json) {
+                $value = json_decode($value);
+            }
+            // Asignar valor a la configuración.
+            $configurations[$category][$key] = $value;
+        }
+        // Entregar las configuraciones obtenidas desde la base de datos.
+        return $configurations;
+    }
+
+    protected function saveConfigurations(): bool
+    {
+        /*if ($this->config) {
+            $app_pkey = config('app.key');
+            foreach ($this->config as $configuracion => $datos) {
+                foreach ($datos as $variable => $valor) {
+                    $Config = new Model_UsuarioConfig(
+                        $this->id,
+                        $configuracion,
+                        $variable
+                    );
+                    if (!is_array($valor) && !is_object($valor)) {
+                        $Config->json = 0;
+                    } else {
+                        $valor = json_encode($valor);
+                        $Config->json = 1;
+                    }
+                    $class = get_called_class();
+                    if (
+                        in_array($configuracion . '_' . $variable, $class::$config_encrypt)
+                        && $valor !== null
+                    ) {
+                        if (!$app_pkey) {
+                            throw new \Exception(
+                                'No está definida la configuración app.pkey para encriptar configuración del usuario.'
+                            );
+                        }
+                        $valor = encrypt($valor);
+                    }
+                    $Config->valor = $valor;
+                    if ($valor !== null) {
+                        $Config->save();
+                    } else {
+                        $Config->delete();
+                    }
+                }
+            }
+        }*/
+        return true;
+    }
+
+    /**
+     * Indica si la llave de un campo es un campo de configuración o no.
+     *
+     * @param string $key Llave del campo que se desea revisar.
+     * @return boolean `true` si el campo es de configuración.
+     */
+    protected function isConfigurationField(string $key): bool
+    {
+        return strpos($key, 'config_') === 0;
+    }
+
+    /**
+     * Entrega el nombre de la configuración a partir del nombre completo del
+     * atributo del objeto.
+     *
+     * @param string $attribute Atributo del objeto que generará el nombre.
+     * @return string El nombre de la configuración (atributo sin prefijo).
+     */
+    protected function getConfigurationName(string $attribute): string
+    {
+        if (!$this->isConfigurationField($attribute)) {
+            throw new \Exception(__(
+                'El atributo %s no es de configuración',
+                $attribute
+            ));
+        }
+        return substr($attribute, 7);
+    }
+
+    /**
+     * Entrega la llave del atributo de configuración en el repositorio de
+     * configuraciones.
+     *
+     * Se permiten 2 formatos:
+     *
+     *   - Nuevo: usa como separador de `category` y `key` dos guiones bajos
+     *     "__". Esto permite que el nombre de la categoría tenga guiones
+     *     bajos.
+     *
+     *   - Antiguo: usa como separador de `category` y `key` solo un guión bajo
+     *     "_". Esto significa que el nombre de la categoría no puede tener
+     *     guiones bajos.
+     *
+     * Ambos formatos, para un caso con `category` sin guiones bajos son 100%
+     * compatibles. O sea, tanto `config_page_layout` como
+     * `config_page__layout` hacen referencia a la misma configuración. Por lo
+     * que se recomienda migrar las configuraciones al formato nuevo con "__" y
+     * se debe considerar el formato con "_" obsoleto.
+     *
+     * @param string $attribute Atributo del objeto que generará la llave.
+     * @return string Llave de la configuración en el repositorio.
+     */
+    protected function getConfigurationKey(string $attribute): string
+    {
+        $name = $this->getConfigurationName($attribute);
+        if (strpos($name, '__') === false) {
+            $count = 1;
+            return str_replace('_', '.', $name, $count);
+        }
+        return str_replace('__', '.', $name);
+    }
+
+    /**
+     * Entrega el label de un campo de configuración.
+     *
+     * @param string $attribute Atributo del objeto que generará el label.
+     * @return string Label del atributo (desde configuración o generado).
+     */
+    protected function getConfigurationLabel(string $attribute): string
+    {
+        $name = $this->getConfigurationName($attribute);
+        $label = $this->meta['configurations.fields.' . $name . '.label'];
+        if (strpos($label, ':')) {
+            list($module, $label) = explode(':', $label);
+        }
+        if ($label === null) {
+            $label = ucfirst(Str::camel($name));
+        }
+        return $label;
+    }
+
+    /**
+     * Obtiene el valor de una configuración.
+     *
+     * Prefijos soportados:
+     *
+     *   - `config_`.
+     *
+     * @param string $attribute Atributo del objeto que se desea obtener.
+     * @return mixed|null El valor de la configuración o null si no existe.
+     */
+    protected function getConfiguration(string $attribute)
+    {
+        // Obtener con accessor (no se realiza cast automático).
+        $label = $this->getConfigurationLabel($attribute);
+        $accessor = 'get' . $label . 'Configuration';
+        if ($label && method_exists($this, $accessor)) {
+            return $this->$accessor();
+        }
+        // Determinar llave y obtener el valor de la configuración desde el
+        // repositorio, si existe.
+        $key = $this->getConfigurationKey($attribute);
+        $value = $this->config[$key];
+        // Desencriptar si corresponde.
+        if ($this->hasEncryption($attribute)) {
+            $value = decrypt($value);
+        }
+        // Realizar casteo si corresponde.
+        if ($this->hasCast($attribute)) {
+            $value = $this->castForGet($attribute, $value);
+        }
+        // Buscar valor por defecto si no existe valor encontrado.
+        if ($value === null) {
+            $name = $this->getConfigurationName($attribute);
+            $value = $this->meta['configurations.fields.' . $name . '.default'] ?? null;
+        }
+        // Entregar valor de la configuración.
+        return $value;
+    }
+
+    /**
+     * Asigna el valor de una configuración.
+     *
+     * Prefijos soportados:
+     *
+     *   - `config_`.
+     *
+     * @param string $attribute Atributo del objeto que se desea obtener.
+     * @param mixed $value El valor de la configuración.
+     * @return self La misma instancia del objeto para encadenamiento.
+     */
+    protected function setConfiguration(string $attribute, $value): self
+    {
+        // Sanitizar el valor del atributo si es necesario.
+        if ($this->hasSanitization($attribute)) {
+            $value = $this->sanitizeForSet($attribute, $value);
+        }
+        // Asignar con mutador (no se realiza cast automático).
+        $label = $this->getConfigurationLabel($attribute);
+        $mutator = 'set' . $label . 'Configuration';
+        if ($label && method_exists($this, $mutator)) {
+            $this->$mutator($value);
+        }
+        // Asignar directamente haciendo cast si es necesario.
+        else {
+            if ($this->hasCast($attribute)) {
+                $value = $this->castForSet($attribute, $value);
+            } else {
+                $value = $this->castConfigurationForSet($value);
+            }
+            // Encriptar si corresponde.
+            if ($this->hasEncryption($attribute)) {
+                $value = encrypt($value);
+            }
+            // Determinar llave y asignar el valor en la configuración mediante
+            // el repositorio,
+            $key = $this->getConfigurationKey($attribute);
+            $this->configurations[$key] = $value;
+        }
+        // Entregar la misma instancia para encadenamiento.
+        return $this;
+    }
+
+    /**
+     * Entrega el casteo "automático" para asigar configuraciones.
+     *
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function castConfigurationForSet($value)
+    {
+        $value = ($value === false || $value === 0)
+            ? '0'
+            : (
+                (!is_array($value) && !is_object($value))
+                    ? (string)$value
+                    : (
+                        (is_array($value) && empty($value))
+                            ? null
+                            : $value
+                    )
+            )
+        ;
+        return (!is_string($value) || isset($value[0])) ? $value : null;
     }
 
     /*

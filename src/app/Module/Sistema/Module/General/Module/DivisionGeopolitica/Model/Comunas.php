@@ -23,12 +23,14 @@
 
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
+use \sowerphp\autoload\Model_Plural;
+
 /**
  * Modelo plural de la tabla "comuna" de la base de datos.
  *
  * Permite interactuar con varios registros de la tabla.
  */
-class Model_Comunas extends \sowerphp\autoload\Model_Plural
+class Model_Comunas extends Model_Plural
 {
 
     /**

@@ -23,11 +23,13 @@
 
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
+use \sowerphp\autoload\Model_Plural;
+
 /**
  * Modelo plural de la tabla "region" de la base de datos.
  *
  * Permite interactuar con varios registros de la tabla.
  */
-class Model_Regiones extends \sowerphp\autoload\Model_Plural
+class Model_Regiones extends Model_Plural
 {
 }

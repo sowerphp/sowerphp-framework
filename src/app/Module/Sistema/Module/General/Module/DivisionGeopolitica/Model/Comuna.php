@@ -23,12 +23,14 @@
 
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
+use \sowerphp\autoload\Model;
+
 /**
  * Modelo singular de la tabla "comuna" de la base de datos.
  *
  * Permite interactuar con un registro de la tabla.
  */
-class Model_Comuna extends \sowerphp\autoload\Model
+class Model_Comuna extends Model
 {
 
     /**
@@ -50,16 +52,12 @@ class Model_Comuna extends \sowerphp\autoload\Model
             ],
             'comuna' => [
                 'type' => self::TYPE_STRING,
-                'null' => false,
-                'blank' => false,
                 'max_length' => 40,
                 'verbose_name' => 'Comuna',
                 'help_text' => 'Nombre de la comuna.',
             ],
             'provincia' => [
                 'type' => self::TYPE_STRING,
-                'null' => false,
-                'blank' => false,
                 'foreign_key' => Model_Provincia::class,
                 'to_table' => 'provincia',
                 'to_field' => 'codigo',
@@ -69,7 +67,5 @@ class Model_Comuna extends \sowerphp\autoload\Model
             ],
         ],
     ];
-
-    protected $fillable = ['*'];
 
 }
