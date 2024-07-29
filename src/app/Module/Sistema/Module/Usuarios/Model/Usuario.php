@@ -770,7 +770,7 @@ class Model_Usuario extends Model implements Authenticatable
      */
     public function getRememberToken(): string
     {
-        return $this->ultimo_ingreso_hash;
+        return (string)$this->ultimo_ingreso_hash;
     }
 
     /**
