@@ -79,12 +79,14 @@ class Model_Usuario extends Model implements Authenticatable
                 'max_length' => 255,
                 'verbose_name' => 'Contraseña',
                 'help_text' => 'Contraseña del usuario.',
+                'hidden' => true,
             ],
             'contrasenia_intentos' => [
                 'type' => self::TYPE_SMALL_INTEGER,
                 'default' => 3,
                 'verbose_name' => 'Contraseña Intentos.',
                 'help_text' => 'Intentos de inicio de sesión antes de bloquear cuenta.',
+                'hidden' => true,
             ],
             'hash' => [
                 'type' => self::TYPE_CHAR,
@@ -93,12 +95,14 @@ class Model_Usuario extends Model implements Authenticatable
                 'length' => 32,
                 'verbose_name' => 'Hash',
                 'help_text' => 'Hash único del usuario (32 caracteres).',
+                'hidden' => true,
             ],
             'token' => [
                 'type' => self::TYPE_CHAR,
                 'length' => 64,
                 'verbose_name' => 'Token',
                 'help_text' => 'Token para servicio secundario de autorización.',
+                'hidden' => true,
             ],
             'activo' => [
                 'type' => self::TYPE_BOOLEAN,
@@ -112,6 +116,7 @@ class Model_Usuario extends Model implements Authenticatable
                 'auto' => true,
                 'verbose_name' => 'Último ingreso',
                 'help_text' => 'Fecha y hora del último ingreso del usuario.',
+                'hidden' => true,
             ],
             'ultimo_ingreso_desde' => [
                 'type' => self::TYPE_STRING,
@@ -119,6 +124,7 @@ class Model_Usuario extends Model implements Authenticatable
                 'max_length' => 45,
                 'verbose_name' => 'Última IP',
                 'help_text' => 'Dirección IP del último ingreso del usuario',
+                'hidden' => true,
             ],
             'ultimo_ingreso_hash' => [
                 'type' => self::TYPE_CHAR,
@@ -126,6 +132,7 @@ class Model_Usuario extends Model implements Authenticatable
                 'length' => 32,
                 'verbose_name' => 'Último hash',
                 'help_text' => 'Hash del último ingreso del usuario.',
+                'hidden' => true,
             ],
         ],
         'configurations' => [

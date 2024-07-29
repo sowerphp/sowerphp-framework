@@ -282,6 +282,28 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     }
 
     /**
+     * Muestra la estructura para listar los recursos.
+     *
+     * Permite obtener los datos necesarios para listar los recursos de manera
+     * correcta. Por ejemplo, nombres de columnas o valores para renderizar.
+     */
+    public function _api_list_GET(Request $request)
+    {
+        try {
+            $instance = $this->modelService->instantiate(
+                $this->getModelClass()
+            );
+            $data = $instance->getListData();
+            return response()->json([
+                'meta' => $this->getApiMeta('list'),
+                'data' => $data,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->jsonException($e);
+        }
+    }
+
+    /**
      * Muestra la estructura para crear un recurso.
      *
      * Permite obtener los datos necesarios para la creación. Por ejemplo,

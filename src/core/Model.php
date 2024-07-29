@@ -937,6 +937,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'encrypt' => false,
         // Indica si el campo se debe mostrar en la vista de listado.
         'show_in_list' => true,
+        // El valor del campo que se debe mostrar (renderizar).
+        'display' => null,
+        // Indica que el campo debe ser ocultado al ser serializado.
+        'hidden' => null,
     ];
 
     /**
@@ -1272,7 +1276,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @var array
      */
-    protected $casts;
+    protected $casts = [];
+
+    /**
+     * Los atributos que deben estar ocultos para los arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [];
 
     /**
      * Campos que pueden variar entre las operaciones de creación y edición.
@@ -1474,7 +1485,15 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        // Se definen los campos que se serializarán.
+        $fields = [];
+        foreach ($this->getMeta()['fields'] as $field => $config) {
+            if (!$config['hidden']) {
+                $fields[] = $field;
+            }
+        }
+        // Se entregan los campos a serializar con sus valores.
+        return $this->toArray($fields);
     }
 
     /**
@@ -2188,6 +2207,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 'verbose_name' => $config['verbose_name'] ?? ucfirst(str_replace('_', ' ', $name)),
                 'fillable' => $config['fillable'] ?? $this->isFillable($name),
                 'required' => $config['required'] ?? !($config['null'] || $config['blank']),
+                'hidden' => $config['hidden'] ?? in_array($name, $this->hidden),
             ]);
             // Agregar sanitización según configuración.
             if ($config['max_length']) {
@@ -2337,7 +2357,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function getListData(): array
     {
-        $data = $this->getSaveData('create');
+        $this->generateFieldsValidationRules();
+        $data = $this->meta->all();
         return $data;
     }
 
