@@ -263,9 +263,9 @@ class Service_View implements Interface_Service
             )
             . '/View/' . $view
         ;
-        // Armar listado de archivos que se podrían buscar según la extensión
-        // que se haya incluído en la vista o, si no se incluyó, las
-        // extensiones de los motores de renderizado.
+        // Armar listado de archivos que se podrían buscar según la
+        // extensión que se haya incluído en la vista o, si no se incluyó,
+        // las extensiones de los motores de renderizado.
         $extension = $this->getViewExtension($baseFilepath);
         $viewFiles = [];
         if ($extension) {
@@ -295,24 +295,17 @@ class Service_View implements Interface_Service
      * Existen algunas vistas que podrían no ser encontradas por no se parte de
      * un módulo específico y ser generales para todos los módulos. Estas
      * vistas si no están definidas y no se encuentran previamente se buscarán
-     * acá las por defecto que están escritas con extensión PHP.
+     * acá las vistas "especiales" sin usar un módulo.
      *
      * @param string $view Nombre de la vista que "podría" ser especial.
      * @return string|null Ruta hacia el archivo de la vista solicitado o null.
      */
     protected function resolveViewSpecial(string $view): ?string
     {
-        foreach ($this->specialViews as $specialView) {
-            if ($view == $specialView) {
-                $filename = '/View/' . $specialView . '.php';
-                $filepath = $this->layersService->getFilePath($filename);
-                if ($filepath) {
-                    $this->views[$view] = $filepath;
-                    return $this->views[$view];
-                }
-            }
+        if (!in_array($view, $this->specialViews)) {
+            return null;
         }
-        return null;
+        return $this->resolveViewRelative($view, ''); // '' -> sin módulo.
     }
 
     /**
@@ -556,9 +549,14 @@ class View_Engine_Php extends View_Engine
         $data['_content'] = $content;
         // Renderizar el layout solicitado con el contenido previamente
         // determinado ya incluído en los datos del layout.
-        $layout = $this->viewService->resolveLayout(
-            $data['__view_layout'] . '.php'
+        $extension = substr(
+            $data['__view_layout'],
+            strrpos($data['__view_layout'], '.')
         );
+        if ($extension != '.php') {
+            $data['__view_layout'] .= '.php';
+        }
+        $layout = $this->viewService->resolveLayout($data['__view_layout']);
         return $this->renderPhp($layout, $data);
     }
 
@@ -799,9 +797,14 @@ class View_Engine_Markdown extends View_Engine
         $data['_content'] = $content;
         // Renderizar el layout solicitado con el contenido previamente
         // determinado ya incluído en los datos del layout.
-        $layout = $this->viewService->resolveLayout(
-            $data['__view_layout'] . '.php'
+        $extension = substr(
+            $data['__view_layout'],
+            strrpos($data['__view_layout'], '.')
         );
+        if ($extension != '.php') {
+            $data['__view_layout'] .= '.php';
+        }
+        $layout = $this->viewService->resolveLayout($data['__view_layout']);
         return app('view_engine_php')->renderPhp($layout, $data);
     }
 

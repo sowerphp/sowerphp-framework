@@ -1,0 +1,41 @@
+{% extends "View/Layouts/" ~ __view_layout ~ ".twig" %}
+
+{% block content %}
+
+<script>
+/*$(document).ready(function() {
+    new DataTable('#records', {
+        ajax: 'http://localhost:8000/libredte-enterprise/api/dte/contribuyentes/index?format=datatables',
+        columns: [
+            {% for field in data.fields %}
+                {% if field.show_in_list %}
+                    {
+                        "data": "{{ field.name }}",
+                        "title": "{{ field.verbose_name }}",
+                        "render": function(data, type, row) {
+                            return data;
+                        }
+                    },
+                {% endif %}
+            {% endfor %}
+        ]
+    });
+});*/
+</script>
+
+<table id="{{ data.model.label_lower }}" class="display" style="width:100%">
+    <thead>
+        <tr>
+            {% for field in data.fields %}
+                {% if field.show_in_list %}
+                    <th>{{ field.verbose_name }}</th>
+                {% endif %}
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        <!-- DataTables will populate this -->
+    </tbody>
+</table>
+
+{% endblock %}

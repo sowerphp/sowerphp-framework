@@ -935,6 +935,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'fillable' => null,
         // Indica si el campo se almacena encriptado en la base de datos.
         'encrypt' => false,
+        // Indica si el campo se debe mostrar en la vista de listado.
+        'show_in_list' => true,
     ];
 
     /**
@@ -2325,6 +2327,18 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             return [$id];
         }
         return array_values($this->getPrimaryKeyValues());
+    }
+
+    /**
+     * Entrega los metadatos necesarios para los listados de los recursos en
+     * la base de datos.
+     *
+     * @return array Arreglo con índices: meta, model, fields y relations.
+     */
+    public function getListData(): array
+    {
+        $data = $this->getSaveData('create');
+        return $data;
     }
 
     /**

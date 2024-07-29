@@ -105,7 +105,13 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function index(Request $request)
     {
-        return $this->render('index');
+        $instance = $this->modelService->instantiate(
+            $this->getModelClass()
+        );
+        $data = $instance->getListData();
+        return $this->render('index', [
+            'data' => $data,
+        ]);
     }
 
     /**
@@ -113,7 +119,13 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function create(Request $request)
     {
-        return $this->render('create');
+        $instance = $this->modelService->instantiate(
+            $this->getModelClass()
+        );
+        $data = $instance->getSaveDataCreate();
+        return $this->render('create', [
+            'data' => $data,
+        ]);
     }
 
     /**
@@ -128,6 +140,10 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function show(Request $request, ...$id)
     {
+        $instance = $this->modelService->instantiate(
+            $this->getModelClass(),
+            ...$id
+        );
         return $this->render('show');
     }
 
@@ -136,7 +152,14 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function edit(Request $request, ...$id)
     {
-        return $this->render('edit');
+        $instance = $this->modelService->instantiate(
+            $this->getModelClass(),
+            ...$id
+        );
+        $data = $instance->getSaveDataEdit();
+        return $this->render('edit', [
+            'data' => $data,
+        ]);
     }
 
     /**
