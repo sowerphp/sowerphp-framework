@@ -346,6 +346,7 @@ class Service_View implements Interface_Service
         if ($request) {
             $data['_base'] = $request->getBaseUrlWithoutSlash();
             $data['_request'] = $request->getRequestUriDecoded();
+            $data['_route'] = $request->getRouteConfig();
         }
         // Página que se está viendo.
         if (!empty($data['_request'])) {

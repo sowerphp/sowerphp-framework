@@ -269,7 +269,9 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         // Preparar respuesta formato Datatables.
         else if ($parameters['format'] == 'datatables') {
             $recordsTotal = $pluralInstance->count([]);
-            $recordsFiltered = count($results);
+            $recordsFiltered = $pluralInstance->count([
+                'filters' => $parameters['filters'],
+            ]);
             $body = [
                 'draw' => (int)$request->input('draw'),
                 'recordsTotal' => $recordsTotal,

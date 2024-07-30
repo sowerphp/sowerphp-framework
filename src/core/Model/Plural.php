@@ -106,15 +106,39 @@ abstract class Model_Plural
         // Aplicar filtros.
         $filters = $parameters['filters'] ?? [];
         if (!empty($filters)) {
-            $fields = array_keys($this->meta['fields']);
+            // Determinar columnas por las que se puede buscar.
+            $searchableQuery = $parameters['searchable'] ?? [];
+            $searchableReal = array_keys(array_filter(
+                $this->meta['fields'],
+                function ($config) {
+                    return $config['searchable'];
+                }
+            ));
+            if (!empty($searchableQuery)) {
+                $searchable = array_intersect(
+                    $searchableQuery,
+                    $searchableReal
+                );
+            } else {
+                $searchable = $searchableReal;
+            }
+            // Agregar cada filtro pasado a la búsqueda de campos en el modelo.
             foreach ($filters as $field => $value) {
-                if (!in_array($field, $fields)) {
+                if ($field == 'search') {
+                    $fields = array_intersect_key(
+                        $this->meta['fields'],
+                        array_flip($searchable)
+                    );
+                    $query->whereGlobalSearch($fields, $value);
+                    continue;
+                }
+                if (!in_array($field, $searchable)) {
                     continue;
                 }
                 $query->whereSmartFilter(
                     $field,
                     $value,
-                    $this->meta['fields'][$field]['type']
+                    $this->meta['fields'][$field]
                 );
             }
         }
@@ -137,6 +161,9 @@ abstract class Model_Plural
         if (!empty($parameters['sort'])) {
             foreach ($parameters['sort'] as $sort) {
                 $column = $sort['column'];
+                if (strpos($column, '.') === false) {
+                    $column = $query->from . '.' . $column;
+                }
                 $order = strtolower($sort['order']) == 'desc' ? 'desc' : 'asc';
                 $query->orderBy($column, $order);
             }
@@ -152,8 +179,18 @@ abstract class Model_Plural
         }
         // Seleccionar las columnas deseadas si están especificadas.
         if (!empty($parameters['fields'])) {
+            // Si no se indicó la tabla en la columna es la misma tabla de la
+            // query.
+            foreach ($parameters['fields'] as &$field) {
+                if (strpos($field, '.') === false) {
+                    $field = $query->from . '.' . $field;
+                }
+            }
+            // Agregar columna solicitada.
             $query->select($parameters['fields']);
         }
+        // Debug de la consulta SQL generada.
+        // dd($query->toSql(), $query->getBindings());
         // Entregar query builder.
         return $query;
     }

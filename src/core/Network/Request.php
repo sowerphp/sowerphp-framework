@@ -427,29 +427,56 @@ class Network_Request extends Request
         $minLimit = config('app.ui.pagination.registers_min', 10);
         $maxLimit = config('app.ui.pagination.registers_max', 100);
         $defaultLimit = config('app.ui.pagination.registers', 20);
-        // Determinar parámetros.
+
+        // Inicializar arrays para campos, filtros y orden.
         $fields = [];
         $filters = [];
-        foreach ((array)$this->input('columns') as $column) {
-            $fields[] = $column['data'];
-            if (!empty($column['search']['value'])) {
-                $filters[$column['data']] = $column['search']['value'];
+        $searchable = [];
+
+        // Recorrer columnas para obtener campos y filtros.
+        foreach ((array)$this->input('columns', []) as $column) {
+            if (!empty($column['data'])) {
+                $fields[] = $column['data'];
+                if ($column['searchable']) {
+                    $searchable[] = $column['data'];
+                }
+                if (isset($column['search']['value']) && $column['search']['value'] !== '') {
+                    $filters[$column['data']] = $column['search']['value'];
+                }
             }
         }
+
+        // Obtener filtro global de búsqueda.
+        $globalSearchValue = $this->input('search.value');
+        if (!empty($globalSearchValue)) {
+            $filters['search'] = $globalSearchValue;
+        }
+
+        // Inicializar array para orden.
         $sort = [];
         foreach ($this->input('order', []) as $order) {
-            $sort[] = [
-                'column' => $this->input('columns.' . $order['column'] . '.data'),
-                'order' => $order['dir'] ?? null,
-            ];
+            $columnIndex = $order['column'] ?? null;
+            if ($columnIndex !== null && isset($this->input('columns')[$columnIndex])) {
+                $column = $this->input('columns')[$columnIndex]['data'] ?? null;
+                if (!empty($column)) {
+                    $sort[] = [
+                        'column' => $column,
+                        'order' => $order['dir'] ?? 'asc',
+                    ];
+                }
+            }
         }
+
+        // Definir límites y paginación.
         $limit = max($minLimit, min($maxLimit, $this->input('length', $defaultLimit)));
         $pagination = [
-            'page' => ($this->input('start', 0) / $limit) + 1,
-            'limit' => $limit,
+            'page' => (int)($this->input('start', 0) / $limit) + 1,
+            'limit' => (int)$limit,
         ];
+
         // Entregar parámetros.
-        return compact('fields', 'filters', 'pagination', 'sort');
+        //dd(compact('fields', 'searchable', 'filters', 'pagination', 'sort'));
+        return compact('fields', 'searchable', 'filters', 'pagination', 'sort');
     }
 
     /**

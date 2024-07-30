@@ -80,6 +80,8 @@ class Model_Usuario extends Model implements Authenticatable
                 'verbose_name' => 'Contraseña',
                 'help_text' => 'Contraseña del usuario.',
                 'hidden' => true,
+                'show_in_list' => false,
+                'searchable' => false,
             ],
             'contrasenia_intentos' => [
                 'type' => self::TYPE_SMALL_INTEGER,
@@ -87,6 +89,8 @@ class Model_Usuario extends Model implements Authenticatable
                 'verbose_name' => 'Contraseña Intentos.',
                 'help_text' => 'Intentos de inicio de sesión antes de bloquear cuenta.',
                 'hidden' => true,
+                'show_in_list' => false,
+                'searchable' => false,
             ],
             'hash' => [
                 'type' => self::TYPE_CHAR,
@@ -96,6 +100,8 @@ class Model_Usuario extends Model implements Authenticatable
                 'verbose_name' => 'Hash',
                 'help_text' => 'Hash único del usuario (32 caracteres).',
                 'hidden' => true,
+                'show_in_list' => false,
+                'searchable' => false,
             ],
             'token' => [
                 'type' => self::TYPE_CHAR,
@@ -103,6 +109,8 @@ class Model_Usuario extends Model implements Authenticatable
                 'verbose_name' => 'Token',
                 'help_text' => 'Token para servicio secundario de autorización.',
                 'hidden' => true,
+                'show_in_list' => false,
+                'searchable' => false,
             ],
             'activo' => [
                 'type' => self::TYPE_BOOLEAN,
@@ -116,7 +124,6 @@ class Model_Usuario extends Model implements Authenticatable
                 'auto' => true,
                 'verbose_name' => 'Último ingreso',
                 'help_text' => 'Fecha y hora del último ingreso del usuario.',
-                'hidden' => true,
             ],
             'ultimo_ingreso_desde' => [
                 'type' => self::TYPE_STRING,

@@ -859,6 +859,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'required_db_vendor' => null,
         // Seleccionar el registro tras guardarlo.
         'select_on_save' => false,
+        // Registros por página que se deben mostrar al listar los registros.
+        'list_per_page' => null,
+        // Campos que se deben mostrar en las columnas al listar los registros.
+        'list_display' => null,
+        // Acciones que se pueden realizar desde el listado de registros.
+        'actions' => null,
     ];
 
     /**
@@ -941,6 +947,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'display' => null,
         // Indica que el campo debe ser ocultado al ser serializado.
         'hidden' => null,
+        // Indica si el campo se puede usar para búsquedas.
+        'searchable' => true,
     ];
 
     /**
@@ -1213,6 +1221,45 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     ];
 
     /**
+     * Acciones disponibles para ser mostradas en el menú de cada registro en
+     * la vista que lista los registros del modelo.
+     *
+     * @var array
+     */
+    protected $controllerActions = [
+        [
+            'label' => 'Ver',
+            'action' => 'show',
+            'http_method' => 'GET',
+            'permission' => 'view',
+            'icon' => 'fa-solid fa-eye',
+            'confirmation_message' => null,
+            'divider_before' => false,
+            'divider_after' => false
+        ],
+        [
+            'label' => 'Editar',
+            'action' => 'edit',
+            'http_method' => 'GET',
+            'permission' => 'change',
+            'icon' => 'fa-solid fa-edit',
+            'confirmation_message' => null,
+            'divider_before' => false,
+            'divider_after' => false
+        ],
+        [
+            'label' => 'Eliminar',
+            'action' => 'destroy',
+            'http_method' => 'DELETE',
+            'permission' => 'delete',
+            'icon' => 'fa-solid fa-times',
+            'confirmation_message' => 'Por favor confirmar la eliminación del registro :verbose_name(:id).',
+            'divider_before' => true,
+            'divider_after' => true
+        ],
+    ];
+
+    /**
      * Todos los metadatos del modelo y de los campos (atributos) del modelo.
      *
      * @var array|Repository
@@ -1435,17 +1482,17 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Acciones que se ejecutan antes de serializar la instancia del modelo.
+     * Serializa los datos del objeto.
      *
-     * Este método es llamado cuando se usa serialize() en un objeto.
+     * Este método es llamado cuando el objeto necesita ser serializado.
+     * Devuelve un arreglo asociativo que contiene los valores de los atributos
+     * que deben ser serializados.
      *
-     * Permite realizar tareas de limpieza antes de que el objeto sea
-     * serializado. Además, se puede usar para especificar qué propiedades del
-     * objeto deben ser serializadas.
+     * @return array Un arreglo asociativo con los datos a serializar.
      */
-    public function __sleep(): array
+    public function __serialize(): array
     {
-        $unsetAttributes = [
+        $skipAttributes = [
             'defaultModelConfig',
             'defaultFieldConfig',
             'defaultFieldConfigByType',
@@ -1457,23 +1504,62 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'reflector',
             'pluralInstance'
         ];
-        foreach ($unsetAttributes as $attribute) {
-            unset($this->$attribute);
+        $attributes = get_object_vars($this);
+        $data = [];
+        foreach ($attributes as $attribute => $value) {
+            if (!in_array($attribute, $skipAttributes)) {
+                $data[$attribute] = $value;
+            }
         }
-        return array_keys(get_object_vars($this));
+        return $data;
     }
 
     /**
-     * Acciones que se ejecutan después de deserializar la instancia del modelo.
+     * Deserializa los datos del objeto.
      *
-     * Este método es llamado cuando se usa unserialize() en un objeto.
+     * Este método es llamado cuando el objeto necesita ser deserializado.
+     * Recibe un arreglo asociativo que contiene los valores de los atributos
+     * que deben ser deserializados y los asigna a las propiedades
+     * correspondientes del objeto.
      *
-     * Permite restaurar cualquier recurso que el objeto pueda necesitar
-     * después de ser deserializado.
+     * @param array $data Un arreglo asociativo con los datos deserializados.
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        foreach ($data as $attribute => $value) {
+            $this->$attribute = $value;
+        }
+        $this->bootstrap();
+    }
+
+    /**
+     * Prepara el objeto para la serialización.
+     *
+     * Este método es llamado cuando el objeto necesita ser serializado.
+     * Devuelve un arreglo con los nombres de los atributos que deben ser
+     * serializados.
+     *
+     * @return array Un arreglo con los nombres de los atributos a serializar.
+     */
+    public function __sleep(): array
+    {
+        return array_keys($this->__serialize());
+    }
+
+    /**
+     * Restaura el objeto después de la deserialización.
+     *
+     * Este método es llamado cuando el objeto necesita ser deserializado.
+     * Utiliza los datos proporcionados por el método __serialize() y
+     * __unserialize() para reconstruir el objeto.
+     *
+     * @return void
      */
     public function __wakeup(): void
     {
-        $this->bootstrap();
+        $data = $this->__serialize();
+        $this->__unserialize($data);
     }
 
     /**
@@ -2166,6 +2252,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 str_replace('._', '.', Str::snake($meta['model']['label']))
             );
         }
+        if ($meta['model']['list_per_page'] === null) {
+            $meta['model']['list_per_page'] = config('app.ui.pagination.registers', 20);
+        }
         // Normalizar la configuración de cada campo del modelo.
         $pkDefined = !empty($meta['model']['primary_key']);
         foreach ($meta['fields'] as $name => &$config) {
@@ -2357,8 +2446,29 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function getListData(): array
     {
+        // Generar reglas de valicación y obtener los metadatos generales.
         $this->generateFieldsValidationRules();
         $data = $this->meta->all();
+        // Agregar los campos que se deben listar por defecto si no se han
+        // especificado.
+        if ($data['model']['list_display'] === null) {
+            $data['model']['list_display'] = [];
+            foreach ($data['fields'] as $field => $config) {
+                if (!$config['hidden']) {
+                    $data['model']['list_display'][] = $field;
+                }
+            }
+        }
+        // Agregar las acciones por defecto si no se han especificado.
+        if ($data['model']['actions'] === null) {
+            $data['model']['actions'] = [];
+            foreach ($this->controllerActions as $action) {
+                if (in_array($action['permission'], $data['model']['default_permissions'])) {
+                    $data['model']['actions'][] = $action;
+                }
+            }
+        }
+        // Entregar los datos para los listados de registros.
         return $data;
     }
 
@@ -2869,6 +2979,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // la base de datos.
         $configCols = array_values($configModelMeta['fields']);
         $results = $query->get($configCols);
+        $configurations = [];
         foreach ($results as $row) {
             // Obtener valores desde la base de datos.
             $category = $row->{$configModelMeta['fields']['category']};

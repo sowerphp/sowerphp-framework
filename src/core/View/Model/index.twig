@@ -4,53 +4,336 @@
 
 {% block content %}
 
+<h1>Listado de {{ data.model.verbose_name_plural|lower }}</h1>
+<p>{{ data.model.db_table_comment }}</p>
+
+<div class="table-responsive">
+    <table id="registers" class="table table-bordered table-striped table-hover table-sm display" style="width:100%">
+        <caption>
+            Registros seleccionados: <span id="selected-count">0</span>.
+        </caption>
+        <thead>
+            <tr>
+                <th rowspan="2" class="text-center">
+                    <input type="checkbox" id="select-all" class="form-check-input" />
+                </th>
+                {% for field in data.model.list_display %}
+                    <th class="text-center">{{ data.fields[field].verbose_name }}</th>
+                {% endfor %}
+                <th class="text-center">
+                    <i class="fa-solid fa-cogs fa-fw"></i>
+                </th>
+            </tr>
+            <tr class="filters-row">
+                {% for field in data.model.list_display %}
+                    <th>
+                        {% if data.fields[field].searchable %}
+                            {% if data.fields[field].cast == 'date' or data.fields[field].cast == 'datetime' %}
+                                <input type="date" class="form-control form-control-sm" />
+                            {% else %}
+                                <input type="text" class="form-control form-control-sm" />
+                            {% endif %}
+                        {% endif %}
+                    </th>
+                {% endfor %}
+                <th class="p-1">
+                    <button id="reset-table" class="btn btn-primary btn-sm w-100 h-100">
+                        <i class="fa-solid fa-redo fa-fw"></i>
+                    </button>
+                </th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
 <script>
 $(document).ready(function() {
-    new DataTable('#registers', {
-        ajax: '{{_url}}/api{{_request}}/index?format=datatables',
+
+    // Inicializar DataTables.
+    var table = $('#registers').DataTable({
+        ajax: '{{_url}}/api{{_route.url.controller}}/index?format=datatables',
         serverSide: true,
         processing: true,
         paging: true,
-        pageLength: 20,
+        pageLength: {{ data.model.list_per_page }},
         lengthMenu: [10, 20, 25, 50, 75, 100],
+        orderCellsTop: true,
+        order: [],
         columns: [
-            {% for field in data.fields %}
-
-                    {
-                        "data": "{{ field.name }}",
-                        "title": "{{ field.verbose_name }}",
-                        "visible": {{ field.show_in_list ? 1 : 0 }},
-                        "render": function(data, type, row) {
-                            {% if field.display %}
-                                return __.selector(row, '{{ field.display|raw }}');
-                            {% elseif field.cast == 'datetime' %}
-                                return moment(data).format("D MMMM YYYY, H:mm:ss");
-                            {% elseif field.cast == 'date' %}
-                                return moment(data).format("D MMMM YYYY");
-                            {% else %}
-                                return data;
+            // Columna con los checkboxes para acciones masivas.
+            {
+                data: null,
+                visible: true,
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row) {
+                    var columns = {{ data.model.primary_key|json_encode() | raw }};
+                    var primaryKey = __.keyValues(columns, row);
+                    var pkValue = Object.values(primaryKey).join("/");
+                    var dataAttributes = Object.entries(primaryKey).map(([key, value]) => {
+                        return `data-primary_key-${key}="${value}"`;
+                    }).join(" ");
+                    return `<input type="checkbox" name="row_id[]" class="form-check-input" value="${pkValue}" ${dataAttributes} />`;
+                }
+            },
+            // Columnas con los datos del modelo.
+            {% for field in data.model.list_display %}
+                {
+                    data: "{{ data.fields[field].name }}",
+                    visible: {{ data.fields[field].show_in_list ? 1 : 0 }},
+                    orderable: true,
+                    searchable: {{ data.fields[field].searchable ? 1 : 0 }},
+                    render: function(data, type, row) {
+                        {% if data.fields[field].display %}
+                            return __.selector(row, '{{ data.fields[field].display|raw }}');
+                        {% elseif data.fields[field].cast == 'integer' %}
+                            return __.num(data);
+                        {% elseif data.fields[field].cast | slice(0, 7) == 'decimal' %}
+                            {% set decimals = data.fields[field].cast | slice(8) %}
+                            {% if decimals == '' %}
+                                {% set decimals = 2 %}
                             {% endif %}
-                        }
-                    },
-
+                            return __.num(data, {{ decimals }});
+                        {% elseif data.fields[field].cast == 'boolean' %}
+                            return data
+                                ? '<div class="text-center"><i class="fa-solid fa-check-circle fa-fw text-success"></i></div>'
+                                : '<div class="text-center"><i class="fa-solid fa-times-circle fa-fw text-danger"></i></div>'
+                            ;
+                        {% elseif data.fields[field].cast == 'datetime' %}
+                            return moment(data).format("D MMMM YYYY, H:mm:ss");
+                        {% elseif data.fields[field].cast == 'date' %}
+                            return moment(data).format("D MMMM YYYY");
+                        {% else %}
+                            return data;
+                        {% endif %}
+                    }
+                },
             {% endfor %}
+            // Columna con las acciones manuales (individuales) de cada registro.
+            {
+                data: null,
+                visible: true,
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row) {
+                    // Definir la llave primaria del registro.
+                    var columns = {{ data.model.primary_key|json_encode() | raw }};
+                    var primaryKey = __.keyValues(columns, row);
+                    var pkValue = Object.values(primaryKey).join("/");
+
+                    // Obtener las acciones del modelo.
+                    var actionsData = {{ data.model.actions|json_encode() | raw }};
+                    var actions = '';
+
+                    if (actionsData.length === 1) {
+                        // Si solo hay una acción, no mostrar dropdown.
+                        var singleAction = actionsData[0];
+                        var singleUrl = '{{_url}}{{_route.url.controller}}/' + singleAction.action + '/' + pkValue;
+
+                        if (singleAction.http_method === 'GET') {
+                            actions += `
+                                <a href="${singleUrl}" class="btn btn-primary btn-sm">
+                                    <i class="${singleAction.icon} fa-fw" title="${singleAction.label}"></i>
+                                </a>
+                            `;
+                        } else {
+                            var formAttributes = `action="${singleUrl}" method="POST" style="display:inline;"`;
+                            if (singleAction.confirmation_message) {
+                                var message = singleAction.confirmation_message
+                                    .replace(':verbose_name', '{{ data.model.verbose_name }}')
+                                    .replace(':id', Object.values(primaryKey).join(', '))
+                                ;
+                                formAttributes += ` onsubmit="return __.confirm(this, '${message}');"`;
+                            }
+                            actions += `
+                                <form ${formAttributes}>
+                                    <input type="hidden" name="_method" value="${singleAction.http_method}">
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="${singleAction.icon} fa-fw" title="${singleAction.label}"></i>
+                                    </button>
+                                </form>
+                            `;
+                        }
+                    } else {
+                        // Crear el botón y el menú de acciones manuales.
+                        actions += '<div class="btn-group w-100">';
+
+                        // Botón principal (primera acción fuera del dropdown).
+                        var primaryAction = actionsData[0];
+                        var primaryUrl = '{{_url}}{{_route.url.controller}}/' + primaryAction.action + '/' + pkValue;
+
+                        if (primaryAction.http_method === 'GET') {
+                            actions += `
+                                <a href="${primaryUrl}" class="btn btn-primary btn-sm">
+                                    <i class="${primaryAction.icon} fa-fw" title="${primaryAction.label}"></i>
+                                </a>
+                            `;
+                        } else {
+                            var primaryFormAttributes = `action="${primaryUrl}" method="POST" style="display:inline;"`;
+                            if (primaryAction.confirmation_message) {
+                                var message = primaryAction.confirmation_message
+                                    .replace(':verbose_name', '{{ data.model.verbose_name }}')
+                                    .replace(':id', Object.values(primaryKey).join(', '))
+                                ;
+                                primaryFormAttributes += ` onsubmit="return __.confirm(this, '${message}');"`;
+                            }
+                            actions += `
+                                <form ${primaryFormAttributes}>
+                                    <input type="hidden" name="_method" value="${primaryAction.http_method}">
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="${primaryAction.icon} fa-fw" title="${primaryAction.label}"></i>
+                                    </button>
+                                </form>
+                            `;
+                        }
+
+                        // Botón dropdown.
+                        actions += `
+                            <button type="button" class="btn btn-primary btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu">
+                        `;
+
+                        // Variable para evitar dividers duplicados.
+                        var previousDivider = false;
+
+                        // Otras acciones dentro del dropdown.
+                        actionsData.slice(1).forEach(function(action, index, array) {
+                            var actionUrl = '{{_url}}{{_route.url.controller}}/' + action.action + '/' + pkValue;
+
+                            // Manejo de dividers.
+                            if (action.divider_before && !previousDivider) {
+                                actions += '<li><hr class="dropdown-divider"></li>';
+                                previousDivider = true;
+                            }
+
+                            // Agregar la acción.
+                            actions += '<li>';
+
+                            if (action.http_method === 'GET') {
+                                var confirmationAttributes = '';
+                                if (action.confirmation_message) {
+                                    var message = action.confirmation_message
+                                        .replace(':verbose_name', '{{ data.model.verbose_name }}')
+                                        .replace(':id', Object.values(primaryKey).join(', '))
+                                    ;
+                                    confirmationAttributes = ` onclick="return __.confirm(this, '${message}');"`;
+                                }
+                                actions += `
+                                    <a class="dropdown-item" href="${actionUrl}"${confirmationAttributes}>
+                                        <i class="${action.icon} fa-fw"></i> ${action.label}
+                                    </a>
+                                `;
+                            } else {
+                                var formAttributes = `action="${actionUrl}" method="POST" style="display:inline;"`;
+                                if (action.confirmation_message) {
+                                    var message = action.confirmation_message
+                                        .replace(':verbose_name', '{{ data.model.verbose_name }}')
+                                        .replace(':id', Object.values(primaryKey).join(', '))
+                                    ;
+                                    formAttributes += ` onsubmit="return __.confirm(this, '${message}');"`;
+                                }
+                                actions += `
+                                    <form ${formAttributes}>
+                                        <input type="hidden" name="_method" value="${action.http_method}">
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="${action.icon} fa-fw"></i> ${action.label}
+                                        </button>
+                                    </form>
+                                `;
+                            }
+
+                            actions += '</li>';
+
+                            // Manejo de dividers.
+                            if (action.divider_after && index < array.length - 1) {
+                                actions += '<li><hr class="dropdown-divider"></li>';
+                                previousDivider = true;
+                            } else {
+                                previousDivider = false;
+                            }
+                        });
+
+                        actions += '</ul>';
+                        actions += '</div>';
+                    }
+
+                    // Entregar las acciones.
+                    return actions;
+                }
+            }
         ],
         language: {
             url: '//cdn.datatables.net/plug-ins/2.1.2/i18n/es-MX.json',
         }
     });
-});
-</script>
 
-<table id="registers" class="display" style="width:100%">
-    <thead>
-        <tr>
-            {% for field in data.fields %}
-                <th>{{ field.verbose_name }}</th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+    // Añadir eventos de búsqueda por columna.
+    $('#registers thead .filters-row th').each(function(i) {
+        $('input', this).on('keyup change', function() {
+            var columnIndex = i + 1; // Se ajusta índice por checkbox inicial.
+            if (table.column(columnIndex).search() !== this.value) {
+                table.column(columnIndex).search(this.value).draw();
+            }
+        });
+    });
+
+    // Evento para seleccionar/deseleccionar todos los registros visibles.
+    $('#select-all').on('click', function() {
+        var rows = table.rows({ 'search': 'applied' }).nodes();
+        $('input[name="row_id[]"]', rows).prop('checked', this.checked);
+        updateSelectedCount();
+    });
+
+    // Evento para actualizar el checkbox general al cambiar el estado de
+    // cualquier checkbox de fila.
+    $('#registers tbody').on('change', 'input[name="row_id[]"]', function() {
+        if (!this.checked) {
+            var el = $('#select-all').get(0);
+            if (el && el.checked && ('indeterminate' in el)) {
+                el.indeterminate = true;
+            }
+        }
+        updateSelectedCount();
+    });
+
+    // Evento para reiniciar la tabla.
+    $('#reset-table').on('click', function() {
+        table.search('').columns().search('').draw();
+        table.order([]).draw();
+        table.page.len({{ data.model.list_per_page }}).draw();
+        $('#registers thead .filters-row input').val('');
+    });
+
+});
+
+// Función para actualizar el contador de elementos seleccionados.
+function updateSelectedCount() {
+    var count = $('input[name="row_id[]"]:checked').length;
+    $('#selected-count').text(__.num(count));
+}
+
+/**
+ * Genera un objeto con los valores de las claves especificadas de un objeto
+ * fuente.
+ *
+ * @param {Array} keys - Lista de claves cuyos valores se desean extraer del
+ * objeto fuente.
+ * @param {Object} source - Objeto fuente del cual se extraerán los valores.
+ * @returns {Object} - Objeto con los valores de las claves especificadas,
+ * donde cada clave es el nombre de la clave original y el valor es el valor
+ * correspondiente en el objeto fuente.
+ */
+__.keyValues = function (keys, source) {
+    var values = {};
+    keys.forEach(function(key) {
+        values[key] = source[key];
+    });
+    return values;
+}
+
+</script>
 
 {% endblock %}
