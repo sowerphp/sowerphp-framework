@@ -41,6 +41,7 @@ class Model_Comuna extends Model
     protected $meta = [
         'model' => [
             'ordering' => ['comuna'],
+            'default_permissions' => ['list', 'view'],
         ],
         'fields' => [
             'codigo' => [
@@ -64,6 +65,8 @@ class Model_Comuna extends Model
                 'length' => 3,
                 'verbose_name' => 'Provincia',
                 'help_text' => 'Provincia a la que pertenece la comuna.',
+                'display' => '(provincia.provincia)',
+                'searchable' => 'codigo:string|provincia:string',
             ],
         ],
     ];

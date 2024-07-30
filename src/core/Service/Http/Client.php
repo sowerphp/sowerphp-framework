@@ -24,7 +24,6 @@
 namespace sowerphp\core;
 
 use Illuminate\Http\Client\Factory;
-use Illuminate\Container\Container;
 use Illuminate\Http\Client\Response;
 
 /**
@@ -43,25 +42,6 @@ class Service_Http_Client implements Interface_Service
     protected $httpFactory;
 
     /**
-     * Constructor de la clase.
-     *
-     * @param Service_Config $configService Servicio de configuración.
-     */
-    public function __construct(Service_Config $configService)
-    {
-        // Crear un contenedor de Illuminate
-        $container = new Container();
-
-        // Configurar el contenedor con la configuración de cliente HTTP
-        $container['config'] = [
-            'http' => $configService->get('http'),
-        ];
-
-        // Crear una instancia de Factory
-        $this->httpFactory = new Factory($container);
-    }
-
-    /**
      * Registra el servicio de cliente HTTP.
      *
      * @return void
@@ -77,6 +57,8 @@ class Service_Http_Client implements Interface_Service
      */
     public function boot(): void
     {
+        // Crear una instancia de Factory.
+        $this->httpFactory = new Factory();
     }
 
     /**
@@ -91,67 +73,59 @@ class Service_Http_Client implements Interface_Service
     /**
      * Envía una solicitud GET.
      *
-     * @param string $url
-     * @param array $options
-     * @return Response
+     * @param string $url URL a la cual se enviará la solicitud.
+     * @param array $queryParams Parámetros de consulta para la solicitud.
+     * @param array $headers Cabeceras para la solicitud.
+     * @return Response Respuesta de la solicitud.
      */
-    public function get(string $url, array $options = []): Response
+    public function get(string $url, array $queryParams = [], array $headers = []): Response
     {
-        return $this->httpFactory->get($url, $options);
+        return $this->httpFactory->withHeaders($headers)->get($url, $queryParams);
     }
 
     /**
      * Envía una solicitud POST.
      *
-     * @param string $url
-     * @param array $data
-     * @return Response
+     * @param string $url URL a la cual se enviará la solicitud.
+     * @param array $data Datos que se enviarán en el cuerpo de la solicitud.
+     * @param array $headers Cabeceras para la solicitud.
+     * @return Response Respuesta de la solicitud.
      */
-    public function post(string $url, array $data = []): Response
+    public function post(string $url, array $data = [], array $headers = []): Response
     {
-        return $this->httpFactory->post($url, $data);
+        return $this->httpFactory->withHeaders($headers)->post($url, $data);
     }
 
     /**
      * Envía una solicitud PUT.
      *
-     * @param string $url
-     * @param array $data
-     * @return Response
+     * @param string $url URL a la cual se enviará la solicitud.
+     * @param array $data Datos que se enviarán en el cuerpo de la solicitud.
+     * @param array $headers Cabeceras para la solicitud.
+     * @return Response Respuesta de la solicitud.
      */
-    public function put(string $url, array $data = []): Response
+    public function put(string $url, array $data = [], array $headers = []): Response
     {
-        return $this->httpFactory->put($url, $data);
+        return $this->httpFactory->withHeaders($headers)->put($url, $data);
     }
 
     /**
      * Envía una solicitud DELETE.
      *
-     * @param string $url
-     * @param array $options
-     * @return Response
+     * @param string $url URL a la cual se enviará la solicitud.
+     * @param array $data Datos que se enviarán en el cuerpo de la solicitud (si es necesario).
+     * @param array $headers Cabeceras para la solicitud.
+     * @return Response Respuesta de la solicitud.
      */
-    public function delete(string $url, array $options = []): Response
+    public function delete(string $url, array $data = [], array $headers = []): Response
     {
-        return $this->httpFactory->delete($url, $options);
-    }
-
-    /**
-     * Método personalizado exampleMethod.
-     *
-     * @param string $url
-     * @return Response
-     */
-    public function exampleMethod(string $url): Response
-    {
-        // Ejemplo de uso directo del cliente de Guzzle a través de Laravel
-        return $this->httpFactory->get($url);
+        return $this->httpFactory->withHeaders($headers)->delete($url, $data);
     }
 
     /**
      * Acceso directo al cliente de Guzzle.
      *
-     * @return \GuzzleHttp\Client
+     * @return \GuzzleHttp\Client Cliente de Guzzle.
      */
     public function guzzleClient(): \GuzzleHttp\Client
     {

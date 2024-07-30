@@ -7,6 +7,14 @@
 <h1>Listado de {{ data.model.verbose_name_plural|lower }}</h1>
 <p>{{ data.model.db_table_comment }}</p>
 
+{% if 'add' in data.model.default_permissions %}
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ _url }}{{ _route.url.controller }}/create" class="btn btn-success btn-sm">
+            <i class="fa-solid fa-plus"></i> Crear {{ data.model.verbose_name|lower }}
+        </a>
+    </div>
+{% endif %}
+
 <div class="table-responsive">
     <table id="registers" class="table table-bordered table-striped table-hover table-sm display" style="width:100%">
         <caption>
@@ -14,7 +22,7 @@
         </caption>
         <thead>
             <tr>
-                <th rowspan="2" class="text-center">
+                <th rowspan="2" class="text-center" style="width:1px">
                     <input type="checkbox" id="select-all" class="form-check-input" />
                 </th>
                 {% for field in data.model.list_display %}
@@ -36,7 +44,7 @@
                         {% endif %}
                     </th>
                 {% endfor %}
-                <th class="p-1">
+                <th class="p-1" style="width:1px">
                     <button id="reset-table" class="btn btn-primary btn-sm w-100 h-100">
                         <i class="fa-solid fa-redo fa-fw"></i>
                     </button>
@@ -74,7 +82,7 @@ $(document).ready(function() {
                     var dataAttributes = Object.entries(primaryKey).map(([key, value]) => {
                         return `data-primary_key-${key}="${value}"`;
                     }).join(" ");
-                    return `<input type="checkbox" name="row_id[]" class="form-check-input" value="${pkValue}" ${dataAttributes} />`;
+                    return `<div class="text-center"><input type="checkbox" name="row_id[]" class="form-check-input" value="${pkValue}" ${dataAttributes} /></div>`;
                 }
             },
             // Columnas con los datos del modelo.
@@ -126,6 +134,15 @@ $(document).ready(function() {
                     var actionsData = {{ data.model.actions|json_encode() | raw }};
                     var actions = '';
 
+                    if (actionsData.length === 0) {
+                        actions += `
+                            <a class="btn btn-primary btn-sm disabled">
+                                <i class="fa-solid fa-minus fa-fw"></i>
+                            </a>
+                        `;
+                        return actions;
+                    }
+
                     if (actionsData.length === 1) {
                         // Si solo hay una acción, no mostrar dropdown.
                         var singleAction = actionsData[0];
@@ -141,7 +158,7 @@ $(document).ready(function() {
                             var formAttributes = `action="${singleUrl}" method="POST" style="display:inline;"`;
                             if (singleAction.confirmation_message) {
                                 var message = singleAction.confirmation_message
-                                    .replace(':verbose_name', '{{ data.model.verbose_name }}')
+                                    .replace(':label', '{{ data.model.label }}')
                                     .replace(':id', Object.values(primaryKey).join(', '))
                                 ;
                                 formAttributes += ` onsubmit="return __.confirm(this, '${message}');"`;
@@ -173,7 +190,7 @@ $(document).ready(function() {
                             var primaryFormAttributes = `action="${primaryUrl}" method="POST" style="display:inline;"`;
                             if (primaryAction.confirmation_message) {
                                 var message = primaryAction.confirmation_message
-                                    .replace(':verbose_name', '{{ data.model.verbose_name }}')
+                                    .replace(':label', '{{ data.model.label }}')
                                     .replace(':id', Object.values(primaryKey).join(', '))
                                 ;
                                 primaryFormAttributes += ` onsubmit="return __.confirm(this, '${message}');"`;
@@ -216,7 +233,7 @@ $(document).ready(function() {
                                 var confirmationAttributes = '';
                                 if (action.confirmation_message) {
                                     var message = action.confirmation_message
-                                        .replace(':verbose_name', '{{ data.model.verbose_name }}')
+                                        .replace(':label', '{{ data.model.label }}')
                                         .replace(':id', Object.values(primaryKey).join(', '))
                                     ;
                                     confirmationAttributes = ` onclick="return __.confirm(this, '${message}');"`;
@@ -230,7 +247,7 @@ $(document).ready(function() {
                                 var formAttributes = `action="${actionUrl}" method="POST" style="display:inline;"`;
                                 if (action.confirmation_message) {
                                     var message = action.confirmation_message
-                                        .replace(':verbose_name', '{{ data.model.verbose_name }}')
+                                        .replace(':label', '{{ data.model.label }}')
                                         .replace(':id', Object.values(primaryKey).join(', '))
                                     ;
                                     formAttributes += ` onsubmit="return __.confirm(this, '${message}');"`;

@@ -41,6 +41,7 @@ class Model_Provincia extends Model
     protected $meta = [
         'model' => [
             'ordering' => ['provincia'],
+            'default_permissions' => ['list', 'view'],
         ],
         'fields' => [
             'codigo' => [
@@ -64,6 +65,8 @@ class Model_Provincia extends Model
                 'length' => 2,
                 'verbose_name' => 'Región',
                 'help_text' => 'Región a la que pertenece la provincia.',
+                'display' => '(region.region)',
+                'searchable' => 'codigo:string|region:string',
             ],
         ],
     ];

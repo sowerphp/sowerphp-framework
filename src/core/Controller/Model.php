@@ -108,8 +108,35 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         $instance = $this->modelService->instantiate(
             $this->getModelClass()
         );
+        if (!in_array('list', $instance->getMeta()['model.default_permissions'])) {
+            return redirect()->withError(__(
+                'No es posible listar recursos de tipo %s.',
+                $instance->getMeta()['model.label']
+            ))->back();
+        }
         $data = $instance->getListData();
         return $this->render('index', [
+            'data' => $data,
+        ]);
+    }
+
+    /**
+     * Muestra el recurso especificado.
+     */
+    public function show(Request $request, ...$id)
+    {
+        $instance = $this->modelService->instantiate(
+            $this->getModelClass(),
+            ...$id
+        );
+        if (!in_array('view', $instance->getMeta()['model.default_permissions'])) {
+            return redirect()->withError(__(
+                'No es posible mostrar recursos de tipo %s.',
+                $instance->getMeta()['model.label']
+            ))->back();
+        }
+        $data = $instance->getShowData();
+        return $this->render('show', [
             'data' => $data,
         ]);
     }
@@ -122,6 +149,12 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         $instance = $this->modelService->instantiate(
             $this->getModelClass()
         );
+        if (!in_array('add', $instance->getMeta()['model.default_permissions'])) {
+            return redirect()->withError(__(
+                'No es posible crear recursos de tipo %s.',
+                $instance->getMeta()['model.label']
+            ))->back();
+        }
         $data = $instance->getSaveDataCreate();
         return $this->render('create', [
             'data' => $data,
@@ -136,18 +169,6 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     }
 
     /**
-     * Muestra el recurso especificado.
-     */
-    public function show(Request $request, ...$id)
-    {
-        $instance = $this->modelService->instantiate(
-            $this->getModelClass(),
-            ...$id
-        );
-        return $this->render('show');
-    }
-
-    /**
      * Muestra el formulario para editar el recurso especificado.
      */
     public function edit(Request $request, ...$id)
@@ -156,6 +177,12 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $this->getModelClass(),
             ...$id
         );
+        if (!in_array('change', $instance->getMeta()['model.default_permissions'])) {
+            return redirect()->withError(__(
+                'No es posible editar recursos de tipo %s.',
+                $instance->getMeta()['model.label']
+            ))->back();
+        }
         $data = $instance->getSaveDataEdit();
         return $this->render('edit', [
             'data' => $data,
@@ -174,6 +201,22 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function destroy(Request $request, ...$id)
     {
+        // Obtener URL de la API que se deberá consumir.
+        $routeConfig = $request->getRouteConfig();
+        $url = sprintf(
+            '%s/%s/%s',
+            $routeConfig['url']['controller'],
+            $routeConfig['action'],
+            implode('/', $id)
+        );
+        // Consumir recurso de la API.
+        $response = libredte()->delete($url);
+        $json = $response->json();
+        if (!$response->successful()) {
+            return redirect()->withError($json['message'])->back($json['status_code']);
+        } else {
+            return redirect()->withSuccess($json['message'])->back($response->status());
+        }
     }
 
     /**
@@ -205,6 +248,12 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     public function _api_index_GET(Request $request)
     {
         $pluralInstance = $this->getModelPluralInstance();
+        if (!in_array('list', $pluralInstance->getMeta()['model.default_permissions'])) {
+            throw new \Exception(__(
+                'No es posible listar recursos de tipo %s.',
+                $pluralInstance->getMeta()['model.label']
+            ));
+        }
         // Obtener registros.
         $parameters = $request->getModelParametersFromUrl();
         $results = $pluralInstance->filter(
@@ -295,10 +344,50 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $instance = $this->modelService->instantiate(
                 $this->getModelClass()
             );
+            if (!in_array('list', $instance->getMeta()['model.default_permissions'])) {
+                throw new \Exception(__(
+                    'No es posible listar recursos de tipo %s.',
+                    $instance->getMeta()['model.label']
+                ));
+            }
             $data = $instance->getListData();
             return response()->json([
                 'meta' => $this->getApiMeta('list'),
                 'data' => $data,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->jsonException($e);
+        }
+    }
+
+    /**
+     * Retorna el recurso especificado.
+     */
+    public function _api_show_GET(Request $request, ...$id)
+    {
+        $stdClass = (bool)$request->input('stdClass', false);
+        try {
+            $instance = $this->modelService->instantiate(
+                $this->getModelClass(),
+                ...$id
+            );
+            if (!in_array('view', $instance->getMeta()['model.default_permissions'])) {
+                throw new \Exception(__(
+                    'No es posible mostrar recursos de tipo %s.',
+                    $instance->getMeta()['model.label']
+                ));
+            }
+            if (!$instance->exists()) {
+                throw new \Exception(__(
+                    'Recurso solicitado %s(%s) no existe, no se puede mostrar.',
+                    $instance->getMeta()['model.label'],
+                    implode(', ', $id)
+                ));
+            }
+            $result = $stdClass ? $instance->toStdClass() : $instance->toArray();
+            return response()->json([
+                'meta' => $this->getApiMeta('show'),
+                'data' => $result
             ], 200);
         } catch (\Exception $e) {
             return response()->jsonException($e);
@@ -317,6 +406,12 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $instance = $this->modelService->instantiate(
                 $this->getModelClass()
             );
+            if (!in_array('add', $instance->getMeta()['model.default_permissions'])) {
+                throw new \Exception(__(
+                    'No es posible crear recursos de tipo %s.',
+                    $instance->getMeta()['model.label']
+                ));
+            }
             $data = $instance->getSaveDataCreate();
             return response()->json([
                 'meta' => $this->getApiMeta('create'),
@@ -336,6 +431,12 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $instance = $this->modelService->instantiate(
                 $this->getModelClass()
             );
+            if (!in_array('add', $instance->getMeta()['model.default_permissions'])) {
+                throw new \Exception(__(
+                    'No es posible almacenar recursos de tipo %s.',
+                    $instance->getMeta()['model.label']
+                ));
+            }
             $rules = $instance->getValidationRulesCreate('data.');
             $validatedData = $request->validate($rules);
             $instance->fill($validatedData['data']);
@@ -355,31 +456,10 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
-                    'status_code' => 422,
-                    'message' => __('Los datos proporcionados no son válidos.'),
-                    'errors' => $e->errors(),
-                ], 422);
-        } catch (\Exception $e) {
-            return response()->jsonException($e);
-        }
-    }
-
-    /**
-     * Retorna el recurso especificado.
-     */
-    public function _api_show_GET(Request $request, ...$id)
-    {
-        $stdClass = (bool)$request->input('stdClass', false);
-        try {
-            $instance = $this->modelService->instantiate(
-                $this->getModelClass(),
-                ...$id
-            );
-            $result = $stdClass ? $instance->toStdClass() : $instance->toArray();
-            return response()->json([
-                    'meta' => $this->getApiMeta('show'),
-                    'data' => $result
-                ], 200);
+                'status_code' => 422,
+                'message' => __('Los datos proporcionados no son válidos.'),
+                'errors' => $e->errors(),
+            ], 422);
         } catch (\Exception $e) {
             return response()->jsonException($e);
         }
@@ -395,11 +475,24 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 $this->getModelClass(),
                 ...$id
             );
+            if (!in_array('change', $instance->getMeta()['model.default_permissions'])) {
+                throw new \Exception(__(
+                    'No es posible editar recursos de tipo %s.',
+                    $instance->getMeta()['model.label']
+                ));
+            }
+            if (!$instance->exists()) {
+                throw new \Exception(__(
+                    'Recurso solicitado %s(%s) no existe, no se puede editar.',
+                    $instance->getMeta()['model.label'],
+                    implode(', ', $id)
+                ));
+            }
             $data = $instance->getSaveDataEdit();
             return response()->json([
-                    'meta' => $this->getApiMeta('edit'),
-                    'data' => $data,
-                ], 200);
+                'meta' => $this->getApiMeta('edit'),
+                'data' => $data,
+            ], 200);
         } catch (\Exception $e) {
             return response()->jsonException($e);
         }
@@ -415,6 +508,19 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 $this->getModelClass(),
                 ...$id
             );
+            if (!in_array('change', $instance->getMeta()['model.default_permissions'])) {
+                throw new \Exception(__(
+                    'No es posible actualizar recursos de tipo %s.',
+                    $instance->getMeta()['model.label']
+                ));
+            }
+            if (!$instance->exists()) {
+                throw new \Exception(__(
+                    'Recurso solicitado %s(%s) no existe, no se puede actualizar.',
+                    $instance->getMeta()['model.label'],
+                    implode(', ', $id)
+                ));
+            }
             $rules = $instance->getValidationRulesEdit('data.');
             $validatedData = $request->validate($rules);
             $instance->fill($validatedData['data']);
@@ -453,6 +559,19 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 $this->getModelClass(),
                 ...$id
             );
+            if (!in_array('delete', $instance->getMeta()['model.default_permissions'])) {
+                throw new \Exception(__(
+                    'No es posible eliminar recursos de tipo %s.',
+                    $instance->getMeta()['model.label']
+                ));
+            }
+            if (!$instance->exists()) {
+                throw new \Exception(__(
+                    'Recurso solicitado %s(%s) no existe, no se puede eliminar.',
+                    $instance->getMeta()['model.label'],
+                    implode(', ', $id)
+                ));
+            }
             $status = $instance->delete();
             if ($status) {
                 $message = __(
@@ -475,17 +594,6 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             return response()->jsonException($e);
         }
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | DESDE AQUÍ HACIA ABAJO ESTÁ OBSOLETO Y DEBE SER REFACTORIZADO Y ELIMINAR.
-    |--------------------------------------------------------------------------
-    */
-
-    protected $deleteRecord = true; ///< Indica si se permite o no borrar registros
-    protected $contraseniaNames = ['contrasenia', 'clave', 'password', 'pass']; ///< Posibles nombres de campo tipo contraseña
-    protected $actionsColsWidth = 170; ///< Ancho de la columna de acciónes en acción listar
-    protected $extraActions = []; ///< iconos extra para la columna de acciones
 
     /**
      * Método que busca la vista que se deberá renderizar.
@@ -525,6 +633,17 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             return parent::render('Model/' . $view, $data);
         }
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DESDE AQUÍ HACIA ABAJO ESTÁ OBSOLETO Y DEBE SER REFACTORIZADO Y ELIMINAR.
+    |--------------------------------------------------------------------------
+    */
+
+    protected $deleteRecord = true; ///< Indica si se permite o no borrar registros
+    protected $contraseniaNames = ['contrasenia', 'clave', 'password', 'pass']; ///< Posibles nombres de campo tipo contraseña
+    protected $actionsColsWidth = 170; ///< Ancho de la columna de acciónes en acción listar
+    protected $extraActions = []; ///< iconos extra para la columna de acciones
 
     /**
      * Método que permite forzar las opciones de búsqueda para la acción listar

@@ -41,6 +41,7 @@ class Model_Region extends Model
     protected $meta = [
         'model' => [
             'ordering' => ['orden'],
+            'default_permissions' => ['list', 'view'],
         ],
         'fields' => [
             'codigo' => [

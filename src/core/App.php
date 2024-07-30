@@ -65,7 +65,7 @@ class App
         'model' => Service_Model::class,
         'validator' => Service_Validator::class,
         //'mail' => Service_Mail::class,
-        //'http_client' => Service_Http_Client::class,
+        'http_client' => Service_Http_Client::class,
         //'log' => Service_Log::class,
         //'notification' => Service_Notification::class,
         'view' => Service_View::class,

@@ -850,7 +850,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Campos para usar en choices.
         'choices' => ['id' => null, 'name' => null],
         // Permisos básicos por defecto.
-        'default_permissions' => ['add', 'change', 'delete', 'view'],
+        'default_permissions' => ['list', 'view', 'add', 'change', 'delete'],
         // Permisos adicionales específicos.
         'permissions' => [],
         // Características requeridas de la base de datos.
@@ -1253,7 +1253,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'http_method' => 'DELETE',
             'permission' => 'delete',
             'icon' => 'fa-solid fa-times',
-            'confirmation_message' => 'Por favor confirmar la eliminación del registro :verbose_name(:id).',
+            'confirmation_message' => 'Por favor confirmar la eliminación del registro :label(:id).',
             'divider_before' => true,
             'divider_after' => true
         ],
@@ -2146,7 +2146,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $array = [];
         foreach ($fields as $i => $field) {
             if ($resolveForeignKey) {
-                $value = $this->getField($field);
+                $value = $values[$field]
+                    ?? $values[$i]
+                    ?? $this->getField($field)
+                ;
             } else {
                 $value = $values[$field]
                     ?? $values[$i]
@@ -2442,12 +2445,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Entrega los metadatos necesarios para los listados de los recursos en
      * la base de datos.
      *
-     * @return array Arreglo con índices: meta, model, fields y relations.
+     * @return array Arreglo con índices: model y fields.
      */
     public function getListData(): array
     {
         // Generar reglas de valicación y obtener los metadatos generales.
-        $this->generateFieldsValidationRules();
         $data = $this->meta->all();
         // Agregar los campos que se deben listar por defecto si no se han
         // especificado.
@@ -2468,7 +2470,21 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 }
             }
         }
-        // Entregar los datos para los listados de registros.
+        // Entregar los metadatos para los listados de registros.
+        return $data;
+    }
+
+    /**
+     * Entrega los metadatos necesarios para mostrar un recurso de la base de
+     * datos.
+     *
+     * @return array Arreglo con índices: model y fields.
+     */
+    public function getShowData(): array
+    {
+        // Generar reglas de valicación y obtener los metadatos generales.
+        $data = $this->meta->all();
+        // Entregar los metadatos para mostrar un registro.
         return $data;
     }
 
@@ -2476,7 +2492,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Entrega los metadatos necesarios para la creación de un nuevo recurso en
      * la base de datos.
      *
-     * @return array Arreglo con índices: meta, model, fields y relations.
+     * @return array Arreglo con índices: model, fields y relations.
      */
     public function getSaveDataCreate(): array
     {
@@ -2488,7 +2504,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Entrega los metadatos necesarios para la edición de un recurso
      * existente en la base de datos.
      *
-     * @return array Arreglo con índices: meta, model, fields y relations.
+     * @return array Arreglo con índices: model, fields y relations.
      */
     public function getSaveDataEdit(): array
     {

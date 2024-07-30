@@ -73,6 +73,16 @@ abstract class Model_Plural
     }
 
     /**
+     * Entrega repositorio con los metadatos normalizados del modelo.
+     *
+     * @return Repository Repositorio con los metadatos para fácil uso.
+     */
+    public function getMeta(): Repository
+    {
+        return $this->meta;
+    }
+
+    /**
      * Recupera la conexión a la base de datos asociada al modelo.
      *
      * Si la conexión no existe se obtiene desde el servicio de bases de
