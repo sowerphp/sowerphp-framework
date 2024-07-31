@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<h1>Listado de {{ data.model.verbose_name_plural|lower }}</h1>
+<h1 class="page-header">Listado de {{ data.model.verbose_name_plural|lower }}</h1>
 <p>{{ data.model.db_table_comment }}</p>
 
 {% if 'add' in data.model.default_permissions %}

@@ -86,8 +86,8 @@ class Model_Usuario extends Model implements Authenticatable
             'contrasenia_intentos' => [
                 'type' => self::TYPE_SMALL_INTEGER,
                 'default' => 3,
-                'verbose_name' => 'Contraseña Intentos.',
-                'help_text' => 'Intentos de inicio de sesión antes de bloquear cuenta.',
+                'verbose_name' => 'Intentos de contraseña',
+                'help_text' => 'Intentos de inicio de sesión con contraseña incorrecta antes de bloquear cuenta.',
                 'hidden' => true,
                 'show_in_list' => false,
                 'searchable' => false,
@@ -521,10 +521,10 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que entrega el listado de recursos sobre los que el usuario tiene
+     * Método que entrega el listado de registros sobre los que el usuario tiene
      * permisos para acceder.
      *
-     * @return array Listado de recursos a los que el usuario tiene acceso.
+     * @return array Listado de registros a los que el usuario tiene acceso.
      */
     public function auths($forceGet = false): array
     {
@@ -535,7 +535,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que entrega los recursos a los que tiene acceso el usuario dado
+     * Método que entrega los registros a los que tiene acceso el usuario dado
      * determinados grupos.
      */
     public function getAuths(array $groups = []): array
@@ -563,7 +563,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que asigna manualmente un listado de recursos a los que el
+     * Método que asigna manualmente un listado de registros a los que el
      * usuario tiene acceso.
      */
     public function setAuths(array $auths = []): void

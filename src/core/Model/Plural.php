@@ -219,10 +219,10 @@ abstract class Model_Plural
     }
 
     /**
-     * Realiza una búsqueda y cuenta los recursos del.
+     * Realiza una búsqueda y cuenta los registros del.
      *
      * @param array $parameters Parámetros de búsqueda y obtención de registros.
-     * @return int Cantidad de recursos encontrados.
+     * @return int Cantidad de registros encontrados.
      */
     public function count(array $parameters): int
     {
@@ -260,7 +260,7 @@ abstract class Model_Plural
     }*/
 
     /**
-     * Realiza una búsqueda y obtiene recursos del modelo.
+     * Realiza una búsqueda y obtiene registros del modelo.
      *
      * @param array $parameters Parámetros de búsqueda y obtención de registros.
      * @param bool $stdClass =true se entregará un objeto stdClass.

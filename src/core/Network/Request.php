@@ -381,8 +381,8 @@ class Network_Request extends Request
     }
 
     /**
-     * Obtener parámetros para buscar en recursos (modelos) usando el formato
-     * de parámetros de la URL estándar.
+     * Obtener parámetros para buscar en  registros  (modelos) usando el
+     * formato de parámetros de la URL estándar.
      *
      * @return array
      */
@@ -417,7 +417,7 @@ class Network_Request extends Request
     }
 
     /**
-     * Obtener parámetros para buscar en recursos (modelos) usando el formato
+     * Obtener parámetros para buscar en  registros  (modelos) usando el formato
      * de parámetros de la URL de Datatables.
      *
      * @return array

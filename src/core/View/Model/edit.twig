@@ -4,6 +4,22 @@
 
 {% block content %}
 
-<h1>Editar {{ data.model.verbose_name|lower }}</h1>
+<h1 class="page-header">Editar {{ data.model.verbose_name|lower }}</h1>
+
+{{ form_init(data) }}
+{{ form_start(data.form) }}
+    {% for field in data.fields %}
+        {% if field.editable %}
+            {{ form_row(field) }}
+        {% endif %}
+    {% endfor %}
+    {{ form_submit('Editar el registro') }}
+{{ form_end(data.form) }}
+
+<script>
+function validateModelEditForm() {
+    return true;
+}
+</script>
 
 {% endblock %}

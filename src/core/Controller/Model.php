@@ -27,7 +27,7 @@ use \sowerphp\core\Network_Request as Request;
 use \sowerphp\core\Facade_Session_Message as SessionMessage;
 
 /**
- * Clase que implementa los métodos para interacturar con recursos de modelos
+ * Clase que implementa los métodos para interacturar con registros de modelos
  * de la base de datos.
  */
 abstract class Controller_Model extends \sowerphp\autoload\Controller
@@ -110,7 +110,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         );
         if (!in_array('list', $instance->getMeta()['model.default_permissions'])) {
             return redirect()->withError(__(
-                'No es posible listar recursos de tipo %s.',
+                'No es posible listar registros de tipo %s.',
                 $instance->getMeta()['model.label']
             ))->back();
         }
@@ -131,7 +131,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         );
         if (!in_array('view', $instance->getMeta()['model.default_permissions'])) {
             return redirect()->withError(__(
-                'No es posible mostrar recursos de tipo %s.',
+                'No es posible mostrar registros de tipo %s.',
                 $instance->getMeta()['model.label']
             ))->back();
         }
@@ -146,16 +146,32 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function create(Request $request)
     {
+        // Crear una instancia del modelo.
         $instance = $this->modelService->instantiate(
             $this->getModelClass()
         );
+        // Validar que el modelo permite la creación de registros.
         if (!in_array('add', $instance->getMeta()['model.default_permissions'])) {
             return redirect()->withError(__(
-                'No es posible crear recursos de tipo %s.',
+                'No es posible crear registros de tipo %s.',
                 $instance->getMeta()['model.label']
             ))->back();
         }
+        // Preparar los metadatos para el formulario de creación.
         $data = $instance->getSaveDataCreate();
+        $routeConfig = $request->getRouteConfig();
+        $data['form'] = [
+            'action' => 'create',
+            'url' => url($routeConfig['url']['controller'] . '/store'),
+            'method' => 'POST',
+            'id' => 'modelCreateForm',
+            'class' => 'needs-validation',
+            'enctype' => 'multipart/form-data',
+            'attributes' => [
+                'onsubmit' => 'return validateModelCreateForm(this)',
+            ]
+        ];
+        // Renderizar la vista con el formulario de creación.
         return $this->render('create', [
             'data' => $data,
         ]);
@@ -173,17 +189,33 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function edit(Request $request, ...$id)
     {
+        // Crear una instancia del modelo.
         $instance = $this->modelService->instantiate(
             $this->getModelClass(),
             ...$id
         );
+        // Validar que el modelo permite la edición de registros.
         if (!in_array('change', $instance->getMeta()['model.default_permissions'])) {
             return redirect()->withError(__(
-                'No es posible editar recursos de tipo %s.',
+                'No es posible editar registros de tipo %s.',
                 $instance->getMeta()['model.label']
             ))->back();
         }
+        // Preparar los metadatos para el formulario de edición.
         $data = $instance->getSaveDataEdit();
+        $routeConfig = $request->getRouteConfig();
+        $data['form'] = [
+            'action' => 'edit',
+            'url' => url($routeConfig['url']['controller'] . '/update'),
+            'method' => 'POST',
+            'id' => 'modelEditForm',
+            'class' => 'needs-validation',
+            'enctype' => 'multipart/form-data',
+            'attributes' => [
+                'onsubmit' => 'return validateModelEditForm(this)',
+            ]
+        ];
+        // Renderizar la vista con el formulario de edición.
         return $this->render('edit', [
             'data' => $data,
         ]);
@@ -250,7 +282,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         $pluralInstance = $this->getModelPluralInstance();
         if (!in_array('list', $pluralInstance->getMeta()['model.default_permissions'])) {
             throw new \Exception(__(
-                'No es posible listar recursos de tipo %s.',
+                'No es posible listar registros de tipo %s.',
                 $pluralInstance->getMeta()['model.label']
             ));
         }
@@ -335,7 +367,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     /**
      * Muestra la estructura para listar los recursos.
      *
-     * Permite obtener los datos necesarios para listar los recursos de manera
+     * Permite obtener los datos necesarios para listar los registros de manera
      * correcta. Por ejemplo, nombres de columnas o valores para renderizar.
      */
     public function _api_list_GET(Request $request)
@@ -346,7 +378,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             );
             if (!in_array('list', $instance->getMeta()['model.default_permissions'])) {
                 throw new \Exception(__(
-                    'No es posible listar recursos de tipo %s.',
+                    'No es posible listar registros de tipo %s.',
                     $instance->getMeta()['model.label']
                 ));
             }
@@ -373,7 +405,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             );
             if (!in_array('view', $instance->getMeta()['model.default_permissions'])) {
                 throw new \Exception(__(
-                    'No es posible mostrar recursos de tipo %s.',
+                    'No es posible mostrar registros de tipo %s.',
                     $instance->getMeta()['model.label']
                 ));
             }
@@ -408,7 +440,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             );
             if (!in_array('add', $instance->getMeta()['model.default_permissions'])) {
                 throw new \Exception(__(
-                    'No es posible crear recursos de tipo %s.',
+                    'No es posible crear registros de tipo %s.',
                     $instance->getMeta()['model.label']
                 ));
             }
@@ -433,7 +465,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             );
             if (!in_array('add', $instance->getMeta()['model.default_permissions'])) {
                 throw new \Exception(__(
-                    'No es posible almacenar recursos de tipo %s.',
+                    'No es posible almacenar registros de tipo %s.',
                     $instance->getMeta()['model.label']
                 ));
             }
@@ -477,7 +509,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             );
             if (!in_array('change', $instance->getMeta()['model.default_permissions'])) {
                 throw new \Exception(__(
-                    'No es posible editar recursos de tipo %s.',
+                    'No es posible editar registros de tipo %s.',
                     $instance->getMeta()['model.label']
                 ));
             }
@@ -510,7 +542,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             );
             if (!in_array('change', $instance->getMeta()['model.default_permissions'])) {
                 throw new \Exception(__(
-                    'No es posible actualizar recursos de tipo %s.',
+                    'No es posible actualizar registros de tipo %s.',
                     $instance->getMeta()['model.label']
                 ));
             }
@@ -561,7 +593,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             );
             if (!in_array('delete', $instance->getMeta()['model.default_permissions'])) {
                 throw new \Exception(__(
-                    'No es posible eliminar recursos de tipo %s.',
+                    'No es posible eliminar registros de tipo %s.',
                     $instance->getMeta()['model.label']
                 ));
             }

@@ -921,6 +921,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'max_digits' => null,
         // El número de decimales permitidos.
         'decimal_places' => null,
+        // Intervalos de incremento permitidos para, por ejemplo, números y fechas.
+        'step' => null,
         // Opciones disponibles para el campo, usado en select inputs.
         'choices' => null,
         // Nombre descriptivo del campo, usado en interfaces de usuario.
@@ -939,6 +941,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'required' => null,
         // Reglas de validación del campo, como min:3, max:255, etc.
         'validation' => null,
+        // Expresión regular para validar el campo.
+        'regex' => null,
         // Reglas de sanitización del campo, como strip_tags, trim etc.
         'sanitize' => null,
         // Indica si el campo es editable en formularios.
@@ -957,6 +961,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'hidden' => null,
         // Indica si el campo se puede usar para búsquedas.
         'searchable' => true,
+        // Contiene los errores del campo por un proceso de validación.
+        'errors' => null,
     ];
 
     /**
@@ -2513,7 +2519,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Entrega los metadatos necesarios para los listados de los recursos en
+     * Entrega los metadatos necesarios para los listados de los registros en
      * la base de datos.
      *
      * @return array Arreglo con índices: model y fields.
