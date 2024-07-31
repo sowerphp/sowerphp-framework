@@ -126,9 +126,8 @@ class Model_Usuario extends Model implements Authenticatable
                 'help_text' => 'Fecha y hora del último ingreso del usuario.',
             ],
             'ultimo_ingreso_desde' => [
-                'type' => self::TYPE_STRING,
+                'type' => self::TYPE_IP_ADDRESS,
                 'auto' => true,
-                'max_length' => 45,
                 'verbose_name' => 'Última IP',
                 'help_text' => 'Dirección IP del último ingreso del usuario',
                 'hidden' => true,

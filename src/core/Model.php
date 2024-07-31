@@ -913,6 +913,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'min_length' => null,
         // Longitud máxima permitida para el campo.
         'max_length' => null,
+        // Valor mínimo permitido.
+        'min_value' => null,
+        // Valor máximo permitido.
+        'max_value' => null,
+        // El número máximo de dígitos permitidos.
+        'max_digits' => null,
+        // El número de decimales permitidos.
+        'decimal_places' => null,
         // Opciones disponibles para el campo, usado en select inputs.
         'choices' => null,
         // Nombre descriptivo del campo, usado en interfaces de usuario.
@@ -966,22 +974,32 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'unique' => true,
             'editable' => false,
             'verbose_name' => 'ID',
+            'min_value' => 1,
+            'max_value' => 9223372036854775807,
         ],
         self::TYPE_BIG_INTEGER => [
             'cast' => 'integer',
             'input_type' => self::INPUT_NUMBER,
+            'min_value' => 9223372036854775808,
+            'max_value' => 9223372036854775807,
         ],
         self::TYPE_DECIMAL => [
             'cast' => 'decimal:2',
             'input_type' => self::INPUT_NUMBER,
+            'decimal_places' => 2,
+            'max_digits' => 10,
         ],
         self::TYPE_DOUBLE => [
             'cast' => 'double',
             'input_type' => self::INPUT_NUMBER,
+            'min_value' => PHP_FLOAT_MIN,
+            'max_value' => PHP_FLOAT_MAX,
         ],
         self::TYPE_FLOAT => [
             'cast' => 'float',
             'input_type' => self::INPUT_NUMBER,
+            'min_value' => PHP_FLOAT_MIN,
+            'max_value' => PHP_FLOAT_MAX,
         ],
         self::TYPE_INCREMENTS => [
             'auto' => true,
@@ -991,10 +1009,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'unique' => true,
             'editable' => false,
             'verbose_name' => 'ID',
+            'min_value' => 1,
+            'max_value' => 2147483647,
         ],
         self::TYPE_INTEGER => [
             'input_type' => self::INPUT_NUMBER,
             'cast' => 'integer',
+            'min_value' => -2147483648,
+            'max_value' => 2147483647,
         ],
         self::TYPE_MEDIUM_INCREMENTS => [
             'auto' => true,
@@ -1004,10 +1026,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'unique' => true,
             'editable' => false,
             'verbose_name' => 'ID',
+            'min_value' => 1,
+            'max_value' => 16777215,
         ],
         self::TYPE_MEDIUM_INTEGER => [
             'cast' => 'integer',
             'input_type' => self::INPUT_NUMBER,
+            'min_value' => -8388608,
+            'max_value' => 8388607,
         ],
         self::TYPE_SMALL_INCREMENTS => [
             'auto' => true,
@@ -1017,10 +1043,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'unique' => true,
             'editable' => false,
             'verbose_name' => 'ID',
+            'min_value' => 1,
+            'max_value' => 65535,
         ],
         self::TYPE_SMALL_INTEGER => [
             'cast' => 'integer',
             'input_type' => self::INPUT_NUMBER,
+            'min_value' => -32768,
+            'max_value' => 32767,
         ],
         self::TYPE_TINY_INCREMENTS => [
             'auto' => true,
@@ -1030,34 +1060,50 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'unique' => true,
             'editable' => false,
             'verbose_name' => 'ID',
+            'min_value' => 1,
+            'max_value' => 255,
         ],
         self::TYPE_TINY_INTEGER => [
             'cast' => 'integer',
             'input_type' => self::INPUT_NUMBER,
+            'min_value' => 0,
+            'max_value' => 255,
         ],
         self::TYPE_UNSIGNED_BIG_INTEGER => [
             'cast' => 'integer',
             'input_type' => self::INPUT_NUMBER,
+            'min_value' => 0,
+            'max_value' => PHP_INT_MAX,
         ],
         self::TYPE_UNSIGNED_DECIMAL => [
             'cast' => 'decimal:2',
             'input_type' => self::INPUT_NUMBER,
+            'decimal_places' => 2,
+            'max_digits' => 10, // Este valor puede variar según el caso.
         ],
         self::TYPE_UNSIGNED_INTEGER => [
             'cast' => 'integer',
             'input_type' => self::INPUT_NUMBER,
+            'min_value' => 0,
+            'max_value' => PHP_INT_MAX,
         ],
         self::TYPE_UNSIGNED_MEDIUM_INTEGER => [
             'cast' => 'integer',
             'input_type' => self::INPUT_NUMBER,
+            'min_value' => 0,
+            'max_value' => 16777215,
         ],
         self::TYPE_UNSIGNED_SMALL_INTEGER => [
             'cast' => 'integer',
             'input_type' => self::INPUT_NUMBER,
+            'min_value' => 0,
+            'max_value' => 65535,
         ],
         self::TYPE_UNSIGNED_TINY_INTEGER => [
             'cast' => 'integer',
             'input_type' => self::INPUT_NUMBER,
+            'min_value' => 0,
+            'max_value' => 255,
         ],
         // Tipos de Cadenas de Texto.
         self::TYPE_CHAR => [
@@ -1076,16 +1122,19 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'cast' => 'string',
             'input_type' => self::INPUT_TEXTAREA,
             'sanitize' => ['strip_tags', 'spaces', 'trim'],
+            'max_length' => 65535,
         ],
         self::TYPE_MEDIUM_TEXT => [
             'cast' => 'string',
             'input_type' => self::INPUT_TEXTAREA,
             'sanitize' => ['strip_tags', 'spaces', 'trim'],
+            'max_length' => 16777215,
         ],
         self::TYPE_LONG_TEXT => [
             'cast' => 'string',
             'input_type' => self::INPUT_TEXTAREA,
             'sanitize' => ['strip_tags', 'spaces', 'trim'],
+            'max_length' => 4294967295,
         ],
         self::TYPE_UUID => [
             'cast' => 'string',
@@ -1108,46 +1157,65 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         self::TYPE_DATE => [
             'cast' => 'date',
             'input_type' => self::INPUT_DATE,
+            'min_value' => '1900-01-01',
+            'max_value' => '2099-12-31',
         ],
         self::TYPE_DATE_TIME => [
             'cast' => 'datetime',
             'input_type' => self::INPUT_DATETIME_LOCAL,
+            'min_value' => '1900-01-01 00:00:00',
+            'max_value' => '2099-12-31 23:59:59',
         ],
         self::TYPE_DATE_TIME_TZ => [
             'cast' => 'datetime',
             'input_type' => self::INPUT_DATETIME_LOCAL,
+            'min_value' => '1900-01-01 00:00:00',
+            'max_value' => '2099-12-31 23:59:59',
         ],
         self::TYPE_TIME => [
             'cast' => 'datetime',
             'input_type' => self::INPUT_TIME,
+            'min_value' => '1900-01-01 00:00:00',
+            'max_value' => '2099-12-31 23:59:59',
         ],
         self::TYPE_TIME_TZ => [
             'cast' => 'datetime',
             'input_type' => self::INPUT_TIME,
+            'min_value' => '1900-01-01 00:00:00',
+            'max_value' => '2099-12-31 23:59:59',
         ],
         self::TYPE_TIMESTAMP => [
             'cast' => 'timestamp',
             'input_type' => self::INPUT_DATETIME_LOCAL,
+            'min_value' => 0,
+            'max_value' => 4102441199,
         ],
         self::TYPE_TIMESTAMP_TZ => [
             'cast' => 'timestamp',
             'input_type' => self::INPUT_DATETIME_LOCAL,
+            'min_value' => 0,
+            'max_value' => 4102441199,
         ],
         self::TYPE_YEAR => [
             'input_type' => self::INPUT_TEXT,
+            'min_value' => 1900,
+            'max_value' => 2099,
         ],
         // Tipos de Binarios.
         self::TYPE_BINARY => [
             'input_type' => self::INPUT_FILE,
+            'max_length' => 10485760, // 10 MB como tamaño máximo razonable.
         ],
         // Tipos de JSON.
         self::TYPE_JSON => [
             'cast' => 'array',
             'input_type' => self::INPUT_TEXTAREA,
+            'max_length' => 65535,
         ],
         self::TYPE_JSONB => [
             'cast' => 'array',
             'input_type' => self::INPUT_TEXTAREA,
+            'max_length' => 65535,
         ],
         // Tipos Geográficos.
         self::TYPE_GEOMETRY => [
@@ -1179,11 +1247,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'cast' => 'string',
             'input_type' => self::INPUT_TEXT,
             'sanitize' => ['strip_tags', 'spaces', 'trim'],
+            'max_length' => 39, // Para soportar IPv4 e IPv6.
         ],
         self::TYPE_MAC_ADDRESS => [
             'cast' => 'string',
             'input_type' => self::INPUT_TEXT,
             'sanitize' => ['strip_tags', 'spaces', 'trim'],
+            'max_length' => 17, // Para soportar formato MAC xx:xx:xx:xx:xx:xx
         ],
         self::TYPE_MORPHS => [
             'input_type' => self::INPUT_HIDDEN,
@@ -1201,6 +1271,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'cast' => 'string',
             'input_type' => self::INPUT_HIDDEN,
             'sanitize' => ['strip_tags', 'spaces', 'trim'],
+            'max_length' => 100,
         ],
     ];
 
