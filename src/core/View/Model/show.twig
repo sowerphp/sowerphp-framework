@@ -6,4 +6,32 @@
 
 <h1 class="page-header">{{ data.model.verbose_name }}</h1>
 
+<div class="d-flex justify-content-end mb-3">
+    {% for action in data.model.actions %}
+        {% if action.action != 'show' %}
+            <a href="{{ _url }}{{ _route.url.controller }}/{{ action.action }}/{{id | join('/')}}" class="btn btn-primary btn-sm me-2" {% if action.confirmation_message %}onclick="return __.confirm(this, '{{ action.confirmation_message | replace({':label': data.model.label}) | replace({':id': id | join(', ') })}}');"{% endif %}>
+                <i class="{{ action.icon }}"></i>
+                {{ action.label }}
+            </a>
+        {% endif %}
+    {% endfor %}
+    <a href="{{ _url }}{{ _route.url.controller }}" class="btn btn-primary btn-sm">
+        <i class="fa-solid fa-table-list"></i>
+        Listado de {{ data.model.verbose_name_plural|lower }}
+    </a>
+</div>
+
+{% for field in data.fields %}
+    {% if not field.hidden %}
+        <div class="mb-3 row">
+            <div class="col-sm-2">
+                {{ field.verbose_name }}
+            </div>
+            <div class="col-sm-10">
+                {{ field.value }}
+            </div>
+        </div>
+    {% endif %}
+{% endfor %}
+
 {% endblock %}

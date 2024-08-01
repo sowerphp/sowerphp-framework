@@ -931,12 +931,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'help_text' => null,
         // Valor por defecto en la base de datos, usado si no se provee otro.
         'default' => null,
-        // Tipo de entrada en formularios, como text, number, etc.
-        'input_type' => null,
-        // Texto de marcador de posición para formularios.
-        'placeholder' => null,
-        // Valor inicial del campo en formularios antes de cualquier cambio.
-        'initial_value' => null,
         // Indica si el campo es requerido en formularios.
         'required' => null,
         // Reglas de validación del campo, como min:3, max:255, etc.
@@ -947,12 +941,22 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'sanitize' => null,
         // Indica si el campo es editable en formularios.
         'editable' => true,
-        // Indica si el campo es de solo lectura.
-        'readonly' => false,
         // Indica si el campo se puede asignar masivamente.
         'fillable' => null,
         // Indica si el campo se almacena encriptado en la base de datos.
         'encrypt' => false,
+        // Valor inicial del campo en formularios antes de cualquier cambio.
+        'initial_value' => null,
+        // Contiene los errores del campo por un proceso de validación.
+        'errors' => null,
+        // Widget de formulario para renderizar el campo.
+        'widget' => null,
+        // Tipo de entrada en formularios, como text, number, etc.
+        'input_type' => null,
+        // Texto de marcador de posición para formularios.
+        'placeholder' => null,
+        // Indica si el campo es de solo lectura.
+        'readonly' => false,
         // Indica si el campo se debe mostrar en la vista de listado.
         'show_in_list' => true,
         // El valor del campo que se debe mostrar (renderizar).
@@ -961,8 +965,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'hidden' => null,
         // Indica si el campo se puede usar para búsquedas.
         'searchable' => true,
-        // Contiene los errores del campo por un proceso de validación.
-        'errors' => null,
     ];
 
     /**
@@ -1432,7 +1434,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @var bool
      */
-    protected $exists;
+    protected $exists = false;
 
     /**
      * Constructor del modelo singular.
@@ -1532,7 +1534,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 throw $e;
             }
             $result = null;
-            $this->exists = false;
         }
         return $result;
     }
@@ -2519,6 +2520,29 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Entrega las acciones que se pueden realizar sobre el modelo mediante el
+     * controlador asociado.
+     *
+     * @return array
+     */
+    protected function getActions(): array
+    {
+        $meta = $this->getMeta();
+        // Agregar las acciones por defecto si no se han especificado.
+        if ($meta['model.actions'] === null) {
+            $actions = [];
+            foreach ($this->controllerActions as $action) {
+                if (in_array($action['permission'], $meta['model.default_permissions'])) {
+                    $actions[] = $action;
+                }
+            }
+            $meta['model.actions'] = $actions;
+        }
+        // Entregar las acciones del modelo.
+        return $meta['model.actions'];
+    }
+
+    /**
      * Entrega los metadatos necesarios para los listados de los registros en
      * la base de datos.
      *
@@ -2538,15 +2562,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 }
             }
         }
-        // Agregar las acciones por defecto si no se han especificado.
-        if ($data['model']['actions'] === null) {
-            $data['model']['actions'] = [];
-            foreach ($this->controllerActions as $action) {
-                if (in_array($action['permission'], $data['model']['default_permissions'])) {
-                    $data['model']['actions'][] = $action;
-                }
-            }
-        }
+        // Agregar las acciones del modelo.
+        $data['model']['actions'] = $this->getActions();
         // Entregar los metadatos para los listados de registros.
         return $data;
     }
@@ -2561,6 +2578,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         // Generar reglas de valicación y obtener los metadatos generales.
         $data = $this->meta->all();
+        // Agregar las acciones del modelo.
+        $data['model']['actions'] = $this->getActions();
         // Entregar los metadatos para mostrar un registro.
         return $data;
     }
@@ -2802,11 +2821,16 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function exists(): bool
     {
+        // Si no está asignado el atributo se determina.
+        // NOTE: Esto jamás se debería ejecutar, porque $exists por defecto es
+        // `false`. Se deja por si algún modelo sobrescribe $exists y lo deja
+        // sin definir o `null`.
         if (!isset($this->exists)) {
             $primaryKeyValues = $this->getPrimaryKeyValues();
             $query = $this->getPluralInstance()->query();
             $this->exists = $query->where($primaryKeyValues)->exists();
         }
+        // Entregar el resultado que indica si el registro existe o no en la BD.
         return $this->exists;
     }
 

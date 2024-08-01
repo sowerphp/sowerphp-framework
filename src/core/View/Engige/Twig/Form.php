@@ -23,24 +23,17 @@
 
 namespace sowerphp\core;
 
+use \Illuminate\Support\Str;
+use \Twig\Environment;
 use \Twig\TwigFunction;
 use \Twig\Markup;
+use \Twig\Error\Error as TwigException;
 
 /**
  * Extensión para el renderizado de formularios en una plantilla twig.
  */
 class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
 {
-
-    /**
-     * Codificación de caracteres para los renderizados devueltos por las
-     * funciones de la extensión.
-     *
-     * Se utiliza en el objeto \Twig\Markup que se retorna en cada función.
-     *
-     * @var string
-     */
-    protected $charset = 'UTF-8';
 
     /**
      * Metadatos utilizados en el formulario.
@@ -55,6 +48,81 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * @var array
      */
     protected $renderedFields = [];
+
+    /**
+     * Entorno de Twig.
+     *
+     * @var \Twig\Environment
+     */
+    protected $env;
+
+    /**
+     * Codificación de caracteres para los renderizados devueltos por las
+     * funciones de la extensión.
+     *
+     * Se utiliza en el objeto \Twig\Markup que se retorna en cada función.
+     *
+     * @var string
+     */
+    protected $charset = 'UTF-8';
+
+    /**
+     * Constructor para inicializar el entorno de Twig.
+     *
+     * @param \Twig\Environment $env El entorno de Twig.
+     */
+    public function __construct(Environment $env)
+    {
+        $this->env = $env;
+    }
+
+    /**
+     * Escapa una cadena de texto para ser segura en un entorno HTML.
+     *
+     * Este método utiliza el filtro `escape` de Twig para asegurar que la
+     * cadena de texto sea escapada adecuadamente, previniendo posibles ataques
+     * XSS.
+     *
+     * @param string $string La cadena de texto que se desea escapar.
+     * @param string $strategy La estrategia de escape. Por defecto es 'html'.
+     * Otras opciones pueden ser 'js', 'css', 'url', etc.
+     * @return string La cadena de texto escapada.
+     */
+    public function escape(string $string, string $strategy = 'html'): string
+    {
+        $twigTemplate = $this->env->createTemplate(
+            '{{ string | escape(strategy, charset) }}'
+        );
+        return $twigTemplate->render([
+            'string' => $string,
+            'strategy' => $strategy,
+            'charset' => $this->charset,
+        ]);
+    }
+
+    /**
+     * Construye una cadena de atributos HTML a partir de un arreglo.
+     *
+     * @param array $attributes Arreglo de atributos.
+     * @return string Cadena de atributos HTML.
+     */
+    protected function buildAttributes(array $attributes): string
+    {
+        $attributes = array_filter($attributes, function($value) {
+            return $value !== null;
+        });
+        return implode(' ', array_map(
+            function($key, $value) {
+                return sprintf(
+                    '%s="%s"',
+                    $this->escape($key),
+                    $this->escape($value)
+                );
+            },
+            array_keys($attributes),
+            $attributes
+        ));
+    }
 
     /**
      * Entrega las funciones de la extensión.
@@ -116,7 +184,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         $html = sprintf(
             '<button %s>%s</button>',
             $attributes,
-            htmlspecialchars($label, ENT_QUOTES)
+            $this->escape($label)
         );
         // Entregar el botón renderizado.
         return new \Twig\Markup($html, 'UTF-8');
@@ -128,7 +196,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * @param array $form El array de configuración del formulario.
      * @return \Twig\Markup Código HTML para iniciar el formulario.
      */
-    public function function_form_start(array $form): Markup
+    public function function_form_start(array $form = []): Markup
     {
         // Definir atributos del tag <form>.
         $attributes = $this->buildAttributes(array_merge([
@@ -150,7 +218,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * @param array $form El array de configuración del formulario.
      * @return \Twig\Markup Código HTML para cerrar el formulario.
      */
-    public function function_form_end(array $form): Markup
+    public function function_form_end(array $form = []): Markup
     {
         return new Markup('</form>', $this->charset);
     }
@@ -214,7 +282,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         $html = sprintf(
             '<label %s>%s</label>',
             $attributes,
-            htmlspecialchars($label, ENT_QUOTES)
+            $this->escape($label)
         );
         // Entregar la etiqueta renderizada.
         return new Markup($html, $this->charset);
@@ -255,7 +323,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         // Generar el HTML de los errores.
         $html = '<ul class="text-danger">';
         foreach ($errors as $error) {
-            $html .= sprintf('<li>%s</li>', htmlspecialchars($error, ENT_QUOTES));
+            $html .= sprintf('<li>%s</li>', $this->escape($error));
         }
         $html .= '</ul>';
         // Entregar los errores renderizados.
@@ -284,7 +352,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         $html = sprintf(
             '<div %s>%s</div>',
             $attributes,
-            htmlspecialchars($helpText, ENT_QUOTES)
+            $this->escape($helpText)
         );
         // Entregar el texto de ayuda renderizado.
         return new Markup($html, $this->charset);
@@ -296,7 +364,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * @param array $form El array de configuración del formulario.
      * @return string Código HTML para los campos restantes.
      */
-    public function function_form_rest(array $form): Markup
+    public function function_form_rest(array $form = []): Markup
     {
         $fields = $this->meta['fields'] ?? [];
         // Generar el HTML de todos los campos que no han sido renderizados.
@@ -345,7 +413,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * @param array $form El array de configuración del formulario.
      * @return bool True si el formulario es válido, de lo contrario False.
      */
-    public function function_form_is_valid(array $form): bool
+    public function function_form_is_valid(array $form = []): bool
     {
         // Iterar sobre los campos y verificar si tienen errores.
         foreach ($this->meta['fields'] as $field) {
@@ -356,30 +424,6 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         }
         // Si no se encontraron errores, el formulario es válido.
         return true;
-    }
-
-    /**
-     * Construye una cadena de atributos HTML a partir de un arreglo.
-     *
-     * @param array $attributes Arreglo de atributos.
-     * @return string Cadena de atributos HTML.
-     */
-    protected function buildAttributes(array $attributes): string
-    {
-        $attributes = array_filter($attributes, function($value) {
-            return $value !== null;
-        });
-        return implode(' ', array_map(
-            function($key, $value) {
-                return sprintf(
-                    '%s="%s"',
-                    htmlspecialchars($key, ENT_QUOTES),
-                    htmlspecialchars($value, ENT_QUOTES)
-                );
-            },
-            array_keys($attributes),
-            $attributes
-        ));
     }
 
     /**
@@ -403,17 +447,41 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      *
      * @param array $field La configuración del campo.
      * @return string El nombre del método de renderizado.
+     * @throws \Twig\Error\Error Si el método de renderizado para el widget no existe.
      */
     protected function resolveWidgetRenderer(array $field): string
     {
-        // TODO: implementar los métodos de renderizado de cada widget.
-        if (false) {
+        $widget = $this->resolveWidgetName($field);
+        $method = 'render' . ucfirst(Str::camel($widget)) . 'Widget';
+        if (!method_exists($this, $method)) {
+            throw new TwigException(__(
+                'El método de renderizado "%s()", de la extensión de formularios, para el campo "%s" con el widget "%s" no existe.',
+                $method,
+                $field['name'],
+                $widget
+            ));
+        }
+        return $method;
+    }
 
+    /**
+     * Determina el widget para el campo.
+     *
+     * @param array $field La configuración del campo.
+     * @return string El nombre del widget que usará el campo.
+     */
+    protected function resolveWidgetName(array $field): string
+    {
+        // Si el widget viene definido en la configuración del campo se usa.
+        if (!empty($field['widget'])) {
+            return $field['widget'];
         }
-        // Por defecto utilizar un método de renderizado genérico.
-        else {
-            return 'renderDefaultWidget';
+        // TODO: Definir el widget en base a reglas de los metadatos del campo.
+        if (false) {
+            return 'widget_xyz';
         }
+        // Si no se logró determinar el widget se usa el por defecto.
+        return 'default';
     }
 
     /**
@@ -438,6 +506,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
             'placeholder' => $field['placeholder'] ?? null,
             'required' => !empty($field['required']) ? 'required' : null,
             'readonly' => !empty($field['readonly']) ? 'readonly' : null,
+            'minlength' => $field['min_length'] ?? null,
             'maxlength' => $field['max_length'] ?? null,
             'min' => $field['min_value'] ?? null,
             'max' => $field['max_value'] ?? null,

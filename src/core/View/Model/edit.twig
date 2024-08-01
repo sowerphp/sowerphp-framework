@@ -6,6 +6,13 @@
 
 <h1 class="page-header">Editar {{ data.model.verbose_name|lower }}</h1>
 
+<div class="d-flex justify-content-end mb-3">
+    <a href="{{ _url }}{{ _route.url.controller }}" class="btn btn-primary btn-sm">
+        <i class="fa-solid fa-table-list"></i>
+        Listado de {{ data.model.verbose_name_plural|lower }}
+    </a>
+</div>
+
 {{ form_init(data) }}
 {{ form_start(data.form) }}
     {% for field in data.fields %}

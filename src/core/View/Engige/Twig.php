@@ -91,7 +91,7 @@ class View_Engine_Twig extends View_Engine
         // Cargar las extensiones que estarán disponibles en las plantillas.
         $extensions = config('app.ui.twig.extensions', $this->extensions);
         foreach ($extensions as $extension) {
-            $this->twig->addExtension(new $extension());
+            $this->twig->addExtension(new $extension($this->twig));
         }
     }
 

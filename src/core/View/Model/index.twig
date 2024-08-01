@@ -10,7 +10,8 @@
 {% if 'add' in data.model.default_permissions %}
     <div class="d-flex justify-content-end mb-3">
         <a href="{{ _url }}{{ _route.url.controller }}/create" class="btn btn-success btn-sm">
-            <i class="fa-solid fa-plus"></i> Crear {{ data.model.verbose_name|lower }}
+            <i class="fa-solid fa-plus"></i>
+            Crear {{ data.model.verbose_name|lower }}
         </a>
     </div>
 {% endif %}
@@ -59,7 +60,7 @@
 $(document).ready(function() {
 
     // Inicializar DataTables.
-    var table = $('#registers').DataTable({
+    $('#registers').DataTable({
         ajax: '{{_url}}/api{{_route.url.controller}}/index?format=datatables',
         serverSide: true,
         processing: true,
@@ -284,15 +285,26 @@ $(document).ready(function() {
         ],
         language: {
             url: '//cdn.datatables.net/plug-ins/2.1.2/i18n/es-MX.json',
+        },
+        initComplete: function () {
+            datatablesInitComplete(this.api());
         }
     });
 
+});
+
+// Configuraciones una vez que la tabla es inicializada con datatables.
+function datatablesInitComplete(api) {
+
+    // Utilizar la API proporcionada para obtener la tabla.
+    var table = api.table();
+
     // Añadir eventos de búsqueda por columna.
-    $('#registers thead .filters-row th').each(function(i) {
+    $('#registers thead .filters-row th').each(function(index) {
+        var column = table.column((index + 1) + ':visible');
         $('input', this).on('keyup change', function() {
-            var columnIndex = i + 1; // Se ajusta índice por checkbox inicial.
-            if (table.column(columnIndex).search() !== this.value) {
-                table.column(columnIndex).search(this.value).draw();
+            if (column.search() !== this.value) {
+                column.search(this.value).draw();
             }
         });
     });
@@ -324,7 +336,7 @@ $(document).ready(function() {
         $('#registers thead .filters-row input').val('');
     });
 
-});
+}
 
 // Función para actualizar el contador de elementos seleccionados.
 function updateSelectedCount() {

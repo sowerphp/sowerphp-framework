@@ -136,7 +136,11 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             ))->back();
         }
         $data = $instance->getShowData();
+        foreach ($data['fields'] as $field => &$config) {
+            $config['value'] = $instance->getAttribute($field);
+        }
         return $this->render('show', [
+            'id' => $id,
             'data' => $data,
         ]);
     }
@@ -194,6 +198,13 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $this->getModelClass(),
             ...$id
         );
+        if (!$instance->exists()) {
+            return redirect()->withError(__(
+                'Recurso solicitado %s(%s) no existe, no se puede editar.',
+                $instance->getMeta()['model.label'],
+                implode(', ', $id)
+            ))->back();
+        }
         // Validar que el modelo permite la edición de registros.
         if (!in_array('change', $instance->getMeta()['model.default_permissions'])) {
             return redirect()->withError(__(
@@ -217,6 +228,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         ];
         // Renderizar la vista con el formulario de edición.
         return $this->render('edit', [
+            'id' => $id,
             'data' => $data,
         ]);
     }
