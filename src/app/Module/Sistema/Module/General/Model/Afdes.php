@@ -23,16 +23,13 @@
 
 namespace sowerphp\app\Sistema\General;
 
+use \sowerphp\autoload\Model_Plural;
+
 /**
- * Clase para mapear la tabla afd de la base de datos
- * Comentario de la tabla:
- * Esta clase permite trabajar sobre un conjunto de registros de la tabla afd
+ * Modelo plural de la tabla "afd" de la base de datos.
+ *
+ * Permite interactuar con varios registros de la tabla.
  */
-class Model_Afdes extends \sowerphp\autoload\Model_Plural
+class Model_Afdes extends Model_Plural
 {
-
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'afd'; ///< Tabla del modelo
-
 }

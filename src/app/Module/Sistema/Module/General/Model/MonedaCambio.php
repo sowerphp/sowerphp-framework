@@ -23,77 +23,56 @@
 
 namespace sowerphp\app\Sistema\General;
 
+use \sowerphp\autoload\Model;
+
 /**
- * Clase para mapear la tabla moneda_cambio de la base de datos
- * Comentario de la tabla:
- * Esta clase permite trabajar sobre un registro de la tabla moneda_cambio
+ * Modelo singular de la tabla "moneda_cambio" de la base de datos.
+ *
+ * Permite interactuar con un registro de la tabla.
  */
-class Model_MonedaCambio extends \sowerphp\autoload\Model
+class Model_MonedaCambio extends Model
 {
 
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'moneda_cambio'; ///< Tabla del modelo
-
-    // Atributos de la clase (columnas en la base de datos)
-    public $desde; ///< char(3) NOT NULL DEFAULT '' PK
-    public $a; ///< char(3) NOT NULL DEFAULT '' PK
-    public $fecha; ///< date() NOT NULL DEFAULT '0000-00-00' PK
-    public $valor; ///< float(12) NOT NULL DEFAULT ''
-
-    // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'desde' => array(
-            'name'      => 'Desde',
-            'comment'   => '',
-            'type'      => 'char',
-            'length'    => 3,
-            'null'      => false,
-            'default'   => '',
-            'auto'      => false,
-            'pk'        => true,
-            'fk'        => null
-        ),
-        'a' => array(
-            'name'      => 'A',
-            'comment'   => '',
-            'type'      => 'char',
-            'length'    => 3,
-            'null'      => false,
-            'default'   => '',
-            'auto'      => false,
-            'pk'        => true,
-            'fk'        => null
-        ),
-        'fecha' => array(
-            'name'      => 'Fecha',
-            'comment'   => '',
-            'type'      => 'date',
-            'length'    => null,
-            'null'      => false,
-            'default'   => '0000-00-00',
-            'auto'      => false,
-            'pk'        => true,
-            'fk'        => null
-        ),
-        'valor' => array(
-            'name'      => 'Valor',
-            'comment'   => '',
-            'type'      => 'float',
-            'length'    => 12,
-            'null'      => false,
-            'default'   => '',
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-
-    );
-
-    // Comentario de la tabla en la base de datos
-    public static $tableComment = '';
-
-    public static $fkNamespace = []; ///< Namespaces que utiliza esta clase
+    /**
+     * Metadatos del modelo.
+     *
+     * @var array
+     */
+    protected $meta = [
+        'model' => [
+            'db_table_comment' => '',
+            'ordering' => ['desde'],
+        ],
+        'fields' => [
+            'desde' => [
+                'type' => self::TYPE_STRING,
+                'primary_key' => true,
+                'max_length' => 3,
+                'verbose_name' => 'Desde',
+                'help_text' => '',
+            ],
+            'a' => [
+                'type' => self::TYPE_STRING,
+                'primary_key' => true,
+                'max_length' => 3,
+                'verbose_name' => 'A',
+                'help_text' => '',
+            ],
+            'fecha' => [
+                'type' => self::TYPE_DATE,
+                'default' => '0000-00-00',
+                'primary_key' => true,
+                'verbose_name' => 'Fecha',
+                'help_text' => '',
+            ],
+            'valor' => [
+                'type' => self::TYPE_FLOAT,
+                'max_length' => 12,
+                'verbose_name' => 'Valor',
+                'help_text' => '',
+            ],
+        ],
+    ]; 
 
     private static $monedas_aduana = [
         'DOLAR USA' => 'USD',

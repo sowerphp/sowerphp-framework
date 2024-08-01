@@ -23,80 +23,66 @@
 
 namespace sowerphp\app\Sistema\General;
 
+use \sowerphp\autoload\Model;
+use \sowerphp\app\Sistema\General\Model_Afd;
+
 /**
- * Clase para mapear la tabla afd_transicion de la base de datos
- * Comentario de la tabla:
- * Esta clase permite trabajar sobre un registro de la tabla afd_transicion
+ * Modelo singular de la tabla "afd_transicion" de la base de datos.
+ *
+ * Permite interactuar con un registro de la tabla.
  */
-class Model_AfdTransicion extends \sowerphp\autoload\Model
+class Model_AfdTransicion extends Model
 {
 
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'afd_transicion'; ///< Tabla del modelo
-
-    // Atributos de la clase (columnas en la base de datos)
-    public $afd; ///< varchar(10) NOT NULL DEFAULT '' PK FK:afd_estado.afd
-    public $desde; ///< int(10) NOT NULL DEFAULT '0' PK FK:afd_estado.codigo
-    public $valor; ///< varchar(5) NOT NULL DEFAULT '' PK
-    public $hasta; ///< int(10) NOT NULL DEFAULT '' FK:afd_estado.codigo
-
-    // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'afd' => array(
-            'name'      => 'Afd',
-            'comment'   => '',
-            'type'      => 'varchar',
-            'length'    => 10,
-            'null'      => false,
-            'default'   => '',
-            'auto'      => false,
-            'pk'        => true,
-            'fk'        => array('table' => 'afd_estado', 'column' => 'afd')
-        ),
-        'desde' => array(
-            'name'      => 'Desde',
-            'comment'   => '',
-            'type'      => 'int',
-            'length'    => 10,
-            'null'      => false,
-            'default'   => '0',
-            'auto'      => false,
-            'pk'        => true,
-            'fk'        => array('table' => 'afd_estado', 'column' => 'codigo')
-        ),
-        'valor' => array(
-            'name'      => 'Valor',
-            'comment'   => '',
-            'type'      => 'varchar',
-            'length'    => 5,
-            'null'      => false,
-            'default'   => '',
-            'auto'      => false,
-            'pk'        => true,
-            'fk'        => null
-        ),
-        'hasta' => array(
-            'name'      => 'Hasta',
-            'comment'   => '',
-            'type'      => 'int',
-            'length'    => 10,
-            'null'      => false,
-            'default'   => '',
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => array('table' => 'afd_estado', 'column' => 'codigo')
-        ),
-
-    );
-
-    // Comentario de la tabla en la base de datos
-    public static $tableComment = '';
-
-    public static $fkNamespace = array(
-        'Model_AfdEstado' => 'website\Sistema',
-        'Model_AfdEstado' => 'website\Sistema',
-        'Model_AfdEstado' => 'website\Sistema'
-    ); ///< Namespaces que utiliza esta clase
+    /**
+     * Metadatos del modelo.
+     *
+     * @var array
+     */
+    protected $meta = [
+        'model' => [
+            'db_table_comment' => '',
+            'ordering' => ['afd'],
+        ],
+        'fields' => [
+            'afd' => [
+                'type' => self::TYPE_STRING,
+                'primary_key' => true,
+                'foreign_key' => Model_Afd::class,
+                'to_table' => 'afd_estado',
+                'to_field' => 'afd',
+                'max_length' => 10,
+                'verbose_name' => 'Afd',
+                'help_text' => '',
+            ],
+            'desde' => [
+                'type' => self::TYPE_INTEGER,
+                'default' => '0',
+                'primary_key' => true,
+                'foreign_key' => Model_Afd::class,
+                'to_table' => 'afd_estado',
+                'to_field' => 'codigo',
+                'max_length' => 10,
+                'verbose_name' => 'Desde',
+                'help_text' => '',
+            ],
+            'valor' => [
+                'type' => self::TYPE_STRING,
+                'primary_key' => true,
+                'max_length' => 5,
+                'verbose_name' => 'Valor',
+                'help_text' => '',
+            ],
+            'hasta' => [
+                'type' => self::TYPE_INTEGER,
+                'foreign_key' => Model_Afd::class,
+                'to_table' => 'afd_estado',
+                'to_field' => 'codigo',
+                'max_length' => 10,
+                'verbose_name' => 'Hasta',
+                'help_text' => '',
+            ],
+        ],
+    ];
 
 }

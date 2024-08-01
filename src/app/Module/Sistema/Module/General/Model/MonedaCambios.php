@@ -23,17 +23,15 @@
 
 namespace sowerphp\app\Sistema\General;
 
-/**
- * Clase para mapear la tabla moneda_cambio de la base de datos
- * Comentario de la tabla:
- * Esta clase permite trabajar sobre un conjunto de registros de la tabla moneda_cambio
- */
-class Model_MonedaCambios extends \sowerphp\autoload\Model_Plural
-{
+use \sowerphp\autoload\Model_Plural;
 
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'moneda_cambio'; ///< Tabla del modelo
+/**
+ * Modelo plural de la tabla "moneda_cambio" de la base de datos.
+ *
+ * Permite interactuar con varios registros de la tabla.
+ */
+class Model_MonedaCambios extends Model_Plural
+{
 
     private $decimales = [
         'CLP' => 0,

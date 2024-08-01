@@ -23,66 +23,52 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
+use \sowerphp\autoload\Model;
+use sowerphp\app\Sistema\Usuarios\Model_Grupo;
+
 /**
- * Clase para mapear la tabla auth de la base de datos
- * Comentario de la tabla: Permisos de grupos para acceder a recursos
- * Esta clase permite trabajar sobre un registro de la tabla auth
+ * Modelo singular de la tabla "auth" de la base de datos.
+ *
+ * Permite interactuar con un registro de la tabla.
  */
-class Model_Auth extends \sowerphp\autoload\Model
+class Model_Auth extends Model
 {
-
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'auth'; ///< Tabla del modelo
-
-    public static $fkNamespace = array(
-        'Model_Grupo' => 'sowerphp\app\Sistema\Usuarios'
-    ); ///< Namespaces que utiliza esta clase
-
-    // Atributos de la clase (columnas en la base de datos)
-    public $id; ///< Identificador (serial): integer(32) NOT NULL DEFAULT 'nextval('auth_id_seq'::regclass)' AUTO PK
-    public $grupo; ///< Grupo al que se le condede el permiso: integer(32) NOT NULL DEFAULT '' FK:grupo.id
-    public $recurso; ///< Recurso al que el grupo tiene acceso: character varying(300) NULL DEFAULT ''
-
-    // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'id' => array(
-            'name'      => 'ID',
-            'comment'   => 'Identificador (serial)',
-            'type'      => 'integer',
-            'length'    => 32,
-            'null'      => false,
-            'default'   => "nextval('auth_id_seq'::regclass)",
-            'auto'      => true,
-            'pk'        => true,
-            'fk'        => null
-        ),
-        'grupo' => array(
-            'name'      => 'Grupo',
-            'comment'   => 'Grupo al que se le concede el permiso',
-            'type'      => 'integer',
-            'length'    => 32,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => array('table' => 'grupo', 'column' => 'id')
-        ),
-        'recurso' => array(
-            'name'      => 'Recurso',
-            'comment'   => 'Recurso al que el grupo tiene acceso',
-            'type'      => 'character varying',
-            'length'    => 300,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-
-    );
-
-    // Comentario de la tabla en la base de datos
-    public static $tableComment = 'Permisos de grupos para acceder a recursos';
+    /**
+     * Metadatos del modelo.
+     *
+     * @var array
+     */
+    protected $meta = [
+        'model' => [
+            'db_table_comment' => 'Permisos de grupos para acceder a recursos',
+            'ordering' => ['id'],
+        ],
+        'fields' => [
+            'id' => [
+                'type' => self::TYPE_INTEGER,
+                'default' => "nextval('auth_id_seq'::regclass)",
+                'auto' => true,
+                'primary_key' => true,
+                'max_length' => 32,
+                'verbose_name' => 'ID',
+                'help_text' => 'Identificador (serial)',
+            ],
+            'grupo' => [
+                'type' => self::TYPE_INTEGER,
+                'foreign_key' => Model_Grupo::class,
+                'to_table' => 'grupo',
+                'to_field' => 'id',
+                'max_length' => 32,
+                'verbose_name' => 'Grupo',
+                'help_text' => 'Grupo al que se le concede el permiso',
+            ],
+            'recurso' => [
+                'type' => self::TYPE_STRING,
+                'max_length' => 300,
+                'verbose_name' => 'Recurso',
+                'help_text' => 'Recurso al que el grupo tiene acceso',
+            ],
+        ],
+    ];
 
 }
