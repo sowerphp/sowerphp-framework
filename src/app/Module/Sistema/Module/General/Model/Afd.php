@@ -23,57 +23,53 @@
 
 namespace sowerphp\app\Sistema\General;
 
+use \sowerphp\autoload\Model;
+
 /**
- * Clase para mapear la tabla afd de la base de datos
- * Comentario de la tabla:
- * Esta clase permite trabajar sobre un registro de la tabla afd
+ * Modelo singular de la tabla "afd" de la base de datos.
+ *
+ * Permite interactuar con un registro de la tabla.
+ * 
  */
-class Model_Afd extends \sowerphp\autoload\Model
+class Model_Afd extends Model
 {
 
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'afd'; ///< Tabla del modelo
+    /**
+     * Metadatos del modelo.
+     *
+     * @var array
+     */
+    protected $meta = [
+        'model' => [
+            'db_table_comment' => '',
+            'ordering' => ['codigo'],
+        ],
+        'fields' => [
+            'codigo' => [
+                'type' => self::TYPE_STRING,
+                'primary_key' => true,
+                'max_length' => 10,
+                'verbose_name' => 'Codigo',
+                'help_text' => '',
+            ],
+            'nombre' => [
+                'type' => self::TYPE_STRING,
+                'max_length' => 50,
+                'verbose_name' => 'Nombre',
+                'help_text' => '',
+            ],
+        ],
+    ];
 
-    // Atributos de la clase (columnas en la base de datos)
-    public $codigo; ///< varchar(10) NOT NULL DEFAULT '' PK
-    public $nombre; ///< varchar(50) NOT NULL DEFAULT ''
-
-    // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'codigo' => array(
-            'name'      => 'Codigo',
-            'comment'   => '',
-            'type'      => 'varchar',
-            'length'    => 10,
-            'null'      => false,
-            'default'   => '',
-            'auto'      => false,
-            'pk'        => true,
-            'fk'        => null
-        ),
-        'nombre' => array(
-            'name'      => 'Nombre',
-            'comment'   => '',
-            'type'      => 'varchar',
-            'length'    => 50,
-            'null'      => false,
-            'default'   => '',
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-
-    );
-
-    // Comentario de la tabla en la base de datos
-    public static $tableComment = '';
-
-    public static $fkNamespace = []; ///< Namespaces que utiliza esta clase
 
     // variables para guardar estados y transiciones
     public $estados = [];
     public $transiciones = [];
+
+    public function getAfdAtrribute()
+    {
+        return $this->nombre;
+    }
 
     /**
      * Contructor para el modelo AFD
@@ -82,7 +78,6 @@ class Model_Afd extends \sowerphp\autoload\Model
     public function __construct($codigo = null)
     {
         parent::__construct($codigo);
-        $this->afd = &$this->nombre;
     }
 
     /**

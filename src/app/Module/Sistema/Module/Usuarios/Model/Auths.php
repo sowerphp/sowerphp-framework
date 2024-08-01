@@ -23,16 +23,13 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
+use \sowerphp\autoload\Model_Plural;
+
 /**
- * Clase para mapear la tabla auth de la base de datos
- * Comentario de la tabla: Permisos de grupos para acceder a recursos
- * Esta clase permite trabajar sobre un conjunto de registros de la tabla auth
+ * Modelo plural de la tabla "auth" de la base de datos.
+ *
+ * Permite interactuar con varios registros de la tabla.
  */
-class Model_Auths extends \sowerphp\autoload\Model_Plural
+class Model_Auths extends Model_Plural
 {
-
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'auth'; ///< Tabla del modelo
-
 }

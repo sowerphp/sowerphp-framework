@@ -23,17 +23,15 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
-/**
- * Clase para mapear la tabla grupo de la base de datos
- * Comentario de la tabla: Grupos de la aplicación
- * Esta clase permite trabajar sobre un conjunto de registros de la tabla grupo
- */
-class Model_Grupos extends \sowerphp\autoload\Model_Plural
-{
+use \sowerphp\autoload\Model_Plural;
 
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'grupo'; ///< Tabla del modelo
+/**
+ * Modelo plural de la tabla "grupo" de la base de datos.
+ *
+ * Permite interactuar con varios registros de la tabla.
+ */
+class Model_Grupos extends Model_Plural
+{
 
     /**
      * Método que entrega los IDs de un listado de nombres de grupos

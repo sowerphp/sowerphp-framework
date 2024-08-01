@@ -23,67 +23,55 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
+use \sowerphp\autoload\Model;
+use \sowerphp\app\Sistema\Usuarios\Model_Usuario;
+use \sowerphp\app\Sistema\Usuarios\Model_Grupo;
+
 /**
- * Clase para mapear la tabla usuario_grupo de la base de datos
- * Comentario de la tabla: Relación entre usuarios y los grupos a los que pertenecen
- * Esta clase permite trabajar sobre un registro de la tabla usuario_grupo
+ * Modelo singular de la tabla "usuario_grupo" de la base de datos.
+ *
+ * Permite interactuar con un registro de la tabla.
  */
-class Model_UsuarioGrupo extends \sowerphp\autoload\Model
+class Model_UsuarioGrupo extends Model
 {
 
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'usuario_grupo'; ///< Tabla del modelo
-
-    public static $fkNamespace = array(
-        'Model_Usuario' => 'sowerphp\app\Sistema\Usuarios',
-        'Model_Grupo' => 'sowerphp\app\Sistema\Usuarios'
-    ); ///< Namespaces que utiliza esta clase
-
-    // Atributos de la clase (columnas en la base de datos)
-    public $usuario; ///< Usuario de la aplicación: integer(32) NOT NULL DEFAULT '' PK FK:usuario.id
-    public $grupo; ///< Grupo al que pertenece el usuario: integer(32) NOT NULL DEFAULT '' PK FK:grupo.id
-    public $primario; ///< Indica si el grupo es el grupo primario del usuario: boolean() NOT NULL DEFAULT 'false'
-
-    // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'usuario' => array(
-            'name'      => 'Usuario',
-            'comment'   => 'Usuario de la aplicación',
-            'type'      => 'integer',
-            'length'    => 32,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => true,
-            'fk'        => array('table' => 'usuario', 'column' => 'id')
-        ),
-        'grupo' => array(
-            'name'      => 'Grupo',
-            'comment'   => 'Grupo al que pertenece el usuario',
-            'type'      => 'integer',
-            'length'    => 32,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => true,
-            'fk'        => array('table' => 'grupo', 'column' => 'id')
-        ),
-        'primario' => array(
-            'name'      => 'Primario',
-            'comment'   => 'Indica si el grupo es el grupo primario del usuario',
-            'type'      => 'boolean',
-            'length'    => null,
-            'null'      => false,
-            'default'   => "false",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-
-    );
-
-    // Comentario de la tabla en la base de datos
-    public static $tableComment = 'Relación entre usuarios y los grupos a los que pertenecen';
+    /**
+     * Metadatos del modelo.
+     *
+     * @var array
+     */
+    protected $meta = [
+        'model' => [
+            'db_table_comment' => 'Relación entre usuarios y los grupos a los que pertenecen',
+        ],
+        'fields' => [
+            'usuario' => [
+                'type' => self::TYPE_INTEGER,
+                'primary_key' => true,
+                'foreign_key' => Model_Usuario::class,
+                'to_table' => 'usuario',
+                'to_field' => 'id',
+                'max_length' => 32,
+                'verbose_name' => 'Usuario',
+                'help_text' => 'Usuario de la aplicación',
+            ],
+            'grupo' => [
+                'type' => self::TYPE_INTEGER,
+                'primary_key' => true,
+                'foreign_key' => Model_Grupo::class,
+                'to_table' => 'grupo',
+                'to_field' => 'id',
+                'max_length' => 32,
+                'verbose_name' => 'Grupo',
+                'help_text' => 'Grupo al que pertenece el usuario',
+            ],
+            'primario' => [
+                'type' => self::TYPE_BOOLEAN,
+                'default' => "false",
+                'verbose_name' => 'Primario',
+                'help_text' => 'Indica si el grupo es el grupo primario del usuario',
+            ],
+        ],
+    ];
 
 }

@@ -23,16 +23,13 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
+use \sowerphp\autoload\Model_Plural;
+
 /**
- * Clase para mapear la tabla usuario_grupo de la base de datos
- * Comentario de la tabla: Relación entre usuarios y los grupos a los que pertenecen
- * Esta clase permite trabajar sobre un conjunto de registros de la tabla usuario_grupo
+ * Modelo plural de la tabla "usuario_grupo" de la base de datos.
+ *
+ * Permite interactuar con varios registros de la tabla.
  */
-class Model_UsuarioGrupos extends \sowerphp\autoload\Model_Plural
+class Model_UsuarioGrupos extends Model_Plural
 {
-
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'usuario_grupo'; ///< Tabla del modelo
-
 }

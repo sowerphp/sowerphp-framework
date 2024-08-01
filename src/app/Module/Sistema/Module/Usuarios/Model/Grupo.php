@@ -23,64 +23,50 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
+use \sowerphp\autoload\Model;
+
 /**
- * Clase para mapear la tabla grupo de la base de datos
- * Comentario de la tabla: Grupos de la aplicación
- * Esta clase permite trabajar sobre un registro de la tabla grupo
+ * Modelo singular de la tabla "grupo" de la base de datos.
+ *
+ * Permite interactuar con un registro de la tabla.
  */
-class Model_Grupo extends \sowerphp\autoload\Model
+class Model_Grupo extends Model
 {
 
-    // Datos para la conexión a la base de datos
-    protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'grupo'; ///< Tabla del modelo
-
-    public static $fkNamespace = []; ///< Namespaces que utiliza esta clase
-
-    // Atributos de la clase (columnas en la base de datos)
-    public $id; ///< Identificador (serial): integer(32) NOT NULL DEFAULT 'nextval('grupo_id_seq'::regclass)' AUTO PK
-    public $grupo; ///< Nombre del grupo: character varying(30) NOT NULL DEFAULT ''
-    public $activo; ///< Indica si el grupo se encuentra activo: boolean() NOT NULL DEFAULT 'true'
-
-    // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'id' => array(
-            'name'      => 'ID',
-            'comment'   => 'Identificador (serial)',
-            'type'      => 'integer',
-            'length'    => 32,
-            'null'      => false,
-            'default'   => "nextval('grupo_id_seq'::regclass)",
-            'auto'      => true,
-            'pk'        => true,
-            'fk'        => null
-        ),
-        'grupo' => array(
-            'name'      => 'Grupo',
-            'comment'   => 'Nombre del grupo',
-            'type'      => 'character varying',
-            'length'    => 30,
-            'null'      => false,
-            'default'   => "",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-        'activo' => array(
-            'name'      => 'Activo',
-            'comment'   => 'Indica si el grupo se encuentra activo',
-            'type'      => 'boolean',
-            'length'    => null,
-            'null'      => false,
-            'default'   => "true",
-            'auto'      => false,
-            'pk'        => false,
-            'fk'        => null
-        ),
-
-    );
-
-    // Comentario de la tabla en la base de datos
-    public static $tableComment = 'Grupos a los que puede pertenecer un usuario';
+    /**
+     * Metadatos del modelo.
+     *
+     * @var array
+     */
+    protected $meta = [
+        'model' => [
+            'db_table_comment' => 'Grupos a los que puede pertenecer un usuario',
+            'ordering' => ['id'],
+        ],
+        'fields' => [
+            'id' => [
+                'type' => self::TYPE_INTEGER,
+                'default' => "nextval('grupo_id_seq'::regclass)",
+                'auto' => true,
+                'primary_key' => true,
+                'max_length' => 32,
+                'verbose_name' => 'ID',
+                'help_text' => 'Identificador (serial)',
+            ],
+            'grupo' => [
+                'type' => self::TYPE_STRING,
+                'null' => true,
+                'max_length' => 30,
+                'verbose_name' => 'Grupo',
+                'help_text' => 'Nombre del grupo',
+            ],
+            'activo' => [
+                'type' => self::TYPE_BOOLEAN,
+                'default' => "true",
+                'verbose_name' => 'Activo',
+                'help_text' => 'Indica si el grupo se encuentra activo',
+            ],
+        ],
+    ];
 
 }
