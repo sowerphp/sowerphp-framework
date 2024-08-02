@@ -23,14 +23,11 @@
 
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
-/**
- * Clase para el controlador asociado a la tabla region de la base de
- * datos
- * Comentario de la tabla: Regiones del país
- * Esta clase permite controlar las acciones entre el modelo y vista para la
- * tabla region
- */
-class Controller_Regiones extends \sowerphp\autoload\Controller_Model
-{
+use \sowerphp\autoload\Controller_Model;
 
+/**
+ * Controlador modelo: region.
+ */
+class Controller_Regiones extends Controller_Model
+{
 }

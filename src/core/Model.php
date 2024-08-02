@@ -1961,7 +1961,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                     is_string($value) ? json_decode($value, true) : $value
                 );
             case 'date':
-                return Carbon::parse($value)->startOfDay();
+                return Carbon::parse($value)->startOfDay()->format('Y-m-d');
             case 'datetime':
                 return Carbon::parse($value);
             case 'timestamp':
@@ -2414,6 +2414,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                     $this->defaultFieldConfigByType[self::TYPE_BIG_INCREMENTS],
                     [
                         'type' => self::TYPE_BIG_INCREMENTS,
+                        'label' => 'Id',
+                        'db_column' => 'id',
+                        'verbose_name' => 'ID',
                     ]
                 )
             ], $meta['fields']);
@@ -2798,10 +2801,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected function generateFieldValidationRulesString(array $config): array
     {
         $create = $edit = [];
-        if ($config['required']['create']) {
+        if (!empty($config['required']['create'])) {
             $create[] = 'required';
         }
-        if ($config['required']['edit']) {
+        if (!empty($config['required']['edit'])) {
             $edit[] = 'required';
         }
         if ($config['min_length']) {

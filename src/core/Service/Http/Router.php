@@ -764,6 +764,7 @@ class Service_Http_Router implements Interface_Service
      * El recurso de la URL se procesa considerando el siguiente formato:
      *
      *   /módulo(s)/controlador/accion/parámetro(s)
+     *   /api/módulo(s)/controlador/accion/parámetro(s)
      *
      * Donde:
      *
@@ -775,6 +776,14 @@ class Service_Http_Router implements Interface_Service
      */
     protected function getRouteConfigAutomagically(string $resource): array
     {
+        // Si es una llamada de API, se quita el prefijo y se busca como ruta
+        // normal web.
+        if (strpos($resource, '/api/') === 0) {
+            $resource = substr($resource, 4);
+            $isApiRoute = true;
+        } else {
+            $isApiRoute = false;
+        }
         // Buscar si existe un módulo en el recurso de la URL y asignarlo a la
         // configuración base de la ruta.
         $config = [
@@ -792,6 +801,11 @@ class Service_Http_Router implements Interface_Service
         if (empty($config['controller']) && !empty($config['module'])) {
             $config['controller'] = 'app';
             $config['action'] = 'module';
+        }
+        // Se ajusta configuración encontrada si es API.
+        if ($isApiRoute) {
+            array_unshift($config['parameters'], $config['action']);
+            $config['action'] = 'api';
         }
         // Retornar configuración de la ruta determinada.
         return $config;

@@ -19,7 +19,7 @@
             {% for field in data.model.list_display %}
                 <th class="text-center">{{ data.fields[field].verbose_name }}</th>
             {% endfor %}
-            <th class="text-center">
+            <th class="text-center" style="width:1px">
                 <i class="fa-solid fa-cogs fa-fw"></i>
             </th>
         </tr>
@@ -35,7 +35,7 @@
                     {% endif %}
                 </th>
             {% endfor %}
-            <th class="p-1" style="width:1px">
+            <th class="p-1">
                 <button class="btn btn-primary btn-sm w-100 h-100 reset-table">
                     <i class="fa-solid fa-redo fa-fw"></i>
                 </button>
@@ -57,6 +57,7 @@ $(document).ready(function() {
         ajax: '{{_url}}/api{{_route.url.controller}}/index?format=datatables',
         serverSide: true,
         processing: true,
+        autoWidth: false,
         lengthMenu: [10, 20, 25, 50, 75, 100],
         pageLength: {{ data.model.list_per_page }},
         fixedHeader: true,

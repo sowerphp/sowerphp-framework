@@ -40,8 +40,9 @@ class Model_Provincia extends Model
      */
     protected $meta = [
         'model' => [
-            'ordering' => ['provincia'],
+            'ordering' => ['codigo'],
             'default_permissions' => ['list', 'view'],
+            'list_group_by' => 'region.region',
         ],
         'fields' => [
             'codigo' => [

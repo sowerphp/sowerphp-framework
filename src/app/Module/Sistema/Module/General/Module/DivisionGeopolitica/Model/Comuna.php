@@ -40,8 +40,9 @@ class Model_Comuna extends Model
      */
     protected $meta = [
         'model' => [
-            'ordering' => ['comuna'],
+            'ordering' => ['codigo'],
             'default_permissions' => ['list', 'view'],
+            'list_group_by' => 'provincia.region.region',
         ],
         'fields' => [
             'codigo' => [

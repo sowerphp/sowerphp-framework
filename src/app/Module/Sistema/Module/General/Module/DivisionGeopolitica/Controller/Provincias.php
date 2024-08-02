@@ -23,14 +23,11 @@
 
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
-/**
- * Clase para el controlador asociado a la tabla provincia de la base de
- * datos
- * Comentario de la tabla: Provincias de cada región del país
- * Esta clase permite controlar las acciones entre el modelo y vista para la
- * tabla provincia
- */
-class Controller_Provincias extends \sowerphp\autoload\Controller_Model
-{
+use \sowerphp\autoload\Controller_Model;
 
+/**
+ * Controlador modelo: provincia.
+ */
+class Controller_Provincias extends Controller_Model
+{
 }

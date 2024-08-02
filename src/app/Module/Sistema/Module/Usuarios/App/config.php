@@ -30,22 +30,22 @@ return [
 
         // Menú para el módulo.
         'nav' => [
-            '/usuarios/listar/1/ultimo_ingreso_fecha_hora/D?search=activo:1' => [
+            '/usuarios' => [
                 'name' => 'Usuarios',
                 'desc' => 'Usuarios del sistema',
                 'icon' => 'fa fa-user',
             ],
-            '/grupos/listar' => [
+            '/grupos' => [
                 'name' => 'Grupos',
                 'desc' => 'Grupos del sistema',
                 'icon' => 'fa fa-users',
             ],
-            '/usuario_grupos/listar' => [
+            '/usuario_grupos' => [
                 'name' => 'Usuarios y grupos',
                 'desc' => 'Pertenencia de usuarios a grupos',
                 'icon' => 'fa fa-users',
             ],
-            '/auths/listar' => [
+            '/auths' => [
                 'name' => 'Autorización',
                 'desc' => 'Autorización y control de acceso sobre recursos',
                 'icon' => 'fa fa-lock',

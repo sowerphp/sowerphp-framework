@@ -23,14 +23,11 @@
 
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
-/**
- * Clase para el controlador asociado a la tabla comuna de la base de
- * datos
- * Comentario de la tabla: Comunas de cada provincia del país
- * Esta clase permite controlar las acciones entre el modelo y vista para la
- * tabla comuna
- */
-class Controller_Comunas extends \sowerphp\autoload\Controller_Model
-{
+use \sowerphp\autoload\Controller_Model;
 
+/**
+ * Controlador modelo: comuna.
+ */
+class Controller_Comunas extends Controller_Model
+{
 }

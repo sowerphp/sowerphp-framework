@@ -30,15 +30,15 @@ return [
 
         // Menú para el módulo.
         'nav' => [
-            '/comunas/listar' => [
+            '/comunas' => [
                 'name' => 'Comunas',
                 'icon' => 'fas fa-map-marker-alt',
             ],
-            '/provincias/listar' => [
+            '/provincias' => [
                 'name' => 'Provincias',
                 'icon' => 'fa fa-map',
             ],
-            '/regiones/listar' => [
+            '/regiones' => [
                 'name' => 'Regiones',
                 'icon' => 'fa fa-globe',
             ],
