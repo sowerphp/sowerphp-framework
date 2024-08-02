@@ -863,6 +863,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'list_per_page' => null,
         // Campos que se deben mostrar en las columnas al listar los registros.
         'list_display' => null,
+        // Campo por el que se deben agrupar los registros al listarlos.
+        'list_group_by' => null,
         // Acciones que se pueden realizar desde el listado de registros.
         'actions' => null,
     ];
@@ -1650,7 +1652,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public function jsonSerialize(): array
     {
         // Se definen los campos que se serializarán.
-        $fields = [];
+        $fields = ['id'];
         foreach ($this->getMeta()['fields'] as $field => $config) {
             if (!$config['hidden']) {
                 $fields[] = $field;
@@ -1939,6 +1941,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             case 'real':
             case 'float':
             case 'double':
+            case 'decimal':
                 return (isset($parameters) && $parameters != '')
                     ? (float) number_format($value, (int) $parameters)
                     : (float) $value
@@ -2415,6 +2418,43 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 )
             ], $meta['fields']);
         }
+        // Si no hay un campo ID se agrega uno que no será un campo real en la
+        // base de datos. Se autodeterminará y se utilizará para estandarizar
+        // el acceso y búsqueda de registros que tienen PK con un nombre
+        // diferente a ID o sobre todo aquellos modelos con PK compuestas.
+        if (!isset($meta['fields']['id'])) {
+            // Definir configuración base del campo ID "falso".
+            $idConfig = array_merge($this->defaultFieldConfig, [
+                'name' => 'id',
+                'verbose_name' => 'ID',
+                'alias' => null,
+                'label' => 'Id',
+                'db_column' => false,
+                'type' => 'string',
+                'auto' => true,
+                'cast' => 'string',
+                'editable' => false,
+                'fillable' => false,
+                'widget' => false,
+                'readonly' => true,
+                'show_in_list' => false,
+                'hidden' => false,
+                'searchable' => false,
+            ]);
+            // Si la PK no es compuesta se usan las opciones base de la PK.
+            if (!isset($meta['model']['primary_key'][1])) {
+                $pkConfig = $meta['fields'][$meta['model']['primary_key'][0]];
+                $configKeys = ['type', 'cast'];
+                foreach ($configKeys as $key) {
+                    $idConfig[$key] = $pkConfig[$key];
+                }
+                $idConfig['alias'] = $pkConfig['name'];
+            }
+            // Agregar campo ID.
+            $meta['fields'] = array_merge([
+                'id' => $idConfig,
+            ], $meta['fields']);
+        }
         // Definir forma de ordenar y buscar registros si no se ha definido.
         if (empty($meta['model']['ordering'])) {
             foreach ($meta['model']['primary_key'] as $pk) {
@@ -2517,6 +2557,34 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             return [$id];
         }
         return array_values($this->getPrimaryKeyValues());
+    }
+
+    /**
+     * Obtiene el valor del ID del registro.
+     *
+     * Permite obtener:
+     *
+     *   - ID real, como atributo real de la base de datos.
+     *   - ID como alias del atributo real que no se llama ID.
+     *   - ID como alias de una PK compuesta.
+     *
+     * @return void
+     */
+    protected function getIdAttribute()
+    {
+        $meta = $this->getMeta();
+        $db_column = $meta['fields.id.db_column'];
+        // Obtener el valor desde el arreglo de atributos del modelo.
+        if ($db_column) {
+            return (integer)$this->attributes['id'] ?? null;
+        }
+        // Obtener el valor desde la PK cuando es alias (PK no compuesta).
+        $alias = $meta['fields.id.alias'];
+        if ($alias) {
+            return $this->getAttribute($alias);
+        }
+        // Obtener el valor desde una PK compuesta.
+        return implode('/', $this->toArray($meta['model.primary_key'], [], false));
     }
 
     /**

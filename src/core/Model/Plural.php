@@ -121,7 +121,7 @@ abstract class Model_Plural
             $searchableReal = array_keys(array_filter(
                 $this->meta['fields'],
                 function ($config) {
-                    return $config['searchable'];
+                    return $config['db_column'] && $config['searchable'];
                 }
             ));
             if (!empty($searchableQuery)) {
@@ -189,15 +189,24 @@ abstract class Model_Plural
         }
         // Seleccionar las columnas deseadas si están especificadas.
         if (!empty($parameters['fields'])) {
-            // Si no se indicó la tabla en la columna es la misma tabla de la
-            // query.
-            foreach ($parameters['fields'] as &$field) {
+            $selectFields = [];
+            foreach ($parameters['fields'] as $field) {
+                // Si no se indicó la tabla en la columna se asume que se pasó
+                // el nombre del campo que no necesariamente es el nombre de la
+                // columna en la base de datos. Por lo cual se busca la columna
+                // de la base de datos. Si no existe, se omite el campo.
                 if (strpos($field, '.') === false) {
-                    $field = $query->from . '.' . $field;
+                    $db_column = $this->meta['fields.' . $field . '.db_column'];
+                    if (!$db_column) {
+                        continue;
+                    }
+                    $field = $query->from . '.' . $db_column;
                 }
+                // Se agrega el campo a los que se seleccionarán.
+                $selectFields[] = $field;
             }
             // Agregar columna solicitada.
-            $query->select($parameters['fields']);
+            $query->select($selectFields);
         }
         // Debug de la consulta SQL generada.
         // dd($query->toSql(), $query->getBindings());

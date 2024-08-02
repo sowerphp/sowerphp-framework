@@ -58,6 +58,7 @@ class View_Engine_Twig_General extends AbstractExtension
             new TwigFunction('dd', 'dd'),
             new TwigFunction('project_path', [$this, 'function_project_path']),
             new TwigFunction('session_messages', [$this, 'function_session_messages']),
+            new TwigFunction('explode', [$this, 'function_explode']),
             new TwigFunction('app_stats', [app(), 'getStats']),
         ];
     }
@@ -81,6 +82,24 @@ class View_Engine_Twig_General extends AbstractExtension
     public function function_session_messages(): Markup
     {
         return new Markup(SessionMessage::getMessagesAsString(), 'UTF-8');
+    }
+
+    /**
+     * Emula la función explode de PHP en Twig.
+     *
+     * @param string $delimiter El delimitador.
+     * @param string $string La cadena de texto a dividir.
+     * @param int|null $index (Opcional) El índice del elemento a retornar.
+     * @return array|string El array resultante de la división o un elemento
+     * específico si se proporciona el índice.
+     */
+    public function function_explode(string $delimiter, string $string, int $index = null): ?string
+    {
+        $parts = explode($delimiter, $string);
+        if ($index !== null) {
+            return $parts[$index] ?? null;
+        }
+        return $parts;
     }
 
 }
