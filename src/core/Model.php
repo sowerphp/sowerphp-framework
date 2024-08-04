@@ -26,7 +26,7 @@ namespace sowerphp\core;
 use \stdClass;
 use \Illuminate\Config\Repository;
 use \Illuminate\Support\Str;
-use \Illuminate\Database\Query\Builder as QueryBuilder;
+use \sowerphp\core\Database_QueryBuilder as QueryBuilder;
 
 /**
  * Clase abstracta para todos los modelos.
@@ -980,7 +980,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Tipos Enteros y Flotantes.
         self::TYPE_BIG_INCREMENTS => [
             'auto' => true,
-            'cast' => 'integer',
+            'cast' => 'int',
             'input_type' => self::INPUT_NUMBER,
             'primary_key' => true,
             'unique' => true,
@@ -992,13 +992,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'max_value' => 9223372036854775807,
         ],
         self::TYPE_BIG_INTEGER => [
-            'cast' => 'integer',
+            'cast' => 'int',
             'input_type' => self::INPUT_NUMBER,
             'min_value' => 9223372036854775808,
             'max_value' => 9223372036854775807,
         ],
         self::TYPE_DECIMAL => [
-            'cast' => 'decimal:2',
+            'cast' => 'float:2',
             'input_type' => self::INPUT_NUMBER,
             'decimal_places' => 2,
             'max_digits' => 10,
@@ -1017,7 +1017,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         ],
         self::TYPE_INCREMENTS => [
             'auto' => true,
-            'cast' => 'integer',
+            'cast' => 'int',
             'input_type' => self::INPUT_NUMBER,
             'primary_key' => true,
             'unique' => true,
@@ -1030,13 +1030,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         ],
         self::TYPE_INTEGER => [
             'input_type' => self::INPUT_NUMBER,
-            'cast' => 'integer',
+            'cast' => 'int',
             'min_value' => -2147483648,
             'max_value' => 2147483647,
         ],
         self::TYPE_MEDIUM_INCREMENTS => [
             'auto' => true,
-            'cast' => 'integer',
+            'cast' => 'int',
             'input_type' => self::INPUT_NUMBER,
             'primary_key' => true,
             'unique' => true,
@@ -1048,14 +1048,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'max_value' => 16777215,
         ],
         self::TYPE_MEDIUM_INTEGER => [
-            'cast' => 'integer',
+            'cast' => 'int',
             'input_type' => self::INPUT_NUMBER,
             'min_value' => -8388608,
             'max_value' => 8388607,
         ],
         self::TYPE_SMALL_INCREMENTS => [
             'auto' => true,
-            'cast' => 'integer',
+            'cast' => 'int',
             'input_type' => self::INPUT_NUMBER,
             'primary_key' => true,
             'unique' => true,
@@ -1067,14 +1067,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'max_value' => 65535,
         ],
         self::TYPE_SMALL_INTEGER => [
-            'cast' => 'integer',
+            'cast' => 'int',
             'input_type' => self::INPUT_NUMBER,
             'min_value' => -32768,
             'max_value' => 32767,
         ],
         self::TYPE_TINY_INCREMENTS => [
             'auto' => true,
-            'cast' => 'integer',
+            'cast' => 'int',
             'input_type' => self::INPUT_NUMBER,
             'primary_key' => true,
             'unique' => true,
@@ -1086,43 +1086,43 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'max_value' => 255,
         ],
         self::TYPE_TINY_INTEGER => [
-            'cast' => 'integer',
+            'cast' => 'int',
             'input_type' => self::INPUT_NUMBER,
             'min_value' => 0,
             'max_value' => 255,
         ],
         self::TYPE_UNSIGNED_BIG_INTEGER => [
-            'cast' => 'integer',
+            'cast' => 'int',
             'input_type' => self::INPUT_NUMBER,
             'min_value' => 0,
             'max_value' => PHP_INT_MAX,
         ],
         self::TYPE_UNSIGNED_DECIMAL => [
-            'cast' => 'decimal:2',
+            'cast' => 'float:2',
             'input_type' => self::INPUT_NUMBER,
             'decimal_places' => 2,
             'max_digits' => 10, // Este valor puede variar según el caso.
         ],
         self::TYPE_UNSIGNED_INTEGER => [
-            'cast' => 'integer',
+            'cast' => 'int',
             'input_type' => self::INPUT_NUMBER,
             'min_value' => 0,
             'max_value' => PHP_INT_MAX,
         ],
         self::TYPE_UNSIGNED_MEDIUM_INTEGER => [
-            'cast' => 'integer',
+            'cast' => 'int',
             'input_type' => self::INPUT_NUMBER,
             'min_value' => 0,
             'max_value' => 16777215,
         ],
         self::TYPE_UNSIGNED_SMALL_INTEGER => [
-            'cast' => 'integer',
+            'cast' => 'int',
             'input_type' => self::INPUT_NUMBER,
             'min_value' => 0,
             'max_value' => 65535,
         ],
         self::TYPE_UNSIGNED_TINY_INTEGER => [
-            'cast' => 'integer',
+            'cast' => 'int',
             'input_type' => self::INPUT_NUMBER,
             'min_value' => 0,
             'max_value' => 255,
@@ -1197,7 +1197,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         ],
         // Tipos Booleanos.
         self::TYPE_BOOLEAN => [
-            'cast' => 'boolean',
+            'cast' => 'bool',
             'input_type' => self::INPUT_SELECT,
             'choices' => [
                 0 => 'No',
@@ -1520,9 +1520,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Recupera la conexión a la base de datos asociada al modelo.
      *
-     * @return Database_Connection_Custom
+     * @return Database_Connection
      */
-    protected function getDatabaseConnection(): Database_Connection_Custom
+    protected function getDatabaseConnection(): Database_Connection
     {
         return $this->getPluralInstance()->getDatabaseConnection();
     }

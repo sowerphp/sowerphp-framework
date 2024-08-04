@@ -25,11 +25,11 @@ namespace sowerphp\core;
 
 /**
  * Clase personalizada para gestionar conexiones a bases de datos MySQL.
- * Extiende de Database_Connection_Custom para aplicar configuraciones y
+ * Extiende de Database_Connection para aplicar configuraciones y
  * optimizaciones específicas del motor MySQL. Permite la personalización de la
  * conexión y ejecución de comandos específicos de MySQL.
  */
-class Database_Connection_Custom_Mysql extends Database_Connection_Custom
+class Database_Connection_Mysql extends Database_Connection
 {
 
     /**

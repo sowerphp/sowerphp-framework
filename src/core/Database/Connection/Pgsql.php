@@ -25,11 +25,11 @@ namespace sowerphp\core;
 
 /**
  * Clase personalizada para gestionar conexiones a bases de datos PostgreSQL.
- * Extiende de Database_Connection_Custom para incluir funcionalidades
- * específicas de PostgreSQL, optimizando las interacciones y operaciones
- * específicas de este motor de base de datos.
+ * Extiende de Database_Connection para incluir funcionalidades específicas de
+ * PostgreSQL, optimizando las interacciones y operaciones específicas de este
+ * motor de base de datos.
  */
-class Database_Connection_Custom_Pgsql extends Database_Connection_Custom
+class Database_Connection_Pgsql extends Database_Connection
 {
 
     /**

@@ -154,9 +154,9 @@ function cache(): \sowerphp\core\Service_Cache
  * Obtiene una conexión a la base de datos.
  *
  * @param string|null $name Nombre de la conexión.
- * @return \sowerphp\core\Database_Connection_Custom
+ * @return \sowerphp\core\Database_Connection
  */
-function database(?string $name = null): \sowerphp\core\Database_Connection_Custom
+function database(?string $name = null): \sowerphp\core\Database_Connection
 {
     return app('database')->connection($name);
 }

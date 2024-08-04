@@ -25,11 +25,11 @@ namespace sowerphp\core;
 
 /**
  * Clase personalizada para gestionar conexiones a bases de datos SQLite.
- * Extiende de Database_Connection_Custom, adaptando y optimizando la conexión
- * para el manejo eficiente de bases de datos SQLite. Esta clase facilita la
+ * Extiende de Database_Connection, adaptando y optimizando la conexión para el
+ * manejo eficiente de bases de datos SQLite. Esta clase facilita la
  * implementación de funcionalidades específicas para SQLite.
  */
-class Database_Connection_Custom_Sqlite extends Database_Connection_Custom
+class Database_Connection_Sqlite extends Database_Connection
 {
 
     /**

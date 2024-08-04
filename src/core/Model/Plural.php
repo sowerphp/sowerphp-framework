@@ -24,7 +24,7 @@
 namespace sowerphp\core;
 
 use \Illuminate\Config\Repository;
-use \Illuminate\Database\Query\Builder as QueryBuilder;
+use \sowerphp\core\Database_QueryBuilder as QueryBuilder;
 
 /**
  * Clase abstracta para todos los modelos.
@@ -50,7 +50,7 @@ abstract class Model_Plural
     /**
      * Conexión a la base de datos asociada al modelo.
      *
-     * @var Database_Connection_Custom
+     * @var Database_Connection
      */
     protected $db;
 
@@ -88,9 +88,9 @@ abstract class Model_Plural
      * Si la conexión no existe se obtiene desde el servicio de bases de
      * datos.
      *
-     * @return Database_Connection_Custom
+     * @return Database_Connection
      */
-    public function getDatabaseConnection(): Database_Connection_Custom
+    public function getDatabaseConnection(): Database_Connection
     {
         if (!isset($this->db)) {
             $this->db = database($this->meta['model.db_name']);

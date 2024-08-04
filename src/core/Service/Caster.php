@@ -119,19 +119,19 @@ class Service_Caster implements Interface_Service
             : []
         ;
         switch ($type) {
+            case 'string':
+                return (string) $value;
             case 'int':
             case 'integer':
                 return (int) $value;
-            case 'real':
             case 'float':
+            case 'real':
             case 'double':
             case 'decimal':
                 return isset($parameters[0])
                     ? (float) number_format($value, (int) $parameters[0])
                     : (float) $value
                 ;
-            case 'string':
-                return (string) $value;
             case 'bool':
             case 'boolean':
                 return (bool) $value;
@@ -172,18 +172,19 @@ class Service_Caster implements Interface_Service
             : []
         ;
         switch ($type) {
+            case 'string':
+                return (string) $value;
             case 'int':
             case 'integer':
                 return (int) $value;
-            case 'real':
             case 'float':
+            case 'real':
+            case 'double':
             case 'decimal':
                 return isset($parameters[0])
                     ? (float) number_format($value, (int) $parameters[0])
                     : (float) $value
                 ;
-            case 'string':
-                return (string) $value;
             case 'bool':
             case 'boolean':
                 return (bool) $value;

@@ -23,7 +23,7 @@
 
 namespace sowerphp\core;
 
-use Illuminate\Database\Connection;
+use \Illuminate\Database\Connection;
 
 /**
  * Clase base abstracta para conexiones personalizadas de base de datos.
@@ -36,7 +36,7 @@ use Illuminate\Database\Connection;
  *
  * @abstract
  */
-abstract class Database_Connection_Custom extends Connection
+abstract class Database_Connection extends Connection
 {
 
     /**
@@ -70,6 +70,18 @@ abstract class Database_Connection_Custom extends Connection
     public function __toString()
     {
         return $this->getDriverName();
+    }
+
+    /**
+     * Entrega la instancia del QueryBuilder.
+     *
+     * @return Database_QueryBuilder
+     */
+    public function query(): Database_QueryBuilder
+    {
+        return new Database_QueryBuilder(
+            $this, $this->getQueryGrammar(), $this->getPostProcessor()
+        );
     }
 
     /**

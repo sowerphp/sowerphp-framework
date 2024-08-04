@@ -49,7 +49,7 @@ $(document).ready(function() {
     // Inicializar DataTables.
     $('#registers').DataTable({
         language: {
-            url: '//cdn.datatables.net/plug-ins/2.1.2/i18n/es-MX.json',
+            url: 'https://cdn.datatables.net/plug-ins/2.1.2/i18n/es-MX.json',
         },
         rowId: 'id',
         ajax: '{{_url}}/api{{_route.url.controller}}?format=datatables',
@@ -236,7 +236,7 @@ $(document).ready(function() {
                         {% if data.fields[field].display %}
                             return __.selector(row, '{{ data.fields[field].display|raw }}');
                         {% elseif data.fields[field].cast == 'integer' %}
-                            return __.num(data);
+                            return data !== null ? __.num(data) : null;
                         {% elseif data.fields[field].cast | slice(0, 7) == 'decimal' %}
                             {% set decimals = data.fields[field].cast | slice(8) %}
                             {% if decimals == '' %}
