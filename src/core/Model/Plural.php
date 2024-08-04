@@ -23,8 +23,8 @@
 
 namespace sowerphp\core;
 
-use Illuminate\Config\Repository;
-use Illuminate\Database\Query\Builder as QueryBuilder;
+use \Illuminate\Config\Repository;
+use \Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
  * Clase abstracta para todos los modelos.

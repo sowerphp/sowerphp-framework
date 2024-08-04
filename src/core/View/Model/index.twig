@@ -1,6 +1,4 @@
-{# {% extends "View/Layouts/" ~ __view_layout ~ ".twig" %} #}
-
-{% extends "View/Layouts/LibreDTE.twig" %}
+{% extends "View/Layouts/" ~ __view_layout ~ ".twig" %}
 
 {% block content %}
 
@@ -54,7 +52,7 @@ $(document).ready(function() {
             url: '//cdn.datatables.net/plug-ins/2.1.2/i18n/es-MX.json',
         },
         rowId: 'id',
-        ajax: '{{_url}}/api{{_route.url.controller}}/index?format=datatables',
+        ajax: '{{_url}}/api{{_route.url.controller}}?format=datatables',
         serverSide: true,
         processing: true,
         autoWidth: false,
@@ -320,7 +318,7 @@ function datatablesInitComplete(api) {
         $('input', this).on('keyup change', function() {
             if (!this.value.length) {
                 column.search('').draw();
-            } else if (this.value.length >= 3 && column.search() !== this.value) {
+            } else if (this.value.length >= 1 && column.search() !== this.value) {
                 column.search(this.value).draw();
             }
         });
@@ -408,7 +406,7 @@ function datatablesRenderActions(data, type, row) {
     if (actionsData.length === 1) {
         // Si solo hay una acción, no mostrar dropdown.
         var singleAction = actionsData[0];
-        var singleUrl = '{{_url}}{{_route.url.controller}}/' + singleAction.action + '/' + row.id.toString();
+        var singleUrl = '{{_url}}{{_route.url.controller}}/' + singleAction.action + '/' + row.id.toString().split('/').map(encodeURIComponent).join('/');
 
         if (singleAction.http_method === 'GET') {
             actions += `
@@ -440,7 +438,7 @@ function datatablesRenderActions(data, type, row) {
 
         // Botón principal (primera acción fuera del dropdown).
         var primaryAction = actionsData[0];
-        var primaryUrl = '{{_url}}{{_route.url.controller}}/' + primaryAction.action + '/' + row.id.toString();
+        var primaryUrl = '{{_url}}{{_route.url.controller}}/' + primaryAction.action + '/' + row.id.toString().split('/').map(encodeURIComponent).join('/');
 
         if (primaryAction.http_method === 'GET') {
             actions += `
@@ -480,7 +478,7 @@ function datatablesRenderActions(data, type, row) {
 
         // Otras acciones dentro del dropdown.
         actionsData.slice(1).forEach(function(action, index, array) {
-            var actionUrl = '{{_url}}{{_route.url.controller}}/' + action.action + '/' + row.id.toString();
+            var actionUrl = '{{_url}}{{_route.url.controller}}/' + action.action + '/' + row.id.toString().split('/').map(encodeURIComponent).join('/');
 
             // Manejo de dividers.
             if (action.divider_before && !previousDivider) {

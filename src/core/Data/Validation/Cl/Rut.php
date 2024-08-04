@@ -27,9 +27,8 @@ use Illuminate\Contracts\Validation\Rule;
 
 class Data_Validation_Cl_Rut implements Rule
 {
-
     /**
-     * Determina si el valor es un periodo válido en formato YYYYMM.
+     * Determina si el valor es un RUT válido.
      *
      * @param string $attribute
      * @param mixed $value
@@ -37,8 +36,60 @@ class Data_Validation_Cl_Rut implements Rule
      */
     public function passes($attribute, $value): bool
     {
-        // TODO: programar validación.
-        return true;
+        return $this->validateRut($value);
+    }
+
+    /**
+     * Valida un RUT chileno.
+     *
+     * @param string $rut
+     * @return bool
+     */
+    private function validateRut(string $rut): bool
+    {
+        // Remover puntos y guiones.
+        $rut = preg_replace('/[.\-]/', '', $rut);
+
+        // Verificar longitud mínima.
+        if (strlen($rut) < 8) {
+            return false;
+        }
+
+        // Obtener el dígito verificador.
+        $dv = strtoupper(substr($rut, -1));
+        $number = substr($rut, 0, -1);
+
+        // Validar dígito verificador.
+        return $this->calculateVerificationDigit($number) === $dv;
+    }
+
+    /**
+     * Calcula el dígito verificador de un RUT.
+     *
+     * @param string $number
+     * @return string
+     */
+    private function calculateVerificationDigit(string $number): string
+    {
+        $sum = 0;
+        $factor = 2;
+
+        for ($i = strlen($number) - 1; $i >= 0; $i--) {
+            $sum += $number[$i] * $factor;
+            $factor = $factor == 7 ? 2 : $factor + 1;
+        }
+
+        $dv = 11 - ($sum % 11);
+
+        if ($dv == 11) {
+            return '0';
+        }
+
+        if ($dv == 10) {
+            return 'K';
+        }
+
+        return (string) $dv;
     }
 
     /**

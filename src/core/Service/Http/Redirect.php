@@ -157,27 +157,6 @@ class Service_Http_Redirect extends Network_Response implements Interface_Servic
     }
 
     /**
-     * Añade múltiples mensajes de error a la sesión. Si se pasa una cadena,
-     * se convierte en un arreglo con la clave 'error' antes de procesarlo.
-     * Ideal para manejar errores no específicos de campos en formularios.
-     *
-     * @param array|string $errors Puede ser un array asociativo de errores
-     * donde cada clave es el campo y cada valor es el mensaje asociado,
-     * o un mensaje de error único como string.
-     * @return self Instancia actual para permitir encadenamiento.
-     */
-    public function withErrors($errors): self
-    {
-        if (!is_array($errors)) {
-            $errors = ['error' => $errors];
-        }
-        foreach ($errors as $key => $value) {
-            $this->withError($value);
-        }
-        return $this;
-    }
-
-    /**
      * Añade un mensaje informativo a la sesión utilizando la clave 'info'.
      * Útil para notificaciones generales al usuario.
      *
@@ -223,6 +202,42 @@ class Service_Http_Redirect extends Network_Response implements Interface_Servic
     public function withError(string $value): self
     {
         return $this->with('error', $value);
+    }
+
+    /**
+     * Añade múltiples mensajes de error a la sesión. Si se pasa una cadena,
+     * se convierte en un arreglo con la clave 'error' antes de procesarlo.
+     * Ideal para manejar errores no específicos de campos en formularios.
+     *
+     * @param array|string $errors Puede ser un array asociativo de errores
+     * donde cada clave es el campo y cada valor es el mensaje asociado,
+     * o un mensaje de error único como string.
+     * @return self Instancia actual para permitir encadenamiento.
+     */
+    public function withErrors($errors, string $key = 'default'): self
+    {
+        if (!is_array($errors)) {
+            $errors = ['error' => $errors];
+        }
+        $this->with('errors.' . $key, $errors);
+        return $this;
+    }
+
+    /**
+     * Almacena los datos de entrada en la sesión para que estén disponibles en
+     * la próxima solicitud. Esto es útil para redirigir a un formulario con
+     * los datos que el usuario ingresó previamente.
+     *
+     * @param array $input Arreglo con los datos de entrada a almacenar en la
+     * sesión. Si no se proporciona, se utilizarán los datos de la solicitud
+     * actual.
+     * @return $this Instancia actual para permitir el encadenamiento.
+     */
+    public function withInput(array $input = [])
+    {
+        $input = $input ?: request()->input();
+        session()->flashInput($input);
+        return $this;
     }
 
     /**

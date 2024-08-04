@@ -23,7 +23,7 @@
 
 namespace sowerphp\app\Sistema\General;
 
-use \sowerphp\core\Facade_Session_Message as SessionMessage;
+use \sowerphp\core\Network_Request as Request;
 
 /**
  * Clase para el controlador asociado a la tabla afd de la base de
@@ -47,7 +47,7 @@ class Controller_Afdes extends \sowerphp\autoload\Controller_Model
     /**
      * Acción para crear un AFD.
      */
-    public function crear()
+    public function crear(Request $request)
     {
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         // Si se envió el formulario se procesa.
@@ -86,8 +86,9 @@ class Controller_Afdes extends \sowerphp\autoload\Controller_Model
      *
      * @param string $codigo Código del AFD a editar.
      */
-    public function editar($codigo)
+    public function editar(Request $request, ...$pk)
     {
+        list($codigo) = $pk;
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         $Afd = new Model_Afd($codigo);
         // Si el registro que se quiere editar no existe error.

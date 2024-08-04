@@ -24,9 +24,9 @@
 namespace sowerphp\core;
 
 use \stdClass;
-use \Carbon\Carbon;
 use \Illuminate\Config\Repository;
 use \Illuminate\Support\Str;
+use \Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
  * Clase abstracta para todos los modelos.
@@ -859,6 +859,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'required_db_vendor' => null,
         // Seleccionar el registro tras guardarlo.
         'select_on_save' => false,
+        // Eliminar el registro realmente de la base de datos al usar delete().
+        'force_on_delete' => true,
         // Registros por página que se deben mostrar al listar los registros.
         'list_per_page' => null,
         // Campos que se deben mostrar en las columnas al listar los registros.
@@ -983,6 +985,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'primary_key' => true,
             'unique' => true,
             'editable' => false,
+            'readonly' => true,
+            'label' => 'Id',
             'verbose_name' => 'ID',
             'min_value' => 1,
             'max_value' => 9223372036854775807,
@@ -1018,6 +1022,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'primary_key' => true,
             'unique' => true,
             'editable' => false,
+            'readonly' => true,
+            'label' => 'Id',
             'verbose_name' => 'ID',
             'min_value' => 1,
             'max_value' => 2147483647,
@@ -1035,6 +1041,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'primary_key' => true,
             'unique' => true,
             'editable' => false,
+            'readonly' => true,
+            'label' => 'Id',
             'verbose_name' => 'ID',
             'min_value' => 1,
             'max_value' => 16777215,
@@ -1052,6 +1060,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'primary_key' => true,
             'unique' => true,
             'editable' => false,
+            'readonly' => true,
+            'label' => 'Id',
             'verbose_name' => 'ID',
             'min_value' => 1,
             'max_value' => 65535,
@@ -1069,6 +1079,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'primary_key' => true,
             'unique' => true,
             'editable' => false,
+            'readonly' => true,
+            'label' => 'Id',
             'verbose_name' => 'ID',
             'min_value' => 1,
             'max_value' => 255,
@@ -1120,30 +1132,55 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'cast' => 'string',
             'input_type' => self::INPUT_TEXT,
             'max_length' => 1,
-            'sanitize' => ['strip_tags', 'spaces', 'trim'],
+            'sanitize' => [
+                'remove_non_printable',
+                'strip_tags',
+                'spaces',
+                'trim',
+            ],
         ],
         self::TYPE_STRING => [
             'cast' => 'string',
             'input_type' => self::INPUT_TEXT,
             'max_length' => 255,
-            'sanitize' => ['strip_tags', 'spaces', 'trim'],
+            'sanitize' => [
+                'remove_non_printable',
+                'strip_tags',
+                'spaces',
+                'trim',
+            ],
         ],
         self::TYPE_TEXT => [
             'cast' => 'string',
             'input_type' => self::INPUT_TEXTAREA,
-            'sanitize' => ['strip_tags', 'spaces', 'trim'],
+            'sanitize' => [
+                'remove_non_printable',
+                'strip_tags',
+                'spaces',
+                'trim',
+            ],
             'max_length' => 65535,
         ],
         self::TYPE_MEDIUM_TEXT => [
             'cast' => 'string',
             'input_type' => self::INPUT_TEXTAREA,
-            'sanitize' => ['strip_tags', 'spaces', 'trim'],
+            'sanitize' => [
+                'remove_non_printable',
+                'strip_tags',
+                'spaces',
+                'trim',
+            ],
             'max_length' => 16777215,
         ],
         self::TYPE_LONG_TEXT => [
             'cast' => 'string',
             'input_type' => self::INPUT_TEXTAREA,
-            'sanitize' => ['strip_tags', 'spaces', 'trim'],
+            'sanitize' => [
+                'remove_non_printable',
+                'strip_tags',
+                'spaces',
+                'trim',
+            ],
             'max_length' => 4294967295,
         ],
         self::TYPE_UUID => [
@@ -1151,7 +1188,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'input_type' => self::INPUT_TEXT,
             'min_length' => 36,
             'max_length' => 36,
-            'sanitize' => ['strip_tags', 'spaces', 'trim'],
+            'sanitize' => [
+                'remove_non_printable',
+                'strip_tags',
+                'spaces',
+                'trim',
+            ],
         ],
         // Tipos Booleanos.
         self::TYPE_BOOLEAN => [
@@ -1166,30 +1208,35 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Tipos de Fecha y Hora.
         self::TYPE_DATE => [
             'cast' => 'date',
+            'widget' => 'date',
             'input_type' => self::INPUT_DATE,
             'min_value' => '1900-01-01',
             'max_value' => '2099-12-31',
         ],
         self::TYPE_DATE_TIME => [
             'cast' => 'datetime',
+            'widget' => 'datetime',
             'input_type' => self::INPUT_DATETIME_LOCAL,
             'min_value' => '1900-01-01 00:00:00',
             'max_value' => '2099-12-31 23:59:59',
         ],
         self::TYPE_DATE_TIME_TZ => [
             'cast' => 'datetime',
+            'widget' => 'datetime',
             'input_type' => self::INPUT_DATETIME_LOCAL,
             'min_value' => '1900-01-01 00:00:00',
             'max_value' => '2099-12-31 23:59:59',
         ],
         self::TYPE_TIME => [
             'cast' => 'datetime',
+            'widget' => 'datetime',
             'input_type' => self::INPUT_TIME,
             'min_value' => '1900-01-01 00:00:00',
             'max_value' => '2099-12-31 23:59:59',
         ],
         self::TYPE_TIME_TZ => [
             'cast' => 'datetime',
+            'widget' => 'datetime',
             'input_type' => self::INPUT_TIME,
             'min_value' => '1900-01-01 00:00:00',
             'max_value' => '2099-12-31 23:59:59',
@@ -1256,13 +1303,23 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         self::TYPE_IP_ADDRESS => [
             'cast' => 'string',
             'input_type' => self::INPUT_TEXT,
-            'sanitize' => ['strip_tags', 'spaces', 'trim'],
+            'sanitize' => [
+                'remove_non_printable',
+                'strip_tags',
+                'spaces',
+                'trim',
+            ],
             'max_length' => 39, // Para soportar IPv4 e IPv6.
         ],
         self::TYPE_MAC_ADDRESS => [
             'cast' => 'string',
             'input_type' => self::INPUT_TEXT,
-            'sanitize' => ['strip_tags', 'spaces', 'trim'],
+            'sanitize' => [
+                'remove_non_printable',
+                'strip_tags',
+                'spaces',
+                'trim',
+            ],
             'max_length' => 17, // Para soportar formato MAC xx:xx:xx:xx:xx:xx
         ],
         self::TYPE_MORPHS => [
@@ -1280,25 +1337,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         self::TYPE_REMEMBER_TOKEN => [
             'cast' => 'string',
             'input_type' => self::INPUT_HIDDEN,
-            'sanitize' => ['strip_tags', 'spaces', 'trim'],
+            'sanitize' => [
+                'remove_non_printable',
+                'strip_tags',
+                'spaces',
+                'trim',
+            ],
             'max_length' => 100,
         ],
-    ];
-
-    /**
-     * Filtros disponibles para usar en la sanitización con filter_var().
-     *
-     * @var array
-     */
-    protected $filters = [
-        'default' => FILTER_DEFAULT,
-        'encoded' => FILTER_SANITIZE_ENCODED,
-        'special_chars' => FILTER_SANITIZE_SPECIAL_CHARS,
-        'email' => FILTER_SANITIZE_EMAIL,
-        'url' => FILTER_SANITIZE_URL,
-        'number_int' => FILTER_SANITIZE_NUMBER_INT,
-        'number_float' => FILTER_SANITIZE_NUMBER_FLOAT,
-        'add_slashes' => FILTER_SANITIZE_ADD_SLASHES,
     ];
 
     /**
@@ -1343,7 +1389,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Todos los metadatos del modelo y de los campos (atributos) del modelo.
      *
-     * @var array|Repository
+     * Será arreglo solo durante la asignación en el código. Una vez se crea
+     * con el constructor (o se restaura con bootstrap() realmente) se
+     * convertirá a un Repository normalizado.
+     *
+     * @var array|\Illuminate\Config\Repository
      */
     protected $meta = [];
 
@@ -1360,7 +1410,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Son atributos adicionales que estarán disponible a través de atributos
      * del modelo usando el prefijo `config_`.
      *
-     * @var Repository
+     * @var \Illuminate\Config\Repository
      */
     protected $configurations;
 
@@ -1447,6 +1497,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $this->bootstrap();
         $this->retrieve($id);
+        if ($this->hasConfigurations()) {
+            $this->getConfigAttribute();
+        }
     }
 
     /**
@@ -1702,7 +1755,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $this->setConfiguration($key, $value);
         }
         // Se asigna, probablemente, un atributo del modelo.
-        $this->setAttribute($key, $value);
+        else {
+            $this->setAttribute($key, $value);
+        }
     }
 
     /**
@@ -1821,71 +1876,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($value === null) {
             return $value;
         }
-        $sanitize = $this->getSanitization($key);
-        if (!$sanitize) {
+        $rules = $this->getSanitization($key);
+        if (!$rules) {
             return $value;
         }
-        foreach ($sanitize as $sanitizer) {
-            list($type, $parameters) = explode(':', $sanitizer . ':');
-            switch ($type) {
-                case 'strip_tags':
-                    $value = (isset($parameters) && $parameters != '')
-                        ? strip_tags($value, $parameters)
-                        : strip_tags($value)
-                    ;
-                    break;
-                case 'spaces':
-                    $value = preg_replace('/\s+/', ' ', $value);
-                    break;
-                case 'trim':
-                    $value = (isset($parameters) && $parameters != '')
-                        ? trim($value, $parameters)
-                        : trim($value)
-                    ;
-                    break;
-                case 'htmlspecialchars':
-                    $value = htmlspecialchars($value);
-                    break;
-                case 'htmlentities':
-                    $value = htmlentities($value);
-                    break;
-                case 'addslashes':
-                    $value = addslashes($value);
-                    break;
-                case 'urlencode':
-                    $value = urlencode($value);
-                    break;
-                case 'rawurlencode':
-                    $value = rawurlencode($value);
-                    break;
-                case 'intval':
-                    $value = (isset($parameters) && $parameters != '')
-                        ? intval($value, $parameters)
-                        : intval($value)
-                    ;
-                    break;
-                case 'floatval':
-                    $value = floatval($value);
-                    break;
-                case 'strtolower':
-                    $value = strtolower($value);
-                    break;
-                case 'strtoupper':
-                    $value = strtoupper($value);
-                    break;
-                case 'filter_var':
-                    $filter = $this->filters[$parameters]
-                        ?? $this->filters['default']
-                    ;
-                    $value = filter_var($value, $filter);
-                    break;
-                case 'substr':
-                case 'mb_substr':
-                    $value = mb_substr($value, 0, $parameters);
-                    break;
-            }
-        }
-        return $value;
+        $sanitized = app('sanitizer')->sanitize([$key => $value], $rules);
+        return $sanitized[$key];
     }
 
     /**
@@ -1929,46 +1925,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($value === null) {
             return $value;
         }
-        $cast = $this->getCast($key);
-        if (!$cast) {
+        $rules = $this->getCast($key);
+        if (!$rules) {
             return $value;
         }
-        list($type, $parameters) = explode(':', $cast . ':');
-        switch ($type) {
-            case 'int':
-            case 'integer':
-                return (int) $value;
-            case 'real':
-            case 'float':
-            case 'double':
-            case 'decimal':
-                return (isset($parameters) && $parameters != '')
-                    ? (float) number_format($value, (int) $parameters)
-                    : (float) $value
-                ;
-            case 'string':
-                return (string) $value;
-            case 'bool':
-            case 'boolean':
-                return (bool) $value;
-            case 'object':
-                return json_decode($value);
-            case 'array':
-            case 'json':
-                return is_string($value) ? json_decode($value, true) : $value;
-            case 'collection':
-                return collect(
-                    is_string($value) ? json_decode($value, true) : $value
-                );
-            case 'date':
-                return Carbon::parse($value)->startOfDay()->format('Y-m-d');
-            case 'datetime':
-                return Carbon::parse($value);
-            case 'timestamp':
-                return Carbon::createFromTimestamp($value);
-            default:
-                return $value;
-        }
+        $casted = app('caster')->castForGet([$key => $value], [$rules]);
+        return $casted[$key];
     }
 
     /**
@@ -1983,40 +1945,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($value === null) {
             return $value;
         }
-        $cast = $this->getCast($key);
-        if (!$cast) {
+        $rules = $this->getCast($key);
+        if (!$rules) {
             return $value;
         }
-        list($type, $parameters) = explode(':', $cast . ':');
-        switch ($type) {
-            case 'int':
-            case 'integer':
-                return (int) $value;
-            case 'real':
-            case 'float':
-            case 'double':
-                return (float) $value;
-            case 'string':
-                return (string) $value;
-            case 'bool':
-            case 'boolean':
-                return (bool) $value;
-            case 'object':
-                return json_encode($value);
-            case 'array':
-            case 'json':
-                return json_encode($value);
-            case 'collection':
-                return json_encode($value->toArray());
-            case 'date':
-                return Carbon::parse($value)->toDateString();
-            case 'datetime':
-                return Carbon::parse($value)->toDateTimeString();
-            case 'timestamp':
-                return Carbon::parse($value)->timestamp;
-            default:
-                return $value;
-        }
+        $casted = app('caster')->castForSet([$key => $value], [$rules]);
+        return $casted[$key];
     }
 
     /**
@@ -2037,7 +1971,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Asigna el valor de un atributo del modelo usando formato de arreglo.
+     * Asigna el valor de un atributo o configuración del modelo usando formato
+     * de arreglo.
      *
      * @param string $offset
      * @param mixed $value
@@ -2045,40 +1980,53 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function offsetSet($offset, $value): void
     {
-        $this->setAttribute($offset, $value);
+        $this->__set($offset, $value);
     }
 
     /**
-     * Obtiene el valor de un atributo del modelo usando formato de arreglo.
+     * Obtiene el valor de un atributo o configuración del modelo usando
+     * formato de arreglo.
      *
      * @param string $offset
      * @return void
      */
     public function offsetGet($offset)
     {
-        return $this->getAttribute($offset);
+        return $this->__get($offset);
     }
 
     /**
-     * Determina si un atributo del modelo existe y tiene valor asignado.
+     * Determina si un atributo o configuración del modelo existe y tiene valor
+     * asignado.
      *
      * @param string $offset
      * @return boolean
      */
     public function offsetExists($offset): bool
     {
-        return isset($this->attributes[$offset]);
+        if ($this->isConfigurationField($offset)) {
+            $key = $this->getConfigurationKey($offset);
+            return isset($this->config[$offset]);
+            return $this->getConfiguration($offset) !== null;
+        } else {
+            return isset($this->attributes[$offset]);
+        }
     }
 
     /**
-     * Elimina (o desasigna) el valor de un atributo del modelo.
+     * Elimina (o desasigna) el valor de un atributo o configuración del
+     * modelo.
      *
      * @param string $offset
      * @return void
      */
     public function offsetUnset($offset): void
     {
-        $this->setAttribute($offset, null);
+        if ($this->isConfigurationField($offset)) {
+            $this->setConfiguration($offset, null);
+        } else {
+            $this->setAttribute($offset, null);
+        }
     }
 
     /**
@@ -2098,8 +2046,19 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                     $this->setAttribute($key, $value);
                 }
             } else {
+                if ($this->isConfigurationField($key)) {
+                    $name = $this->getConfigurationName($key);
+                    $verbose_name =
+                        $this->meta['configurations.fields.' . $name . '.verbose_name']
+                        ?? $this->meta['configurations.fields.' . $name . '.label']
+                        ?? $name
+                    ;
+                } else {
+                    $verbose_name = $this->meta['fields.' . $key . '.verbose_name'];
+                }
                 throw new \Exception(__(
-                    'El atributo %s no es asignable masivamente.',
+                    'El atributo "%s" (%s) no es asignable masivamente.',
+                    $verbose_name,
                     $key
                 ), 422);
             }
@@ -2116,7 +2075,15 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected function isFillable(string $key): bool
     {
         // Determinar mediante configuración del campo en los metadatos.
-        $isFillable = $this->meta['fields'][$key]['fillable'] ?? null;
+        if ($this->isConfigurationField($key)) {
+            $name = $this->getConfigurationName($key);
+            $isFillable =
+                $this->meta['configurations']['fields'][$name]['fillable']
+                ?? null
+            ;
+        } else {
+            $isFillable = $this->meta['fields'][$key]['fillable'] ?? null;
+        }
         if ($isFillable !== null) {
             return $isFillable;
         }
@@ -2282,8 +2249,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         // Agregar índices base del modelo y los campos (atributos) del modelo.
         $meta = array_merge([
+            // Metadatos generales del modelo.
             'model' => [],
+            // Metadatos de los campos (atributos) del modelo.
             'fields' => [],
+            // Metadatos de la configuración extendida del modelo.
+            'configurations' => null,
         ], $meta);
         // Normalizar la configuración general del modelo.
         $meta['model'] = array_merge(
@@ -2579,7 +2550,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $db_column = $meta['fields.id.db_column'];
         // Obtener el valor desde el arreglo de atributos del modelo.
         if ($db_column) {
-            return (integer)$this->attributes['id'] ?? null;
+            $id = $this->attributes['id'] ?? null;
+            return $id === null ? null : (int) $id;
         }
         // Obtener el valor desde la PK cuando es alias (PK no compuesta).
         $alias = $meta['fields.id.alias'];
@@ -2748,7 +2720,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             : $this->getSaveDataEdit()
         ;
         foreach ($data['fields'] as $field => $config) {
-            $rules[$prefix . $field] = $config['validation'];
+            $rules[$prefix . $field] = $config['validation'] !== null
+                ? $config['validation']
+                : []
+            ;
         }
         return $rules;
     }
@@ -2784,8 +2759,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected function generateFieldValidationRules(array $config): array
     {
         // Reglas para el tipo: string.
-        if ($config['type'] == self::TYPE_STRING) {
+        if ($config['cast'] == 'string') {
             return $this->generateFieldValidationRulesString($config);
+        }
+        // Reglas para el tipo: int.
+        if ($config['cast'] == 'integer') {
+            return $this->generateFieldValidationRulesInteger($config);
         }
         // Si no hay reglas que especificar se retorna vacío.
         return [];
@@ -2852,7 +2831,73 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             }
         }
         if ($config['choices']) {
-            $create[] = $edit[] = 'in:' . implode(',', $config['choices']);
+            $create[] = $edit[] = 'in:' . implode(',', array_keys($config['choices']));
+        }
+        return compact('create', 'edit');
+    }
+
+    /**
+     * Genera las reglas por defecto de un campo de tipo integer en base a su
+     * configuración.
+     *
+     * @param array $config Configuración del campo.
+     * @return array Reglas de validación.
+     */
+    protected function generateFieldValidationRulesInteger(array $config): array
+    {
+        $create = $edit = [];
+        if (!empty($config['required']['create'])) {
+            $create[] = 'required';
+        }
+        if (!empty($config['required']['edit'])) {
+            $edit[] = 'required';
+        }
+        if ($config['min_value']) {
+            $create[] = $edit[] =  'min:' . $config['min_value'];
+        }
+        if ($config['max_value']) {
+            $create[] = $edit[] =  'max:' . $config['max_value'];
+        }
+        if ($config['unique']) {
+            $primaryKey = $this->getPrimaryKey();
+            // Regla unique cuando existe solo un campo que forma la llave
+            // primaria del modelo.
+            if (!isset($primaryKey[1])) {
+                $unique = 'unique:'
+                    . $this->meta['model.db_table']
+                    . ',' . $config['db_column']
+                ;
+                $create[] = $unique;
+                $edit[] = $unique
+                    . ',' . $this->getAttribute($config['name'])
+                    . ',' . $primaryKey[0]
+                ;
+            }
+            // Regla unique cuando existen múltiples campos que forman la llave
+            // primaria del modelo.
+            else {
+                $unique = [
+                    $config['name'] => $this->getAttribute($config['name']),
+                ];
+                $ignore = [];
+                foreach ($primaryKey as $field) {
+                    $ignore[$field] = $this->getAttribute($field);
+                }
+                $create[] = new Data_Validation_UniqueComposite(
+                    $this->meta['model.db_name'],
+                    $this->meta['model.db_table'],
+                    $unique
+                );
+                $edit[] = new Data_Validation_UniqueComposite(
+                    $this->meta['model.db_name'],
+                    $this->meta['model.db_table'],
+                    $unique,
+                    $ignore
+                );
+            }
+        }
+        if ($config['choices']) {
+            $create[] = $edit[] = 'in:' . implode(',', array_keys($config['choices']));
         }
         return compact('create', 'edit');
     }
@@ -2886,6 +2931,16 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Crea una nueva instancia del constructor de consultas para el modelo.
+     *
+     * @return QueryBuilder
+     */
+    protected function newQuery(): QueryBuilder
+    {
+        return $this->getPluralInstance()->query();
+    }
+
+    /**
      * Verifica si el modelo existe en la base de datos.
      *
      * @return bool Verdadero si el modelo existe, falso en caso contrario.
@@ -2898,11 +2953,179 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // sin definir o `null`.
         if (!isset($this->exists)) {
             $primaryKeyValues = $this->getPrimaryKeyValues();
-            $query = $this->getPluralInstance()->query();
+            $query = $this->newQuery();
             $this->exists = $query->where($primaryKeyValues)->exists();
         }
         // Entregar el resultado que indica si el registro existe o no en la BD.
         return $this->exists;
+    }
+
+    /**
+     * Guarda el modelo en la base de datos.
+     *
+     * @param array $options Opciones adicionales para guardar. Ejemplos:
+     *   - `timestamps` (bool): Si deben actualizarse las marcas de tiempo.
+     *     Las marcas de tiempo son: `created_at`, `updated_at`.
+     *   - `event` (bool): Indica si deben dispararse eventos del modelo.
+     *     Eventos como: `creating`, `created`, `updating` y `updated`.
+     *     `true` para disparar, `false` para no.
+     * @return bool Verdadero si el modelo se guardó correctamente, falso en
+     * caso contrario.
+     */
+    public function save(array $options = []): bool
+    {
+        // Por defecto se asume como no guardado el registro.
+        $saved = false;
+
+        // Iniciar una transacción.
+        $this->getDatabaseConnection()->beginTransaction();
+
+        // Determinar si el modelo ya existe en la base de datos.
+        if ($this->exists()) {
+            // Si el modelo existe, realiza una actualización.
+            $saved = $this->isDirty() ? $this->performUpdate($options) : true;
+        } else {
+            // Si el modelo no existe, realiza una inserción.
+            $saved = $this->performInsert($options);
+        }
+
+        // Si no se pudo guardar el registro se hace rollback y se retorna.
+        if (!$saved) {
+            $this->getDatabaseConnection()->rollBack();
+            return false;
+        }
+
+        // Marcar el registro como existente.
+        $this->exists = true;
+
+        // Verificar si se debe volver a cargar el registro recién guardado
+        // para actualizar los atributos de la instancia.
+        $selectOption = $options['select']
+            ?? $this->meta['model.select_on_save']
+        ;
+        if ($selectOption) {
+            $this->configurations = null;
+            if (!$this->retrieve($this->getId())) {
+                $this->getDatabaseConnection()->rollBack();
+                return false;
+            }
+        }
+
+        // Guardar configuraciones asociadas al modelo si existen.
+        $configOption = $options['config'] ?? $this->hasConfigurations();
+        if ($configOption) {
+            if (!$this->saveConfigurations()) {
+                $this->getDatabaseConnection()->rollBack();
+                return false;
+            }
+        }
+
+        // Realizar commit y retornar que el guardado pudo ser realizado.
+        $this->getDatabaseConnection()->commit();
+        return true;
+    }
+
+    /**
+     * Actualiza el modelo en la base de datos.
+     *
+     * @param array $attributes Atributos a actualizar.
+     * @param array $options Opciones adicionales para actualizar. Ejemplos:
+     *   - `timestamps` (bool): Si debe actualizarse la marca de tiempo.
+     *     La marca de tiempo es: `updated_at`.
+     *   - `event` (bool): Indica si deben dispararse eventos del modelo.
+     *     Eventos como: `updating` y `updated`.
+     *     `true` para disparar, `false` para no.
+     * @return bool Verdadero si el modelo se actualizó correctamente, falso en
+     * caso contrario.
+     */
+    public function update(array $attributes = [], array $options = []): bool
+    {
+        return $this->fill($attributes)->save($options);
+    }
+
+    /**
+     * Elimina el modelo de la base de datos.
+     *
+     * @param array $options Opciones adicionales para eliminar. Ejemplos:
+     *   - `force` (bool): Forzar eliminación sin aplicar soft deletes.
+     *   - `event` (bool): Indica si deben dispararse eventos del modelo.
+     *     Eventos como: `deleting` y `deleted`.
+     *     `true` para disparar, `false` para no.
+     * @return bool Verdadero si el modelo se eliminó correctamente, false en
+     * caso de error.
+     */
+    public function delete(array $options = []): bool
+    {
+        // Si la opción 'force' es verdadera, realizar una eliminación
+        // permanente.
+        $forceOption = $options['force']
+            ?? $this->meta['model.force_on_delete']
+        ;
+        if ($forceOption) {
+            return $this->forceDelete($options);
+        }
+
+        // De lo contrario, realizar un soft delete.
+        return $this->runSoftDelete($options);
+    }
+
+    /**
+     * Realiza una eliminación permanente del modelo en la base de datos.
+     *
+     * @param array $options Opciones adicionales para eliminar. Ejemplos:
+     *   - `event` (bool): Indica si deben dispararse eventos del modelo.
+     *     Eventos como: `deleting` y `deleted`.
+     *     `true` para disparar, `false` para no.
+     * @return bool Verdadero si el modelo se eliminó correctamente, falso en
+     * caso de error.
+     */
+    protected function forceDelete(array $options): bool
+    {
+        // Verificar si deben dispararse los eventos.
+        if ($options['event'] ?? true) {
+            // Disparar evento 'deleting'.
+            if ($this->fireModelEvent('deleting') === false) {
+                return false;
+            }
+        }
+
+        // Realizar la eliminación del registro en la base de datos.
+        $primaryKeyValues = $this->getPrimaryKeyValues();
+        $query = $this->newQuery();
+        $deleted = $query->where($primaryKeyValues)->delete();
+
+        // Si el registro fue eliminado disparar eventos y retornar.
+        if ($deleted > 0) {
+            // Marcar el registro como eliminado.
+            $this->exists = false;
+
+            // Verificar si deben dispararse los eventos.
+            if ($options['event'] ?? true) {
+                // Disparar evento 'deleted'.
+                $this->fireModelEvent('deleted', false);
+            }
+
+            // Retornar que la eliminación pudo ser realizada.
+            return true;
+        }
+
+        // Retornar que la eliminación no pudo ser realizada.
+        return false;
+    }
+
+    /**
+     * Ejecuta el soft delete en el modelo.
+     *
+     * @param array $options Opciones adicionales para eliminar. Ejemplos:
+     *   - `event` (bool): Indica si deben dispararse eventos del modelo.
+     *     Eventos como: `deleting` y `deleted`.
+     *     `true` para disparar, `false` para no.
+     * @return bool Verdadero si el modelo se eliminó correctamente, falso en caso de error.
+     */
+    protected function runSoftDelete(array $options): bool
+    {
+        // TODO: implementar.
+        throw new \Exception(__('Soft delete no está implementado.'));
     }
 
     /**
@@ -2913,95 +3136,141 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @return bool Verdadero si algún atributo ha cambiado, falso en caso
      * contrario.
      */
-    public function isDirty($attributes = null): bool
+    protected function isDirty($attributes = null): bool
     {
-        // TODO: Implementar. Por ahora se asumen siempre modificados y se
-        // actualizarán siempre en la base de datos cuando se necesite guardar
-        // y el registro ya exista.
-        return true;
+        // TODO: Implementar. Por ahora se deja una validación muy simple.
+        // Se asumen siempre modificados si están en el arreglo de atributos.
+        return !empty($this->attributes);
     }
 
     /**
-     * Guarda el modelo en la base de datos.
+     * Realiza la inserción del modelo en la base de datos.
      *
-     * @param array $options Opciones adicionales para guardar.
-     * @return bool Verdadero si el modelo se guardó correctamente, falso en
-     * caso contrario.
-     */
-    public function save(array $options = []): bool
-    {
-        // Por defecto se asume como no guardado el registro.
-        $saved = false;
-        // Determinar si el modelo ya existe en la base de datos.
-        if ($this->exists()) {
-            // Si el modelo existe, realiza una actualización.
-            $saved = $this->isDirty() ? $this->update($options) : true;
-        } else {
-            // Si el modelo no existe, realiza una inserción.
-            $saved = $this->insert($options);
-        }
-        // Si se guardó correctamente se establece que el modelo existe y, si
-        // es necesario, se recupera el registro guardado en la base de datos
-        // para actualizar los atributos de la instancia.
-        if ($saved) {
-            $this->exists = true;
-            if ($this->meta['model.select_on_save']) {
-                $this->retrieve($this->getId());
-            }
-        }
-        // Entregar el resultado del guardado.
-        return $saved;
-    }
-
-    /**
-     * Inserta el modelo en la base de datos.
-     *
-     * @param array $options Opciones adicionales para insertar.
+     * @param array $options Opciones adicionales para insertar. Ejemplos:
+     *   - `timestamps` (bool): Si debe asignarse la marca de tiempo.
+     *     La marca de tiempo es: `created_at`.
+     *   - `event` (bool): Indica si deben dispararse eventos del modelo.
+     *     Eventos como: `creating` y `created`.
+     *     `true` para disparar, `false` para no.
      * @return bool Verdadero si el modelo se insertó correctamente, falso en
      * caso contrario.
      */
-    protected function insert(array $options): bool
+    protected function performInsert(array $options): bool
     {
-        $query = $this->getPluralInstance()->query();
+        // Verificar si deben dispararse los eventos.
+        if ($options['event'] ?? true) {
+            // Disparar evento 'creating'.
+            if ($this->fireModelEvent('creating') === false) {
+                return false;
+            }
+        }
+
+        // Verificar si deben asignarse las marcas de tiempo.
+        if ($options['timestamps'] ?? true) {
+            $this->updateTimestamps();
+        }
+
+        // Realizar la inserción del registro en la base de datos.
+        $query = $this->newQuery();
         $inserted = $query->insert($this->attributes);
+
+        // Si el registro fue insertado disparar eventos y retornar.
         if ($inserted) {
+            // Marcar el registro como existente.
             $this->exists = true;
+
+            // Verificar si deben dispararse los eventos.
+            if ($options['event'] ?? true) {
+                // Disparar evento 'created'.
+                $this->fireModelEvent('created', false);
+            }
+
+            // Retornar que la inserción pudo ser realizada.
             return true;
         }
+
+        // Retornar que la inserción no pudo ser realizada.
         return false;
     }
 
     /**
-     * Actualiza el modelo en la base de datos.
+     * Realiza la actualización del modelo en la base de datos.
      *
-     * @param array $options Opciones adicionales para actualizar.
+     * @param array $options Opciones adicionales para actualizar. Ejemplos:
+     *   - `timestamps` (bool): Si debe actualizarse la marca de tiempo.
+     *     La marca de tiempo es: `updated_at`.
+     *   - `event` (bool): Indica si deben dispararse eventos del modelo.
+     *     Eventos como: `updating` y `updated`.
+     *     `true` para disparar, `false` para no.
      * @return bool Verdadero si el modelo se actualizó correctamente, falso en
      * caso contrario.
      */
-    protected function update(array $options): bool
+    protected function performUpdate(array $options): bool
     {
+        // Verificar si deben dispararse los eventos.
+        if ($options['event'] ?? true) {
+            // Disparar evento 'updating'.
+            if ($this->fireModelEvent('updating') === false) {
+                return false;
+            }
+        }
+
+        // Verificar si deben actualizarse las marcas de tiempo.
+        if ($options['timestamps'] ?? true) {
+            $this->updateTimestamps();
+        }
+
+        // Realizar actualización de los atributos en la base de datos.
         $primaryKeyValues = $this->getPrimaryKeyValues();
-        $query = $this->getPluralInstance()->query();
+        $query = $this->newQuery();
         $updated = $query->where($primaryKeyValues)->update($this->attributes);
-        return $updated > 0;
+
+        // Si se logró actualizar revisar eventos y retornar.
+        if ($updated > 0) {
+
+            // Verificar si deben dispararse los eventos.
+            if ($options['event'] ?? true) {
+                // Disparar evento 'updated'.
+                $this->fireModelEvent('updated', false);
+            }
+
+            // Retornar que la actualización pudo ser realizada.
+            return true;
+        }
+
+        // Retornar que la actualización no pudo ser realizada.
+        return false;
     }
 
     /**
-     * Elimina el modelo de la base de datos.
+     * Dispara el evento dado para el modelo.
      *
-     * @return bool Verdadero si el modelo se eliminó correctamente, false en
-     * caso de error.
+     * @param string $event El nombre del evento a disparar.
+     * @param bool $halt Indica si el proceso debe detenerse si uno de los
+     * listeners retorna `false`. Por defecto es `true`.
+     * @return mixed
      */
-    public function delete(): bool
+    protected function fireModelEvent(string $event, bool $halt = true)
     {
-        $primaryKeyValues = $this->getPrimaryKeyValues();
-        $query = $this->getPluralInstance()->query();
-        $deleted = $query->where($primaryKeyValues)->delete();
-        if ($deleted > 0) {
-            $this->exists = false;
-            return true;
-        }
-        return false;
+        $dispatcher = app('events');
+        $event = "model.{$event}: " . static::class;
+        return $halt
+            ? $dispatcher->until($event, $this)
+            : $dispatcher->dispatch($event, $this)
+        ;
+    }
+
+    /**
+     * Actualiza las marcas de tiempo del modelo.
+     */
+    protected function updateTimestamps(): void
+    {
+        // TODO: implementar, lo ideal sería usar en vez de este método algo
+        // como updateAudit() y que se actualicen timestamps y otras cosas.
+        // Además, por defecto el modelo podría tener la config 'audit' donde
+        // se indicen los nombres de las columnas, porque en algunos modelos
+        // pueden no ser las estándares 'created_at' y 'updated_at'. Y se
+        // podrían agregar otras como 'created_by' y 'updated_by'.
     }
 
     /**
@@ -3087,6 +3356,16 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Indica si el modelo tiene o no configuraciones en una tabla aparte.
+     *
+     * @return boolean
+     */
+    protected function hasConfigurations(): bool
+    {
+        return !empty($this->meta['configurations']);
+    }
+
+    /**
      * Entrega el atributo con el arreglo de configuraciones del modelo.
      *
      * Es un accessor para el atributo Model::$config.
@@ -3105,6 +3384,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 }
             }
         }
+        if (is_array($this->configurations)) {
+            $this->configurations = new Repository($this->configurations);
+        }
         return $this->configurations;
     }
 
@@ -3113,12 +3395,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @return array Arreglo con los metadatos del modelo de configuraciones.
      */
-    protected function getConfigurationsMeta(): array
+    protected function getConfigurationsModelMeta(): array
     {
         $modelDbTable = $this->getMeta()['model.db_table'];
         $configModelDefaultMeta = [
             'db_table' => $modelDbTable . '_config',
-            'primary_key' => [
+            'foreign_key' => [
                 $modelDbTable => 'id',
             ],
             'fields' => [
@@ -3136,6 +3418,45 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Entrega los datos para una consulta específica de configuraciones
+     * de un registro.
+     *
+     * @return array Arreglo con los datos para usar en la query.
+     * @throws Exception Si no están los datos necesarios para realizar la
+     * query a la tabla de configuraciones del registro.
+     */
+    protected function getConfigurationsQueryData(): array
+    {
+        // Obtener los metadatos de las configuraciones.
+        $meta = $this->getConfigurationsModelMeta();
+        // Armar la información para la query, incluye la FK y sus valores.
+        $data = [
+            'db_table' => $meta['db_table'],
+            'foreign_key' => [],
+            'fields' => [
+                'category' => $meta['fields']['category'],
+                'key' => $meta['fields']['key'],
+                'value' => $meta['fields']['value'],
+                'is_json' => $meta['fields']['is_json'],
+            ],
+        ];
+        // Asignar la llave foránea del modelo de configuración.
+        foreach ($meta['foreign_key'] as $configModelField => $modelField) {
+            $modelValue = $this->getAttribute($modelField);
+            if ($modelValue === null) {
+                throw new \Exception(__(
+                    'Falta el valor del campo %s para armar la FK de la configuración del modelo %s.',
+                    $modelField,
+                    static::class
+                ));
+            }
+            $data['foreign_key'][$configModelField] = $modelValue;
+        }
+        // Entregar los datos de la query para configuraciones.
+        return $data;
+    }
+
+    /**
      * Obtiene las configuraciones desde la base de datos y las entrega en un
      * arreglo estandarizado.
      *
@@ -3143,43 +3464,36 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     protected function loadConfigurations(): array
     {
-        // Obtener metadatos del modelo de consiguración.
-        $configModelMeta = $this->getConfigurationsMeta();
-        $query = $this->getPluralInstance()
-            ->getDatabaseConnection()
-            ->table($configModelMeta['db_table'])
-        ;
-        // Asignar la llave primaria del modelo de configuración y determinar
-        // si están los datos necesarios para ser consultado.
-        $canBeQueried = true;
-        foreach ($configModelMeta['primary_key'] as $configModelField => $modelField) {
-            $modelValue = $this->getAttribute($modelField);
-            if ($modelValue === null) {
-                $canBeQueried = false;
-                break;
-            }
-            $query->where($configModelField, '=', $modelValue);
-        }
-        if (!$canBeQueried) {
+        // Obtener metadatos del modelo de configuración.
+        try {
+            $meta = $this->getConfigurationsQueryData();
+        } catch (\Exception $e) {
             return [];
         }
-        // Realizar consulta para obtener las configuraciones dle modelo desde
-        // la base de datos.
-        $configCols = array_values($configModelMeta['fields']);
-        $results = $query->get($configCols);
+        // Armar y realizar la query a la tabla de configuraciones del modelo.
+        $query = $this->getDatabaseConnection()->table($meta['db_table']);
+        foreach ($meta['foreign_key'] as $field => $value) {
+            $query->where($field, '=', $value);
+        }
+        $results = $query->get(array_values($meta['fields']));
+        // Armar arreglo con las configuraciones del modelo.
         $configurations = [];
         foreach ($results as $row) {
             // Obtener valores desde la base de datos.
-            $category = $row->{$configModelMeta['fields']['category']};
-            $key = $row->{$configModelMeta['fields']['key']};
-            $value = $row->{$configModelMeta['fields']['value']};
-            $is_json = $row->{$configModelMeta['fields']['is_json']};
+            $category = $row->{$meta['fields']['category']};
+            $key = $row->{$meta['fields']['key']};
+            $value = $row->{$meta['fields']['value']};
+            $is_json = $row->{$meta['fields']['is_json']};
             // Desencriptar y decodificar JSON si es necesario.
             $attribute = 'config_' . $category . '_' . $key;
             if ($this->hasEncryption($attribute)) {
-                $value = decrypt($value);
+                try {
+                    $value = decrypt($value);
+                } catch (\Exception $e) {
+                    $value = null;
+                }
             }
-            if ($is_json) {
+            if ($value != null && $is_json) {
                 $value = json_decode($value);
             }
             // Asignar valor a la configuración.
@@ -3189,44 +3503,71 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         return $configurations;
     }
 
+    /**
+     * Guarda la configuración asociada al registro del modelo en la base de
+     * datos.
+     *
+     * @return boolean `true` si fue posible guardar la configuración, `false`
+     * si no fue posible.
+     */
     protected function saveConfigurations(): bool
     {
-        /*if ($this->config) {
-            $app_pkey = config('app.key');
-            foreach ($this->config as $configuracion => $datos) {
-                foreach ($datos as $variable => $valor) {
-                    $Config = new Model_UsuarioConfig(
-                        $this->id,
-                        $configuracion,
-                        $variable
+        // Si no hay configuraciones asignadas se retorna OK, ya que no fue
+        // necesario guardar.
+        if (empty($this->configurations)) {
+            return true;
+        }
+        // Obtener metadatos del modelo de configuración.
+        try {
+            $meta = $this->getConfigurationsQueryData();
+        } catch (\Exception $e) {
+            return false;
+        }
+        // Obtener el arreglo de configuraciones y los metadatos de las mismas.
+        $configurations = $this->config->all();
+        // Iterar las configuraciones e ir guardando.
+        foreach ($configurations as $category => $config) {
+            foreach ($config as $key => $value) {
+                // Codificar valor como JSON si es necesario.
+                // NOTE: No se encripta por que ya está encriptado en el
+                // atributo $configurations del modelo al ser leído desde la
+                // base de datos o ser asignado en la aplicación.
+                if (!is_array($value) && !is_object($value)) {
+                    $is_json = 0;
+                } else {
+                    $value = json_encode($value);
+                    $is_json = 1;
+                }
+                // Determinar llave primaria para filtrar y valores a guardar
+                // de la configuración asociada al modelo.
+                $primaryKeyValues = array_merge($meta['foreign_key'], [
+                    $meta['fields']['category'] => $category,
+                    $meta['fields']['key'] => $key,
+                ]);
+                $configValues = [
+                    $meta['fields']['value'] => $value,
+                    $meta['fields']['is_json'] => $is_json,
+                ];
+                // Realizar la consulta a la base de datos para guardar la
+                // configuración asociada al modelo.
+                $query = $this->getDatabaseConnection()->table($meta['db_table']);
+                if ($value !== null) {
+                    $saved = $query->updateOrInsert(
+                        $primaryKeyValues,
+                        $configValues
                     );
-                    if (!is_array($valor) && !is_object($valor)) {
-                        $Config->json = 0;
-                    } else {
-                        $valor = json_encode($valor);
-                        $Config->json = 1;
+                    if (!$saved) {
+                        return false;
                     }
-                    $class = get_called_class();
-                    if (
-                        in_array($configuracion . '_' . $variable, $class::$config_encrypt)
-                        && $valor !== null
-                    ) {
-                        if (!$app_pkey) {
-                            throw new \Exception(
-                                'No está definida la configuración app.pkey para encriptar configuración del usuario.'
-                            );
-                        }
-                        $valor = encrypt($valor);
-                    }
-                    $Config->valor = $valor;
-                    if ($valor !== null) {
-                        $Config->save();
-                    } else {
-                        $Config->delete();
-                    }
+                } else {
+                    $deleted = $query->where($primaryKeyValues)->delete();
+                    // NOTE: deleted no se valida porque se podría solicitar
+                    // eliminar una configuración que no exista y eso no es un
+                    // problema.
                 }
             }
-        }*/
+        }
+        // Retornar que el guardado de la configuración pudo ser realizado.
         return true;
     }
 
@@ -3286,8 +3627,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $name = $this->getConfigurationName($attribute);
         if (strpos($name, '__') === false) {
-            $count = 1;
-            return str_replace('_', '.', $name, $count);
+            $position = strpos($name, '_');
+            $name[$position] = '.';
+            return $name;
         }
         return str_replace('__', '.', $name);
     }
@@ -3334,7 +3676,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $key = $this->getConfigurationKey($attribute);
         $value = $this->config[$key];
         // Desencriptar si corresponde.
-        if ($this->hasEncryption($attribute)) {
+        if ($value !== null && $this->hasEncryption($attribute)) {
             $value = decrypt($value);
         }
         // Realizar casteo si corresponde.
@@ -3381,7 +3723,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $value = $this->castConfigurationForSet($value);
             }
             // Encriptar si corresponde.
-            if ($this->hasEncryption($attribute)) {
+            if ($value !== null && $this->hasEncryption($attribute)) {
                 $value = encrypt($value);
             }
             // Determinar llave y asignar el valor en la configuración mediante

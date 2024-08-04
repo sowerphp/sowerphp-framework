@@ -318,7 +318,7 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
     /**
      * Acción para crear un nuevo usuario
      */
-    public function crear()
+    public function crear(Request $request)
     {
         if (!empty($_GET['listar'])) {
             $filterListarUrl = '?listar='.$_GET['listar'];
@@ -423,8 +423,9 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
     /**
      * Acción para editar un nuevo usuario.
      */
-    public function editar($id)
+    public function editar(Request $request, ...$pk)
     {
+        list($id) = $pk;
         if (!empty($_GET['listar'])) {
             $filterListarUrl = '?listar=' . $_GET['listar'];
             $filterListar = base64_decode($_GET['listar']);
@@ -1010,20 +1011,18 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
     public function layout(Request $request, $layout = null)
     {
         $user = $request->user();
-        // verificar se haya indicado un layout
+        // Verificar se haya indicado un layout.
         $layout = !empty($_POST['layout']) ? $_POST['layout'] : $layout;
         if (!$layout) {
             return redirect('/usuarios/perfil')->withError(__(
                 'Debe indicar el nuevo diseño que desea utilizar en la aplicación.'
             ));
         }
-        // cambiar layout
-        $user->fill([
-            'config_app_ui_layout' => $layout,
-        ]);
+        // Cambiar layout.
+        $user->config_app_ui_layout = $layout;
         $user->save();
         auth()->save();
-        return redirect('/app/session/app.ui.layout/'.$layout.'/'.base64_encode('/usuarios/perfil'))
+        return redirect('/app/session/app.ui.layout/'.$layout.'/'.base64_encode('/usuarios/perfil#libredte'))
             ->withSuccess('Se modificó el diseño por defecto de su cuenta.')
         ;
     }

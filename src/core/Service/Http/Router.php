@@ -339,6 +339,10 @@ class Service_Http_Router implements Interface_Service
                 '\\sowerphp\\autoload\\' . $routeConfig['class']
             ;
         }
+        // Se decodifican los parámetros de la URL que son parte del PATH.
+        foreach ($routeConfig['parameters'] as &$parameter) {
+            $parameter = rawurldecode($parameter);
+        }
         // Entregar configuración normalizada.
         return $routeConfig;
     }

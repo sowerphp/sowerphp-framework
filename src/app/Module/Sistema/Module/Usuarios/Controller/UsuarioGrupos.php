@@ -23,6 +23,8 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
+use \sowerphp\core\Network_Request as Request;
+
 /**
  * Clase para el controlador asociado a la tabla usuario_grupo de la base de
  * datos
@@ -35,9 +37,10 @@ class Controller_UsuarioGrupos extends \sowerphp\autoload\Controller_Model
 
     protected $deleteRecord = false; ///< Indica si se permite o no borrar registros
 
-    public function editar($usuario)
+    public function editar(Request $request, ...$pk)
     {
-        $listar = base64_encode(url($this->request->getBaseUrlWithoutSlash().'/sistema/usuarios/usuario_grupos/listar'.base64_decode($_GET['listar'])));
+        list($usuario) = $pk;
+        $listar = base64_encode(url($request->getBaseUrlWithoutSlash().'/sistema/usuarios/usuario_grupos/listar'.base64_decode($_GET['listar'])));
         return redirect('/sistema/usuarios/usuarios/editar/'.$usuario.'?listar='.$listar);
     }
 

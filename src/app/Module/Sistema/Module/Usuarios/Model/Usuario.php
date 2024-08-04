@@ -72,7 +72,13 @@ class Model_Usuario extends Model implements Authenticatable
                 'verbose_name' => 'Email',
                 'help_text' => 'Correo electrónico del usuario.',
                 'validation' => ['email'],
-                'sanitize' => ['strip_tags', 'spaces', 'trim', 'email'],
+                'sanitize' => [
+                    'remove_non_printable',
+                    'strip_tags',
+                    'spaces',
+                    'trim',
+                    'filter_var:email',
+                ],
             ],
             'contrasenia' => [
                 'type' => self::TYPE_STRING,
@@ -82,6 +88,7 @@ class Model_Usuario extends Model implements Authenticatable
                 'hidden' => true,
                 'show_in_list' => false,
                 'searchable' => false,
+                'input_type' => 'password',
             ],
             'contrasenia_intentos' => [
                 'type' => self::TYPE_SMALL_INTEGER,
@@ -102,15 +109,19 @@ class Model_Usuario extends Model implements Authenticatable
                 'hidden' => true,
                 'show_in_list' => false,
                 'searchable' => false,
+                'input_type' => 'password',
             ],
             'token' => [
                 'type' => self::TYPE_CHAR,
+                'blank' => true,
+                'unique' => true,
                 'length' => 64,
                 'verbose_name' => 'Token',
                 'help_text' => 'Token para servicio secundario de autorización.',
                 'hidden' => true,
                 'show_in_list' => false,
                 'searchable' => false,
+                'input_type' => 'password',
             ],
             'activo' => [
                 'type' => self::TYPE_BOOLEAN,
@@ -139,10 +150,12 @@ class Model_Usuario extends Model implements Authenticatable
                 'verbose_name' => 'Último hash',
                 'help_text' => 'Hash del último ingreso del usuario.',
                 'hidden' => true,
+                'input_type' => 'password',
             ],
         ],
         'configurations' => [
             'fields' => [
+                // Configuración de los campos.
             ],
         ],
     ];
@@ -172,7 +185,7 @@ class Model_Usuario extends Model implements Authenticatable
      * token, lo anterior ya que hay métodos especiales para actualizar dichas
      * columnas.
      */
-    protected function update(array $columns = []): bool
+    /*public function update(array $columns = []): bool
     {
         if ($columns) {
             return parent::update($columns);
@@ -188,7 +201,7 @@ class Model_Usuario extends Model implements Authenticatable
                 'ultimo_ingreso_hash' => $this->ultimo_ingreso_hash,
             ]);
         }
-    }
+    }*/
 
     /**
      * Método que revisa si el nombre de usuario ya existe en la base de datos.

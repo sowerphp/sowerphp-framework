@@ -72,7 +72,7 @@ class Model_MonedaCambio extends Model
                 'help_text' => '',
             ],
         ],
-    ]; 
+    ];
 
     private static $monedas_aduana = [
         'DOLAR USA' => 'USD',

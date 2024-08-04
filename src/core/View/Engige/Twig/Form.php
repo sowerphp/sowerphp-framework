@@ -321,9 +321,9 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
             return new Markup('', $this->charset);
         }
         // Generar el HTML de los errores.
-        $html = '<ul class="text-danger">';
+        $html = '<ul class="list-unstyled mb-0">';
         foreach ($errors as $error) {
-            $html .= sprintf('<li>%s</li>', $this->escape($error));
+            $html .= sprintf('<li><i class="fa-solid fa-exclamation-circle"></i> %s</li>', $this->escape($error));
         }
         $html .= '</ul>';
         // Entregar los errores renderizados.
@@ -485,6 +485,39 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
     }
 
     /**
+     * Obtiene el valor de un campo, teniendo en cuenta la prioridad de valores
+     * establecidos, valores de entrada antiguos en la sesión y valores
+     * predeterminados.
+     *
+     * Prioridad de valores (de mayor a menor):
+     *
+     *   1. `initial_value` - Un valor inicial específico proporcionado en el
+     *      array del campo.
+     *   2. `value` - Un valor actual proporcionado en el array del campo.
+     *   3. `default` - Un valor predeterminado proporcionado en el array del
+     *      campo.
+     *   4. `null` - Si ninguno de los valores anteriores está presente.
+     *
+     * Finalmente, se verifica si hay un valor antiguo en la sesión (valores de
+     * entrada previos almacenados en la sesión) para el nombre del campo
+     * proporcionado. Si lo hay, tendrá la máxima prioridad.
+     *
+     * @param array $field Un array que contiene los detalles del campo,
+     * incluyendo 'name', 'initial_value', 'value', y 'default'.
+     * @return mixed El valor del campo, considerando los valores anteriores de
+     * la sesión.
+     */
+    protected function getFieldValue(array $field)
+    {
+        $value = $field['initial_value']
+            ?? $field['value']
+            ?? $field['default']
+            ?? null
+        ;
+        return session()->getOldInput($field['name'], $value);
+    }
+
+    /**
      * Renderiza el widget por defecto para un campo.
      *
      * @param array $field La configuración del campo.
@@ -492,17 +525,16 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      */
     protected function renderDefaultWidget(array $field): string
     {
+        $valid = empty($field['errors']) ? '' : 'is-invalid';
         // Atributos del campo.
         $attributes = [
             'type' => $field['input_type'] ?? 'text',
             'name' => $field['name'],
             'id' => $field['id'] ?? $field['name'],
-            'class' => 'form-control ' . (($field['class'] ?? null) ?: ''),
-            'value' => $field['initial_value']
-                ?? $field['value']
-                ?? $field['default']
-                ?? null
+            'class' => 'form-control ' . $valid . ' '
+                . (($field['class'] ?? null) ?: '')
             ,
+            'value' => $this->getFieldValue($field),
             'placeholder' => $field['placeholder'] ?? null,
             'required' => !empty($field['required']) ? 'required' : null,
             'readonly' => !empty($field['readonly']) ? 'readonly' : null,
@@ -520,6 +552,24 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         );
         // Entregar el HTML del widget.
         return $html;
+    }
+
+    protected function renderDateWidget(array $field): string
+    {
+        $value = $this->getFieldValue($field);
+        if ($value) {
+            $field['initial_value'] = substr($value, 0, 10);
+        }
+        return $this->renderDefaultWidget($field);
+    }
+
+    protected function renderDatetimeWidget(array $field): string
+    {
+        $value = $this->getFieldValue($field);
+        if ($value) {
+            $field['initial_value'] = substr($value, 0, 16);
+        }
+        return $this->renderDefaultWidget($field);
     }
 
 }

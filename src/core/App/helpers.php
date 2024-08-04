@@ -557,10 +557,10 @@ function shell_exec_async($cmd, $log = false, &$output = []): int
  */
 function message_format(string $string, bool $html = true): string
 {
-    // preguntas frecuentes de la aplicación
+    // Preguntas frecuentes de la aplicación.
     if (strpos($string, '[faq:') !== false) {
         $faq = (array)config('services.faq');
-        // hay config de faqs -> se agrega enlace
+        // Hay config de faqs -> se agrega enlace.
         if (!empty($faq['url']) && !empty($faq['text'])) {
             $replace = $html
                 ? '<a href="' . $faq['url']
@@ -573,7 +573,7 @@ function message_format(string $string, bool $html = true): string
                 $string
             );
         }
-        // no hay config de faqs -> se quita FAQ del mensaje
+        // No hay config de faqs -> se quita FAQ del mensaje.
         else {
             $string = preg_replace(
                 '/\[(faq):([\w\d]+)\]/i',
@@ -582,18 +582,20 @@ function message_format(string $string, bool $html = true): string
             );
         }
     }
-    // cambios cuando es HTML (se pasa texto a HTML)
+
+    // Cambios cuando es HTML (se pasa texto a HTML).
     if ($html) {
-        // enlaces en formato markdown
+        // Enlaces en formato markdown.
         $string = preg_replace(
             '/\[([^\]]+)\]\((https?:\/\/[^\s]+)\)/',
             '<a href="$2" target="_blank" class="alert-link">$1</a>',
             $string
         );
-        // flechas para instrucciones (tipo "siguiente")
+        // Flechas para instrucciones (tipo "siguiente").
         $string = str_replace('>>', '&raquo;', $string);
     }
-    // entregar string modificado con los enlaces correspondientes
+
+    // Entregar string modificado con los enlaces correspondientes.
     return $string;
 }
 
@@ -631,10 +633,12 @@ function is_serialized($data): bool
     if (!is_string($data)) {
         return false;
     }
+
     // Si es "N;", está serializado (valor NULL).
     if ($data === 'N;') {
         return true;
     }
+
     // Verificar si es un valor serializado más complejo.
     if (preg_match('/^([adObis]):/', $data, $matches)) {
         switch ($matches[1]) {
@@ -648,6 +652,59 @@ function is_serialized($data): bool
                 return (bool)preg_match("/^{$matches[1]}:[0-9.E-]+;$/", $data);
         }
     }
+
     // Otros casos no se consideran serializados.
     return false;
+}
+
+/**
+ * Convierte un string de parámetros en un arreglo, manejando caracteres de
+ * split escapados.
+ *
+ * Esta función permite convertir una cadena de parámetros separados por un
+ * delimitador especificado en un arreglo. El delimitador puede ser
+ * cualquier carácter, y las instancias de dicho delimitador que estén
+ * escapadas serán tratadas como parte del valor del parámetro en lugar de
+ * como un separador.
+ *
+ * @param string $parametersString El string de parámetros, donde los
+ * parámetros están separados por un carácter especificado.
+ * @param string $delimiter El carácter utilizado para separar los
+ * parámetros (por defecto es una coma).
+ * @return array Arreglo de parámetros.
+ *
+ * @example
+ * // Con la coma como delimitador.
+ * parseParameters('param\,1,2');
+ * Resultado: ['param,1', '2']
+ *
+ * @example
+ * // Con el punto y coma como delimitador.
+ * parseParameters('param\;1;2', ';');
+ * Resultado: ['param;1', '2']
+ */
+function split_parameters(string $parametersString, string $delimiter = ','): array
+{
+    // Escapa el delimitador para su uso en expresiones regulares.
+    $escapedDelimiter = preg_quote($delimiter, '/');
+
+    // Reemplaza las instancias del delimitador escapado con un marcador
+    // temporal.
+    $tempMarker = '{{[[DELIMITER]]}}';
+    $tempString = preg_replace(
+        '/\\' . $escapedDelimiter . '/',
+        $tempMarker,
+        $parametersString
+    );
+
+    // Divide la cadena en partes usando el delimitador como separador.
+    $parts = explode($delimiter, $tempString);
+
+    // Restaura los delimitadores escapados en las partes.
+    $parameters = array_map(function ($part) use ($delimiter, $tempMarker) {
+        return str_replace($tempMarker, $delimiter, $part);
+    }, $parts);
+
+    // Entregar los parámetros encontrados.
+    return $parameters;
 }

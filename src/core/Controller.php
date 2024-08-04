@@ -142,6 +142,12 @@ abstract class Controller
             $viewAction = $this->request->getRouteConfig()['action'];
             $view = $viewFolder . DIRECTORY_SEPARATOR . $viewAction;
         }
+        // Asignar layout del usuario si hay sesión iniciada y tiene layout
+        // asignado en su configuración.
+        $user = user();
+        if ($user && $user->config_app_ui_layout) {
+            $this->viewVars['__view_layout'] = $user->config_app_ui_layout;
+        }
         // Preparar los datos que se pasarán a la vista para ser renderizada.
         $data = array_merge($this->viewVars, $data);
         // Renderizar vista y retornar.

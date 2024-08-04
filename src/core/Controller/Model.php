@@ -129,6 +129,15 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $this->getModelClass(),
             ...$id
         );
+        if (!$instance->exists()) {
+            if (!$instance->exists()) {
+                return redirect()->withError(__(
+                    'Recurso solicitado %s(%s) no existe, no se puede mostrar.',
+                    $instance->getMeta()['model.label'],
+                    implode(', ', $id)
+                ))->back();
+            }
+        }
         if (!in_array('view', $instance->getMeta()['model.default_permissions'])) {
             return redirect()->withError(__(
                 'No es posible mostrar registros de tipo %s.',
@@ -164,6 +173,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         // Preparar los metadatos para el formulario de creación.
         $data = $instance->getSaveDataCreate();
         $routeConfig = $request->getRouteConfig();
+        // Agregar metadatos del formulario en si.
         $data['form'] = [
             'action' => 'create',
             'url' => url($routeConfig['url']['controller'] . '/store'),
@@ -175,6 +185,17 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 'onsubmit' => 'return validateModelCreateForm(this)',
             ]
         ];
+        // Agregar errores del formulario si existen.
+        $formErrors = session()->get('errors.default');
+        if ($formErrors) {
+            SessionMessage::error('El formulario enviado contiene errores. Por favor, revisa los campos del formulario y corrige los errores antes de continuar.');
+            foreach ($formErrors as $key => $errors) {
+                if (!isset($data['fields'][$key])) {
+                    continue;
+                }
+                $data['fields'][$key]['errors'] = $errors;
+            }
+        }
         // Renderizar la vista con el formulario de creación.
         return $this->render('create', [
             'data' => $data,
@@ -186,6 +207,46 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function store(Request $request)
     {
+        // Crear una instancia del modelo.
+        $instance = $this->modelService->instantiate(
+            $this->getModelClass()
+        );
+        // Validar datos.
+        try {
+            $rules = $instance->getValidationRulesCreate();
+            $validatedData = $request->validate($rules);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back(422)->withErrors($e->errors())->withInput();
+        }
+        // Obtener URL de la API que se deberá consumir.
+        $routeConfig = $request->getRouteConfig();
+        $url = sprintf(
+            '%s/%s',
+            $routeConfig['url']['controller'],
+            $routeConfig['action']
+        );
+        // Consumir recurso de la API.
+        $response = libredte()->post($url, ['data' => $validatedData]);
+        $json = $response->json() ?? $response->body();
+        if (!$response->successful()) {
+            if (is_string($json)) {
+                $message = $json;
+                $status_code = $response->status();
+            } else {
+                $message = $json['message'];
+                if (!empty($json['errors'])) {
+                    foreach ($json['errors'] as $field => $errors) {
+                        foreach ($errors as $error) {
+                            $message .= ' ' . $error;
+                        }
+                    }
+                }
+                $status_code = $json['status_code'];
+            }
+            return redirect()->back($status_code)->withError($message)->withInput();
+        } else {
+            return redirect()->withSuccess($json['message'])->back(200);
+        }
     }
 
     /**
@@ -215,9 +276,14 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         // Preparar los metadatos para el formulario de edición.
         $data = $instance->getSaveDataEdit();
         $routeConfig = $request->getRouteConfig();
+        // Agregar metadatos del formulario en si.
         $data['form'] = [
             'action' => 'edit',
-            'url' => url($routeConfig['url']['controller'] . '/update'),
+            'url' => url(
+                $routeConfig['url']['controller']
+                . '/update/'
+                . implode('/', $id)
+            ),
             'method' => 'POST',
             'id' => 'modelEditForm',
             'class' => 'needs-validation',
@@ -226,6 +292,17 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 'onsubmit' => 'return validateModelEditForm(this)',
             ]
         ];
+        // Agregar errores del formulario si existen.
+        $formErrors = session()->get('errors.default');
+        if ($formErrors) {
+            SessionMessage::error('El formulario enviado contiene errores. Por favor, revisa los campos del formulario y corrige los errores antes de continuar.');
+            foreach ($formErrors as $key => $errors) {
+                if (!isset($data['fields'][$key])) {
+                    continue;
+                }
+                $data['fields'][$key]['errors'] = $errors;
+            }
+        }
         // Renderizar la vista con el formulario de edición.
         return $this->render('edit', [
             'id' => $id,
@@ -238,6 +315,47 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function update(Request $request, ...$id)
     {
+        // Crear una instancia del modelo.
+        $instance = $this->modelService->instantiate(
+            $this->getModelClass()
+        );
+        // Validar datos.
+        try {
+            $rules = $instance->getValidationRulesEdit();
+            $validatedData = $request->validate($rules);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back(422)->withErrors($e->errors())->withInput();
+        }
+        // Obtener URL de la API que se deberá consumir.
+        $routeConfig = $request->getRouteConfig();
+        $url = sprintf(
+            '%s/%s/%s',
+            $routeConfig['url']['controller'],
+            $routeConfig['action'],
+            implode('/', $id)
+        );
+        // Consumir recurso de la API.
+        $response = libredte()->put($url, ['data' => $validatedData]);
+        $json = $response->json() ?? $response->body();
+        if (!$response->successful()) {
+            if (is_string($json)) {
+                $message = $json;
+                $status_code = $response->status();
+            } else {
+                $message = $json['message'];
+                if (!empty($json['errors'])) {
+                    foreach ($json['errors'] as $field => $errors) {
+                        foreach ($errors as $error) {
+                            $message .= ' ' . $error;
+                        }
+                    }
+                }
+                $status_code = $json['status_code'];
+            }
+            return redirect()->back($status_code)->withError($message)->withInput();
+        } else {
+            return redirect()->withSuccess($json['message'])->back($response->status());
+        }
     }
 
     /**
@@ -255,9 +373,11 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         );
         // Consumir recurso de la API.
         $response = libredte()->delete($url);
-        $json = $response->json();
+        $json = $response->json() ?? $response->body();
         if (!$response->successful()) {
-            return redirect()->withError($json['message'])->back($json['status_code']);
+            $message = is_string($json) ? $json : $json['message'];
+            $status_code = is_string($json) ? $response->status() : $json['status_code'];
+            return redirect()->back($status_code)->withError($message);
         } else {
             return redirect()->withSuccess($json['message'])->back($response->status());
         }
@@ -721,9 +841,8 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     /**
      * Acción para listar los registros de la tabla.
      */
-    public function listar($page = 1, $orderby = null, $order = 'A')
+    public function listar(Request $request, $page = 1, $orderby = null, $order = 'A')
     {
-        $request = request();
         // Crear objeto plural.
         $Objs = $this->getModelPluralInstance();
         // Si se debe buscar se agrega filtro.
@@ -863,9 +982,8 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     /**
      * Acción para crear un registro en la tabla
      */
-    public function crear()
+    public function crear(Request $request)
     {
-        $request = request();
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         // si se envió el formulario se procesa
         if (isset($_POST['submit'])) {
@@ -916,12 +1034,11 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      * Acción para editar un registro de la tabla
      * @param pk Parámetro que representa la PK, pueden ser varios parámetros los pasados
      */
-    public function editar($pk)
+    public function editar(Request $request, ...$pk)
     {
-        $request = request();
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         $modelClass = $this->getModelClass();
-        $Obj = new $modelClass(array_map('urldecode', func_get_args()));
+        $Obj = new $modelClass(array_map('urldecode', $pk));
         // si el registro que se quiere editar no existe error
         if (!$Obj->exists()) {
             return redirect(
@@ -929,7 +1046,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             )->withError(
                 __('Registro (%(args)s) no existe, no se puede editar.',
                     [
-                        'args' => implode(', ', func_get_args())
+                        'args' => implode(', ', $pk)
                     ]
                 )
             );
@@ -954,7 +1071,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                         ->withSuccess(
                             __('Registro (%(args)s) editado.',
                                 [
-                                    'args' => implode(', ', func_get_args())
+                                    'args' => implode(', ', $pk)
                                 ]
                             )
                         );
@@ -963,7 +1080,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                         ->withError(
                             __('Registro (%(args)s) no editado.',
                                 [
-                                    'args' => implode(', ', func_get_args())
+                                    'args' => implode(', ', $pk)
                                 ]
                             )
                         );
@@ -988,9 +1105,8 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      * Acción para eliminar un registro de la tabla
      * @param pk Parámetro que representa la PK, pueden ser varios parámetros los pasados
      */
-    public function eliminar($pk)
+    public function eliminar(Request $request, ...$pk)
     {
-        $request = request();
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         if (!$this->deleteRecord) {
             return redirect(
@@ -1000,7 +1116,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             );
         }
         $modelClass = $this->getModelClass();
-        $Obj = new $modelClass(array_map('urldecode', func_get_args()));
+        $Obj = new $modelClass(array_map('urldecode', $pk));
         // si el registro que se quiere eliminar no existe error
         if(!$Obj->exists()) {
             return redirect(
@@ -1008,7 +1124,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             )->withError(
                 __('Registro (%(args)s) no existe, no se puede eliminar.',
                     [
-                        'args' => implode(', ', func_get_args())
+                        'args' => implode(', ', $pk)
                     ]
                 )
             );
@@ -1019,7 +1135,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 ->withSuccess(
                     __('Registro (%(args)s) eliminado.'.
                         [
-                            'args' => implode(', ', func_get_args())
+                            'args' => implode(', ', $pk)
                         ])
                 );
         } catch (\Exception $e) {
@@ -1027,7 +1143,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 ->withError(
                     __('No se pudo eliminar el registro (%(args)s): %(error_message)s',
                         [
-                            'args' => implode(', ', func_get_args()),
+                            'args' => implode(', ', $pk),
                             'error_message' => $e->getMessage()
                         ]
                     )
@@ -1038,9 +1154,8 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     /**
      * Método para descargar un archivo desde la base de datos
      */
-    public function d($campo, $pk)
+    public function d(Request $request, $campo, ...$pk)
     {
-        $request = request();
         // si el campo que se solicita no existe error
         if (!isset($this->getModelClass()::$columnsInfo[$campo . '_data'])) {
             return redirect(
@@ -1053,9 +1168,8 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 )
             );
         }
-        $pks = array_slice(func_get_args(), 1);
         $modelClass = $this->getModelClass();
-        $Obj = new $modelClass($pks);
+        $Obj = new $modelClass(...$pk);
         // si el registro que se quiere eliminar no existe error
         if(!$Obj->exists()) {
             return redirect(
@@ -1063,7 +1177,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             )->withError(
                 __('Registro (%(pks)s) no existe. No se puede obtener %(field)s.',
                     [
-                        'pks' => implode(', ', $pks),
+                        'pks' => implode(', ', $pk),
                         'field' => $campo
                     ]
                 )
@@ -1076,7 +1190,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 __('No hay datos para el campo %(field)s en el registro (%(pks)s).',
                     [
                         'field' => $campo,
-                        'pks' => implode(', ', $pks)
+                        'pks' => implode(', ', $pk)
                     ]
                 )
             );

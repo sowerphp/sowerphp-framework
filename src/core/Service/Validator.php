@@ -127,7 +127,7 @@ class Service_Validator implements Interface_Service
     }
 
     /**
-     * Valida los datos de la solicitud según las reglas definidas.
+     * Valida los datos según las reglas definidas.
      *
      * Crea una instancia del `ValidatorFactory` utilizando los servicios de
      * traducción y eventos. Valida los datos de la solicitud y lanza una

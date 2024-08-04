@@ -67,15 +67,26 @@ class Network_Response //extends Response
      * Asigna el código de estado de la respuesta HTTP que se enviará o lo
      * recupera.
      *
-     * @param int|null $status Estado HTTP que se desea asignar a la respuesta.
-     * @return int Código HTTP asignado (puede haber sido ajustado del original).
+     * @param int|string|null $status Estado HTTP que se desea asignar a la
+     * respuesta.
+     * @return int Código HTTP asignado. Puede haber sido ajustado del
+     * original.
      */
-    public function status(?int $status = null): int
+    public function status($status = null): int
     {
         if ($status !== null) {
-            // Si no hay código (es 0), se asigna 200 por defecto.
-            if ($status === 0) {
+            // Si no hay código, se asigna 200 por defecto.
+            if (!$status) {
                 $status = 200;
+            }
+            // Si el código no es un númerp, ejemplo "42P01" (que es un error
+            // de PostgreSQL) se normaliza a un número.
+            else if (!is_numeric($status)) {
+                $this->header('X-Original-Error-Code', $status);
+                // Error 409 (Conflict): Este código indica que hay un problema
+                // con el estado de la solicitud o del recurso que impide su
+                // procesamiento.
+                $status = 409;
             }
             // Si el código es menor que 200, se asume que es un código de
             // error no estándar y se reasigna a 409, con el código original en
