@@ -28,7 +28,7 @@
                         <div class="input-group input-group-sm">
                             {% if data.fields[field].cast == 'date' or data.fields[field].cast == 'datetime' %}
                                 <input type="date" class="form-control form-control-sm toggle-form-search-input" data-type="original" />
-                                <input type="text" class="form-control form-control-sm toggle-form-search-input d-none" data-type="alternate" />
+                                <input type="text" class="form-control form-control-sm toggle-form-search-input d-none" data-type="alternate" name="{{field}}" />
                                 <button class="btn btn-secondary toggle-form-search-btn border-start-0" type="button">
                                     <i class="fa-solid fa-calendar"></i>
                                 </button>
@@ -39,12 +39,12 @@
                                         <option value="{{ value }}">{{ option }}</option>
                                     {% endfor %}
                                 </select>
-                                <input type="text" class="form-control form-control-sm toggle-form-search-input d-none" data-type="alternate" />
+                                <input type="text" class="form-control form-control-sm toggle-form-search-input d-none" data-type="alternate" name="{{field}}" />
                                 <button class="btn btn-secondary toggle-form-search-btn border-start-0" type="button">
                                     <i class="fa-solid fa-list"></i>
                                 </button>
                             {% else %}
-                                <input type="text" class="form-control form-control-sm" />
+                                <input type="text" class="form-control form-control-sm" name="{{field}}" />
                             {% endif %}
                         </div>
                     {% endif %}
@@ -60,7 +60,291 @@
     <tbody></tbody>
 </table>
 
+<div class="modal fade" data-filter-modal-for="registers" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Filtros avanzados de columnas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Coincidencia de filtros por columna:</label>
+                    <div class="filter-matching">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="matchingOptions" value="all" checked />
+                            <label class="form-check-label">Coincidir con TODOS los siguientes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="matchingOptions" value="any" />
+                            <label class="form-check-label">Coincidir con CUALQUIERA de los siguientes</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-conditions">
+                    <!-- Aquí se añadirán dinámicamente las condiciones de filtrado -->
+                </div>
+                <div class="text-end">
+                    <button type="button" class="btn btn-secondary add-condition-btn">
+                        <i class="fa-solid fa-plus"></i> Añadir condición
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="smartFilterApply(this)">Aplicar filtros</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+
+
+// Determinar diccionario con los filtros.
+function smartFilterGenerateFilterDictionaryFromConditions(filterModal) {
+    const matchingOption = filterModal.querySelector('input[name="matchingOptions"]:checked').value;
+    const conditions = Array.from(filterModal.querySelectorAll('.filter-condition'))
+        .map(condition => {
+            const column = condition.querySelector('.column-select').value;
+            const operator = condition.querySelector('.operator-select').value;
+            const value = condition.querySelector('.value-input').value.trim();
+
+            if (value) {
+                return {
+                    column,
+                    condition: `${operator}${value}`
+                };
+            }
+            return null;
+        })
+        .filter(condition => condition !== null)
+        .reduce((acc, curr) => {
+            if (!acc[curr.column]) {
+                acc[curr.column] = [];
+            }
+            acc[curr.column].push(curr.condition);
+            return acc;
+        }, {})
+    ;
+    const filterDictionary = {
+        matching: matchingOption === 'any' ? 'OR' : 'AND',
+        conditions: conditions
+    };
+    return filterDictionary;
+}
+
+function smartFilterGenerateFilterDictionaryFromInputs(tableId) {
+    const filterJSON = {
+        matching: 'AND', // Predeterminado a 'AND'.
+        conditions: {}
+    };
+
+    const filterRow = document.querySelector(`#${tableId} .filters-row`);
+    filterRow.querySelectorAll('th').forEach(th => {
+        const input = th.querySelector('input[type="text"]');
+        if (input && input.value.trim() !== '') {
+            const column = input.name;
+            const value = input.value.trim();
+
+            let operatorMatching = '&&'; // Default matching operator '&&' (AND).
+            if (value.includes('||')) {
+                operatorMatching = '||';
+            }
+            filterJSON.matching = (operatorMatching === '||') ? 'OR' : 'AND';
+
+            const values = value.split(operatorMatching).map(v => v.trim());
+
+            values.forEach(val => {
+                const smartFilterOperators = ['!=', '!', '=', '>=', '<=', '>', '<', '^', '~', '$', 'in:', 'notin:', 'between:', 'notbetween:', 'date:', 'year:', 'month:'];
+                let operator = smartFilterOperators.find(op => val.startsWith(op)) || '~';
+                let conditionValue = val.replace(operator, '').trim();
+
+                if (!filterJSON.conditions[column]) {
+                    filterJSON.conditions[column] = [];
+                }
+
+                filterJSON.conditions[column].push(`${operator}${conditionValue}`);
+            });
+        }
+    });
+
+    return filterJSON;
+}
+
+// Función para aplicar los filtros y generar el diccionario
+function smartFilterApply(button) {
+    // Elementos de la página necesarios.
+    const filterModal = button.closest('.modal');
+    const tableId = filterModal.getAttribute('data-filter-modal-for');
+    const filterDictionary = smartFilterGenerateFilterDictionaryFromConditions(filterModal);
+    const table = document.getElementById(tableId);
+    const filterRow = table.querySelector('thead tr.filters-row');
+
+    // Iterar sobre las columnas de la fila de filtros.
+    filterRow.querySelectorAll('th').forEach(th => {
+        // Obtener input de la columna y sus condiciones.
+        const input = th.querySelector('input[type="text"]');
+        if (input === null) {
+            return;
+        }
+
+        // Alternar entre tipo de input si es necesario.
+        const alternateInput = th.querySelector('.toggle-form-search-input[data-type="alternate"]');
+        if (alternateInput && alternateInput.classList.contains('d-none')) {
+            const toggleButton = th.querySelector('.toggle-form-search-btn');
+            if (toggleButton) {
+                toggleButton.click();
+            }
+        }
+
+        // Buscar las condiciones de la columna.
+        const columnName = input.getAttribute('name');
+        const columnConditions = filterDictionary.conditions[columnName] || [];
+        if (columnConditions.length == 0) {
+            input.value = '';
+            return;
+        }
+
+        // Aplicar las condiciones a la columna.
+        const filterValue = columnConditions.join(filterDictionary.matching == 'AND' ? ' && ' : ' || ');
+        input.value = filterValue;
+    });
+
+    // Cerrar el modal.
+    const modalInstance = bootstrap.Modal.getInstance(filterModal);
+    modalInstance.hide();
+
+    // Lanzar búsqueda.
+    datatablesTriggerSearch(tableId);
+}
+
+// Generar las opciones para seleccionar columnas agrupadas por visibles y no visibles
+function smartFilterGenerateColumnSelectOptions(columns) {
+    const visibleColumns = columns
+        .filter(col => col.visible && col.data)
+        .map(col => `<option value="${col.data}" data-visible="1">${col.verbose_name}</option>`)
+        .join('');
+    const hiddenColumns = columns
+        .filter(col => !col.visible && col.data)
+        .map(col => `<option value="${col.data}" data-visible="0">${col.verbose_name}</option>`)
+        .join('');
+
+    let options = '';
+    if (visibleColumns) {
+        options += `
+            <optgroup label="Columnas visibles">
+                ${visibleColumns}
+            </optgroup>
+        `;
+    }
+    /*if (hiddenColumns) {
+        options += `
+            <optgroup label="Columnas ocultas">
+                ${hiddenColumns}
+            </optgroup>
+        `;
+    }*/
+    return options || '<option disabled>No hay columnas buscables disponibles</option>';
+}
+
+// Función que abre el modal de filtrado con SmartFilter.
+function datatablesSmartFilterModal(dtInstance) {
+    const tableId = dtInstance.table().node().id;
+    const filterModal = document.querySelector(`[data-filter-modal-for="${tableId}"]`);
+
+    // Limpiar condiciones anteriores.
+    filterModal.querySelector('.filter-conditions').innerHTML = '';
+
+    // Generar el diccionario de filtros a partir de los inputs actuales.
+    const filterDictionary = smartFilterGenerateFilterDictionaryFromInputs(tableId);
+
+    // Añadir condiciones existentes al modal.
+    if (Object.keys(filterDictionary.conditions).length > 0) {
+        Object.keys(filterDictionary.conditions).forEach(column => {
+            filterDictionary.conditions[column].forEach(condition => {
+                const smartFilterOperators = ['!=', '!', '=', '>=', '<=', '>', '<', '^', '~', '$', 'in:', 'notin:', 'between:', 'notbetween:', 'date:', 'year:', 'month:'];
+                const operator = smartFilterOperators.find(op => condition.startsWith(op)) || '~';
+                const value = condition.replace(operator, '').trim();
+                smartFilterAddCondition(dtInstance, filterModal, column, operator, value);
+            });
+        });
+    } else {
+        // Añadir una primera condición por defecto si no existen condiciones.
+        smartFilterAddCondition(dtInstance, filterModal);
+    }
+
+    // Configurar el botón de añadir condición, asegurando que solo se añada un escuchador de eventos.
+    const addConditionBtn = filterModal.querySelector('.add-condition-btn');
+    if (!addConditionBtn.hasAttribute('data-event-added')) {
+        addConditionBtn.addEventListener('click', () => smartFilterAddCondition(dtInstance, filterModal));
+        addConditionBtn.setAttribute('data-event-added', 'true');
+    }
+
+    // Abrir el modal.
+    const modalInstance = new bootstrap.Modal(filterModal, { keyboard: true });
+    modalInstance.show();
+}
+
+// Añadir una nueva condición de filtrado.
+function smartFilterAddCondition(dtInstance, filterModal, column = '', operator = '=', value = '') {
+    const columns = dtInstance.settings().init().columns;
+    const columnSelectOptions = smartFilterGenerateColumnSelectOptions(columns);
+    const condition = `
+        <div class="input-group mb-3 filter-condition">
+            <select class="form-select column-select">
+                ${columnSelectOptions}
+            </select>
+            <select class="form-select operator-select">
+                <option value="=" ${operator === '=' ? 'selected' : ''}>Igual a</option>
+                <option value="!=" ${operator === '!=' ? 'selected' : ''}>Distinto a</option>
+                <option value=">=" ${operator === '>=' ? 'selected' : ''}>Mayor o igual que</option>
+                <option value="<=" ${operator === '<=' ? 'selected' : ''}>Menor o igual que</option>
+                <option value=">" ${operator === '>' ? 'selected' : ''}>Mayor que</option>
+                <option value="<" ${operator === '<' ? 'selected' : ''}>Menor que</option>
+                <option value="^" ${operator === '^' ? 'selected' : ''}>Empieza con</option>
+                <option value="~" ${operator === '~' ? 'selected' : ''}>Contiene</option>
+                <option value="$" ${operator === '$' ? 'selected' : ''}>Termina con</option>
+                <option value="in:" ${operator === 'in:' ? 'selected' : ''}>Pertenece a la lista</option>
+                <option value="notin:" ${operator === 'notin:' ? 'selected' : ''}>No pertenece a la lista</option>
+                <option value="between:" ${operator === 'between:' ? 'selected' : ''}>Entre 2 valores</option>
+                <option value="notbetween:" ${operator === 'notbetween:' ? 'selected' : ''}>No entre 2 valores</option>
+                <option value="date:" ${operator === 'date:' ? 'selected' : ''}>Fecha (AAAAMMDD)</option>
+                <option value="year:" ${operator === 'year:' ? 'selected' : ''}>Año (AAAA)</option>
+                <option value="month:" ${operator === 'month:' ? 'selected' : ''}>Mes (AAAAMM)</option>
+            </select>
+            <input type="text" class="form-control value-input" value="${value}" />
+            <button class="btn btn-danger remove-condition-btn" type="button"><i class="fa-solid fa-times"></i></button>
+        </div>
+    `;
+    filterModal.querySelector('.filter-conditions').insertAdjacentHTML('beforeend', condition);
+
+    // Seleccionar la columna correcta.
+    if (column) {
+        const lastCondition = filterModal.querySelector('.filter-condition:last-child');
+        const columnSelect = lastCondition.querySelector('.column-select');
+        columnSelect.value = column;
+    }
+
+    // Añadir evento al botón de eliminar condición.
+    filterModal.querySelectorAll('.remove-condition-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            this.closest('.filter-condition').remove();
+        });
+    });
+}
+
+function datatablesTriggerSearch(tableId) {
+    const dtInstance = $(`#${tableId}`).DataTable();
+    dtInstance.columns().every(function () {
+        const column = this;
+        const input = $(`.filters-row th input[name="${column.dataSrc()}"]`);
+        if (input.length) {
+            column.search(input.val()).draw();
+        }
+    });
+}
+
 $(document).ready(function() {
 
     // Inicializar DataTables.
@@ -95,6 +379,14 @@ $(document).ready(function() {
                             }
                         },
                     {% endif %}
+                    {
+                        titleAttr: 'Filtros de columnas avanzados',
+                        text: '<i class="fa-solid fa-filter fa-fw"></i>',
+                        className: 'btn-sm',
+                        action: function(e, dt, node, config) {
+                            datatablesSmartFilterModal(dt);
+                        },
+                    },
                     {
                         extend: 'selected',
                         titleAttr: 'Ejecutar acción masiva',
@@ -184,13 +476,13 @@ $(document).ready(function() {
                             $(win.document.body).find('thead tr:eq(1)').remove();
                         }
                     },
-                    /*{
+                    {
                         extend: 'colvis',
                         titleAttr: 'Personalizar las columnas de la tabla',
                         text: '<i class="fa-solid fa-table-columns fa-fw"></i>',
                         className: 'btn-sm',
                         columns: ':not(:first-child):not(:last-child)'
-                    },*/
+                    },
                     {
                         extend: 'createState',
                         titleAttr: 'Guardar configuración actual de la tabla',
@@ -245,6 +537,7 @@ $(document).ready(function() {
             // Columnas con los datos del modelo.
             {% for field in data.model.list_display %}
                 {
+                    verbose_name: "{{ data.fields[field].verbose_name }}",
                     data: "{{ data.fields[field].name }}",
                     visible: {{ data.fields[field].show_in_list ? 1 : 0 }},
                     orderable: true,
