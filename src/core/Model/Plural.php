@@ -106,53 +106,7 @@ abstract class Model_Plural
      */
     public function query(array $parameters = []): QueryBuilder
     {
-        // Inicializar el query builder para el modelo.
-        $query = $this->getDatabaseConnection()->table(
-            $this->meta['model.db_table']
-        );
-        if (empty($parameters)) {
-            return $query;
-        }
-        // Aplicar filtros.
-        $filters = $parameters['filters'] ?? [];
-        if (!empty($filters)) {
-            // Determinar columnas por las que se puede buscar.
-            $searchableQuery = $parameters['searchable'] ?? [];
-            $searchableReal = array_keys(array_filter(
-                $this->meta['fields'],
-                function ($config) {
-                    return $config['db_column'] && $config['searchable'];
-                }
-            ));
-            if (!empty($searchableQuery)) {
-                $searchable = array_intersect(
-                    $searchableQuery,
-                    $searchableReal
-                );
-            } else {
-                $searchable = $searchableReal;
-            }
-            // Agregar cada filtro pasado a la búsqueda de campos en el modelo.
-            foreach ($filters as $field => $value) {
-                if ($field == 'search') {
-                    $fields = array_intersect_key(
-                        $this->meta['fields'],
-                        array_flip($searchable)
-                    );
-                    $query->whereGlobalSearch($fields, $value);
-                    continue;
-                }
-                if (!in_array($field, $searchable)) {
-                    continue;
-                }
-                $query->whereSmartFilter(
-                    $field,
-                    $value,
-                    $this->meta['fields'][$field]
-                );
-            }
-        }
-        // Aplicar ordenamiento.
+        // Asignar ordenamiento por defecto del modelo si no fue solicitado.
         if (empty($parameters['sort'])) {
             $parameters['sort'] = [];
             foreach ($this->meta['model.ordering'] as $ordering) {
@@ -168,50 +122,12 @@ abstract class Model_Plural
                 ];
             }
         }
-        if (!empty($parameters['sort'])) {
-            foreach ($parameters['sort'] as $sort) {
-                $column = $sort['column'];
-                if (strpos($column, '.') === false) {
-                    $column = $query->from . '.' . $column;
-                }
-                $order = strtolower($sort['order']) == 'desc' ? 'desc' : 'asc';
-                $query->orderBy($column, $order);
-            }
-        }
-        // Aplicar paginación.
-        if (
-            isset($parameters['pagination']['page'])
-            && isset($parameters['pagination']['limit'])
-        ) {
-            $page = $parameters['pagination']['page'];
-            $limit = $parameters['pagination']['limit'];
-            $query->skip(($page - 1) * $limit)->take($limit);
-        }
-        // Seleccionar las columnas deseadas si están especificadas.
-        if (!empty($parameters['fields'])) {
-            $selectFields = [];
-            foreach ($parameters['fields'] as $field) {
-                // Si no se indicó la tabla en la columna se asume que se pasó
-                // el nombre del campo que no necesariamente es el nombre de la
-                // columna en la base de datos. Por lo cual se busca la columna
-                // de la base de datos. Si no existe, se omite el campo.
-                if (strpos($field, '.') === false) {
-                    $db_column = $this->meta['fields.' . $field . '.db_column'];
-                    if (!$db_column) {
-                        continue;
-                    }
-                    $field = $query->from . '.' . $db_column;
-                }
-                // Se agrega el campo a los que se seleccionarán.
-                $selectFields[] = $field;
-            }
-            // Agregar columna solicitada.
-            $query->select($selectFields);
-        }
-        // Debug de la consulta SQL generada.
-        // dd($query->toSql(), $query->getBindings());
-        // Entregar query builder.
-        return $query;
+        // Obtejer objeto query usando el QueryBuilder y SmartQuery.
+        return $this->getDatabaseConnection()->query()->smartQuery(
+            $parameters,
+            $this->meta['model.db_table'],
+            $this->meta['fields']
+        );
     }
 
     /**
@@ -238,35 +154,6 @@ abstract class Model_Plural
         $query = $this->query($parameters);
         return $query->count();
     }
-
-    /**
-     * Entrega la cantidad de registros que hay en la tabla, hará uso
-     * del whereStatement si no es null también de groupByStatement y
-     * havingStatement.
-     * @return int Cantidad de registros encontrados.
-     */
-    /*public function count(): int
-    {
-        // armar consulta
-        $query = '
-            SELECT COUNT(*)
-            FROM ' . $this->meta['model.db_table']
-        ;
-        // si hay where se usa
-        if ($this->whereStatement) {
-            $query .= $this->whereStatement;
-        }
-        // en caso que se quiera usar el group by se hace una subconsulta
-        if ($this->groupByStatement) {
-            $query .= $this->groupByStatement;
-            if ($this->havingStatement) {
-                $query .= $this->havingStatement;
-            }
-            $query = "SELECT COUNT(*) FROM ($query) AS t";
-        }
-        // entregar resultados
-        return (int)$this->getDatabaseConnection()->getValue($query, $this->queryVars);
-    }*/
 
     /**
      * Realiza una búsqueda y obtiene registros del modelo.
@@ -326,10 +213,34 @@ abstract class Model_Plural
         return $results[0];
     }
 
-
-
-
-
+    /**
+     * Entrega la cantidad de registros que hay en la tabla, hará uso
+     * del whereStatement si no es null también de groupByStatement y
+     * havingStatement.
+     * @return int Cantidad de registros encontrados.
+     */
+    /*public function count(): int
+    {
+        // armar consulta
+        $query = '
+            SELECT COUNT(*)
+            FROM ' . $this->meta['model.db_table']
+        ;
+        // si hay where se usa
+        if ($this->whereStatement) {
+            $query .= $this->whereStatement;
+        }
+        // en caso que se quiera usar el group by se hace una subconsulta
+        if ($this->groupByStatement) {
+            $query .= $this->groupByStatement;
+            if ($this->havingStatement) {
+                $query .= $this->havingStatement;
+            }
+            $query = "SELECT COUNT(*) FROM ($query) AS t";
+        }
+        // entregar resultados
+        return (int)$this->getDatabaseConnection()->getValue($query, $this->queryVars);
+    }*/
 
     // Atributo con configuración para generar consultas SQL
     protected $selectStatement; ///< Columnas a consultar

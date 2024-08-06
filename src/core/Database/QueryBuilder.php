@@ -60,6 +60,108 @@ class Database_QueryBuilder extends QueryBuilder
     ];
 
     /**
+     * Arma el query builder y lo retorna según los parámetros pasados.
+     *
+     * @param array $parameters Parámetros de búsqueda y obtención de registros.
+     * @return Database_QueryBuilder
+     */
+    public function smartQuery(
+        array $parameters = [],
+        ?string $table = null,
+        array $fieldsConfig = []
+    ): QueryBuilder
+    {
+        // Inicializar el query builder para el modelo.
+        $query = $this->from($table);
+        if (empty($parameters)) {
+            return $query;
+        }
+        // Aplicar filtros.
+        $filters = $parameters['filters'] ?? [];
+        if (!empty($filters)) {
+            // Determinar columnas por las que se puede buscar.
+            $searchableQuery = $parameters['searchable'] ?? [];
+            $searchableReal = array_keys(array_filter(
+                $fieldsConfig,
+                function ($config) {
+                    return $config['db_column'] && $config['searchable'];
+                }
+            ));
+            if (!empty($searchableQuery)) {
+                $searchable = array_intersect(
+                    $searchableQuery,
+                    $searchableReal
+                );
+            } else {
+                $searchable = $searchableReal;
+            }
+            // Agregar cada filtro pasado a la búsqueda de campos en el modelo.
+            foreach ($filters as $field => $value) {
+                if ($field == 'search') {
+                    $fields = array_intersect_key(
+                        $fieldsConfig,
+                        array_flip($searchable)
+                    );
+                    $query->whereGlobalSearch($fields, $value);
+                    continue;
+                }
+                if (!in_array($field, $searchable)) {
+                    continue;
+                }
+                $query->whereSmartFilter(
+                    $field,
+                    $value,
+                    $fieldsConfig[$field]
+                );
+            }
+        }
+        if (!empty($parameters['sort'])) {
+            foreach ($parameters['sort'] as $sort) {
+                $column = $sort['column'];
+                if (strpos($column, '.') === false) {
+                    $column = $query->from . '.' . $column;
+                }
+                $order = strtolower($sort['order']) == 'desc' ? 'desc' : 'asc';
+                $query->orderBy($column, $order);
+            }
+        }
+        // Aplicar paginación.
+        if (
+            isset($parameters['pagination']['page'])
+            && isset($parameters['pagination']['limit'])
+        ) {
+            $page = $parameters['pagination']['page'];
+            $limit = $parameters['pagination']['limit'];
+            $query->skip(($page - 1) * $limit)->take($limit);
+        }
+        // Seleccionar las columnas deseadas si están especificadas.
+        if (!empty($parameters['fields'])) {
+            $selectFields = [];
+            foreach ($parameters['fields'] as $field) {
+                // Si no se indicó la tabla en la columna se asume que se pasó
+                // el nombre del campo que no necesariamente es el nombre de la
+                // columna en la base de datos. Por lo cual se busca la columna
+                // de la base de datos. Si no existe, se omite el campo.
+                if (strpos($field, '.') === false) {
+                    $db_column = $fieldsConfig[$field]['db_column'] ?? null;
+                    if (!$db_column) {
+                        continue;
+                    }
+                    $field = $query->from . '.' . $db_column;
+                }
+                // Se agrega el campo a los que se seleccionarán.
+                $selectFields[] = $field;
+            }
+            // Agregar columna solicitada.
+            $query->select($selectFields);
+        }
+        // Debug de la consulta SQL generada.
+        // dd($query->toSql(), $query->getBindings());
+        // Entregar query builder.
+        return $query;
+    }
+
+    /**
      * Añade una condición WHERE a la consulta para realizar una búsqueda
      * insensible a mayúsculas.
      *
