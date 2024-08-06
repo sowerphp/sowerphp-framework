@@ -25,11 +25,28 @@
             {% for field in data.model.list_display %}
                 <th>
                     {% if data.fields[field].searchable %}
-                        {% if data.fields[field].cast == 'date' or data.fields[field].cast == 'datetime' %}
-                            <input type="date" class="form-control form-control-sm" />
-                        {% else %}
-                            <input type="text" class="form-control form-control-sm" />
-                        {% endif %}
+                        <div class="input-group input-group-sm">
+                            {% if data.fields[field].cast == 'date' or data.fields[field].cast == 'datetime' %}
+                                <input type="date" class="form-control form-control-sm toggle-form-search-input" data-type="original" />
+                                <input type="text" class="form-control form-control-sm toggle-form-search-input d-none" data-type="alternate" />
+                                <button class="btn btn-secondary toggle-form-search-btn border-start-0" type="button">
+                                    <i class="fa-solid fa-calendar"></i>
+                                </button>
+                            {% elseif data.fields[field].cast == 'bool' %}
+                                <select class="form-select form-select-sm toggle-form-search-input" data-type="original">
+                                    <option value="">Sin filtrar</option>
+                                    {% for value, option in data.fields[field].choices %}
+                                        <option value="{{ value }}">{{ option }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="text" class="form-control form-control-sm toggle-form-search-input d-none" data-type="alternate" />
+                                <button class="btn btn-secondary toggle-form-search-btn border-start-0" type="button">
+                                    <i class="fa-solid fa-list"></i>
+                                </button>
+                            {% else %}
+                                <input type="text" class="form-control form-control-sm" />
+                            {% endif %}
+                        </div>
                     {% endif %}
                 </th>
             {% endfor %}
@@ -309,10 +326,21 @@ function datatablesInitComplete(api) {
     // Añadir eventos de búsqueda por columna.
     $(table.table().header()).find('.filters-row th').each(function(index) {
         var column = table.column((index + 1) + ':visible');
+
+        // Manejar eventos para inputs
         $('input', this).on('keyup change', function() {
             if (!this.value.length) {
                 column.search('').draw();
             } else if (this.value.length >= 1 && column.search() !== this.value) {
+                column.search(this.value).draw();
+            }
+        });
+
+        // Manejar eventos para selects
+        $('select', this).on('change', function() {
+            if (!this.value.length) {
+                column.search('').draw();
+            } else if (column.search() !== this.value) {
                 column.search(this.value).draw();
             }
         });
@@ -377,6 +405,32 @@ function datatablesInitComplete(api) {
         table.order([]).draw();
         table.page.len({{ data.model.list_per_page }}).draw();
         $(table.table().header()).find('.filters-row input').val('');
+    });
+
+    // Evento para cambiar el tipo de buscador de cada columna.
+    document.querySelectorAll('.toggle-form-search-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var container = button.closest('.input-group');
+            var originalInput = container.querySelector('.toggle-form-search-input[data-type="original"]');
+            var alternateInput = container.querySelector('.toggle-form-search-input[data-type="alternate"]');
+
+            // Toggle visibility
+            originalInput.classList.toggle('d-none');
+            alternateInput.classList.toggle('d-none');
+
+            // Update button icon
+            if (originalInput.classList.contains('d-none')) {
+                if (originalInput.type === 'date' || originalInput.tagName.toLowerCase() === 'select') {
+                    button.innerHTML = '<i class="fa-solid fa-text-width"></i>';
+                }
+            } else {
+                if (originalInput.type === 'date') {
+                    button.innerHTML = '<i class="fa-solid fa-calendar"></i>';
+                } else if (originalInput.tagName.toLowerCase() === 'select') {
+                    button.innerHTML = '<i class="fa-solid fa-list"></i>';
+                }
+            }
+        });
     });
 
 }

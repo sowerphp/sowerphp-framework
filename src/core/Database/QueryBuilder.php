@@ -871,6 +871,22 @@ class Database_QueryBuilder extends QueryBuilder
         if ($columnType == 'float') {
             $values = array_map('floatval', $values);
         }
+        if ($columnType == 'carbon') {
+            $pattern = '/^(?:\d{2}|\d{4})\d{2}\d{2}$/';
+            for ($i=0; $i<2; $i++) {
+                if (!preg_match($pattern, $values[$i]) || !is_numeric($values[$i])) {
+                    return $this;
+                }
+                if (!isset($values[$i][6])) {
+                    $values[$i] = '20' . $values[$i];
+                }
+                $year = substr($values[$i], 0, 4);
+                $month = substr($values[$i], 4, 2);
+                $day = substr($values[$i], 6, 2);
+                $values[$i] = $year . '-' . $month . '-' . $day;
+            }
+            $values[1] .= ' 23:59:59';
+        }
         // Agregar filtro BETWEEN"
         return $this->whereBetween($column, [$values[0], $values[1]]);
     }
@@ -915,6 +931,22 @@ class Database_QueryBuilder extends QueryBuilder
         }
         if ($columnType == 'float') {
             $values = array_map('floatval', $values);
+        }
+        if ($columnType == 'carbon') {
+            $pattern = '/^(?:\d{2}|\d{4})\d{2}\d{2}$/';
+            for ($i=0; $i<2; $i++) {
+                if (!preg_match($pattern, $values[$i]) || !is_numeric($values[$i])) {
+                    return $this;
+                }
+                if (!isset($values[$i][6])) {
+                    $values[$i] = '20' . $values[$i];
+                }
+                $year = substr($values[$i], 0, 4);
+                $month = substr($values[$i], 4, 2);
+                $day = substr($values[$i], 6, 2);
+                $values[$i] = $year . '-' . $month . '-' . $day;
+            }
+            $values[1] .= ' 23:59:59';
         }
         // Agregar filtro BETWEEN"
         return $this->whereNotBetween($column, [$values[0], $values[1]]);
