@@ -692,7 +692,7 @@ function split_parameters(string $parametersString, string $delimiter = ','): ar
     // temporal.
     $tempMarker = '{{[[DELIMITER]]}}';
     $tempString = preg_replace(
-        '/\\' . $escapedDelimiter . '/',
+        '/\\\\' . $escapedDelimiter . '/',
         $tempMarker,
         $parametersString
     );
@@ -702,7 +702,7 @@ function split_parameters(string $parametersString, string $delimiter = ','): ar
 
     // Restaura los delimitadores escapados en las partes.
     $parameters = array_map(function ($part) use ($delimiter, $tempMarker) {
-        return str_replace($tempMarker, $delimiter, $part);
+        return str_replace($tempMarker, $delimiter, trim($part));
     }, $parts);
 
     // Entregar los parámetros encontrados.

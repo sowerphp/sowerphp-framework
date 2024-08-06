@@ -235,21 +235,15 @@ $(document).ready(function() {
                     render: function(data, type, row) {
                         {% if data.fields[field].display %}
                             return __.selector(row, '{{ data.fields[field].display|raw }}');
-                        {% elseif data.fields[field].cast == 'integer' %}
+                        {% elseif data.fields[field].cast == 'int' %}
                             return data !== null ? __.num(data) : null;
-                        {% elseif data.fields[field].cast | slice(0, 7) == 'decimal' %}
-                            {% set decimals = data.fields[field].cast | slice(8) %}
-                            {% if decimals == '' %}
-                                {% set decimals = 2 %}
-                            {% endif %}
-                            return __.num(data, {{ decimals }});
                         {% elseif data.fields[field].cast | slice(0, 5) == 'float' %}
                             {% set decimals = data.fields[field].cast | slice(6) %}
                             {% if decimals == '' %}
                                 {% set decimals = 2 %}
                             {% endif %}
                             return __.num(data, {{ decimals }});
-                        {% elseif data.fields[field].cast == 'boolean' %}
+                        {% elseif data.fields[field].cast == 'bool' %}
                             return data
                                 ? '<div class="text-center"><i class="fa-solid fa-check-circle fa-fw text-success"></i></div>'
                                 : '<div class="text-center"><i class="fa-solid fa-times-circle fa-fw text-danger"></i></div>'
