@@ -141,7 +141,7 @@ class Database_QueryBuilder extends QueryBuilder
      *
      * @param string $column El nombre de la columna en la que se va a aplicar
      * la condición.
-     * @param mixed $value  El valor del filtro que puede incluir operadores
+     * @param mixed $value El valor del filtro que puede incluir operadores
      * como '!=', '>=', '<=', '>', '<', 'null', '!null', etc.
      * @param array $config Configuración adicional para la columna, como
      * 'foreign_key', 'to_table', 'to_field', 'db_column', y 'searchable'.
@@ -171,6 +171,11 @@ class Database_QueryBuilder extends QueryBuilder
             return $this->applyForeignKeySmartFilter($column, $value, $config);
         }
 
+        // Verificar si el valor contiene filtros compuestos.
+        if ($this->isCompositeFilter($value)) {
+            return $this->applyCompositeSmartFilter($column, $value, $config);
+        }
+
         // Aplicar el filtro a la columna mediante un operador.
         $filter = $this->extractOperatorAndValueFromSmartFilter($value);
         if ($filter !== null) {
@@ -181,6 +186,175 @@ class Database_QueryBuilder extends QueryBuilder
 
         // Aplicar el filtro directamente a la columna según su tipo.
         return $this->applyTypeSmartFilter($column, $value, $config);
+    }
+
+    /**
+     * Verifica si el valor contiene operadores && o || para filtros compuestos.
+     *
+     * @param mixed $value
+     * @return boolean
+     */
+    protected function isCompositeFilter($value): bool
+    {
+        return strpos($value, '&&') !== false || strpos($value, '||') !== false;
+    }
+
+    /**
+     * Aplica los filtros de manera compuesta. Determina el árbol asociado al
+     * filtro y lo aplica usando SmartFilter.
+     *
+     * @param string $column
+     * @param mixed $value
+     * @param array $config
+     * @return self
+     */
+    protected function applyCompositeSmartFilter(string $column, $value, array $config): self
+    {
+        $tree = $this->parseCompositeFilter($value);
+        return $this->applyTreeSmartFilter($column, $tree, $config);
+    }
+
+    /**
+     * Aplica un filtro compuesto a una columna utilizando un árbol de
+     * condiciones.
+     *
+     * Este método maneja la aplicación de filtros compuestos a una columna,
+     * representados por un árbol de condiciones que puede incluir operadores
+     * lógicos `AND` (&&) y `OR` (||). Los nodos del árbol pueden ser
+     * condiciones simples o subárboles que representan combinaciones de
+     * condiciones.
+     *
+     * @param string $column El nombre de la columna en la que se va a aplicar
+     * la condición.
+     * @param mixed $node El nodo del árbol de condiciones. Puede ser un string
+     * que representa una condición simple o un array que representa un
+     * subárbol de condiciones.
+     * @param array $config Configuración adicional para la columna, como
+     * 'cast' para definir el tipo de datos.
+     * @return self Retorna la instancia del Query Builder para permitir el
+     * encadenamiento de métodos.
+     *
+     * @example
+     * // Aplicar un filtro compuesto a la columna "usuario".
+     * $query->applyTreeSmartFilter('usuario', [
+     *     'operator' => '||',
+     *     'left' => '=delaf',
+     *     'right' => '=esteban'
+     * ], ['cast' => 'string']);
+     * // SQL: WHERE ("usuario" = 'delaf' OR "usuario" = 'esteban')
+     */
+    protected function applyTreeSmartFilter(string $column, $node, array $config): self
+    {
+        // Nodo es NULL (no se procesa).
+        if ($node === null) {
+            return $this;
+        }
+
+        // Nodo hoja (condición simple).
+        if (!is_array($node)) {
+            return $this->whereSmartFilter($column, $node, $config);
+        }
+
+        // Operadores y nodos que se deben aplicar.
+        $operator = $node['operator'];
+        $left = $node['left'];
+        $right = $node['right'];
+
+        // Se realiza una operación AND.
+        if ($operator === '&&') {
+            return $this->where(function($query) use ($column, $left, $right, $config) {
+                $query->applyTreeSmartFilter($column, $left, $config);
+                $query->applyTreeSmartFilter($column, $right, $config);
+            });
+        }
+
+        // Se realiza una operación OR.
+        if ($operator === '||') {
+            return $this->where(function($query) use ($column, $left, $right, $config) {
+                $query->orWhere(function($subQuery) use ($column, $left, $config) {
+                    $subQuery->applyTreeSmartFilter($column, $left, $config);
+                })->orWhere(function($subQuery) use ($column, $right, $config) {
+                    $subQuery->applyTreeSmartFilter($column, $right, $config);
+                });
+            });
+        }
+
+        // Por defecto se entrega la instancia del QueryBuilder.
+        return $this;
+    }
+
+    /**
+     * Convierte una expresión de filtro compuesta en una estructura de árbol.
+     *
+     * @param string $value La expresión de filtro compuesta.
+     * @return array La estructura del árbol que representa la expresión de
+     * filtro.
+     */
+    protected function parseCompositeFilter(string $value): array
+    {
+        $tokens = $this->tokenizeCompositeFilter($value);
+        return $this->buildExpressionTree($tokens);
+    }
+
+    /**
+     * Divide la expresión de filtro compuesta en tokens.
+     *
+     * @param string $value La expresión de filtro compuesta.
+     * @return array Los tokens de la expresión.
+     */
+    protected function tokenizeCompositeFilter(string $value): array
+    {
+        $pattern = '/(\|\||&&|\(|\)|[^|\&\(\)\s]+)/';
+        preg_match_all($pattern, $value, $matches);
+        return $matches[0];
+    }
+
+    /**
+     * Construye el árbol de expresiones a partir de los tokens.
+     *
+     * @param array $tokens Los tokens de la expresión.
+     * @return array La estructura del árbol que representa la expresión de filtro.
+     */
+    protected function buildExpressionTree(array $tokens): array
+    {
+        $output = [];
+        $operators = [];
+        $precedence = ['||' => 1, '&&' => 2];
+
+        $applyOperator = function() use (&$output, &$operators) {
+            $operator = array_pop($operators);
+            $right = array_pop($output);
+            $left = array_pop($output);
+            $output[] = ['operator' => $operator, 'left' => $left, 'right' => $right];
+        };
+
+        foreach ($tokens as $token) {
+            if ($token === '(') {
+                $operators[] = $token;
+            } elseif ($token === ')') {
+                while (end($operators) !== '(') {
+                    $applyOperator();
+                }
+                array_pop($operators);
+            } elseif (isset($precedence[$token])) {
+                while (
+                    !empty($operators) &&
+                    end($operators) !== '(' &&
+                    $precedence[end($operators)] >= $precedence[$token]
+                ) {
+                    $applyOperator();
+                }
+                $operators[] = $token;
+            } else {
+                $output[] = $token;
+            }
+        }
+
+        while (!empty($operators)) {
+            $applyOperator();
+        }
+
+        return $output[0];
     }
 
     /**
