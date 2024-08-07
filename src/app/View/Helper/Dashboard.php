@@ -24,7 +24,7 @@
 namespace sowerphp\app;
 
 /**
- * Helper para la generación de los dashboards
+ * Helper para la generación de los dashboards.
  */
 class View_Helper_Dashboard
 {

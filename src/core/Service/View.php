@@ -348,6 +348,7 @@ class Service_View implements Interface_Service
             $data['_request'] = $request->getRequestUriDecoded();
             $data['_route'] = $request->getRouteConfig();
         }
+        $data['__view_app_name'] = config('app.name');
         // Página que se está viendo.
         if (!empty($data['_request'])) {
             $slash = strpos($data['_request'], '/', 1);
