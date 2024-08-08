@@ -42,7 +42,9 @@ class Model_UsuarioGrupo extends Model
      */
     protected $meta = [
         'model' => [
-            'db_table_comment' => 'Relación entre usuarios y los grupos a los que pertenecen',
+            'verbose_name' => 'Relación usuario y grupo',
+            'verbose_name_plural' => 'Relación usuarios y grupos',
+            'db_table_comment' => 'Relación entre usuarios y los grupos a los que pertenecen.',
         ],
         'fields' => [
             'usuario' => [
@@ -51,9 +53,10 @@ class Model_UsuarioGrupo extends Model
                 'foreign_key' => Model_Usuario::class,
                 'to_table' => 'usuario',
                 'to_field' => 'id',
-                'max_length' => 32,
                 'verbose_name' => 'Usuario',
-                'help_text' => 'Usuario de la aplicación',
+                'help_text' => 'Usuario de la aplicación.',
+                'display' => '(usuario.usuario)',
+                'searchable' => 'id:integer|usuario:string|nombre:string|email:string',
             ],
             'grupo' => [
                 'type' => self::TYPE_INTEGER,
@@ -61,15 +64,15 @@ class Model_UsuarioGrupo extends Model
                 'foreign_key' => Model_Grupo::class,
                 'to_table' => 'grupo',
                 'to_field' => 'id',
-                'max_length' => 32,
                 'verbose_name' => 'Grupo',
-                'help_text' => 'Grupo al que pertenece el usuario',
+                'help_text' => 'Grupo al que pertenece el usuario.',
+                'display' => '(grupo.grupo)',
             ],
             'primario' => [
                 'type' => self::TYPE_BOOLEAN,
-                'default' => "false",
+                'default' => false,
                 'verbose_name' => 'Primario',
-                'help_text' => 'Indica si el grupo es el grupo primario del usuario',
+                'help_text' => 'Indica si el grupo es el grupo primario del usuario.',
             ],
         ],
     ];

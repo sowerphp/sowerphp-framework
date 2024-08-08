@@ -46,7 +46,7 @@ class Model_Comuna extends Model
         ],
         'fields' => [
             'codigo' => [
-                'type' => self::TYPE_STRING,
+                'type' => self::TYPE_CHAR,
                 'primary_key' => true,
                 'length' => 5,
                 'verbose_name' => 'Código',
@@ -59,7 +59,7 @@ class Model_Comuna extends Model
                 'help_text' => 'Nombre de la comuna.',
             ],
             'provincia' => [
-                'type' => self::TYPE_STRING,
+                'type' => self::TYPE_CHAR,
                 'foreign_key' => Model_Provincia::class,
                 'to_table' => 'provincia',
                 'to_field' => 'codigo',

@@ -40,33 +40,31 @@ class Model_Auth extends Model
      */
     protected $meta = [
         'model' => [
-            'db_table_comment' => 'Permisos de grupos para acceder a recursos',
+            'verbose_name' => 'Permiso de grupo',
+            'verbose_name_plural' => 'Permisos de grupos',
+            'db_table_comment' => 'Permisos de grupos para acceder a recursos.',
             'ordering' => ['id'],
         ],
         'fields' => [
             'id' => [
-                'type' => self::TYPE_INTEGER,
-                'default' => "nextval('auth_id_seq'::regclass)",
-                'auto' => true,
-                'primary_key' => true,
-                'max_length' => 32,
+                'type' => self::TYPE_INCREMENTS,
                 'verbose_name' => 'ID',
-                'help_text' => 'Identificador (serial)',
+                'help_text' => 'Identificador (serial).',
             ],
             'grupo' => [
                 'type' => self::TYPE_INTEGER,
                 'foreign_key' => Model_Grupo::class,
                 'to_table' => 'grupo',
                 'to_field' => 'id',
-                'max_length' => 32,
                 'verbose_name' => 'Grupo',
-                'help_text' => 'Grupo al que se le concede el permiso',
+                'help_text' => 'Grupo al que se le concede el permiso.',
+                'display' => '(grupo.grupo)',
             ],
             'recurso' => [
                 'type' => self::TYPE_STRING,
                 'max_length' => 300,
                 'verbose_name' => 'Recurso',
-                'help_text' => 'Recurso al que el grupo tiene acceso',
+                'help_text' => 'Recurso al que el grupo tiene acceso.',
             ],
         ],
     ];
