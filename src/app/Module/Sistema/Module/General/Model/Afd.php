@@ -29,7 +29,7 @@ use \sowerphp\autoload\Model;
  * Modelo singular de la tabla "afd" de la base de datos.
  *
  * Permite interactuar con un registro de la tabla.
- * 
+ *
  */
 class Model_Afd extends Model
 {
@@ -41,7 +41,7 @@ class Model_Afd extends Model
      */
     protected $meta = [
         'model' => [
-            'db_table_comment' => '',
+            'db_table_comment' => 'Listado afd',
             'ordering' => ['codigo'],
         ],
         'fields' => [
@@ -49,14 +49,12 @@ class Model_Afd extends Model
                 'type' => self::TYPE_STRING,
                 'primary_key' => true,
                 'max_length' => 10,
-                'verbose_name' => 'Codigo',
-                'help_text' => '',
+                'verbose_name' => 'Código',
             ],
             'nombre' => [
                 'type' => self::TYPE_STRING,
                 'max_length' => 50,
                 'verbose_name' => 'Nombre',
-                'help_text' => '',
             ],
         ],
     ];

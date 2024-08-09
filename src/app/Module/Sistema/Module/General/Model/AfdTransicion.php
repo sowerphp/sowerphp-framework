@@ -41,7 +41,7 @@ class Model_AfdTransicion extends Model
      */
     protected $meta = [
         'model' => [
-            'db_table_comment' => '',
+            'db_table_comment' => 'Transición AFD',
             'ordering' => ['afd'],
         ],
         'fields' => [
@@ -53,34 +53,30 @@ class Model_AfdTransicion extends Model
                 'to_field' => 'afd',
                 'max_length' => 10,
                 'verbose_name' => 'Afd',
-                'help_text' => '',
+                'display' => '(afd_estado.nombre)',
             ],
             'desde' => [
                 'type' => self::TYPE_INTEGER,
-                'default' => '0',
                 'primary_key' => true,
                 'foreign_key' => Model_Afd::class,
                 'to_table' => 'afd_estado',
                 'to_field' => 'codigo',
-                'max_length' => 10,
                 'verbose_name' => 'Desde',
-                'help_text' => '',
+                'display' => '(afd_estado.codigo)',
             ],
             'valor' => [
                 'type' => self::TYPE_STRING,
                 'primary_key' => true,
                 'max_length' => 5,
                 'verbose_name' => 'Valor',
-                'help_text' => '',
             ],
             'hasta' => [
                 'type' => self::TYPE_INTEGER,
                 'foreign_key' => Model_Afd::class,
                 'to_table' => 'afd_estado',
                 'to_field' => 'codigo',
-                'max_length' => 10,
                 'verbose_name' => 'Hasta',
-                'help_text' => '',
+                'display' => '(afd_estado.codigo)',
             ],
         ],
     ];

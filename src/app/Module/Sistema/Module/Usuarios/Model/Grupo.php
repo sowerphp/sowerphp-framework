@@ -40,31 +40,31 @@ class Model_Grupo extends Model
      */
     protected $meta = [
         'model' => [
-            'db_table_comment' => 'Grupos a los que puede pertenecer un usuario',
+            'verbose_name' => 'Grupo',
+            'verbose_name_plural' => 'Grupos',
+            'db_table_comment' => 'Grupos a los que puede pertenecer un usuario.',
             'ordering' => ['id'],
         ],
         'fields' => [
             'id' => [
-                'type' => self::TYPE_INTEGER,
-                'default' => "nextval('grupo_id_seq'::regclass)",
-                'auto' => true,
-                'primary_key' => true,
-                'max_length' => 32,
+                'type' => self::TYPE_INCREMENTS,
                 'verbose_name' => 'ID',
-                'help_text' => 'Identificador (serial)',
+                'help_text' => 'Identificador (serial).',
             ],
             'grupo' => [
                 'type' => self::TYPE_STRING,
                 'null' => true,
+                'blank' => true,
                 'max_length' => 30,
                 'verbose_name' => 'Grupo',
-                'help_text' => 'Nombre del grupo',
+                'help_text' => 'Nombre del grupo.',
             ],
             'activo' => [
                 'type' => self::TYPE_BOOLEAN,
-                'default' => "true",
+                'default' => true,
+                'blank' => true,
                 'verbose_name' => 'Activo',
-                'help_text' => 'Indica si el grupo se encuentra activo',
+                'help_text' => 'Indica si el grupo se encuentra activo.',
             ],
         ],
     ];
