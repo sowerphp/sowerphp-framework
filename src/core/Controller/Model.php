@@ -185,17 +185,6 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 'onsubmit' => 'return validateModelCreateForm(this)',
             ]
         ];
-        // Agregar errores del formulario si existen.
-        $formErrors = session()->get('errors.default');
-        if ($formErrors) {
-            SessionMessage::error('El formulario enviado contiene errores. Por favor, revisa los campos del formulario y corrige los errores antes de continuar.');
-            foreach ($formErrors as $key => $errors) {
-                if (!isset($data['fields'][$key])) {
-                    continue;
-                }
-                $data['fields'][$key]['errors'] = $errors;
-            }
-        }
         // Renderizar la vista con el formulario de creación.
         return $this->render('create', [
             'data' => $data,
@@ -292,21 +281,13 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 'onsubmit' => 'return validateModelEditForm(this)',
             ]
         ];
-        // Agregar errores del formulario si existen.
-        $formErrors = session()->get('errors.default');
-        if ($formErrors) {
-            SessionMessage::error('El formulario enviado contiene errores. Por favor, revisa los campos del formulario y corrige los errores antes de continuar.');
-            foreach ($formErrors as $key => $errors) {
-                if (!isset($data['fields'][$key])) {
-                    continue;
-                }
-                $data['fields'][$key]['errors'] = $errors;
-            }
-        }
+        // Crear formulario a partir de los metadados del modelo.
+        require app('layers')->getFrameworkPath('/src/core/View/Form/Model.php');
+        $form = new View_Form_Model($data);
+        $form->buildFrom($data);
         // Renderizar la vista con el formulario de edición.
         return $this->render('edit', [
-            'id' => $id,
-            'data' => $data,
+            'form' => $form,
         ]);
     }
 

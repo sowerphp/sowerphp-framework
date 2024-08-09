@@ -1,4 +1,4 @@
-{% extends "View/Layouts/" ~ __view_layout ~ ".twig" %}
+{% extends "View/Layout/" ~ __view_layout ~ ".twig" %}
 
 {% block title %}Bienvenido a SowerPHP{% endblock %}
 
@@ -20,7 +20,7 @@
     <div class="bg-body-tertiary rounded-3 border h-100 p-5 mb-4">
         <h2 class="mb-4">¡Listo para programar!</h2>
         <p>Ya tienes instalado SowerPHP, es hora de empezar a programar.</p>
-        <p>Primero, crea una página de inicio en <code>{{ project_path('/src/app/View/Pages/inicio.twig') }}</code></p>
+        <p>Primero, crea una página de inicio en <code>{{ project_path('/src/app/View/Template/Pages/inicio.twig') }}</code></p>
     </div>
 
 {% endblock %}

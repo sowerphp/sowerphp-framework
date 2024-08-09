@@ -1,0 +1,29 @@
+{% extends "View/Layout/" ~ __view_layout ~ ".twig" %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>{% block title %}{{ title }}{% endblock %}</h1>
+</div>
+
+{% for category in nav %}
+    {% if category.name %}
+        <h2 class="mt-4">{{ category.name }}</h2>
+    {% endif %}
+    <div class="row row-cols-sm-2 row-cols-md-4" style="margin-top: -20px;">
+        {% for link, info in category.menu %}
+            <div class="col mt-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <a href="{{ _base }}/{{ module }}{{ link }}" title="{{ info.desc }}">
+                            <i class="{{ info.icon }} fa-3x" aria-hidden="true"></i>
+                            <p class="card-text small mt-2">{{ info.name }}</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endfor %}
+
+{% endblock %}

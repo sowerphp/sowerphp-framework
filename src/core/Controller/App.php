@@ -74,7 +74,8 @@ class Controller_App extends \sowerphp\autoload\Controller
     /**
      * Renderizar la vista de una página "estática" (sin acción).
      *
-     * @param string $page Vista que se desea renderizar ubicada en View/Pages.
+     * @param string $page Vista que se desea renderizar ubicada en
+     * View/Template/Pages.
      * @return Network_Response
      */
     public function page(?string $page = null): Network_Response
@@ -92,61 +93,60 @@ class Controller_App extends \sowerphp\autoload\Controller
     {
         $moduleService = app('module');
         $module = $this->request->getRouteConfig()['module'];
-        // Si existe una vista para el del modulo se usa.
-        if ($moduleService->getFilePath($module, '/View/index.php')) {
-            return $this->render('index');
-        }
-        // Si no se incluye el archivo con el título y el menú para el módulo.
-        else {
-            // Menú del módulo.
-            $module_nav = $moduleService->getModuleNav($module);
-            // Nombre del módulo para URL.
-            $module_url = str_replace(
-                '.',
-                '/',
-                \sowerphp\core\Utility_Inflector::underscore($module)
-            );
-            // Verificar permisos.
-            $auth = app('auth');
-            foreach ($module_nav as $category_id => &$category) {
-                foreach ($category['menu'] as $link => &$info) {
-                    // Si info no es un arreglo es solo el nombre y se arma.
-                    if (!is_array($info)) {
-                        $info = [
-                            'name' => $info,
-                            'desc' => '',
-                            'icon' => 'fa-solid fa-link',
-                        ];
-                    }
-                    // Si es un arreglo colocar opciones por defecto.
-                    else {
-                        $info = array_merge([
-                            'name' => $link,
-                            'desc' => '',
-                            'icon' => 'fa-solid fa-link',
-                        ], $info);
-                    }
-                    // Verificar permisos para acceder al enlace.
-                    if (!$auth->checkResourcePermission('/' . $module_url . $link)) {
-                        unset($module_nav[$category_id]['menu'][$link]);
-                    }
+
+        // Menú del módulo.
+        $module_nav = $moduleService->getModuleNav($module);
+        // Nombre del módulo para URL.
+        $module_url = str_replace(
+            '.',
+            '/',
+            \sowerphp\core\Utility_Inflector::underscore($module)
+        );
+        // Verificar permisos.
+        $auth = app('auth');
+        foreach ($module_nav as $category_id => &$category) {
+            foreach ($category['menu'] as $link => &$info) {
+                // Si info no es un arreglo es solo el nombre y se arma.
+                if (!is_array($info)) {
+                    $info = [
+                        'name' => $info,
+                        'desc' => '',
+                        'icon' => 'fa-solid fa-link',
+                    ];
                 }
-                $module_nav[$category_id]['quantity'] = count(
-                    $module_nav[$category_id]['menu']
-                );
-                if (!$module_nav[$category_id]['quantity']) {
-                    unset($module_nav[$category_id]);
+                // Si es un arreglo colocar opciones por defecto.
+                else {
+                    $info = array_merge([
+                        'name' => $link,
+                        'desc' => '',
+                        'icon' => 'fa-solid fa-link',
+                    ], $info);
+                }
+                // Verificar permisos para acceder al enlace.
+                if (!$auth->checkResourcePermission('/' . $module_url . $link)) {
+                    unset($module_nav[$category_id]['menu'][$link]);
                 }
             }
-            // Renderizar la vista.
-            return $this->render('App/module', [
-                'title' => config('modules.' . $module . '.title')
-                    ?? str_replace ('.', ' &raquo; ', $module)
-                ,
-                'nav' => $module_nav,
-                'module' => $module_url,
-            ]);
+            $module_nav[$category_id]['quantity'] = count(
+                $module_nav[$category_id]['menu']
+            );
+            if (!$module_nav[$category_id]['quantity']) {
+                unset($module_nav[$category_id]);
+            }
         }
+        // Si existe una vista para el del modulo se usa sino la por defecto.
+        $view = app('view')->resolveViewRelative('Module/index', $module);
+        if ($view === null) {
+            $view = 'App/module';
+        }
+        // Renderizar la vista.
+        return $this->render($view, [
+            'title' => config('modules.' . $module . '.title')
+                ?? str_replace ('.', ' &raquo; ', $module)
+            ,
+            'nav' => $module_nav,
+            'module' => $module_url,
+        ]);
     }
 
     /**

@@ -95,6 +95,7 @@ class App
         'redirect' => Service_Http_Redirect::class,
         'session' => Service_Http_Session::class,
         'auth' => Service_Http_Auth::class,
+        'captcha' => Service_Http_Captcha::class,
     ];
 
     /**

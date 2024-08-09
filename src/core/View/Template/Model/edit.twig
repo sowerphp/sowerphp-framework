@@ -1,8 +1,8 @@
-{% extends "View/Layouts/" ~ __view_layout ~ ".twig" %}
+{% extends "View/Layout/" ~ __view_layout ~ ".twig" %}
 
 {% block content %}
 
-<h1 class="page-header">Crear {{ data.model.verbose_name|lower }}</h1>
+<h1 class="page-header">Editar {{ data.model.verbose_name|lower }}</h1>
 
 <div class="d-flex justify-content-end mb-3">
     <a href="{{ _url }}{{ _route.url.controller }}" class="btn btn-primary btn-sm">
@@ -11,18 +11,17 @@
     </a>
 </div>
 
-{{ form_init(data) }}
-{{ form_start(data.form) }}
-    {% for field in data.fields %}
+{{ form_start(form) }}
+    {% for field in form.fields %}
         {% if field.editable %}
             {{ form_row(field) }}
         {% endif %}
     {% endfor %}
-    {{ form_submit('Crear nuevo registro') }}
-{{ form_end(data.form) }}
+    {{ form_submit('Editar el registro') }}
+{{ form_end(form) }}
 
 <script>
-function validateModelCreateForm() {
+function validateModelEditForm() {
     return true;
 }
 </script>

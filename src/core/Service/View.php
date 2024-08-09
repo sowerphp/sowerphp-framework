@@ -261,7 +261,13 @@ class Service_View implements Interface_Service
                 ? ('/Module/' . str_replace('.', '/Module/', $module))
                 : ''
             )
-            . '/View/' . $view
+            . (
+                // Los layouts está fuera del directorio Template, en su propio
+                // directorio Layout.
+                strpos($view, 'Layout/') === 0
+                    ? '/View/' . $view
+                    : '/View/Template/' . $view
+            )
         ;
         // Armar listado de archivos que se podrían buscar según la
         // extensión que se haya incluído en la vista o, si no se incluyó,
@@ -453,11 +459,11 @@ class Service_View implements Interface_Service
     public function resolveLayout(string $layout): string
     {
         if ($layout[0] != '/') {
-            $layout = 'Layouts/' . $layout;
+            $layout = 'Layout/' . $layout;
         }
         $filepath = $this->resolveView($layout, '');
         if (!$filepath) {
-            $layout = 'Layouts/' . $this->defaultLayout;
+            $layout = 'Layout/' . $this->defaultLayout;
             $filepath = $this->resolveView($layout, '');
         }
         return $filepath;

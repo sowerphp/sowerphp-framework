@@ -1,0 +1,26 @@
+{% extends "View/Layout/" ~ __view_layout ~ ".twig" %}
+
+{% block session_messages %}
+    {% if not form_is_valid(form) %}
+        El formulario enviado contiene errores. Por favor, revisa los campos del formulario y corrige los errores antes de continuar.
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header"><h1>{% block title %}Contacto{% endblock %}</h1></div>
+<p>Por favor enviar su mensaje a través del siguiente formulario, será contactado a la brevedad.</p>
+
+{{ form_start(form) }}
+    {{ form_row(form.name) }}
+    {{ form_row(form.email) }}
+    {{ form_row(form.message) }}
+    {{ form_captcha(form.id) }}
+    <div class="row mb-3 form-group">
+        <div class="offset-sm-2 col-sm-10">
+            {{ form_submit('Enviar mensaje') }}
+        </div>
+    </div>
+{{ form_end(form) }}
+
+{% endblock %}
