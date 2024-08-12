@@ -23,49 +23,13 @@
 
 namespace sowerphp\core;
 
+use Illuminate\Validation\ValidationException;
+
 /**
  * Clase que representa un formulario.
  */
-class View_Form
+class View_Form implements \ArrayAccess
 {
-
-    /**
-     * Un diccionario que contiene todos los campos del formulario.
-     *
-     * @var array
-     */
-    public $fields = [];
-
-    /**
-     * Un diccionario que contiene los errores de validación para cada campo.
-     *
-     * @var array
-     */
-    public $errors = [];
-
-    /**
-     * Un booleano que indica si el formulario ha sido enviado con datos (es
-     * decir, si está "bound").
-     *
-     * @var bool
-     */
-    public $is_bound = false;
-
-    /**
-     * Un diccionario que contiene los datos validados del formulario,
-     * disponible después de llamar a is_valid().
-     *
-     * @var array
-     */
-    public $cleaned_data = [];
-
-    /**
-     * Un diccionario que contiene los valores iniciales de los campos del
-     * formulario.
-     *
-     * @var array
-     */
-    public $initial = [];
 
     /**
      * Un diccionario con los datos enviados del formulario (disponible si
@@ -84,6 +48,14 @@ class View_Form
     public $files = [];
 
     /**
+     * Una cadena de formato utilizada para generar los atributos id de los
+     * campos del formulario.
+     *
+     * @var string
+     */
+    public $auto_id = '%sField';
+
+    /**
      * Un prefijo de cadena que se añade a los nombres de los campos del
      * formulario para diferenciar formularios.
      *
@@ -92,20 +64,20 @@ class View_Form
     public $prefix = '';
 
     /**
-     * La clase utilizada para los errores del formulario (por defecto es
-     * ErrorList).
+     * Un diccionario que contiene los valores iniciales de los campos del
+     * formulario.
      *
-     * @var string
+     * @var array
      */
-    public $error_class = 'ErrorList';
+    public $initial = [];
 
     /**
-     * Una cadena de formato utilizada para generar los atributos id de los
-     * campos del formulario.
+     * La clase utilizada para los errores del formulario (por defecto es
+     * 'invalid-feedback').
      *
      * @var string
      */
-    public $auto_id = 'id_%s';
+    public $error_class = 'invalid-feedback';
 
     /**
      * Una cadena que se añade al final de la etiqueta de cada campo.
@@ -131,37 +103,280 @@ class View_Form
     public $use_required_attribute = true;
 
     /**
+     * Un booleano que indica si el formulario ha sido enviado con datos (es
+     * decir, si está "bound").
+     *
+     * Será `true` si al constructor se pasa $data o $files.
+     *
+     * @var bool
+     */
+    public $is_bound = false;
+
+    /**
+     * Un diccionario que contiene los datos validados del formulario,
+     * disponible después de llamar a is_valid().
+     *
+     * @var array
+     */
+    public $cleaned_data = [];
+
+    /**
+     * Un diccionario que contiene todos los campos del formulario.
+     *
+     * @var array
+     */
+    public $fields = [];
+
+    /**
+     * Un diccionario que contiene los errores de validación para cada campo.
+     *
+     * @var array
+     */
+    public $errors = [];
+
+    /**
+     * Clave para almacenar los errores en la sesión.
+     *
+     * @var string
+     */
+    public $errors_key;
+
+    /**
+     * Atributos del formulario.
+     *
+     * Serán los que se utilizarán al renderizar el tag <form>.
+     *
+     * Este atributo incluye un listado de atributos mínimos que se incluirán
+     * por defecto en el tag del formulario renderizado. Se pueden sobrescribir
+     * al instanciar el formulario al renderizar el tag <form>.
+     *
+     * @var array
+     */
+    public $attributes = [
+        'id' => 'defaultFormId',
+        'action' => null,
+        'target' => '_self',
+        'method' => 'POST',
+        'enctype' => 'application/x-www-form-urlencoded',
+        'class' => 'form-horizontal needs-validation',
+        'novalidate' => false,
+        'autocomplete' => 'on',
+        'accept-charset' => 'UTF-8',
+        'role' => 'form',
+    ];
+
+    /**
+     * Configuración del botón de envío del formulario.
+     *
+     * Contiene los índices:
+     *   - `label`: Para el contenido del botón, que puede ser texto o HTML.
+     *   - `attributes`: Para los atributos HTML del botón.
+     *
+     * @var array
+     */
+    public $submit_button = [
+        'label' => 'Enviar',
+        'attributes' => [
+            'id' => 'id_submit_button',
+            'type' => 'submit',
+            'name' => 'submit_button',
+            'value' => 'submit',
+            'class' => 'btn btn-primary',
+            'aria-label' => 'Enviar formulario',
+        ],
+    ];
+
+    /**
      * Constructor del formulario.
      *
-     * @param array $data Datos enviados del formulario.
-     * @param array $files Archivos enviados del formulario.
-     * @param array $initial Valores iniciales de los campos del formulario.
-     * @param string $prefix Prefijo para los nombres de los campos del formulario.
-     * @param array $options Opciones adicionales para configurar el formulario.
+     * @param array $options Opciones adicionales para configurar el
+     * formulario. Las opciones pueden incluir los otros argumentos del
+     * constructor.
+     * @param array|null $data Datos enviados del formulario (equivalente a
+     * $request->input() en Illuminate).
+     * @param array|null $files Archivos enviados del formulario (equivalente a
+     * $request->file() en Illuminate).
+     * @param string $auto_id Una cadena de formato utilizada para generar los
+     * atributos id de los campos del formulario.
+     * @param string|null $prefix Un prefijo de cadena que se añade a los
+     * nombres de los campos del formulario para diferenciar formularios.
+     * @param array|null $initial Valores iniciales de los campos del
+     * formulario.
+     * @param string $error_class La clase utilizada para los errores del
+     * formulario (por defecto es 'invalid-feedback').
+     * @param string|null $label_suffix Una cadena que se añade al final de la
+     * etiqueta de cada campo.
+     * @param bool $empty_permitted Un booleano que indica si es permitido
+     * enviar el formulario con todos los campos vacíos.
+     * @param bool|null $use_required_attribute Un booleano que indica si se
+     * debe usar el atributo required en los campos del formulario al
+     * renderizar el HTML.
      */
     public function __construct(
+        array $options = [],
         array $data = [],
         array $files = [],
-        array $initial = [],
+        string $auto_id = '%sField',
         string $prefix = '',
-        array $options = []
+        array $initial = [],
+        string $error_class = 'invalid-feedback',
+        string $label_suffix = ':',
+        bool $empty_permitted = false,
+        bool $use_required_attribute = true,
+        array $attributes = [],
+        array $fields = [],
+        array $submit_button = []
     )
     {
         // Inicializar propiedades con valores proporcionados.
-        $this->data = $data;
-        $this->files = $files;
-        $this->initial = $initial;
-        $this->prefix = $prefix;
+        $this->data = $options['data'] ?? $data;
+        $this->files = $options['files'] ?? $files;
+        $this->auto_id = $options['auto_id'] ?? $auto_id;
+        $this->prefix = $options['prefix'] ?? $prefix;
+        $this->initial = $options['initial'] ?? $initial;
+        $this->error_class = $options['error_class'] ?? $error_class;
+        $this->label_suffix = $options['label_suffix'] ?? $label_suffix;
+        $this->empty_permitted = $options['empty_permitted']
+            ?? $empty_permitted
+        ;
+        $this->use_required_attribute = $options['use_required_attribute']
+            ?? $use_required_attribute
+        ;
+        $attributes = $options['attributes'] ?? $attributes;
+        $this->attributes = Utility_Array::mergeRecursiveDistinct(
+            $this->attributes,
+            $attributes
+        );
+        $this->fields = $options['fields'] ?? $fields;
+        $submit_button = $options['submit_button'] ?? $submit_button;
+        $this->submit_button = Utility_Array::mergeRecursiveDistinct(
+            $this->submit_button,
+            $submit_button
+        );
+
+        // Determinar si el formulario está vinculado.
+        if (!empty($this->data) || !empty($this->files)) {
+            $this->is_bound = true;
+        }
+
+        // Buscar errores de los campos del formulario.
+        $this->errors_key = 'forms.' . $this->attributes['id'];
+        $this->errors = session()->get('errors.' . $this->errors_key);
+        if ($this->errors) {
+            foreach ($this->errors as $field => $errors) {
+                foreach ($errors as $code => $error) {
+                    $this->add_error($field, $error, $code);
+                }
+            }
+        }
     }
 
     /**
-     * Verifica si el formulario es válido.
+     * Entrega mágicamente un campo del formulario como si fuese un atributo
+     * de la instancia del formulario.
      *
+     * @param string $attribute Nombre del campo del formulario a obtener.
+     * @return View_Form_Field
+     */
+    public function __get(string $attribute)
+    {
+        // Se solicitó un campo del formulario.
+        if (isset($this->fields[$attribute])) {
+            return $this->fields[$attribute];
+        }
+        // Lo que se solicitó no es un campo del formulario, entonces error.
+        throw new \Exception(__(
+            'Campo "%s" del formulario "%s" no existe.',
+            $attribute,
+            $this->attributes['id']
+        ));
+    }
+
+    /**
+     * Permite indicar mágicamente si un atributo solicitado del objeto puede
+     * ser obtenido como un campo del formulario.
+     *
+     * @param string $name
      * @return bool
+     */
+    public function __isset(string $attribute): bool
+    {
+        return isset($this->fields[$attribute]);
+    }
+
+    /**
+     * Verifica si un índice existe en el formulario.
+     *
+     * @param mixed $offset El índice a verificar.
+     * @return bool Verdadero si el índice existe, falso de lo contrario.
+     */
+    public function offsetExists($offset): bool
+    {
+        return property_exists($this, $offset);
+    }
+
+    /**
+     * Obtiene el valor de un índice del formulario.
+     *
+     * @param mixed $offset El índice cuyo valor se desea obtener.
+     * @return mixed El valor del índice si existe, nulo de lo contrario.
+     */
+    public function offsetGet($offset)
+    {
+        if (method_exists($this, $offset)) {
+            return $this->$offset();
+        }
+        return $this->$offset ?? null;
+    }
+
+    /**
+     * Asigna un valor a un índice del formulario.
+     *
+     * @param mixed $offset El índice al cual se le quiere asignar un valor.
+     * @param mixed $value El valor que se quiere asignar.
+     * @return void
+     */
+    public function offsetSet($offset, $value): void
+    {
+        $this->$offset = $value;
+    }
+
+    /**
+     * Elimina un índice del formulario y restablece su valor por defecto si existe.
+     *
+     * @param mixed $offset El índice que se quiere eliminar.
+     * @return void
+     */
+    public function offsetUnset($offset): void
+    {
+        $reflection = new \ReflectionClass($this);
+        $defaultProperties = $reflection->getDefaultProperties();
+        $this->$offset = $defaultProperties[$offset] ?? null;
+    }
+
+    /**
+     * Determina si el formulario es válido.
+     *
+     * Proceso para determinar si es válido:
+     *
+     *   - Verifica si el formulario está vinculado.
+     *   - Realiza una limpieza y validación completa.
+     *
+     * @return bool Devuelve true si no hay errores, false en caso contrario.
      */
     public function is_valid(): bool
     {
-        // Implementar lógica de validación del formulario.
+        // Si el formulario no está vinculado, se considera inválido.
+        if (!$this->is_bound) {
+            return false;
+        }
+
+        // Realiza la limpieza completa de los datos del formulario.
+        $this->full_clean();
+
+        // El formulario es válido si no hubo errores durante la limpieza y
+        // validación.
+        return empty($this->errors);
     }
 
     /**
@@ -169,9 +384,83 @@ class View_Form
      *
      * @return void
      */
-    public function full_clean(): void
+    protected function full_clean(): void
     {
-        // Implementar lógica de limpieza y validación de datos.
+        // Asegurar que tendremos datos y errores limpios.
+        $this->cleaned_data = [];
+        $this->errors = [];
+
+        // Si el formulario no está vinculado se retorna (nada que validar).
+        if (!$this->is_bound) {
+            return;
+        }
+
+        // Ejecutar limpieza y validación.
+        $this->clean_fields();
+        $this->clean_form();
+        $this->post_clean();
+    }
+
+    /**
+     * Limpia y valida cada campo individualmente utilizando los métodos de
+     * limpieza específicos de cada campo (clean_<fieldname>()).
+     *
+     * @return void
+     */
+    protected function clean_fields(): void
+    {
+        // Obtener datos que se pasaron.
+        $data = array_merge($this->data, $this->files);
+
+
+        // Limpiar datos.
+        // TODO: mejorar la sanitización utilizando reglas de sanitización
+        // personalizadas por cada campo (similar a las validaciones).
+        $data = app('sanitizer')->sanitize($data, [
+            'remove_non_printable',
+            'strip_tags',
+            'spaces',
+            'trim',
+        ]);
+
+        // Obtener reglas de validación.
+        $rules = [];
+        $customAttributes = [];
+        foreach ($this->fields as $field) {
+            $rules[$field->name] = $field->validators;
+            $customAttributes[$field->name] = $field->label;
+        }
+
+        // Validar datos.
+        try {
+            $this->cleaned_data = app('validator')->validate(
+                $data,
+                $rules,
+                [],
+                $customAttributes
+            );
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $field => $errors) {
+                foreach ($errors as $code => $error) {
+                    $this->add_error($field, $error, $code);
+                }
+            }
+        }
+    }
+
+    /**
+     * Llama al método clean() del formulario para realizar validaciones
+     * adicionales que involucren múltiples campos.
+     *
+     * @return void
+     */
+    protected function clean_form(): void
+    {
+        try {
+            $this->clean();
+        } catch (ValidationException $e) {
+            $this->add_error(null, $e->getMessage());
+        }
     }
 
     /**
@@ -180,21 +469,52 @@ class View_Form
      *
      * @return void
      */
-    public function clean(): void
+    protected function clean(): void
     {
-        // Implementar lógica de limpieza personalizada
+        // Implementar lógica de limpieza personalizada en cada clase heredada.
+    }
+
+    /**
+     * En formularios de modelos, este método se encarga de validar la
+     * instancia del modelo contra las restricciones de la base de datos
+     * (como restricciones de unicidad).
+     *
+     * Puede ser usado para cualquier validación adicional que necesite
+     * realizarse después de que todos los campos individuales han sido
+     * limpiados y validados.
+     *
+     * Este método puede estar vacío si no hay validaciones adicionales.
+     * Si hay validaciones adicionales, se pueden implementar aquí.
+     *
+     * @return void
+     */
+    protected function post_clean(): void
+    {
+        // TODO: ver dónde y cómo usar. Por ejemplo, la unicidad ya se valida
+        // antes mediante las reglas de validación estándares.
     }
 
     /**
      * Agrega un error a un campo específico del formulario.
      *
-     * @param string $field Nombre del campo.
+     * @param null|string $field Nombre del campo.
      * @param string $error Mensaje de error.
+     * @param int|string $code Código de error.
      * @return void
      */
-    public function add_error(string $field, string $error): void
+    protected function add_error(?string $field, string $error, $code = null): void
     {
-        // Implementar lógica para agregar un error a un campo.
+        if ($field === null) {
+            $this->errors[] = $error;
+        } else {
+            if ($code === null) {
+                $this->errors[$field][] = $error;
+                $this->fields[$field]->error_messages[] = $error;
+            } else {
+                $this->errors[$field][$code] = $error;
+                $this->fields[$field]->error_messages[$code] = $error;
+            }
+        }
     }
 
     /**
@@ -206,7 +526,10 @@ class View_Form
      */
     public function has_error(string $field, string $code = null): bool
     {
-        // Implementar lógica para verificar si un campo tiene errores.
+        if ($code === null) {
+            return !empty($this->fields[$field]->error_messages);
+        }
+        return !empty($this->fields[$field]->error_messages[$code]);
     }
 
     /**
@@ -250,8 +573,13 @@ class View_Form
      */
     public function is_multipart(): bool
     {
-        // Implementar lógica para verificar si el formulario necesita
-        // enctype="multipart/form-data".
+        foreach ($this->fields as $field) {
+            $type = $field->widget->attributes['type'] ?? null;
+            if ($type == 'file') {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -261,7 +589,14 @@ class View_Form
      */
     public function hidden_fields(): array
     {
-        // Implementar lógica para devolver una lista de los campos ocultos.
+        $fields = [];
+        foreach ($this->fields as $name => $field) {
+            $type = $field->widget->attributes['type'] ?? null;
+            if ($type == 'hidden') {
+                $fields[$name] = $field;
+            }
+        }
+        return $fields;
     }
 
     /**
@@ -271,7 +606,53 @@ class View_Form
      */
     public function visible_fields(): array
     {
-        // Implementar lógica para devolver una lista de los campos visibles.
+        $fields = [];
+        foreach ($this->fields as $name => $field) {
+            $type = $field->widget->attributes['type'] ?? null;
+            if ($type != 'hidden') {
+                $fields[$name] = $field;
+            }
+        }
+        return $fields;
+    }
+
+    /**
+     * Entrega el Token CSRF para ser usado en el formulario.
+     *
+     * @return string
+     */
+    public function csrf_token(): string
+    {
+        return session()->csrf_token();
+    }
+
+    /**
+     * Método genérico que crea un formulario a partir de los datos que son
+     * entregados por el método estático buildForm().
+     *
+     * Este método permite crear fácilmente formularios a partir de un arreglo
+     * de opciones entrado por el método buildForm() que debe ser implementado
+     * en cada uno de las clases de formularios que hereden de esta clase y que
+     * deseen usar la factory con el método estático create().
+     *
+     * @return self
+     */
+    public static function create(array $options = []): self
+    {
+        $options = static::buildForm($options);
+        if (isset($options['fields'])) {
+            foreach ((array)$options['fields'] as $name => $field) {
+                if (is_array($field)) {
+                    $options['fields'][$name] = new View_Form_Field(
+                        array_merge([
+                            'name' => $name,
+                        ], $field)
+                    );
+                }
+            }
+        }
+        $form = new self($options);
+        return $form;
     }
 
 }

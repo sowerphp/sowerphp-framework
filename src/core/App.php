@@ -66,7 +66,7 @@ class App
         'sanitizer' => Service_Sanitizer::class,
         'caster' => Service_Caster::class,
         'validator' => Service_Validator::class,
-        //'mail' => Service_Mail::class,
+        'mail' => Service_Mail::class,
         'http_client' => Service_Http_Client::class,
         //'log' => Service_Log::class,
         //'notification' => Service_Notification::class,

@@ -23,63 +23,49 @@
 
 namespace sowerphp\core;
 
-use Illuminate\Mail\MailManager;
-use Illuminate\Container\Container;
-use Illuminate\Mail\Mailer;
-use Illuminate\Contracts\Mail\Mailable;
+use \Symfony\Component\Mailer\Mailer;
+use \Symfony\Component\Mailer\Envelope;
+use \Symfony\Component\Mime\RawMessage;
+use \Symfony\Component\Mime\Address;
 
 /**
  * Servicio de correo.
  *
- * Gestiona el envío de correos electrónicos, proporcionando métodos
- * para obtener y crear instancias de mailers utilizando Illuminate Mail.
+ * Gestiona los correos electrónicos. Tanto el envío mediante mailer() y la
+ * recepción mediante receiver().
  */
 class Service_Mail implements Interface_Service
 {
 
     /**
-     * Servicio de configuración.
+     * Instancia de la aplicación
      *
-     * @var Service_Config
+     * @var App
      */
-    protected $configService;
+    protected $app;
 
     /**
-     * Instancia de MailManager.
+     * Servicio de envío de correo (mailer).
      *
-     * @var MailManager
+     * @var Service_Mail_Mailer
      */
-    protected $mailManager;
+    protected $mailerService;
 
     /**
-     * Constructor de la clase.
+     * Servicio de recepción de correo (receiver).
      *
-     * @param Service_Config $configService Servicio de configuración.
+     * @var Service_Mail_Receiver
      */
-    public function __construct(Service_Config $configService)
+    protected $receiverService;
+
+    /**
+     * Contructor del servicio.
+     *
+     * @param App $app
+     */
+    public function __construct(App $app)
     {
-        $this->configService = $configService;
-
-        // Crear un contenedor de Illuminate
-        $container = new Container();
-
-        // Configurar el contenedor con la configuración de correo
-        $container['config'] = [
-            'mail.default' => $this->configService->get('mail.default'),
-            'mail.mailers' => $this->configService->get('mail.mailers'),
-            'mail.from' => $this->configService->get('mail.from'),
-        ];
-
-        // Crear una instancia de MailManager
-        $this->mailManager = new MailManager($container);
-
-        // Configurar el resolver para usar CustomMailer para diferentes transportes
-        $transports = ['smtp', 'ses', 'mailgun', 'postmark', 'sendmail'];
-        foreach ($transports as $transport) {
-            $this->mailManager->extend($transport, function ($config) use ($container) {
-                return new CustomMailer($container['config']->get('mail.mailers.' . $config['transport']), $container);
-            });
-        }
+        $this->app = $app;
     }
 
     /**
@@ -89,7 +75,10 @@ class Service_Mail implements Interface_Service
      */
     public function register(): void
     {
-        // Código de registro del servicio.
+        $this->app->registerService('mailer', Service_Mail_Mailer::class);
+        $this->mailerService = $this->app->getService('mailer');
+        $this->app->registerService('mail_receiver', Service_Mail_Receiver::class);
+        $this->receiverService = $this->app->getService('mail_receiver');
     }
 
     /**
@@ -99,7 +88,6 @@ class Service_Mail implements Interface_Service
      */
     public function boot(): void
     {
-        // Código de inicialización del servicio.
     }
 
     /**
@@ -115,43 +103,57 @@ class Service_Mail implements Interface_Service
      * Obtiene un remitente de correo.
      *
      * @param string|null $name Nombre del remitente.
-     * @return CustomMailer
+     * @return Symfony\Component\Mailer\Mailer
      */
-    public function mailer(?string $name = null): CustomMailer
+    public function mailer(?string $name = null): Mailer
     {
-        return $this->mailManager->mailer($name ?? $this->mailManager->getDefaultDriver());
-    }
-
-}
-
-class CustomMailer extends Mailer
-{
-
-    /**
-     * Constructor de la clase.
-     *
-     * @param array $config Configuración del remitente.
-     * @param Container $container
-     */
-    public function __construct(array $config, Container $container)
-    {
-        parent::__construct($container, $container['view'], $config['name']);
-        $this->setQueue($container['queue']);
-        $this->alwaysFrom($config['from']['address'], $config['from']['name']);
+        return $this->mailerService->mailer($name);
     }
 
     /**
-     * Método personalizado sendMail.
+     * Obtiene un receptor de correo.
      *
-     * @param Mailable $mailable
+     * @param string|null $name Nombre del receptor.
+     */
+    public function receiver(?string $name = null)
+    {
+        return $this->receiverService->receiver($name);
+    }
+
+    /**
+     * Envía el correo electrónico.
+     *
+     * Esta envoltura del método Mailer::send() agrega de manera automática un
+     * $envelope al envío si no se especificó uno. Si se quiere evitar este
+     * comportamiento usar Mailer::send().
+     *
+     * @param RawMessage $message
+     * @param Envelope|null $envelope
+     * @param string|null $name Nombre del mailer que se usará para el envío.
      * @return void
      */
-    public function sendMail(Mailable $mailable): void
+    public function send(
+        RawMessage $message,
+        ?Envelope $envelope = null,
+        ?string $name = null
+    ): void
     {
-        // Implementación del método sendMail
-        $this->send($mailable);
+        // Agregar $envelope si no se especificó uno con los datos por defecto
+        // de la configuración del correo electrónico.
+        if ($envelope === null) {
+            $config = $this->mailerService->config($name);
+            $sender = new Address(
+                $config['from']['address'],
+                $config['from']['name'] ?? ''
+            );
+            $recipient = new Address(
+                $config['to']['address'],
+                $config['to']['name'] ?? ''
+            );
+            $envelope = new Envelope($sender, [$recipient]);
+        }
+        // Enviar mensaje del correo electrónico en el $envelope.
+        $this->mailer($name)->send($message, $envelope);
     }
-
-    // Añadir otros métodos personalizados si es necesario
 
 }

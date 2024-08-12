@@ -175,19 +175,23 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         $routeConfig = $request->getRouteConfig();
         // Agregar metadatos del formulario en si.
         $data['form'] = [
-            'action' => 'create',
-            'url' => url($routeConfig['url']['controller'] . '/store'),
-            'method' => 'POST',
-            'id' => 'modelCreateForm',
-            'class' => 'needs-validation',
-            'enctype' => 'multipart/form-data',
+            'data' => $request->input(),
+            'file' => $request->file(),
             'attributes' => [
+                'id' => $data['model']['db_table'] . 'ModelCreateForm',
+                'action' => url($routeConfig['url']['controller'] . '/store'),
                 'onsubmit' => 'return validateModelCreateForm(this)',
-            ]
+            ],
+            'submit_button' => [
+                'label' => 'Crear nuevo ' . strtolower($data['model']['verbose_name']),
+            ],
         ];
+        // Crear formulario a partir de los metadados del modelo.
+        $form = View_Form_Model::create($data);
         // Renderizar la vista con el formulario de creación.
         return $this->render('create', [
             'data' => $data,
+            'form' => $form,
         ]);
     }
 
@@ -205,7 +209,11 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $rules = $instance->getValidationRulesCreate();
             $validatedData = $request->validate($rules);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect()->back(422)->withErrors($e->errors())->withInput();
+            return redirect()
+                ->back(422)
+                ->withErrors($e->errors(), 'create')
+                ->withInput()
+            ;
         }
         // Obtener URL de la API que se deberá consumir.
         $routeConfig = $request->getRouteConfig();
@@ -267,26 +275,26 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         $routeConfig = $request->getRouteConfig();
         // Agregar metadatos del formulario en si.
         $data['form'] = [
-            'action' => 'edit',
-            'url' => url(
-                $routeConfig['url']['controller']
-                . '/update/'
-                . implode('/', $id)
-            ),
-            'method' => 'POST',
-            'id' => 'modelEditForm',
-            'class' => 'needs-validation',
-            'enctype' => 'multipart/form-data',
+            'data' => $request->input(),
+            'file' => $request->file(),
             'attributes' => [
+                'id' => $data['model']['db_table'] . 'ModelEditForm',
+                'action' => url(
+                    $routeConfig['url']['controller']
+                    . '/update/'
+                    . implode('/', $id)
+                ),
                 'onsubmit' => 'return validateModelEditForm(this)',
-            ]
+            ],
+            'submit_button' => [
+                'label' => 'Editar ' . strtolower($data['model']['verbose_name']),
+            ],
         ];
         // Crear formulario a partir de los metadados del modelo.
-        require app('layers')->getFrameworkPath('/src/core/View/Form/Model.php');
-        $form = new View_Form_Model($data);
-        $form->buildFrom($data);
+        $form = View_Form_Model::create($data);
         // Renderizar la vista con el formulario de edición.
         return $this->render('edit', [
+            'data' => $data,
             'form' => $form,
         ]);
     }
@@ -305,7 +313,11 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $rules = $instance->getValidationRulesEdit();
             $validatedData = $request->validate($rules);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect()->back(422)->withErrors($e->errors())->withInput();
+            return redirect()
+                ->back(422)
+                ->withErrors($e->errors(), 'edit')
+                ->withInput()
+            ;
         }
         // Obtener URL de la API que se deberá consumir.
         $routeConfig = $request->getRouteConfig();

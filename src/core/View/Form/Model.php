@@ -26,9 +26,25 @@ namespace sowerphp\core;
 class View_Form_Model extends View_Form
 {
 
-    public function buildForm(array $data = [])
+    public static function buildForm(array $options): array
     {
-        dd($data);
+        $fields = [];
+        foreach ($options['fields'] as $name => $config) {
+            $field = new View_Form_Field($config);
+            $fields[$name] = $field;
+        }
+        $initial = array_filter(
+            array_map(function ($field) { return $field->initial; }, $fields),
+            function ($initial) { return $initial !== null; }
+        );
+        return [
+            'data' => $options['form']['data'] ?? [],
+            'files' => $options['form']['files'] ?? [],
+            'initial' => $initial,
+            'attributes' => $options['form']['attributes'] ?? [],
+            'fields' => $fields,
+            'submit_button' => $options['form']['submit_button'] ?? [],
+        ];
     }
 
 }

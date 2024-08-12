@@ -1,4 +1,4 @@
-{% extends "View/Layout/" ~ __view_layout ~ ".twig" %}
+{% extends "View/Layout/" ~ __view_layout ~ ".html.twig" %}
 
 {% block content %}
 
@@ -17,7 +17,8 @@
             {{ form_row(field) }}
         {% endif %}
     {% endfor %}
-    {{ form_submit('Editar el registro') }}
+    {{ form_csrf(form) }}
+    {{ form_submit(form.submit_button.label, form.submit_button.attributes) }}
 {{ form_end(form) }}
 
 <script>

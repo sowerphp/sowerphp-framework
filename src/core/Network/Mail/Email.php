@@ -23,12 +23,11 @@
 
 namespace sowerphp\core;
 
+use Symfony\Component\Mime\Email;
+
 /**
- * Clase padre para un comando (personalizable)
- *
- * En esta clase se deben incluir las personalizaciones a la clase Shell
- * que el programador desee realiar a las Shell en general.
+ * Mensaje de correo electrónico que se usará con el servicio 'mailer'.
  */
-abstract class Shell_App extends Shell
+class Network_Mail_Email extends Email
 {
 }

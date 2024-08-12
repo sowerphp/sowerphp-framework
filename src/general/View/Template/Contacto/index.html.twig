@@ -1,8 +1,8 @@
-{% extends "View/Layout/" ~ __view_layout ~ ".twig" %}
+{% extends "View/Layout/" ~ __view_layout ~ ".html.twig" %}
 
 {% block session_messages %}
     {% if not form_is_valid(form) %}
-        El formulario enviado contiene errores. Por favor, revisa los campos del formulario y corrige los errores antes de continuar.
+        {{ form_errors_message() }}
     {% endif %}
 {% endblock %}
 
@@ -15,12 +15,9 @@
     {{ form_row(form.name) }}
     {{ form_row(form.email) }}
     {{ form_row(form.message) }}
-    {{ form_captcha(form.id) }}
-    <div class="row mb-3 form-group">
-        <div class="offset-sm-2 col-sm-10">
-            {{ form_submit('Enviar mensaje') }}
-        </div>
-    </div>
+    {{ form_captcha(form) }}
+    {{ form_csrf(form) }}
+    {{ form_submit('Enviar mensaje') }}
 {{ form_end(form) }}
 
 {% endblock %}

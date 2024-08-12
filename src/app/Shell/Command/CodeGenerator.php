@@ -26,7 +26,7 @@ namespace sowerphp\app;
 /**
  * Comando para generar código de forma automática
  */
-class Shell_Command_CodeGenerator extends \Shell_App
+class Shell_Command_CodeGenerator extends \sowerphp\autoload\Shell
 {
 
     public static $db; ///< Conexión a la base de datos

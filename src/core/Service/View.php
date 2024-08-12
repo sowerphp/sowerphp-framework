@@ -79,7 +79,7 @@ class Service_View implements Interface_Service
      */
     protected $engines = [
         //'.blade.php' => View_Engine_Blade::class,
-        '.twig' => View_Engine_Twig::class,
+        '.html.twig' => View_Engine_Twig::class,
         '.php' => View_Engine_Php::class,
         //'.md' => View_Engine_Markdown::class,
     ];

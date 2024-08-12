@@ -23,39 +23,147 @@
 
 namespace sowerphp\core;
 
+use \Illuminate\Support\Str;
+
 /**
  * Clase base para todos los widgets de formulario.
  */
-abstract class View_Form_Widget
+class View_Form_Widget implements \ArrayAccess
 {
 
     /**
-     * Renderiza el widget del campo.
+     * El nombre del widget del formulario.
      *
-     * @param string $name El nombre del campo.
-     * @param mixed $value El valor del campo.
-     * @param array $attributes Atributos adicionales para el widget.
-     * @return string El HTML renderizado del widget.
+     * @var string
      */
-    abstract public function render(
-        string $name,
-        $value,
-        array $attributes = []
-    ): string;
+    protected $name;
 
     /**
-     * Construye una cadena de atributos HTML a partir de un array.
+     * El valor del widget del formulario.
      *
-     * @param array $attributes Atributos adicionales para el widget.
-     * @return string La cadena de atributos HTML.
+     * @var mixed
      */
-    protected function buildAttributes(array $attributes): string
+    protected $value;
+
+    /**
+     * Los atributos (u opciones) del widget del formulario.
+     *
+     * Normalmente serán atributos directos de un elemento de formmulario HTML.
+     * Sin embargo, algunos widgets usan opciones más complehas para rederizar
+     * los elementos (ej: un widget con múltiples elementos HTML).
+     *
+     * @var array
+     */
+    protected $attributes;
+
+    /**
+     * Constructor de un widget de formulario.
+     *
+     * @param string $name El nombre del widget del formulario.
+     * @param mixed $value El valor del widget del formulario.
+     * @param array $attributes Los atributos (u opciones) del widget del
+     * formulario.
+     */
+    public function __construct(string $name, $value, array $attributes = [])
     {
-        $attrString = '';
-        foreach ($attributes as $key => $value) {
-            $attrString .= " {$key}='{$value}'";
+        $this->name = $name;
+        $this->value = $value;
+        $this->attributes = $attributes;
+    }
+
+    /**
+     * Verifica si un índice existe en el widget.
+     *
+     * @param mixed $offset El índice a verificar.
+     * @return bool Verdadero si el índice existe, falso de lo contrario.
+     */
+    public function offsetExists($offset): bool
+    {
+        return property_exists($this, $offset);
+    }
+
+    /**
+     * Obtiene el valor de un índice del widget.
+     *
+     * @param mixed $offset El índice cuyo valor se desea obtener.
+     * @return mixed El valor del índice si existe, nulo de lo contrario.
+     */
+    public function offsetGet($offset)
+    {
+        return $this->$offset ?? null;
+    }
+
+    /**
+     * Asigna un valor a un índice del widget.
+     *
+     * @param mixed $offset El índice al cual se le quiere asignar un valor.
+     * @param mixed $value El valor que se quiere asignar.
+     * @return void
+     */
+    public function offsetSet($offset, $value): void
+    {
+        $this->$offset = $value;
+    }
+
+    /**
+     * Elimina un índice del widget y restablece su valor por defecto si existe.
+     *
+     * @param mixed $offset El índice que se quiere eliminar.
+     * @return void
+     */
+    public function offsetUnset($offset): void
+    {
+        $reflection = new \ReflectionClass($this);
+        $defaultProperties = $reflection->getDefaultProperties();
+        $this->$offset = $defaultProperties[$offset] ?? null;
+    }
+
+    /**
+     * Renderiza el widget del campo del formulario generando su HTML.
+     *
+     * @return string El HTML renderizado del widget.
+     */
+    public function render(array $options = []): string
+    {
+        $method = 'render' . ucfirst(Str::camel($this->name)) . 'Widget';
+        if (!method_exists($this, $method)) {
+            return $this->renderDefaultWidget($options);
         }
-        return $attrString;
+        return $this->$method($options);
+    }
+
+    protected function renderDefaultWidget(): string
+    {
+        $this->attributes['value'] = $this->value;
+        return sprintf(
+            '<input %s />',
+            html_attributes($this->attributes)
+        );
+    }
+
+    protected function renderDateWidget(): string
+    {
+        if (!empty($this->value)) {
+            $this->value = substr($this->value, 0, 10);
+        }
+        return $this->renderDefaultWidget();
+    }
+
+    protected function renderDatetimeLocalWidget(): string
+    {
+        if (!empty($this->value)) {
+            $this->value = substr($this->value, 0, 16);
+        }
+        return $this->renderDefaultWidget();
+    }
+
+    protected function renderTextareaWidget(): string
+    {
+        return sprintf(
+            '<textarea %s />%s</textarea>',
+            html_attributes($this->attributes),
+            $this->value
+        );
     }
 
 }

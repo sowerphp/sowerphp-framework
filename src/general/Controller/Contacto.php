@@ -23,14 +23,14 @@
 
 namespace sowerphp\general;
 
-use \Illuminate\Validation\ValidationException;
+use Symfony\Component\Mime\Address;
 use \sowerphp\core\Network_Request as Request;
-use \sowerphp\core\Facade_Session_Message as SessionMessage;
+use \sowerphp\autoload\Controller;
 
 /**
  * Controlador para página de contacto.
  */
-class Controller_Contacto extends \sowerphp\autoload\Controller
+class Controller_Contacto extends Controller
 {
 
     /**
@@ -38,7 +38,7 @@ class Controller_Contacto extends \sowerphp\autoload\Controller
      */
     public function boot(): void
     {
-        app('auth')->allowActionsWithoutLogin('index', 'send', 'thanks');
+        app('auth')->allowActionsWithoutLogin('index', 'send');
         parent::boot();
     }
 
@@ -55,7 +55,7 @@ class Controller_Contacto extends \sowerphp\autoload\Controller
                     __('La página de contacto no se encuentra disponible.')
                 );
         }
-        $form = new View_Form_Contacto();
+        $form = View_Form_Contacto::create();
         return $this->render(null, [
             'form' => $form,
         ]);
@@ -63,19 +63,15 @@ class Controller_Contacto extends \sowerphp\autoload\Controller
 
     /**
      * Método que procesará el formulario de contacto.
-     *
-     * @param Request $request
-     * @return void
      */
     public function send(Request $request)
     {
-        // Si se envió el formulario se procesa.
-        if ($request->isMethod('get')) {
-            return redirect('/contacto')->withError(__(
-                'Debe enviar el formulario para que sea procesado.'
-            ));
-        }
-        // Validar captcha.
+        // Crear formulario con los posibles datos enviados.
+        $form = View_Form_Contacto::create([
+            'data' => $request->input(),
+            'file' => $request->file(),
+        ]);
+        // Validar captcha del formulario.
         try {
             app('captcha')->check($request);
         } catch (\Exception $e) {
@@ -84,48 +80,47 @@ class Controller_Contacto extends \sowerphp\autoload\Controller
                 $e->getMessage()
             ));
         }
-        try {
-            $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|max:255',
-                'message' => 'required|string|min:1000|max:1000',
-            ]);
-        } catch (ValidationException $e) {
-            return redirect()->back(422)->withErrors($e->errors())->withInput();
+        // Validar formmulario.
+        if (!$form->is_valid()) {
+            return redirect()
+                ->back(422)
+                ->withInput()
+                ->withErrors($form->errors, $form->errors_key)
+            ;
         }
-        exit;
-        // Enviar email.
-        $_POST['nombre'] = trim(strip_tags($_POST['nombre']));
-        $_POST['correo'] = trim(strip_tags($_POST['correo']));
-        $_POST['mensaje'] = trim(strip_tags($_POST['mensaje']));
-        if (
-            !empty($_POST['nombre'])
-            && !empty($_POST['correo'])
-            && !empty($_POST['mensaje'])
-        ) {
-            $email = new \sowerphp\core\Network_Email();
-            $email->replyTo($_POST['correo'], $_POST['nombre']);
-            $email->to(config('mail.to.address'));
-            $email->subject(
-                !empty($_POST['asunto'])
-                ? trim(strip_tags($_POST['asunto']))
-                : __('Contacto desde %s #%d', url(), date('YmdHis'))
-            );
-            $msg = $_POST['mensaje']."\n\n".'-- '."\n".$_POST['nombre']."\n".$_POST['correo'];
-            $status = $email->send($msg);
-            if ($status === true) {
-                return redirect('/contacto')->withSuccess(__(
-                    'Su mensaje ha sido enviado, se responderá a la brevedad.'
-                ));
-            } else {
-                SessionMessage::error(__(
-                    'Ha ocurrido un error al enviar su mensaje, por favor intente nuevamente.<br /><em>%s</em>', $status['message']
-                ));
-            }
-        } else {
-            SessionMessage::error(__(
-                'Por favor, completar todos los campos del formulario.'
+        // Armar correo electrónico que se enviará.
+        $data = $form->cleaned_data;
+        $from = new Address($data['email'], $data['name']);
+        $text = sprintf(
+            "%s\n\n-- \n%s\n%s\n",
+            $data['message'],
+            $data['name'],
+            $data['email']
+        );
+        //$html = '<p>' . str_replace("\n", '</p><p>', $text) . '</p>';
+        $email = (new \sowerphp\core\Network_Mail_Email())
+            ->from($from)
+            ->to($from)
+            ->replyTo($from)
+            ->subject(__('Contacto desde %s #%d', url(), date('YmdHis')))
+            ->text($text)
+            //->html($html)
+        ;
+        // Enviar correo electrónico.
+        try {
+            app('mail')->send($email);
+            return redirect('/contacto')->withSuccess(__(
+                'Su mensaje ha sido enviado, se responderá a la brevedad.'
             ));
+        } catch (\Exception $e) {
+            return redirect()
+                ->back(422)
+                ->withInput()
+                ->withError(__(
+                    'Ha ocurrido un error al enviar su mensaje, por favor intente nuevamente.<br /><br /><em>%s</em>',
+                    $e->getMessage()
+                ))
+            ;
         }
     }
 

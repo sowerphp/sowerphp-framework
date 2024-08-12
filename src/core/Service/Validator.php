@@ -252,4 +252,110 @@ class Service_Validator implements Interface_Service
         return $validatedData;
     }
 
+    /**
+     * Genera las reglas de validación por defecto de un campo en base a su
+     * configuración.
+     *
+     * @param array $config Configuración del campo.
+     * @return array Reglas de validación.
+     */
+    public function generateValidationRules(array $config): array
+    {
+        $rules = $this->generateValidationRulesDefault($config);
+        //$rules = $this->generateValidationRulesString($config, $rules);
+        //$rules = $this->generateValidationRulesInt($config, $rules);
+        return $rules['create'] != $rules['edit'] ? $rules : $rules['create'];
+    }
+
+    /**
+     * Reglas de validación por defecto para todos los tipos de campo.
+     *
+     * Se determinan las reglas de validación según diferentes casos.
+     * Se generan reglas para "create" y "edit". Donde si ambas reglas son
+     * iguales se entrega sólo un listado de reglas.
+     *
+     * @param array $config Configuración del campo.
+     * @return array Reglas de validación determinadas.
+     */
+    protected function generateValidationRulesDefault(array $config): array
+    {
+        $rules = ['create' => [], 'edit' => []];
+        // El valor es obligatorio.
+        if (!empty($config['required'])) {
+            // Obligatorio siempre.
+            if ($config['required'] === true) {
+                $rules['create'][] = $rules['edit'][] = 'required';
+            }
+            // Obligatorio al crear.
+            if (!empty($config['required']['create'])) {
+                $rules['create'][] = 'required';
+            }
+            // Obligatorio al editar.
+            if (!empty($config['required']['edit'])) {
+                $rules['edit'][] = 'required';
+            }
+        }
+        // El valor tiene largo mínimo o máximo.
+        if (isset($config['min_length'])) {
+            $rules['create'][] = $rules['edit'][] =
+                'min:' . $config['min_length']
+            ;
+        }
+        if (isset($config['max_length'])) {
+            $rules['create'][] = $rules['edit'][] =
+                'max:' . $config['max_length']
+            ;
+        }
+        // El valor debe estar en un rango de mínimo o máximo.
+        if (isset($config['min_value'])) {
+            $rules['create'][] = $rules['edit'][] =
+                'min:' . $config['min_value']
+            ;
+        }
+        if (isset($config['max_value'])) {
+            $rules['create'][] = $rules['edit'][] =
+                'max:' . $config['max_value']
+            ;
+        }
+        // El valor debe estar dentro de una lista de opciones.
+        if (!empty($config['choices'])) {
+            $rules['create'][] = $rules['edit'][] =
+                'in:' . implode(',', array_keys($config['choices']))
+            ;
+        }
+        // El valor debe ser único.
+        if (!empty($config['unique'])) {
+            $n_ignore = count($config['unique']['ignore']);
+            // PK normal.
+            if ($n_ignore == 1) {
+                $unique = 'unique:'
+                    . $config['unique']['db_table']
+                    . ',' . $config['db_column']
+                ;
+                $rules['create'][] = $unique;
+                $pk = array_keys($config['unique']['ignore'])[0];
+                $rules['edit'][] = $unique
+                    . ',' . $config['unique']['ignore'][$pk]
+                    . ',' . $pk
+                ;
+            }
+            // PK compuesta.
+            else {
+                $rules['create'][] = new Data_Validation_UniqueComposite(
+                    $config['unique']['db_name'],
+                    $config['unique']['db_table'],
+                    $config['unique']['columns']
+                );
+                $rules['edit'][] = new Data_Validation_UniqueComposite(
+                    $config['unique']['db_name'],
+                    $config['unique']['db_table'],
+                    $config['unique']['columns'],
+                    $config['unique']['ignore']
+                );
+            }
+        }
+        // Entregar las reglas determinadas.
+        return $rules;
+    }
+
 }

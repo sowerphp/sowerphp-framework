@@ -24,41 +24,41 @@
 namespace sowerphp\general;
 
 use \sowerphp\core\View_Form;
-use \sowerphp\core\View_Form_Field;
 
 class View_Form_Contacto extends View_Form
 {
 
-    protected function buildForm()
+    protected static function buildForm(array $options): array
     {
-        // Agregar configuración general del formulario.
-        $this->config = [
-            'action' => url('/contacto/send'),
-            'id' => 'contactusForm',
+        return [
+            'data' => $options['data'] ?? [],
+            'files' => $options['files'] ?? [],
+            'initial' => $options['initial'] ?? [],
+            'attributes' => [
+                'id' => 'contactusForm',
+                'action' => url('/contacto/send'),
+            ],
+            'fields' => [
+                'name' => [
+                    'verbose_name' => __('Nombre'),
+                    'required' => true,
+                    'max_length' => 255,
+                ],
+                'email' => [
+                    'input_type' => 'email',
+                    'verbose_name' => __('Correo electrónico'),
+                    'required' => true,
+                    'max_length' => 255,
+                ],
+                'message' => [
+                    'widget' => 'textarea',
+                    'verbose_name' => __('Mensaje'),
+                    'required' => true,
+                    'min_length' => 100,
+                    'max_length' => 1000,
+                ],
+            ],
         ];
-        // Agregar campos del formulario.
-        $this->fields = [];
-        $this->fields[] = new View_Form_Field([
-            'name' => 'name',
-            'verbose_name' => __('Nombre'),
-            'required' => true,
-            'max_length' => 255,
-        ]);
-        $this->fields[] = new View_Form_Field([
-            'input_type' => 'email',
-            'name' => 'email',
-            'verbose_name' => __('Correo electrónico'),
-            'required' => true,
-            'max_length' => 255,
-        ]);
-        $this->fields[] = new View_Form_Field([
-            'widget' => 'textarea',
-            'name' => 'message',
-            'verbose_name' => __('Mensaje'),
-            'required' => true,
-            'min_length' => 100,
-            'max_length' => 1000,
-        ]);
     }
 
 }

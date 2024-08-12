@@ -1,4 +1,4 @@
-{% extends "View/Layout/" ~ __view_layout ~ ".twig" %}
+{% extends "View/Layout/" ~ __view_layout ~ ".html.twig" %}
 
 {% block title %}Ha ocurrido un error{% endblock %}
 
@@ -12,14 +12,14 @@
     <p>Encontramos un problema y la aplicación dejó de ejecutarse.</p>
     {% if error_reporting and exception and message %}
         <div class="card mb-4">
-            <div class="card-header text-muted">{{ exception }}</div>
-            <div class="card-body"><pre class="text-dark">{{ message }}</pre></div>
+            <div class="card-header text-muted">{{ exception | raw }}</div>
+            <div class="card-body"><pre class="text-dark">{{ message | raw }}</pre></div>
         </div>
     {% endif %}
     {% if error_reporting and trace %}
         <div class="card mb-4">
             <div class="card-header text-muted">Traza del error</div>
-            <div class="card-body"><pre class="text-dark">{{ trace }}</pre></div>
+            <div class="card-body"><pre class="text-dark">{{ trace | raw }}</pre></div>
         </div>
     {% endif %}
     <p>Por favor, verifique que la dirección web que lo trajo a esta página o los datos ingresados sean válidos.</p>

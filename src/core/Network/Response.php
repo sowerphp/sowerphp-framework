@@ -23,7 +23,7 @@
 
 namespace sowerphp\core;
 
-use Illuminate\Http\Response;
+//use Illuminate\Http\Response;
 
 /**
  * Clase para generar respuesta al cliente

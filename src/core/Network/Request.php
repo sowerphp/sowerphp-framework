@@ -272,7 +272,12 @@ class Network_Request extends Request
                 $request = urldecode($request);
             }
             $this->requestUriDecoded = $request;
+            // Quitar índice del request reescrito de $_GET y del input del
+            // Request heredado de Illuminate.
             unset($_GET[$this->requestUriDecoded]);
+            $input = $this->all();
+            unset($input[$this->requestUriDecoded]);
+            $this->replace($input);
         }
         return $this->requestUriDecoded;
     }

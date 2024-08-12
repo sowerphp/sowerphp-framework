@@ -90,6 +90,7 @@ class Service_Http_Kernel implements Interface_Service
     protected $middlewares = [
         Middleware_Auth::class,
         Middleware_Throttle::class,
+        Middleware_Csrf::class,
         Middleware_Log::class,
     ];
 

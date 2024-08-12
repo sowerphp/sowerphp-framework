@@ -276,11 +276,22 @@ function model(?string $model = null, $pk = null)
  * Obtiene un remitente de correo.
  *
  * @param string|null $name Nombre del remitente.
- * @return Mailer
+ * @return \Symfony\Component\Mailer\Mailer
  */
-function mailer(?string $name = null): \Illuminate\Mail\Mailer
+function mailer(?string $name = null): \Symfony\Component\Mailer\Mailer
 {
     return app('mail')->mailer($name);
+}
+
+/**
+ * Obtiene un receptor de correo.
+ *
+ * @param string|null $name Nombre del receptor.
+ * @return \sowerphp\core\Network_Mail_Mailbox
+ */
+function mail_receiver(?string $name = null): \sowerphp\core\Network_Mail_Mailbox
+{
+    return app('mail')->receiver($name);
 }
 
 /**
@@ -707,4 +718,28 @@ function split_parameters(string $parametersString, string $delimiter = ','): ar
 
     // Entregar los parámetros encontrados.
     return $parameters;
+}
+
+/**
+ * Construye una cadena de atributos HTML a partir de un arreglo.
+ *
+ * @param array $attributes Arreglo de atributos.
+ * @return string Cadena de atributos HTML.
+ */
+function html_attributes(array $attributes): string
+{
+    $attributes = array_filter($attributes, function($value) {
+        return $value !== null && $value !== false && $value !== '';
+    });
+    return implode(' ', array_map(
+        function($key, $value) {
+            if ($value === true) {
+                return sprintf('%s', e($key));
+            } else {
+                return sprintf('%s="%s"', e($key), e($value));
+            }
+        },
+        array_keys($attributes),
+        $attributes
+    ));
 }

@@ -1208,35 +1208,30 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Tipos de Fecha y Hora.
         self::TYPE_DATE => [
             'cast' => 'date',
-            'widget' => 'date',
             'input_type' => self::INPUT_DATE,
             'min_value' => '1900-01-01',
             'max_value' => '2099-12-31',
         ],
         self::TYPE_DATE_TIME => [
             'cast' => 'datetime',
-            'widget' => 'datetime',
             'input_type' => self::INPUT_DATETIME_LOCAL,
             'min_value' => '1900-01-01 00:00:00',
             'max_value' => '2099-12-31 23:59:59',
         ],
         self::TYPE_DATE_TIME_TZ => [
             'cast' => 'datetime',
-            'widget' => 'datetime',
             'input_type' => self::INPUT_DATETIME_LOCAL,
             'min_value' => '1900-01-01 00:00:00',
             'max_value' => '2099-12-31 23:59:59',
         ],
         self::TYPE_TIME => [
             'cast' => 'datetime',
-            'widget' => 'datetime',
             'input_type' => self::INPUT_TIME,
             'min_value' => '1900-01-01 00:00:00',
             'max_value' => '2099-12-31 23:59:59',
         ],
         self::TYPE_TIME_TZ => [
             'cast' => 'datetime',
-            'widget' => 'datetime',
             'input_type' => self::INPUT_TIME,
             'min_value' => '1900-01-01 00:00:00',
             'max_value' => '2099-12-31 23:59:59',
@@ -2739,167 +2734,51 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     protected function generateFieldsValidationRules(): void
     {
+        $validatorService = app('validator');
         foreach ($this->meta['fields'] as $field => $config) {
             if (!isset($config['validation'])) {
-                $validation = $this->generateFieldValidationRules(
+                // Si el campo deber ser único se arma la regla de valicación
+                // acá pues depende del modelo.
+                if ($config['unique']) {
+                    // Armar campos que deben ser únicos y la valle primaria
+                    // que se debe ignorar con sus valores (si existen).
+                    $primaryKey = $this->getPrimaryKey();
+                    $columns = [
+                        $config['db_column'] => $this->getAttribute(
+                            $config['name']
+                        ),
+                    ];
+                    $ignore = [];
+                    foreach ($primaryKey as $pk) {
+                        $ignore[$this->meta['fields.' . $pk . '.db_column']] =
+                            $this->getAttribute($pk)
+                        ;
+                    }
+                    $config['unique'] = [
+                        'db_name' => $this->meta['model.db_name'],
+                        'db_table' => $this->meta['model.db_table'],
+                        'columns' => $columns,
+                        'ignore' => $ignore,
+                    ];
+                }
+                // Generar reglas de validación con los datos del modelo.
+                $validation = $validatorService->generateValidationRules(
                     $config
                 );
+                // Asignar reglas de valicación.
                 $key = 'fields.' . $field . '.validation';
-                $this->meta[$key] = $validation;
-            }
-        }
-    }
-
-    /**
-     * Genera las reglas por defecto de un campo en base a su configuración.
-     *
-     * @param array $config Configuración del campo.
-     * @return array Reglas de validación.
-     */
-    protected function generateFieldValidationRules(array $config): array
-    {
-        // Reglas para el tipo: string.
-        if ($config['cast'] == 'string') {
-            return $this->generateFieldValidationRulesString($config);
-        }
-        // Reglas para el tipo: int.
-        if ($config['cast'] == 'integer') {
-            return $this->generateFieldValidationRulesInteger($config);
-        }
-        // Si no hay reglas que especificar se retorna vacío.
-        return [];
-    }
-
-    /**
-     * Genera las reglas por defecto de un campo de tipo string en base a su
-     * configuración.
-     *
-     * @param array $config Configuración del campo.
-     * @return array Reglas de validación.
-     */
-    protected function generateFieldValidationRulesString(array $config): array
-    {
-        $create = $edit = [];
-        if (!empty($config['required']['create'])) {
-            $create[] = 'required';
-        }
-        if (!empty($config['required']['edit'])) {
-            $edit[] = 'required';
-        }
-        if ($config['min_length']) {
-            $create[] = $edit[] =  'min:' . $config['min_length'];
-        }
-        if ($config['max_length']) {
-            $create[] = $edit[] =  'max:' . $config['max_length'];
-        }
-        if ($config['unique']) {
-            $primaryKey = $this->getPrimaryKey();
-            // Regla unique cuando existe solo un campo que forma la llave
-            // primaria del modelo.
-            if (!isset($primaryKey[1])) {
-                $unique = 'unique:'
-                    . $this->meta['model.db_table']
-                    . ',' . $config['db_column']
-                ;
-                $create[] = $unique;
-                $edit[] = $unique
-                    . ',' . $this->getAttribute($config['name'])
-                    . ',' . $primaryKey[0]
+                $this->meta[$key] = (
+                    isset($validation['create'])
+                    || isset($validation['edit'])
+                )
+                    ? $validation
+                    : [
+                        'create' => $validation,
+                        'edit' => $validation,
+                    ]
                 ;
             }
-            // Regla unique cuando existen múltiples campos que forman la llave
-            // primaria del modelo.
-            else {
-                $unique = [
-                    $config['name'] => $this->getAttribute($config['name']),
-                ];
-                $ignore = [];
-                foreach ($primaryKey as $field) {
-                    $ignore[$field] = $this->getAttribute($field);
-                }
-                $create[] = new Data_Validation_UniqueComposite(
-                    $this->meta['model.db_name'],
-                    $this->meta['model.db_table'],
-                    $unique
-                );
-                $edit[] = new Data_Validation_UniqueComposite(
-                    $this->meta['model.db_name'],
-                    $this->meta['model.db_table'],
-                    $unique,
-                    $ignore
-                );
-            }
         }
-        if ($config['choices']) {
-            $create[] = $edit[] = 'in:' . implode(',', array_keys($config['choices']));
-        }
-        return compact('create', 'edit');
-    }
-
-    /**
-     * Genera las reglas por defecto de un campo de tipo integer en base a su
-     * configuración.
-     *
-     * @param array $config Configuración del campo.
-     * @return array Reglas de validación.
-     */
-    protected function generateFieldValidationRulesInteger(array $config): array
-    {
-        $create = $edit = [];
-        if (!empty($config['required']['create'])) {
-            $create[] = 'required';
-        }
-        if (!empty($config['required']['edit'])) {
-            $edit[] = 'required';
-        }
-        if ($config['min_value']) {
-            $create[] = $edit[] =  'min:' . $config['min_value'];
-        }
-        if ($config['max_value']) {
-            $create[] = $edit[] =  'max:' . $config['max_value'];
-        }
-        if ($config['unique']) {
-            $primaryKey = $this->getPrimaryKey();
-            // Regla unique cuando existe solo un campo que forma la llave
-            // primaria del modelo.
-            if (!isset($primaryKey[1])) {
-                $unique = 'unique:'
-                    . $this->meta['model.db_table']
-                    . ',' . $config['db_column']
-                ;
-                $create[] = $unique;
-                $edit[] = $unique
-                    . ',' . $this->getAttribute($config['name'])
-                    . ',' . $primaryKey[0]
-                ;
-            }
-            // Regla unique cuando existen múltiples campos que forman la llave
-            // primaria del modelo.
-            else {
-                $unique = [
-                    $config['name'] => $this->getAttribute($config['name']),
-                ];
-                $ignore = [];
-                foreach ($primaryKey as $field) {
-                    $ignore[$field] = $this->getAttribute($field);
-                }
-                $create[] = new Data_Validation_UniqueComposite(
-                    $this->meta['model.db_name'],
-                    $this->meta['model.db_table'],
-                    $unique
-                );
-                $edit[] = new Data_Validation_UniqueComposite(
-                    $this->meta['model.db_name'],
-                    $this->meta['model.db_table'],
-                    $unique,
-                    $ignore
-                );
-            }
-        }
-        if ($config['choices']) {
-            $create[] = $edit[] = 'in:' . implode(',', array_keys($config['choices']));
-        }
-        return compact('create', 'edit');
     }
 
     /**

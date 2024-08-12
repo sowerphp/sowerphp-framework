@@ -155,15 +155,27 @@ class Facade_Session_Message
         $messages = self::readAll();
         $buffer = '';
         foreach ($messages as $message) {
-            $buffer .= sprintf(
-                self::$messageTemplate,
-                $message['style'],
-                $message['icon'],
-                $message['type'],
-                message_format($message['text'])
-            );
+            $buffer .= self::render($message);
         }
         return $buffer;
+    }
+
+    /**
+     * Renderiza un mensaje como string.
+     *
+     * @param array $message Arreglo con índices: `text` y `type` obligatorios.
+     * Los índices `icon` y `style` se pueden derivar desde `type`.
+     * @return string String con el mensaje renderizado.
+     */
+    public static function render(array $message): string
+    {
+        return sprintf(
+            self::$messageTemplate,
+            $message['style'] ?? self::$config[$message['type']]['style'],
+            $message['icon'] ?? self::$config[$message['type']]['icon'],
+            $message['type'],
+            message_format($message['text'])
+        );
     }
 
 }

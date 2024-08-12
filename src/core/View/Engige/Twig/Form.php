@@ -23,11 +23,10 @@
 
 namespace sowerphp\core;
 
-use \Illuminate\Support\Str;
-use \Twig\Environment;
 use \Twig\TwigFunction;
 use \Twig\Markup;
 use \Twig\Error\Error as TwigException;
+use \sowerphp\core\Facade_Session_Message as SessionMessage;
 
 /**
  * Extensión para el renderizado de formularios en una plantilla twig.
@@ -36,25 +35,12 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
 {
 
     /**
-     * Metadatos utilizados en el formulario.
+     * Mensaje de error por defecto que se renderizará cuando el formulario
+     * tenga errores.
      *
-     * @var array
+     * @var string
      */
-    protected $meta = [];
-
-    /**
-     * Registro de los campos que ya han sido renderizados.
-     *
-     * @var array
-     */
-    protected $renderedFields = [];
-
-    /**
-     * Entorno de Twig.
-     *
-     * @var \Twig\Environment
-     */
-    protected $env;
+    protected $defaultErrorsMessage = 'El formulario enviado contiene errores. Por favor, revisa los campos del formulario y corrige los errores antes de continuar.';
 
     /**
      * Codificación de caracteres para los renderizados devueltos por las
@@ -67,14 +53,11 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
     protected $charset = 'UTF-8';
 
     /**
-     * Constructor para inicializar el entorno de Twig.
+     * Registro de los campos que ya han sido renderizados.
      *
-     * @param \Twig\Environment $env El entorno de Twig.
+     * @var array
      */
-    public function __construct(Environment $env)
-    {
-        $this->env = $env;
-    }
+    protected $renderedFields = [];
 
     /**
      * Entrega las funciones de la extensión.
@@ -84,7 +67,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('form_submit', [$this, 'function_form_submit']),
+            // Funciones estándares.
             new TwigFunction('form_start', [$this, 'function_form_start']),
             new TwigFunction('form_end', [$this, 'function_form_end']),
             new TwigFunction('form_row', [$this, 'function_form_row']),
@@ -96,59 +79,12 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
             new TwigFunction('form_enctype', [$this, 'function_form_enctype']),
             new TwigFunction('form_is_submitted', [$this, 'function_form_is_submitted']),
             new TwigFunction('form_is_valid', [$this, 'function_form_is_valid']),
+            // Funciones extras.
             new TwigFunction('form_captcha', [$this, 'function_form_captcha']),
+            new TwigFunction('form_csrf', [$this, 'function_form_csrf']),
+            new TwigFunction('form_submit', [$this, 'function_form_submit']),
+            new TwigFunction('form_errors_message', [$this, 'function_form_errors_message']),
         ];
-    }
-
-    /**
-     * Inicializa el formulario con metadatos que pueden incluir información
-     * del modelo asociado o las relaciones que el formulario necesitará.
-     *
-     * @param array $metadata Metadatos del formulario, ej: model o relations.
-     * @return void
-     */
-    /*public function function_form_init(array $meta = []): void
-    {
-        // Asignar metadatos del formulario.
-        $this->meta = $meta;
-        // Buscar errores de los campos del formulario.
-        $formErrors = session()->get('errors.default');
-        debug($formErrors);
-        if ($formErrors) {
-            foreach ($formErrors as $key => $errors) {
-                if (!isset($this->meta['fields'][$key])) {
-                    continue;
-                }
-                $this->meta['fields'][$key]['errors'] = $errors;
-            }
-        }
-    }*/
-
-    /**
-     * Renderiza el botón de envío del formulario.
-     *
-     * @param string $label El texto del botón.
-     * @param array $attributes Atributos adicionales para el botón.
-     * @return \Twig\Markup Código HTML para el botón de envío.
-     */
-    public function function_form_submit(
-        string $label = 'Enviar',
-        array $attributes = []
-    ): Markup
-    {
-        // Definir atributos del botón.
-        $attributes = $this->buildAttributes(array_merge([
-            'type' => 'submit',
-            'class' => 'btn btn-primary'
-        ], $attributes));
-        // Generar el HTML del botón.
-        $html = sprintf(
-            '<button %s>%s</button>',
-            $attributes,
-            $this->escape($label)
-        );
-        // Entregar el botón renderizado.
-        return new \Twig\Markup($html, 'UTF-8');
     }
 
     /**
@@ -169,17 +105,26 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      */
     public function function_form_start($form, array $options = []): Markup
     {
+        // Si el form no existe error.
+        if ($form === null) {
+            throw new TwigException(__(
+                'Se solicitó renderizar un formulario que no existe.'
+            ));
+        }
         // Reiniciar los campos renderizados.
         $this->renderedFields = [];
         // Definir atributos del tag <form>.
-        $attributes = $this->buildAttributes(array_merge([
-            'action' => $form['url'] ?? null,
-            'method' => $form['method'] ?? 'POST',
-            'id' => $form['id'] ?? null,
-            'class' => $form['class'] ?? null,
-            'enctype' => $this->function_form_enctype($form),
-            'role' => 'form',
-        ], $form['attributes'] ?? []));
+        $attributes = html_attributes(array_merge($form['attributes'], [
+            'action' => $options['action'] ?? $form['attributes']['action'] ?? null,
+            'method' => $options['method'] ?? $form['attributes']['method'] ?? 'POST',
+            'id' => $form['attributes']['id'] ?? null,
+            'class' => $form['attributes']['class'] ?? null,
+            'enctype' => ($options['multipart'] ?? null) === true
+                ? 'multipart/form-data'
+                : $this->function_form_enctype($form)
+            ,
+            'role' => $form['attributes']['role'] ?? 'form',
+        ], $options['attr'] ?? []));
         // Generar el HTML del tag <form>.
         $html = sprintf('<form %s>', $attributes);
         // Entregar el tag <form> renderizado.
@@ -198,7 +143,13 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      */
     public function function_form_end($form, array $options = []): Markup
     {
-        return new Markup('</form>', $this->charset);
+        $render_rest = $options['render_rest'] ?? false;
+        $html = '';
+        if ($render_rest) {
+            $html .= $this->function_form_rest($form);
+        }
+        $html .= '</form>';
+        return new Markup($html, $this->charset);
     }
 
     /**
@@ -222,9 +173,21 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      */
     public function function_form_row($field, array $options = []): Markup
     {
+        // Si el field no existe error.
+        if ($field === null) {
+            throw new TwigException(__(
+                'Se solicitó renderizar un campo de formulario que no existe.'
+            ));
+        }
         // Generar subcomponentes del renderizado del campo.
-        $label = $this->function_form_label($field);
-        $widget = $this->function_form_widget($field);
+        $label = $this->function_form_label($field, [
+            'label' => $options['label'] ?? null,
+            'label_attr' => $options['label_attr'] ?? null,
+            'label_translation_parameters' => $options['label_translation_parameters'] ?? null,
+        ]);
+        $widget = $this->function_form_widget($field, [
+            'attr' => $options['attr'] ?? null,
+        ]);
         $errors = $this->function_form_errors($field);
         $help = $this->function_form_help($field);
         // Generar el HTML del campo.
@@ -268,15 +231,21 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      */
     public function function_form_label($field, array $options = []): Markup
     {
+        // Si el field no existe error.
+        if ($field === null) {
+            throw new TwigException(__(
+                'Se solicitó renderizar un campo de formulario que no existe.'
+            ));
+        }
         // Obtener el nombre y la etiqueta del campo.
-        $name = $this->getFieldName($field);
-        $label = $this->getFieldLabel($field);
+        $name = $field['name'];
+        $label = $field['label'];
         if ($label === null) {
             return new Markup('', $this->charset);
         }
-        $id = $field['id'] ?? $name . 'Field';
+        $id = $field['widget']['attributes']['id'] ?? $name . 'Field';
         // Atributos de la etiqueta.
-        $attributes = $this->buildAttributes([
+        $attributes = html_attributes([
             'for' => $id,
             'class' => 'form-label'
         ]);
@@ -284,7 +253,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         $html = sprintf(
             '<label %s>%s</label>',
             $attributes,
-            $this->escape($label)
+            e($label)
         );
         // Entregar la etiqueta renderizada.
         return new Markup($html, $this->charset);
@@ -302,11 +271,22 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      */
     public function function_form_widget($field, array $options = []): Markup
     {
-        // Determinar widget, su configuración y método de renderizado.
-        $field['widget'] = $this->getWidgetConfig($field);
-        $renderMethod = $this->getWidgetRenderer($field['widget']['element']);
+        // Si el field no existe error.
+        if ($field === null) {
+            throw new TwigException(__(
+                'Se solicitó renderizar un campo de formulario que no existe.'
+            ));
+        }
+        // Si el widget no es un objeto se crea como objeto.
+        if (!is_object($field['widget'])) {
+            $field['widget'] = new View_Form_Widget(
+                $field['widget']['name'] ?? 'default',
+                $field['widget']['value'] ?? null,
+                $field['widget']['attributes'] ?? []
+            );
+        }
         // Generar el HTML del widget.
-        $html = $this->$renderMethod($field);
+        $html = $field['widget']->render($options);
         // Marcar el campo como renderizado.
         if (!empty($field['name'])) {
             $this->markFieldAsRendered($field['name']);
@@ -323,8 +303,14 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      */
     public function function_form_errors($field): Markup
     {
+        // Si el field no existe error.
+        if ($field === null) {
+            throw new TwigException(__(
+                'Se solicitó renderizar un campo de formulario que no existe.'
+            ));
+        }
         // Obtener los errores del campo.
-        $errors = $field['errors'] ?? [];
+        $errors = $field['error_messages'] ?? [];
         // Si no hay errores, devolver una cadena vacía.
         if (empty($errors)) {
             return new Markup('', $this->charset);
@@ -332,7 +318,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         // Generar el HTML de los errores.
         $html = '<ul class="list-unstyled mb-0">';
         foreach ($errors as $error) {
-            $html .= sprintf('<li><i class="fa-solid fa-exclamation-circle"></i> %s</li>', $this->escape($error));
+            $html .= sprintf('<li><i class="fa-solid fa-exclamation-circle"></i> %s</li>', e($error));
         }
         $html .= '</ul>';
         // Entregar los errores renderizados.
@@ -347,6 +333,12 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      */
     public function function_form_help($field): Markup
     {
+        // Si el field no existe error.
+        if ($field === null) {
+            throw new TwigException(__(
+                'Se solicitó renderizar un campo de formulario que no existe.'
+            ));
+        }
         // Obtener el texto de ayuda del campo.
         $helpText = $field['help_text'] ?? '';
         // Si no hay texto de ayuda, devolver una cadena vacía.
@@ -354,14 +346,14 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
             return new Markup('', $this->charset);
         }
         // Atributos del texto de ayuda.
-        $attributes = $this->buildAttributes([
+        $attributes = html_attributes([
             'class' => 'form-text text-muted'
         ]);
         // Generar el HTML del texto de ayuda.
         $html = sprintf(
             '<div %s>%s</div>',
             $attributes,
-            $this->escape($helpText)
+            e($helpText)
         );
         // Entregar el texto de ayuda renderizado.
         return new Markup($html, $this->charset);
@@ -375,12 +367,11 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      */
     public function function_form_rest($form): Markup
     {
-        $fields = $form['fields'] ?? [];
         // Generar el HTML de todos los campos que no han sido renderizados.
         $html = '';
-        foreach ($fields as $field => $config) {
-            if (!in_array($field, $this->renderedFields) && $config['editable']) {
-                $html .= $this->function_form_row($config);
+        foreach ($form['fields'] as $field) {
+            if (!in_array($field['name'], $this->renderedFields) && $field['editable']) {
+                $html .= $this->function_form_row($field);
             }
         }
         // Entregar los campos pendientes de renderizar renderizados.
@@ -393,10 +384,17 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * @param object|array $form El formulario completo.
      * @return string El atributo enctype para el formulario.
      */
-    public function function_form_enctype($form): ?string
+    public function function_form_enctype($form): string
     {
-        $enctype = $form['enctype'] ?? null;
-        return $enctype;
+        foreach ($form['fields'] as $field) {
+            $type = $field['widget']['attributes']['type'] ?? null;
+            if ($type == 'file') {
+                return 'multipart/form-data';
+            }
+        }
+        return $form['attributes']['enctype']
+            ?? 'application/x-www-form-urlencoded'
+        ;
     }
 
     /**
@@ -407,13 +405,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      */
     public function function_form_is_submitted($form): bool
     {
-        $method = $form['method'] ?? 'POST';
-        if (strtoupper($method) === 'POST') {
-            return !empty($_POST);
-        } elseif (strtoupper($method) === 'GET') {
-            return !empty($_GET);
-        }
-        return false;
+        return $form['is_bound'];
     }
 
     /**
@@ -427,7 +419,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         // Iterar sobre los campos y verificar si tienen errores.
         foreach ($form['fields'] as $field) {
             // Si algún campo tiene errores, el formulario no es válido.
-            if (!empty($field['errors'])) {
+            if (!empty($field['error_messages'])) {
                 return false;
             }
         }
@@ -443,57 +435,71 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      */
     public function function_form_captcha($form): Markup
     {
-        $id = $form['id'] ?? null;
+        $id = $form['attributes']['id'] ?? null;
         $html = app('captcha')->render($id);
         return new Markup($html, $this->charset);
     }
 
     /**
-     * Escapa una cadena de texto para ser segura en un entorno HTML.
+     * Agrega el Token CSRF al formulario.
      *
-     * Este método utiliza el filtro `escape` de Twig para asegurar que la
-     * cadena de texto sea escapada adecuadamente, previniendo posibles ataques
-     * XSS.
-     *
-     * @param string $string La cadena de texto que se desea escapar.
-     * @param string $strategy La estrategia de escape. Por defecto es 'html'.
-     * Otras opciones pueden ser 'js', 'css', 'url', etc.
-     * @return string La cadena de texto escapada.
+     * @param object|array $form El formulario completo.
+     * @return \Twig\Markup
      */
-    protected function escape(string $string, string $strategy = 'html'): string
+    public function function_form_csrf($form): Markup
     {
-        $twigTemplate = $this->env->createTemplate(
-            '{{ string | escape(strategy, charset) }}'
+        $html = sprintf(
+            '<input type="hidden" name="csrf_token" value="%s" />',
+            $form['csrf_token']
         );
-        return $twigTemplate->render([
-            'string' => $string,
-            'strategy' => $strategy,
-            'charset' => $this->charset,
-        ]);
+        return new Markup($html, $this->charset);
     }
 
     /**
-     * Construye una cadena de atributos HTML a partir de un arreglo.
+     * Renderiza el botón de envío del formulario.
      *
-     * @param array $attributes Arreglo de atributos.
-     * @return string Cadena de atributos HTML.
+     * @param string $label El texto del botón.
+     * @param array $attributes Atributos adicionales para el botón.
+     * @return \Twig\Markup Código HTML para el botón de envío.
      */
-    protected function buildAttributes(array $attributes): string
+    public function function_form_submit(
+        string $label = 'Enviar',
+        array $attributes = []
+    ): Markup
     {
-        $attributes = array_filter($attributes, function($value) {
-            return $value !== null;
-        });
-        return implode(' ', array_map(
-            function($key, $value) {
-                return sprintf(
-                    '%s="%s"',
-                    $this->escape($key),
-                    $this->escape($value)
-                );
-            },
-            array_keys($attributes),
-            $attributes
-        ));
+        // Definir atributos del botón.
+        $attributes = html_attributes(array_merge([
+            'type' => 'submit',
+            'class' => 'btn btn-primary'
+        ], $attributes));
+        // Generar el HTML del botón.
+        $html = sprintf(
+            '<div class="row mb-3 form-group">
+                <div class="offset-sm-2 col-sm-10">
+                    <button %s>%s</button>
+                </div>
+            </div>',
+            $attributes,
+            e($label)
+        );
+        // Entregar el botón renderizado.
+        return new \Twig\Markup($html, 'UTF-8');
+    }
+
+    /**
+     * Función que genera el HTML de un mensaje de error cuando el formulario
+     * contiene errores.
+     *
+     * @param string|null $message Mensaje a mostrar o se usa uno por defecto.
+     * @return Markup
+     */
+    public function function_form_errors_message(?string $message = null): Markup
+    {
+        $html = SessionMessage::render([
+            'type' => 'error',
+            'text' => $message ?? $this->defaultErrorsMessage,
+        ]);
+        return new \Twig\Markup($html, 'UTF-8');
     }
 
     /**
@@ -510,319 +516,6 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         if (!in_array($field, $this->renderedFields)) {
             $this->renderedFields[] = $field;
         }
-    }
-
-    /**
-     * Determina el método de renderizado adecuado para el campo.
-     *
-     * @param array $field La configuración del campo.
-     * @return string El nombre del método de renderizado.
-     * @throws \Twig\Error\Error Si el método de renderizado para el widget no existe.
-     */
-    protected function getWidgetRenderer(string $widget): string
-    {
-        $method = 'render' . ucfirst(Str::camel($widget)) . 'Widget';
-        if (!method_exists($this, $method)) {
-            throw new TwigException(__(
-                'El método de renderizado "%s()", de la extensión de formularios, para el widget "%s" no existe.',
-                $method,
-                $widget
-            ));
-        }
-        return $method;
-    }
-
-    /**
-     * Determina el widget para el campo.
-     *
-     * @param array $field La configuración del campo.
-     * @return string El tipo del widget que usará el campo.
-     */
-    protected function getWidgetElement(array $field): string
-    {
-        // Si el widget viene definido en la configuración del campo se usa.
-        if (!empty($field['widget'])) {
-            return is_string($field['widget'])
-                ? $field['widget']
-                : $field['widget']['element'] ?? 'default'
-            ;
-        }
-        // Si el 'input_type' existe y tiene un renderizador asociado se define
-        // el 'input_type' como widget.
-        $input_type = $field['input_type'] ?? null;
-        if ($input_type !== null) {
-            try {
-                $this->getWidgetRenderer($input_type);
-                return $input_type;
-            } catch (TwigException $e) {
-                // Fallar silenciosamente para pasar a siguiente validación.
-            }
-        }
-        // Si no se logró determinar el widget se usa el por defecto.
-        return 'default';
-    }
-
-    /**
-     * Entrega el nombre del campo.
-     *
-     * @param array $field Configuración del campo.
-     * @return string Nombre del campo.
-     */
-    protected function getFieldName(array $field): string
-    {
-        return $field['name'] ?? null;
-    }
-
-    /**
-     * Entrega la etiqueta del campo.
-     *
-     * @param array $field Configuración del campo.
-     * @return string Etiqueta del campo.
-     */
-    protected function getFieldLabel(array $field): string
-    {
-        return $field['verbose_name']
-            ?? $field['label']
-            ?? $this->getFieldName($field)
-        ;
-    }
-
-    /**
-     * Obtiene el valor de un campo, teniendo en cuenta la prioridad de valores
-     * establecidos, valores de entrada antiguos en la sesión y valores
-     * predeterminados.
-     *
-     * Prioridad de valores (de mayor a menor):
-     *
-     *   1. `initial_value` - Un valor inicial específico proporcionado en el
-     *      array del campo.
-     *   2. `value` - Un valor actual proporcionado en el array del campo.
-     *   3. `default` - Un valor predeterminado proporcionado en el array del
-     *      campo.
-     *   4. `null` - Si ninguno de los valores anteriores está presente.
-     *
-     * Finalmente, se verifica si hay un valor antiguo en la sesión (valores de
-     * entrada previos almacenados en la sesión) para el nombre del campo
-     * proporcionado. Si lo hay, tendrá la máxima prioridad.
-     *
-     * @param array $field Un array que contiene los detalles del campo,
-     * incluyendo 'name', 'initial_value', 'value', y 'default'.
-     * @return mixed El valor del campo, considerando los valores anteriores de
-     * la sesión.
-     */
-    protected function getFieldValue(array $field)
-    {
-        if (empty($field['name'])) {
-            return null;
-        }
-        $value = $field['initial_value']
-            ?? $field['value']
-            ?? $field['default']
-            ?? null
-        ;
-        return session()->getOldInput($field['name'], $value);
-    }
-
-    /**
-     * Determina la configuración del widget del elemento HTML a partir de los
-     * datos del campo del formulario.
-     *
-     * @param array $field Datos del campo (normalmente los del modelo).
-     * @return array Arreglo con la configuración del widget a renderizar.
-     */
-    protected function getWidgetConfig(array $field): array
-    {
-        // Determinar configuración base del widget.
-        $widget = $field['widget'] ?? [];
-        if (!is_array($widget)) {
-            $widget = ['element' => $widget];
-        }
-        $widgetElement = $widget['element'] ?? $this->getWidgetElement($field);
-        // Asignar atributos que pueden venir en el campo y no en el widget.
-        // NOTE: Probablemente en el futuro se deba revisar y dejar obsoletos
-        // algunos atributos que están en el field y que son solo del widget.
-        $configWidgetInField = [
-            'id' => 'id',
-            'name' => 'name',
-            'minlength' => 'min_length',
-            'maxlength' => 'max_length',
-            'min' => 'min_value',
-            'max' => 'max_value',
-            'step' => 'step',
-            'required' => 'required',
-            'pattern' => 'regex',
-            'contenteditable' => 'editable',
-            'type' => 'input_type',
-            'placeholder' => 'placeholder',
-            'readonly' => 'readonly',
-            'class' => 'class',
-        ];
-        foreach ($configWidgetInField as $attribute => $alias) {
-            if (!isset($widget[$attribute])) {
-                $value = $field[$alias] ?? null;
-                if ($value !== null) {
-                    $widget[$attribute] = $value;
-                }
-            }
-        }
-        // Atributos globales de elementos HTML.
-        $attributes = [
-            'accesskey' => $widget['accesskey'] ?? null,
-            'autocapitalize' => $widget['autocapitalize'] ?? null,
-            'autofocus' => $widget['autofocus'] ?? null,
-            'class' => $widget['class'] ?? null,
-            'contenteditable' => $widget['contenteditable'] ?? null,
-            'enterkeyhint' => $widget['enterkeyhint'] ?? null,
-            'hidden' => $widget['hidden'] ?? null,
-            'id' => $widget['id'] ?? null,
-            'inputmode' => $widget['inputmode'] ?? null,
-            'lang' => $widget['lang'] ?? null,
-            'spellcheck' => $widget['spellcheck'] ?? true,
-            'style' => $widget['style'] ?? null,
-            'tabindex' => $widget['tabindex'] ?? null,
-            'title' => $widget['title'] ?? null,
-            'virtualkeyboardpolicy' => $widget['virtualkeyboardpolicy'] ?? null,
-        ];
-        // Agregar atributos data-* (también son globales).
-        if (!empty($widget['data'])) {
-            foreach ($widget['data'] as $key => $value) {
-                if ($value !== null) {
-                    $attributes['data-' . $key] = $value;
-                }
-            }
-        }
-        // Agregar atributos comunes de elementos de formularios.
-        $attributes['form'] = $widget['form'] ?? null;
-        $attributes['name'] = $widget['name'] ?? null;
-        $attributes['disabled'] = !empty($widget['disabled']) ? 'disabled' : null;
-        $attributes['readonly'] = !empty($widget['readonly']) ? 'readonly' : null;
-        $attributes['required'] = !empty($widget['required']) ? 'required' : null;
-        $attributes['id'] = $attributes['id']
-            ?? ($attributes['name'] ?? null) . 'Field'
-        ;
-        // Agregar atributos que son de elementos like 'input'.
-        if (in_array($widgetElement, ['default', 'input', 'date', 'datetime'])) {
-            $attributes['type'] = $widget['type'] ?? 'text';
-            $attributes['value'] = $widget['value'] ?? $this->getFieldValue($field);
-            // Agregar class según su 'type'.
-            $inputTypesWithoutFormControl = ['checkbox', 'radio', 'file', 'submit', 'reset', 'button', 'image'];
-            if (!in_array($attributes['type'], $inputTypesWithoutFormControl)) {
-                $attributes['class'] = 'form-control ' . ($widget['class'] ?? '');
-            }
-            // Agregar atributos para elementos 'input' según su 'type'.
-            $inputTypes = ['text', 'search', 'url', 'tel', 'email', 'password'];
-            if (in_array($attributes['type'], $inputTypes)) {
-                $attributes['placeholder'] = $widget['placeholder'] ?? null;
-                $attributes['maxlength'] = $widget['maxlength'] ?? null;
-                $attributes['minlength'] = $widget['minlength'] ?? null;
-                $attributes['pattern'] = $widget['pattern'] ?? null;
-                $attributes['list'] = $widget['list'] ?? null;
-            }
-            $inputTypes = ['number', 'range'];
-            if (in_array($attributes['type'], $inputTypes)) {
-                $attributes['min'] = $widget['min'] ?? null;
-                $attributes['max'] = $widget['max'] ?? null;
-                $attributes['step'] = $widget['step'] ?? null;
-            }
-            $inputTypes = ['checkbox', 'radio'];
-            if (in_array($attributes['type'], $inputTypes)) {
-                $attributes['checked'] = $widget['checked'] ?? null;
-                $attributes['class'] = 'form-check-input ' . ($widget['class'] ?? '');
-            }
-            $inputTypes = ['file'];
-            if (in_array($attributes['type'], $inputTypes)) {
-                $attributes['multiple'] = $widget['multiple'] ?? null;
-                $attributes['accept'] = $widget['accept'] ?? null;
-                $attributes['class'] = 'form-control-file ' . ($widget['class'] ?? '');
-            }
-            $inputTypes = ['image'];
-            if (in_array($attributes['type'], $inputTypes)) {
-                $attributes['src'] = $widget['src'] ?? null;
-                $attributes['alt'] = $widget['alt'] ?? null;
-            }
-            $inputTypes = ['submit', 'reset', 'button'];
-            if (in_array($attributes['type'], $inputTypes)) {
-                $attributes['class'] = 'btn btn-primary ' . ($widget['class'] ?? '');
-            }
-        }
-        // Agregar atributos que son de elementos like 'select'.
-        if (in_array($widgetElement, ['select'])) {
-            $attributes['multiple'] = $widget['multiple'] ?? null;
-            $attributes['size'] = $widget['size'] ?? null;
-            $attributes['class'] = 'form-control ' . ($widget['class'] ?? '');
-        }
-        // Agregar atributos que son de elementos like 'textarea'.
-        if (in_array($widgetElement, ['textarea'])) {
-            $attributes['rows'] = $widget['rows'] ?? 5;
-            $attributes['cols'] = $widget['cols'] ?? 10;
-            $attributes['wrap'] = $widget['wrap'] ?? null;
-            $attributes['maxlength'] = $widget['maxlength'] ?? null;
-            $attributes['minlength'] = $widget['minlength'] ?? null;
-            $attributes['placeholder'] = $widget['placeholder'] ?? null;
-            $attributes['class'] = 'form-control ' . ($widget['class'] ?? '');
-        }
-        // Ajustar class del elemento.
-        $valid = empty($field['errors']) ? '' : ' is-invalid';
-        $attributes['class'] = trim(($attributes['class'] ?? '') . $valid);
-        // Entregar los atributos determinados.
-        return [
-            'element' => $widgetElement,
-            'attributes' => $attributes,
-        ];
-    }
-
-    /**
-     * Renderiza el widget por defecto para un campo.
-     *
-     * @param array $field La configuración del campo.
-     * @return string Código HTML para el widget del campo.
-     */
-    protected function renderDefaultWidget(array $field): string
-    {
-        // Atributos del campo.
-        $attributes = $field['widget']['attributes'];
-        // Generar el HTML del widget.
-        $html = sprintf(
-            '<input %s />',
-            $this->buildAttributes($attributes)
-        );
-        // Entregar el HTML del widget.
-        return $html;
-    }
-
-    protected function renderDateWidget(array $field): string
-    {
-        if (!empty($field['widget']['attributes']['value'])) {
-            $field['widget']['attributes']['value'] = substr(
-                $field['widget']['attributes']['value'], 0, 10
-            );
-        }
-        return $this->renderDefaultWidget($field);
-    }
-
-    protected function renderDatetimeWidget(array $field): string
-    {
-        if (!empty($field['widget']['attributes']['value'])) {
-            $field['widget']['attributes']['value'] = substr(
-                $field['widget']['attributes']['value'], 0, 16
-            );
-        }
-        return $this->renderDefaultWidget($field);
-    }
-
-    protected function renderTextareaWidget(array $field): string
-    {
-        $value = $this->getFieldValue($field);
-        // Atributos del campo.
-        $attributes = $field['widget']['attributes'];
-        // Generar el HTML del widget.
-        $html = sprintf(
-            '<textarea %s />%s</textarea>',
-            $this->buildAttributes($attributes),
-            $value
-        );
-        // Entregar el HTML del widget.
-        return $html;
     }
 
 }

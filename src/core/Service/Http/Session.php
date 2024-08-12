@@ -366,6 +366,18 @@ class Service_Http_Session implements Interface_Service
     }
 
     /**
+     * Entrega el Token CSRF para ser usado el envío de datos a la aplicación.
+     *
+     * @return string
+     */
+    public function csrf_token(): string
+    {
+        $token = bin2hex(random_bytes(32));
+        $this->flash('csrf_token', $token);
+        return $token;
+    }
+
+    /**
      * Cualquier método que no esté definido en el servicio será llamado en el
      * administrador de la sesión.
      *
