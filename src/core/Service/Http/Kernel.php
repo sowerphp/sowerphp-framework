@@ -153,7 +153,7 @@ class Service_Http_Kernel implements Interface_Service
     }
 
     /**
-     * Terminar el servicio HTTP kernel.
+     * Termina el servicio HTTP kernel.
      */
     public function terminate(): void
     {

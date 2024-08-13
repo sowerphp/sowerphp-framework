@@ -71,6 +71,7 @@ class App
         //'log' => Service_Log::class,
         //'notification' => Service_Notification::class,
         'view' => Service_View::class,
+        'jobs' => Service_Jobs::class,
     ];
 
     /**

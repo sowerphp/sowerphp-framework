@@ -16,10 +16,7 @@
         "source": "https://github.com/sascocl/sowerphp"
     },
     "autoload": {
-        "classmap": ["src/"],
-        "exclude-from-classmap": [
-            "src/**/App/"
-        ]
+        "classmap": ["src/"]
     },
     "autoload-dev": {
         "classmap": ["tests/"]
@@ -54,7 +51,8 @@
         "symfony/http-client": "^5.4",
         "symfony/mailer": "^5.4",
         "symfony/mailgun-mailer": "^5.4",
-        "symfony/postmark-mailer": "^5.4"
+        "symfony/postmark-mailer": "^5.4",
+        "symfony/console": "^5.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

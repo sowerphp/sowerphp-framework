@@ -16,22 +16,97 @@
  * Consulte los detalles de la Licencia Pública General Affero de GNU para
  * obtener una información más detallada.
  *
- * Debería haber recibido una copia de la Licencia Pública General Affero de GNU
- * junto a este programa.
+* Debería haber recibido una copia de la Licencia Pública General
+ * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
 namespace sowerphp\core;
 
+use Symfony\Component\Console\Application;
+
+/**
+ * Kernel para la aplicación de consola y ejecutar sus comandos.
+ */
 class Service_Console_Kernel implements Interface_Service
 {
 
+    /**
+     * Aplicación de consola.
+     *
+     * @var Symfony\Component\Console\Application
+     */
+    protected $console;
+
+    /**
+     * Comandos del núcleo Console que son cargados por defecto.
+     *
+     * @var array
+     */
+    protected $defaultCoreCommands = [
+        Console_Command_App_Check::class,
+        Console_Command_App_Deploy::class,
+        Console_Command_App_Run::class,
+        Console_Command_App_Setup::class,
+        Console_Command_Assets_Collect::class,
+        Console_Command_Backup_Run::class,
+        Console_Command_Cache_Clear::class,
+        Console_Command_Cache_Warmup::class,
+        Console_Command_Config_Cache::class,
+        Console_Command_Config_List::class,
+        Console_Command_Database_Seed::class,
+        Console_Command_Jobs_Running::class,
+        Console_Command_Jobs_Scheduled::class,
+        Console_Command_Lint_Twig::class,
+        Console_Command_Log_Clear::class,
+        Console_Command_Log_Rotate::class,
+        Console_Command_Migrations_Status::class,
+        Console_Command_Migrations_Make::class,
+        Console_Command_Migrations_Migrate::class,
+        Console_Command_Migrations_Rollback::class,
+        Console_Command_Router_List::class,
+        Console_Command_Router_Match::class,
+        Console_Command_Security_Check::class,
+        Console_Command_Session_Clear::class,
+        Console_Command_Translation_List::class,
+        Console_Command_Translation_Update::class,
+        Console_Command_User_Create::class,
+    ];
+
+    /**
+     * Registra el servicio de Console kernel.
+     *
+     * @return void
+     */
     public function register(): void
     {
     }
 
+    /**
+     * Inicializa el servicio de Console kernel.
+     *
+     * @return void
+     */
     public function boot(): void
     {
+        $this->console = new Application();
+        $this->console->setAutoExit(false);
+        $this->loadCommands();
+    }
+
+    /**
+     * Carga y agrega los comandos definidos a la aplicación de la consola.
+     *
+     * @return void
+     */
+    protected function loadCommands(): void
+    {
+        // Cargar comandos del núcleo.
+        foreach ($this->defaultCoreCommands as $command) {
+            $this->console->add(new $command());
+        }
+        // Cargar comandos personalizados de la configuración.
+        // TODO: implementar comandos personalizados mediante configuración.
     }
 
     /**
@@ -50,174 +125,46 @@ class Service_Console_Kernel implements Interface_Service
      */
     public function handle(): int
     {
-        global $argv;
-        set_time_limit(0);
-        if (empty($argv[1])) {
-            echo 'SowerPHP shell: debe indicar un comando a ejecutar.' , "\n";
-            return 1;
-        }
-        $command = ucfirst($argv[1]);
-        $args = array_slice($argv, 2);
-        return $this->dispatch($command, $args);
+        $status = $this->console->run();
+        $this->showStats();
+        return $status;
     }
 
     /**
-     * Método que busca y ejecuta un comando.
-     *
-     * @param string $command Comando a ejecutar.
-     * @param array $args Argumentos que se pasarán al comando.
-     * @return int Resultado de la ejecución del comando.
+     * Método para mostrar estadísticas finales de la ejecución del comando.
      */
-    protected function dispatch(string $command, array $args): int
+    protected function showStats(): void
     {
-        // Crear instancia del comando que se debe ejecutar.
-        $dot = strrpos($command, '.');
-        if ($dot) {
-            $module = substr($command, 0, $dot);
-            $class = 'Shell_Command_' . substr($command, $dot + 1);
-            if ($module) {
-                $class = str_replace('.', '\\', $module) . '\\' . $class;
-            }
-            $class = '\\sowerphp\\autoload\\' . $class;
+        /*// Obtener las estadísticas de la aplicación.
+        $stats = app()->getStats();
+        $time = $stats['time']['duration'];
+
+        // Imprimir el tiempo que tomó la ejecución del comando.
+        if ($time < 60) {
+            echo 'Proceso ejecutado en '.num($time, 1).' segundos.'."\n";
+        } elseif ($time < 3600) {
+            echo 'Proceso ejecutado en '.num($time / 60, 1).' minutos.'."\n";
         } else {
-            $class = 'Shell_Command_' . $command;
-        }
-        if (!class_exists($class)) {
-            echo 'SowerPHP shell: ',$command,': no se encontró la orden (',$class,').',"\n";
-            return 1;
-        }
-        $shell = new $class();
-        // Revisar posibles flags especiales que se pasaron al comando.
-        $argc = count($args);
-        for ($i=0; $i<$argc; $i++) {
-            // Asignar el modo de "verbose" que corresponda (de 1 a 5).
-            if (preg_match('/^\-v+$/', $args[$i])) {
-                $shell->verbose = strlen($args[$i]) - 1;
-                unset($args[$i]);
-            }
-            // Mostrar la ayuda del comando (y no ejecutar comando).
-            else if ($args[$i] == '-h') {
-                $method = new \ReflectionMethod($shell, 'main');
-                echo '   Modo de uso: ',$command,' ';
-                foreach ($method->getParameters() as &$p) {
-                    echo ($p->isOptional()
-                        ? '[' . $p->name . ' = ' . $p->getDefaultValue() . ']'
-                        : $p->name
-                    ) , ' ';
-                }
-                echo "\n";
-                exit;
-            }
-        }
-        // Validar los parámetros que se están pasando al comando.
-        $method = new \ReflectionMethod($shell, 'main');
-        if (count($args) < $method->getNumberOfRequiredParameters()) {
-            echo 'SowerPHP shell: ',$command,': requiere al menos ',
-                $method->getNumberOfRequiredParameters(),' parámetro(s)',"\n";
-            echo '   Modo de uso: ',$command,' ';
-            foreach($method->getParameters() as &$p) {
-                echo ($p->isOptional()
-                    ? '[' . $p->name . ' = ' . $p->getDefaultValue() . ']'
-                    : $p->name
-                ) , ' ';
-            }
-            echo "\n";
-            return 1;
-        }
-        // Validar que el proceso pueda ser ejecutado.
-        // Si ya hay un proceso en ejecución y no se permiten múltiples
-        // instancias del mismo proceso en ejecución se debe bloquear.
-        if (!$shell->canHaveMultipleInstances()) {
-            // Obtener procesos que tienen "/shell.php " en su comando.
-            $procesos = $this->getCurrentProcesses('/shell.php ');
-            if (is_numeric($procesos)) {
-                echo 'SowerPHP shell: no fue posible obtener los procesos en ejecución.' , "\n";
-                return $procesos;
-            }
-            // Buscar otros procesos que existan en ejecución con los mismos
-            // argumentos.
-            global $argv;
-            $cmd_actual = implode(' ', $argv);
-            $cmd_actual = trim(mb_substr(
-                $cmd_actual,
-                strpos($cmd_actual, '/shell.php ') + 1
-            ));
-            $pid_actual = getmypid();
-            $ppid_actual = posix_getppid();
-            $otros_procesos = [];
-            foreach ($procesos as $p) {
-                $cmd = $p['cmd'];
-                $cmd = trim(mb_substr($cmd, strpos($cmd, '/shell.php ') + 1));
-                if (
-                    !in_array($p['pid'], [$pid_actual, $ppid_actual])
-                    && $cmd == $cmd_actual
-                ) {
-                    $otros_procesos[] = $p;
-                }
-            }
-            unset($procesos);
-            // Mostrar error en caso de existir otros procesos en ejecución.
-            if (!empty($otros_procesos)) {
-                echo 'SowerPHP shell: no es posible ejecutar el comando, existen otras instancias en' ,"\n";
-                echo 'ejecución que coinciden con: ' , $cmd_actual , "\n";
-                foreach ($otros_procesos as $p) {
-                    echo ' - PID ' , $p['pid'] , ' ejecutándose desde '
-                        , $p['start_time'] , "\n"
-                    ;
-                }
-                return 1;
-            }
-        }
-        // Ejecutar el proceso invocando a Comando::main() con sus argumentos.
-        $return = (int)$method->invokeArgs($shell, $args);
-        // Retornar el estado de resultado del proceso.
-        return $return;
+            echo 'Proceso ejecutado en '.num($time / 3600, 1).' horas.'."\n";
+        }*/
     }
 
     /**
-     * Método que entrega el listado de procesos en ejecución en el sistema
-     * con sus argumentos y otros datos.
+     * Fallback.
+     *
+     * Symfony Console maneja las excepciones internamente y proporciona un
+     * manejo de errores estándar. Por lo que este método jamás debería ser
+     * ejecutado por la App.
+     *
+     * @param \Throwable $throwable
+     * @return void
      */
-    protected function getCurrentProcesses(?string $filter = null): array
-    {
-        $cols = [
-            'pid',
-            'start_time',
-            'etimes',
-            'user',
-            'stat',
-            'psr',
-            'sgi_p',
-            'cputimes',
-            'pcpu',
-            'pmem',
-            'rsz',
-            'vsz',
-            'cmd',
-        ];
-        $cmd = 'ps -eo ' . implode(',', $cols) . ' --sort -etimes --no-headers';
-        if ($filter !== null) {
-            $cmd .= ' | grep "' . $filter . '"';
-        }
-        exec($cmd, $lines, $rc);
-        if ($rc) {
-            return $rc;
-        }
-        $processes = [];
-        foreach ($lines as $line) {
-            $line = preg_replace('!\s+!', ' ', trim($line));
-            $processes[] = array_combine($cols, explode(' ', $line, 13));
-        }
-        return $processes;
-    }
-
     public function handleThrowable(\Throwable $throwable): void
     {
-        $stdout = new Shell_Output('php://stdout');
-        $stdout->write("\n" . '<error>' . get_class($throwable) . ':</error>', 2);
-        $stdout->write('<error>' . $throwable->getMessage() . '</error>', 2);
-        $stdout->write('<error>' . $throwable->getTraceAsString() . '</error>', 2);
-        exit($throwable->getCode());
+        echo get_class($throwable) , "\n";
+        echo $throwable->getMessage() , "\n";
+        echo $throwable->getTraceAsString();
+        exit(1);
     }
 
 }
