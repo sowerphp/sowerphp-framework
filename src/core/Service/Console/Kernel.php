@@ -34,7 +34,7 @@ class Service_Console_Kernel implements Interface_Service
     /**
      * Aplicación de consola.
      *
-     * @var Symfony\Component\Console\Application
+     * @var Application
      */
     protected $console;
 
@@ -105,8 +105,45 @@ class Service_Console_Kernel implements Interface_Service
         foreach ($this->defaultCoreCommands as $command) {
             $this->console->add(new $command());
         }
+
+        // Cargar comandos de los servicios registrados en el contenedor.
+        $this->loadCommandsFromServices();
+
         // Cargar comandos personalizados de la configuración.
-        // TODO: implementar comandos personalizados mediante configuración.
+        $this->loadCommandsFromConfig();
+    }
+
+    /**
+     * Carga los comandos desde los servicios que implementan comandos.
+     */
+    protected function loadCommandsFromServices(): void
+    {
+        $container = app()->getContainer();
+        $services = array_keys($container->getBindings());
+        $loaded = [];
+        foreach ($services as $key) {
+            $service = $container->make($key);
+            $serviceClass = get_class($service);
+            if (
+                $service instanceof Interface_Service
+                && !isset($loaded[$serviceClass])
+                && method_exists($service, 'getConsoleCommands')
+            ) {
+                $commands = $service->getConsoleCommands();
+                foreach ($commands as $command) {
+                    $this->console->add($command);
+                }
+                $loaded[$serviceClass] = true;
+            }
+        }
+    }
+
+    /**
+     * Carga los comandos que están definidos en la configuración.
+     */
+    protected function loadCommandsFromConfig(): void
+    {
+        // TODO: implementar (o quizás autodescubrir).
     }
 
     /**
@@ -165,6 +202,16 @@ class Service_Console_Kernel implements Interface_Service
         echo $throwable->getMessage() , "\n";
         echo $throwable->getTraceAsString();
         exit(1);
+    }
+
+    /**
+     * Entrega la instancia de la aplicación de consola.
+     *
+     * @return Application
+     */
+    public function getConsole(): Application
+    {
+        return $this->console;
     }
 
 }

@@ -24,8 +24,10 @@
 namespace sowerphp\core;
 
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Helper\Table;
 
 /**
  * Comando para listar la configuración actual de la aplicación.
@@ -61,7 +63,9 @@ class Console_Command_Config_List extends Command
     {
         $this
             ->setDescription('Lista la configuración actual de la aplicación.')
-            ->setHelp('Este comando permite mostrar todas las configuraciones actuales de la aplicación.');
+            ->setHelp('Este comando permite mostrar todas las configuraciones actuales de la aplicación.')
+            ->addArgument('key', InputArgument::OPTIONAL, 'La configuración específica que se desea obtener.')
+        ;
     }
 
     /**
@@ -72,9 +76,48 @@ class Console_Command_Config_List extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // TODO: implementar ejecución.
-        $output->writeln(__('Comando %s no está implementado.', static::$defaultName));
-        return Command::FAILURE;
+        // Obtener configuración solicitada.
+        $key = $input->getArgument('key');
+        $config = $key ? app('config')->get($key) : app('config')->all();
+        if ($config === null) {
+            $output->writeln(__(
+                'La configuración "%s" no está definida.',
+                $key
+            ));
+            return Command::INVALID;
+        }
+
+        // Ajustar la configuración son su clave vacía si se obtuvo un escalar.
+        if (!is_array($config)) {
+            $config = ['' => $config];
+        }
+
+        // Renderizar tabla con la configuración.
+        $table = new Table($output);
+        $table->setHeaders(['Config key', 'Config value']);
+        foreach ($config as $configKey => $configValue) {
+            $columnKey = trim($key . '.' . $configKey, '.');
+            $columnValue = $this->formatValue($configValue);
+            $table->addRow([$columnKey, $columnValue]);
+        }
+        $table->render();
+
+        // Todo fue OK con el comando.
+        return Command::SUCCESS;
+    }
+
+    /**
+     * Formatea el valor de la configuración.
+     *
+     * @param mixed $value
+     * @return string
+     */
+    protected function formatValue($value): string
+    {
+        if (is_array($value)) {
+            return json_encode($value, JSON_PRETTY_PRINT);
+        }
+        return (string) $value;
     }
 
 }

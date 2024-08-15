@@ -24,7 +24,8 @@
 namespace sowerphp\core;
 
 /**
- * Utilidad para validar datos
+ * Utilidad para validar datos.
+ * @deprecated Utilizar Service_Validator con app('validator').
  */
 class Utility_Data_Validation
 {
@@ -41,6 +42,7 @@ class Utility_Data_Validation
      * @param data Dato que se quiere validar
      * @param rules Reglas que se revisarán para validar el dato
      * @return mixed =true si todo va ok, =false o =string si hubo un error al validar
+     * @deprecated Utilizar Service_Validator con app('validator').
      */
     public static function check($data, $rules)
     {
@@ -77,6 +79,7 @@ class Utility_Data_Validation
      * Método que valida que el dato no sea vacío
      * @param data Dato que se quiere validar
      * @return bool =true si no es vacio
+     * @deprecated Utilizar Service_Validator con app('validator').
      */
     public static function check_notempty($data)
     {
@@ -87,6 +90,7 @@ class Utility_Data_Validation
      * Método que valida que el dato sea una representación de un entero
      * @param data Dato que se quiere validar
      * @return bool =true si es un entero
+     * @deprecated Utilizar Service_Validator con app('validator').
      */
     public static function check_integer($data)
     {
@@ -97,6 +101,7 @@ class Utility_Data_Validation
      * Método que valida que el dato sea un RUT válido
      * @param data Dato que se quiere validar
      * @return bool =true si es un RUT válido
+     * @deprecated Utilizar Service_Validator con app('validator').
      */
     public static function check_rut($data)
     {

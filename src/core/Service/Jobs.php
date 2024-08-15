@@ -23,11 +23,30 @@
 
 namespace sowerphp\core;
 
+use Symfony\Component\Messenger\Envelope;
+
 /**
  * Servicio de trabajos en segundo plano (tareas).
  */
 class Service_Jobs implements Interface_Service
 {
+
+    /**
+     * Servicio de mensajes.
+     *
+     * @var Service_Messenger
+     */
+    protected $messengerService;
+
+    /**
+     * Constructor del servicio de trabajos en segundo plano (tareas).
+     *
+     * @param Service_Messenger $messengerService
+     */
+    public function __construct(Service_Messenger $messengerService)
+    {
+        $this->messengerService = $messengerService;
+    }
 
     /**
      * Registra el servicio de trabajos en segundo plano (tareas).
@@ -54,6 +73,33 @@ class Service_Jobs implements Interface_Service
      */
     public function terminate(): void
     {
+    }
+
+    /**
+     * Enviar un trabajo a ejecución.
+     *
+     * Ejemplo:
+     *
+     *   $envelope = $this->executeCommand('config:list', ['key' => 'layers']);
+     *
+     * @param string $command
+     * @param array $arguments
+     * @param array $options
+     * @return Envelope
+     */
+    public function executeCommand(
+        string $command,
+        array $arguments = [],
+        array $options = []
+    ): Envelope
+    {
+        $job = new Network_Messenger_Message_Job(
+            $command,
+            $arguments,
+            $options
+        );
+        $envelope = $this->messengerService->send($job);
+        return $envelope;
     }
 
 }

@@ -35,6 +35,7 @@ class Utility_Data
      *
      * @param $data Datos que se desean limpiar, puede ser un arreglo de datos.
      * @param array $options Opciones para la limpieza de los datos.
+     * @deprecated Utilizar Service_Sanitizer con app('sanitizer').
      */
     public static function sanitize(&$data, array $options = [])
     {
@@ -63,6 +64,7 @@ class Utility_Data
      *
      * @param string $listado Listado de correos electrónicos.
      * @return array Listado de correos que hay en el listado.
+     * @deprecated Utilizar Service_Caster con app('caster').
      */
     public static function emails($listado): array
     {

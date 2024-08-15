@@ -23,10 +23,28 @@
 
 namespace sowerphp\core;
 
-use Illuminate\Events\Dispatcher as EventsDispatcher;
+use Illuminate\Events\Dispatcher as IlluminateEventsDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventsDispatcher;
 
-class Service_Events extends EventsDispatcher implements Interface_Service
+/**
+ * Servicio de eventos de la aplicación.
+ */
+class Service_Events extends IlluminateEventsDispatcher implements Interface_Service
 {
+
+    /**
+     * Instancia del Dispatcher de Illuminate.
+     *
+     * @var IlluminateEventsDispatcher
+     */
+    protected $illuminateDispatcher;
+
+    /**
+     * Instancia del EventDispatcher de Symfony.
+     *
+     * @var SymfonyEventsDispatcher
+     */
+    protected $symfonyDispatcher;
 
     /**
      * Instancia servicio de configuración.
@@ -35,6 +53,12 @@ class Service_Events extends EventsDispatcher implements Interface_Service
      */
     protected $configService;
 
+    /**
+     * Contructor del servicio de eventos.
+     *
+     * @param App $app
+     * @param Service_Config $configService
+     */
     public function __construct(App $app, Service_Config $configService)
     {
         $this->configService = $configService;
@@ -73,6 +97,32 @@ class Service_Events extends EventsDispatcher implements Interface_Service
      */
     public function terminate(): void
     {
+    }
+
+    /**
+     * Entrega el despachador de eventos de Illuminate.
+     *
+     * @return IlluminateEventsDispatcher
+     */
+    public function getIlluminateDispatcher(): IlluminateEventsDispatcher
+    {
+        if (!isset($this->illuminateDispatcher)) {
+            $this->illuminateDispatcher = $this;
+        }
+        return $this->illuminateDispatcher;
+    }
+
+    /**
+     * Entrega el despachador de eventos de Symfony.
+     *
+     * @return SymfonyEventsDispatcher
+     */
+    public function getSymfonyDispatcher(): SymfonyEventsDispatcher
+    {
+        if (!isset($this->symfonyDispatcher)) {
+            $this->symfonyDispatcher = new SymfonyEventsDispatcher();
+        }
+        return $this->symfonyDispatcher;
     }
 
 }

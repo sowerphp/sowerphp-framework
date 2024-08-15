@@ -202,4 +202,19 @@ class Service_Cache implements Interface_Service
         }
     }
 
+    /**
+     * Obtiene una instancia del pool de ítems de caché.
+     *
+     * Este método crea y retorna una nueva instancia de `Adapter_CacheItemPool`,
+     * utilizando el almacén de caché proporcionado por el servicio de caché.
+     *
+     * @param string|null $name Nombre del almacén.
+     * @return Adapter_CacheItemPool Una instancia del adaptador del pool de
+     * ítems de caché.
+     */
+    public function getCacheItemPool(?string $name = null): Adapter_CacheItemPool
+    {
+        return new Adapter_CacheItemPool($this->store($name));
+    }
+
 }
