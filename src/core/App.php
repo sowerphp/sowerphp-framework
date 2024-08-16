@@ -67,12 +67,12 @@ class App
         'sanitizer' => Service_Sanitizer::class,
         'caster' => Service_Caster::class,
         'validator' => Service_Validator::class,
-        'messenger' => Service_Messenger::class,
-        'mail' => Service_Mail::class,
         'http_client' => Service_Http_Client::class,
+        'messenger' => Service_Messenger::class,
         'jobs' => Service_Jobs::class,
-        //'notification' => Service_Notification::class,
         'view' => Service_View::class,
+        'mail' => Service_Mail::class,
+        'notification' => Service_Notification::class,
     ];
 
     /**

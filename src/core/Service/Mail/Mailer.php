@@ -25,6 +25,7 @@ namespace sowerphp\core;
 
 use \Symfony\Component\Mailer\Mailer;
 use \Symfony\Component\Mailer\Transport;
+use \Symfony\Component\Mailer\Transport\TransportInterface;
 
 /**
  * Clase para el envío de correos electrónicos.
@@ -94,12 +95,35 @@ class Service_Mail_Mailer implements Interface_Service
     {
         if (!isset($this->mailers[$name])) {
             $this->mailers[$name]['config'] = $this->config($name, $config);
-            $transport = Transport::fromDsn(
-                $this->mailers[$name]['config']['dsn']
+            $this->mailers[$name]['transport'] = $this->transport(
+                $name,
+                $this->mailers[$name]['config']
             );
-            $this->mailers[$name]['mailer'] = new Mailer($transport);
+            $this->mailers[$name]['mailer'] = new Mailer(
+                $this->mailers[$name]['transport']
+            );
         }
         return $this->mailers[$name]['mailer'];
+    }
+
+    /**
+     * Obtiene un transporte de correo.
+     *
+     * @param string|null $name Nombre del remitente (mailer) que define el
+     * transporte que se utilizará
+     * @param array|null $config Configuración del remitente.
+     * @return \Symfony\Component\Mailer\Transport\TransportInterface
+     */
+    public function transport(?string $name = null, ?array $config = []): TransportInterface
+    {
+        $name = $name ?? $this->configService->get('mail.default') ?? 'smtp';
+        if (!isset($this->mailers[$name]['transport'])) {
+            $this->mailers[$name]['config'] = $this->config($name, $config);
+            $this->mailers[$name]['transport'] = Transport::fromDsn(
+                $this->mailers[$name]['config']['dsn']
+            );
+        }
+        return $this->mailers[$name]['transport'];
     }
 
     /**

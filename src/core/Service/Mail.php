@@ -121,6 +121,34 @@ class Service_Mail implements Interface_Service
     }
 
     /**
+     * Entrega el remitente por defecto del servicio de correo electrónico.
+     *
+     * @param string|null $name Nombre del mailer asociado al remitente.
+     * @return Address
+     */
+    public function getDefaultSender(?string $name = null): Address
+    {
+        $config = $this->mailerService->config($name);
+        $fromAddress = $config['from']['address'];
+        $fromName = $config['from']['name'] ?? $fromAddress;
+        return new Address($fromAddress, $fromName);
+    }
+
+    /**
+     * Entrega el destinatario por defecto del servicio de correo electrónico.
+     *
+     * @param string|null $name Nombre del mailer asociado al destinatario.
+     * @return Address
+     */
+    public function getDefaultRecipient(?string $name = null): Address
+    {
+        $config = $this->mailerService->config($name);
+        $toAddress = $config['to']['address'];
+        $toName = $config['to']['name'] ?? $toAddress;
+        return new Address($toAddress, $toName);
+    }
+
+    /**
      * Envía el correo electrónico.
      *
      * Esta envoltura del método Mailer::send() agrega de manera automática un
@@ -141,17 +169,11 @@ class Service_Mail implements Interface_Service
         // Agregar $envelope si no se especificó uno con los datos por defecto
         // de la configuración del correo electrónico.
         if ($envelope === null) {
-            $config = $this->mailerService->config($name);
-            $sender = new Address(
-                $config['from']['address'],
-                $config['from']['name'] ?? ''
-            );
-            $recipient = new Address(
-                $config['to']['address'],
-                $config['to']['name'] ?? ''
-            );
+            $sender = $this->getDefaultSender($name);
+            $recipient = $this->getDefaultRecipient($name);
             $envelope = new Envelope($sender, [$recipient]);
         }
+
         // Enviar mensaje del correo electrónico en el $envelope.
         $this->mailer($name)->send($message, $envelope);
     }

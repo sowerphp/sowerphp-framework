@@ -319,15 +319,21 @@ function log_message($level, string $message, array $context = []): void
 }
 
 /**
- * Envía una notificación a las entidades notificables dadas.
+ * Envía una notificación a un destinatario por correo electrónico.
  *
- * @param mixed $notifiables Entidades que recibirán la notificación.
- * @param mixed $notification Instancia de la notificación a enviar.
+ * @param string $subject El asunto del correo.
+ * @param string|array $content Un string con el contenido del correo o un
+ * arreglo con índices: `text` y `html`.
+ * @param string|array $to Un string con el correo electrónico del
+ * destinatario o un arreglo con índices: `address` y `name`.
+ * @param array $attachments Arreglo con los archivos adjuntos del correo.
+ * @param string|array $from Un string con el correo electrónico del
+ * remitente o un arreglo con índices: `address` y `name`.
  * @return void
  */
-function send_notification($notifiables, $notification): void
+function send_email(string $subject, $content, $to, array $attachments = [], $from = null): void
 {
-    app('notification')->send($notifiables, $notification);
+    app('notification')->sendEmail($subject, $content, $to, $attachments, $from);
 }
 
 /**

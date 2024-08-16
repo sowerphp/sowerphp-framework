@@ -58,7 +58,8 @@
         "symfony/doctrine-messenger": "^5.4",
         "symfony/redis-messenger": "^5.4",
         "symfony/cache": "^5.4",
-        "monolog/monolog": "^2.9"
+        "monolog/monolog": "^2.9",
+        "symfony/notifier": "^5.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
