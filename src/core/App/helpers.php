@@ -307,12 +307,13 @@ function http_client(): \sowerphp\core\Service_Http_Client
 /**
  * Registra un mensaje en el logger.
  *
- * @param string $level El nivel del log (ej: info, error, warning).
+ * @param mixed $level El nivel del log (puede ser una cadena o una constante
+ * de Monolog).
  * @param string $message El mensaje a registrar.
- * @param array $context Contexto adicional para el mensaje de log.
+ * @param array $context Contexto adicional para el mensaje.
  * @return void
  */
-function log_message(string $level, string $message, array $context = []): void
+function log_message($level, string $message, array $context = []): void
 {
     app('log')->log($level, $message, $context);
 }
@@ -523,40 +524,6 @@ function num($n, $d = 0, $language = null)
     $formatter->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, $d);
 
     return $formatter->format($n);
-}
-
-/**
- * Función que permite ejecutar un comando en la terminal.
- */
-function shell_exec_async($cmd, $log = false, &$output = []): int
-{
-    $cmd = trim($cmd);
-    if (empty($cmd)) {
-        return 255;
-    }
-    if ($cmd[0] != '/') {
-        $cmd = app('layers')->getProjectPath() . '/console/shell.php ' . $cmd;
-    }
-    $screen_cmd = 'screen -dm';
-    if ($log) {
-        if (!is_string($log)) {
-            $log = DIR_TMP . '/screen_' . microtime(true) . '.log';
-        } else {
-            $log = trim($log);
-        }
-        exec('screen --version', $screen_version);
-        $version = explode(' ', $screen_version[0])[2];
-        if ($version >= '4.06.00') {
-            $screen_cmd .= ' -L -Logfile '.escapeshellarg($log);
-        } else {
-            $screen_cmd .= ' -L '.escapeshellarg($log);
-        }
-    }
-    $screen_cmd .= ' ' . $cmd;
-    $rc = 0;
-    exec($screen_cmd, $output, $rc);
-    $output = implode("\n", $output);
-    return $rc;
 }
 
 /**

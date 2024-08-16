@@ -317,7 +317,7 @@ class Service_Layers implements Interface_Service
     /**
      * Método que normaliza un path. Esto lo hace incorporando el "slash"
      * inicial. Con esto el path quedará desde la "raíz". Y esa "raíz" podrá
-     * ser la raíz real del sistema de archivo o la raíz de uno de los
+     * ser la raíz real del sistema de archivos o la raíz de uno de los
      * directorios de las capas.
      *
      * @param string|null $path Path que se está buscando normalizar.

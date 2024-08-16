@@ -61,7 +61,7 @@ use League\Flysystem\Local\LocalFilesystemAdapter;
  * - move($from, $to)
  * - delete($paths)
  * - deleteDirectory($directory)
- * - makeDirectory($path)
+ * - createDirectory($path)
  * - cleanDirectory($directory)
  *
  * Enlaces simbólicos:
@@ -152,7 +152,7 @@ class Service_Storage implements Interface_Service
     }
 
     /**
-     * Retorna una instancia del disco solicitado.
+     * Obtiene una instancia del disco solicitado.
      *
      * @param string $name Nombre del almacenamiento solicitado.
      * @return Filesystem Almacenamiento solicitado para ser usado.
@@ -160,13 +160,68 @@ class Service_Storage implements Interface_Service
     public function disk(?string $name = null): Filesystem
     {
         $name = $name ?? $this->defaultStorage;
-        if (isset($this->disks[$name])) {
-            return $this->disks[$name];
+        if (!isset($this->disks[$name])) {
+            throw new \Exception(sprintf(
+                'El almacenamiento "%s" no está configurado para ser usado.',
+                $name
+            ));
+
         }
-        throw new \Exception(sprintf(
-            'El almacenamiento "%s" no está configurado para ser usado.',
-            $name
-        ));
+        return $this->disks[$name];
+    }
+
+    /**
+     * Obtiene la ruta completa dentro de un almacenamiento.
+     *
+     * @param string $path Ruta que se desea obtener completa dentro del
+     * almacenamiento.
+     * @param string $name Nombre del almacenamiento solicitado.
+     * @return string Ruta completa dentro del almacenamiento.
+     */
+    public function getFullPath(?string $path = null, ?string $name = null): string
+    {
+        $basePath = $this->path($name) ?? '';
+        $path = $this->normalizePath($path ?? '');
+        return $basePath . $path;
+    }
+
+    /**
+     * Obtiene la ruta base del almacenamiento solicitado.
+     *
+     * @param string $name Nombre del almacenamiento solicitado.
+     * @return string Ruta base del almacenamiento.
+     */
+    protected function path(?string $name = null): string
+    {
+        $name = $name ?? $this->defaultStorage;
+        if (!isset($this->paths[$name])) {
+            throw new \Exception(sprintf(
+                'El almacenamiento "%s" no está configurado para ser usado.',
+                $name
+            ));
+
+        }
+        return $this->paths[$name] ?? null;
+    }
+
+    /**
+     * Método que normaliza un path. Esto lo hace incorporando el "slash"
+     * inicial. Con esto el path quedará desde la "raíz". Y esa "raíz" podrá
+     * ser la raíz real del sistema de archivos o la raíz de uno de los
+     * directorios de los discos de almacenamiento.
+     *
+     * @param string|null $path Path que se está buscando normalizar.
+     * @return string
+     */
+    protected function normalizePath(?string $path = null): string
+    {
+        if ($path) {
+            if ($path[0] != DIRECTORY_SEPARATOR) {
+                $path = DIRECTORY_SEPARATOR . $path;
+            }
+            return $path;
+        }
+        return '';
     }
 
 }

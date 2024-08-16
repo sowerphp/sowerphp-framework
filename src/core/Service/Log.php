@@ -23,36 +23,108 @@
 
 namespace sowerphp\core;
 
-use Illuminate\Log\LogManager;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerTrait;
 
-class Service_Log extends LogManager implements Interface_Service
+/**
+ * Servicio de logging utilizando Monolog.
+ */
+class Service_Log implements Interface_Service, LoggerInterface
 {
 
+    // Usar LoggerTrait para implementar métodos básicos de LoggerInterface.
+    use LoggerTrait;
+
     /**
-     * Registra el servicio de logging.
+     * El objeto Logger utilizado para registrar mensajes de log.
      *
-     * @return void
+     * @var Logger
+     */
+    protected $logger;
+
+    /**
+     * Servicio de almacenamiento.
+     *
+     * @var Service_Storage
+     */
+    protected $storageService;
+
+    /**
+     * Constructor.
+     */
+    public function __construct(Service_Storage $storageService)
+    {
+        $this->storageService = $storageService;
+    }
+
+    /**
+     * Registra el servicio de logs.
      */
     public function register(): void
     {
     }
 
     /**
-     * Inicializa el servicio de logging.
-     *
-     * @return void
+     * Inicializa el servicio de logs.
      */
     public function boot(): void
+    {
+        $channelName = 'app';
+
+        // Corroborar que exista el directorio para logs.
+        $diskName = 'local';
+        $disk = $this->storageService->disk($diskName);
+        if (!$disk->directoryExists('/logs')) {
+            $disk->createDirectory('/logs');
+        }
+        $logsFile = $this->storageService->getFullPath(
+            '/logs/' . $channelName . '.log',
+            $diskName
+        );
+
+        // Crear logger y asignar handler stream.
+        $this->logger = new Logger($channelName);
+        $this->logger->pushHandler(new StreamHandler($logsFile, Logger::DEBUG));
+    }
+
+    /**
+     * Finaliza el servicio de logs.
+     */
+    public function terminate(): void
     {
     }
 
     /**
-     * Finaliza el servicio de logging.
+     * Registra mensajes con un nivel arbitrario.
      *
+     * @param mixed $level El nivel del log (puede ser una cadena o una
+     * constante de Monolog).
+     * @param string $message El mensaje a registrar.
+     * @param array $context Contexto adicional para el mensaje.
      * @return void
      */
-    public function terminate(): void
+    public function log($level, $message, array $context = []): void
     {
+        $this->logger->log($level, $message, $context);
+    }
+
+    /**
+     * Cualquier método que no esté definido en el servicio será llamado en el
+     * logger de Monolog.
+     */
+    public function __call($method, $parameters)
+    {
+        try {
+            return call_user_func_array([$this->logger, $method], $parameters);
+        } catch (\Exception $e) {
+            throw new \Exception(__(
+                'Error al ejecutar método %s del logger: %s.',
+                $method,
+                $e->getMessage()
+            ));
+        }
     }
 
 }

@@ -25,7 +25,7 @@ namespace sowerphp\core;
 
 use Illuminate\Container\Container;
 use Symfony\Component\Messenger\Transport\Serialization\PhpSerializer;
-use Symfony\Component\Messenger\MessageBusInterface;
+//use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\MessageBus;
 use Symfony\Component\Messenger\Handler\HandlersLocator;
 use Symfony\Component\Messenger\Middleware\HandleMessageMiddleware;
@@ -36,10 +36,12 @@ use Symfony\Component\Messenger\Transport\Sync\SyncTransport;
 use Symfony\Component\Messenger\Bridge\Redis\Transport\Connection as RedisConnection;
 use Symfony\Component\Messenger\Bridge\Redis\Transport\RedisTransport;
 use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Stamp\BusNameStamp;
 use Symfony\Component\Messenger\RoutableMessageBus;
 use Symfony\Component\Messenger\Transport\Receiver\ReceiverInterface;
 use Symfony\Component\Messenger\Command\ConsumeMessagesCommand;
 use Symfony\Component\Messenger\Command\StopWorkersCommand;
+use Symfony\Component\Messenger\EventListener\StopWorkerOnSigtermSignalListener;
 use Symfony\Component\Messenger\EventListener\StopWorkerOnRestartSignalListener;
 
 /**
@@ -70,6 +72,13 @@ class Service_Messenger implements Interface_Service
     protected $bus;
 
     /**
+     * Nombre del bus de mensajes de Symfony Messenger.
+     *
+     * @var string
+     */
+    protected $busName = 'messenger.bus.default';
+
+    /**
      * Servicio de configuración.
      *
      * @var Service_Config
@@ -77,13 +86,24 @@ class Service_Messenger implements Interface_Service
     protected $configService;
 
     /**
+     * Servicio de log.
+     *
+     * @var Service_Log
+     */
+    protected $logService;
+
+    /**
      * Constructor del servicio de mensajes.
      *
      * @param Service_Config $configService
      */
-    public function __construct(Service_Config $configService)
+    public function __construct(
+        Service_Config $configService,
+        Service_Log $logService
+    )
     {
         $this->configService = $configService;
+        $this->logService = $logService;
     }
 
     /**
@@ -142,9 +162,11 @@ class Service_Messenger implements Interface_Service
         }
 
         // Crear el middleware del localizador de remitentes.
-        return new SendMessageMiddleware(
+        $sendMessageMiddleware = new SendMessageMiddleware(
             new SendersLocator($sendersMap, $this->container)
         );
+        $sendMessageMiddleware->setLogger($this->logService);
+        return $sendMessageMiddleware;
     }
 
     /**
@@ -248,7 +270,9 @@ class Service_Messenger implements Interface_Service
      */
     public function send(object $message): Envelope
     {
-        return $this->bus->dispatch(new Envelope($message));
+        $envelope = new Envelope($message);
+        $envelope = $envelope->with(new BusNameStamp($this->busName));
+        return $this->bus->dispatch($envelope);
     }
 
     /**
@@ -277,18 +301,24 @@ class Service_Messenger implements Interface_Service
     {
         // Crear $routableBus.
         $container = new Container();
-        $container->instance(MessageBusInterface::class, $this->bus);
+        //$container->instance(MessageBusInterface::class, $this->bus);
+        $container->instance($this->busName, $this->bus);
         $routableBus = new RoutableMessageBus($container);
 
         // Crear $receiverLocator.
         $receiverLocator = new Container();
         $transports = (array) $this->configService->get('messenger.transports');
+        $receiverNames = [];
         foreach ($transports as $name => $config) {
+            if ($name == 'sync') {
+                continue;
+            }
             $transport = $this->transport($name);
             if (!$transport instanceof ReceiverInterface) {
                 continue;
             }
             $receiverLocator->instance($name, $transport);
+            $receiverNames[] = $name;
         }
 
         // Obtener la instancia del EventDispatcher de Symfony.
@@ -299,19 +329,24 @@ class Service_Messenger implements Interface_Service
             $routableBus,
             $receiverLocator,
             $eventDispatcher,
-            null, // Logger, si es necesario.
-            [],   // Receiver names.
-            null, // Listener de reinicio de servicios, no se usa.
-            ['default'] // Bus IDs.
+            $this->logService,
+            $receiverNames,
+            null,              // Listener de reinicio de servicios, no se usa.
+            [$this->busName]   // Bus IDs.
         );
 
-        // Crear la instancia del comando para detener los workers.
+        // Crear la instancia del comando para detener (reiniciar) los workers.
+        // Los workers solo se detendran, no se iniciarán nuevamente. Esto se
+        // debe manejar a través de algún monitor en el sistema que revise que
+        // los workers estén en ejecución: bin/console messenger:stop-workers -h
         $cacheItemPool = cache()->getCacheItemPool();
         $stopWorkersCommand = new StopWorkersCommand($cacheItemPool);
 
         // Añadir el listener al EventDispatcher.
-        $stopWorkerListener = new StopWorkerOnRestartSignalListener($cacheItemPool);
+        $stopWorkerListener = new StopWorkerOnSigtermSignalListener();
         $eventDispatcher->addSubscriber($stopWorkerListener);
+        /*$stopWorkerListener = new StopWorkerOnRestartSignalListener($cacheItemPool);
+        $eventDispatcher->addSubscriber($stopWorkerListener);*/
 
         // Entregar los comandos del servicio.
         return [$consumeMessagesCommand, $stopWorkersCommand];

@@ -82,9 +82,15 @@ class Network_Messenger_Handler_Job implements MessageHandlerInterface
         // Crear la salida como un buffer para poder recuperarla.
         $output = new BufferedOutput();
 
+        // Registro para indicar que el comando se ejecutará.
+        log_message('debug', __('Ejecutando el comando %s', $command));
+
         // Ejecutar el comando y entregar resultado.
         try {
             $status = $console->run($input, $output);
+            log_message('debug', __(
+                'Comando %s ejecutado con estado %s', $command, $status
+            ));
             return (object)[
                 'status' => $status,
                 'output' => $output->fetch(),
@@ -95,6 +101,7 @@ class Network_Messenger_Handler_Job implements MessageHandlerInterface
                 $command,
                 $e->getMessage()
             );
+            log_message('error', $error);
             return (object)[
                 'status' => 1,
                 'output' => $error,

@@ -58,6 +58,7 @@ class App
         'autoload' => Service_Autoload::class,
         'inflector' => Service_Inflector::class,
         'translator' => Service_Translator::class,
+        'log' => Service_Log::class,
         'cache' => Service_Cache::class,
         'database' => Service_Database::class,
         'events' => Service_Events::class,
@@ -66,13 +67,12 @@ class App
         'sanitizer' => Service_Sanitizer::class,
         'caster' => Service_Caster::class,
         'validator' => Service_Validator::class,
+        'messenger' => Service_Messenger::class,
         'mail' => Service_Mail::class,
         'http_client' => Service_Http_Client::class,
-        //'log' => Service_Log::class,
+        'jobs' => Service_Jobs::class,
         //'notification' => Service_Notification::class,
         'view' => Service_View::class,
-        'messenger' => Service_Messenger::class,
-        'jobs' => Service_Jobs::class,
     ];
 
     /**
