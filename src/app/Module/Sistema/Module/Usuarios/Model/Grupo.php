@@ -43,7 +43,7 @@ class Model_Grupo extends Model
             'verbose_name' => 'Grupo',
             'verbose_name_plural' => 'Grupos',
             'db_table_comment' => 'Grupos a los que puede pertenecer un usuario.',
-            'ordering' => ['id'],
+            'ordering' => ['grupo'],
         ],
         'fields' => [
             'id' => [
@@ -65,6 +65,24 @@ class Model_Grupo extends Model
                 'blank' => true,
                 'verbose_name' => 'Activo',
                 'help_text' => 'Indica si el grupo se encuentra activo.',
+            ],
+        ],
+        'relations' => [
+            'usuarios' => [
+                'relation' => Model_Usuario::class,
+                'belongs_to_many' => 'usuario',
+                'through' => 'usuario_grupo',
+                'through_fields' => [
+                    'usuario' => ['id' => 'usuario'],
+                    'grupo' => ['id' => 'grupo'],
+                ],
+                'pivot_fields' => [
+                    'primario',
+                ],
+                'models' => [
+                    'usuario' => Model_Usuario::class,
+                    'grupo' => Model_Grupo::class,
+                ],
             ],
         ],
     ];

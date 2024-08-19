@@ -43,9 +43,13 @@ abstract class Model_Plural
     /**
      * Todos los metadatos del modelo y de los campos (atributos) del modelo.
      *
-     * @var Repository
+     * @var array|\Illuminate\Config\Repository
      */
-    protected $meta;
+    protected $meta = [
+        'model' => [
+            'db_name' => 'default',
+        ],
+    ];
 
     /**
      * Conexión a la base de datos asociada al modelo.
@@ -64,8 +68,12 @@ abstract class Model_Plural
             $singularClass = app('inflector')->singularize(
                 $this->getReflector()->getName()
             );
-            $singularInstance = new $singularClass();
-            $meta = $singularInstance->getMeta();
+            if (class_exists($singularClass)) {
+                $singularInstance = new $singularClass();
+                $meta = $singularInstance->getMeta();
+            } else {
+                $meta = new Repository($this->meta);
+            }
         }
         $this->meta = $meta;
         // Asignar la conexión a la base de datos.
@@ -211,6 +219,20 @@ abstract class Model_Plural
         }
         // Se encontró exactamente un resultado (como se espera para una PK).
         return $results[0];
+    }
+
+    /**
+     * Obtiene una instancia de un registro (modelo singular).
+     *
+     * La ventaja es que se utiliza el caché del servicio de modelos
+     * (Service_Model). O sea, si el registro ya había sido recuperado no se
+     * vuelve a hacer la consulta a la base de datos.
+     *
+     * @param array ...$id Identificador del registro.
+     */
+    public function get(...$id): Model
+    {
+        return model($this->meta['model.singular'], ...$id);
     }
 
     /**
@@ -554,32 +576,24 @@ abstract class Model_Plural
     }
 
     /**
-     * Método que permite obtener un objeto singular (clase singular). La
-     * ventaja es que se utiliza caché, esto es, si el objeto ya había sido
-     * recuperado no se vuelve a hacer la consulta a la base de datos.
-     * @param pk Clave primaria del objeto (pueden ser varios parámetros)
-     */
-    public function get(...$id)
-    {
-        return model($this->meta['model.singular'], ...$id);
-    }
-
-    /**
-     * Método para obtener un listado de los objetos (usando id y glosa)
+     * Método para obtener un listado de los objetos (usando id y glosa).
+     *
      * El método de la clase abstracta asume que el campo glosa se llama
      * igual que la tabla, o sea se buscará id y tabla como campos,
      * donde id es la PK. Si estos no son, el método deberá ser
      * reescrito en la clase final.
+     *
+     * @return array Arreglo con el listado de registros en una tupla:
+     * (id, name).
      */
-    public function getList()
+    public function getList(): array
     {
-        $cols = array_keys($this->meta['model.singular']::$columnsInfo);
-        $id = $cols[0];
-        $glosa = in_array($this->meta['model.db_table'], $cols) ? $this->meta['model.db_table'] : $cols[1];
+        $id = $this->meta['model.choices.id'];
+        $name = $this->meta['model.choices.name'];
         return $this->getDatabaseConnection()->getTable('
-            SELECT '.$id.' AS id, '.$glosa.' AS glosa
-            FROM '.$this->meta['model.db_table'].'
-            ORDER BY '.$glosa
+            SELECT ' . $id . ' AS id, ' . $name . ' AS name
+            FROM ' . $this->meta['model.db_table'] . '
+            ORDER BY ' . $name
         );
     }
 

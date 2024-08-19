@@ -259,17 +259,16 @@ function decrypt($payload, $unserialize = true)
  * datos).
  *
  * @param string|null $model Nombre del modelo que se desea obtener.
- * @param int|string|array $pk Llave primaria del modelo en la base de datos.
- * Si lla llave es compuesta, se debe pasar como un arreglo.
- * @return Service_Model|Model
+ * @param array ...$id Identificador del modelo en la base de datos.
+ * @return \sowerphp\core\Service_Model|\sowerphp\core\Model
  */
-function model(?string $model = null, $pk = null)
+function model(?string $model = null, ...$id)
 {
     $modelService = app('model');
     if ($model === null) {
         return $modelService;
     }
-    return $modelService->instantiate($model, $pk);
+    return $modelService->instantiate($model, ...$id);
 }
 
 /**

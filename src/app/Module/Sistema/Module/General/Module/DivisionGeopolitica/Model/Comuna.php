@@ -60,9 +60,9 @@ class Model_Comuna extends Model
             ],
             'provincia' => [
                 'type' => self::TYPE_CHAR,
-                'foreign_key' => Model_Provincia::class,
-                'to_table' => 'provincia',
-                'to_field' => 'codigo',
+                'relation' => Model_Provincia::class,
+                'belongs_to' => 'provincia',
+                'related_field' => 'codigo',
                 'length' => 3,
                 'verbose_name' => 'Provincia',
                 'help_text' => 'Provincia a la que pertenece la comuna.',

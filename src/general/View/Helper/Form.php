@@ -72,7 +72,7 @@ class View_Helper_Form
         if (!is_array($config)) {
             $config = ['action'=>$config];
         }
-        // asignar configuración
+        // Asignar configuración.
         $config = array_merge(
             [
                 'id' => 'formulario',
@@ -113,16 +113,15 @@ class View_Helper_Form
             if (!is_array($config)) {
                 $config = ['value'=>$config];
             }
-            // asignar configuración
+            // Asignar configuración.
             $config['type'] = 'submit';
-            $config = array_merge(
-                [
-                    'type' => 'submit',
-                    'name' => 'submit',
-                    'value' => 'Enviar',
-                    'label' => '',
-                ], $config
-            );
+            $config = array_merge([
+                'type' => 'submit',
+                'value' => 'Enviar',
+            ], $config, [
+                'label' => null,
+                'name' => null,
+            ]);
             // generar fin del formulario
             return $this->input($config).'</form>'."\n\n";
         } else {
@@ -142,7 +141,7 @@ class View_Helper_Form
         if (!is_array($config)) {
             $config = array('name'=>$config, 'label'=>$config);
         }
-        // asignar configuración
+        // Asignar configuración.
         $config = array_merge(
             array(
                 'type' => 'text',

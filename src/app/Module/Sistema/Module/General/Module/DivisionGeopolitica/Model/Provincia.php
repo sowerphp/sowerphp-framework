@@ -60,9 +60,9 @@ class Model_Provincia extends Model
             ],
             'region' => [
                 'type' => self::TYPE_STRING,
-                'foreign_key' => Model_Region::class,
-                'to_table' => 'region',
-                'to_field' => 'codigo',
+                'relation' => Model_Region::class,
+                'belongs_to' => 'region',
+                'related_field' => 'codigo',
                 'length' => 2,
                 'verbose_name' => 'Región',
                 'help_text' => 'Región a la que pertenece la provincia.',
@@ -70,6 +70,16 @@ class Model_Provincia extends Model
                 'searchable' => 'codigo:string|region:string',
             ],
         ],
+        'relations' => [
+            'comunas' => [
+                'relation' => Model_Comuna::class,
+                'has_many' => 'comuna',
+                'related_field' => [
+                    'codigo' => 'provincia',
+                ],
+
+            ],
+        ]
     ];
 
 }

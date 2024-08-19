@@ -38,7 +38,7 @@ class Utility_Bot_Telegram
      */
     public function __construct($config = 'default')
     {
-        // asignar configuración del bot
+        // Asignar configuración. del bot
         if (is_string($config)) {
             if (strpos($config, ':')) {
                 $config = ['token' => $config];

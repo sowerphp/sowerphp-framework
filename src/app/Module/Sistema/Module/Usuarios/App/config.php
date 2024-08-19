@@ -50,7 +50,7 @@ return [
                 'desc' => 'Autorización y control de acceso sobre recursos',
                 'icon' => 'fa fa-lock',
             ],
-            '/email/grupos' => [
+            '/grupos/email' => [
                 'name' => 'Enviar email a grupos',
                 'desc' => 'Enviar correo electrónico a todos los usuarios de uno o varios grupos',
                 'icon' => 'fas fa-paper-plane',

@@ -38,7 +38,7 @@ class Controller_Bd extends \sowerphp\autoload\Controller
      */
     public function tablas()
     {
-        if (isset($_POST['submit'])) {
+        if (!empty($_POST)) {
             $db = &database($_POST['database']);
             $tables = $db->getTablesFromDatabase();
             $data = [];
@@ -87,7 +87,7 @@ class Controller_Bd extends \sowerphp\autoload\Controller
         // setear listado de bases de datos
         $this->_setDatabases();
         // procesar formulario si fue enviado
-        if (isset($_POST['submit'])) {
+        if (!empty($_POST)) {
             if (!isset($_FILES['file']) || $_FILES['file']['error']) {
                 SessionMessage::error('No fue posible leer el archivo de carga de datos.');
                 return;
@@ -259,7 +259,7 @@ class Controller_Bd extends \sowerphp\autoload\Controller
      */
     public function consulta()
     {
-        if (isset($_POST['submit'])) {
+        if (!empty($_POST)) {
             ini_set('memory_limit', '1024M');
             $db = &database($_POST['database']);
             try {

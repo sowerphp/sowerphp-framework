@@ -120,7 +120,8 @@ class Service_Sanitizer implements Interface_Service
 
     protected function remove_non_printable(string $value): string
     {
-        return preg_replace('/[[:^print:]]/', '', $value);
+        $result = preg_replace('/[\x00-\x1F\x7F]/u', '', $value);
+        return $result !== null ? $result : $value;
     }
 
     protected function strip_tags(string $value, string $allowed_tags = null): string
@@ -241,6 +242,25 @@ class Service_Sanitizer implements Interface_Service
     {
         preg_match_all($regex, $value, $matches);
         return implode('', $matches[0]);
+    }
+
+    protected function for_id(string $value): string
+    {
+        return str_replace(['/', '"', '\'', ' ', '&', '%', '+', '#'], '_', $value);
+    }
+
+    protected function for_rut(string $value): ?int
+    {
+        // Si no se especificó un RUT se retorna null.
+        if (empty($value)) {
+            return null;
+        }
+        // Si el RUT no es numérico, entonces se pasó con guión y DV.
+        if (!is_numeric($value)) {
+            $value = explode('-', str_replace('.', '', $value))[0];
+        }
+        // Entregar el RUT sanitizado.
+        return (int) $value;
     }
 
 }

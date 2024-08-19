@@ -65,6 +65,29 @@ class Service_Config implements Interface_Service, \ArrayAccess
     ];
 
     /**
+     * Niveles de error (en realidad de diagnósticos) de PHP.
+     *
+     * @var array
+     */
+    protected $errorLevels = [
+        E_ERROR => 'Error',
+        E_WARNING => 'Warning',
+        E_PARSE => 'Parse Error',
+        E_NOTICE => 'Notice',
+        E_CORE_ERROR => 'Core Error',
+        E_CORE_WARNING => 'Core Warning',
+        E_COMPILE_ERROR => 'Compile Error',
+        E_COMPILE_WARNING => 'Compile Warning',
+        E_USER_ERROR => 'User Error',
+        E_USER_WARNING => 'User Warning',
+        E_USER_NOTICE => 'User Notice',
+        E_STRICT => 'Strict Notice',
+        E_RECOVERABLE_ERROR => 'Recoverable Error',
+        E_DEPRECATED => 'Deprecated',
+        E_USER_DEPRECATED => 'User Deprecated',
+    ];
+
+    /**
      * Constructor de Service_Config.
      *
      * @param Service_Layers $layersService
@@ -212,6 +235,50 @@ class Service_Config implements Interface_Service, \ArrayAccess
         // Configuración de errores y su manejo en PHP.
         ini_set('display_errors', $this->get('app.debug'));
         error_reporting($this->get('app.php.error_reporting'));
+
+        // Configurar los diagnósticos como excepciones.
+        //
+        // Esto lanzará una excepción para los diagnósticos generados de tipo:
+        //
+        //   - E_ERROR: Errores fatales que detienen el script.
+        //   - E_WARNING: Advertencias que no detienen el script.
+        //   - E_PARSE: Errores de sintaxis durante la compilación.
+        //   - E_NOTICE: Notificaciones de posibles errores no fatales.
+        //   - E_CORE_ERROR: Errores fatales en el inicio de PHP.
+        //   - E_CORE_WARNING: Advertencias en el inicio de PHP.
+        //   - E_COMPILE_ERROR: Errores fatales del compilador Zend.
+        //   - E_COMPILE_WARNING: Advertencias del compilador Zend.
+        //   - E_USER_ERROR: Errores fatales generados por el usuario.
+        //   - E_USER_WARNING: Advertencias generadas por el usuario.
+        //   - E_USER_NOTICE: Notificaciones generadas por el usuario.
+        //   - E_STRICT: Sugerencias para mejorar la interoperabilidad.
+        //   - E_RECOVERABLE_ERROR: Errores graves que se pueden capturar.
+        //   - E_DEPRECATED: Advertencias de uso de funciones obsoletas.
+        //   - E_USER_DEPRECATED: Advertencias de código obsoleto del usuario.
+        //
+        // Solo se generará la excepción si el nivel de error está dentro de
+        // los niveles reportados con error_reporting().
+        if ($this->get('app.php.diagnostics_as_exception')) {
+            set_error_handler(function ($severity, $message, $file, $line) {
+                $currentErrorReporting = error_reporting();
+                if ($severity & $currentErrorReporting) {
+                    $message = __(
+                        '[%s] %s in %s:%d',
+                        $this->errorLevels[$severity] ?? 'Unknown error severity',
+                        $message,
+                        $this->layersService->obfuscatePath($file),
+                        $line
+                    );
+                    throw new \ErrorException(
+                        $message,
+                        255,
+                        $severity,
+                        $file,
+                        $line
+                    );
+                }
+            });
+        }
 
         // Definir la zona horaria.
         date_default_timezone_set($this->get('app.timezone'));

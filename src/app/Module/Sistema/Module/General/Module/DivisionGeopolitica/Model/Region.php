@@ -63,6 +63,16 @@ class Model_Region extends Model
                 'help_text' => 'Orden en el que se deben listar las regiones.',
             ],
         ],
+        'relations' => [
+            'provincias' => [
+                'relation' => Model_Provincia::class,
+                'has_many' => 'provincia',
+                'related_field' => [
+                    'codigo' => 'region',
+                ],
+
+            ],
+        ]
     ];
 
 }

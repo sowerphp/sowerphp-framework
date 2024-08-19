@@ -32,45 +32,44 @@ use League\Flysystem\Local\LocalFilesystemAdapter;
  * Métodos disponibles en los discos de Filesystem obtenidos con disk():
  *
  * Almacenamiento de archivos:
- * - put($path, $contents, $options = [])
- * - putFile($path, $file, $options = [])
- * - putFileAs($path, $file, $name, $options = [])
- * - writeStream($path, $resource, $options = [])
+ * - write(string $location, string $contents, array $config = [])
+ *   Escribe contenido en un archivo.
+ * - writeStream(string $location, $contents, array $config = [])
+ *   Escribe un flujo de datos en un archivo.
+ * - setVisibility(string $path, string $visibility)
+ *   Establece la visibilidad (pública o privada) de un archivo.
  *
  * Recuperación de archivos:
- * - get($path)
- * - readStream($path)
- * - exists($path)
- * - missing($path)
- * - getVisibility($path)
- * - setVisibility($path, $visibility)
- *
- * Información de archivos:
- * - size($path)
- * - lastModified($path)
- * - mimeType($path)
+ * - read(string $location): string
+ *   Lee el contenido de un archivo como una cadena.
+ * - readStream(string $location)
+ *   Lee el contenido de un archivo como un flujo de datos.
+ * - fileExists(string $location): bool
+ *   Verifica si un archivo existe en la ruta especificada.
+ * - lastModified(string $path): int
+ *   Obtiene la fecha de la última modificación del archivo.
+ * - fileSize(string $path): int
+ *   Obtiene el tamaño del archivo.
+ * - mimeType(string $path): string
+ *   Obtiene el tipo MIME del archivo.
+ * - visibility(string $path): string
+ *   Obtiene la visibilidad de un archivo.
  *
  * Directorio y navegación de archivos:
- * - directories($directory = null, $recursive = false)
- * - allDirectories($directory = null)
- * - files($directory = null, $recursive = false)
- * - allFiles($directory = null)
+ * - listContents(string $location, bool $deep = self::LIST_SHALLOW): DirectoryListing
+ *   Lista los contenidos de un directorio, opcionalmente de forma recursiva.
  *
  * Manipulación de archivos:
- * - copy($from, $to)
- * - move($from, $to)
- * - delete($paths)
- * - deleteDirectory($directory)
- * - createDirectory($path)
- * - cleanDirectory($directory)
- *
- * Enlaces simbólicos:
- * - url($path)
- * - temporaryUrl($path, $expiration, $options = [])
- *
- * Descarga y respuesta:
- * - download($path, $name = null, $headers = [])
- * - response($path, $name = null, $headers = [], $disposition = 'inline')
+ * - move(string $source, string $destination, array $config = [])
+ *   Mueve un archivo de una ubicación a otra.
+ * - copy(string $source, string $destination, array $config = [])
+ *   Copia un archivo a una nueva ubicación.
+ * - delete(string $location): void
+ *   Elimina un archivo.
+ * - deleteDirectory(string $location): void
+ *   Elimina un directorio y su contenido.
+ * - createDirectory(string $location, array $config = []): void
+ *   Crea un directorio en la ruta especificada.
  *
  * Además se tienen todos los métodos disponibles en la clase CustomFilesystem.
  */
@@ -103,7 +102,11 @@ class Service_Storage implements Interface_Service
      */
     protected $disks = [];
 
-    // Dependencias de otros servicios.
+    /**
+     * Servicio de capas de la aplicación.
+     *
+     * @var Service_Layers
+     */
     protected $layersService;
 
     /**
@@ -129,11 +132,17 @@ class Service_Storage implements Interface_Service
         $this->disks['local'] = new CustomFilesystem(
             new LocalFilesystemAdapter($this->paths['local'])
         );
-        // Almacenamiento para archivos estáticos.
-        // Estos archivos son accesibles mediante la URL.
+        // Almacenamiento para archivos estáticos públicos.
+        // Estos archivos son accesibles mediante la URL (/static).
         $this->paths['static'] = $this->layersService->getStaticPath();
         $this->disks['static'] = new CustomFilesystem(
             new LocalFilesystemAdapter($this->paths['static'])
+        );
+        // Almacenamiento para archivos estáticos privados.
+        // Estos archivos son accesibles mediante la URL (/private).
+        $this->paths['private'] = $this->getFullPath('/private', 'local');
+        $this->disks['private'] = new CustomFilesystem(
+            new LocalFilesystemAdapter($this->paths['private'])
         );
         // Almacenamiento para archivos temporales.
         $this->paths['tmp'] = $this->layersService->getTmpPath();
@@ -168,6 +177,25 @@ class Service_Storage implements Interface_Service
 
         }
         return $this->disks[$name];
+    }
+
+    /**
+     * Crea una instancia de un disco dentro de otro almacenamiento (subdisco).
+     *
+     * @param string $name Nombre del almacenamiento solicitado.
+     * @return Filesystem Almacenamiento solicitado para ser usado.
+     */
+    public function subdisk(string $path, ?string $name = null): Filesystem
+    {
+        $name = $name ?? $this->defaultStorage;
+        $key = $name . ':' . $path;
+        if (!isset($this->disks[$key])) {
+            $this->paths[$key] = $this->getFullPath($path, $name);
+            $this->disks[$key] = new CustomFilesystem(
+                new LocalFilesystemAdapter($this->paths[$key])
+            );
+        }
+        return $this->disks[$key];
     }
 
     /**

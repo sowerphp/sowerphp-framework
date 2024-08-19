@@ -45,9 +45,9 @@ class Middleware_Csrf implements Interface_Middleware
         if ($request->method() == 'POST') {
             $csfrTokenPost = $request->input('csrf_token');
             if (!$csfrTokenPost) {
-                return redirect()->back()->withError(__(
+                /*return redirect()->back()->withError(__(
                     'No se ha especificado el Token CSRF.'
-                ));
+                ));*/
             }
             /*$csfrTokenSession = session('csrf_token');
             if ($csfrTokenPost != $csfrTokenSession) {

@@ -35,6 +35,15 @@ class Database_QueryBuilder extends QueryBuilder
 {
 
     /**
+     * Clase a la que se mapearán los resultados.
+     *
+     * Si no se especifica se entregarán con la clase estándar: \stdClass.
+     *
+     * @var string|null
+     */
+    protected $mapClass = null;
+
+    /**
      * Operadores para los filtros de SmartFilter.
      *
      * @var array
@@ -207,12 +216,12 @@ class Database_QueryBuilder extends QueryBuilder
     {
         foreach ($fields as $field => $config) {
             if (
-                !empty($config['foreign_key'])
+                !empty($config['relation'])
                 && is_string($config['searchable'])
             ) {
                 $this->join(
-                    $config['to_table'],
-                    $config['to_table'] . '.' . $config['to_field'],
+                    $config['belongs_to'],
+                    $config['belongs_to'] . '.' . $config['related_field'],
                     '=',
                     $this->from . '.' . $config['db_column']
                 );
@@ -246,7 +255,7 @@ class Database_QueryBuilder extends QueryBuilder
      * @param mixed $value El valor del filtro que puede incluir operadores
      * como '!=', '>=', '<=', '>', '<', 'null', '!null', etc.
      * @param array $config Configuración adicional para la columna, como
-     * 'foreign_key', 'to_table', 'to_field', 'db_column', y 'searchable'.
+     * 'relation', 'belongs_to', 'related_field', 'db_column', y 'searchable'.
      * @return self Retorna la instancia del Query Builder para permitir el
      * encadenamiento de métodos.
      */
@@ -269,7 +278,7 @@ class Database_QueryBuilder extends QueryBuilder
 
         // Si la columna es una llave foránea se aplica el filtro como llave
         // foránea a los campos de la tabla relacionada que son "buscables".
-        if (!empty($config['foreign_key'])) {
+        if (!empty($config['relation'])) {
             return $this->applyForeignKeySmartFilter($column, $value, $config);
         }
 
@@ -474,8 +483,8 @@ class Database_QueryBuilder extends QueryBuilder
      * @param array $config Configuración adicional para la columna,
      * incluyendo la información de la relación de la llave foránea.
      * Los parámetros esperados en la configuración son:
-     *   - 'to_table': El nombre de la tabla relacionada.
-     *   - 'to_field': El campo en la tabla relacionada que se usa para la
+     *   - 'belongs_to': El nombre de la tabla relacionada.
+     *   - 'related_field': El campo en la tabla relacionada que se usa para la
      *     relación.
      *   - 'searchable': Campos en la tabla relacionada que son buscables,
      *     separados por '|'.
@@ -495,14 +504,14 @@ class Database_QueryBuilder extends QueryBuilder
             return $this->whereSmartFilter(
                 $column,
                 $value,
-                array_merge($config, ['foreign_key' => null])
+                array_merge($config, ['relation' => null])
             );
         }
 
         // JOIN con la tabla relacionada de la FK.
         $this->join(
-            $config['to_table'],
-            $config['to_table'] . '.' . $config['to_field'],
+            $config['belongs_to'],
+            $config['belongs_to'] . '.' . $config['related_field'],
             '=',
             $column
         );
@@ -516,7 +525,7 @@ class Database_QueryBuilder extends QueryBuilder
                 $query->orWhere(
                     function($subQuery) use ($config, $fkColumn, $value, $fkConfig) {
                         $subQuery->whereSmartFilter(
-                            $config['to_table'] . '.' . $fkColumn,
+                            $config['belongs_to'] . '.' . $fkColumn,
                             $value,
                             $fkConfig
                         );
@@ -1202,6 +1211,128 @@ class Database_QueryBuilder extends QueryBuilder
             return 'carbon';
         }
         return null;
+    }
+
+    /**
+     * Define la clase a la que se mapearán los resultados de la consulta.
+     *
+     * @param string $class El nombre de la clase a la que se mapearán los
+     * resultados.
+     * @return $this
+     */
+    public function setMapClass(string $class): self
+    {
+        $this->mapClass = $class;
+        return $this;
+    }
+
+    /**
+     * Ejecuta la consulta y obtiene los resultados.
+     *
+     * @param array|string $columns
+     * @return \Illuminate\Support\Collection
+     */
+    public function get($columns = ['*']): \Illuminate\Support\Collection
+    {
+        $results = parent::get($columns);
+
+        if ($this->mapClass) {
+            return $results->map(function ($item) {
+                $class = $this->mapClass;
+                return (new $class())->forceFill((array)$item)->setExists(true);
+            });
+        }
+
+        return $results;
+    }
+
+    /**
+     * Obtiene un cursor para recorrer los resultados de la consulta.
+     *
+     * @return \Generator
+     */
+    public function cursor(): \Generator
+    {
+        foreach (parent::cursor() as $result) {
+            if ($this->mapClass) {
+                $class = $this->mapClass;
+                yield (new $class())->forceFill((array)$result)->setExists(true);
+            } else {
+                yield $result;
+            }
+        }
+    }
+
+    /**
+     * Obtiene un valor de una sola columna de la primera fila del resultado.
+     *
+     * @param string $column
+     * @return mixed
+     */
+    public function value($column)
+    {
+        // Desactiva el mapeo temporalmente si está habilitado.
+        $originalMapClass = $this->mapClass;
+        $this->mapClass = null;
+
+        // Obtiene el valor de la columna solicitada.
+        $this->select($column);
+        $result = parent::value($column);
+
+        // Restaura el mapeo si era necesario.
+        $this->mapClass = $originalMapClass;
+
+        // Entregar el resultado (valor de la columna solicitada).
+        return $result;
+    }
+
+    /**
+     * Cuenta los registros de la consulta.
+     *
+     * Este método modifica el select actual para realizar la agregación de
+     * conteo en la base de datos, eliminando cualquier selección existente
+     * para evitar conflictos con selecciones previas (ej: tabla pivote).
+     *
+     * @param string $columns La columna a contar, por defecto '*' para contar todas.
+     * @return int El número de registros encontrados.
+     */
+    public function count($columns = '*')
+    {
+        // Clona la consulta actual para modificarla sin afectar la original.
+        $query = $this->clone();
+
+        // Limpia la selección actual para evitar conflictos con selecciones
+        // previas.
+        $query->select($columns)
+            ->resetBindings(['select'])
+            ->setAggregate('count', [$columns])
+        ;
+
+        // Ejecuta la consulta y obtiene el conteo.
+        $result = $query->get();
+
+        // Devuelve el conteo obtenido.
+        return $result->isEmpty() ? 0 : (int) $result->first()->aggregate;
+    }
+
+    /**
+     * Resetea los bindings de la consulta.
+     *
+     * @param array $types Los tipos de bindings que deseas resetear.
+     * Por defecto: todos.
+     * @return self
+     */
+    public function resetBindings($types = []): self
+    {
+        if (empty($types)) {
+            $this->bindings = [];
+        } else {
+            foreach ((array) $types as $type) {
+                $this->bindings[$type] = [];
+            }
+        }
+
+        return $this;
     }
 
 }

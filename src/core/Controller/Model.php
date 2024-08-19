@@ -911,13 +911,8 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             // falle la app se redirecciona al listado con el error.
             // Lo ideal es controlar esto antes con un "error más lindo".
             return redirect($request->getRequestUriDecoded())
-                ->withError(
-                    __('%(error_message)s',
-                        [
-                            'error_message' => $e->getMessage()
-                        ]
-                    )
-                );
+                ->withError($e->getMessage())
+            ;
         }
         // Paginar los resultados si es necesario.
         if ((integer)$page > 0) {
@@ -979,7 +974,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     {
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         // si se envió el formulario se procesa
-        if (isset($_POST['submit'])) {
+        if (!empty($_POST)) {
             $modelClass = $this->getModelClass();
             $Obj = new $modelClass();
             $Obj->set($_POST);
@@ -1045,7 +1040,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             );
         }
         // si no se ha enviado el formulario se mostrará
-        if (isset($_POST['submit'])) {
+        if (!empty($_POST)) {
             foreach ($this->getModelClass()::$columnsInfo as $col => &$info) {
                 if (in_array($col, $this->contraseniaNames) && empty($_POST[$col])) {
                     $_POST[$col] = $Obj->$col;

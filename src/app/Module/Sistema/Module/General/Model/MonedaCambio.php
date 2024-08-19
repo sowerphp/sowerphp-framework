@@ -40,10 +40,11 @@ class Model_MonedaCambio extends Model
      */
     protected $meta = [
         'model' => [
-            'verbose_name' => 'Moneda de cambio',
-            'verbose_name_plural' => 'Moneda de cambios',
-            'db_table_comment' => 'Cambios de moneda.',
+            'verbose_name' => 'Tipo de cambio de moneda',
+            'verbose_name_plural' => 'Tipos de cambios de monedas',
+            'db_table_comment' => 'Tipos de cambio de diferentes monedas, se registra un valor por día.',
             'ordering' => ['-fecha'],
+            //'list_group_by' => 'fecha',
         ],
         'fields' => [
             'desde' => [

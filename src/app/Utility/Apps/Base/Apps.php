@@ -158,12 +158,13 @@ abstract class Utility_Apps_Base_Apps
      * Método que entrega el código HTML de la página de configuración de la aplicación
      * @param form Objeto con el formulario que se está usando para construir la página de configuración
      */
-    public function getConfigPageHTML(\sowerphp\general\View_Helper_Form $form)
+    public function getConfigPageHTML(\sowerphp\general\View_Helper_Form $form): string
     {
+        $prefix = 'app_' . $this->getCodigo();
         $buffer = '';
         $buffer .= $form->input([
             'type' => 'select',
-            'name' => 'app_'.$this->getCodigo().'_disponible',
+            'name' => $prefix . '_disponible',
             'label' => '¿Disponible?',
             'options' => ['No', 'Si'],
             'value' => (int)(!empty($this->getConfig()->disponible)),
@@ -174,14 +175,26 @@ abstract class Utility_Apps_Base_Apps
 
     /**
      * Método que asigna la configuración de la aplicación procesando el
-     * formulario enviado por POST
+     * formulario enviado por POST.
+     *
+     * @return array|null Arreglo con la configuración determinada.
      */
-    public function setConfigPOST()
+    public function setConfigPOST(): ?array
     {
-        $_POST['config_apps_'.$this->getCodigo()] = [
-            'disponible' => (int)!empty($_POST['app_'.$this->getCodigo().'_disponible']),
+        // Asignar configuración.
+        $prefix = 'app_' . $this->getCodigo();
+        $configName = 'config_apps_' . $this->getCodigo();
+
+        // Asignar configuración.
+        $_POST[$configName] = [
+            'disponible' => (int)!empty($_POST[$prefix . '_disponible']),
         ];
-        unset($_POST['app_'.$this->getCodigo().'_disponible']);
+
+        // Limpiar $_POST.
+        unset($_POST[$prefix . '_disponible']);
+
+        // Entregar la configuración.
+        return $_POST[$configName];
     }
 
     /**
@@ -217,7 +230,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que asigna las variables de la aplicación
+     * Método que asigna las variables de la aplicación.
      */
     public function setVars(array $vars)
     {
@@ -225,7 +238,8 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega el código de la aplicación de alguna parte de la página.
+     * Método que entrega el código de la aplicación de alguna parte de la
+     * página.
      */
     public function getPageCode(string $page, array $vars = []): string
     {
@@ -233,6 +247,7 @@ abstract class Utility_Apps_Base_Apps
         if (!is_readable($plantilla)) {
             return '';
         }
+        $vars = array_merge(['__view_layout' => false], $this->vars, $vars);
         if (!empty($this->config)) {
             $vars['config'] = $this->config;
         }

@@ -23,6 +23,9 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
+use \sowerphp\core\Network_Request as Request;
+use \sowerphp\core\Facade_Session_Message as SessionMessage;
+
 /**
  * Clase para el controlador asociado a la tabla grupo de la base de
  * datos
@@ -32,5 +35,128 @@ namespace sowerphp\app\Sistema\Usuarios;
  */
 class Controller_Grupos extends \sowerphp\autoload\Controller_Model
 {
+
+    /**
+     * Acción que permite enviar correos masivos a los usuarios de ciertos
+     * grupos de la aplicación.
+     */
+    public function email(Request $request)
+    {
+        $user = $request->user();
+        $page_title = config('app.name');
+        $grupos = database()
+            ->query()
+            ->from('grupo')
+            ->setMapClass(Model_Grupo::class)
+            ->orderBy('grupo', 'asc')
+            ->get()
+            ->map(function($grupo) {
+                return [$grupo->id, $grupo->grupo, $grupo->usuarios()->count()];
+            })
+            ->all()
+        ;
+        $this->set([
+            'grupos' => $grupos,
+            'page_title' => $page_title,
+        ]);
+        if (!empty($_POST)) {
+            if (
+                !isset($_POST['grupos'])
+                || empty($_POST['asunto'])
+                || empty($_POST['mensaje'])
+            ) {
+                SessionMessage::error(
+                    __('Debe completar todos los campos del formulario.')
+                );
+            } else {
+                $Grupos = new Model_Grupos();
+                $emails = $Grupos->emails($_POST['grupos']);
+                if(($key = array_search($user->email, $emails)) !== false) {
+                    unset($emails[$key]);
+                    sort($emails);
+                }
+                $n_emails = count($emails);
+                if (!$n_emails) {
+                    SessionMessage::error(
+                        __('No hay destinatarios para el correo electrónico con los grupos seleccionados.')
+                    );
+                } else {
+                    // preparar mensaje a enviar
+                    $msg = view()->render('Grupos/email_mensaje', [
+                        'mensaje' => $_POST['mensaje'],
+                        'n_emails' => $n_emails,
+                        'grupos' => $Grupos->getGlosas($_POST['grupos']),
+                        'de_nombre' => $user->nombre,
+                        'de_email' => $user->email,
+                    ]);
+                    // agrupar
+                    if ($_POST['agrupar']) {
+                        $grupo = -1;
+                        $destinatarios = [];
+                        for ($i=0; $i<$n_emails; $i++) {
+                            if ($i % $_POST['agrupar'] == 0) {
+                                $destinatarios[++$grupo] = [];
+                            }
+                            $destinatarios[$grupo][] = $emails[$i];
+                        }
+                    } else {
+                        $destinatarios = [$emails];
+                    }
+                    // enviar email
+                    $primero = true;
+                    foreach ($destinatarios as $correos) {
+                        $email = new \sowerphp\core\Network_Email();
+                        $email->from($user->email, $user->nombre);
+                        $email->replyTo($user->email, $user->nombre);
+                        if ($primero) {
+                            $email->to($user->email);
+                            $primero = false;
+                        }
+                        if ($_POST['enviar_como'] == 'cc') {
+                            $email->cc($correos);
+                        } else {
+                            $email->bcc($correos);
+                        }
+                        $email->subject('['.$page_title.'] '.$_POST['asunto']);
+                        // adjuntar archivos si se pasaron
+                        $n_adjuntos = !empty($_FILES['adjuntos']) ? count($_FILES['adjuntos']['name']) : 0;
+                        for ($i=0; $i<$n_adjuntos; $i++) {
+                            if (!$_FILES['adjuntos']['error'][$i]) {
+                                $email->attach([
+                                    'tmp_name' => $_FILES['adjuntos']['tmp_name'][$i],
+                                    'name' => $_FILES['adjuntos']['name'][$i],
+                                    'type' => $_FILES['adjuntos']['type'][$i],
+                                ]);
+                            }
+                        }
+                        // enviar archivo
+                        $status = $email->send($msg);
+                        if ($status!==true) {
+                            break;
+                        }
+                    }
+                    if ($status === true) {
+                        return redirect($request->getRequestUriDecoded())
+                            ->withSuccess(
+                                __('Mensaje envíado a %(num_emails)s usuarios.',
+                                    [
+                                        'num_emails' => num($n_emails)
+                                    ]
+                                )
+                            );
+                    } else {
+                        return redirect($request->getRequestUriDecoded())
+                            ->withError(
+                                __('Ha ocurrido un error al intentar enviar su mensaje, por favor intente nuevamente.<br /><em>%(status_message)s</em>',
+                                    [
+                                        'status_message' => $status['message']
+                                    ]
+                                )
+                            );
+                    }
+                }
+            }
+        }
+    }
 
 }

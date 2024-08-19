@@ -132,26 +132,26 @@ class Service_Model implements Interface_Service
      * de clases. Lo que permite "no ensuciar" la aplicación con alias que
      * pueden resultar confusos o generar problemas al no estar en formato FQCN.
      *
-     * @param string $id Identificador de la clase.
+     * @param string $modelId Identificador de la clase.
      * @return string Clase que se encontró para el identificador.
      */
-    protected function getModelClass(string $id): string
+    protected function getModelClass(string $modelId): string
     {
-        $key = 'models.alias.' . $id;
+        $key = 'models.alias.' . $modelId;
         $modelClass = $this->configService->get($key);
-        return $modelClass ?? $id;
+        return $modelClass ?? $modelId;
     }
 
     /**
      * Genera una clave única para el caché a partir del ID y PK del modelo.
      *
-     * @param string $id Identificador del modelo.
-     * @param array $pk Clave primaria del modelo.
+     * @param string $modelId Identificador del modelo.
+     * @param array $id Clave primaria del modelo.
      * @return string Clave única para el modelo (ID y PK).
      */
-    protected function getCacheKey(string $id, array $pk): string
+    protected function getCacheKey(string $modelId, array $id): string
     {
-        return $id . ':' . implode(':', $pk);
+        return $modelId . ':' . implode(':', $id);
     }
 
     /**

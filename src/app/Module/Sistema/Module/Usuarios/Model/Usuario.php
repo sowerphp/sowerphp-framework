@@ -158,6 +158,24 @@ class Model_Usuario extends Model implements Authenticatable
                 // Configuración de los campos.
             ],
         ],
+        'relations' => [
+            'grupos' => [
+                'relation' => Model_Grupo::class,
+                'belongs_to_many' => 'grupo',
+                'through' => 'usuario_grupo',
+                'through_fields' => [
+                    'usuario' => ['id' => 'usuario'],
+                    'grupo' => ['id' => 'grupo'],
+                ],
+                'pivot_fields' => [
+                    'primario',
+                ],
+                'models' => [
+                    'usuario' => Model_Usuario::class,
+                    'grupo' => Model_Grupo::class,
+                ],
+            ],
+        ],
     ];
 
     // atributos para caché
@@ -170,7 +188,7 @@ class Model_Usuario extends Model implements Authenticatable
      * @param array $id Clave primaria del modelo.
      * @return stdClass|null
      */
-    public function retrieve(array $id): ?stdClass
+    protected function retrieve(array $id, array $options = []): ?stdClass
     {
         $realId = $this->getPluralInstance()->getIdFromCredentials($id);
         if ($realId === null) {

@@ -51,7 +51,7 @@ class Controller_Afdes extends \sowerphp\autoload\Controller_Model
     {
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         // Si se envió el formulario se procesa.
-        if (isset($_POST['submit'])) {
+        if (!empty($_POST)) {
             $Afd = new Model_Afd();
             $Afd->codigo = $_POST['codigo'];
             $Afd->nombre = $_POST['nombre'];
@@ -100,7 +100,7 @@ class Controller_Afdes extends \sowerphp\autoload\Controller_Model
             ;
         }
         // Si no se ha enviado el formulario se mostrará.
-        if(!isset($_POST['submit'])) {
+        if (empty($_POST)) {
             // Renderizar vista.
             return $this->render('Afdes/crear_editar', [
                 'Afd' => $Afd,

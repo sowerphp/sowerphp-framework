@@ -27,6 +27,7 @@ use Illuminate\Contracts\Validation\Rule;
 
 class Data_Validation_Cl_Rut implements Rule
 {
+
     /**
      * Determina si el valor es un RUT válido.
      *

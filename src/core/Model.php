@@ -869,6 +869,57 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'list_group_by' => null,
         // Acciones que se pueden realizar desde el listado de registros.
         'actions' => null,
+        // Opciones de auditoría del modelo.
+        'audit' => [
+            // Campos para las auditorías.
+            // Se deben definir los nombres de los campos que guardarán el dato
+            // para la auditoría.
+            //
+            // Los campos son:
+            //
+            // - created: rastrea la creación del registro.
+            // - updated: rastrea la actualización del registro.
+            // - deleted: rastrea el borrado (soft-delete) del registro.
+            // - restored: rastrea la restauración de un registro borrado.
+            // - accessed: rastrea el acceso a un registro.
+            //
+            // Los valores para cada campo son:
+            //
+            // - at: fecha y hora del evento.
+            // - by: usuario que realizó la acción.
+            // - ip: dirección IP desde la que se realizó la acción.
+            // - rs: razón o motivo de la acción.
+            //
+            // Estos campos cubren la mayoría de los casos de auditoría y son
+            // manejados automáticamente por el modelo.
+            'fields' => [
+                // Auditoría para la creación del registro.
+                'created_at' => null,
+                'created_by' => null,
+                'created_ip' => null,
+                'created_rs' => null,
+                // Auditoría para la actualización del registro.
+                'updated_at' => null,
+                'updated_by' => null,
+                'updated_ip' => null,
+                'updated_rs' => null,
+                // Auditoría para el borrado (soft-delete) del registro.
+                'deleted_at' => null,
+                'deleted_by' => null,
+                'deleted_ip' => null,
+                'deleted_rs' => null,
+                // Auditoría para la restauración (!soft-delete) del registro.
+                'restored_at' => null,
+                'restored_by' => null,
+                'restored_ip' => null,
+                'restored_rs' => null,
+                // Auditoría para el acceso al registro.
+                'accessed_at' => null,
+                'accessed_by' => null,
+                'accessed_ip' => null,
+                'accessed_rs' => null,
+            ],
+        ],
     ];
 
     /**
@@ -895,18 +946,16 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'unique' => false,
         // Indica si el campo es la clave primaria de la tabla.
         'primary_key' => false,
-        // Modelo relacionado para llaves foráneas.
-        'foreign_key' => null,
-        // Tabla del campo relacionado en la llave foránea.
-        'to_table' => null,
-        // Campo relacionado en la llave foránea.
-        'to_field' => null,
+        // Indica que la llave foránea es virtual (no está materializada en la BD).
+        'virtual_fk' => null,
+        // Modelo relacionado con este campo.
+        'relation' => null,
+        // Campo relacionado en la llave foránea (string o array).
+        'related_field' => null,
+        // Tabla a la que el modelo actual pertenece.
+        'belongs_to' => null,
         // Filtros para limitar las opciones disponibles en relaciones.
         'limit_choices_to' => [],
-        // Modelo intermedio para relaciones ManyToMany.
-        'through' => null,
-        // Campos intermedios en relaciones ManyToMany.
-        'through_fields' => null,
         // Acción a realizar al eliminar la llave foránea.
         'on_delete' => self::PROTECT,
         // Permite valores nulos en la base de datos.
@@ -1343,6 +1392,36 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     ];
 
     /**
+     * Configuración por defecto de las relaciones.
+     *
+     * Esta configuración es para relaciones:
+     *
+     *   - has_many (OneToMany).
+     *   - belongs_to_many (ManyToMany).
+     *
+     * Las relaciones belongs_to (ManyToOne) se configuran en cada campo del
+     * modelo.
+     *
+     * @var array
+     */
+    protected $defaultRelationConfig = [
+        // Modelo relacionado con este campo.
+        'relation' => null,
+        // Tabla que pertenece al modelo actual.
+        'has_many' => null,
+        // Tabla de la relación en muchos a muchos.
+        'belongs_to_many' => null,
+        // Campo relacionado en la llave foránea (string o array).
+        'related_field' => null,
+        // Modelo intermedio para relaciones ManyToMany.
+        'through' => null,
+        // Campos intermedios en relaciones ManyToMany.
+        'through_fields' => null,
+        // Acción a realizar al eliminar la llave foránea.
+        'on_delete' => self::PROTECT,
+    ];
+
+    /**
      * Acciones disponibles para ser mostradas en el menú de cada registro en
      * la vista que lista los registros del modelo.
      *
@@ -1408,6 +1487,19 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @var \Illuminate\Config\Repository
      */
     protected $configurations;
+
+    /**
+     * Hash de los campos del modelo (atributos y configuraciones).
+     *
+     * Este atributo es un hash del último estado de los atributos y
+     * configuraciones en la base de datos. Volviendo a calcularlo con los
+     * atributos y configuraciones en cualquier momento se puede determinar si
+     * el modelo está "sucio" y debe ser almacenado en la base de datos para
+     * persistir su estado.
+     *
+     * @var string
+     */
+    protected $fieldsHash;
 
     /**
      * Los atributos que se pueden asignar masivamente.
@@ -1495,6 +1587,17 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($this->hasConfigurations()) {
             $this->getConfigAttribute();
         }
+        $this->fieldsHash = $this->calculateFieldsHash();
+    }
+
+    /**
+     * Calcula el hash de los campos del modelo (atributos y configuraciones).
+     *
+     * @return string
+     */
+    protected function calculateFieldsHash(): string
+    {
+        return hash('sha256', json_encode($this->attributes) . json_encode($this->configurations));
     }
 
     /**
@@ -1540,6 +1643,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         self::$columnsInfo = $this->getColumnsInfo(); // TODO: eliminar al refactorizar.
     }
 
+    /**
+     * Entrega los campos que deben tener valores únicos.
+     *
+     * @return array
+     */
     protected function getUniqueFields(): array
     {
         $fields = [];
@@ -1556,9 +1664,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * primaria u otras columnas que sean valores únicos si están disponibles.
      *
      * @param array $id Clave primaria del modelo.
+     * @param array $options Opciones adicionales para eliminar. Ejemplos:
+     *   - `audit` (bool): Si deben actualizarse las marcas de auditoría.
+     *   - `timestamps` (bool): Si debe actualizarse la marca de tiempo.
+     *     La marca de tiempo es: `created_at`, `updated_at`, `deleted_at`, etc.
      * @return stdClass|null
      */
-    protected function retrieve(array $id): ?stdClass
+    protected function retrieve(array $id, array $options = []): ?stdClass
     {
         if (empty($id)) {
             return null;
@@ -1576,9 +1688,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             return null;
         }
         try {
+            // Buscar registro en la base de datos.
             $result = $this->getPluralInstance()->retrieve($filters, true);
             $this->forceFill((array)$result);
-            $this->exists = true;
+            $this->setExists(true);
+
+            // Aplicar auditoría al registro.
+            $this->applyAudit('retrieve', $options);
         } catch (\Exception $e) {
             if ($e->getCode() != 404) {
                 throw $e;
@@ -1599,14 +1715,18 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function __toString(): string
     {
-        return __($this->meta['model.label'] . '('
-            . implode(', ', array_map(function ($pk) {
-                return '%(' . $pk . ')s'; },
-                $this->getPrimaryKey()
-            ))
-            . ')',
-            $this->getPrimaryKeyValues()
-        );
+        try {
+            return __($this->meta['model.label'] . '('
+                . implode(', ', array_map(function ($pk) {
+                    return '%(' . $pk . ')s'; },
+                    $this->getPrimaryKey()
+                ))
+                . ')',
+                $this->getPrimaryKeyValues()
+            );
+        } catch (\Exception $e) {
+            return __($this->meta['model.label'] . '()');
+        }
     }
 
     /**
@@ -1656,7 +1776,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public function __unserialize(array $data): void
     {
         foreach ($data as $attribute => $value) {
-            $this->$attribute = $value;
+            $this->$attribute = $value; // Asigna atributos reales.
         }
         $this->bootstrap();
     }
@@ -1706,8 +1826,52 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $fields[] = $field;
             }
         }
-        // Se entregan los campos a serializar con sus valores.
-        return $this->toArray($fields);
+        // Se obtienen los campos a serializar con sus valores.
+        $data = $this->toArray($fields);
+        // Obtener configuraciones que se deben serializar.
+        if ($this->hasConfigurations()) {
+            $configurations = [];
+            foreach ($this->meta['configurations.fields'] as $field => $config) {
+                $serializable = $config['serializable'] ?? false;
+                if ($serializable) {
+                    $configurations[$field] = $this->getConfiguration('config_' . $field);
+                }
+            }
+            if ($configurations) {
+                $data['configurations'] = $configurations;
+            }
+        }
+        // Entregar los datos que se serializarán.
+        return $data;
+    }
+
+    /**
+     * Indica si el atributo está o no asignado.
+     *
+     * Este método permite validar si están asignados:
+     *
+     *   - Atributos del modelo.
+     *   - Configuraciones del modelo (opciones extendidas en otra tabla).
+     *
+     * @param string $key El nombre del atributo.
+     * @return boolean `true` si el atributo está asignado, `false` si no.
+     */
+    public function __isset(string $key): bool
+    {
+        // Se solicita una opción de la configuración del modelo.
+        if ($this->isConfigurationField($key)) {
+            // Verificar si existe el índice.
+            $idx = $this->getConfigurationKey($key);
+            if (!$this->config->has($idx)) {
+                return false;
+            }
+            // Si el índice existe se debe validar que no sea null.
+            return $this->getConfiguration($key) !== null;
+        }
+        // Se solicita, probablemente, un atributo del modelo.
+        else {
+            return isset($this->attributes[$key]);
+        }
     }
 
     /**
@@ -1756,9 +1920,25 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Desasigna el valor de un atributo utilizando la sobrecarga de propiedades.
+     *
+     * Este método permite desasignar valores de:
+     *
+     *   - Atributos del modelo.
+     *   - Configuraciones del modelo (opciones extendidas en otra tabla).
+     *
+     * @param string $key El nombre del atributo.
+     * @return void
+     */
+    public function __unset(string $key): void
+    {
+        $this->__set($key, null);
+    }
+
+    /**
      * Entrega el label de un atributo del modelo.
      *
-     * @param string $attribute Atributo del objeto que generará el label.
+     * @param string $attribute Atributo del campo que generará el label.
      * @return string Label del atributo (desde configuración o generado).
      */
     protected function getAttributeLabel(string $attribute): string
@@ -1788,10 +1968,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             return $this->$accessor();
         }
         // Obtener el valor desde el arreglo de atributos del modelo.
-        $value = $this->attributes[$key]
-            ?? $this->getMeta()['fields.' . $key . '.default']
-            ?? null
-        ;
+        $value = $this->attributes[$key] ?? $this->getDefaultValue($key);
         // Realizar casteo si corresponde.
         if ($this->hasCast($key)) {
             return $this->castForGet($key, $value);
@@ -1999,13 +2176,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function offsetExists($offset): bool
     {
-        if ($this->isConfigurationField($offset)) {
-            $key = $this->getConfigurationKey($offset);
-            return isset($this->config[$offset]);
-            return $this->getConfiguration($offset) !== null;
-        } else {
-            return isset($this->attributes[$offset]);
-        }
+        return $this->__isset($offset);
     }
 
     /**
@@ -2017,11 +2188,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function offsetUnset($offset): void
     {
-        if ($this->isConfigurationField($offset)) {
-            $this->setConfiguration($offset, null);
-        } else {
-            $this->setAttribute($offset, null);
-        }
+        $this->__unset($offset);
     }
 
     /**
@@ -2057,6 +2224,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                     $key
                 ), 422);
             }
+        }
+        if ($this->isDirty()) {
+            $this->setExists(null);
         }
         return $this;
     }
@@ -2121,11 +2291,20 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public function forceFill(array $attributes): self
     {
         foreach ($attributes as $key => $value) {
-            if ($this->isConfigurationField($key)) {
+            if (strpos($key, '__pivot_') === 0) {
+                if (!$this->__isset('pivot')) {
+                    $this->pivot = new \stdClass();
+                }
+                $pivotAttribute = substr($key, 8);
+                $this->pivot->$pivotAttribute = $value;
+            } else if ($this->isConfigurationField($key)) {
                 $this->setConfiguration($key, $value);
             } else {
                 $this->setAttribute($key, $value);
             }
+        }
+        if ($this->isDirty()) {
+            $this->setExists(null);
         }
         return $this;
     }
@@ -2150,19 +2329,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if (!isset($attribute)) {
             return null;
         }
-        // Si no es relación (llave foránea), se entrega el atributo.
-        if (!isset($config['foreign_key'])) {
+        // Si no es relación (ej: llave foránea), se entrega el atributo.
+        if (!isset($config['relation'])) {
             return $attribute;
         }
         // Es una relación por lo que se obtiene el objeto asociado.
-        try {
-            return model()->instantiate(
-                $config['foreign_key'],
-                $this->attributes[$key] ?? null
-            );
-        } catch (\Exception $e) {
-            return null;
-        }
+        return $this->getRelation($key);
     }
 
     /**
@@ -2226,6 +2398,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         if (!($this->meta instanceof Repository)) {
             $meta = $this->normalizeMeta($meta);
+            $extra = $this->extraMeta($meta);
+            $meta = \sowerphp\core\Utility_Array::mergeRecursiveDistinct(
+                $meta, $extra
+            );
             $this->meta = new Repository($meta);
         }
         return $this->meta;
@@ -2334,7 +2510,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $config['blank'] = false;
                 $config['sanitize'] = array_merge(
                     $config['sanitize'] ?? [],
-                    ['urlencode']
+                    ['for_id', 'urlencode']
                 );
             }
             // Revisión final de campos.
@@ -2353,8 +2529,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $config['sanitize'][] = 'substr:' . (int)$config['max_length'];
             }
             // Si es llave foránea se corrigen atributos.
-            if ($config['foreign_key']) {
-                $config['input_type'] = self::INPUT_SELECT;
+            if ($config['relation']) {
+                if ($config['belongs_to']) {
+                    $config['input_type'] = self::INPUT_SELECT;
+                }
             }
             // Corregir asignación de campos que pueden variar entre la
             // operación "create" y "edit".
@@ -2438,7 +2616,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             !isset($meta['model']['choices']['id'])
             || !isset($meta['model']['choices']['name']))
         {
-            $keys = array_keys($meta['fields']);
+            $keys = array_keys(array_filter($meta['fields'], function($field) {
+                return $field['db_column'];
+            }));
             $meta['model']['choices']['id'] =
                 $meta['model']['choices']['id']
                 ?? $keys[0]
@@ -2452,6 +2632,21 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
         // Entregar metadatos normalizados.
         return $meta;
+    }
+
+    /**
+     * Entrega una configuración extra para los metadatos del modelo.
+     *
+     * Este método se debe sobreescribir en el modelo que quiera entregar un
+     * arreglo meta complementario al principal del modelo. Útil en herencias
+     * de herencias de este modelo base.
+     *
+     * @param array $meta Arreglo con los metadatos normalizados.
+     * @return array Arreglo con los metadatos adicionales o modificados.
+     */
+    protected function extraMeta(array $meta): array
+    {
+        return [];
     }
 
     /**
@@ -2498,12 +2693,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public function getPrimaryKeyValues(array $id = []): array
     {
         $fields = $this->getPrimaryKey();
-        $values = $this->toArray($fields, $id);
+        $values = $this->toArray($fields, $id, false);
         foreach ($values as $key => $value) {
             if ($value === null) {
                 throw new \Exception(__(
-                    'El campo %s debe tener un valor asignado para construir la llave primaria (PK).',
-                    $key
+                    'El campo %s (%s) del modelo %s debe tener un valor asignado para construir la llave primaria (PK).',
+                    $this->getMeta()['fields.' . $key . '.verbose_name'],
+                    $key,
+                    $this->getMeta()['model.label']
                 ));
             }
         }
@@ -2555,6 +2752,49 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
         // Obtener el valor desde una PK compuesta.
         return implode('/', $this->toArray($meta['model.primary_key'], [], false));
+    }
+
+    /**
+     * Entrega el valor por defecto de un atributo o configuración.
+     *
+     * @param string $attribute Atributo del campo que se desea su valor por
+     * defecto.
+     * @return mixed
+     */
+    protected function getDefaultValue(string $attribute)
+    {
+        // Se solicita una opción de la configuración del modelo.
+        if ($this->isConfigurationField($attribute)) {
+            $name = $this->getConfigurationName($attribute);
+            $config = $this->meta['configurations.fields.' . $name];
+        }
+        // Se solicita, probablemente, un atributo del modelo.
+        else {
+            $config = $this->getMeta()['fields.' . $attribute];
+        }
+        // Obtener valor por defecto de la configuración del atributo si existe.
+        $default = $config['default'] ?? null;
+        if ($default === null) {
+            return null;
+        }
+        $type = $config['type'] ?? null;
+        // Revisar si el valor por defecto es una expresión que se deba
+        // procesar (calcular) para obtener el valor por defecto real.
+        // NOTE: este método solo para valores que no dependan de otros
+        // registros, por ejemplo, no sirve para determinar autoincrementales.
+        if (is_callable($default)) {
+            return $default($this);
+        }
+        if ($default == '__NOW__') {
+            if ($type == self::TYPE_DATE_TIME) {
+                return date('Y-m-d H:i:s');
+            }
+            if ($type == self::TYPE_DATE) {
+                return date('Y-m-d');
+            }
+        }
+        // Entregar el valor por defecto original de los metadados.
+        return $default;
     }
 
     /**
@@ -2647,7 +2887,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $config['value'] = $this->getAttribute($field);
             if (!isset($config['initial_value'])) {
                 $config['initial_value'] = $config['value']
-                    ?? $config['default']
+                    ?? $this->getDefaultValue($field)
                 ;
             }
         }
@@ -2672,7 +2912,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 ;
             }
         }
-        $data['relations'] = $this->getRelations();
+        $data['relations_choices'] = $this->getRelationsChoices();
         return $data;
     }
 
@@ -2787,18 +3027,18 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @return array
      */
-    protected function getRelations(): array
+    protected function getRelationsChoices(): array
     {
         $relations = [];
         foreach ($this->meta['fields'] as $field => $config) {
-            if (!isset($config['foreign_key'])) {
+            if (!isset($config['relation'])) {
                 continue;
             }
-            $foreignKeyInstance = model()->instantiate($config['foreign_key']);
+            $foreignKeyInstance = model()->instantiate($config['relation']);
             if (!isset($foreignKeyInstance)) {
                 continue;
             }
-            $relations[$config['foreign_key']] = [
+            $relations[$config['relation']] = [
                 'choices_fields' => $foreignKeyInstance->getMeta()['model.choices'],
                 'choices' => $foreignKeyInstance
                     ->getPluralInstance()
@@ -2820,6 +3060,105 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Entrega las columnas de la tabla en la base de datos con sus valores.
+     *
+     * Mapea los atributos del modelo a las columans de la base de datos con su
+     * valor actual. Solo entrega atributos del modelo que existan como
+     * columnas en la base de datos.
+     *
+     * @return array
+     */
+    protected function getDatabaseColumns(): array
+    {
+        $fields = $this->getMeta()['fields'];
+        $columns = array_filter(
+            $this->attributes,
+            function ($key) use ($fields) {
+                // Solo se asigna el atributo si existe como columna en la base
+                // de datos.
+                return isset($fields[$key]) && ($fields[$key]['db_column'] ?? null);
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+        return $columns;
+    }
+
+    /**
+     * Aplica la auditoría al registro del modelo en la base de datos.
+     *
+     * @param string $action Acción que se está realizando y se debe auditar.
+     * @param array $options Opciones adicionales para eliminar. Ejemplos:
+     *   - `audit` (bool): Si deben actualizarse las marcas de auditoría.
+     *   - `timestamps` (bool): Si debe actualizarse la marca de tiempo.
+     *     La marca de tiempo es: `created_at`, `updated_at`, `deleted_at`, etc.
+     * @return void
+     */
+    protected function applyAudit(string $action, array $options): void
+    {
+
+        // Verificar si deben asignarse las marcas de tiempo.
+        if ($options['timestamps'] ?? true) {
+            $this->updateTimestamps($action);
+        }
+
+        // TODO: implementar otras columans de auditoría.
+    }
+
+    /**
+     * Actualiza las marcas de tiempo del modelo.
+     *
+     * @param string $action Acción para la que se actualizará el timestamp.
+     * @return void
+     */
+    protected function updateTimestamps(string $action): void
+    {
+        // Determinar columna que se debe actualizar el timestamp.
+        $column = null;
+        if ($action == 'insert') {
+            $column = $this->getMeta()['model.audit.fields.created_at'];
+        } else if ($action == 'update') {
+            if ($this->isDirty()) {
+                $column = $this->getMeta()['model.audit.fields.updated_at'];
+            }
+        } else if ($action == 'soft-delete') {
+            $column = $this->getMeta()['model.audit.fields.deleted_at'];
+        } else if ($action == 'restore') {
+            $column = $this->getMeta()['model.audit.fields.restored_at'];
+        } else if ($action == 'retrieve') {
+            $column = $this->getMeta()['model.audit.fields.accessed_at'];
+        }
+
+        // Realizar la actualización de la columna si se encontró una asociada
+        // a la acción.
+        if ($column !== null) {
+            $this->$column = date('Y-m-d H:i:s');
+        }
+    }
+
+    /**
+     * Asignar si el registro existe o no.
+     *
+     * Es útil cuando se usa en conjunto con forceFill() desde fuera del modelo
+     * para asignar el resultado de una consulta a la base de datos que se sabe
+     * que existe.
+     *
+     * @param boolean|null $exists `true` existe en la base de datos, `false`
+     * no existe en la base de datos y `null` no se sabe si existe y se debe
+     * determinar al llamar a exists().
+     * @return self
+     */
+    public function setExists(?bool $exists = true): self
+    {
+        $this->exists = $exists;
+        if ($this->exists === true) {
+            $this->fieldsHash = $this->calculateFieldsHash();
+        } else if ($this->exists === false) {
+            $this->fieldsHash = null;
+        }
+        return $this;
+    }
+
+    /**
      * Verifica si el modelo existe en la base de datos.
      *
      * @return bool Verdadero si el modelo existe, falso en caso contrario.
@@ -2831,9 +3170,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // `false`. Se deja por si algún modelo sobrescribe $exists y lo deja
         // sin definir o `null`.
         if (!isset($this->exists)) {
-            $primaryKeyValues = $this->getPrimaryKeyValues();
-            $query = $this->newQuery();
-            $this->exists = $query->where($primaryKeyValues)->exists();
+            try {
+                $primaryKeyValues = $this->getPrimaryKeyValues();
+                $query = $this->newQuery();
+                $exists = $query->where($primaryKeyValues)->exists();
+                $this->setExists($exists);
+            } catch (\Exception $e) {
+                $this->setExists(false);
+            }
         }
         // Entregar el resultado que indica si el registro existe o no en la BD.
         return $this->exists;
@@ -2843,6 +3187,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Guarda el modelo en la base de datos.
      *
      * @param array $options Opciones adicionales para guardar. Ejemplos:
+     *   - `audit` (bool): Si deben actualizarse las marcas de auditoría.
      *   - `timestamps` (bool): Si deben actualizarse las marcas de tiempo.
      *     Las marcas de tiempo son: `created_at`, `updated_at`.
      *   - `event` (bool): Indica si deben dispararse eventos del modelo.
@@ -2875,7 +3220,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         // Marcar el registro como existente.
-        $this->exists = true;
+        $this->setExists(true);
 
         // Verificar si se debe volver a cargar el registro recién guardado
         // para actualizar los atributos de la instancia.
@@ -2899,6 +3244,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             }
         }
 
+        // Recalcular el hash de los campos para reflejar su nuevo estado.
+        $this->fieldsHash = $this->calculateFieldsHash();
+
         // Realizar commit y retornar que el guardado pudo ser realizado.
         $this->getDatabaseConnection()->commit();
         return true;
@@ -2909,6 +3257,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @param array $attributes Atributos a actualizar.
      * @param array $options Opciones adicionales para actualizar. Ejemplos:
+     *   - `audit` (bool): Si deben actualizarse las marcas de auditoría.
      *   - `timestamps` (bool): Si debe actualizarse la marca de tiempo.
      *     La marca de tiempo es: `updated_at`.
      *   - `event` (bool): Indica si deben dispararse eventos del modelo.
@@ -2926,6 +3275,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Elimina el modelo de la base de datos.
      *
      * @param array $options Opciones adicionales para eliminar. Ejemplos:
+     *   - `audit` (bool): Si deben actualizarse las marcas de auditoría.
+     *   - `timestamps` (bool): Si debe actualizarse la marca de tiempo.
+     *     La marca de tiempo es: `deleted_at` (para soft-delete).
      *   - `force` (bool): Forzar eliminación sin aplicar soft deletes.
      *   - `event` (bool): Indica si deben dispararse eventos del modelo.
      *     Eventos como: `deleting` y `deleted`.
@@ -2976,7 +3328,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Si el registro fue eliminado disparar eventos y retornar.
         if ($deleted > 0) {
             // Marcar el registro como eliminado.
-            $this->exists = false;
+            $this->setExists(false);
 
             // Verificar si deben dispararse los eventos.
             if ($options['event'] ?? true) {
@@ -2996,6 +3348,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Ejecuta el soft delete en el modelo.
      *
      * @param array $options Opciones adicionales para eliminar. Ejemplos:
+     *   - `audit` (bool): Si deben actualizarse las marcas de auditoría.
+     *   - `timestamps` (bool): Si debe actualizarse la marca de tiempo.
+     *     La marca de tiempo es: `deleted_at` (para soft-delete).
      *   - `event` (bool): Indica si deben dispararse eventos del modelo.
      *     Eventos como: `deleting` y `deleted`.
      *     `true` para disparar, `false` para no.
@@ -3003,29 +3358,40 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     protected function runSoftDelete(array $options): bool
     {
-        // TODO: implementar.
-        throw new \Exception(__('Soft delete no está implementado.'));
+        // Verificar si es posible hacer un soft delete.
+        $deleted_at = $this->getMeta()['model.audit.fields.deleted_at'];
+        if ($deleted_at === null) {
+            throw new \Exception(__(
+                'Soft delete no está implementado en el modelo %s.',
+                $this->getMeta()['model.label']
+            ));
+        }
+
+        // Aplicar auditoría al registro.
+        // Esto incluye realizar el soft-delete, a menos que se haya pedido no
+        // actualizar los timestamps lo que sería un error de programación.
+        $this->applyAudit('soft-delete', $options);
+
+        // Guardar cambios.
+        return $this->save();
     }
 
     /**
      * Determina si el modelo o alguno de sus atributos ha cambiado.
      *
-     * @param string|array|null $attributes Atributo(s) específico(s) a
-     * comprobar, o nulo para comprobar todos.
      * @return bool Verdadero si algún atributo ha cambiado, falso en caso
      * contrario.
      */
-    protected function isDirty($attributes = null): bool
+    protected function isDirty(): bool
     {
-        // TODO: Implementar. Por ahora se deja una validación muy simple.
-        // Se asumen siempre modificados si están en el arreglo de atributos.
-        return !empty($this->attributes);
+        return $this->calculateFieldsHash() !== $this->fieldsHash;
     }
 
     /**
      * Realiza la inserción del modelo en la base de datos.
      *
      * @param array $options Opciones adicionales para insertar. Ejemplos:
+     *   - `audit` (bool): Si deben actualizarse las marcas de auditoría.
      *   - `timestamps` (bool): Si debe asignarse la marca de tiempo.
      *     La marca de tiempo es: `created_at`.
      *   - `event` (bool): Indica si deben dispararse eventos del modelo.
@@ -3044,19 +3410,17 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             }
         }
 
-        // Verificar si deben asignarse las marcas de tiempo.
-        if ($options['timestamps'] ?? true) {
-            $this->updateTimestamps();
-        }
+        // Aplicar auditoría al registro.
+        $this->applyAudit('insert', $options);
 
         // Realizar la inserción del registro en la base de datos.
         $query = $this->newQuery();
-        $inserted = $query->insert($this->attributes);
+        $inserted = $query->insert($this->getDatabaseColumns());
 
         // Si el registro fue insertado disparar eventos y retornar.
         if ($inserted) {
             // Marcar el registro como existente.
-            $this->exists = true;
+            $this->setExists(true);
 
             // Verificar si deben dispararse los eventos.
             if ($options['event'] ?? true) {
@@ -3076,6 +3440,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Realiza la actualización del modelo en la base de datos.
      *
      * @param array $options Opciones adicionales para actualizar. Ejemplos:
+     *   - `audit` (bool): Si deben actualizarse las marcas de auditoría.
      *   - `timestamps` (bool): Si debe actualizarse la marca de tiempo.
      *     La marca de tiempo es: `updated_at`.
      *   - `event` (bool): Indica si deben dispararse eventos del modelo.
@@ -3094,15 +3459,15 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             }
         }
 
-        // Verificar si deben actualizarse las marcas de tiempo.
-        if ($options['timestamps'] ?? true) {
-            $this->updateTimestamps();
-        }
+        // Aplicar auditoría al registro.
+        $this->applyAudit('update', $options);
 
         // Realizar actualización de los atributos en la base de datos.
         $primaryKeyValues = $this->getPrimaryKeyValues();
         $query = $this->newQuery();
-        $updated = $query->where($primaryKeyValues)->update($this->attributes);
+        $updated = $query->where($primaryKeyValues)->update(
+            $this->getDatabaseColumns()
+        );
 
         // Si se logró actualizar revisar eventos y retornar.
         if ($updated > 0) {
@@ -3140,62 +3505,212 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Actualiza las marcas de tiempo del modelo.
+     * Entrega la relación asociada a un campo.
+     *
+     * @param string $field Campo para el cual se obtendrá la relación.
+     * @return Model|array|null
      */
-    protected function updateTimestamps(): void
+    protected function getRelation(string $field, ?array $config = [])
     {
-        // TODO: implementar, lo ideal sería usar en vez de este método algo
-        // como updateAudit() y que se actualicen timestamps y otras cosas.
-        // Además, por defecto el modelo podría tener la config 'audit' donde
-        // se indicen los nombres de las columnas, porque en algunos modelos
-        // pueden no ser las estándares 'created_at' y 'updated_at'. Y se
-        // podrían agregar otras como 'created_by' y 'updated_by'.
+        // Obtener configuración de la relación si no fue pasada.
+        if (empty($config)) {
+            $config = $this->meta['fields.' . $field];
+        }
+        $class = $config['relation'] ?? null;
+        if (empty($class)) {
+            return null;
+        }
+
+        // Es una relación "pertenece a" (belongs to) o "tiene muchos" (has many).
+        if (!empty($config['belongs_to']) || !empty($config['has_many'])) {
+            // Para ambas relaciones se requiere 'related_field'.
+            if (empty($config['related_field'])) {
+                return null;
+            }
+            $related_field = is_array($config['related_field'])
+                ? $config['related_field']
+                : [$field => $config['related_field']]
+            ;
+
+            // Es una relación "pertenece a" (belongs to).
+            if (!empty($config['belongs_to'])) {
+                return $this->belongsTo($class, $related_field);
+            }
+
+            // Es una relación "tiene muchos" (has many).
+            return $this->hasMany($class, $related_field);
+        }
+
+        // Es una relación "pertenece a muchos" (belongs to many).
+        if (!empty($config['belongs_to_many'])) {
+            $through = $config['through'] ?? null;
+            $through_fields = $config['through_fields'] ?? null;
+            if ($through !== null && $through_fields !== null) {
+                return $this->belongsToMany(
+                    $class,
+                    $through,
+                    $through_fields,
+                    $config['pivot_fields'] ?? [],
+                    $config['models'] ?? []
+                );
+            }
+        }
     }
 
     /**
      * Define una relación "pertenece a" (belongs to) con otro modelo.
      *
+     * Anotación: @ORM\ManyToOne
+     *
      * @param string $class El nombre de la clase del modelo relacionado.
+     * @param array $related_field Campo relacionado. En el índice el atributo
+     * de este modelo y en el valor el atributo del modelo relacionado, permite
+     * llaves foráneas (FK) compuestas.
      * @return Model|null El modelo relacionado o null si no se encuentra.
      */
-    protected function belongsTo(string $class): ?Model
+    protected function belongsTo(string $class, array $related_field): ?Model
     {
-        // TODO: Implementar lógica para recuperar la relación "pertenece a"
-        // (belongs to). Aquí se deberá buscar el modelo relacionado usando la
-        // clave foránea almacenada en el modelo actual y devolver la instancia
-        // del modelo relacionado.
-        return null;
+        $aux = $this->toArray(array_keys($related_field), [], false);
+        $fields = array_combine(array_values($related_field), array_values($aux));
+        foreach ($fields as $field => $value) {
+            if ($value === null) {
+                return null;
+            }
+        }
+        $relation = call_user_func_array(
+            [model(), 'instantiate'],
+            array_merge([$class], array_values($fields))
+        );
+        return $relation->exists() ? $relation : null;
     }
 
     /**
      * Define una relación "tiene muchos" (has many) con otro modelo.
      *
+     * Entrega una instancia del QueryBuilder con los filtros ya asignados para
+     * obtener los registros de la relación.
+     *
+     * Anotación: @ORM\OneToMany
+     *
      * @param string $class El nombre de la clase del modelo relacionado.
-     * @return array Una lista de instancias del modelo relacionado.
+     * @param array $related_field Campo relacionado. En el índice el atributo
+     * de este modelo y en el valor el atributo del modelo relacionado, permite
+     * llaves foráneas (FK) compuestas.
+     * @return QueryBuilder Constructor de consultas a la base de datos.
      */
-    protected function hasMany(string $class): array
+    protected function hasMany(string $class, array $related_field): QueryBuilder
     {
-        // TODO: Implementar lógica para recuperar la relación "tiene muchos"
-        // (has many). Aquí se deberá buscar todas las instancias del modelo
-        // relacionado que tienen una clave foránea apuntando al modelo actual
-        // y devolver una lista de instancias de esos modelos relacionados.
-        return [];
+        // Obtener instancia, metadatos, tabla y campos para filtrar en la
+        // tabla relacionada.
+        $instance = new $class();
+        $meta = $instance->getMeta();
+        $table = $meta['model.db_table'];
+        $aux = $this->toArray(array_keys($related_field), [], false);
+        $fields = array_combine(array_values($related_field), array_values($aux));
+
+        // Obtener query, asignar tabla, aplicar filtros y asignar modelo.
+        $query = $this->getDatabaseConnection()
+            ->query()
+            ->from($table)
+            ->where($fields)
+            ->setMapClass($class)
+        ;
+
+        // Aplicar ordenamiento si está especificado.
+        if (!empty($meta['model.ordering'])) {
+            foreach ($meta['model.ordering'] as $order_by) {
+                $column = $order_by[0] != '-' ? $order_by : substr($order_by, 1);
+                $order = $order_by[0] != '-' ? 'asc' : 'desc';
+                $query->orderBy($column, $order);
+            }
+        }
+
+        // Entregar el QueryBuilder.
+        return $query;
     }
 
     /**
      * Define una relación "pertenece a muchos" (belongs to many) con otro modelo.
      *
+     * Anotación: @ORM\ManyToMany
+     *
      * @param string $class El nombre de la clase del modelo relacionado.
-     * @return array Una lista de instancias del modelo relacionado.
+     * @param string $through
+     * @param array $through_fields
+     * @param array $pivot_fields
+     * @param array $models
+     * @return QueryBuilder Constructor de consultas a la base de datos.
      */
-    protected function belongsToMany(string $class): array
+    protected function belongsToMany(
+        string $class,
+        string $through,
+        array $through_fields,
+        array $pivot_fields = [],
+        array $models = []
+    ): QueryBuilder
     {
-        // TODO: Implementar lógica para recuperar la relación "pertenece a
-        // muchos" (belongs to many). Aquí se deberá buscar todas las
-        // instancias del modelo relacionado que están asociadas al modelo
-        // actual a través de una tabla intermedia y devolver una lista de
-        // instancias de esos modelos relacionados.
-        return [];
+        // Obtener la tabla del modelo final.
+        $instance = new $class();
+        $related_table = $instance->getMeta()['model.db_table'];
+
+        // Obtener la tabla del modelo actual.
+        $local_table = $this->getMeta()['model.db_table'];
+
+        // Iniciar la consulta en la tabla intermedia.
+        $query = $this->getDatabaseConnection()->query()->from($through);
+
+        // Asignar clase para mapear los resultados.
+        $query->setMapClass($class);
+
+        // Aplicar todos los joins basados en las relaciones definidas en los
+        // metadatos.
+        foreach ($through_fields as $table => $fields) {
+            // Determinar si la relación es con el modelo actual.
+            if ($table === $local_table) {
+                $source_table = $local_table;
+                $target_table = $through;
+            }
+            // La relación es con el modelo final.
+            else if ($table === $related_table) {
+                $source_table = $related_table;
+                $target_table = $through;
+            }
+            // Si el modelo no coincide con el actual o el final, es una
+            // relación intermedia.
+            else {
+                $table_class = $models[$table] ?? ucfirst(Str::camel($table));
+                $intermediate_instance = new $table_class();
+                $source_table = $intermediate_instance->getMeta()['model.db_table'];
+                $target_table = $through;
+            }
+
+            // Hacer el join utilizando las claves definidas en los metadatos.
+            foreach ($fields as $source_field => $target_field) {
+                $query->join(
+                    $source_table,
+                    "$target_table.$target_field",
+                    '=',
+                    "$source_table.$source_field"
+                );
+            }
+        }
+
+        // Filtrar por la clave primaria del modelo actual.
+        foreach ($through_fields[$this->getMeta()['model.db_table']] as $local_key => $through_key) {
+            $query->where("$through.$through_key", $this->$local_key);
+        }
+
+        // Seleccionar los campos del modelo final y de la tabla intermedia con prefijo.
+        $prefixedPivotColumns = [];
+        foreach ($pivot_fields as $column) {
+            $prefixedPivotColumns[] = "$through.$column as __pivot_$column";
+        }
+
+        // Añadir los campos que se seleccionarán (modelo final e intermedio).
+        $query->select(array_merge(["$related_table.*"], $prefixedPivotColumns));
+
+        // Entregar el QueryBuilder.
+        return $query;
     }
 
     /**
@@ -3204,9 +3719,6 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Específicamente procesa las llamadas a los "accessors" que permiten
      * obtener relaciones. También entrega escalares, pero, principalmente, es
      * útil para las relaciones.
-     *
-     * NOTE: Debería ser reemplazado al implementar y usar correctamente:
-     * belongsTo(), hasMany() y belongsToMany().
      */
     public function __call(string $method, $args)
     {
@@ -3214,9 +3726,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $pattern = '/^get([A-Z][a-zA-Z]*)Field$/';
         if (preg_match($pattern, $method, $matches)) {
             $field = Str::snake($matches[1]);
-            if (isset($this->meta['fields.' . $field])) {
-                return $this->getField($field);
+            if (!isset($this->meta['fields.' . $field])) {
+                throw new \Exception(__(
+                    'Método %s::%s() no existe.',
+                    get_class($this),
+                    $method
+                ));
             }
+            return $this->getField($field);
         }
         // Si es un "accessor" getXyz() se procesa como getXyzField().
         // NOTE: esto debería ser temporal ya que la opción sin "Field" está
@@ -3225,6 +3742,17 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $pattern = '/^get([A-Z][a-zA-Z]*)$/';
         if (preg_match($pattern, $method, $matches)) {
             return $this->__call($method . 'Field', $args);
+        }
+        // Si es un "accessor" xyz(), puede ser de un campo que tiene una
+        // relación o directamente de una relación, se procesa con getRelation().
+        foreach (['fields', 'relations'] as $section) {
+            $config = $this->getMeta()[$section . '.' . $method];
+            if ($config['relation'] ?? null) {
+                return call_user_func_array(
+                    [$this, 'getRelation'],
+                    array_merge([$method, $config], $args)
+                );
+            }
         }
         // Si el método no existe se genera una excepción.
         throw new \Exception(__(
@@ -3279,7 +3807,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $modelDbTable = $this->getMeta()['model.db_table'];
         $configModelDefaultMeta = [
             'db_table' => $modelDbTable . '_config',
-            'foreign_key' => [
+            'relation' => [
                 $modelDbTable => 'id',
             ],
             'fields' => [
@@ -3311,7 +3839,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Armar la información para la query, incluye la FK y sus valores.
         $data = [
             'db_table' => $meta['db_table'],
-            'foreign_key' => [],
+            'relation' => [],
             'fields' => [
                 'category' => $meta['fields']['category'],
                 'key' => $meta['fields']['key'],
@@ -3391,6 +3919,18 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     protected function saveConfigurations(): bool
     {
+        // Asignar configuraciones por defecto.
+        foreach ($this->meta['configurations.fields'] as $field => $config) {
+            if ($this->getDefaultValue($field)) {
+                $key = $this->getConfigurationKey('config_' . $field);
+                if ($this->configurations[$key] === null) {
+                    $this->setConfiguration(
+                        'config_' . $field,
+                        $this->getDefaultValue($field)
+                    );
+                }
+            }
+        }
         // Si no hay configuraciones asignadas se retorna OK, ya que no fue
         // necesario guardar.
         if (empty($this->configurations)) {
@@ -3465,7 +4005,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Entrega el nombre de la configuración a partir del nombre completo del
      * atributo del objeto.
      *
-     * @param string $attribute Atributo del objeto que generará el nombre.
+     * @param string $attribute Atributo del campo que generará el nombre.
      * @return string El nombre de la configuración (atributo sin prefijo).
      */
     protected function getConfigurationName(string $attribute): string
@@ -3499,7 +4039,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * que se recomienda migrar las configuraciones al formato nuevo con "__" y
      * se debe considerar el formato con "_" obsoleto.
      *
-     * @param string $attribute Atributo del objeto que generará la llave.
+     * @param string $attribute Atributo del campo que generará la llave.
      * @return string Llave de la configuración en el repositorio.
      */
     protected function getConfigurationKey(string $attribute): string
@@ -3516,7 +4056,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Entrega el label de un campo de configuración.
      *
-     * @param string $attribute Atributo del objeto que generará el label.
+     * @param string $attribute Atributo del campo que generará el label.
      * @return string Label del atributo (desde configuración o generado).
      */
     protected function getConfigurationLabel(string $attribute): string
@@ -3539,7 +4079,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      *   - `config_`.
      *
-     * @param string $attribute Atributo del objeto que se desea obtener.
+     * @param string $attribute Atributo del campo que se desea obtener.
      * @return mixed|null El valor de la configuración o null si no existe.
      */
     protected function getConfiguration(string $attribute)
@@ -3553,7 +4093,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Determinar llave y obtener el valor de la configuración desde el
         // repositorio, si existe.
         $key = $this->getConfigurationKey($attribute);
-        $value = $this->config[$key];
+        $value = $this->config->get($key) ?? $this->getDefaultValue($attribute);
         // Desencriptar si corresponde.
         if ($value !== null && $this->hasEncryption($attribute)) {
             $value = decrypt($value);
@@ -3578,7 +4118,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      *   - `config_`.
      *
-     * @param string $attribute Atributo del objeto que se desea obtener.
+     * @param string $attribute Atributo del campo que se desea asignar.
      * @param mixed $value El valor de la configuración.
      * @return self La misma instancia del objeto para encadenamiento.
      */
@@ -3679,8 +4219,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 'auto'      =>  $config['auto'],
                 'pk'        =>  $config['primary_key'],
                 'fk'        =>  [
-                                    'table' => $config['to_table'],
-                                    'column'=> $config['to_field']
+                                    'table'  => $config['belongs_to'] ?? null,
+                                    'column' => $config['related_field'] ?? null,
                                 ]
                 ,
             ];

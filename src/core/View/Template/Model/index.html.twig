@@ -555,7 +555,9 @@ $(document).ready(function() {
                         {% elseif data.fields[field].cast == 'bool' %}
                             return data
                                 ? '<div class="text-center"><i class="fa-solid fa-check-circle fa-fw text-success"></i></div>'
+                                    + '<div class="d-none d-print-block">Si</div>'
                                 : '<div class="text-center"><i class="fa-solid fa-times-circle fa-fw text-danger"></i></div>'
+                                    + '<div class="d-none d-print-block">No</div>'
                             ;
                         {% elseif data.fields[field].cast == 'datetime' %}
                             return moment(data).format("D MMMM YYYY, H:mm:ss");

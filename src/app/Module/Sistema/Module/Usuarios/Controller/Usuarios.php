@@ -328,7 +328,7 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
             $filterListar = '';
         }
         // si se envió el formulario se procesa
-        if (isset($_POST['submit'])) {
+        if (!empty($_POST)) {
             $Usuario = model()->getUser();
             $Usuario->fill($_POST);
             $Usuario->usuario = \sowerphp\core\Utility_String::normalize(
@@ -451,7 +451,7 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
                 );
         }
         // si no se ha enviado el formulario se mostrará
-        if (!isset($_POST['submit'])) {
+        if (empty($_POST)) {
             $this->getModelClass()::$columnsInfo['contrasenia']['null'] = true;
             $grupos_asignados = $Usuario->groups();
             $this->setGruposAsignables();

@@ -412,7 +412,6 @@ class View_Form implements \ArrayAccess
         // Obtener datos que se pasaron.
         $data = array_merge($this->data, $this->files);
 
-
         // Limpiar datos.
         // TODO: mejorar la sanitización utilizando reglas de sanitización
         // personalizadas por cada campo (similar a las validaciones).
