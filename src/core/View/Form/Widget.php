@@ -166,4 +166,83 @@ class View_Form_Widget implements \ArrayAccess
         );
     }
 
+    protected function renderDivWidget(): string
+    {
+        return '';
+    }
+
+    protected function renderHiddenWidget(): string
+    {
+        return '';
+    }
+
+    protected function renderButtonWidget(): string
+    {
+        return '';
+    }
+
+    protected function renderTextWidget(): string
+    {
+        return '';
+    }
+
+    protected function renderPasswordWidget(): string
+    {
+        return '';
+    }
+
+    protected function renderBoolWidget(): string
+    {
+        return '';
+    }
+
+    protected function renderSelectWidget(): string
+    {
+        return '';
+    }
+
+    protected function renderFileWidget(): string
+    {
+        return '';
+    }
+
+    protected function renderFilesWidget(): string
+    {
+        return '';
+    }
+
+    protected function renderTableWidget(): string
+    {
+        return '';
+    }
+
+    protected function renderJsWidget(): string
+    {
+        return '';
+    }
+
+    protected function renderCheckboxWidget(): string
+    {
+        return '';
+    }
+
+    protected function renderCheckBoxesWidget(): string
+    {
+        return '';
+    }
+
+    protected function renderTableCheckWidget(): string
+    {
+        return '';
+    }
+
+    protected function renderRadiosWidget(): string
+    {
+        return '';
+    }
+
+    protected function renderTableRadiosWidget(): string
+    {
+        return '';
+    }
 }
