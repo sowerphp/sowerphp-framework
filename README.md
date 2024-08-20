@@ -1,5 +1,4 @@
-SowerPHP
-========
+# SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP
 
 SowerPHP es un framework, o ambiente de desarrollo, para PHP desarrollado en Chile.
 
@@ -11,8 +10,7 @@ siempre, teniendo como principal uso LibreDTE.
 Todo el código fuente de SowerPHP se encuentra liberado utilizando la
 [licencia AGPL v3 o superior](https://github.com/sascocl/sowerphp/blob/master/COPYING).
 
-Crear proyecto vacío
---------------------
+## Crear proyecto vacío
 
 ```shell
 composer create-project --prefer-dist sowerphp/sowerphp-project my-project dev-master
@@ -20,8 +18,7 @@ cd my-project
 cp env-dist .env
 ```
 
-Ambiente DEV o QA (no producción)
----------------------------------
+## Ambiente DEV o QA (no producción)
 
 ### Instalación
 

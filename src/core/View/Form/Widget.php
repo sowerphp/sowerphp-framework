@@ -141,6 +141,11 @@ class View_Form_Widget implements \ArrayAccess
         );
     }
 
+    protected function renderTextWidget(): string
+    {
+        return $this->renderDefaultWidget();
+    }
+
     protected function renderDateWidget(): string
     {
         if (!empty($this->value)) {
@@ -183,11 +188,6 @@ class View_Form_Widget implements \ArrayAccess
         return '';
     }
 
-    protected function renderTextWidget(): string
-    {
-        return $this->renderDefaultWidget();
-    }
-
     protected function renderPasswordWidget(): string
     {
         return '';
@@ -228,7 +228,7 @@ class View_Form_Widget implements \ArrayAccess
         return '';
     }
 
-    protected function renderCheckBoxesWidget(): string
+    protected function renderCheckboxesWidget(): string
     {
         return '';
     }
