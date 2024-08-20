@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SowerPHP: Framework PHP hecho en Chile.
+ * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
@@ -140,6 +140,22 @@ class Service_View implements Interface_Service
      *
      * @param string $view Vista que se desea renderizar.
      * @param array $data Variables que se pasarán a la vista al renderizar.
+     * @return Network_Response Objeto con la respuesta de la solicitud HTTP
+     * que contiene en el cuerpo (body) la vista renderizada.
+     */
+    public function renderToResponse(string $view, array $data = []): Network_Response
+    {
+        $response = response();
+        $body = $this->render($view, $data);
+        $response->body($body);
+        return $response;
+    }
+
+    /**
+     * Método para renderizar una vista con su contexto (variables).
+     *
+     * @param string $view Vista que se desea renderizar.
+     * @param array $data Variables que se pasarán a la vista al renderizar.
      * @return string String con el contenido (cuerpo) de la vista renderizada.
      */
     public function render(string $view, array $data = []): string
@@ -169,19 +185,21 @@ class Service_View implements Interface_Service
     }
 
     /**
-     * Método para renderizar una vista con su contexto (variables).
+     * Método que renderiza específicamente una vista de layout.
      *
-     * @param string $view Vista que se desea renderizar.
-     * @param array $data Variables que se pasarán a la vista al renderizar.
-     * @return Network_Response Objeto con la respuesta de la solicitud HTTP
-     * que contiene en el cuerpo (body) la vista renderizada.
+     * @param string $layout Layout que se desea renderizar. Puede ser una ruta
+     * relativa dentro de un directorio View/Layout o bien una ruta absoluta.
+     * @param array $data Datos que se pasarán al layout para ser renderizado.
+     * El más importante es el índice: _content.
+     * @return string String con el layout renderizado.
      */
-    public function renderToResponse(string $view, array $data = []): Network_Response
+    public function renderLayout(string $layout, array $data = []): string
     {
-        $response = response();
-        $body = $this->render($view, $data);
-        $response->body($body);
-        return $response;
+        $layout = $this->resolveLayout($layout);
+        if (!isset($data['_content'])) {
+            $data['_content'] = '';
+        }
+        return $this->render($layout, $data);
     }
 
     /**

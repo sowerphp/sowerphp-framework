@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SowerPHP: Framework PHP hecho en Chile.
+ * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
@@ -38,7 +38,7 @@ class Model_Comuna extends Model
      *
      * @var array
      */
-    protected $meta = [
+    protected $metadata = [
         'model' => [
             'ordering' => ['codigo'],
             'default_permissions' => ['list', 'view'],

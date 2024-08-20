@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SowerPHP: Framework PHP hecho en Chile.
+ * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
@@ -108,10 +108,10 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         $instance = $this->modelService->instantiate(
             $this->getModelClass()
         );
-        if (!in_array('list', $instance->getMeta()['model.default_permissions'])) {
+        if (!in_array('list', $instance->getMetadata('model.default_permissions'))) {
             return redirect()->withError(__(
                 'No es posible listar registros de tipo %s.',
-                $instance->getMeta()['model.label']
+                $instance->getMetadata('model.label')
             ))->back();
         }
         $data = $instance->getListData();
@@ -133,15 +133,15 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             if (!$instance->exists()) {
                 return redirect()->withError(__(
                     'Recurso solicitado %s(%s) no existe, no se puede mostrar.',
-                    $instance->getMeta()['model.label'],
+                    $instance->getMetadata('model.label'),
                     implode(', ', $id)
                 ))->back();
             }
         }
-        if (!in_array('view', $instance->getMeta()['model.default_permissions'])) {
+        if (!in_array('view', $instance->getMetadata('model.default_permissions'))) {
             return redirect()->withError(__(
                 'No es posible mostrar registros de tipo %s.',
-                $instance->getMeta()['model.label']
+                $instance->getMetadata('model.label')
             ))->back();
         }
         $data = $instance->getShowData();
@@ -164,33 +164,33 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $this->getModelClass()
         );
         // Validar que el modelo permite la creación de registros.
-        if (!in_array('add', $instance->getMeta()['model.default_permissions'])) {
+        if (!in_array('add', $instance->getMetadata('model.default_permissions'))) {
             return redirect()->withError(__(
                 'No es posible crear registros de tipo %s.',
-                $instance->getMeta()['model.label']
+                $instance->getMetadata('model.label')
             ))->back();
         }
         // Preparar los metadatos para el formulario de creación.
-        $data = $instance->getSaveDataCreate();
+        $options = $instance->getSaveDataCreate();
         $routeConfig = $request->getRouteConfig();
         // Agregar metadatos del formulario en si.
-        $data['form'] = [
+        $options['form'] = [
             'data' => $request->input(),
-            'file' => $request->file(),
+            'files' => $request->file(),
             'attributes' => [
-                'id' => $data['model']['db_table'] . 'ModelCreateForm',
+                'id' => $options['model']['db_table'] . 'ModelCreateForm',
                 'action' => url($routeConfig['url']['controller'] . '/store'),
                 'onsubmit' => 'return validateModelCreateForm(this)',
             ],
             'submit_button' => [
-                'label' => 'Crear nuevo ' . strtolower($data['model']['verbose_name']),
+                'label' => 'Crear nuevo ' . strtolower($options['model']['verbose_name']),
             ],
         ];
         // Crear formulario a partir de los metadados del modelo.
-        $form = View_Form_Model::create($data);
+        $form = View_Form_Model::create($options);
         // Renderizar la vista con el formulario de creación.
         return $this->render('create', [
-            'data' => $data,
+            'data' => $options,
             'form' => $form,
         ]);
     }
@@ -259,26 +259,26 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         if (!$instance->exists()) {
             return redirect()->withError(__(
                 'Recurso solicitado %s(%s) no existe, no se puede editar.',
-                $instance->getMeta()['model.label'],
+                $instance->getMetadata('model.label'),
                 implode(', ', $id)
             ))->back();
         }
         // Validar que el modelo permite la edición de registros.
-        if (!in_array('change', $instance->getMeta()['model.default_permissions'])) {
+        if (!in_array('change', $instance->getMetadata('model.default_permissions'))) {
             return redirect()->withError(__(
                 'No es posible editar registros de tipo %s.',
-                $instance->getMeta()['model.label']
+                $instance->getMetadata('model.label')
             ))->back();
         }
         // Preparar los metadatos para el formulario de edición.
-        $data = $instance->getSaveDataEdit();
+        $options = $instance->getSaveDataEdit();
         $routeConfig = $request->getRouteConfig();
         // Agregar metadatos del formulario en si.
-        $data['form'] = [
+        $options['form'] = [
             'data' => $request->input(),
-            'file' => $request->file(),
+            'files' => $request->file(),
             'attributes' => [
-                'id' => $data['model']['db_table'] . 'ModelEditForm',
+                'id' => $options['model']['db_table'] . 'ModelEditForm',
                 'action' => url(
                     $routeConfig['url']['controller']
                     . '/update/'
@@ -287,14 +287,14 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 'onsubmit' => 'return validateModelEditForm(this)',
             ],
             'submit_button' => [
-                'label' => 'Editar ' . strtolower($data['model']['verbose_name']),
+                'label' => 'Editar ' . strtolower($options['model']['verbose_name']),
             ],
         ];
         // Crear formulario a partir de los metadados del modelo.
-        $form = View_Form_Model::create($data);
+        $form = View_Form_Model::create($options);
         // Renderizar la vista con el formulario de edición.
         return $this->render('edit', [
-            'data' => $data,
+            'data' => $options,
             'form' => $form,
         ]);
     }
@@ -380,10 +380,10 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      * Entrega los metadatos de la consulta a la API.
      *
      * @param string $action Acción de la API que se realizó.
-     * @param array $meta Metadatos que se deben incluir en la respuesta.
+     * @param array $metadata Metadatos que se deben incluir en la respuesta.
      * @return array Arreglo con los metadatos de la respuesta de la API.
      */
-    protected function getApiMeta(string $action, array $meta = []): array
+    protected function getApiMetadata(string $action, array $metadata = []): array
     {
         $request = request();
         return array_merge([
@@ -396,7 +396,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             //'expires_at' => date('c', strtotime('+1 day')),
             'locale' => app('translator')->getLocale(),
             'user' => $request->user(),
-        ], $meta);
+        ], $metadata);
     }
 
     /**
@@ -404,27 +404,25 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function _api_index_GET(Request $request)
     {
+        // Obtener la instancia plural asociada al modelo del controlador.
         $pluralInstance = $this->getModelPluralInstance();
-        if (!in_array('list', $pluralInstance->getMeta()['model.default_permissions'])) {
+        if (!in_array('list', $pluralInstance->getMetadata('model.default_permissions'))) {
             throw new \Exception(__(
                 'No es posible listar registros de tipo %s.',
-                $pluralInstance->getMeta()['model.label']
+                $pluralInstance->getMetadata('model.label')
             ));
         }
         // Obtener registros.
         $parameters = $request->getModelParametersFromUrl();
-        $results = $pluralInstance->filter(
-            $parameters,
-            $parameters['stdClass']
-        );
+        $results = $pluralInstance->filter($parameters, $parameters['stdClass']);
         // Preparar respuesta formato estándar.
         if ($parameters['format'] == 'standard') {
-            $metaTotal = $pluralInstance->count([
+            $metadataTotal = $pluralInstance->count([
                 'filters' => $parameters['filters'],
             ]);
-            $metaCount = count($results);
-            $metaPaginationTotalPages = ceil(
-                $metaTotal / $parameters['pagination']['limit']
+            $metadataCount = count($results);
+            $metadataPaginationTotalPages = ceil(
+                $metadataTotal / $parameters['pagination']['limit']
             );
             $currentUrl = $request->getFullUrlWithoutQuery()
                 . $request->getRequestUriDecoded()
@@ -442,23 +440,23 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             ;
             $linksSelf = $currentUrl . '?' . $this->modelService->buildUrlParameters($parameters);
             $aux = ['pagination' => ['page' => $parameters['pagination']['page'] + 1]];
-            $linksNext = $parameters['pagination']['page'] < $metaPaginationTotalPages
+            $linksNext = $parameters['pagination']['page'] < $metadataPaginationTotalPages
                 ? $currentUrl . '?' . $this->modelService->buildUrlParameters(
                     Utility_Array::mergeRecursiveDistinct($parameters, $aux)
                 )
                 : null
             ;
-            $aux = ['pagination' => ['page' => $metaPaginationTotalPages]];
+            $aux = ['pagination' => ['page' => $metadataPaginationTotalPages]];
             $linksLast = $currentUrl . '?' . $this->modelService->buildUrlParameters(
                 Utility_Array::mergeRecursiveDistinct($parameters, $aux)
             );
             $body = [
-                'meta' => $this->getApiMeta('index',[
-                    'total' => $metaTotal,
-                    'count' => $metaCount,
+                'metadata' => $this->getApiMetadata('index',[
+                    'total' => $metadataTotal,
+                    'count' => $metadataCount,
                     'pagination' => [
                         'current_page' => (int)$parameters['pagination']['page'],
-                        'total_pages' => $metaPaginationTotalPages,
+                        'total_pages' => $metadataPaginationTotalPages,
                         'per_page' => (int)$parameters['pagination']['limit'],
                     ]
                 ]),
@@ -501,15 +499,15 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $instance = $this->modelService->instantiate(
                 $this->getModelClass()
             );
-            if (!in_array('list', $instance->getMeta()['model.default_permissions'])) {
+            if (!in_array('list', $instance->getMetadata('model.default_permissions'))) {
                 throw new \Exception(__(
                     'No es posible listar registros de tipo %s.',
-                    $instance->getMeta()['model.label']
+                    $instance->getMetadata('model.label')
                 ));
             }
             $data = $instance->getListData();
             return response()->json([
-                'meta' => $this->getApiMeta('list'),
+                'metadata' => $this->getApiMetadata('list'),
                 'data' => $data,
             ], 200);
         } catch (\Exception $e) {
@@ -528,22 +526,22 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 $this->getModelClass(),
                 ...$id
             );
-            if (!in_array('view', $instance->getMeta()['model.default_permissions'])) {
+            if (!in_array('view', $instance->getMetadata('model.default_permissions'))) {
                 throw new \Exception(__(
                     'No es posible mostrar registros de tipo %s.',
-                    $instance->getMeta()['model.label']
+                    $instance->getMetadata('model.label')
                 ));
             }
             if (!$instance->exists()) {
                 throw new \Exception(__(
                     'Recurso solicitado %s(%s) no existe, no se puede mostrar.',
-                    $instance->getMeta()['model.label'],
+                    $instance->getMetadata('model.label'),
                     implode(', ', $id)
                 ));
             }
             $result = $stdClass ? $instance->toStdClass() : $instance->toArray();
             return response()->json([
-                'meta' => $this->getApiMeta('show'),
+                'metadata' => $this->getApiMetadata('show'),
                 'data' => $result
             ], 200);
         } catch (\Exception $e) {
@@ -563,15 +561,15 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $instance = $this->modelService->instantiate(
                 $this->getModelClass()
             );
-            if (!in_array('add', $instance->getMeta()['model.default_permissions'])) {
+            if (!in_array('add', $instance->getMetadata('model.default_permissions'))) {
                 throw new \Exception(__(
                     'No es posible crear registros de tipo %s.',
-                    $instance->getMeta()['model.label']
+                    $instance->getMetadata('model.label')
                 ));
             }
             $data = $instance->getSaveDataCreate();
             return response()->json([
-                'meta' => $this->getApiMeta('create'),
+                'metadata' => $this->getApiMetadata('create'),
                 'data' => $data,
             ], 200);
         } catch (\Exception $e) {
@@ -588,10 +586,10 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $instance = $this->modelService->instantiate(
                 $this->getModelClass()
             );
-            if (!in_array('add', $instance->getMeta()['model.default_permissions'])) {
+            if (!in_array('add', $instance->getMetadata('model.default_permissions'))) {
                 throw new \Exception(__(
                     'No es posible almacenar registros de tipo %s.',
-                    $instance->getMeta()['model.label']
+                    $instance->getMetadata('model.label')
                 ));
             }
             $rules = $instance->getValidationRulesCreate('data.');
@@ -604,7 +602,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 ), 422);
             }
             return response()->json([
-                'meta' => $this->getApiMeta('store'),
+                'metadata' => $this->getApiMetadata('store'),
                 'message' => __(
                     'Recurso %s creado correctamente.',
                     (string)$instance
@@ -632,22 +630,22 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 $this->getModelClass(),
                 ...$id
             );
-            if (!in_array('change', $instance->getMeta()['model.default_permissions'])) {
+            if (!in_array('change', $instance->getMetadata('model.default_permissions'))) {
                 throw new \Exception(__(
                     'No es posible editar registros de tipo %s.',
-                    $instance->getMeta()['model.label']
+                    $instance->getMetadata('model.label')
                 ));
             }
             if (!$instance->exists()) {
                 throw new \Exception(__(
                     'Recurso solicitado %s(%s) no existe, no se puede editar.',
-                    $instance->getMeta()['model.label'],
+                    $instance->getMetadata('model.label'),
                     implode(', ', $id)
                 ));
             }
             $data = $instance->getSaveDataEdit();
             return response()->json([
-                'meta' => $this->getApiMeta('edit'),
+                'metadata' => $this->getApiMetadata('edit'),
                 'data' => $data,
             ], 200);
         } catch (\Exception $e) {
@@ -665,16 +663,16 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 $this->getModelClass(),
                 ...$id
             );
-            if (!in_array('change', $instance->getMeta()['model.default_permissions'])) {
+            if (!in_array('change', $instance->getMetadata('model.default_permissions'))) {
                 throw new \Exception(__(
                     'No es posible actualizar registros de tipo %s.',
-                    $instance->getMeta()['model.label']
+                    $instance->getMetadata('model.label')
                 ));
             }
             if (!$instance->exists()) {
                 throw new \Exception(__(
                     'Recurso solicitado %s(%s) no existe, no se puede actualizar.',
-                    $instance->getMeta()['model.label'],
+                    $instance->getMetadata('model.label'),
                     implode(', ', $id)
                 ));
             }
@@ -688,7 +686,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 ), 422);
             }
             return response()->json([
-                'meta' => $this->getApiMeta('update'),
+                'metadata' => $this->getApiMetadata('update'),
                 'message' => __(
                     'Recurso %s editado correctamente.',
                     (string)$instance
@@ -716,16 +714,16 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 $this->getModelClass(),
                 ...$id
             );
-            if (!in_array('delete', $instance->getMeta()['model.default_permissions'])) {
+            if (!in_array('delete', $instance->getMetadata('model.default_permissions'))) {
                 throw new \Exception(__(
                     'No es posible eliminar registros de tipo %s.',
-                    $instance->getMeta()['model.label']
+                    $instance->getMetadata('model.label')
                 ));
             }
             if (!$instance->exists()) {
                 throw new \Exception(__(
                     'Recurso solicitado %s(%s) no existe, no se puede eliminar.',
-                    $instance->getMeta()['model.label'],
+                    $instance->getMetadata('model.label'),
                     implode(', ', $id)
                 ));
             }
@@ -744,7 +742,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 $code = 500;
             }
             return response()->json([
-                'meta' => $this->getApiMeta('destroy'),
+                'metadata' => $this->getApiMetadata('destroy'),
                 'message' => $message,
             ], $code);
         } catch (\Exception $e) {
@@ -807,17 +805,19 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      * esto permite a cierto usuario mostrar solo cierto listado de registros
      * y no todos, esto evita tener que reprogramar la acción listar.
      */
-    protected function forceSearch(array $data)
+    protected function forceSearch(array $data): void
     {
+        $request = request();
         // Se asignan datos forzados para la búsqueda de registros.
         $search = [];
         foreach ($data as $var => $val) {
             $search[] = $var . ':' . $val;
         }
         // Se copian filtros extras, menos los forzados.
-        if (!empty($_GET['search'])) {
+        $inputSearch = $request->input('search');
+        if (!empty($inputSearch)) {
             $vars = array_keys($data);
-            $filters = explode(',', $_GET['search']);
+            $filters = explode(',', $inputSearch);
             foreach ($filters as &$filter) {
                 if (strpos($filter, ':')) {
                     list($var, $val) = explode(':', $filter);
@@ -828,7 +828,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             }
         }
         // Se vuelve a armar la búsqueda.
-        $_GET['search'] = implode(',', $search);
+        $request->merge(['search' => implode(',', $search)]);
     }
 
     /**
@@ -836,132 +836,64 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
      */
     public function listar(Request $request, $page = 1, $orderby = null, $order = 'A')
     {
-        // Crear objeto plural.
-        $Objs = $this->getModelPluralInstance();
-        // Si se debe buscar se agrega filtro.
-        $searchUrl = null;
-        $search = [];
-        if (!empty($_GET['search'])) {
-            $searchUrl = '?search=' . $_GET['search'];
-            $filters = explode(',', $_GET['search']);
-            $where = [];
-            $vars = [];
-            foreach ($filters as &$filter) {
-                if (!strpos($filter, ':')) {
-                    continue;
-                }
-                list($var, $val) = explode(':', $filter);
-                // Solo procesar filtros donde el campo por el que se filtra
-                // esté en el modelo.
-                if (empty($this->getModelClass()::$columnsInfo[$var])) {
-                    continue;
-                }
-                $search[$var] = $val;
-                // Si el valor es '!null' se compara contra IS NOT NULL.
-                if ($val == '!null') {
-                    $where[] = $var . ' IS NOT NULL';
-                }
-                // Si el valor es null o 'null' se compara contra IS NULL.
-                else if ($val === null || $val == 'null') {
-                    $where[] = $var . ' IS NULL';
-                }
-                // Si es una FK se filtra con igualdad.
-                else if (!empty($this->getModelClass()::$columnsInfo[$var]['fk'])) {
-                    $where[] = $var . ' = :' . $var;
-                    $vars[':' . $var] = $val;
-                }
-                // Si es un campo de texto se filtrará con LIKE.
-                else if (in_array($this->getModelClass()::$columnsInfo[$var]['type'], ['char', 'character varying', 'varchar', 'text'])) {
-                    $where[] = 'LOWER(' . $var . ') LIKE :' . $var;
-                    $vars[':' . $var] = '%' . strtolower($val) . '%';
-                }
-                // Si es un tipo fecha con hora se usará LIKE.
-                else if (in_array($this->getModelClass()::$columnsInfo[$var]['type'], ['timestamp', 'timestamp without time zone'])) {
-                    $where[] = 'CAST(' . $var . ' AS TEXT) LIKE :' . $var;
-                    $vars[':' . $var] = $val . ' %';
-                }
-                // Si es un campo número entero se castea.
-                else if (in_array($this->getModelClass()::$columnsInfo[$var]['type'], ['smallint', 'integer', 'bigint', 'smallserial', 'serial', 'bigserial'])) {
-                    $where[] = $var . ' = :' . $var;
-                    $vars[':' . $var] = (int)$val;
-                }
-                // Si es un campo número decimal se castea.
-                else if (in_array($this->getModelClass()::$columnsInfo[$var]['type'], ['decimal', 'numeric', 'real', 'double precision'])) {
-                    $where[] = $var . ' = :' . $var;
-                    $vars[':' . $var] = (float)$val;
-                }
-                // Si es cualquier otro caso se comparará con una igualdad.
-                else {
-                    $where[] = $var . ' = :' . $var;
-                    $vars[':' . $var] = $val;
-                }
-            }
-            $Objs->setWhereStatement($where, $vars);
-        }
-        // Si se debe ordenar se agrega.
-        if (isset($this->getModelClass()::$columnsInfo[$orderby])) {
-            $Objs->setOrderByStatement([$orderby => ($order == 'D' ? 'DESC' : 'ASC')]);
-        }
-        // Total de registros.
-        try {
-            $registers_total = $Objs->count();
-        } catch (\Exception $e) {
-            // Si hay algún error en la base de datos es porque los filtros
-            // están mal armados. Si se llegó acá con el error, para que no
-            // falle la app se redirecciona al listado con el error.
-            // Lo ideal es controlar esto antes con un "error más lindo".
-            return redirect($request->getRequestUriDecoded())
-                ->withError($e->getMessage())
-            ;
-        }
-        // Paginar los resultados si es necesario.
-        if ((integer)$page > 0) {
-            $registers_per_page = config('app.ui.pagination.registers');
-            $pages = ceil($registers_total / $registers_per_page);
-            $Objs->setLimitStatement(
-                $registers_per_page,
-                ($page - 1) * $registers_per_page
+        // Obtener la instancia plural asociada al modelo del controlador junto
+        // con los metadatos del modelo singular.
+        $pluralInstance = $this->getModelPluralInstance();
+        $metadata = $pluralInstance->getMetadata();
+
+        // Obtener los parámetros de búsqueda para el modelo desde la URL.
+        $request->merge([
+            'format' => 'old',
+            'limit' => $metadata['model.list_per_page'],
+        ]);
+        $parameters = $request->getModelParametersFromUrl();
+
+        // Obtener total de registros y calcular las páginas.
+        $metadataTotal = $pluralInstance->count([
+            'filters' => $parameters['filters'],
+        ]);
+        $metadataPaginationTotalPages = ceil(
+            $metadataTotal / $parameters['pagination']['limit']
+        );
+
+        // Redireccionar a la página 1 si la página solicitada no es válida.
+        $searchUrl = '?search=' . $request->input('search');
+        if ($page != 1 && ($page > $metadataPaginationTotalPages || $page <= 0)) {
+            return redirect(
+                $request->getControllerUrl() . '/listar/1'
+                . ($orderby ? ('/' . $orderby . '/' . $order) : '') . $searchUrl
             );
-            if ($page != 1 && $page > $pages) {
-                return redirect(
-                    $request->getControllerUrl() . '/listar/1'
-                    . ($orderby ? ('/' . $orderby . '/' . $order) : '') . $searchUrl
-                );
-            }
         }
-        // Crear variable con las columnas para la vista.
-        if (!empty($this->columnsView['listar'])) {
-            $columns = [];
-            foreach ($this->getModelClass()::$columnsInfo as $col => &$info) {
-                if (in_array($col, $this->columnsView['listar'])) {
-                    $columns[$col] = $info;
-                }
-            }
-        } else {
-            $columns = $this->getModelClass()::$columnsInfo;
+
+        // Definir las columnas que serán mostradas en la vista.
+        $columnsKeys = $pluralInstance->getMetadata('model.list_display');
+        if (empty($columnsKeys)) {
+            $columnsKeys = array_keys($metadata['fields']);
         }
+        $columns = array_intersect_key($metadata['fields'], array_flip($columnsKeys));
+
+        // Obtener registros.
+        $results = $pluralInstance->filter($parameters, $parameters['stdClass']);
+
         // Renderizar la vista.
         return $this->render('listar', [
-            'model' => $this->getModelClass(),
-            'models' => app('inflector')->pluralize($this->getModelClass()),
-            'module_url' => $request->getModuleUrl() . '/',
-            'controller' => $request->getRouteConfig()['controller'],
+            'metadata' => $metadata,
+            'deleteRecord' => in_array('delete', $metadata['model.default_permissions']),
+            'columns' => $columns,
+            //'fkNamespace' => $this->getModelClass()::$fkNamespace,
+            'urlController' => url($request->getRouteConfig()['url']['controller']),
             'page' => $page,
             'orderby' => $orderby,
             'order' => $order,
             'searchUrl' => $searchUrl,
-            'search' => $search,
-            'Objs' => $Objs->getObjects($this->getModelClass()),
-            'columns' => $columns,
-            'registers_total' => $registers_total,
-            'pages' => isset($pages) ? $pages : 0,
+            'search' => $parameters['filters'],
+            'Objs' => $results,
+            'registers_total' => $metadataTotal,
+            'pages' => $metadataPaginationTotalPages,
             'linkEnd' => ($orderby ? ('/' . $orderby . '/' . $order) : '') . $searchUrl,
-            'fkNamespace' => $this->getModelClass()::$fkNamespace,
-            'comment' => $this->getModelClass()::$tableComment,
             'listarFilterUrl' => '?listar=' . base64_encode(
                 '/' . $page . ($orderby ? ('/' . $orderby . '/' . $order) : '') . $searchUrl
             ),
-            'deleteRecord' => $this->deleteRecord,
             'actionsColsWidth' => $this->actionsColsWidth,
             'extraActions' => $this->extraActions,
         ]);
@@ -1014,7 +946,8 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             'columns' => $this->getModelClass()::$columnsInfo,
             'contraseniaNames' => $this->contraseniaNames,
             'listarUrl' => $request->getControllerUrl()
-                . '/listar' . $filterListar,
+                . '/listar' . $filterListar
+            ,
         ]);
     }
 

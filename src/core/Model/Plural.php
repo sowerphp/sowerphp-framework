@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SowerPHP: Framework PHP hecho en Chile.
+ * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
@@ -24,6 +24,7 @@
 namespace sowerphp\core;
 
 use \Illuminate\Config\Repository;
+use \Illuminate\Support\Collection;
 use \sowerphp\core\Database_QueryBuilder as QueryBuilder;
 
 /**
@@ -45,7 +46,7 @@ abstract class Model_Plural
      *
      * @var array|\Illuminate\Config\Repository
      */
-    protected $meta = [
+    protected $metadata = [
         'model' => [
             'db_name' => 'default',
         ],
@@ -61,33 +62,49 @@ abstract class Model_Plural
     /**
      * Constructor del modelo plural.
      */
-    public function __construct(?Repository $meta = null)
+    public function __construct(?Repository $metadata = null)
     {
         // Asignar la configuración del modelo (metadatos) si no fue pasada.
-        if ($meta === null) {
+        if ($metadata === null) {
             $singularClass = app('inflector')->singularize(
                 $this->getReflector()->getName()
             );
             if (class_exists($singularClass)) {
                 $singularInstance = new $singularClass();
-                $meta = $singularInstance->getMeta();
+                $metadata = $singularInstance->getMetadata();
             } else {
-                $meta = new Repository($this->meta);
+                $metadata = new Repository($this->metadata);
             }
         }
-        $this->meta = $meta;
+        $this->metadata = $metadata;
         // Asignar la conexión a la base de datos.
         $this->db = $this->getDatabaseConnection();
     }
 
     /**
-     * Entrega repositorio con los metadatos normalizados del modelo.
+     * Entrega el repositorio con los metadatos normalizados del modelo o un
+     * valor dentro de los metadatos si se indica la llave.
      *
-     * @return Repository Repositorio con los metadatos para fácil uso.
+     * Si el modelo plural:
+     *
+     *   - Tiene un modelo singular asociado, entregará los metadatos del
+     *     modelo singular.
+     *   - No tiene un modelo singular asociado, entregará los metadatos del
+     *     modelo plural.
+     *
+     * @param string|null $key Llave de búsqueda dentro de los metadatos.
+     * @return Repository|mixed|null Repositorio con los metadatos o valor
+     * solicitado si se especificó una llave con $key. `null` si se especificó
+     * llave y no se encontró un valor en el repositorio.
      */
-    public function getMeta(): Repository
+    public function getMetadata(?string $key = null)
     {
-        return $this->meta;
+        // Si los metadatos no son un repositorio, se crean como repositorio.
+        if (!($this->metadata instanceof Repository)) {
+            $this->metadata = new Repository($this->metadata);
+        }
+        // Entregar todos los metadatos o la llave solicitada.
+        return $key ? $this->metadata[$key] : $this->metadata;
     }
 
     /**
@@ -101,7 +118,7 @@ abstract class Model_Plural
     public function getDatabaseConnection(): Database_Connection
     {
         if (!isset($this->db)) {
-            $this->db = database($this->meta['model.db_name']);
+            $this->db = database($this->getMetadata('model.db_name'));
         }
         return $this->db;
     }
@@ -117,7 +134,7 @@ abstract class Model_Plural
         // Asignar ordenamiento por defecto del modelo si no fue solicitado.
         if (empty($parameters['sort'])) {
             $parameters['sort'] = [];
-            foreach ($this->meta['model.ordering'] as $ordering) {
+            foreach ($this->getMetadata('model.ordering') as $ordering) {
                 $column = $ordering;
                 $order = 'asc';
                 if ($column[0] == '-') {
@@ -133,8 +150,8 @@ abstract class Model_Plural
         // Obtejer objeto query usando el QueryBuilder y SmartQuery.
         return $this->getDatabaseConnection()->query()->smartQuery(
             $parameters,
-            $this->meta['model.db_table'],
-            $this->meta['fields']
+            $this->getMetadata('model.db_table'),
+            $this->getMetadata('fields')
         );
     }
 
@@ -152,7 +169,7 @@ abstract class Model_Plural
     }
 
     /**
-     * Realiza una búsqueda y cuenta los registros del.
+     * Realiza una búsqueda y cuenta los registros del modelo.
      *
      * @param array $parameters Parámetros de búsqueda y obtención de registros.
      * @return int Cantidad de registros encontrados.
@@ -167,30 +184,27 @@ abstract class Model_Plural
      * Realiza una búsqueda y obtiene registros del modelo.
      *
      * @param array $parameters Parámetros de búsqueda y obtención de registros.
-     * @param bool $stdClass =true se entregará un objeto stdClass.
-     * @return \Illuminate\Support\Collection|array
+     * @param bool $stdClass `true` se entregarán objetos stdClass en el
+     * resultado, `false` (por defecto) se entregarán objetos del modelo
+     * singular en el resultado.
+     * @return Collection
      */
-    public function filter(array $parameters, $stdClass = false)
+    public function filter(array $parameters, ?bool $stdClass = false): Collection
     {
         $query = $this->query($parameters);
-        // Obtener los resultados.
-        $results = $query->get();
-        if ($stdClass) {
-            return $results;
+        if (!$stdClass) {
+            $query->setMapClass($this->getMetadata('model.singular'));
         }
-        // Crear instancias del modelo para retornar.
-        $class = $this->meta['model.singular'];
-        $instances = [];
-        foreach ($results as $result) {
-            $instance = new $class();
-            $instance->forceFill((array)$result);
-            $instances[] = $instance;
-        }
-        return $instances;
+        return $query->get();
     }
 
     /**
      * Obtener un recurso (registro) desde el modelo (base de datos).
+     *
+     * Este método difiere de get() porque:
+     *
+     *   - No busca por ID (PK), sino por cualquier filtro.
+     *   - No usa la caché que usa get() al usar el Service_Model.
      *
      * @param array $filters Filtros con la clave primaria del modelo.
      * @param bool $stdClass =true se entregará un objeto stdClass.
@@ -200,20 +214,20 @@ abstract class Model_Plural
     {
         // Generar filtros con la PK.
         $results = $this->filter(['filters' => $filters], $stdClass);
-        $n_results = count($results);
-        // DoesNotExist
+        $n_results = $results->count();
+        // Excepción equivalente a: DoesNotExist.
         if ($n_results === 0) {
             throw new \Exception(__(
                 'No se encontró un registro para %s::retrieve(%s).',
-                $this->meta['model.label'],
+                $this->getMetadata('model.label'),
                 implode(', ', array_values($filters))
             ), 404);
         }
-        // MultipleObjectsReturned
+        // Excepción equivalente a: MultipleObjectsReturned.
         else if ($n_results > 1) {
             throw new \Exception(__(
                 'Se obtuvo más de un registro para %s::retrieve(%s).',
-                $this->meta['model.label'],
+                $this->getMetadata('model.label'),
                 implode(', ', array_values($filters))
             ), 409);
         }
@@ -232,7 +246,7 @@ abstract class Model_Plural
      */
     public function get(...$id): Model
     {
-        return model($this->meta['model.singular'], ...$id);
+        return model($this->getMetadata('model.singular'), ...$id);
     }
 
     /**
@@ -246,7 +260,7 @@ abstract class Model_Plural
         // armar consulta
         $query = '
             SELECT COUNT(*)
-            FROM ' . $this->meta['model.db_table']
+            FROM ' . $this->getMetadata('model.db_table')
         ;
         // si hay where se usa
         if ($this->whereStatement) {
@@ -392,7 +406,7 @@ abstract class Model_Plural
      */
     public function getMax($campo)
     {
-        $query = 'SELECT MAX('.$campo.') FROM '.$this->meta['model.db_table'];
+        $query = 'SELECT MAX('.$campo.') FROM '.$this->getMetadata('model.db_table');
         if ($this->whereStatement) {
             $query .= $this->whereStatement;
         }
@@ -407,7 +421,7 @@ abstract class Model_Plural
      */
     public function getMin($campo)
     {
-        $query = 'SELECT MIN('.$campo.') FROM '.$this->meta['model.db_table'];
+        $query = 'SELECT MIN('.$campo.') FROM '.$this->getMetadata('model.db_table');
         if ($this->whereStatement) {
             $query .= $this->whereStatement;
         }
@@ -422,7 +436,7 @@ abstract class Model_Plural
      */
     public function getSum ($campo)
     {
-        $query = 'SELECT SUM('.$campo.') FROM '.$this->meta['model.db_table'];
+        $query = 'SELECT SUM('.$campo.') FROM '.$this->getMetadata('model.db_table');
         if ($this->whereStatement) {
             $query .= $this->whereStatement;
         }
@@ -437,7 +451,7 @@ abstract class Model_Plural
      */
     public function getAvg($campo)
     {
-        $query = 'SELECT AVG('.$campo.') FROM '.$this->meta['model.db_table'];
+        $query = 'SELECT AVG('.$campo.') FROM '.$this->getMetadata('model.db_table');
         if ($this->whereStatement) {
             $query .= $this->whereStatement;
         }
@@ -456,9 +470,9 @@ abstract class Model_Plural
     {
         // preparar consulta inicial
         if ($this->selectStatement) {
-            $query = 'SELECT '.$this->selectStatement.' FROM '.$this->meta['model.db_table'];
+            $query = 'SELECT '.$this->selectStatement.' FROM '.$this->getMetadata('model.db_table');
         } else {
-            $query = 'SELECT * FROM '.$this->meta['model.db_table'];
+            $query = 'SELECT * FROM '.$this->getMetadata('model.db_table');
         }
         // agregar where
         if ($this->whereStatement) {
@@ -494,7 +508,7 @@ abstract class Model_Plural
                 if ($class === null) {
                     $aux = \sowerphp\core\Utility_Inflector::singularize(get_class($this));
                     $namespace = substr($aux, 0, strrpos($aux, '\\'));
-                    $class = $namespace.'\Model_'.\sowerphp\core\Utility_Inflector::camelize($this->meta['model.db_table']);
+                    $class = $namespace.'\Model_'.\sowerphp\core\Utility_Inflector::camelize($this->getMetadata('model.db_table'));
                 }
                 // iterar creando objetos
                 foreach ($tabla as &$fila) {
@@ -588,11 +602,11 @@ abstract class Model_Plural
      */
     public function getList(): array
     {
-        $id = $this->meta['model.choices.id'];
-        $name = $this->meta['model.choices.name'];
+        $id = $this->getMetadata('model.choices.id');
+        $name = $this->getMetadata('model.choices.name');
         return $this->getDatabaseConnection()->getTable('
             SELECT ' . $id . ' AS id, ' . $name . ' AS name
-            FROM ' . $this->meta['model.db_table'] . '
+            FROM ' . $this->getMetadata('model.db_table') . '
             ORDER BY ' . $name
         );
     }

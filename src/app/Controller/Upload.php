@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SowerPHP: Framework PHP hecho en Chile.
+ * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
@@ -36,7 +36,7 @@ class Controller_Upload extends \sowerphp\autoload\Controller
     {
         if (empty($_FILES['file'])) {
             return response()->json(
-                __('Debe enviar la imagen'), 
+                __('Debe enviar la imagen'),
                 400
             );
         }

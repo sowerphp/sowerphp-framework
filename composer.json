@@ -1,6 +1,6 @@
 {
     "name": "sowerphp/sowerphp-framework",
-    "description": "Framework PHP hecho en Chile.",
+    "description": "Simple and Open Web Ecosystem Reimagined for PHP.",
     "type": "library",
     "keywords": ["sowerphp", "framework"],
     "homepage": "https://www.sowerphp.org",
@@ -28,7 +28,6 @@
         "graphp/graphviz": "~0.2.2",
         "league/flysystem": "^2.5",
         "libchart/libchart": "~1.5.0",
-        "michelf/php-markdown": "^1.9.1",
         "predis/predis": "^2.2",
         "php-imap/php-imap": "^4.0",
         "phpoffice/phpspreadsheet": "^1.25.2",
@@ -59,7 +58,10 @@
         "symfony/redis-messenger": "^5.4",
         "symfony/cache": "^5.4",
         "monolog/monolog": "^2.9",
-        "symfony/notifier": "^5.4"
+        "symfony/notifier": "^5.4",
+        "league/commonmark": "^2.5",
+        "embed/embed": "^4.4",
+        "nyholm/psr7": "^1.8"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SowerPHP: Framework PHP hecho en Chile.
+ * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
@@ -114,7 +114,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         // Reiniciar los campos renderizados.
         $this->renderedFields = [];
         // Definir atributos del tag <form>.
-        $attributes = html_attributes(array_merge($form['attributes'], [
+        $attributes = html_attributes(array_merge($form['attributes'] ?? [], [
             'action' => $options['action'] ?? $form['attributes']['action'] ?? null,
             'method' => $options['method'] ?? $form['attributes']['method'] ?? 'POST',
             'id' => $form['attributes']['id'] ?? null,
@@ -192,7 +192,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         $help = $this->function_form_help($field);
         // Generar el HTML del campo.
         $html = sprintf(
-            '<div class="row mb-3 form-group'.($field['required']?' required':'').'">
+            '<div class="row mb-3 form-group'.(($field['required'] ?? null)?' required':'').'">
                 <div class="col-sm-2">
                     %s
                 </div>
@@ -239,7 +239,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         }
         // Obtener el nombre y la etiqueta del campo.
         $name = $field['name'];
-        $label = $field['label'];
+        $label = $field['label'] ?? null;
         if ($label === null) {
             return new Markup('', $this->charset);
         }
@@ -278,9 +278,14 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
             ));
         }
         // Si el widget no es un objeto se crea como objeto.
-        if (!is_object($field['widget'])) {
+        if (!is_object($field['widget'] ?? null)) {
             $field['widget'] = new View_Form_Widget(
-                $field['widget']['name'] ?? 'default',
+                is_string($field['widget'] ?? [])
+                    ? $field['widget']
+                    : $field['widget']['name']
+                        ?? $field['input_type']
+                        ?? 'default'
+                ,
                 $field['widget']['value'] ?? null,
                 $field['widget']['attributes'] ?? []
             );
@@ -386,7 +391,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      */
     public function function_form_enctype($form): string
     {
-        foreach ($form['fields'] as $field) {
+        foreach (($form['fields'] ?? []) as $field) {
             $type = $field['widget']['attributes']['type'] ?? null;
             if ($type == 'file') {
                 return 'multipart/form-data';

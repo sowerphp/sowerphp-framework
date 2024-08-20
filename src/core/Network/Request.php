@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SowerPHP: Framework PHP hecho en Chile.
+ * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
@@ -386,16 +386,13 @@ class Network_Request extends Request
     }
 
     /**
-     * Obtener parámetros para buscar en  registros  (modelos) usando el
-     * formato de parámetros de la URL estándar.
+     * Obtener parámetros para buscar en registros (modelos) usando el
+     * formato de parámetros de la URL estándar (standard).
      *
      * @return array
      */
     protected function getModelParametersFromUrlStandard(): array
     {
-        $minLimit = config('app.ui.pagination.registers_min', 10);
-        $maxLimit = config('app.ui.pagination.registers_max', 100);
-        $defaultLimit = config('app.ui.pagination.registers', 20);
         // Determinar parámetros.
         $fields = $this->input('fields');
         $fields = $fields ? explode(',', $fields) : [];
@@ -413,26 +410,28 @@ class Network_Request extends Request
                 ];
             }
         }
+
+        // Definir límites y paginación.
+        $minLimit = config('app.ui.pagination.registers_min', 10);
+        $maxLimit = config('app.ui.pagination.registers_max', 100);
+        $defaultLimit = config('app.ui.pagination.registers', 20);
         $pagination = [
             'page' => (int)$this->input('page', 1),
             'limit' => max($minLimit, min($maxLimit, $this->input('limit', $defaultLimit))),
         ];
+
         // Entregar parámetros.
         return compact('fields', 'filters', 'pagination', 'sort');
     }
 
     /**
-     * Obtener parámetros para buscar en  registros  (modelos) usando el formato
-     * de parámetros de la URL de Datatables.
+     * Obtener parámetros para buscar en registros (modelos) usando el formato
+     * de parámetros de la URL de Datatables (datatables).
      *
      * @return array
      */
     protected function getModelParametersFromUrlDatatables(): array
     {
-        $minLimit = config('app.ui.pagination.registers_min', 10);
-        $maxLimit = config('app.ui.pagination.registers_max', 100);
-        $defaultLimit = config('app.ui.pagination.registers', 20);
-
         // Inicializar arrays para campos, filtros y orden.
         $fields = [];
         $filters = [];
@@ -473,6 +472,9 @@ class Network_Request extends Request
         }
 
         // Definir límites y paginación.
+        $minLimit = config('app.ui.pagination.registers_min', 10);
+        $maxLimit = config('app.ui.pagination.registers_max', 100);
+        $defaultLimit = config('app.ui.pagination.registers', 20);
         $limit = max($minLimit, min($maxLimit, $this->input('length', $defaultLimit)));
         $pagination = [
             'page' => (int)($this->input('start', 0) / $limit) + 1,
@@ -482,6 +484,53 @@ class Network_Request extends Request
         // Entregar parámetros.
         //dd(compact('fields', 'searchable', 'filters', 'pagination', 'sort'));
         return compact('fields', 'searchable', 'filters', 'pagination', 'sort');
+    }
+
+    /**
+     * Obtener parámetros para buscar en registros (modelos) usando el
+     * formato de parámetros de la URL antigua (old).
+     *
+     * @return array
+     */
+    protected function getModelParametersFromUrlOld(): array
+    {
+        // Definir filtros de columnas.
+        $filters = [];
+        $search = $this->input('search');
+        if (!empty($search)) {
+            $searchArray = array_map(
+                function($q) { return explode(':', $q); },
+                explode(',', $search)
+            );
+            $filters = array_combine(
+                array_column($searchArray, 0),
+                array_column($searchArray, 1)
+            );
+        }
+
+        // Definir límites y paginación.
+        $minLimit = config('app.ui.pagination.registers_min', 10);
+        $maxLimit = config('app.ui.pagination.registers_max', 100);
+        $defaultLimit = config('app.ui.pagination.registers', 20);
+        $routeConfig = $this->getRouteConfig();
+        $pagination = [
+            'page' => $routeConfig['parameters'][0] ?? 1,
+            'limit' => max($minLimit, min($maxLimit, $this->input('limit', $defaultLimit))),
+        ];
+
+        // Inicializar array para orden.
+        $sort = [];
+        $order_column = $routeConfig['parameters'][1] ?? null;
+        if ($order_column) {
+            $order_direction = $routeConfig['parameters'][2] ?? 'A';
+            $sort[] = [
+                'column' => $order_column,
+                'order' => $order_direction == 'A' ? 'asc' : 'desc',
+            ];
+        }
+
+        // Entregar parámetros del estilo antiguo de las URL de modelos.
+        return compact('filters', 'pagination', 'sort');
     }
 
     /**

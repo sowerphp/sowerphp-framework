@@ -1,15 +1,17 @@
-<div class="page-header"><h1>Listado de <?=$models?></h1></div>
-<p><?=$comment?></p>
+<div class="page-header">
+    <h1>Listado de <?=strtolower($metadata['model.verbose_name_plural'])?></h1>
+</div>
+<p><?=$metadata['model.db_table_comment']?></p>
 
 <?php
 
-// preparar títulos de columnas (con link para ordenar por dicho campo)
+// Preparar títulos de columnas (con link para ordenar por dicho campo).
 $titles = [];
 $colsWidth = [];
 foreach ($columns as $column => $info) {
     $titles[] = $info['name'].' '.
-        '<div class="float-end"><a href="'.$_base.$module_url.$controller.'/listar/'.$page.'/'.$column.'/A'.$searchUrl.'" title="Ordenar ascendentemente por '.$info['name'].'"><i class="fas fa-sort-alpha-down"></i></a>'.
-        ' <a href="'.$_base.$module_url.$controller.'/listar/'.$page.'/'.$column.'/D'.$searchUrl.'" title="Ordenar descendentemente por '.$info['name'].'"><i class="fas fa-sort-alpha-up"></i></a></div>'
+        '<div class="float-end"><a href="'.$urlController.'/listar/'.$page.'/'.$column.'/A'.$searchUrl.'" title="Ordenar ascendentemente por '.$info['name'].'"><i class="fas fa-sort-alpha-down"></i></a>'.
+        ' <a href="'.$urlController.'/listar/'.$page.'/'.$column.'/D'.$searchUrl.'" title="Ordenar descendentemente por '.$info['name'].'"><i class="fas fa-sort-alpha-up"></i></a></div>'
     ;
     $colsWidth[] = null;
 }
@@ -17,7 +19,7 @@ $titles[] = 'Acciones';
 $colsWidth[] = $actionsColsWidth;
 
 // crear arreglo para la tabla y agregar títulos de columnas
-$data = array($titles);
+$data = [$titles];
 
 // agregar fila para búsqueda mediante formulario
 $row = [];
@@ -33,18 +35,17 @@ foreach ($columns as $column => &$info) {
     else if ($info['type']=='boolean' || $info['type']=='tinyint') {
         $row[] = $form->input(array('type'=>'select', 'name'=>$column, 'options' => $optionsBoolean, 'value' => (isset($search[$column])?$search[$column]:'')));
     }
-    // si es llave foránea
-    else if ($info['fk']) {
-        $class = 'Model_'.\sowerphp\core\Utility_Inflector::camelize(
-            $info['fk']['table']
-        );
-        $classs = $fkNamespace[$class].'\Model_'.\sowerphp\core\Utility_Inflector::camelize(
-            \sowerphp\core\Utility_Inflector::pluralize($info['fk']['table'])
-        );
-        $objs = new $classs();
+    // Si es una relación.
+    else if ($info['relation']) {
+        $objs = (new $info['relation']())->getPluralInstance();
         $options = $objs->getList();
-        array_unshift($options, array('', 'Todos'));
-        $row[] = $form->input(array('type'=>'select', 'name'=>$column, 'options' => $options, 'value' => (isset($search[$column])?$search[$column]:'')));
+        array_unshift($options, ['', 'Todos']);
+        $row[] = $form->input([
+            'type' => 'select',
+            'name' => $column,
+            'options' => $options,
+            'value' => $search[$column] ?? '',
+        ]);
     }
     // si es un tipo de dato de fecha o fecha con hora se muestra un input para fecha
     else if (in_array($info['type'], ['date', 'timestamp', 'timestamp without time zone'])) {
@@ -69,7 +70,7 @@ foreach ($Objs as &$obj) {
         // si es un archivo
         if ($info['type']=='file') {
             if ($obj->{$column.'_size'})
-                $row[] = '<a href="'.$_base.$module_url.$controller.'/d/'.$column.'/'.urlencode($obj->id).'" class="btn btn-primary"><i class="fas fa-download fa-fw"></i></a>';
+                $row[] = '<a href="'.$urlController.'/d/'.$column.'/'.urlencode($obj->id).'" class="btn btn-primary"><i class="fas fa-download fa-fw"></i></a>';
             else
                 $row[] = '';
         }
@@ -80,15 +81,9 @@ foreach ($Objs as &$obj) {
                 : '<div class="text-center"><i class="fa-solid fa-times-circle fa-fw text-danger"></i></div>'
             ;
         }
-        // si es llave foránea
-        else if ($info['fk']) {
-            // si no es vacía la columna
-            if (!empty($obj->{$column})) {
-                $method = 'get'.\sowerphp\core\Utility_Inflector::camelize($info['fk']['table']);
-                $row[] = $obj->$method($obj->$column)->{$info['fk']['table']};
-            } else {
-                $row[] = '';
-            }
+        // Si es una relación.
+        else if ($info['relation']) {
+            $row[] = $obj->{$column}();
         }
         // si es una fecha
         else if ($info['type'] == 'date') {
@@ -120,23 +115,23 @@ foreach ($Objs as &$obj) {
     $actions = '';
     if (!empty($extraActions)) {
         foreach ($extraActions as $a => $i) {
-            $actions .= '<a href="'.$_base.$module_url.$controller.'/'.$a.'/'.$pkURL.$listarFilterUrl.'" title="'.(isset($i['desc'])?$i['desc']:'').'" class="btn btn-primary mb-2"><i class="'.$i['icon'].' fa-fw"></i></a> ';
+            $actions .= '<a href="'.$urlController.'/'.$a.'/'.$pkURL.$listarFilterUrl.'" title="'.(isset($i['desc'])?$i['desc']:'').'" class="btn btn-primary mb-2"><i class="'.$i['icon'].' fa-fw"></i></a> ';
         }
     }
-    $actions .= '<a href="'.$_base.$module_url.$controller.'/editar/'.$pkURL.$listarFilterUrl.'" title="Editar" class="btn btn-primary mb-2"><i class="fa fa-edit fa-fw"></i></a>';
+    $actions .= '<a href="'.$urlController.'/editar/'.$pkURL.$listarFilterUrl.'" title="Editar" class="btn btn-primary mb-2"><i class="fa fa-edit fa-fw"></i></a>';
     if ($deleteRecord) {
-        $actions .= ' <a href="'.$_base.$module_url.$controller.'/eliminar/'.$pkURL.$listarFilterUrl.'" title="Eliminar" onclick="return eliminar(this, \''.$model.'\', \''.implode(', ', $pkValues).'\')" class="btn btn-danger mb-2"><i class="fas fa-times fa-fw"></i></a>';
+        $actions .= ' <a href="'.$urlController.'/eliminar/'.$pkURL.$listarFilterUrl.'" title="Eliminar" onclick="return eliminar(this, \''.$metadata['model.label'].'\', \''.implode(', ', $pkValues).'\')" class="btn btn-danger mb-2"><i class="fas fa-times fa-fw"></i></a>';
     }
     $row[] = $actions;
     $data[] = $row;
 }
 
-// renderizar el mantenedor
-$maintainer = new \sowerphp\app\View_Helper_Maintainer ([
-    'link' => $_base.$module_url.$controller,
+// Renderizar la tabla con el mantenedor de los registros.
+$maintainer = new \sowerphp\app\View_Helper_Maintainer([
+    'link' => $urlController,
     'linkEnd' => $linkEnd,
     'listarFilterUrl' => $listarFilterUrl
 ]);
-$maintainer->setId($models);
+$maintainer->setId($metadata['model.label_lower']);
 $maintainer->setColsWidth($colsWidth);
-echo $maintainer->listar ($data, $pages, $page);
+echo $maintainer->listar($data, $pages, $page);

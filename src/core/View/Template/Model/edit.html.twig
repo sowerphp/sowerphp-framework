@@ -1,5 +1,11 @@
 {% extends "View/Layout/" ~ __view_layout ~ ".html.twig" %}
 
+{% block session_messages %}
+    {% if not form_is_valid(form) %}
+        {{ form_errors_message() }}
+    {% endif %}
+{% endblock %}
+
 {% block content %}
 
 <h1 class="page-header">Editar {{ data.model.verbose_name|lower }}</h1>

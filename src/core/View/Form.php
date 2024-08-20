@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SowerPHP: Framework PHP hecho en Chile.
+ * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
@@ -208,6 +208,7 @@ class View_Form implements \ArrayAccess
      * etiqueta de cada campo.
      * @param bool $empty_permitted Un booleano que indica si es permitido
      * enviar el formulario con todos los campos vacíos.
+     * @param array $field_order Orden en qué se deben renderizar los campos.
      * @param bool|null $use_required_attribute Un booleano que indica si se
      * debe usar el atributo required en los campos del formulario al
      * renderizar el HTML.
@@ -222,6 +223,7 @@ class View_Form implements \ArrayAccess
         string $error_class = 'invalid-feedback',
         string $label_suffix = ':',
         bool $empty_permitted = false,
+        array $field_order = [],
         bool $use_required_attribute = true,
         array $attributes = [],
         array $fields = [],
@@ -229,26 +231,46 @@ class View_Form implements \ArrayAccess
     )
     {
         // Inicializar propiedades con valores proporcionados.
-        $this->data = $options['data'] ?? $data;
-        $this->files = $options['files'] ?? $files;
-        $this->auto_id = $options['auto_id'] ?? $auto_id;
-        $this->prefix = $options['prefix'] ?? $prefix;
-        $this->initial = $options['initial'] ?? $initial;
-        $this->error_class = $options['error_class'] ?? $error_class;
-        $this->label_suffix = $options['label_suffix'] ?? $label_suffix;
-        $this->empty_permitted = $options['empty_permitted']
-            ?? $empty_permitted
+        $formAttrs = [
+            'data',
+            'files',
+            'auto_id',
+            'prefix',
+            'initial',
+            'error_class',
+            'label_suffix',
+            'empty_permitted',
+            'field_order',
+            'use_required_attribute',
+            'fields',
+        ];
+        foreach ($formAttrs as $attr) {
+            $this->$attr =
+                $options[$attr]
+                ?? $options['form'][$attr]
+                ?? $$attr
+            ;
+        }
+
+        // Asignar los atributos considerando los valores por defecto del
+        // formulario.
+        $attributes =
+            $options['attributes']
+            ?? $options['form']['attributes']
+            ?? $attributes
         ;
-        $this->use_required_attribute = $options['use_required_attribute']
-            ?? $use_required_attribute
-        ;
-        $attributes = $options['attributes'] ?? $attributes;
         $this->attributes = Utility_Array::mergeRecursiveDistinct(
             $this->attributes,
             $attributes
         );
-        $this->fields = $options['fields'] ?? $fields;
-        $submit_button = $options['submit_button'] ?? $submit_button;
+
+        // Asignar el botón de submit considerando los valores por defecto para
+        // el botón disponibles como atributo de esta clase.
+        $submit_button =
+            $options['submit_button']
+            ?? $options['form']['submit_button']
+            ?? $submit_button
+        ;
         $this->submit_button = Utility_Array::mergeRecursiveDistinct(
             $this->submit_button,
             $submit_button

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SowerPHP: Framework PHP hecho en Chile.
+ * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
@@ -504,6 +504,18 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * @example year('birth_year')
      */
     const TYPE_YEAR = 'year';
+
+    /**
+     * Columna de tipo año y mes.
+     *
+     * Categoría: Tipos de Fecha y Hora.
+     *
+     * Este tipo representa una columna de tipo año con mes en la base de datos.
+     *
+     * @param string $column Nombre de la columna.
+     * @example yearMonth('invoice_month')
+     */
+    const TYPE_YEAR_MONTH = 'yearMonth';
 
     /**
      * Columna de tipo binario.
@@ -1302,6 +1314,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             'min_value' => 1900,
             'max_value' => 2099,
         ],
+        self::TYPE_YEAR_MONTH => [
+            'input_type' => self::INPUT_NUMBER,
+            'min_value' => 190001,
+            'max_value' => 209912,
+        ],
         // Tipos de Binarios.
         self::TYPE_BINARY => [
             'input_type' => self::INPUT_FILE,
@@ -1469,7 +1486,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @var array|\Illuminate\Config\Repository
      */
-    protected $meta = [];
+    protected $metadata = [];
 
     /**
      * Almacena los valores de los campos (atributos) del modelo.
@@ -1608,9 +1625,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public function getPluralInstance(): Model_Plural
     {
         if (!isset($this->pluralInstance)) {
-            $this->pluralInstance = new $this->meta['model.plural'](
-                $this->meta
-            );
+            $class = $this->getMetadata('model.plural');
+            $this->pluralInstance = new $class($this->getMetadata());
         }
         return $this->pluralInstance;
     }
@@ -1636,8 +1652,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     protected function bootstrap(): void
     {
-        if (!is_object($this->meta)) {
-            $this->meta = $this->getMeta($this->meta);
+        if (!is_object($this->metadata)) {
+            $this->metadata = $this->setMetadata($this->metadata);
         }
         $this->pluralInstance = $this->getPluralInstance();
         self::$columnsInfo = $this->getColumnsInfo(); // TODO: eliminar al refactorizar.
@@ -1651,7 +1667,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected function getUniqueFields(): array
     {
         $fields = [];
-        foreach ($this->getMeta()['fields'] as $name => $config) {
+        foreach ($this->getMetadata('fields') as $name => $config) {
             if ($config['unique']) {
                 $fields[] = $name;
             }
@@ -1716,7 +1732,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public function __toString(): string
     {
         try {
-            return __($this->meta['model.label'] . '('
+            return __($this->getMetadata('model.label') . '('
                 . implode(', ', array_map(function ($pk) {
                     return '%(' . $pk . ')s'; },
                     $this->getPrimaryKey()
@@ -1725,7 +1741,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $this->getPrimaryKeyValues()
             );
         } catch (\Exception $e) {
-            return __($this->meta['model.label'] . '()');
+            return __($this->getMetadata('model.label') . '()');
         }
     }
 
@@ -1821,7 +1837,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         // Se definen los campos que se serializarán.
         $fields = ['id'];
-        foreach ($this->getMeta()['fields'] as $field => $config) {
+        foreach ($this->getMetadata('fields') as $field => $config) {
             if (!$config['hidden']) {
                 $fields[] = $field;
             }
@@ -1831,7 +1847,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Obtener configuraciones que se deben serializar.
         if ($this->hasConfigurations()) {
             $configurations = [];
-            foreach ($this->meta['configurations.fields'] as $field => $config) {
+            foreach ($this->getMetadata('configurations.fields') as $field => $config) {
                 $serializable = $config['serializable'] ?? false;
                 if ($serializable) {
                     $configurations[$field] = $this->getConfiguration('config_' . $field);
@@ -1943,7 +1959,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     protected function getAttributeLabel(string $attribute): string
     {
-        $label = $this->meta['fields.' . $attribute . '.label'];
+        $label = $this->getMetadata('fields.' . $attribute . '.label');
         if (strpos($label, ':')) {
             list($module, $label) = explode(':', $label);
         }
@@ -2018,9 +2034,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         if ($this->isConfigurationField($key)) {
             $name = $this->getConfigurationName($key);
-            return $this->meta['configurations.fields.' . $name . '.sanitize'];
+            return $this->getMetadata('configurations.fields.' . $name . '.sanitize');
         } else {
-            return $this->meta['fields.' . $key . '.sanitize'];
+            return $this->getMetadata('fields.' . $key . '.sanitize');
         }
     }
 
@@ -2067,9 +2083,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         if ($this->isConfigurationField($key)) {
             $name = $this->getConfigurationName($key);
-            return $this->meta['configurations.fields.' . $name . '.cast'];
+            return $this->getMetadata('configurations.fields.' . $name . '.cast');
         } else {
-            return $this->meta['fields.' . $key . '.cast'];
+            return $this->getMetadata('fields.' . $key . '.cast');
         }
     }
 
@@ -2136,9 +2152,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         if ($this->isConfigurationField($key)) {
             $name = $this->getConfigurationName($key);
-            return (bool)$this->meta['configurations.fields.' . $name . '.encrypt'];
+            return (bool)$this->getMetadata('configurations.fields.' . $name . '.encrypt');
         } else {
-            return (bool)$this->meta['fields.' . $key . '.encrypt'];
+            return (bool)$this->getMetadata('fields.' . $key . '.encrypt');
         }
     }
 
@@ -2211,12 +2227,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 if ($this->isConfigurationField($key)) {
                     $name = $this->getConfigurationName($key);
                     $verbose_name =
-                        $this->meta['configurations.fields.' . $name . '.verbose_name']
-                        ?? $this->meta['configurations.fields.' . $name . '.label']
+                        $this->getMetadata('configurations.fields.' . $name . '.verbose_name')
+                        ?? $this->getMetadata('configurations.fields.' . $name . '.label')
                         ?? $name
                     ;
                 } else {
-                    $verbose_name = $this->meta['fields.' . $key . '.verbose_name'];
+                    $verbose_name = $this->getMetadata('fields.' . $key . '.verbose_name');
                 }
                 throw new \Exception(__(
                     'El atributo "%s" (%s) no es asignable masivamente.',
@@ -2243,11 +2259,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($this->isConfigurationField($key)) {
             $name = $this->getConfigurationName($key);
             $isFillable =
-                $this->meta['configurations']['fields'][$name]['fillable']
+                $this->getMetadata('configurations.fields.' . $name . '.fillable')
                 ?? null
             ;
         } else {
-            $isFillable = $this->meta['fields'][$key]['fillable'] ?? null;
+            $isFillable = $this->getMetadata('fields.' . $key . 'fillable') ?? null;
         }
         if ($isFillable !== null) {
             return $isFillable;
@@ -2320,7 +2336,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public function getField(string $key)
     {
         // Buscar configuración si existe.
-        $config = $this->meta['fields.' . $key];
+        $config = $this->getMetadata('fields.' . $key);
         if (!isset($config)) {
             return null;
         }
@@ -2389,22 +2405,65 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Entrega repositorio con los metadatos normalizados del modelo.
+     * Asigna los metadatos del modelo.
      *
-     * @param array|null $meta Arreglo con los metadatos que se desean usar.
-     * @return Repository Repositorio con los metadatos para fácil uso.
+     * @param array|Repository $metadata Metadatos que se desean asignar.
+     * @param bool $merge Si se debe hacer merge con datos del modelo (y extras)
+     * o se asignan solo los metadatos pasados mediante $metadata.
+     * @return Repository
      */
-    public function getMeta(?array $meta = []): Repository
+    public function setMetadata($metadata, $merge = true): Repository
     {
-        if (!($this->meta instanceof Repository)) {
-            $meta = $this->normalizeMeta($meta);
-            $extra = $this->extraMeta($meta);
-            $meta = \sowerphp\core\Utility_Array::mergeRecursiveDistinct(
-                $meta, $extra
+        // Si hay que hacer merge (por defecto) se unen las posibles fuentes de
+        // metadatos: modelo, extra y método.
+        if ($merge) {
+            // Unir los datos actuales (modelo) con los extras (extendidos).
+            $currentMetadata = $this->metadata instanceof Repository
+                ? $this->metadata->all()
+                : (array) $this->metadata
+            ;
+            $extraMetadata = $this->extraMetadata($currentMetadata);
+            $metadata = \sowerphp\core\Utility_Array::mergeRecursiveDistinct(
+                $currentMetadata,
+                $extraMetadata,
             );
-            $this->meta = new Repository($meta);
+            // Unir los metadatos del modelo+extra con los del método.
+            $newMetadata = $metadata instanceof Repository
+                ? $metadata->all()
+                : (array) $metadata
+            ;
+            $metadata = \sowerphp\core\Utility_Array::mergeRecursiveDistinct(
+                $metadata,
+                $newMetadata
+            );
+
+            // Normalizar los metadatos.
+            $metadata = $this->normalizeMetadata($metadata);
         }
-        return $this->meta;
+
+        // Asignar los metadatos (ya sea que vienen de merge o del método).
+        $this->metadata = $metadata instanceof Repository
+            ? $metadata
+            : new Repository($metadata)
+        ;
+
+        // Entregar el repositorio con los metadatos asignados.
+        return $this->metadata;
+    }
+
+    /**
+     * Entrega el repositorio con los metadatos normalizados del modelo o un
+     * valor dentro de los metadatos si se indica la llave.
+     *
+     * @param string|null $key Llave de búsqueda dentro de los metadatos.
+     * @return Repository|mixed|null
+     */
+    public function getMetadata(?string $key = null)
+    {
+        if (!($this->metadata instanceof Repository)) {
+            $this->metadata = new Repository($this->metadata);
+        }
+        return $key ? $this->metadata[$key] : $this->metadata;
     }
 
     /**
@@ -2413,77 +2472,77 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Este método estandariza el arreglo de metadatos para asegurar que todos
      * los valores sean consistentes y cumplan con las expectativas.
      *
-     * @param array $meta Arreglo sin normalizar.
+     * @param array $metadata Arreglo sin normalizar.
      * @return array Arreglo normalizado.
      */
-    protected function normalizeMeta(array $meta): array
+    protected function normalizeMetadata(array $metadata): array
     {
         // Agregar índices base del modelo y los campos (atributos) del modelo.
-        $meta = array_merge([
+        $metadata = array_merge([
             // Metadatos generales del modelo.
             'model' => [],
             // Metadatos de los campos (atributos) del modelo.
             'fields' => [],
             // Metadatos de la configuración extendida del modelo.
             'configurations' => null,
-        ], $meta);
+        ], $metadata);
         // Normalizar la configuración general del modelo.
-        $meta['model'] = array_merge(
+        $metadata['model'] = array_merge(
             $this->defaultModelConfig,
-            $meta['model']
+            $metadata['model']
         );
         // Agregar configuración del modelo que no se definieron y son
         // obligatorias.
-        if ($meta['model']['namespace'] === null) {
-            $meta['model']['namespace'] = $this->getNamespace();
+        if ($metadata['model']['namespace'] === null) {
+            $metadata['model']['namespace'] = $this->getNamespace();
         }
-        if ($meta['model']['singular'] === null) {
-            $meta['model']['singular'] = $this->getReflector()->getName();
+        if ($metadata['model']['singular'] === null) {
+            $metadata['model']['singular'] = $this->getReflector()->getName();
         }
-        if ($meta['model']['plural'] === null) {
-            $meta['model']['plural'] = app('inflector')->pluralize(
-                $meta['model']['singular']
+        if ($metadata['model']['plural'] === null) {
+            $metadata['model']['plural'] = app('inflector')->pluralize(
+                $metadata['model']['singular']
             );
         }
-        if ($meta['model']['db_table'] === null) {
-            list($aux, $singular) = explode('\Model_', $meta['model']['singular']);
-            $meta['model']['db_table'] = Str::snake($singular);
+        if ($metadata['model']['db_table'] === null) {
+            list($aux, $singular) = explode('\Model_', $metadata['model']['singular']);
+            $metadata['model']['db_table'] = Str::snake($singular);
         }
-        if ($meta['model']['verbose_name'] === null) {
+        if ($metadata['model']['verbose_name'] === null) {
             if (!isset($singular)) {
-                list($aux, $singular) = explode('\Model_', $meta['model']['singular']);
+                list($aux, $singular) = explode('\Model_', $metadata['model']['singular']);
             }
-            $meta['model']['verbose_name'] = $singular;
+            $metadata['model']['verbose_name'] = $singular;
         }
-        if ($meta['model']['verbose_name_plural'] === null) {
+        if ($metadata['model']['verbose_name_plural'] === null) {
             if (!isset($singular)) {
-                list($aux, $singular) = explode('\Model_', $meta['model']['singular']);
+                list($aux, $singular) = explode('\Model_', $metadata['model']['singular']);
             }
-            $meta['model']['verbose_name_plural'] = app('inflector')->pluralize(
+            $metadata['model']['verbose_name_plural'] = app('inflector')->pluralize(
                 $singular
             );
         }
-        if ($meta['model']['label'] === null) {
-            $module = app('module')->findModuleByClass($meta['model']['singular']);
-            $meta['model']['label'] = $module ?? $meta['model']['singular'];
+        if ($metadata['model']['label'] === null) {
+            $module = app('module')->findModuleByClass($metadata['model']['singular']);
+            $metadata['model']['label'] = $module ?? $metadata['model']['singular'];
             if (!isset($singular)) {
-                list($aux, $singular) = explode('\Model_', $meta['model']['singular']);
+                list($aux, $singular) = explode('\Model_', $metadata['model']['singular']);
             }
-            $meta['model']['label'] .= ':' . $singular;
+            $metadata['model']['label'] .= ':' . $singular;
         }
-        if ($meta['model']['label_lower'] === null) {
-            $meta['model']['label_lower'] = str_replace(
+        if ($metadata['model']['label_lower'] === null) {
+            $metadata['model']['label_lower'] = str_replace(
                 ':_',
                 ':',
-                str_replace('._', '.', Str::snake($meta['model']['label']))
+                str_replace('._', '.', Str::snake($metadata['model']['label']))
             );
         }
-        if ($meta['model']['list_per_page'] === null) {
-            $meta['model']['list_per_page'] = config('app.ui.pagination.registers', 20);
+        if ($metadata['model']['list_per_page'] === null) {
+            $metadata['model']['list_per_page'] = config('app.ui.pagination.registers', 20);
         }
         // Normalizar la configuración de cada campo del modelo.
-        $pkDefined = !empty($meta['model']['primary_key']);
-        foreach ($meta['fields'] as $name => &$config) {
+        $pkDefined = !empty($metadata['model']['primary_key']);
+        foreach ($metadata['fields'] as $name => &$config) {
             // Definir el tipo si no está definido.
             if (!isset($config['type'])) {
                 $config['type'] = $this->defaultFieldConfig['type'];
@@ -2503,7 +2562,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             // Si es llave primaria se corrigen atributos y se agrega al listado.
             if ($config['primary_key']) {
                 if (!$pkDefined) {
-                    $meta['model']['primary_key'][] = $name;
+                    $metadata['model']['primary_key'][] = $name;
                 }
                 $config['unique'] = true;
                 $config['null'] = false;
@@ -2550,9 +2609,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
         // Si no se determinó una llave primaria, se debe agregar un campo de
         // manera automática llamado "id".
-        if (empty($meta['model']['primary_key'])) {
-            $meta['model']['primary_key'] = ['id'];
-            $meta['fields'] = array_merge([
+        if (empty($metadata['model']['primary_key'])) {
+            $metadata['model']['primary_key'] = ['id'];
+            $metadata['fields'] = array_merge([
                 'id' => array_merge(
                     $this->defaultFieldConfig,
                     $this->defaultFieldConfigByType[self::TYPE_BIG_INCREMENTS],
@@ -2563,13 +2622,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                         'verbose_name' => 'ID',
                     ]
                 )
-            ], $meta['fields']);
+            ], $metadata['fields']);
         }
         // Si no hay un campo ID se agrega uno que no será un campo real en la
         // base de datos. Se autodeterminará y se utilizará para estandarizar
         // el acceso y búsqueda de registros que tienen PK con un nombre
         // diferente a ID o sobre todo aquellos modelos con PK compuestas.
-        if (!isset($meta['fields']['id'])) {
+        if (!isset($metadata['fields']['id'])) {
             // Definir configuración base del campo ID "falso".
             $idConfig = array_merge($this->defaultFieldConfig, [
                 'name' => 'id',
@@ -2589,8 +2648,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 'searchable' => false,
             ]);
             // Si la PK no es compuesta se usan las opciones base de la PK.
-            if (!isset($meta['model']['primary_key'][1])) {
-                $pkConfig = $meta['fields'][$meta['model']['primary_key'][0]];
+            if (!isset($metadata['model']['primary_key'][1])) {
+                $pkConfig = $metadata['fields'][$metadata['model']['primary_key'][0]];
                 $configKeys = ['type', 'cast'];
                 foreach ($configKeys as $key) {
                     $idConfig[$key] = $pkConfig[$key];
@@ -2598,53 +2657,53 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $idConfig['alias'] = $pkConfig['name'];
             }
             // Agregar campo ID.
-            $meta['fields'] = array_merge([
+            $metadata['fields'] = array_merge([
                 'id' => $idConfig,
-            ], $meta['fields']);
+            ], $metadata['fields']);
         }
         // Definir forma de ordenar y buscar registros si no se ha definido.
-        if (empty($meta['model']['ordering'])) {
-            foreach ($meta['model']['primary_key'] as $pk) {
-                $meta['model']['ordering'][] = '-' . $pk;
+        if (empty($metadata['model']['ordering'])) {
+            foreach ($metadata['model']['primary_key'] as $pk) {
+                $metadata['model']['ordering'][] = '-' . $pk;
             }
         }
-        if (empty($meta['model']['get_latest_by'])) {
-            $meta['model']['get_latest_by'] = $meta['model']['ordering'];
+        if (empty($metadata['model']['get_latest_by'])) {
+            $metadata['model']['get_latest_by'] = $metadata['model']['ordering'];
         }
         // Definir cómo obtener los campos de las choices del modelo.
         if (
-            !isset($meta['model']['choices']['id'])
-            || !isset($meta['model']['choices']['name']))
+            !isset($metadata['model']['choices']['id'])
+            || !isset($metadata['model']['choices']['name']))
         {
-            $keys = array_keys(array_filter($meta['fields'], function($field) {
+            $keys = array_keys(array_filter($metadata['fields'], function($field) {
                 return $field['db_column'];
             }));
-            $meta['model']['choices']['id'] =
-                $meta['model']['choices']['id']
+            $metadata['model']['choices']['id'] =
+                $metadata['model']['choices']['id']
                 ?? $keys[0]
                 ?? null
             ;
-            $meta['model']['choices']['name'] =
-                $meta['model']['choices']['name']
+            $metadata['model']['choices']['name'] =
+                $metadata['model']['choices']['name']
                 ?? $keys[1]
                 ?? null
             ;
         }
         // Entregar metadatos normalizados.
-        return $meta;
+        return $metadata;
     }
 
     /**
-     * Entrega una configuración extra para los metadatos del modelo.
+     * Entrega los metadatos extras del modelo.
      *
      * Este método se debe sobreescribir en el modelo que quiera entregar un
      * arreglo meta complementario al principal del modelo. Útil en herencias
      * de herencias de este modelo base.
      *
-     * @param array $meta Arreglo con los metadatos normalizados.
+     * @param array $metadata Arreglo con los metadatos actuales.
      * @return array Arreglo con los metadatos adicionales o modificados.
      */
-    protected function extraMeta(array $meta): array
+    protected function extraMetadata(array $metadata): array
     {
         return [];
     }
@@ -2656,8 +2715,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function getNamespace(): string
     {
-        if (isset($this->meta['model']['namespace'])) {
-            return $this->meta['model']['namespace'];
+        if ($this->getMetadata('model.namespace') !== null) {
+            return $this->getMetadata('model.namespace');
         }
         return $this->getReflector()->getNamespaceName();
     }
@@ -2669,7 +2728,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     public function getPrimaryKey(): array
     {
-        return $this->meta['model.primary_key'];
+        return $this->getMetadata('model.primary_key');
     }
 
     /**
@@ -2698,9 +2757,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             if ($value === null) {
                 throw new \Exception(__(
                     'El campo %s (%s) del modelo %s debe tener un valor asignado para construir la llave primaria (PK).',
-                    $this->getMeta()['fields.' . $key . '.verbose_name'],
+                    $this->getMetadata('fields.' . $key . '.verbose_name'),
                     $key,
-                    $this->getMeta()['model.label']
+                    $this->getMetadata('model.label')
                 ));
             }
         }
@@ -2738,20 +2797,20 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     protected function getIdAttribute()
     {
-        $meta = $this->getMeta();
-        $db_column = $meta['fields.id.db_column'];
+        $metadata = $this->getMetadata();
+        $db_column = $metadata['fields.id.db_column'];
         // Obtener el valor desde el arreglo de atributos del modelo.
         if ($db_column) {
             $id = $this->attributes['id'] ?? null;
             return $id === null ? null : (int) $id;
         }
         // Obtener el valor desde la PK cuando es alias (PK no compuesta).
-        $alias = $meta['fields.id.alias'];
+        $alias = $metadata['fields.id.alias'];
         if ($alias) {
             return $this->getAttribute($alias);
         }
         // Obtener el valor desde una PK compuesta.
-        return implode('/', $this->toArray($meta['model.primary_key'], [], false));
+        return implode('/', $this->toArray($metadata['model.primary_key'], [], false));
     }
 
     /**
@@ -2766,11 +2825,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Se solicita una opción de la configuración del modelo.
         if ($this->isConfigurationField($attribute)) {
             $name = $this->getConfigurationName($attribute);
-            $config = $this->meta['configurations.fields.' . $name];
+            $config = $this->getMetadata('configurations.fields.' . $name);
         }
         // Se solicita, probablemente, un atributo del modelo.
         else {
-            $config = $this->getMeta()['fields.' . $attribute];
+            $config = $this->getMetadata('fields.' . $attribute);
         }
         // Obtener valor por defecto de la configuración del atributo si existe.
         $default = $config['default'] ?? null;
@@ -2805,19 +2864,19 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     protected function getActions(): array
     {
-        $meta = $this->getMeta();
+        $metadata = $this->getMetadata();
         // Agregar las acciones por defecto si no se han especificado.
-        if ($meta['model.actions'] === null) {
+        if ($metadata['model.actions'] === null) {
             $actions = [];
             foreach ($this->controllerActions as $action) {
-                if (in_array($action['permission'], $meta['model.default_permissions'])) {
+                if (in_array($action['permission'], $metadata['model.default_permissions'])) {
                     $actions[] = $action;
                 }
             }
-            $meta['model.actions'] = $actions;
+            $metadata['model.actions'] = $actions;
         }
         // Entregar las acciones del modelo.
-        return $meta['model.actions'];
+        return $metadata['model.actions'];
     }
 
     /**
@@ -2829,7 +2888,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public function getListData(): array
     {
         // Generar reglas de valicación y obtener los metadatos generales.
-        $data = $this->meta->all();
+        $data = $this->getMetadata()->all();
         // Agregar los campos que se deben listar por defecto si no se han
         // especificado.
         if ($data['model']['list_display'] === null) {
@@ -2855,7 +2914,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public function getShowData(): array
     {
         // Generar reglas de valicación y obtener los metadatos generales.
-        $data = $this->meta->all();
+        $data = $this->getMetadata()->all();
         // Agregar las acciones del modelo.
         $data['model']['actions'] = $this->getActions();
         // Entregar los metadatos para mostrar un registro.
@@ -2904,7 +2963,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected function getSaveData(string $action): array
     {
         $this->generateFieldsValidationRules();
-        $data = $this->meta->all();
+        $data = $this->getMetadata()->all();
         foreach ($data['fields'] as $field => &$config) {
             foreach ($this->variantFields as $field) {
                 $config[$field] = $config[$field][$action]
@@ -2975,7 +3034,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected function generateFieldsValidationRules(): void
     {
         $validatorService = app('validator');
-        foreach ($this->meta['fields'] as $field => $config) {
+        foreach ($this->getMetadata('fields') as $field => $config) {
             if (!isset($config['validation'])) {
                 // Si el campo deber ser único se arma la regla de valicación
                 // acá pues depende del modelo.
@@ -2990,13 +3049,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                     ];
                     $ignore = [];
                     foreach ($primaryKey as $pk) {
-                        $ignore[$this->meta['fields.' . $pk . '.db_column']] =
+                        $ignore[$this->getMetadata('fields.' . $pk . '.db_column')] =
                             $this->getAttribute($pk)
                         ;
                     }
                     $config['unique'] = [
-                        'db_name' => $this->meta['model.db_name'],
-                        'db_table' => $this->meta['model.db_table'],
+                        'db_name' => $this->getMetadata('model.db_name'),
+                        'db_table' => $this->getMetadata('model.db_table'),
                         'columns' => $columns,
                         'ignore' => $ignore,
                     ];
@@ -3007,7 +3066,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 );
                 // Asignar reglas de valicación.
                 $key = 'fields.' . $field . '.validation';
-                $this->meta[$key] = (
+                $this->metadata[$key] = (
                     isset($validation['create'])
                     || isset($validation['edit'])
                 )
@@ -3030,7 +3089,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected function getRelationsChoices(): array
     {
         $relations = [];
-        foreach ($this->meta['fields'] as $field => $config) {
+        foreach ($this->getMetadata('fields') as $field => $config) {
             if (!isset($config['relation'])) {
                 continue;
             }
@@ -3039,7 +3098,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 continue;
             }
             $relations[$config['relation']] = [
-                'choices_fields' => $foreignKeyInstance->getMeta()['model.choices'],
+                'choices_fields' => $foreignKeyInstance->getMetadata('model.choices'),
                 'choices' => $foreignKeyInstance
                     ->getPluralInstance()
                     ->choices(['filters' => $config['limit_choices_to']])
@@ -3070,7 +3129,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     protected function getDatabaseColumns(): array
     {
-        $fields = $this->getMeta()['fields'];
+        $fields = $this->getMetadata('fields');
         $columns = array_filter(
             $this->attributes,
             function ($key) use ($fields) {
@@ -3115,17 +3174,17 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Determinar columna que se debe actualizar el timestamp.
         $column = null;
         if ($action == 'insert') {
-            $column = $this->getMeta()['model.audit.fields.created_at'];
+            $column = $this->getMetadata('model.audit.fields.created_at');
         } else if ($action == 'update') {
             if ($this->isDirty()) {
-                $column = $this->getMeta()['model.audit.fields.updated_at'];
+                $column = $this->getMetadata('model.audit.fields.updated_at');
             }
         } else if ($action == 'soft-delete') {
-            $column = $this->getMeta()['model.audit.fields.deleted_at'];
+            $column = $this->getMetadata('model.audit.fields.deleted_at');
         } else if ($action == 'restore') {
-            $column = $this->getMeta()['model.audit.fields.restored_at'];
+            $column = $this->getMetadata('model.audit.fields.restored_at');
         } else if ($action == 'retrieve') {
-            $column = $this->getMeta()['model.audit.fields.accessed_at'];
+            $column = $this->getMetadata('model.audit.fields.accessed_at');
         }
 
         // Realizar la actualización de la columna si se encontró una asociada
@@ -3225,7 +3284,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Verificar si se debe volver a cargar el registro recién guardado
         // para actualizar los atributos de la instancia.
         $selectOption = $options['select']
-            ?? $this->meta['model.select_on_save']
+            ?? $this->getMetadata('model.select_on_save')
         ;
         if ($selectOption) {
             $this->configurations = null;
@@ -3290,7 +3349,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Si la opción 'force' es verdadera, realizar una eliminación
         // permanente.
         $forceOption = $options['force']
-            ?? $this->meta['model.force_on_delete']
+            ?? $this->getMetadata('model.force_on_delete')
         ;
         if ($forceOption) {
             return $this->forceDelete($options);
@@ -3359,11 +3418,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected function runSoftDelete(array $options): bool
     {
         // Verificar si es posible hacer un soft delete.
-        $deleted_at = $this->getMeta()['model.audit.fields.deleted_at'];
+        $deleted_at = $this->getMetadata('model.audit.fields.deleted_at');
         if ($deleted_at === null) {
             throw new \Exception(__(
                 'Soft delete no está implementado en el modelo %s.',
-                $this->getMeta()['model.label']
+                $this->getMetadata('model.label')
             ));
         }
 
@@ -3514,7 +3573,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         // Obtener configuración de la relación si no fue pasada.
         if (empty($config)) {
-            $config = $this->meta['fields.' . $field];
+            $config = $this->getMetadata('fields.' . $field);
         }
         $class = $config['relation'] ?? null;
         if (empty($class)) {
@@ -3603,8 +3662,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Obtener instancia, metadatos, tabla y campos para filtrar en la
         // tabla relacionada.
         $instance = new $class();
-        $meta = $instance->getMeta();
-        $table = $meta['model.db_table'];
+        $metadata = $instance->getMetadata();
+        $table = $metadata['model.db_table'];
         $aux = $this->toArray(array_keys($related_field), [], false);
         $fields = array_combine(array_values($related_field), array_values($aux));
 
@@ -3617,8 +3676,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         ;
 
         // Aplicar ordenamiento si está especificado.
-        if (!empty($meta['model.ordering'])) {
-            foreach ($meta['model.ordering'] as $order_by) {
+        if (!empty($metadata['model.ordering'])) {
+            foreach ($metadata['model.ordering'] as $order_by) {
                 $column = $order_by[0] != '-' ? $order_by : substr($order_by, 1);
                 $order = $order_by[0] != '-' ? 'asc' : 'desc';
                 $query->orderBy($column, $order);
@@ -3651,10 +3710,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         // Obtener la tabla del modelo final.
         $instance = new $class();
-        $related_table = $instance->getMeta()['model.db_table'];
+        $related_table = $instance->getMetadata('model.db_table');
 
         // Obtener la tabla del modelo actual.
-        $local_table = $this->getMeta()['model.db_table'];
+        $local_table = $this->getMetadata('model.db_table');
 
         // Iniciar la consulta en la tabla intermedia.
         $query = $this->getDatabaseConnection()->query()->from($through);
@@ -3680,7 +3739,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             else {
                 $table_class = $models[$table] ?? ucfirst(Str::camel($table));
                 $intermediate_instance = new $table_class();
-                $source_table = $intermediate_instance->getMeta()['model.db_table'];
+                $source_table = $intermediate_instance->getMetadata('model.db_table');
                 $target_table = $through;
             }
 
@@ -3696,7 +3755,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
 
         // Filtrar por la clave primaria del modelo actual.
-        foreach ($through_fields[$this->getMeta()['model.db_table']] as $local_key => $through_key) {
+        foreach ($through_fields[$this->getMetadata('model.db_table')] as $local_key => $through_key) {
             $query->where("$through.$through_key", $this->$local_key);
         }
 
@@ -3726,7 +3785,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $pattern = '/^get([A-Z][a-zA-Z]*)Field$/';
         if (preg_match($pattern, $method, $matches)) {
             $field = Str::snake($matches[1]);
-            if (!isset($this->meta['fields.' . $field])) {
+            if ($this->getMetadata('fields.' . $field) === null) {
                 throw new \Exception(__(
                     'Método %s::%s() no existe.',
                     get_class($this),
@@ -3746,7 +3805,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Si es un "accessor" xyz(), puede ser de un campo que tiene una
         // relación o directamente de una relación, se procesa con getRelation().
         foreach (['fields', 'relations'] as $section) {
-            $config = $this->getMeta()[$section . '.' . $method];
+            $config = $this->getMetadata($section . '.' . $method);
             if ($config['relation'] ?? null) {
                 return call_user_func_array(
                     [$this, 'getRelation'],
@@ -3769,7 +3828,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     protected function hasConfigurations(): bool
     {
-        return !empty($this->meta['configurations']);
+        return !empty($this->getMetadata('configurations'));
     }
 
     /**
@@ -3802,9 +3861,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @return array Arreglo con los metadatos del modelo de configuraciones.
      */
-    protected function getConfigurationsModelMeta(): array
+    protected function getConfigurationsModelMetadata(): array
     {
-        $modelDbTable = $this->getMeta()['model.db_table'];
+        $modelDbTable = $this->getMetadata('model.db_table');
         $configModelDefaultMeta = [
             'db_table' => $modelDbTable . '_config',
             'relation' => [
@@ -3819,7 +3878,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         ];
         $configModelMeta = array_merge(
             $configModelDefaultMeta,
-            $this->getMeta()['configurations.model'] ?? []
+            $this->getMetadata('configurations.model') ?? []
         );
         return $configModelMeta;
     }
@@ -3828,27 +3887,27 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Entrega los datos para una consulta específica de configuraciones
      * de un registro.
      *
-     * @return array Arreglo con los datos para usar en la query.
+     * @return Repository Arreglo con los datos para usar en la query.
      * @throws Exception Si no están los datos necesarios para realizar la
      * query a la tabla de configuraciones del registro.
      */
-    protected function getConfigurationsQueryData(): array
+    protected function getConfigurationsQueryMetadata(): Repository
     {
         // Obtener los metadatos de las configuraciones.
-        $meta = $this->getConfigurationsModelMeta();
+        $modelMetadata = $this->getConfigurationsModelMetadata();
         // Armar la información para la query, incluye la FK y sus valores.
-        $data = [
-            'db_table' => $meta['db_table'],
+        $queryMetadata = [
+            'db_table' => $modelMetadata['db_table'],
             'relation' => [],
             'fields' => [
-                'category' => $meta['fields']['category'],
-                'key' => $meta['fields']['key'],
-                'value' => $meta['fields']['value'],
-                'is_json' => $meta['fields']['is_json'],
+                'category' => $modelMetadata['fields']['category'],
+                'key' => $modelMetadata['fields']['key'],
+                'value' => $modelMetadata['fields']['value'],
+                'is_json' => $modelMetadata['fields']['is_json'],
             ],
         ];
         // Asignar la llave foránea del modelo de configuración.
-        foreach ($meta['foreign_key'] as $configModelField => $modelField) {
+        foreach ($modelMetadata['foreign_key'] as $configModelField => $modelField) {
             $modelValue = $this->getAttribute($modelField);
             if ($modelValue === null) {
                 throw new \Exception(__(
@@ -3857,10 +3916,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                     static::class
                 ));
             }
-            $data['foreign_key'][$configModelField] = $modelValue;
+            $queryMetadata['foreign_key'][$configModelField] = $modelValue;
         }
         // Entregar los datos de la query para configuraciones.
-        return $data;
+        return new Repository($queryMetadata);
     }
 
     /**
@@ -3873,24 +3932,24 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         // Obtener metadatos del modelo de configuración.
         try {
-            $meta = $this->getConfigurationsQueryData();
+            $metadata = $this->getConfigurationsQueryMetadata();
         } catch (\Exception $e) {
             return [];
         }
         // Armar y realizar la query a la tabla de configuraciones del modelo.
-        $query = $this->getDatabaseConnection()->table($meta['db_table']);
-        foreach ($meta['foreign_key'] as $field => $value) {
+        $query = $this->getDatabaseConnection()->table($metadata['db_table']);
+        foreach ($metadata['foreign_key'] as $field => $value) {
             $query->where($field, '=', $value);
         }
-        $results = $query->get(array_values($meta['fields']));
+        $results = $query->get(array_values($metadata['fields']));
         // Armar arreglo con las configuraciones del modelo.
         $configurations = [];
         foreach ($results as $row) {
             // Obtener valores desde la base de datos.
-            $category = $row->{$meta['fields']['category']};
-            $key = $row->{$meta['fields']['key']};
-            $value = $row->{$meta['fields']['value']};
-            $is_json = $row->{$meta['fields']['is_json']};
+            $category = $row->{$metadata['fields']['category']};
+            $key = $row->{$metadata['fields']['key']};
+            $value = $row->{$metadata['fields']['value']};
+            $is_json = $row->{$metadata['fields']['is_json']};
             // Desencriptar y decodificar JSON si es necesario.
             $attribute = 'config_' . $category . '_' . $key;
             if ($this->hasEncryption($attribute)) {
@@ -3920,7 +3979,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected function saveConfigurations(): bool
     {
         // Asignar configuraciones por defecto.
-        foreach ($this->meta['configurations.fields'] as $field => $config) {
+        foreach ($this->getMetadata('configurations.fields') as $field => $config) {
             if ($this->getDefaultValue($field)) {
                 $key = $this->getConfigurationKey('config_' . $field);
                 if ($this->configurations[$key] === null) {
@@ -3938,7 +3997,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
         // Obtener metadatos del modelo de configuración.
         try {
-            $meta = $this->getConfigurationsQueryData();
+            $metadata = $this->getConfigurationsQueryMetadata();
         } catch (\Exception $e) {
             return false;
         }
@@ -3959,17 +4018,17 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 }
                 // Determinar llave primaria para filtrar y valores a guardar
                 // de la configuración asociada al modelo.
-                $primaryKeyValues = array_merge($meta['foreign_key'], [
-                    $meta['fields']['category'] => $category,
-                    $meta['fields']['key'] => $key,
+                $primaryKeyValues = array_merge($metadata['foreign_key'], [
+                    $metadata['fields']['category'] => $category,
+                    $metadata['fields']['key'] => $key,
                 ]);
                 $configValues = [
-                    $meta['fields']['value'] => $value,
-                    $meta['fields']['is_json'] => $is_json,
+                    $metadata['fields']['value'] => $value,
+                    $metadata['fields']['is_json'] => $is_json,
                 ];
                 // Realizar la consulta a la base de datos para guardar la
                 // configuración asociada al modelo.
-                $query = $this->getDatabaseConnection()->table($meta['db_table']);
+                $query = $this->getDatabaseConnection()->table($metadata['db_table']);
                 if ($value !== null) {
                     $saved = $query->updateOrInsert(
                         $primaryKeyValues,
@@ -4062,7 +4121,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected function getConfigurationLabel(string $attribute): string
     {
         $name = $this->getConfigurationName($attribute);
-        $label = $this->meta['configurations.fields.' . $name . '.label'];
+        $label = $this->getMetadata('configurations.fields.' . $name . '.label');
         if (strpos($label, ':')) {
             list($module, $label) = explode(':', $label);
         }
@@ -4105,7 +4164,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         // Buscar valor por defecto si no existe valor encontrado.
         if ($value === null) {
             $name = $this->getConfigurationName($attribute);
-            $value = $this->meta['configurations.fields.' . $name . '.default'] ?? null;
+            $value = $this->getMetadata('configurations.fields.' . $name . '.default');
         }
         // Entregar valor de la configuración.
         return $value;
@@ -4208,7 +4267,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         }
         // Crear la información de las columnas a partir de los metadatos.
         $columnsInfo = [];
-        foreach ($this->getMeta()['fields'] as $name => $config) {
+        foreach ($this->getMetadata('fields') as $name => $config) {
             $columnsInfo[$name] = [
                 'name'      =>  $config['verbose_name'],
                 'comment'   =>  $config['help_text'],

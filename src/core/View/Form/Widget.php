@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SowerPHP: Framework PHP hecho en Chile.
+ * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
@@ -134,7 +134,7 @@ class View_Form_Widget implements \ArrayAccess
 
     protected function renderDefaultWidget(): string
     {
-        $this->attributes['value'] = $this->value;
+        $this->attributes['value'] = $this->attributes['value'] ?? $this->value;
         return sprintf(
             '<input %s />',
             html_attributes($this->attributes)
@@ -146,6 +146,7 @@ class View_Form_Widget implements \ArrayAccess
         if (!empty($this->value)) {
             $this->value = substr($this->value, 0, 10);
         }
+        $this->attributes['type'] = 'date';
         return $this->renderDefaultWidget();
     }
 
@@ -154,6 +155,7 @@ class View_Form_Widget implements \ArrayAccess
         if (!empty($this->value)) {
             $this->value = substr($this->value, 0, 16);
         }
+        $this->attributes['type'] = 'datetime-local';
         return $this->renderDefaultWidget();
     }
 
@@ -183,7 +185,7 @@ class View_Form_Widget implements \ArrayAccess
 
     protected function renderTextWidget(): string
     {
-        return '';
+        return $this->renderDefaultWidget();
     }
 
     protected function renderPasswordWidget(): string
@@ -245,4 +247,5 @@ class View_Form_Widget implements \ArrayAccess
     {
         return '';
     }
+
 }

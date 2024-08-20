@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SowerPHP: Framework PHP hecho en Chile.
+ * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
@@ -105,10 +105,44 @@ class View_Engine_Twig extends View_Engine
      */
     public function render(string $filepath, array $data): string
     {
-        // Convertir la ruta absoluta a relativa.
+        // Renderizar la plantilla con el contenido en los datos.
+        if (isset($data['_content'])) {
+            return $this->renderWithContent($filepath, $data);
+        }
+        // Renderizar la plantilla de manera normal (sin contenido en datos).
         $relativePath = substr(str_replace($this->viewPaths, '', $filepath), 1);
-        // Renderizar la plantilla.
         return $this->twig->render($relativePath, $data);
+    }
+
+    /**
+     * Renderizar una plantilla Twig que tiene el contenido en los datos.
+     *
+     * Este método renderiza la plantilla considerando que viene un índice
+     * `_content` en los datos. Esto significa que se deberá buscar un bloque
+     * `content` en la plantilla y reemplazar su contenido antes de renderizar
+     * con twig.
+     *
+     * Caso de uso: cuando se quiere renderizar dentro de un layout twig
+     * contenido de otro motor de renderizado. Por ejemplo al renderizar
+     * contenido markdown dentro de un layout twig.
+     *
+     * @param string $filepath Ruta a la plantilla Twig que se va a renderizar.
+     * @param array $data Datos que se pasarán a la plantilla Twig para su uso
+     * dentro de la vista. Incluye un índice `_content` con el contenido para
+     * el bloque `content` de la plantilla twig.
+     * @return string El contenido HTML generado por la plantilla Twig.
+     */
+    protected function renderWithContent(string $filepath, array $data): string
+    {
+        $templateContent = file_get_contents($filepath);
+        $templateContent = preg_replace(
+            '/\{% block content %\}(.*?)\{% endblock %\}/s',
+            $data['_content'] ?? '',
+            $templateContent
+        );
+        unset($data['_content']);
+        $template = $this->twig->createTemplate($templateContent);
+        return $template->render($data);
     }
 
     /**

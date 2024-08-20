@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SowerPHP: Framework PHP hecho en Chile.
+ * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
@@ -40,7 +40,7 @@ class Model_Usuario extends Model implements Authenticatable
      *
      * @var array
      */
-    protected $meta = [
+    protected $metadata = [
         'model' => [
             'db_table_comment' => 'Usuarios de la aplicación.',
             'ordering' => ['-ultimo_ingreso_fecha_hora'],

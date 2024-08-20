@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SowerPHP: Framework PHP hecho en Chile.
+ * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
@@ -698,8 +698,11 @@ function split_parameters(string $parametersString, string $delimiter = ','): ar
  * @param array $attributes Arreglo de atributos.
  * @return string Cadena de atributos HTML.
  */
-function html_attributes(array $attributes): string
+function html_attributes(?array $attributes): string
 {
+    if (empty($attributes)) {
+        return '';
+    }
     $attributes = array_filter($attributes, function($value) {
         return $value !== null && $value !== false && $value !== '';
     });
