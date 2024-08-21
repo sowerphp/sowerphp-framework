@@ -44,6 +44,10 @@ class View_Form_Model extends View_Form
             'attributes' => $options['form']['attributes'] ?? [],
             'fields' => $fields,
             'submit_button' => $options['form']['submit_button'] ?? [],
+            'layout' => $options['form']['layout']
+                ?? $options['model']['layout']
+                ?? null
+            ,
         ];
     }
 

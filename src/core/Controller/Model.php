@@ -149,7 +149,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $config['value'] = $instance->getAttribute($field);
         }
         return $this->render('show', [
-            'id' => $id,
+            'instance' => $instance,
             'data' => $data,
         ]);
     }
@@ -170,27 +170,13 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 $instance->getMetadata('model.label')
             ))->back();
         }
-        // Preparar los metadatos para el formulario de creación.
-        $options = $instance->getSaveDataCreate();
-        $routeConfig = $request->getRouteConfig();
-        // Agregar metadatos del formulario en si.
-        $options['form'] = [
-            'data' => $request->input(),
-            'files' => $request->file(),
-            'attributes' => [
-                'id' => $options['model']['db_table'] . 'ModelCreateForm',
-                'action' => url($routeConfig['url']['controller'] . '/store'),
-                'onsubmit' => 'return validateModelCreateForm(this)',
-            ],
-            'submit_button' => [
-                'label' => 'Crear nuevo ' . strtolower($options['model']['verbose_name']),
-            ],
-        ];
         // Crear formulario a partir de los metadados del modelo.
+        $options = $this->getFormOptions($instance, 'create');
         $form = View_Form_Model::create($options);
+        unset($options['form']);
         // Renderizar la vista con el formulario de creación.
         return $this->render('create', [
-            'data' => $options,
+            'metadata' => $options,
             'form' => $form,
         ]);
     }
@@ -204,15 +190,15 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         $instance = $this->modelService->instantiate(
             $this->getModelClass()
         );
-        // Validar datos.
-        try {
-            $rules = $instance->getValidationRulesCreate();
-            $validatedData = $request->validate($rules);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        // Crear formulario a partir de los metadados del modelo.
+        $options = $this->getFormOptions($instance, 'store');
+        $form = View_Form_Model::create($options);
+        // Validar formmulario.
+        if (!$form->is_valid()) {
             return redirect()
                 ->back(422)
-                ->withErrors($e->errors(), 'create')
                 ->withInput()
+                ->withErrors($form->errors, $form->errors_key)
             ;
         }
         // Obtener URL de la API que se deberá consumir.
@@ -223,7 +209,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $routeConfig['action']
         );
         // Consumir recurso de la API.
-        $response = libredte()->post($url, ['data' => $validatedData]);
+        $response = libredte()->post($url, ['data' => $form->cleaned_data]);
         $json = $response->json() ?? $response->body();
         if (!$response->successful()) {
             if (is_string($json)) {
@@ -270,31 +256,14 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 $instance->getMetadata('model.label')
             ))->back();
         }
-        // Preparar los metadatos para el formulario de edición.
-        $options = $instance->getSaveDataEdit();
-        $routeConfig = $request->getRouteConfig();
-        // Agregar metadatos del formulario en si.
-        $options['form'] = [
-            'data' => $request->input(),
-            'files' => $request->file(),
-            'attributes' => [
-                'id' => $options['model']['db_table'] . 'ModelEditForm',
-                'action' => url(
-                    $routeConfig['url']['controller']
-                    . '/update/'
-                    . implode('/', $id)
-                ),
-                'onsubmit' => 'return validateModelEditForm(this)',
-            ],
-            'submit_button' => [
-                'label' => 'Editar ' . strtolower($options['model']['verbose_name']),
-            ],
-        ];
         // Crear formulario a partir de los metadados del modelo.
+        $options = $this->getFormOptions($instance, 'edit');
         $form = View_Form_Model::create($options);
+        unset($options['form']);
         // Renderizar la vista con el formulario de edición.
         return $this->render('edit', [
-            'data' => $options,
+            'instance' => $instance,
+            'metadata' => $options,
             'form' => $form,
         ]);
     }
@@ -308,15 +277,15 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         $instance = $this->modelService->instantiate(
             $this->getModelClass()
         );
-        // Validar datos.
-        try {
-            $rules = $instance->getValidationRulesEdit();
-            $validatedData = $request->validate($rules);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        // Crear formulario a partir de los metadados del modelo.
+        $options = $this->getFormOptions($instance, 'update');
+        $form = View_Form_Model::create($options);
+        // Validar formmulario.
+        if (!$form->is_valid()) {
             return redirect()
                 ->back(422)
-                ->withErrors($e->errors(), 'edit')
                 ->withInput()
+                ->withErrors($form->errors, $form->errors_key)
             ;
         }
         // Obtener URL de la API que se deberá consumir.
@@ -328,7 +297,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             implode('/', $id)
         );
         // Consumir recurso de la API.
-        $response = libredte()->put($url, ['data' => $validatedData]);
+        $response = libredte()->put($url, ['data' => $form->cleaned_data]);
         $json = $response->json() ?? $response->body();
         if (!$response->successful()) {
             if (is_string($json)) {
@@ -374,6 +343,85 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         } else {
             return redirect()->withSuccess($json['message'])->back($response->status());
         }
+    }
+
+    /**
+     * Entrega las opciones para crear el formulario para una acción de
+     * creación o edición del modelo.
+     *
+     * Las opciones se crean usando los metadatos del modelo ($instance).
+     *
+     * @param Model $instance Instancia del modelo que se desean obtener sus
+     * opciones del formulario.
+     * @param string $action Para creación se utiliza `create` y `store`.
+     * Para edición se utiliza: `edit` y `update`.
+     * @return array Arreglo con las opciones para pasar al formulario.
+     */
+    protected function getFormOptions($instance, string $action): array
+    {
+        $request = request();
+        $routeConfig = $request->getRouteConfig();
+
+        // Es para un formulario de creación.
+        if ($action == 'create' || $action == 'store') {
+            $options = $instance->getSaveDataCreate();
+            $options['form'] = [
+                'data' => $request->input(),
+                'files' => $request->file(),
+                'attributes' => [
+                    'id' => $options['model']['db_table'] . 'ModelCreateForm',
+                    'action' => url($routeConfig['url']['controller'] . '/store'),
+                    'onsubmit' => 'return validateModelCreateForm(this)',
+                ],
+                'submit_button' => [
+                    'label' => 'Crear nuevo ' . strtolower($options['model']['verbose_name']),
+                ],
+                'layout' => $options['form']['layout']['create']
+                    ?? $options['form']['layout']
+                    ?? $options['model']['layout']['create']
+                    ?? $options['model']['layout']
+                    ?? null
+                ,
+            ];
+        }
+
+        // Es para un formulario de edición.
+        else if ($action == 'edit' || $action == 'update') {
+            $options = $instance->getSaveDataEdit();
+            $options['form'] = [
+                'data' => $request->input(),
+                'files' => $request->file(),
+                'attributes' => [
+                    'id' => $options['model']['db_table'] . 'ModelEditForm',
+                    'action' => url(
+                        $routeConfig['url']['controller']
+                        . '/update/'
+                        . $instance->id
+                    ),
+                    'onsubmit' => 'return validateModelEditForm(this)',
+                ],
+                'submit_button' => [
+                    'label' => 'Editar ' . strtolower($options['model']['verbose_name']),
+                ],
+                'layout' => $options['form']['layout']['edit']
+                    ?? $options['form']['layout']
+                    ?? $options['model']['layout']['edit']
+                    ?? $options['model']['layout']
+                    ?? null
+                ,
+            ];
+        }
+
+        // Se pidió una acción no soportada.
+        else {
+            throw new \Exception(__(
+                'No es posible obtener las opciones de formulario para la acción %s.',
+                $action
+            ));
+        }
+
+        // Entregar las opciones del formulario determinadas.
+        return $options;
     }
 
     /**

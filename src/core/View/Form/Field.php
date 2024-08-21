@@ -406,6 +406,10 @@ class View_Form_Field implements \ArrayAccess
         $attributes['id'] = $attributes['id']
             ?? ($attributes['name'] ?? null) . 'Field'
         ;
+        // Si el atributo es requerido se agrega una marca 'aria'.
+        if ($attributes['required']) {
+            $attributes['aria-required'] = 'true';
+        }
         // Agregar atributos que son de elementos like 'input'.
         $widgetTypes = [
             // Tipos de widgets propios del framework.

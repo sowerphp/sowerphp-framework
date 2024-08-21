@@ -2580,7 +2580,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 'cast' => $config['cast'] ?? $this->casts[$name] ?? null,
                 'verbose_name' => $config['verbose_name'] ?? ucfirst(str_replace('_', ' ', $name)),
                 'fillable' => $config['fillable'] ?? $this->isFillable($name),
-                'required' => $config['required'] ?? !($config['null'] || $config['blank']),
+                'required' => $config['required']
+                    ?? (!$config['auto'] && !($config['null'] || $config['blank'])),
                 'hidden' => $config['hidden'] ?? in_array($name, $this->hidden),
             ]);
             // Agregar sanitización según configuración.
@@ -2793,7 +2794,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *   - ID como alias del atributo real que no se llama ID.
      *   - ID como alias de una PK compuesta.
      *
-     * @return void
+     * @return int|string|null
      */
     protected function getIdAttribute()
     {
@@ -2930,6 +2931,9 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     public function getSaveDataCreate(): array
     {
         $data = $this->getSaveData('create');
+        foreach ($data['fields'] as $field => &$config) {
+            $config['initial_value'] = $this->getDefaultValue($field);
+        }
         return $data;
     }
 

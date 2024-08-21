@@ -44,41 +44,46 @@ class Model_MonedaCambio extends Model
             'verbose_name_plural' => 'Tipos de cambios de monedas',
             'db_table_comment' => 'Tipos de cambio de diferentes monedas, se registra un valor por día.',
             'ordering' => ['-fecha'],
-            //'list_group_by' => 'fecha',
         ],
         'fields' => [
             'desde' => [
                 'type' => self::TYPE_CHAR,
                 'primary_key' => true,
-                'null' => true,
-                'blank' => true,
                 'length' => 3,
-                'verbose_name' => 'Desde',
+                'verbose_name' => 'Moneda de origen',
                 'help_text' => 'Moneda de origen que se desea cambiar.',
             ],
             'a' => [
                 'type' => self::TYPE_CHAR,
                 'primary_key' => true,
-                'null' => true,
-                'blank' => true,
                 'length' => 3,
-                'verbose_name' => 'A',
-                'help_text' => 'Moneda de destino a la que se convertirá.',
+                'default' => 'CLP',
+                'verbose_name' => 'Moneda de destino',
+                'help_text' => 'Moneda de destino a la que se cambiará.',
             ],
             'fecha' => [
                 'type' => self::TYPE_DATE,
                 'primary_key' => true,
-                'null' => true,
-                'blank' => true,
-                'verbose_name' => 'Fecha',
-                'help_text' => 'Fecha de la conversión de moneda.',
+                'default' => '__NOW__',
+                'verbose_name' => 'Fecha del tipo de cambio',
+                'help_text' => 'Fecha del tipo de cambio para la conversión de la moneda de origen a la de destino.',
             ],
             'valor' => [
                 'type' => self::TYPE_FLOAT,
-                'verbose_name' => 'Valor',
-                'help_text' => 'Valor cambiado.',
+                'verbose_name' => '¿Cuánto vale la moneda de origen en la de destino?',
+                'help_text' => 'Precio del tipo de cambio de la moneda de origen a la de destino.',
             ],
         ],
+        'form' => [
+            'layout' => [
+                [
+                    'rows' => [
+                        ['desde', 'a'],
+                        ['fecha', 'valor'],
+                    ]
+                ]
+            ],
+        ]
     ];
 
     private static $monedas_aduana = [

@@ -7,14 +7,14 @@
 <div class="d-flex justify-content-end mb-3">
     {% for action in data.model.actions %}
         {% if action.action != 'show' %}
-            <a href="{{ _url }}{{ _route.url.controller }}/{{ action.action }}/{{id | join('/')}}" class="btn btn-primary btn-sm me-2" {% if action.confirmation_message %}onclick="return __.confirm(this, '{{ action.confirmation_message | replace({':label': data.model.label}) | replace({':id': id | join(', ') })}}');"{% endif %}>
-                <i class="{{ action.icon }}"></i>
+            <a href="{{ _url }}{{ _route.url.controller }}/{{ action.action }}/{{instance.id | join('/')}}" class="btn btn-primary me-2" {% if action.confirmation_message %}onclick="return __.confirm(this, '{{ action.confirmation_message | replace({':label': data.model.label}) | replace({':id': instance.id | join(', ') })}}');"{% endif %}>
+                <i class="{{ action.icon }} me-2"></i>
                 {{ action.label }}
             </a>
         {% endif %}
     {% endfor %}
-    <a href="{{ _url }}{{ _route.url.controller }}" class="btn btn-primary btn-sm">
-        <i class="fa-solid fa-table-list"></i>
+    <a href="{{ _url }}{{ _route.url.controller }}" class="btn btn-primary">
+        <i class="fa-solid fa-table-list me-2"></i>
         Listado de {{ data.model.verbose_name_plural|lower }}
     </a>
 </div>

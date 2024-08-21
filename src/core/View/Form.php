@@ -103,6 +103,16 @@ class View_Form implements \ArrayAccess
     public $use_required_attribute = true;
 
     /**
+     * Layout por defecto con el que se debe renderizar el formulario.
+     *
+     * Esta opción se utiliza si se solicita un renderizado global del
+     * formulario. No se utilizará si se renderizan los campos individualmente.
+     *
+     * @var string|array|object|null
+     */
+    public $layout = null;
+
+    /**
      * Un booleano que indica si el formulario ha sido enviado con datos (es
      * decir, si está "bound").
      *
@@ -212,6 +222,8 @@ class View_Form implements \ArrayAccess
      * @param bool|null $use_required_attribute Un booleano que indica si se
      * debe usar el atributo required en los campos del formulario al
      * renderizar el HTML.
+     * @param string|array|null $layout Layout que se debe usar para renderizar
+     * los campos del formulario cuando se solicita un renderiza global.
      */
     public function __construct(
         array $options = [],
@@ -227,7 +239,8 @@ class View_Form implements \ArrayAccess
         bool $use_required_attribute = true,
         array $attributes = [],
         array $fields = [],
-        array $submit_button = []
+        array $submit_button = [],
+        $layout = null
     )
     {
         // Inicializar propiedades con valores proporcionados.
@@ -243,6 +256,7 @@ class View_Form implements \ArrayAccess
             'field_order',
             'use_required_attribute',
             'fields',
+            'layout',
         ];
         foreach ($formAttrs as $attr) {
             $this->$attr =
@@ -660,7 +674,12 @@ class View_Form implements \ArrayAccess
      */
     public static function create(array $options = []): self
     {
-        $options = static::buildForm($options);
+        $merge = $options['merge'] ?? true;
+        if ($merge) {
+            $options = array_merge($options, static::buildForm($options));
+        } else {
+            $options = static::buildForm($options);
+        }
         if (isset($options['fields'])) {
             foreach ((array)$options['fields'] as $name => $field) {
                 if (is_array($field)) {

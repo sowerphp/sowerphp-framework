@@ -26,6 +26,7 @@ namespace sowerphp\core;
 use \Twig\TwigFunction;
 use \Twig\Markup;
 use \Twig\Error\Error as TwigException;
+use \Illuminate\Support\Str;
 use \sowerphp\core\Facade_Session_Message as SessionMessage;
 
 /**
@@ -83,7 +84,9 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
             new TwigFunction('form_captcha', [$this, 'function_form_captcha']),
             new TwigFunction('form_csrf', [$this, 'function_form_csrf']),
             new TwigFunction('form_submit', [$this, 'function_form_submit']),
-            new TwigFunction('form_errors_message', [$this, 'function_form_errors_message']),
+            new TwigFunction('form_errors_global', [$this, 'function_form_errors_global']),
+            new TwigFunction('form_fields', [$this, 'function_form_fields']),
+            new TwigFunction('form_layout', [$this, 'function_form_layout']),
         ];
     }
 
@@ -183,7 +186,9 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         $label = $this->function_form_label($field, [
             'label' => $options['label'] ?? null,
             'label_attr' => $options['label_attr'] ?? null,
-            'label_translation_parameters' => $options['label_translation_parameters'] ?? null,
+            'label_translation_parameters' =>
+                $options['label_translation_parameters'] ?? null
+            ,
         ]);
         $widget = $this->function_form_widget($field, [
             'attr' => $options['attr'] ?? null,
@@ -191,8 +196,9 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         $errors = $this->function_form_errors($field);
         $help = $this->function_form_help($field);
         // Generar el HTML del campo.
+        $required = ($field['required'] ?? null) ? ' required' : '';
         $html = sprintf(
-            '<div class="row mb-3 form-group'.(($field['required'] ?? null)?' required':'').'">
+            '<div class="row mb-3 form-group'.$required.'">
                 <div class="col-sm-2">
                     %s
                 </div>
@@ -227,10 +233,16 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      *     Ejemplo: ['class' => 'control-label'].
      *   - 'label_translation_parameters' (array): Parámetros de traducción
      *     para la etiqueta del campo. Ejemplo: ['%email%' => 'example@example.com'].
+     *   - 'required_label' (bool|string): para indicar si se debe mostrar si
+     *     el campo es obligatorio (por defecto `true`). Si es un string, será
+     *     el texto que se incluirá para indicar que el campo es obligatorio.
      * @return \Twig\Markup Código HTML para la etiqueta del campo del formulario.
      */
     public function function_form_label($field, array $options = []): Markup
     {
+        $options = array_merge([
+            'required_label' => true,
+        ], $options);
         // Si el field no existe error.
         if ($field === null) {
             throw new TwigException(__(
@@ -245,15 +257,25 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         }
         $id = $field['widget']['attributes']['id'] ?? $name . 'Field';
         // Atributos de la etiqueta.
-        $attributes = html_attributes([
+        $attributes = html_attributes(array_merge([
             'for' => $id,
-            'class' => 'form-label'
-        ]);
+            'class' => 'form-label',
+        ], $options['label_attr'] ?? []));
+        // Determinar la marca de label si es requerido el campo.
+        $required_label = '';
+        if ($options['required_label'] && ($field['required'] ?? false)) {
+            if (is_string($options['required_label'])) {
+                $required_label = ' ' . $options['required_label'];
+            } else {
+                $required_label = ' <i class="fa-solid fa-asterisk small text-danger"></i><br/><span class="small text-muted">Este campo es obligatorio.</span>';
+            }
+        }
         // Generar el HTML de la etiqueta.
         $html = sprintf(
-            '<label %s>%s</label>',
+            '<label %s>%s%s</label>',
             $attributes,
-            e($label)
+            e($label),
+            $required_label
         );
         // Entregar la etiqueta renderizada.
         return new Markup($html, $this->charset);
@@ -323,7 +345,10 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         // Generar el HTML de los errores.
         $html = '<ul class="list-unstyled mb-0">';
         foreach ($errors as $error) {
-            $html .= sprintf('<li><i class="fa-solid fa-exclamation-circle"></i> %s</li>', e($error));
+            $html .= sprintf(
+                '<li><i class="fa-solid fa-exclamation-circle"></i> %s</li>',
+                e($error)
+            );
         }
         $html .= '</ul>';
         // Entregar los errores renderizados.
@@ -368,15 +393,20 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * Renderiza todos los campos no renderizados previamente en el formulario.
      *
      * @param object|array $form El formulario completo.
+     * @param array $options Opciones adicionales para personalizar el
+     * renderizado del campo mediante form_row().
      * @return \Twig\Markup Código HTML para los campos restantes.
      */
-    public function function_form_rest($form): Markup
+    public function function_form_rest($form, array $options = []): Markup
     {
         // Generar el HTML de todos los campos que no han sido renderizados.
         $html = '';
         foreach ($form['fields'] as $field) {
-            if (!in_array($field['name'], $this->renderedFields) && $field['editable']) {
-                $html .= $this->function_form_row($field);
+            if (
+                $field['editable']
+                && !in_array($field['name'], $this->renderedFields)
+            ) {
+                $html .= $this->function_form_row($field, $options);
             }
         }
         // Entregar los campos pendientes de renderizar renderizados.
@@ -492,19 +522,289 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
     }
 
     /**
-     * Función que genera el HTML de un mensaje de error cuando el formulario
-     * contiene errores.
+     * Genera el HTML de un mensaje de error (en formato alerta) cuando el
+     * formulario contiene campos con errores.
      *
+     * @param object|array $form El formulario completo.
      * @param string|null $message Mensaje a mostrar o se usa uno por defecto.
      * @return Markup
      */
-    public function function_form_errors_message(?string $message = null): Markup
+    public function function_form_errors_global($form, ?string $message = null): Markup
     {
+        // Mensaje general si hay errores en el formulario.
         $html = SessionMessage::render([
             'type' => 'error',
             'text' => $message ?? $this->defaultErrorsMessage,
         ]);
+        // Agregar errores de campos no renderizados.
+        // NOTE: esto normalmente debería ser un error de programación.
+        // Se muestran para que al programar se sepa que existen y se puedan
+        // controlar o corregir estos campos no renderizados con errores.
+        // Esto solo funcionará correctamente si la función es llamada en la
+        // plantilla después de renderizar los campos del formulario.
+        foreach ($form['fields'] as $field) {
+            if (
+                !empty($field['error_messages'])
+                && !in_array($field['name'], $this->renderedFields)
+            ) {
+                foreach ($field['error_messages'] as $error) {
+                    $html .= SessionMessage::render([
+                        'type' => 'error',
+                        'text' => $error,
+                    ]);
+                }
+            }
+        }
+        // Entregar HTML de los errores globales.
         return new \Twig\Markup($html, 'UTF-8');
+    }
+
+    /**
+     * Renderiza todos los campos del formulario. Por defecto con el layout
+     * usando "form_row()", pero se puede personalizar el layout.
+     *
+     * @param object|array $form El formulario completo.
+     * @param array $options Opciones adicionales para personalizar el
+     * formulario. Algunas opciones son:
+     *   - 'layout' (string|array): layout que se debe renderizar, por defecto
+     *     se usa el string `row`, también se puede indicar un arreglo con la
+     *     configuración del layout y campos.
+     * Si el formato es el por defecto `row` $options puede contener cualquier
+     * opción disponible en form_row().
+     * @return Markup
+     */
+    public function function_form_fields($form, array $options = []): Markup
+    {
+        $layout = $options['layout'] ?? $form['layout'] ?? 'row';
+
+        // Se especificó el nombre del layout que se debe utilizar para el
+        // renderizado.
+        if (is_string($layout)) {
+            // Renderizado estándar con form_row() a través de form_rest().
+            if ($layout == 'row') {
+                $html = $this->function_form_rest($form, $options);
+            }
+
+            // Error porque no se soporta otro layout como string.
+            else {
+                throw new TwigException(__(
+                    'Layout de formulario %s no soportado.',
+                    $layout
+                ));
+            }
+        }
+
+        // Si el layout es un arreglo se genera según la configuración del
+        // arreglo. El cual debe contener la estructura de un layout de
+        // formulario.
+        else if (is_array($layout)) {
+            $html = $this->function_form_layout($form, $layout);
+        }
+
+        // Si layout es otro tipo de dato, error pues no está soportado.
+        else {
+            throw new TwigException(__('Layout de formulario inválido.'));
+        }
+
+        // Entregar HTML de los errores globales.
+        return new \Twig\Markup($html, 'UTF-8');
+    }
+
+    /**
+     * Renderiza los campos del formulario mediante un layout.
+     *
+     * @param object|array $form El formulario completo.
+     * @param array $layout Arreglo con la configuración del layout y campos.
+     * @return Markup
+     */
+    public function function_form_layout($form, array $layout = []): Markup
+    {
+        $html = '';
+
+        // Si hay pestañas, se genera un contenedor de pestañas.
+        if (!empty($layout['tabs'])) {
+            $html .= '<ul class="nav nav-tabs" role="tablist">';
+            $tabContent = '<div class="tab-content pt-4">';
+
+            // Iterar cada pestaña para incluir enlace y contenido de cada una.
+            foreach ($layout['tabs'] as $index => $tab) {
+                // Atributos generales de la pestaña (incluyendo su ícono).
+                $id = $tab['id'] ?? Str::slug($tab['title']);
+                $tabId = $id . '-tab';
+                $activeClass = $index === 0 ? ' active' : '';
+                $iconHtml = !empty($tab['icon'])
+                    ? sprintf('<i class="%s fa-fw me-2"></i>', e($tab['icon']))
+                    : ''
+                ;
+
+                // Generar enlace de la pestaña.
+                $html .= sprintf(
+                    '<li class="nav-item"><a href="#%s" class="nav-link%s" data-bs-toggle="tab" id="%s" role="tab" aria-controls="%s">%s%s</a></li>',
+                    $id,
+                    $activeClass,
+                    $tabId,
+                    $id,
+                    $iconHtml,
+                    e($tab['title'])
+                );
+
+                // Generar el contenido de pestaña.
+                $tabContent .= sprintf(
+                    '<div class="tab-pane%s" id="%s" role="tabpanel" aria-labelledby="%s">',
+                    $activeClass,
+                    $id,
+                    $tabId
+                );
+                foreach ($tab['sections'] as $index => $section) {
+                    $section['index'] = $index + 1;
+                    $section['tab'] = [
+                        'id' => $id,
+                    ];
+                    $tabContent .= $this->renderLayoutSection($form, $section);
+                }
+                $tabContent .= '</div>'; // Cerrar tab-pane.
+            }
+            $html .= '</ul>';
+            $html .= $tabContent . '</div>'; // Cerrar tab-content.
+        }
+        // Si no hay pestañas, se renderizan solo secciones.
+        else {
+            foreach ($layout as $index => $section) {
+                $section['index'] = $index + 1;
+                $html .= $this->renderLayoutSection($form, $section);
+            }
+        }
+
+        // Script para cambiar el ícono de "+" a "-" al colapsar.
+        $html .= '
+        <script>
+        $(function() { __.tabs(); });
+        document.querySelectorAll("div.card-header .toggle-link").forEach(function(link) {
+            const target = document.querySelector(link.getAttribute("data-bs-target"));
+            const icon = link.querySelector("i.toggle-icon");
+            target.addEventListener("shown.bs.collapse", function() {
+                icon.classList.remove("fa-caret-down");
+                icon.classList.add("fa-caret-up");
+            });
+            target.addEventListener("hidden.bs.collapse", function() {
+                icon.classList.remove("fa-caret-up");
+                icon.classList.add("fa-caret-down");
+            });
+        });
+        </script>';
+
+        // Entregar el HTML renderizado para al vista.
+        return new \Twig\Markup($html, $this->charset);
+    }
+
+    /**
+     * Renderiza una sección del layout del formulario.
+     *
+     * @param object|array $form El formulario completo.
+     * @param array $section La sección del formulario que se debe renderizar.
+     * @return string
+     */
+    protected function renderLayoutSection($form, $section): string
+    {
+        $sectionId = uniqid('section_');
+        $isCollapsible = strpos($section['classes'] ?? '', 'collapse') !== false;
+        $iconHtml = !empty($section['icon'])
+            ? sprintf('<i class="%s fa-fw me-2"></i>', e($section['icon']))
+            : ''
+        ;
+        $cardId = sprintf(
+            '%s_%s-card',
+            $section['tab']['id'] ?? 'main',
+            $section['id']
+                ?? Str::slug($section['title'] ?? null)
+                    ?: 'section_' . ($section['index'] ?? $sectionId)
+            ,
+        );
+
+        $html = sprintf('<div class="card mb-4" id="%s">', $cardId);
+
+        if ($isCollapsible) {
+            $html .= sprintf('
+                <div class="card-header" id="heading-%s">
+                    <a data-bs-toggle="collapse" href="#collapse-%s" role="button" data-bs-target="#collapse-%s" aria-expanded="false" aria-controls="collapse-%s" class="toggle-link">
+                        %s%s
+                        <i class="fa-solid fa-caret-down ms-auto toggle-icon"></i>
+                    </a>
+                </div>
+                <div id="collapse-%s" class="collapse" aria-labelledby="heading-%s">
+                    <div class="card-body pt-0">
+            ', $sectionId, $sectionId, $sectionId, $sectionId, $iconHtml, e($section['title'] ?? ''), $sectionId, $sectionId);
+        } else {
+            if (!empty($section['title'])) {
+                $html .= sprintf('<div class="card-header">%s%s</div>', $iconHtml, e($section['title']));
+            } else if (!isset($section['tab']['id'])) {
+                $html .= sprintf('<div class="card-header pt-3"></div>');
+            } else {
+                $html .= sprintf('<div class="card-header"></div>');
+            }
+            $html .= '<div class="card-body">';
+        }
+
+        foreach ($section['rows'] as $row) {
+            if (!is_array($row)) {
+                $row = [$row];
+            }
+            $html .= '<div class="row g-3">';
+            foreach ($row as $fieldName) {
+                if (isset($form['fields'][$fieldName])) {
+                    $field = $form['fields'][$fieldName];
+                    $errors = $this->function_form_errors($field);
+                    $help = $this->function_form_help($field);
+                    $html .= '<div class="col">';
+                    $html .= '<div class="form-floating mb-3">';
+                    $html .= $this->function_form_widget(
+                        $field,
+                        [
+                            'attr' => [
+                                'class' => 'form-control',
+                            ],
+                        ]
+                    );
+                    $html .= $this->function_form_label(
+                        $field,
+                        [
+                            'label_attr' => [
+                                'class' => '', // No se puede usar form-label.
+                            ],
+                            'required_label' =>
+                                ' <i class="fa-solid fa-asterisk small text-danger"></i>'
+                            ,
+                        ]
+                    );
+                    if ($errors) {
+                        $html .= sprintf(
+                            '<div class="invalid-feedback d-block">%s</div>',
+                            $errors
+                        );
+                    }
+                    if ($help) {
+                        $html .= sprintf(
+                            '<div class="form-text">%s</div>',
+                            $help
+                        );
+                    }
+                    $html .= '</div>'; // Cerrar div de form-floating.
+                    $html .= '</div>';
+                }
+            }
+            $html .= '</div>'; // Cerrar fila.
+        }
+
+        $html .= '</div>'; // Cerrar card-body.
+
+        if ($isCollapsible) {
+            $html .= '</div>'; // Cerrar collapse.
+        }
+
+        $html .= '</div>'; // Cerrar card.
+
+        // Entregar el buffer de HTML de la sección.
+        return $html;
     }
 
     /**

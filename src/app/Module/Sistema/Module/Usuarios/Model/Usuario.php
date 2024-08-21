@@ -93,6 +93,8 @@ class Model_Usuario extends Model implements Authenticatable
             'contrasenia_intentos' => [
                 'type' => self::TYPE_SMALL_INTEGER,
                 'default' => 3,
+                'min_value' => 0,
+                'max_value' => 3,
                 'verbose_name' => 'Intentos de contraseña',
                 'help_text' => 'Intentos de inicio de sesión con contraseña incorrecta antes de bloquear cuenta.',
                 'hidden' => true,
@@ -125,7 +127,6 @@ class Model_Usuario extends Model implements Authenticatable
             ],
             'activo' => [
                 'type' => self::TYPE_BOOLEAN,
-                'blank' => true,
                 'default' => true,
                 'verbose_name' => 'Activo',
                 'help_text' => 'Indica si el usuario está o no activo en la aplicación.',
@@ -173,6 +174,24 @@ class Model_Usuario extends Model implements Authenticatable
                 'models' => [
                     'usuario' => Model_Usuario::class,
                     'grupo' => Model_Grupo::class,
+                ],
+            ],
+        ],
+        'form' => [
+            'layout' => [
+                [
+                    'title' => 'Identificación',
+                    'icon' => 'fa-solid fa-vcard',
+                    'rows' => [
+                        ['nombre', 'usuario', 'email'],
+                    ],
+                ],
+                [
+                    'title' => 'Acceso y Autenticación',
+                    'icon' => 'fa-solid fa-key',
+                    'rows' => [
+                        ['activo', 'contrasenia', 'contrasenia_intentos'],
+                    ],
                 ],
             ],
         ],

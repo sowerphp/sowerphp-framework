@@ -53,8 +53,6 @@ class Model_Grupo extends Model
             ],
             'grupo' => [
                 'type' => self::TYPE_STRING,
-                'null' => true,
-                'blank' => true,
                 'max_length' => 30,
                 'verbose_name' => 'Grupo',
                 'help_text' => 'Nombre del grupo.',
@@ -62,7 +60,6 @@ class Model_Grupo extends Model
             'activo' => [
                 'type' => self::TYPE_BOOLEAN,
                 'default' => true,
-                'blank' => true,
                 'verbose_name' => 'Activo',
                 'help_text' => 'Indica si el grupo se encuentra activo.',
             ],

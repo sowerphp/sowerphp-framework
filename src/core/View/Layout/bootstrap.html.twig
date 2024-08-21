@@ -22,16 +22,14 @@
                     <span class="fs-4">SowerPHP</span>
                 </a>
                 <ul class="nav nav-pills">
-                    <li class="nav-item">
-                        <a href="{{ _base }}/inicio" class="nav-link active" aria-current="page">
-                            Inicio
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ _base }}/contacto" class="nav-link">
-                            Contacto
-                        </a>
-                    </li>
+                    {% for link, nav in _nav_website %}
+                        <li class="nav-item ms-2">
+                            <a href="{{ _base }}{{ link }}" class="nav-link{% if _page == link %} active" aria-current="page{% endif %}" title="{{ nav.desc }}">
+                                <i class="{{ nav.icon }}"></i>
+                                {{ nav.name }}
+                            </a>
+                        </li>
+                    {% endfor %}
                 </ul>
             </header>
         </div>
@@ -46,22 +44,21 @@
                     &copy; <a href="https://www.sowerphp.org">SowerPHP</a>
                     2014 - {{ "now" | date("Y") }}
                     <br/>
-                    <span class="small text-muted">Simple and Open Web Ecosystem Reimagined for PHP.</span>
+                    <span class="small text-muted">
+                        Simple and Open Web Ecosystem Reimagined for PHP.
+                    </span>
                 </p>
                 <a href="{{ _base }}" class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
                     <i class="fa-solid fa-home"></i>
                 </a>
-                <ul class="nav col-md-4 justify-content-end">
-                    <li class="nav-item">
-                        <a href="{{ _base }}/inicio" class="nav-link px-2 text-body-secondary">
-                            Inicio
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ _base }}/contacto" class="nav-link px-2 text-body-secondary">
-                            Contacto
-                        </a>
-                    </li>
+                <ul class="nav col-md-4 justify-content-end small">
+                    {% for link, nav in _nav_website %}
+                        <li class="nav-item">
+                            <a href="{{ _base }}{{ link }}" class="nav-link px-2 text-body-secondary" title="{{ nav.desc }}">
+                                {{ nav.name }}
+                            </a>
+                        </li>
+                    {% endfor %}
                 </ul>
             </footer>
         </div>

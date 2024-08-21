@@ -272,14 +272,30 @@ class Network_Request extends Request
                 $request = urldecode($request);
             }
             $this->requestUriDecoded = $request;
-            // Quitar índice del request reescrito de $_GET y del input del
-            // Request heredado de Illuminate.
-            unset($_GET[$this->requestUriDecoded]);
-            $input = $this->all();
-            unset($input[$this->requestUriDecoded]);
-            $this->replace($input);
+            $this->removeFromQueryString($this->requestUriDecoded);
         }
         return $this->requestUriDecoded;
+    }
+
+    /**
+     * Quita un índice pasago como QUERY de la URL.
+     *
+     * Esto se hace tanto para el request heredado de Illuminate como para $_GET.
+     *
+     * @param string $key
+     * @return void
+     */
+    protected function removeFromQueryString(string $key): void
+    {
+        $queryParams = $this->query();
+        unset($queryParams[$key]);
+        $newQueryString = http_build_query($queryParams);
+        $urlWithoutQueryString = $this->url();
+        $this->server->set(
+            'REQUEST_URI',
+            $urlWithoutQueryString . ($newQueryString ? '?' . $newQueryString : '')
+        );
+        $_GET = $queryParams;
     }
 
     /**

@@ -1,30 +1,26 @@
 {% extends "View/Layout/" ~ __view_layout ~ ".html.twig" %}
 
-{% block session_messages %}
-    {% if not form_is_valid(form) %}
-        {{ form_errors_message() }}
-    {% endif %}
-{% endblock %}
-
 {% block content %}
 
-<h1 class="page-header">Crear {{ data.model.verbose_name|lower }}</h1>
+<h1 class="page-header">Crear {{ metadata.model.verbose_name|lower }}</h1>
 
 <div class="d-flex justify-content-end mb-3">
-    <a href="{{ _url }}{{ _route.url.controller }}" class="btn btn-primary btn-sm">
-        <i class="fa-solid fa-table-list"></i>
-        Listado de {{ data.model.verbose_name_plural|lower }}
+    <a href="#" class="btn btn-success me-2" onclick="document.getElementById('{{ form.attributes.id }}').requestSubmit(); return false;">
+        <i class="fa-regular fa-floppy-disk me-2"></i>
+        {{ form.submit_button.label }}
+    </a>
+    <a href="{{ _url }}{{ _route.url.controller }}" class="btn btn-primary me-2">
+        <i class="fa-solid fa-table-list me-2"></i>
+        Listado de {{ metadata.model.verbose_name_plural|lower }}
+    </a>
+    <a href="{{ _url }}/api{{ _route.url.controller }}/create" class="btn btn-primary">
+        <i class="fa-solid fa-file-code"></i>
     </a>
 </div>
 
 {{ form_start(form) }}
-    {% for field in form.fields %}
-        {% if field.editable %}
-            {{ form_row(field) }}
-        {% endif %}
-    {% endfor %}
+    {{ form_fields(form) }}
     {{ form_csrf(form) }}
-    {{ form_submit(form.submit_button.label, form.submit_button.attributes) }}
 {{ form_end(form) }}
 
 <script>
@@ -33,4 +29,10 @@ function validateModelCreateForm() {
 }
 </script>
 
+{% endblock %}
+
+{% block session_messages %}
+    {% if not form_is_valid(form) %}
+        {{ form_errors_global(form) }}
+    {% endif %}
 {% endblock %}

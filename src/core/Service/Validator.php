@@ -281,7 +281,7 @@ class Service_Validator implements Interface_Service
     {
         $rules = ['create' => [], 'edit' => []];
         // El valor es obligatorio.
-        if (!empty($config['required'])) {
+        if (!empty($config['required']) && empty($config['auto'])) {
             // Obligatorio siempre.
             if ($config['required'] === true) {
                 $rules['create'][] = $rules['edit'][] = 'required';

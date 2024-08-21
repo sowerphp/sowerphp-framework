@@ -1,11 +1,5 @@
 {% extends "View/Layout/" ~ __view_layout ~ ".html.twig" %}
 
-{% block session_messages %}
-    {% if not form_is_valid(form) %}
-        {{ form_errors_message() }}
-    {% endif %}
-{% endblock %}
-
 {% block content %}
 
 <div class="page-header"><h1>{% block title %}Contacto{% endblock %}</h1></div>
@@ -20,4 +14,10 @@
     {{ form_submit('Enviar mensaje') }}
 {{ form_end(form) }}
 
+{% endblock %}
+
+{% block session_messages %}
+    {% if not form_is_valid(form) %}
+        {{ form_errors_global(form) }}
+    {% endif %}
 {% endblock %}
