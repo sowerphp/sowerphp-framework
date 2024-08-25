@@ -42,6 +42,13 @@ class Service_Model implements Interface_Service
     protected $configService;
 
     /**
+     * Servicio de módulos.
+     *
+     * @var Service_Module
+     */
+    protected $moduleService;
+
+    /**
      * Servicio de base de datos.
      *
      * @var Service_Database
@@ -62,10 +69,12 @@ class Service_Model implements Interface_Service
      */
     public function __construct(
         Service_Config $configService,
+        Service_Module $moduleService,
         Service_Database $databaseService
     )
     {
         $this->configService = $configService;
+        $this->moduleService = $moduleService;
         $this->databaseService = $databaseService;
     }
 
@@ -240,6 +249,37 @@ class Service_Model implements Interface_Service
 
         // Construir y retornar el string de la URL.
         return http_build_query($urlParameters);
+    }
+
+    /**
+     * Obtiene una lista de modelos instanciados vacíos.
+     *
+     * Este método solo obtendrá modelos que hereden (directa o indirectamente)
+     * de la clase base de modelos del framework \sowerphp\core\Model.
+     *
+     * @param string|null $module Nombre del módulo para buscar modelos solo en
+     * uno específico. `''` para buscar modelos solo en las capas. `null` (por
+     * defecto) para buscar modelos en todas las posibles rutas de búsqueda de
+     * la aplicación (capas y módulos).
+     * @return array Arreglo con los modelos instanciados vacíos.
+     */
+    public function getEmptyInstancesFromAllSingularModels(?string $module = null): array
+    {
+        $searchDir = 'Model';
+        $classes = $this->moduleService->searchAndLoadClasses($searchDir, $module);
+        $models = [];
+        $parentClass = Model::class;
+        foreach ($classes as $className => $classInfo) {
+            $reflectionClass = new \ReflectionClass($classInfo['fqcn']);
+            if (!$reflectionClass->isSubclassOf($parentClass)) {
+                continue;
+            }
+            $instance = $reflectionClass->newInstance();
+            $models[$className] = array_merge($classInfo, [
+                'instance' => $instance,
+            ]);
+        }
+        return $models;
     }
 
 }

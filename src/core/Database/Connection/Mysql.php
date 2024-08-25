@@ -72,7 +72,7 @@ class Database_Connection_Mysql extends Database_Connection
      */
     public function getTablesFromDatabase(): array
     {
-        return $this->getTable ('
+        return $this->getTable('
             SELECT
                 table_name AS name,
                 table_comment AS comment
@@ -94,7 +94,7 @@ class Database_Connection_Mysql extends Database_Connection
      */
     public function getCommentFromTable(string $table): string
     {
-        return $this->getValue ('
+        return $this->getValue('
             SELECT
                 table_comment
             FROM

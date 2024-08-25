@@ -252,7 +252,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         // Obtener el nombre y la etiqueta del campo.
         $name = $field['name'];
         $label = $field['label'] ?? null;
-        if ($label === null) {
+        if (empty($label)) {
             return new Markup('', $this->charset);
         }
         $id = $field['widget']['attributes']['id'] ?? $name . 'Field';
@@ -401,9 +401,9 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
     {
         // Generar el HTML de todos los campos que no han sido renderizados.
         $html = '';
-        foreach ($form['fields'] as $field) {
+        foreach (($form['fields'] ?? []) as $field) {
             if (
-                $field['editable']
+                ($field['editable'] ?? true)
                 && !in_array($field['name'], $this->renderedFields)
             ) {
                 $html .= $this->function_form_row($field, $options);
@@ -452,7 +452,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
     public function function_form_is_valid($form): bool
     {
         // Iterar sobre los campos y verificar si tienen errores.
-        foreach ($form['fields'] as $field) {
+        foreach (($form['fields'] ?? []) as $field) {
             // Si algún campo tiene errores, el formulario no es válido.
             if (!empty($field['error_messages'])) {
                 return false;
@@ -505,15 +505,11 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         // Definir atributos del botón.
         $attributes = html_attributes(array_merge([
             'type' => 'submit',
-            'class' => 'btn btn-primary'
+            'class' => 'btn btn-primary w-100'
         ], $attributes));
         // Generar el HTML del botón.
         $html = sprintf(
-            '<div class="row mb-3 form-group">
-                <div class="offset-sm-2 col-sm-10">
-                    <button %s>%s</button>
-                </div>
-            </div>',
+            '<button %s>%s</button>',
             $attributes,
             e($label)
         );
@@ -542,7 +538,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         // controlar o corregir estos campos no renderizados con errores.
         // Esto solo funcionará correctamente si la función es llamada en la
         // plantilla después de renderizar los campos del formulario.
-        foreach ($form['fields'] as $field) {
+        foreach (($form['fields'] ?? []) as $field) {
             if (
                 !empty($field['error_messages'])
                 && !in_array($field['name'], $this->renderedFields)
@@ -707,7 +703,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
     protected function renderLayoutSection($form, $section): string
     {
         $sectionId = uniqid('section_');
-        $isCollapsible = strpos($section['classes'] ?? '', 'collapse') !== false;
+        $isCollapsible = strpos($section['class'] ?? '', 'collapse') !== false;
         $iconHtml = !empty($section['icon'])
             ? sprintf('<i class="%s fa-fw me-2"></i>', e($section['icon']))
             : ''
@@ -735,14 +731,19 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                     <div class="card-body pt-0">
             ', $sectionId, $sectionId, $sectionId, $sectionId, $iconHtml, e($section['title'] ?? ''), $sectionId, $sectionId);
         } else {
-            if (!empty($section['title'])) {
-                $html .= sprintf('<div class="card-header">%s%s</div>', $iconHtml, e($section['title']));
-            } else if (!isset($section['tab']['id'])) {
-                $html .= sprintf('<div class="card-header pt-3"></div>');
-            } else {
+            if (!empty($section['title']) || !empty($section['icon'])) {
+                $html .= sprintf(
+                    '<div class="card-header">%s%s</div>',
+                    $iconHtml,
+                    e($section['title'] ?? '')
+                );
+                $html .= '<div class="card-body">';
+            } else if (isset($section['tab']['id'])) {
                 $html .= sprintf('<div class="card-header"></div>');
+                $html .= '<div class="card-body">';
+            } else {
+                $html .= '<div class="card-body pt-4">';
             }
-            $html .= '<div class="card-body">';
         }
 
         foreach ($section['rows'] as $row) {
@@ -755,8 +756,12 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                     $field = $form['fields'][$fieldName];
                     $errors = $this->function_form_errors($field);
                     $help = $this->function_form_help($field);
+                    $label = $field['label'] ?? null;
                     $html .= '<div class="col">';
-                    $html .= '<div class="form-floating mb-3">';
+                    $html .= sprintf(
+                        '<div class="%smb-3">',
+                        $label ? 'form-floating ' : ''
+                    );
                     $html .= $this->function_form_widget(
                         $field,
                         [
@@ -765,17 +770,19 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                             ],
                         ]
                     );
-                    $html .= $this->function_form_label(
-                        $field,
-                        [
-                            'label_attr' => [
-                                'class' => '', // No se puede usar form-label.
-                            ],
-                            'required_label' =>
-                                ' <i class="fa-solid fa-asterisk small text-danger"></i>'
-                            ,
-                        ]
-                    );
+                    if ($label) {
+                        $html .= $this->function_form_label(
+                            $field,
+                            [
+                                'label_attr' => [
+                                    'class' => '', // No se puede usar form-label.
+                                ],
+                                'required_label' =>
+                                    ' <i class="fa-solid fa-asterisk small text-danger"></i>'
+                                ,
+                            ]
+                        );
+                    }
                     if ($errors) {
                         $html .= sprintf(
                             '<div class="invalid-feedback d-block">%s</div>',
@@ -788,7 +795,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                             $help
                         );
                     }
-                    $html .= '</div>'; // Cerrar div de form-floating.
+                    $html .= '</div>'; // Cerrar div de form-floating (interior col).
                     $html .= '</div>';
                 }
             }
@@ -796,6 +803,13 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         }
 
         $html .= '</div>'; // Cerrar card-body.
+
+        if (!empty($section['footer'])) {
+            $html .= sprintf(
+                '<div class="card-footer small">%s</div>',
+                e($section['footer'])
+            );
+        }
 
         if ($isCollapsible) {
             $html .= '</div>'; // Cerrar collapse.

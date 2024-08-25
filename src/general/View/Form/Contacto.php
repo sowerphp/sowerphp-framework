@@ -51,11 +51,28 @@ class View_Form_Contacto extends View_Form
                     'max_length' => 255,
                 ],
                 'message' => [
-                    'widget' => 'textarea',
+                    'widget' => [
+                        'name' => 'textarea',
+                        'attributes' => [
+                            'rows' => 5,
+                            'class' => 'form-control summernote',
+                            'style' => 'height: auto',
+                        ],
+                    ],
                     'verbose_name' => __('Mensaje'),
                     'required' => true,
                     'min_length' => 100,
                     'max_length' => 1000,
+                ],
+            ],
+            'layout' => [
+                [
+                    'icon' => 'fa-regular fa-comments',
+                    'footer' => 'Envíanos tu mensaje y te contactaremos lo antes posible.',
+                    'rows' => [
+                        ['name', 'email'],
+                        'message'
+                    ],
                 ],
             ],
         ];

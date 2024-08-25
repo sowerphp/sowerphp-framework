@@ -67,11 +67,14 @@ class View_Engine_Twig_General extends AbstractExtension
      * Entrega una ruta absoluta dentro del proyecto.
      *
      * @param string|null $path
+     * @param bool $obfuscate
      * @return string
      */
-    public function function_project_path(?string $path = null): string
+    public function function_project_path(?string $path = null, bool $obfuscate = true): string
     {
-        return app('layers')->getProjectPath($path);
+        $layersService = app('layers');
+        $fullpath = $layersService->getProjectPath($path);
+        return $obfuscate ? $layersService->obfuscatePath($fullpath) : $fullpath;
     }
 
     /**

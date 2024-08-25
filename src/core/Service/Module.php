@@ -476,4 +476,167 @@ class Service_Module implements Interface_Service
         return $normalizedModules;
     }
 
+    /**
+     * Obtiene todas las rutas de búsqueda de la aplicación.
+     *
+     * Por defecto se entregan todas las rutas, incluyendo capas y todos los
+     * módulos y submódulos
+     *
+     * @param string|null $module Nombre del módulo para buscar uno específico.
+     * `''` para buscar solo las capas. `null` (por defecto) para buscar todas
+     * las posibles rutas de búsqueda.
+     * @return array|null Rutas de búsqueda de clases de toda la aplicación.
+     */
+    public function getSearchPaths(?string $module = null): array
+    {
+        // Obtener las capas y módulos de la aplicación..
+        $layers = $this->layersService->getPaths();
+        $modules = $this->getPaths($module);
+
+        // Si se pidió un módulo en específico se normaliza el resultado para
+        // poder iterar luego.
+        if ($module) {
+            $modules = [
+                $module => $modules,
+            ];
+        }
+
+        // Iterar las capas para armar el arreglo de búsqueda con las rutas.
+        $search = [];
+        foreach ($layers as $layerNamespace => $layerPath) {
+            // Agregar la capa como primera prioridad. Siempre lo que esté
+            // en la capa tendrá la máxima prioridad (más que un módulo).
+            if (!$module) {
+                $search[] = [
+                    'path' => $layerPath,
+                    'module' => null,
+                    'namespace' => $layerNamespace,
+                ];
+            }
+            // Iterar los módulos encontrados (si existen) y extraer las rutas
+            // que coincidan con la capa que estamos iterando.
+            foreach ($modules as $moduleName => $modulePaths) {
+                foreach ($modulePaths as $modulePath) {
+                    if (strpos($modulePath, $layerPath) === 0) {
+                        $moduleNamespace = $layerNamespace . '\\' .
+                            str_replace('.', '\\', $moduleName)
+                        ;
+                        $search[] = [
+                            'path' => $modulePath,
+                            'module' => $moduleName,
+                            'namespace' => $moduleNamespace,
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Entregar todas las rutas de búsqueda encontradas por prioridad.
+        return $search;
+    }
+
+    /**
+     * Busca todas las clases en un determinado directorio en todas las rutas
+     * de búsqueda de la aplicación. Además, realizará la carga (require) de
+     * todos los archivos PHP encontrados (sean o no clases).
+     *
+     * @param string $searchDir Directorio dentro de la ruta de búsqueda. Si no
+     * se indica un directorio se buscará en toda la ruta de búsqueda.
+     * @param string|null $module Nombre del módulo para buscar uno específico.
+     * `''` para buscar solo las capas. `null` (por defecto) para buscar todas
+     * las posibles rutas de búsqueda.
+     * @return array Arreglo con todas las clases encontradas en el directorio
+     * de búsqueda de acuerdo a la prioridad de las rutas de búsqueda.
+     */
+    public function searchAndLoadClasses(?string $searchDir = null, ?string $module = null): array
+    {
+        // Si el directorio de búsqueda es el directorio actual se quita para
+        // armar el directorio de búsqueda de manera correcta.
+        if ($searchDir == '.') {
+            $searchDir = '';
+        }
+
+        // Se obtienen todos los directorios de búsqueda solicitados.
+        $searchPaths = $this->getSearchPaths($module);
+
+        // Iterar buscando las clases en cada ruta de búsqueda.
+        $classes = [];
+        foreach ($searchPaths as $searchPath) {
+            $basePath = $searchPath['path'] . '/' . $searchDir;
+            try {
+                $directoryIterator = new \RecursiveDirectoryIterator($basePath);
+            } catch (\UnexpectedValueException $e) {
+                continue;
+            }
+            $iterator = new \RecursiveIteratorIterator($directoryIterator);
+            foreach ($iterator as $file) {
+                // Si no es un archivo PHP se omite el archivo.
+                if (!$file->isFile() || $file->getExtension() !== 'php') {
+                    continue;
+                }
+
+                // Si el archivo está dentro del directorio App de la ruta de
+                // búsqueda se omite, pues ahí no hay clases.
+                $filePath = $file->getRealPath();
+                $appPath = $basePath . 'App/';
+                if (strpos($filePath, $appPath) === 0) {
+                    continue;
+                }
+
+                // Se arma el nombre base de la clase (sin namespace). Esto
+                // asume que es una clase el archivo PHP, y puede no ser
+                // cierto, pues es el caso que nos interesa buscar: clases.
+                $className = sprintf(
+                    '%s_%s',
+                    str_replace('/', '_', $searchDir),
+                    $file->getBasename('.php')
+                );
+
+                // Si la clase ya había sido encontrada en otra ruta se omite.
+                if (isset($classes[$className])) {
+                    continue;
+                }
+
+                // Se incluye el archivo PHP de la posible clase. Esto se hace
+                // solo si el archivo no había sido importado previamente.
+                // Es necesario esto porque la aplicación podría ya tener el
+                // archivo cargado previamente por alguna dependencia, servicio
+                // u algo más que haya requerido que se cargase antes de que se
+                // ejecute esta búsqueda o porque algun archivo de esta misma
+                // búsqueda ya hizo que se cargase el archivo.
+                $includedFiles = get_included_files(); // Se debe hacer en for.
+                if (!in_array($filePath, $includedFiles)) {
+                    // Se incluye el archivo.
+                    require $filePath;
+                }
+
+                // Se arma el nombre completo de la clase (FQCN).
+                $classFqcn = sprintf(
+                    '%s\%s',
+                    $searchPath['namespace'],
+                    $className,
+                );
+
+                // Se verifica que la clase eventualmente importada exista.
+                // Esto es lo que realmente corrobora que lo que había en el
+                // archivo PHP sea una clase y que sea la que estamos buscando.
+                if (!class_exists($classFqcn)) {
+                    continue;
+                }
+
+                // Si la clase existe, se guarda en el arreglo de clases que se
+                // han encontrado.
+                $classes[$className] = [
+                    'name' => $className,
+                    'namespace' => $searchPath['namespace'],
+                    'fqcn' => $classFqcn,
+                    'filepath' => $filePath,
+                ];
+            }
+        }
+
+        // Entregar todas las clases encontradas.
+        return $classes;
+    }
+
 }

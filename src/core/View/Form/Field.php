@@ -517,7 +517,7 @@ class View_Form_Field implements \ArrayAccess
         return [
             'name' => $widgetName,
             'value' => $widgetValue,
-            'attributes' => $attributes,
+            'attributes' => array_merge($attributes, $widget['attributes'] ?? []),
         ];
     }
 

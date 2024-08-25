@@ -24,8 +24,10 @@
 namespace sowerphp\core;
 
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Helper\Table;
 
 /**
  * Comando para mostrar el estado de las migraciones de la base de datos.
@@ -61,7 +63,9 @@ class Console_Command_Migrations_Status extends Command
     {
         $this
             ->setDescription('Muestra el estado de las migraciones de la base de datos.')
-            ->setHelp('Este comando permite ver el estado actual de las migraciones de la base de datos.');
+            ->setHelp('Este comando permite ver el estado actual de las migraciones de la base de datos.')
+            ->addArgument('module', InputArgument::OPTIONAL, 'La configuración específica que se desea obtener.')
+        ;
     }
 
     /**
@@ -72,9 +76,27 @@ class Console_Command_Migrations_Status extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // TODO: implementar ejecución.
-        $output->writeln(__('Comando %s no está implementado.', static::$defaultName));
-        return Command::FAILURE;
+        // Buscar todos los modelos singuales
+        $module = $input->getArgument('module');
+        $models = model()->getEmptyInstancesFromAllSingularModels($module);
+        ksort($models);
+
+        // Renderizar tabla con los modelos encontrados.
+        $i = 1;
+        $table = new Table($output);
+        $table->setHeaders(['#', 'Tabla', 'Modelo', 'Estado']);
+        foreach ($models as $model) {
+            $instance = $model['instance'];
+            $table->addRow([
+                $i++,
+                $instance->getMetadata('model.db_table'),
+                $model['name'],
+            ]);
+        }
+        $table->render();
+
+        // Todo ok con la ejecución.
+        return Command::SUCCESS;
     }
 
 }

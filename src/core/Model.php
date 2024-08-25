@@ -1626,6 +1626,15 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         if (!isset($this->pluralInstance)) {
             $class = $this->getMetadata('model.plural');
+            if (!class_exists($class)) {
+                $className = basename(str_replace('\\', '/', $class));
+                $classDefinition = sprintf(
+                    'class %s extends \sowerphp\autoload\Model_Plural {}',
+                    $className
+                );
+                eval($classDefinition);
+                class_alias($className, $class);
+            }
             $this->pluralInstance = new $class($this->getMetadata());
         }
         return $this->pluralInstance;
