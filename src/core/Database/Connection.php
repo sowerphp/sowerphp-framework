@@ -23,7 +23,7 @@
 
 namespace sowerphp\core;
 
-use \Illuminate\Database\Connection;
+use Illuminate\Database\Connection;
 
 /**
  * Clase base abstracta para conexiones personalizadas de base de datos.

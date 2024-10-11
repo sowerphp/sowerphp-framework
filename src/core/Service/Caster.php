@@ -23,7 +23,7 @@
 
 namespace sowerphp\core;
 
-use \Carbon\Carbon;
+use Carbon\Carbon;
 
 /**
  * Servicio de casteo de datos.

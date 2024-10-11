@@ -27,8 +27,8 @@ use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Exception\TransportException;
-use \GearmanClient;
-use \GearmanWorker;
+use GearmanClient;
+use GearmanWorker;
 
 /**
  * Clase Network_Messenger_Transport_Gearman

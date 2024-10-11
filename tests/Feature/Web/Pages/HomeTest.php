@@ -21,8 +21,8 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-use \PHPUnit\Framework\TestCase;
-use \sowerphp\core\App;
+use PHPUnit\Framework\TestCase;
+use sowerphp\core\App;
 
 /**
  * Test para probar el flujo completo de la aplicación renderizando la página
@@ -30,7 +30,6 @@ use \sowerphp\core\App;
  */
 class HomeTest extends TestCase
 {
-
     protected $app;
 
     protected function setUp(): void
@@ -46,5 +45,4 @@ class HomeTest extends TestCase
         //$this->app->run();
         $this->assertTrue(true);
     }
-
 }

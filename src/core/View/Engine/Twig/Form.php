@@ -23,18 +23,18 @@
 
 namespace sowerphp\core;
 
-use \Twig\TwigFunction;
-use \Twig\Markup;
-use \Twig\Error\Error as TwigException;
-use \Illuminate\Support\Str;
-use \sowerphp\core\Facade_Session_Message as SessionMessage;
+use Illuminate\Support\Str;
+use sowerphp\core\Facade_Session_Message as SessionMessage;
+use Twig\Error\Error as TwigException;
+use Twig\Extension\AbstractExtension;
+use Twig\Markup;
+use Twig\TwigFunction;
 
 /**
  * Extensión para el renderizado de formularios en una plantilla twig.
  */
-class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
+final class View_Engine_Twig_Form extends AbstractExtension
 {
-
     /**
      * Mensaje de error por defecto que se renderizará cuando el formulario
      * tenga errores.
@@ -47,7 +47,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * Codificación de caracteres para los renderizados devueltos por las
      * funciones de la extensión.
      *
-     * Se utiliza en el objeto \Twig\Markup que se retorna en cada función.
+     * Se utiliza en el objeto Markup que se retorna en cada función.
      *
      * @var string
      */
@@ -80,6 +80,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
             new TwigFunction('form_enctype', [$this, 'function_form_enctype']),
             new TwigFunction('form_is_submitted', [$this, 'function_form_is_submitted']),
             new TwigFunction('form_is_valid', [$this, 'function_form_is_valid']),
+
             // Funciones extras.
             new TwigFunction('form_captcha', [$this, 'function_form_captcha']),
             new TwigFunction('form_csrf', [$this, 'function_form_csrf']),
@@ -96,15 +97,15 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * @param object|array $form El formulario completo.
      * @param array $options Opciones adicionales para personalizar el
      * formulario. Algunas opciones son:
-     *   - 'attr' (array): Atributos HTML para el elemento <form>.
-     *      Ejemplo: ['id' => 'my-form', 'class' => 'my-class'].
-     *   - 'method' (string): Método HTTP para el formulario (por defecto es
-     *      'POST'). Ejemplo: 'GET', 'POST'.
-     *   - 'action' (string): URL a la que se envía el formulario.
-     *     Ejemplo: '/submit-form'.
-     *   - 'multipart' (bool): Si se establece en true, se añade el atributo
-     *     'enctype="multipart/form-data"' al formulario.
-     * @return \Twig\Markup Código HTML para iniciar el formulario.
+     *   - `attr` (array): Atributos HTML para el elemento `<form>`.
+     *      Ejemplo: `['id' => 'my-form', 'class' => 'my-class']`.
+     *   - `method` (string): Método HTTP para el formulario (por defecto es
+     *      `POST`). Ejemplo: `GET`, `POST`.
+     *   - `action` (string): URL a la que se envía el formulario.
+     *     Ejemplo: `/submit-form`.
+     *   - `multipart` (bool): Si se establece en true, se añade el atributo
+     *     `enctype="multipart/form-data"` al formulario.
+     * @return Markup Código HTML para iniciar el formulario.
      */
     public function function_form_start($form, array $options = []): Markup
     {
@@ -114,22 +115,36 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                 'Se solicitó renderizar un formulario que no existe.'
             ));
         }
+
         // Reiniciar los campos renderizados.
         $this->renderedFields = [];
+
         // Definir atributos del tag <form>.
-        $attributes = html_attributes(array_merge($form['attributes'] ?? [], [
-            'action' => $options['action'] ?? $form['attributes']['action'] ?? null,
-            'method' => $options['method'] ?? $form['attributes']['method'] ?? 'POST',
-            'id' => $form['attributes']['id'] ?? null,
-            'class' => $form['attributes']['class'] ?? null,
-            'enctype' => ($options['multipart'] ?? null) === true
-                ? 'multipart/form-data'
-                : $this->function_form_enctype($form)
-            ,
-            'role' => $form['attributes']['role'] ?? 'form',
-        ], $options['attr'] ?? []));
+        $attributes = html_attributes(array_merge(
+            $form['attributes'] ?? [],
+            [
+                'action' => $options['action']
+                    ?? $form['attributes']['action']
+                    ?? null
+                ,
+                'method' => $options['method']
+                    ?? $form['attributes']['method']
+                    ?? 'POST'
+                ,
+                'id' => $form['attributes']['id'] ?? null,
+                'class' => $form['attributes']['class'] ?? null,
+                'enctype' => ($options['multipart'] ?? null) === true
+                    ? 'multipart/form-data'
+                    : $this->function_form_enctype($form)
+                ,
+                'role' => $form['attributes']['role'] ?? 'form',
+            ],
+            $options['attr'] ?? []
+        ));
+
         // Generar el HTML del tag <form>.
         $html = sprintf('<form %s>', $attributes);
+
         // Entregar el tag <form> renderizado.
         return new Markup($html, $this->charset);
     }
@@ -140,18 +155,21 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * @param object|array $form El formulario completo.
      * @param array $options Opciones adicionales para personalizar el cierre
      * del formulario. Algunas opciones son:
-     *   - 'render_rest' (bool): Indica si se deben renderizar los campos no
-     *     renderizados (por defecto es true). Ejemplo: false.
-     * @return \Twig\Markup Código HTML para cerrar el formulario.
+     *   - `render_rest` (bool): Indica si se deben renderizar los campos no
+     *     renderizados (por defecto es `true`). Ejemplo: `false`.
+     * @return Markup Código HTML para cerrar el formulario.
      */
     public function function_form_end($form, array $options = []): Markup
     {
-        $render_rest = $options['render_rest'] ?? false;
         $html = '';
+        $render_rest = $options['render_rest'] ?? false;
+
         if ($render_rest) {
             $html .= $this->function_form_rest($form);
         }
+
         $html .= '</form>';
+
         return new Markup($html, $this->charset);
     }
 
@@ -162,17 +180,17 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * @param object|array $field El campo del formulario.
      * @param array $options Opciones adicionales para personalizar el
      * renderizado del campo. Algunas opciones son:
-     *   - 'label' (string): Cambia el texto de la etiqueta del campo.
-     *     Ejemplo: 'Nombre Completo'.
-     *   - 'attr' (array): Atributos HTML para el campo de entrada.
-     *     Ejemplo: ['class' => 'form-control', 'placeholder' => 'Enter your name'].
-     *   - 'label_attr' (array): Atributos HTML para la etiqueta del campo.
-     *     Ejemplo: ['class' => 'control-label'].
-     *   - 'label_translation_parameters' (array): Parámetros de traducción
-     *     para la etiqueta del campo. Ejemplo: ['%name%' => 'John'].
-     *   - 'row_attr' (array): Atributos HTML para el contenedor del campo.
-     *     Ejemplo: ['class' => 'form-group'].
-     * @return \Twig\Markup Código HTML para la fila del campo del formulario.
+     *   - `label` (string): Cambia el texto de la etiqueta del campo.
+     *     Ejemplo: `Nombre Completo`.
+     *   - `attr` (array): Atributos HTML para el campo de entrada.
+     *     Ejemplo: `['class' => 'form-control', 'placeholder' => 'Enter your name']`.
+     *   - `label_attr` (array): Atributos HTML para la etiqueta del campo.
+     *     Ejemplo: `['class' => 'control-label']`.
+     *   - `label_translation_parameters` (array): Parámetros de traducción
+     *     para la etiqueta del campo. Ejemplo: `['%name%' => 'John']`.
+     *   - `row_attr` (array): Atributos HTML para el contenedor del campo.
+     *     Ejemplo: `['class' => 'form-group']`.
+     * @return Markup Código HTML para la fila del campo del formulario.
      */
     public function function_form_row($field, array $options = []): Markup
     {
@@ -182,6 +200,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                 'Se solicitó renderizar un campo de formulario que no existe.'
             ));
         }
+
         // Generar subcomponentes del renderizado del campo.
         $label = $this->function_form_label($field, [
             'label' => $options['label'] ?? null,
@@ -195,6 +214,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         ]);
         $errors = $this->function_form_errors($field);
         $help = $this->function_form_help($field);
+
         // Generar el HTML del campo.
         $required = ($field['required'] ?? null) ? ' required' : '';
         $html = sprintf(
@@ -210,13 +230,21 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
             </div>',
             $label,
             $widget,
-            $errors ? sprintf('<div class="invalid-feedback d-block">%s</div>', $errors) : '',
+            $errors
+                ? sprintf(
+                    '<div class="invalid-feedback d-block">%s</div>',
+                    $errors
+                )
+                : ''
+            ,
             $help ? sprintf('<div class="form-text">%s</div>', $help) : ''
         );
+
         // Marcar el campo como renderizado.
         if (!empty($field['name'])) {
             $this->markFieldAsRendered($field['name']);
         }
+
         // Entregar el campo renderizado.
         return new Markup($html, $this->charset);
     }
@@ -227,40 +255,45 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * @param object|array $field El campo del formulario.
      * @param array $options Opciones adicionales para personalizar la etiqueta.
      * Algunas opciones son:
-     *   - 'label' (string): Cambia el texto de la etiqueta del campo.
+     *   - `label` (string): Cambia el texto de la etiqueta del campo.
      *     Ejemplo: 'Correo Electrónico'.
-     *   - 'label_attr' (array): Atributos HTML para la etiqueta.
-     *     Ejemplo: ['class' => 'control-label'].
-     *   - 'label_translation_parameters' (array): Parámetros de traducción
-     *     para la etiqueta del campo. Ejemplo: ['%email%' => 'example@example.com'].
-     *   - 'required_label' (bool|string): para indicar si se debe mostrar si
-     *     el campo es obligatorio (por defecto `true`). Si es un string, será
-     *     el texto que se incluirá para indicar que el campo es obligatorio.
-     * @return \Twig\Markup Código HTML para la etiqueta del campo del formulario.
+     *   - `label_attr` (array): Atributos HTML para la etiqueta.
+     *     Ejemplo: `['class' => 'control-label']`.
+     *   - `label_translation_parameters` (array): Parámetros de traducción para
+     *     la etiqueta del campo. Ejemplo: `['%email%' => 'example@example.com']`.
+     *   - `required_label` (bool|string): para indicar si se debe mostrar si el
+     *     campo es obligatorio (por defecto `true`). Si es un string, será el
+     *     texto que se incluirá para indicar que el campo es obligatorio.
+     * @return Markup Código HTML para la etiqueta del campo del formulario.
      */
     public function function_form_label($field, array $options = []): Markup
     {
+        // Opciones por defecto de la etiqueta.
         $options = array_merge([
             'required_label' => true,
         ], $options);
+
         // Si el field no existe error.
         if ($field === null) {
             throw new TwigException(__(
                 'Se solicitó renderizar un campo de formulario que no existe.'
             ));
         }
-        // Obtener el nombre y la etiqueta del campo.
+
+        // Obtener el nombre, etiqueta e ID del campo.
         $name = $field['name'];
         $label = $field['label'] ?? null;
         if (empty($label)) {
             return new Markup('', $this->charset);
         }
         $id = $field['widget']['attributes']['id'] ?? $name . 'Field';
+
         // Atributos de la etiqueta.
         $attributes = html_attributes(array_merge([
             'for' => $id,
             'class' => 'form-label',
         ], $options['label_attr'] ?? []));
+
         // Determinar la marca de label si es requerido el campo.
         $required_label = '';
         if ($options['required_label'] && ($field['required'] ?? false)) {
@@ -270,6 +303,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                 $required_label = ' <i class="fa-solid fa-asterisk small text-danger"></i><br/><span class="small text-muted">Este campo es obligatorio.</span>';
             }
         }
+
         // Generar el HTML de la etiqueta.
         $html = sprintf(
             '<label %s>%s%s</label>',
@@ -277,6 +311,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
             e($label),
             $required_label
         );
+
         // Entregar la etiqueta renderizada.
         return new Markup($html, $this->charset);
     }
@@ -287,9 +322,9 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * @param object|array $field El campo del formulario.
      * @param array $options Opciones adicionales para personalizar el widget.
      * Algunas opciones son:
-     *   - 'attr' (array): Atributos HTML para el widget del campo.
-     *     Ejemplo: ['class' => 'form-control', 'placeholder' => 'Enter your name'].
-     * @return \Twig\Markup Código HTML para el widget del campo del formulario.
+     *   - `attr` (array): Atributos HTML para el widget del campo.
+     *     Ejemplo: `['class' => 'form-control', 'placeholder' => 'Enter your name']`.
+     * @return Markup Código HTML para el widget del campo del formulario.
      */
     public function function_form_widget($field, array $options = []): Markup
     {
@@ -299,6 +334,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                 'Se solicitó renderizar un campo de formulario que no existe.'
             ));
         }
+
         // Si el widget no es un objeto se crea como objeto.
         if (!is_object($field['widget'] ?? null)) {
             $field['widget'] = new View_Form_Widget(
@@ -312,12 +348,15 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                 $field['widget']['attributes'] ?? []
             );
         }
+
         // Generar el HTML del widget.
         $html = $field['widget']->render($options);
+
         // Marcar el campo como renderizado.
         if (!empty($field['name'])) {
             $this->markFieldAsRendered($field['name']);
         }
+
         // Entregar el widget renderizado.
         return new Markup($html, $this->charset);
     }
@@ -326,7 +365,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * Renderiza los errores asociados a un campo.
      *
      * @param array $field La configuración del campo.
-     * @return \Twig\Markup Código HTML para los errores del campo.
+     * @return Markup Código HTML para los errores del campo.
      */
     public function function_form_errors($field): Markup
     {
@@ -336,12 +375,15 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                 'Se solicitó renderizar un campo de formulario que no existe.'
             ));
         }
+
         // Obtener los errores del campo.
         $errors = $field['error_messages'] ?? [];
+
         // Si no hay errores, devolver una cadena vacía.
         if (empty($errors)) {
             return new Markup('', $this->charset);
         }
+
         // Generar el HTML de los errores.
         $html = '<ul class="list-unstyled mb-0">';
         foreach ($errors as $error) {
@@ -351,6 +393,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
             );
         }
         $html .= '</ul>';
+
         // Entregar los errores renderizados.
         return new Markup($html, $this->charset);
     }
@@ -358,8 +401,8 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
     /**
      * Renderiza el texto de ayuda asociado a un campo.
      *
-     * @param array $field La configuración del campo.
-     * @return \Twig\Markup Código HTML para el texto de ayuda del campo.
+     * @param array|null $field La configuración del campo.
+     * @return Markup Código HTML para el texto de ayuda del campo.
      */
     public function function_form_help($field): Markup
     {
@@ -369,22 +412,27 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                 'Se solicitó renderizar un campo de formulario que no existe.'
             ));
         }
+
         // Obtener el texto de ayuda del campo.
         $helpText = $field['help_text'] ?? '';
+
         // Si no hay texto de ayuda, devolver una cadena vacía.
         if (empty($helpText)) {
             return new Markup('', $this->charset);
         }
+
         // Atributos del texto de ayuda.
         $attributes = html_attributes([
             'class' => 'form-text text-muted'
         ]);
+
         // Generar el HTML del texto de ayuda.
         $html = sprintf(
             '<div %s>%s</div>',
             $attributes,
             e($helpText)
         );
+
         // Entregar el texto de ayuda renderizado.
         return new Markup($html, $this->charset);
     }
@@ -395,7 +443,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * @param object|array $form El formulario completo.
      * @param array $options Opciones adicionales para personalizar el
      * renderizado del campo mediante form_row().
-     * @return \Twig\Markup Código HTML para los campos restantes.
+     * @return Markup Código HTML para los campos restantes.
      */
     public function function_form_rest($form, array $options = []): Markup
     {
@@ -409,12 +457,13 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                 $html .= $this->function_form_row($field, $options);
             }
         }
+
         // Entregar los campos pendientes de renderizar renderizados.
         return new Markup($html, $this->charset);
     }
 
     /**
-     * Renderiza el atributo enctype para el formulario.
+     * Renderiza el atributo `enctype` para el formulario.
      *
      * @param object|array $form El formulario completo.
      * @return string El atributo enctype para el formulario.
@@ -427,6 +476,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                 return 'multipart/form-data';
             }
         }
+
         return $form['attributes']['enctype']
             ?? 'application/x-www-form-urlencoded'
         ;
@@ -436,7 +486,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * Verifica si el formulario ha sido enviado.
      *
      * @param object|array $form El formulario completo.
-     * @return bool True si el formulario ha sido enviado, de lo contrario False.
+     * @return bool `true` si el formulario ha sido enviado.
      */
     public function function_form_is_submitted($form): bool
     {
@@ -447,7 +497,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * Verifica si el formulario es válido.
      *
      * @param object|array $form El formulario completo.
-     * @return bool True si el formulario es válido, de lo contrario False.
+     * @return bool `true` si el formulario es válido.
      */
     public function function_form_is_valid($form): bool
     {
@@ -458,6 +508,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                 return false;
             }
         }
+
         // Si no se encontraron errores, el formulario es válido.
         return true;
     }
@@ -466,7 +517,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * Agrega los elementos al formulario para usar el captcha.
      *
      * @param object|array $form El formulario completo.
-     * @return \Twig\Markup
+     * @return Markup
      */
     public function function_form_captcha($form): Markup
     {
@@ -479,7 +530,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * Agrega el Token CSRF al formulario.
      *
      * @param object|array $form El formulario completo.
-     * @return \Twig\Markup
+     * @return Markup
      */
     public function function_form_csrf($form): Markup
     {
@@ -487,6 +538,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
             '<input type="hidden" name="csrf_token" value="%s" />',
             $form['csrf_token']
         );
+
         return new Markup($html, $this->charset);
     }
 
@@ -495,7 +547,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      *
      * @param string $label El texto del botón.
      * @param array $attributes Atributos adicionales para el botón.
-     * @return \Twig\Markup Código HTML para el botón de envío.
+     * @return Markup Código HTML para el botón de envío.
      */
     public function function_form_submit(
         string $label = 'Enviar',
@@ -507,14 +559,16 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
             'type' => 'submit',
             'class' => 'btn btn-primary w-100'
         ], $attributes));
+
         // Generar el HTML del botón.
         $html = sprintf(
             '<button %s>%s</button>',
             $attributes,
             e($label)
         );
+
         // Entregar el botón renderizado.
-        return new \Twig\Markup($html, 'UTF-8');
+        return new Markup($html, 'UTF-8');
     }
 
     /**
@@ -532,8 +586,9 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
             'type' => 'error',
             'text' => $message ?? $this->defaultErrorsMessage,
         ]);
+
         // Agregar errores de campos no renderizados.
-        // NOTE: esto normalmente debería ser un error de programación.
+        // NOTE: Esto normalmente debería ser un error de programación.
         // Se muestran para que al programar se sepa que existen y se puedan
         // controlar o corregir estos campos no renderizados con errores.
         // Esto solo funcionará correctamente si la función es llamada en la
@@ -551,8 +606,9 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                 }
             }
         }
+
         // Entregar HTML de los errores globales.
-        return new \Twig\Markup($html, 'UTF-8');
+        return new Markup($html, 'UTF-8');
     }
 
     /**
@@ -562,7 +618,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
      * @param object|array $form El formulario completo.
      * @param array $options Opciones adicionales para personalizar el
      * formulario. Algunas opciones son:
-     *   - 'layout' (string|array): layout que se debe renderizar, por defecto
+     *   - `layout` (string|array): layout que se debe renderizar, por defecto
      *     se usa el string `row`, también se puede indicar un arreglo con la
      *     configuración del layout y campos.
      * Si el formato es el por defecto `row` $options puede contener cualquier
@@ -603,7 +659,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         }
 
         // Entregar HTML de los errores globales.
-        return new \Twig\Markup($html, 'UTF-8');
+        return new Markup($html, 'UTF-8');
     }
 
     /**
@@ -663,6 +719,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
             $html .= '</ul>';
             $html .= $tabContent . '</div>'; // Cerrar tab-content.
         }
+
         // Si no hay pestañas, se renderizan solo secciones.
         else {
             foreach ($layout as $index => $section) {
@@ -690,7 +747,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         </script>';
 
         // Entregar el HTML renderizado para al vista.
-        return new \Twig\Markup($html, $this->charset);
+        return new Markup($html, $this->charset);
     }
 
     /**
@@ -720,16 +777,26 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         $html = sprintf('<div class="card mb-4" id="%s">', $cardId);
 
         if ($isCollapsible) {
-            $html .= sprintf('
-                <div class="card-header" id="heading-%s">
-                    <a data-bs-toggle="collapse" href="#collapse-%s" role="button" data-bs-target="#collapse-%s" aria-expanded="false" aria-controls="collapse-%s" class="toggle-link">
-                        %s%s
-                        <i class="fa-solid fa-caret-down ms-auto toggle-icon"></i>
-                    </a>
-                </div>
-                <div id="collapse-%s" class="collapse" aria-labelledby="heading-%s">
-                    <div class="card-body pt-0">
-            ', $sectionId, $sectionId, $sectionId, $sectionId, $iconHtml, e($section['title'] ?? ''), $sectionId, $sectionId);
+            $html .= sprintf(
+                '
+                    <div class="card-header" id="heading-%s">
+                        <a data-bs-toggle="collapse" href="#collapse-%s" role="button" data-bs-target="#collapse-%s" aria-expanded="false" aria-controls="collapse-%s" class="toggle-link">
+                            %s%s
+                            <i class="fa-solid fa-caret-down ms-auto toggle-icon"></i>
+                        </a>
+                    </div>
+                    <div id="collapse-%s" class="collapse" aria-labelledby="heading-%s">
+                        <div class="card-body pt-0">
+                ',
+                $sectionId,
+                $sectionId,
+                $sectionId,
+                $sectionId,
+                $iconHtml,
+                e($section['title'] ?? ''),
+                $sectionId,
+                $sectionId
+            );
         } else {
             if (!empty($section['title']) || !empty($section['icon'])) {
                 $html .= sprintf(
@@ -739,7 +806,7 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
                 );
                 $html .= '<div class="card-body">';
             } else if (isset($section['tab']['id'])) {
-                $html .= sprintf('<div class="card-header"></div>');
+                $html .= '<div class="card-header"></div>';
                 $html .= '<div class="card-body">';
             } else {
                 $html .= '<div class="card-body pt-4">';
@@ -832,9 +899,9 @@ class View_Engine_Twig_Form extends \Twig\Extension\AbstractExtension
         if (!isset($this->renderedFields)) {
             $this->renderedFields = [];
         }
+
         if (!in_array($field, $this->renderedFields)) {
             $this->renderedFields[] = $field;
         }
     }
-
 }

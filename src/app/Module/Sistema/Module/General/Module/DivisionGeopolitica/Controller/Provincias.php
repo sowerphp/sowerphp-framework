@@ -23,7 +23,7 @@
 
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
-use \sowerphp\autoload\Controller_Model;
+use sowerphp\autoload\Controller_Model;
 
 /**
  * Controlador modelo: provincia.

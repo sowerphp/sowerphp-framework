@@ -23,8 +23,8 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
-use \sowerphp\core\Network_Request as Request;
-use \sowerphp\core\Facade_Session_Message as SessionMessage;
+use sowerphp\core\Network_Request as Request;
+use sowerphp\core\Facade_Session_Message as SessionMessage;
 
 /**
  * Clase para el controlador asociado a la tabla grupo de la base de

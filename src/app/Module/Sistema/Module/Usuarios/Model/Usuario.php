@@ -23,9 +23,9 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
-use \stdClass;
-use \sowerphp\autoload\Model;
-use \Illuminate\Contracts\Auth\Authenticatable;
+use stdClass;
+use sowerphp\autoload\Model;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 /**
  * Modelo singular de la tabla "usuario" de la base de datos.
@@ -141,7 +141,7 @@ class Model_Usuario extends Model implements Authenticatable
                 'type' => self::TYPE_IP_ADDRESS,
                 'auto' => true,
                 'verbose_name' => 'Última IP',
-                'help_text' => 'Dirección IP del último ingreso del usuario',
+                'help_text' => 'Dirección IP del último ingreso del usuario.',
                 'hidden' => true,
             ],
             'ultimo_ingreso_hash' => [

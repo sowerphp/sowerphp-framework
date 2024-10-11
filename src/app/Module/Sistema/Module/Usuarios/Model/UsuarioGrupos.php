@@ -23,7 +23,7 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
-use \sowerphp\autoload\Model_Plural;
+use sowerphp\autoload\Model_Plural;
 
 /**
  * Modelo plural de la tabla "usuario_grupo" de la base de datos.

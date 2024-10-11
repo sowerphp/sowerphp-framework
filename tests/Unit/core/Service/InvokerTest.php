@@ -21,16 +21,15 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-use \PHPUnit\Framework\TestCase;
-use \sowerphp\core\App;
-use \sowerphp\core\Service_Invoker;
+use PHPUnit\Framework\TestCase;
+use sowerphp\core\App;
+use sowerphp\core\Service_Invoker;
 
 /**
  * Test de Service_Invoker.
  */
 class Service_InvokerTest extends TestCase
 {
-
     protected $invokerService;
 
     protected function setUp(): void
@@ -47,7 +46,7 @@ class Service_InvokerTest extends TestCase
         // Crear una instancia de la clase de pruebas.
         $testInstance = new TestClass();
 
-        // Ejecutar test de Service_Invoker::call()
+        // Ejecutar test de Service_Invoker::call().
         $result = $this->invokerService->call($testInstance, 'calledMethod');
 
         // Validar test.
@@ -56,7 +55,7 @@ class Service_InvokerTest extends TestCase
 
     public function testInvoke()
     {
-        // Ejecutar test de Service_Invoker::invoke()
+        // Ejecutar test de Service_Invoker::invoke().
         list($testInstance, $result) = $this->invokerService->invoke(
             TestClass::class,
             'invokedMethod'
@@ -67,15 +66,13 @@ class Service_InvokerTest extends TestCase
         $this->assertEquals(TestClass::class, get_class($testInstance));
         $this->assertEquals(3, $testInstance->getInvokedCounter());
     }
-
 }
 
 /**
  * Clase de prueba para las llamadas mediante Service_Invoker.
  */
-class TestClass
+final class TestClass
 {
-
     protected $invokedCounter = 0;
 
     public function calledMethod(): string
@@ -103,5 +100,4 @@ class TestClass
     {
         return $this->invokedCounter;
     }
-
 }

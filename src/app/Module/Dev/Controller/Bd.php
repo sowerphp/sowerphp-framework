@@ -23,7 +23,7 @@
 
 namespace sowerphp\app\Dev;
 
-use \sowerphp\core\Facade_Session_Message as SessionMessage;
+use sowerphp\core\Facade_Session_Message as SessionMessage;
 
 /**
  * Controlador para las acciones relacionadas con la base de datos

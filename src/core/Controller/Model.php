@@ -23,8 +23,8 @@
 
 namespace sowerphp\core;
 
-use \sowerphp\core\Network_Request as Request;
-use \sowerphp\core\Facade_Session_Message as SessionMessage;
+use sowerphp\core\Network_Request as Request;
+use sowerphp\core\Facade_Session_Message as SessionMessage;
 
 /**
  * Clase que implementa los métodos para interacturar con registros de modelos

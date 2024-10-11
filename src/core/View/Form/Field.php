@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class View_Form_Field implements \ArrayAccess
 {
-
     /**
      * Nombre del campo.
      *
@@ -221,13 +220,20 @@ class View_Form_Field implements \ArrayAccess
      */
     public function validate($value)
     {
-        // Implementar lógica de validación.
+        // TODO: Implementar lógica de validación del campo de formulario.
     }
 
+    /**
+     * Asigna las opciones del campo.
+     *
+     * @param array $options
+     * @return void
+     */
     protected function setOptions(array $options): void
     {
         // Normalizar opciones.
         $options = $this->normalizeOptions($options);
+
         // Asignar opciones.
         $this->name = $options['name'] ?? null;
         $this->label = $options['label'] ?? '';
@@ -264,6 +270,7 @@ class View_Form_Field implements \ArrayAccess
                 'name' => $widget,
             ];
         }
+
         // Obtener valor del widget.
         $widget['name'] = $widget['name'] ?? 'default';
         $widget['value'] = $widget['value']
@@ -273,6 +280,7 @@ class View_Form_Field implements \ArrayAccess
             )
         ;
         $widget['attributes'] = $widget['attributes'] ?? [];
+
         // Crear el widget y retornar.
         return new View_Form_Widget(
             $widget['name'],
@@ -282,9 +290,9 @@ class View_Form_Field implements \ArrayAccess
     }
 
     /**
-     * Normaliza las opciones provenientes desde diferentes formatos al
-     * estándar requerido por la clase Field para poder generar el campo del
-     * formulario y el widget correctamente.
+     * Normaliza las opciones provenientes desde diferentes formatos al estándar
+     * requerido por la clase Field para poder generar el campo del formulario y
+     * el widget correctamente.
      *
      * @param array $options Opciones del campo sin normalizar.
      * @return array Opciones del campo normalizadas.
@@ -318,11 +326,13 @@ class View_Form_Field implements \ArrayAccess
             'max_length' => $options['max_length'] ?? null,
             'choices' => $options['choices'] ?? null,
         ];
+
         if ($normalized['name'] === null) {
             throw new \Exception(__(
                 'Falta especificar el "name" del campo del formulario.'
             ));
         }
+
         return $normalized;
     }
 
@@ -344,6 +354,7 @@ class View_Form_Field implements \ArrayAccess
             ?? $options['input_type']
             ?? 'default'
         ;
+
         // Asignar atributos que pueden venir en el campo y no en el widget.
         // NOTE: Probablemente en el futuro se deba revisar y dejar obsoletos
         // algunos atributos que están en el field y que son solo del widget.
@@ -371,6 +382,7 @@ class View_Form_Field implements \ArrayAccess
                 }
             }
         }
+
         // Atributos globales de elementos HTML.
         $attributes = [
             'accesskey' => $widget['accesskey'] ?? null,
@@ -389,6 +401,7 @@ class View_Form_Field implements \ArrayAccess
             'title' => $widget['title'] ?? null,
             'virtualkeyboardpolicy' => $widget['virtualkeyboardpolicy'] ?? null,
         ];
+
         // Agregar atributos data-* (también son globales).
         if (!empty($widget['data'])) {
             foreach ($widget['data'] as $key => $value) {
@@ -397,6 +410,7 @@ class View_Form_Field implements \ArrayAccess
                 }
             }
         }
+
         // Agregar atributos comunes de elementos de formularios.
         $attributes['form'] = $widget['form'] ?? null;
         $attributes['name'] = $options['name'] ?? null;
@@ -406,10 +420,12 @@ class View_Form_Field implements \ArrayAccess
         $attributes['id'] = $attributes['id']
             ?? ($attributes['name'] ?? null) . 'Field'
         ;
+
         // Si el atributo es requerido se agrega una marca 'aria'.
         if ($attributes['required']) {
             $attributes['aria-required'] = 'true';
         }
+
         // Agregar atributos que son de elementos like 'input'.
         $widgetTypes = [
             // Tipos de widgets propios del framework.
@@ -440,13 +456,24 @@ class View_Form_Field implements \ArrayAccess
             'week'
         ];
         if (in_array($widgetName, $widgetTypes)) {
+            // Determinar tipo y asinar valor pues se pasa aparte en el widget.
             $attributes['type'] = $widget['type'] ?? 'text';
-            $attributes['value'] = null; // Se pasa como un valor aparte en el widget.
+            $attributes['value'] = null;
+
             // Agregar class según su 'type'.
-            $inputTypesWithoutFormControl = ['checkbox', 'radio', 'file', 'submit', 'reset', 'button', 'image'];
+            $inputTypesWithoutFormControl = [
+                'checkbox',
+                'radio',
+                'file',
+                'submit',
+                'reset',
+                'button',
+                'image',
+            ];
             if (!in_array($attributes['type'], $inputTypesWithoutFormControl)) {
                 $attributes['class'] = 'form-control ' . ($widget['class'] ?? '');
             }
+
             // Agregar atributos para elementos 'input' según su 'type'.
             $inputTypes = ['text', 'search', 'url', 'tel', 'email', 'password'];
             if (in_array($attributes['type'], $inputTypes)) {
@@ -483,12 +510,14 @@ class View_Form_Field implements \ArrayAccess
                 $attributes['class'] = 'btn btn-primary ' . ($widget['class'] ?? '');
             }
         }
+
         // Agregar atributos que son de elementos like 'select'.
         if (in_array($widgetName, ['select'])) {
             $attributes['multiple'] = $widget['multiple'] ?? null;
             $attributes['size'] = $widget['size'] ?? null;
             $attributes['class'] = 'form-control ' . ($widget['class'] ?? '');
         }
+
         // Agregar atributos que son de elementos like 'textarea'.
         if (in_array($widgetName, ['textarea'])) {
             $attributes['rows'] = $widget['rows'] ?? 5;
@@ -502,6 +531,7 @@ class View_Form_Field implements \ArrayAccess
         // Ajustar class del elemento.
         $valid = empty($options['errors']) ? '' : ' is-invalid';
         $attributes['class'] = trim(($attributes['class'] ?? '') . $valid);
+
         // Determinar valor del widget.
         $widgetValue = $options['initial_value']
             ?? $options['value']
@@ -511,8 +541,10 @@ class View_Form_Field implements \ArrayAccess
         if (isset($options['name'])) {
             $widgetValue = session()->getOldInput($options['name'], $widgetValue);
         }
+
         // Agregar el nombre del widget como atributo data-*
         $attributes['data-widget-name'] = $widgetName;
+
         // Entregar los atributos determinados.
         return [
             'name' => $widgetName,
@@ -531,5 +563,4 @@ class View_Form_Field implements \ArrayAccess
     {
         return app('validator')->generateValidationRules($options);
     }
-
 }

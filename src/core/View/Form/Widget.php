@@ -23,7 +23,7 @@
 
 namespace sowerphp\core;
 
-use \Illuminate\Support\Str;
+use Illuminate\Support\Str;
 
 /**
  * Clase base para todos los widgets de formulario.

@@ -25,7 +25,7 @@ namespace sowerphp\core;
 
 use Illuminate\Support\Str;
 use Illuminate\Contracts\Auth\Guard;
-use \Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 /**
  * Clase base para las Auth_Guard_X.

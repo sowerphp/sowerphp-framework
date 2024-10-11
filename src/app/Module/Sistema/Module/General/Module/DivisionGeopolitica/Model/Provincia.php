@@ -23,7 +23,7 @@
 
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
-use \sowerphp\autoload\Model;
+use sowerphp\autoload\Model;
 
 /**
  * Modelo singular de la tabla "provincia" de la base de datos.

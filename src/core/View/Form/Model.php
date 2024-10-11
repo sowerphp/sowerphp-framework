@@ -23,20 +23,45 @@
 
 namespace sowerphp\core;
 
+/**
+ * Formulario de un modelo de base de datos.
+ */
 class View_Form_Model extends View_Form
 {
-
+    /**
+     * Entrega los datos que se utilizarán para la construcción de la instancia
+     * del formulario del modelo a partir de las opciones pasadas al método.
+     *
+     * Este método estandariza las opciones del modelo apra que se puedan usar
+     * en una instancia de formulario.
+     *
+     * @param array $options Opciones para construir el formulario.
+     * @return array
+     */
     public static function buildForm(array $options): array
     {
+        // Determinar los campos del formulario, instancias de View_Form_Field.
         $fields = [];
         foreach ($options['fields'] as $name => $config) {
             $field = new View_Form_Field($config);
             $fields[$name] = $field;
         }
+
+        // Obtener los valores iniciales de los campos (desde cada campo).
         $initial = array_filter(
-            array_map(function ($field) { return $field->initial; }, $fields),
-            function ($initial) { return $initial !== null; }
+            array_map(
+                function ($field) {
+                    return $field->initial;
+                },
+                $fields
+            ),
+            function ($initial) {
+                return $initial !== null;
+            }
         );
+
+        // Entregar los datos normalizados que se deben usar para construir el
+        // formulario del modelo.
         return [
             'data' => $options['form']['data'] ?? [],
             'files' => $options['form']['files'] ?? [],
@@ -50,5 +75,4 @@ class View_Form_Model extends View_Form
             ,
         ];
     }
-
 }

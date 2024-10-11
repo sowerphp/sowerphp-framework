@@ -23,9 +23,9 @@
 
 namespace sowerphp\core;
 
-use \PhpImap\Mailbox;
-use \PhpImap\IncomingMailHeader;
-use \PhpImap\IncomingMailAttachment;
+use PhpImap\Mailbox;
+use PhpImap\IncomingMailHeader;
+use PhpImap\IncomingMailAttachment;
 
 /**
  * Casilla de correo electrónico que se usará con el servicio 'mail_receiver'.

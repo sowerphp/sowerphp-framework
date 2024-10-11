@@ -23,7 +23,7 @@
 
 namespace sowerphp\general;
 
-use \sowerphp\core\View_Form;
+use sowerphp\core\View_Form;
 
 class View_Form_Contacto extends View_Form
 {

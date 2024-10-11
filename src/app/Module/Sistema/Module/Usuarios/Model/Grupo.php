@@ -23,7 +23,7 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
-use \sowerphp\autoload\Model;
+use sowerphp\autoload\Model;
 
 /**
  * Modelo singular de la tabla "grupo" de la base de datos.

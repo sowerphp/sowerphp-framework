@@ -23,10 +23,10 @@
 
 namespace sowerphp\core;
 
-use \Twig\Environment;
-use \Twig\Loader\FilesystemLoader;
-use \Twig\TwigFunction;
-use \Twig\TwigFilter;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+use Twig\TwigFunction;
+use Twig\TwigFilter;
 
 /**
  * Motor de renderizado de plantilla HTML utilizando Twig.

@@ -23,9 +23,9 @@
 
 namespace sowerphp\core;
 
-use \Symfony\Component\Mailer\Mailer;
-use \Symfony\Component\Mailer\Transport;
-use \Symfony\Component\Mailer\Transport\TransportInterface;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\Transport\TransportInterface;
 
 /**
  * Clase para el envío de correos electrónicos.

@@ -23,7 +23,7 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
-use \sowerphp\autoload\Model;
+use sowerphp\autoload\Model;
 use sowerphp\app\Sistema\Usuarios\Model_Grupo;
 
 /**

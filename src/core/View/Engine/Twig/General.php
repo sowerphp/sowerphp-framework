@@ -23,18 +23,17 @@
 
 namespace sowerphp\core;
 
-use \Twig\Extension\AbstractExtension;
-use \Twig\TwigFilter;
-use \Twig\TwigFunction;
-use \Twig\Markup;
-use \sowerphp\core\Facade_Session_Message as SessionMessage;
+use Twig\Extension\AbstractExtension;
+use Twig\Markup;
+use Twig\TwigFilter;
+use Twig\TwigFunction;
+use sowerphp\core\Facade_Session_Message as SessionMessage;
 
 /**
  * Extensión general con funciones y filtros para Twig.
  */
-class View_Engine_Twig_General extends AbstractExtension
+final class View_Engine_Twig_General extends AbstractExtension
 {
-
     /**
      * Entrega los filtros de la extensión.
      *
@@ -70,11 +69,17 @@ class View_Engine_Twig_General extends AbstractExtension
      * @param bool $obfuscate
      * @return string
      */
-    public function function_project_path(?string $path = null, bool $obfuscate = true): string
-    {
+    public function function_project_path(
+        ?string $path = null,
+        bool $obfuscate = true
+    ): string {
         $layersService = app('layers');
         $fullpath = $layersService->getProjectPath($path);
-        return $obfuscate ? $layersService->obfuscatePath($fullpath) : $fullpath;
+
+        return $obfuscate
+            ? $layersService->obfuscatePath($fullpath)
+            : $fullpath
+        ;
     }
 
     /**
@@ -93,16 +98,20 @@ class View_Engine_Twig_General extends AbstractExtension
      * @param string $delimiter El delimitador.
      * @param string $string La cadena de texto a dividir.
      * @param int|null $index (Opcional) El índice del elemento a retornar.
-     * @return array|string El array resultante de la división o un elemento
+     * @return array|string|null El array resultante de la división o un elemento
      * específico si se proporciona el índice.
      */
-    public function function_explode(string $delimiter, string $string, int $index = null): ?string
-    {
+    public function function_explode(
+        string $delimiter,
+        string $string,
+        ?int $index = null
+    ) {
         $parts = explode($delimiter, $string);
+
         if ($index !== null) {
             return $parts[$index] ?? null;
         }
+
         return $parts;
     }
-
 }

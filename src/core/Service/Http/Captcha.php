@@ -23,8 +23,8 @@
 
 namespace sowerphp\core;
 
-use \ReCaptcha\ReCaptcha;
-use \sowerphp\core\Network_Request as Request;
+use ReCaptcha\ReCaptcha;
+use sowerphp\core\Network_Request as Request;
 
 /**
  * Servicio de Captcha.

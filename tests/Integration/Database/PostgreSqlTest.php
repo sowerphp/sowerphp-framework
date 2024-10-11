@@ -21,15 +21,14 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-use \PHPUnit\Framework\TestCase;
-use \sowerphp\core\App;
+use PHPUnit\Framework\TestCase;
+use sowerphp\core\App;
 
 /**
  * Test para probar la conexión con una base de datos PostgreSQL.
  */
 class PostgreSqlTest extends TestCase
 {
-
     protected $app;
 
     protected function setUp(): void
@@ -45,5 +44,4 @@ class PostgreSqlTest extends TestCase
         //$this->app->run();
         $this->assertTrue(true);
     }
-
 }

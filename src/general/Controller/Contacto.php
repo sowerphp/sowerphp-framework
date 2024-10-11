@@ -24,8 +24,8 @@
 namespace sowerphp\general;
 
 use Symfony\Component\Mime\Address;
-use \sowerphp\core\Network_Request as Request;
-use \sowerphp\autoload\Controller;
+use sowerphp\core\Network_Request as Request;
+use sowerphp\autoload\Controller;
 
 /**
  * Controlador para página de contacto.

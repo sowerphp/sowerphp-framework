@@ -26,8 +26,8 @@ namespace sowerphp\core;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\Str;
-use \Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use \Symfony\Component\Routing\Exception\RouteNotFoundException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 class Service_Http_Router implements Interface_Service
 {

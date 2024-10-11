@@ -23,9 +23,9 @@
 
 namespace sowerphp\app\Sistema\Usuarios;
 
-use \sowerphp\autoload\Model;
-use \sowerphp\app\Sistema\Usuarios\Model_Usuario;
-use \sowerphp\app\Sistema\Usuarios\Model_Grupo;
+use sowerphp\autoload\Model;
+use sowerphp\app\Sistema\Usuarios\Model_Usuario;
+use sowerphp\app\Sistema\Usuarios\Model_Grupo;
 
 /**
  * Modelo singular de la tabla "usuario_grupo" de la base de datos.

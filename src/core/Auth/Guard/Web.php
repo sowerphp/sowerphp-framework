@@ -23,7 +23,7 @@
 
 namespace sowerphp\core;
 
-use \Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 /**
  * Guard de autenticación para la web.

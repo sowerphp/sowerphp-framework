@@ -23,7 +23,7 @@
 
 namespace sowerphp\app\Sistema\General;
 
-use \sowerphp\autoload\Model_Plural;
+use sowerphp\autoload\Model_Plural;
 
 /**
  * Modelo plural de la tabla "moneda_cambio" de la base de datos.

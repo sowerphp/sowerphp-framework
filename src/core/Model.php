@@ -23,10 +23,10 @@
 
 namespace sowerphp\core;
 
-use \stdClass;
-use \Illuminate\Config\Repository;
-use \Illuminate\Support\Str;
-use \sowerphp\core\Database_QueryBuilder as QueryBuilder;
+use stdClass;
+use Illuminate\Config\Repository;
+use Illuminate\Support\Str;
+use sowerphp\core\Database_QueryBuilder as QueryBuilder;
 
 /**
  * Clase abstracta para todos los modelos.

@@ -23,7 +23,7 @@
 
 namespace sowerphp\app\Sistema\General;
 
-use \sowerphp\autoload\Model;
+use sowerphp\autoload\Model;
 
 /**
  * Modelo singular de la tabla "afd" de la base de datos.

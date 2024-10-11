@@ -23,7 +23,7 @@
 
 namespace sowerphp\app\Sistema\General;
 
-use \sowerphp\core\Network_Request as Request;
+use sowerphp\core\Network_Request as Request;
 
 /**
  * Clase para el controlador asociado a la tabla afd de la base de

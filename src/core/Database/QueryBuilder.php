@@ -23,7 +23,7 @@
 
 namespace sowerphp\core;
 
-use \Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
  * Extensión del QueryBuilder de Illuminate para proveer macros personalizadas.

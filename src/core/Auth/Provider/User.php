@@ -24,7 +24,7 @@
 namespace sowerphp\core;
 
 use Illuminate\Contracts\Auth\UserProvider;
-use \Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 /**
  * Proveedor de usuarios para autenticación.

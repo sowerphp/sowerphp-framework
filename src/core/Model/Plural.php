@@ -23,9 +23,9 @@
 
 namespace sowerphp\core;
 
-use \Illuminate\Config\Repository;
-use \Illuminate\Support\Collection;
-use \sowerphp\core\Database_QueryBuilder as QueryBuilder;
+use Illuminate\Config\Repository;
+use Illuminate\Support\Collection;
+use sowerphp\core\Database_QueryBuilder as QueryBuilder;
 
 /**
  * Clase abstracta para todos los modelos.
