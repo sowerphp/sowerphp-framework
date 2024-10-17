@@ -194,51 +194,57 @@ final class View_Engine_Twig_Form extends AbstractExtension
      */
     public function function_form_row($field, array $options = []): Markup
     {
-        // Si el field no existe error.
-        if ($field === null) {
-            throw new TwigException(__(
-                'Se solicitó renderizar un campo de formulario que no existe.'
-            ));
-        }
+        // Crear el campo $field como objeto si fue pasado como arreglo.
+        $field = $this->createField($field);
 
-        // Generar subcomponentes del renderizado del campo.
-        $label = $this->function_form_label($field, [
-            'label' => $options['label'] ?? null,
-            'label_attr' => $options['label_attr'] ?? null,
-            'label_translation_parameters' =>
-                $options['label_translation_parameters'] ?? null
-            ,
-        ]);
+        // Renderizar el widget del campo.
         $widget = $this->function_form_widget($field, [
             'attr' => $options['attr'] ?? null,
         ]);
-        $errors = $this->function_form_errors($field);
-        $help = $this->function_form_help($field);
 
-        // Generar el HTML del campo.
-        $required = ($field['required'] ?? null) ? ' required' : '';
-        $html = sprintf(
-            '<div class="row mb-3 form-group'.$required.'">
-                <div class="col-sm-2">
-                    %s
-                </div>
-                <div class="col-sm-10">
-                    %s
-                    %s
-                    %s
-                </div>
-            </div>',
-            $label,
-            $widget,
-            $errors
-                ? sprintf(
-                    '<div class="invalid-feedback d-block">%s</div>',
-                    $errors
-                )
-                : ''
-            ,
-            $help ? sprintf('<div class="form-text">%s</div>', $help) : ''
-        );
+        // Si el campo es oculto el HTML del campo es solo el widget.
+        if ($field['widget']['name'] === 'hidden') {
+            $html = $widget;
+        }
+
+        // Generar el resto de subcomponente y el HTML cuando no es oculto.
+        else {
+            // Generar subcomponentes del renderizado del campo.
+            $label = $this->function_form_label($field, [
+                'label' => $options['label'] ?? null,
+                'label_attr' => $options['label_attr'] ?? null,
+                'label_translation_parameters' =>
+                    $options['label_translation_parameters'] ?? null
+                ,
+            ]);
+            $errors = $this->function_form_errors($field);
+            $help = $this->function_form_help($field);
+
+            // Generar el HTML del campo.
+            $required = ($field['required'] ?? null) ? ' required' : '';
+            $html = sprintf(
+                '<div class="row mb-3 form-group'.$required.'">
+                    <div class="col-sm-2">
+                        %s
+                    </div>
+                    <div class="col-sm-10">
+                        %s
+                        %s
+                        %s
+                    </div>
+                </div>',
+                $label,
+                $widget,
+                $errors
+                    ? sprintf(
+                        '<div class="invalid-feedback d-block">%s</div>',
+                        $errors
+                    )
+                    : ''
+                ,
+                $help ? sprintf('<div class="form-text">%s</div>', $help) : ''
+            );
+        }
 
         // Marcar el campo como renderizado.
         if (!empty($field['name'])) {
@@ -274,11 +280,7 @@ final class View_Engine_Twig_Form extends AbstractExtension
         ], $options);
 
         // Si el field no existe error.
-        if ($field === null) {
-            throw new TwigException(__(
-                'Se solicitó renderizar un campo de formulario que no existe.'
-            ));
-        }
+        $field = $this->createField($field);
 
         // Obtener el nombre, etiqueta e ID del campo.
         $name = $field['name'];
@@ -300,7 +302,7 @@ final class View_Engine_Twig_Form extends AbstractExtension
             if (is_string($options['required_label'])) {
                 $required_label = ' ' . $options['required_label'];
             } else {
-                $required_label = ' <i class="fa-solid fa-asterisk small text-danger"></i><br/><span class="small text-muted">Este campo es obligatorio.</span>';
+                $required_label = ' <sup><i class="fa-solid fa-asterisk small text-danger"></i></sup>';
             }
         }
 
@@ -329,25 +331,7 @@ final class View_Engine_Twig_Form extends AbstractExtension
     public function function_form_widget($field, array $options = []): Markup
     {
         // Si el field no existe error.
-        if ($field === null) {
-            throw new TwigException(__(
-                'Se solicitó renderizar un campo de formulario que no existe.'
-            ));
-        }
-
-        // Si el widget no es un objeto se crea como objeto.
-        if (!is_object($field['widget'] ?? null)) {
-            $field['widget'] = new View_Form_Widget(
-                is_string($field['widget'] ?? [])
-                    ? $field['widget']
-                    : $field['widget']['name']
-                        ?? $field['input_type']
-                        ?? 'default'
-                ,
-                $field['widget']['value'] ?? null,
-                $field['widget']['attributes'] ?? []
-            );
-        }
+        $field = $this->createField($field);
 
         // Generar el HTML del widget.
         $html = $field['widget']->render($options);
@@ -364,17 +348,13 @@ final class View_Engine_Twig_Form extends AbstractExtension
     /**
      * Renderiza los errores asociados a un campo.
      *
-     * @param array $field La configuración del campo.
+     * @param object|array $field La configuración del campo.
      * @return Markup Código HTML para los errores del campo.
      */
     public function function_form_errors($field): Markup
     {
         // Si el field no existe error.
-        if ($field === null) {
-            throw new TwigException(__(
-                'Se solicitó renderizar un campo de formulario que no existe.'
-            ));
-        }
+        $field = $this->createField($field);
 
         // Obtener los errores del campo.
         $errors = $field['error_messages'] ?? [];
@@ -401,17 +381,13 @@ final class View_Engine_Twig_Form extends AbstractExtension
     /**
      * Renderiza el texto de ayuda asociado a un campo.
      *
-     * @param array|null $field La configuración del campo.
+     * @param object|array $field La configuración del campo.
      * @return Markup Código HTML para el texto de ayuda del campo.
      */
     public function function_form_help($field): Markup
     {
         // Si el field no existe error.
-        if ($field === null) {
-            throw new TwigException(__(
-                'Se solicitó renderizar un campo de formulario que no existe.'
-            ));
-        }
+        $field = $this->createField($field);
 
         // Obtener el texto de ayuda del campo.
         $helpText = $field['help_text'] ?? '';
@@ -842,10 +818,12 @@ final class View_Engine_Twig_Form extends AbstractExtension
                             $field,
                             [
                                 'label_attr' => [
-                                    'class' => '', // No se puede usar form-label.
+                                    // No se puede usar form-label por lo que se
+                                    // quita si existe.
+                                    'class' => '',
                                 ],
                                 'required_label' =>
-                                    ' <i class="fa-solid fa-asterisk small text-danger"></i>'
+                                    ' <sup><i class="fa-solid fa-asterisk small text-danger"></i></sup>'
                                 ,
                             ]
                         );
@@ -886,6 +864,31 @@ final class View_Engine_Twig_Form extends AbstractExtension
 
         // Entregar el buffer de HTML de la sección.
         return $html;
+    }
+
+    /**
+     * Crea una instancia de View_Form_Field si lo que se pasó no es una
+     * instancia de dicha clase.
+     *
+     * @param object|array|null $field
+     * @return View_Form_Field
+     */
+    protected function createField($field): View_Form_Field
+    {
+        // Si el field no tiene un valor asignado (es `null`) entonces error.
+        if (!isset($field)) {
+            throw new TwigException(__(
+                'Se solicitó renderizar un campo de formulario que no está asignado.'
+            ));
+        }
+
+        // Si el $field no es una instancia de View_Form_Field crea como objeto.
+        if (!$field instanceof View_Form_Field) {
+            $field = new View_Form_Field($field);
+        }
+
+        // Entregar el campo como instancia de View_Form_Field.
+        return $field;
     }
 
     /**

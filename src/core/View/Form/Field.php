@@ -23,24 +23,27 @@
 
 namespace sowerphp\core;
 
+use ArrayAccess;
+use UnderflowException;
+
 /**
  * Representa un campo individual en un formulario.
  */
-class View_Form_Field implements \ArrayAccess
+class View_Form_Field implements ArrayAccess
 {
     /**
      * Nombre del campo.
      *
      * @var string
      */
-    public $name;
+    public $name = null;
 
     /**
      * La etiqueta del campo.
      *
      * @var string
      */
-    public $label;
+    public $label = '';
 
     /**
      * Indica si el campo se puede o no editar.
@@ -54,105 +57,105 @@ class View_Form_Field implements \ArrayAccess
      *
      * @var mixed
      */
-    public $initial;
+    public $initial = null;
 
     /**
      * El texto de ayuda para el campo.
      *
      * @var string
      */
-    public $help_text;
+    public $help_text = '';
 
     /**
      * Indica si el campo es obligatorio.
      *
      * @var bool
      */
-    public $required;
-
-    /**
-     * El widget utilizado para renderizar el campo.
-     *
-     * @var string|array|View_Form_Widget
-     */
-    public $widget;
+    public $required = true;
 
     /**
      * Mensajes de error personalizados para el campo.
      *
      * @var array
      */
-    public $error_messages;
+    public $error_messages = [];
 
     /**
      * Lista de funciones de validación para el campo.
      *
      * @var array
      */
-    public $validators;
+    public $validators = [];
 
     /**
      * Indica si el campo está deshabilitado.
      *
      * @var bool
      */
-    public $disabled;
+    public $disabled = false;
 
     /**
      * Lista de formatos de entrada permitidos (para campos de fecha y hora).
      *
      * @var array
      */
-    public $input_formats;
+    public $input_formats = [];
 
     /**
      * Indica si el campo debe usar localización.
      *
      * @var bool
      */
-    public $localize;
+    public $localize = false;
 
     /**
      * Indica si el campo debe mostrar su valor inicial en un campo oculto.
      *
      * @var bool
      */
-    public $show_hidden_initial;
+    public $show_hidden_initial = false;
 
     /**
      * El valor mínimo permitido (para campos numéricos).
      *
      * @var mixed
      */
-    public $min_value;
+    public $min_value = null;
 
     /**
      * El valor máximo permitido (para campos numéricos).
      *
      * @var mixed
      */
-    public $max_value;
+    public $max_value = null;
 
     /**
      * La longitud mínima permitida (para campos de texto).
      *
      * @var int
      */
-    public $min_length;
+    public $min_length = null;
 
     /**
      * La longitud máxima permitida (para campos de texto).
      *
      * @var int
      */
-    public $max_length;
+    public $max_length = null;
 
     /**
-     * Lista de opciones permitidas (para campos de selección).
+     * Lista de opciones permitidas (para campos de selección o similares).
      *
-     * @var array
+     * @var array|null
      */
-    public $choices;
+    public $choices = null;
+
+    /**
+     * El widget utilizado para renderizar el campo.
+     *
+     * @var View_Form_Widget
+     */
+    public $widget;
 
     /**
      * Constructor para inicializar un campo del formulario.
@@ -162,7 +165,6 @@ class View_Form_Field implements \ArrayAccess
     public function __construct(array $options = [])
     {
         $this->setOptions($options);
-        $this->widget = $this->createWidget($this->widget);
     }
 
     /**
@@ -232,37 +234,62 @@ class View_Form_Field implements \ArrayAccess
     protected function setOptions(array $options): void
     {
         // Normalizar opciones.
-        $options = $this->normalizeOptions($options);
+        $normalizedOptions = $this->normalizeOptions($options);
 
-        // Asignar opciones.
-        $this->name = $options['name'] ?? null;
-        $this->label = $options['label'] ?? '';
-        $this->editable = $options['editable'] ?? true;
-        $this->initial = $options['initial'] ?? null;
-        $this->help_text = $options['help_text'] ?? '';
-        $this->required = $options['required'] ?? true;
-        $this->widget = $options['widget'] ?? null;
-        $this->error_messages = $options['error_messages'] ?? [];
-        $this->validators = $options['validators'] ?? [];
-        $this->disabled = $options['disabled'] ?? false;
-        $this->input_formats = $options['input_formats'] ?? [];
-        $this->localize = $options['localize'] ?? false;
-        $this->show_hidden_initial = $options['show_hidden_initial'] ?? false;
-        $this->min_value = $options['min_value'] ?? null;
-        $this->max_value = $options['max_value'] ?? null;
-        $this->min_length = $options['min_length'] ?? null;
-        $this->max_length = $options['max_length'] ?? null;
-        $this->choices = $options['choices'] ?? [];
+        // Asignar opciones a los atributos.
+        $attributes = [
+            'name',
+            'label',
+            'editable',
+            'initial',
+            'help_text',
+            'required',
+            'error_messages',
+            'validators',
+            'disabled',
+            'input_formats',
+            'localize',
+            'show_hidden_initial',
+            'min_value',
+            'max_value',
+            'min_length',
+            'max_length',
+            'choices',
+        ];
+
+        // Asignar opciones pasadas a los atributos correspondientes. Si la
+        // opción no está definida se usará el valor por defecto del atributo.
+        foreach ($attributes as $attribute) {
+            $this->$attribute = $normalizedOptions[$attribute] ?? $this->$attribute;
+        }
+
+        // Crear y asignar el widget.
+        $widgetData = $normalizedOptions['widget'];
+        $widgetOptions = [
+            // Instancia del campo por si el widget la necesita.
+            'field' => $this,
+
+            // Opciones (tag `options`) que el campo usará.
+            'choices' => $this->choices,
+
+            // Datos para widgets de tipo `table` o que usan tablas.
+            'titles' => $options['titles'] ?? [],
+            'fields' => $options['fields'] ?? [],
+            'values' => $options['values'] ?? [],
+            'rows' => $options['rows'] ?? [],
+        ];
+        $this->widget = $this->createWidget($widgetData, $widgetOptions);
     }
 
     /**
      * Asigna el widget que utilizará el campo del formulario para ser
      * renderizado.
      *
-     * @param string|array $widget Nombre del widget o su configuración.
+     * @param string|array|null $widget Nombre del widget o su configuración.
+     * @param array $options Opciones adicionales para el widget.
      * @return View_Form_Widget Instancia del widget asignado.
      */
-    protected function createWidget($widget): View_Form_Widget
+    protected function createWidget($widget, array $options = []): View_Form_Widget
     {
         // Armar arreglo base de la configuración del widget.
         if (!is_array($widget)) {
@@ -271,7 +298,7 @@ class View_Form_Field implements \ArrayAccess
             ];
         }
 
-        // Obtener valor del widget.
+        // Obtener datos del widget: name, value, attributes y options.
         $widget['name'] = $widget['name'] ?? 'default';
         $widget['value'] = $widget['value']
             ?? session()->getOldInput(
@@ -280,12 +307,14 @@ class View_Form_Field implements \ArrayAccess
             )
         ;
         $widget['attributes'] = $widget['attributes'] ?? [];
+        $widget['options'] = array_merge($widget['options'] ?? [], $options);
 
         // Crear el widget y retornar.
         return new View_Form_Widget(
             $widget['name'],
             $widget['value'],
-            $widget['attributes']
+            $widget['attributes'],
+            $widget['options']
         );
     }
 
@@ -311,7 +340,6 @@ class View_Form_Field implements \ArrayAccess
             'initial' => $widget['value'],
             'help_text' => $options['help_text'] ?? null,
             'required' => $options['required'] ?? null,
-            'widget' => $widget,
             'error_messages' => $options['errors'] ?? null,
             'validators' => $options['validation']
                 ?? $this->generateValidationRules($options)
@@ -325,10 +353,11 @@ class View_Form_Field implements \ArrayAccess
             'min_length' => $options['min_length'] ?? null,
             'max_length' => $options['max_length'] ?? null,
             'choices' => $options['choices'] ?? null,
+            'widget' => $widget,
         ];
 
         if ($normalized['name'] === null) {
-            throw new \Exception(__(
+            throw new UnderflowException(__(
                 'Falta especificar el "name" del campo del formulario.'
             ));
         }
@@ -456,15 +485,14 @@ class View_Form_Field implements \ArrayAccess
             'week'
         ];
         if (in_array($widgetName, $widgetTypes)) {
-            // Determinar tipo y asinar valor pues se pasa aparte en el widget.
-            $attributes['type'] = $widget['type'] ?? 'text';
+            // Determinar tipo y asignar valor pues se pasa aparte en el widget.
+            $attributes['type'] = $widget['type'] ?? $widgetName ?? 'text';
             $attributes['value'] = null;
 
             // Agregar class según su 'type'.
             $inputTypesWithoutFormControl = [
                 'checkbox',
                 'radio',
-                'file',
                 'submit',
                 'reset',
                 'button',
@@ -498,7 +526,6 @@ class View_Form_Field implements \ArrayAccess
             if (in_array($attributes['type'], $inputTypes)) {
                 $attributes['multiple'] = $widget['multiple'] ?? null;
                 $attributes['accept'] = $widget['accept'] ?? null;
-                $attributes['class'] = 'form-control-file ' . ($widget['class'] ?? '');
             }
             $inputTypes = ['image'];
             if (in_array($attributes['type'], $inputTypes)) {
@@ -507,15 +534,15 @@ class View_Form_Field implements \ArrayAccess
             }
             $inputTypes = ['submit', 'reset', 'button'];
             if (in_array($attributes['type'], $inputTypes)) {
-                $attributes['class'] = 'btn btn-primary ' . ($widget['class'] ?? '');
+                $attributes['class'] = 'btn btn-primary w-100 ' . ($widget['class'] ?? '');
             }
         }
 
         // Agregar atributos que son de elementos like 'select'.
-        if (in_array($widgetName, ['select'])) {
+        if (in_array($widgetName, ['select', 'bool'])) {
             $attributes['multiple'] = $widget['multiple'] ?? null;
             $attributes['size'] = $widget['size'] ?? null;
-            $attributes['class'] = 'form-control ' . ($widget['class'] ?? '');
+            $attributes['class'] = 'form-select ' . ($widget['class'] ?? '');
         }
 
         // Agregar atributos que son de elementos like 'textarea'.
@@ -533,7 +560,8 @@ class View_Form_Field implements \ArrayAccess
         $attributes['class'] = trim(($attributes['class'] ?? '') . $valid);
 
         // Determinar valor del widget.
-        $widgetValue = $options['initial_value']
+        $widgetValue = $options['widget']['value']
+            ?? $options['initial_value']
             ?? $options['value']
             ?? $options['default']
             ?? null

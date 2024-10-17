@@ -23,14 +23,16 @@
 
 namespace sowerphp\core;
 
+use ArrayAccess;
 use Illuminate\Validation\ValidationException;
+use ReflectionClass;
+use UnderflowException;
 
 /**
  * Clase que representa un formulario.
  */
-class View_Form implements \ArrayAccess
+class View_Form implements ArrayAccess
 {
-
     /**
      * Un diccionario con los datos enviados del formulario (disponible si
      * is_bound es true).
@@ -320,8 +322,9 @@ class View_Form implements \ArrayAccess
         if (isset($this->fields[$attribute])) {
             return $this->fields[$attribute];
         }
+
         // Lo que se solicitó no es un campo del formulario, entonces error.
-        throw new \Exception(__(
+        throw new UnderflowException(__(
             'Campo "%s" del formulario "%s" no existe.',
             $attribute,
             $this->attributes['id']
@@ -362,6 +365,7 @@ class View_Form implements \ArrayAccess
         if (method_exists($this, $offset)) {
             return $this->$offset();
         }
+
         return $this->$offset ?? null;
     }
 
@@ -378,14 +382,15 @@ class View_Form implements \ArrayAccess
     }
 
     /**
-     * Elimina un índice del formulario y restablece su valor por defecto si existe.
+     * Elimina un índice del formulario y restablece su valor por defecto si
+     * existe.
      *
      * @param mixed $offset El índice que se quiere eliminar.
      * @return void
      */
     public function offsetUnset($offset): void
     {
-        $reflection = new \ReflectionClass($this);
+        $reflection = new ReflectionClass($this);
         $defaultProperties = $reflection->getDefaultProperties();
         $this->$offset = $defaultProperties[$offset] ?? null;
     }
@@ -537,8 +542,11 @@ class View_Form implements \ArrayAccess
      * @param int|string $code Código de error.
      * @return void
      */
-    protected function add_error(?string $field, string $error, $code = null): void
-    {
+    protected function add_error(
+        ?string $field,
+        string $error,
+        $code = null
+    ): void {
         if ($field === null) {
             $this->errors[] = $error;
         } else {
@@ -564,6 +572,7 @@ class View_Form implements \ArrayAccess
         if ($code === null) {
             return !empty($this->fields[$field]->error_messages);
         }
+
         return !empty($this->fields[$field]->error_messages[$code]);
     }
 
@@ -602,7 +611,8 @@ class View_Form implements \ArrayAccess
     }
 
     /**
-     * Devuelve true si el formulario necesita el atributo enctype="multipart/form-data".
+     * Devuelve `true` si el formulario necesita el atributo
+     * `enctype="multipart/form-data"`.
      *
      * @return bool
      */
@@ -610,10 +620,12 @@ class View_Form implements \ArrayAccess
     {
         foreach ($this->fields as $field) {
             $type = $field->widget->attributes['type'] ?? null;
+
             if ($type == 'file') {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -625,12 +637,14 @@ class View_Form implements \ArrayAccess
     public function hidden_fields(): array
     {
         $fields = [];
+
         foreach ($this->fields as $name => $field) {
             $type = $field->widget->attributes['type'] ?? null;
-            if ($type == 'hidden') {
+            if ($type === 'hidden') {
                 $fields[$name] = $field;
             }
         }
+
         return $fields;
     }
 
@@ -642,12 +656,14 @@ class View_Form implements \ArrayAccess
     public function visible_fields(): array
     {
         $fields = [];
+
         foreach ($this->fields as $name => $field) {
             $type = $field->widget->attributes['type'] ?? null;
-            if ($type != 'hidden') {
+            if ($type !== 'hidden') {
                 $fields[$name] = $field;
             }
         }
+
         return $fields;
     }
 
@@ -692,7 +708,7 @@ class View_Form implements \ArrayAccess
             }
         }
         $form = new self($options);
+
         return $form;
     }
-
 }

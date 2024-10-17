@@ -23,27 +23,29 @@
 
 namespace sowerphp\core;
 
+use ArrayAccess;
+use DomainException;
 use Illuminate\Support\Str;
+use ReflectionClass;
 
 /**
  * Clase base para todos los widgets de formulario.
  */
-class View_Form_Widget implements \ArrayAccess
+class View_Form_Widget implements ArrayAccess
 {
-
     /**
      * El nombre del widget del formulario.
      *
      * @var string
      */
-    protected $name;
+    public $name;
 
     /**
      * El valor del widget del formulario.
      *
      * @var mixed
      */
-    protected $value;
+    public $value;
 
     /**
      * Los atributos (u opciones) del widget del formulario.
@@ -54,21 +56,41 @@ class View_Form_Widget implements \ArrayAccess
      *
      * @var array
      */
-    protected $attributes;
+    public $attributes;
+
+    /**
+     * Opciones adicionales para el widget.
+     *
+     * Estas opciones no son atributos válidos para el HTML. Sin embargo, pueden
+     * contener opciones (datos) que son necesarias para renderizar el HTML. Por
+     * ejemplo, los índices que pueden existir en este arreglo, sin ser un
+     * listado taxativo, son:
+     *
+     *   - `choices`: Lista de opciones permitidas para campos de selección o
+     *     similares.
+     *
+     * @var array
+     */
+    protected $options;
 
     /**
      * Constructor de un widget de formulario.
      *
      * @param string $name El nombre del widget del formulario.
      * @param mixed $value El valor del widget del formulario.
-     * @param array $attributes Los atributos (u opciones) del widget del
-     * formulario.
+     * @param array $attributes Los atributos HTML del widget del formulario.
+     * @param array $options Opciones adicionales del widget (no son atributos).
      */
-    public function __construct(string $name, $value, array $attributes = [])
-    {
+    public function __construct(
+        string $name,
+        $value,
+        array $attributes = [],
+        array $options = []
+    ) {
         $this->name = $name;
         $this->value = $value;
         $this->attributes = $attributes;
+        $this->options = $options;
     }
 
     /**
@@ -113,7 +135,7 @@ class View_Form_Widget implements \ArrayAccess
      */
     public function offsetUnset($offset): void
     {
-        $reflection = new \ReflectionClass($this);
+        $reflection = new ReflectionClass($this);
         $defaultProperties = $reflection->getDefaultProperties();
         $this->$offset = $defaultProperties[$offset] ?? null;
     }
@@ -125,58 +147,139 @@ class View_Form_Widget implements \ArrayAccess
      */
     public function render(array $options = []): string
     {
+        // Unir las opciones pasadas al renderizar con las que previamente
+        // estaban asignadas mediante el constructor.
+        $this->options = array_merge($this->options, $options);
+
+        // Asignar los atributos del widget según lo que se haya pasado en las
+        // opciones. Esto permite reutilizar un widget modificando sus valores
+        // al momento de renderizarlo.
+        $this->name = $this->options['name'] ?? $this->name;
+        $this->value = $this->options['value'] ?? $this->value;
+        $this->attributes = array_merge(
+            $this->attributes,
+            $this->options['attributes'] ?? [],
+            $this->options['attr'] ?? []
+        );
+
+        // Definir el método que renderizará el widget.
         $method = 'render' . ucfirst(Str::camel($this->name)) . 'Widget';
+
+        // Si el método de renderizado no existe se renderiza con el widget de
+        // entrada por defecto.
         if (!method_exists($this, $method)) {
-            return $this->renderDefaultWidget($options);
+            return $this->renderDefaultWidget();
         }
-        return $this->$method($options);
+
+        // Renderizar el widget con un método específico.
+        return $this->$method();
     }
 
     /**
-     * Renderiza el widget predeterminado input del campo del formulario.
+     * Renderiza el widget de tipo `div`.
+     *
+     * Este tipo de widget se utiliza cuando se desea mostrar un valor en el
+     * formulario pero que no es utilizado como entrada para datos a través
+     * del formulario.
+     *
+     * @return string El HTML renderizado del widget.
+     */
+    protected function renderDivWidget(): string
+    {
+        return sprintf(
+            '<div %s>%s</div>',
+            $this->renderAttributes(),
+            $this->value
+        );
+    }
+
+    /**
+     * Renderiza el widget por defecto que se debe utilizar.
+     *
+     * Es un alias para renderizar el widget de tipo `input`.
      *
      * @return string El HTML renderizado del widget.
      */
     protected function renderDefaultWidget(): string
     {
+        return $this->renderInputWidget();
+    }
+
+    /**
+     * Renderiza el widget de tipo `input`.
+     *
+     * @return string El HTML renderizado del widget.
+     */
+    protected function renderInputWidget(): string
+    {
+        $this->attributes['name'] = $this->attributes['name'] ?? $this->name;
         $this->attributes['value'] = $this->attributes['value'] ?? $this->value;
         $this->attributes['required'] = $this->attributes['required'] ?? false;
+
         return sprintf(
             '<input %s />',
-            html_attributes($this->attributes)
+            $this->renderAttributes()
         );
     }
 
     /**
-     * Renderiza el widget de tipo text.
+     * Renderiza el widget predeterminado para los campos de un formulario.
      *
-     *  El widget de tipo text es el widget por defecto.
+     * Se utiliza el tipo `text` como widget por defecto.
      *
-     * @return string El HTML con el campo text renderizado.
+     * @return string El HTML renderizado del widget.
      */
     protected function renderTextWidget(): string
     {
-        return $this->renderDefaultWidget();
+        $this->attributes['type'] = 'text';
+
+        return $this->renderInputWidget();
     }
 
     /**
-     * Renderiza el widget de tipo date.
+     * Renderiza el widget de tipo `hidden`.
+     *
+     * @return string El HTML renderizado del widget.
+     */
+    protected function renderHiddenWidget(): string
+    {
+        return $this->renderInputWidget();
+    }
+
+    /**
+     * Renderiza el widget de tipo `date`.
      *
      * Renderiza un campo de entrada de fecha.
      *
-     * @return string El HTML con el campo date renderizado.
+     * @return string El HTML renderizado del widget.
      */
     protected function renderDateWidget(): string
     {
         if (!empty($this->value)) {
             $this->value = substr($this->value, 0, 10);
         }
-        $this->attributes['type'] = 'date';
-        return $this->renderDefaultWidget();
+
+        return $this->renderInputWidget();
     }
 
     /**
-     * Renderiza el widget de tipo DatetimeLocal.
+     * Renderiza el widget de tipo `datetime`.
+     *
+     * Renderiza un campo de entrada de fecha y hora.
+     *
+     * Este es un alias del método renderDatetimeLocalWidget().
+     *
+     * @return string El HTML renderizado del widget.
+     */
+    protected function renderDatetimeWidget(): string
+    {
+        $this->attributes['type'] = 'datetime-local';
+
+        return $this->renderDatetimeLocalWidget();
+    }
+
+    /**
+     * Renderiza el widget de tipo `datetime-local`.
      *
      * Renderiza un campo de entrada de fecha y hora.
      *
@@ -187,12 +290,12 @@ class View_Form_Widget implements \ArrayAccess
         if (!empty($this->value)) {
             $this->value = substr($this->value, 0, 16);
         }
-        $this->attributes['type'] = 'datetime-local';
-        return $this->renderDefaultWidget();
+
+        return $this->renderInputWidget();
     }
 
     /**
-     * Renderiza el widget de tipo Textarea.
+     * Renderiza el widget de tipo `textarea`.
      *
      * Renderiza un campo de texto de varias líneas.
      *
@@ -202,185 +305,250 @@ class View_Form_Widget implements \ArrayAccess
     {
         return sprintf(
             '<textarea %s />%s</textarea>',
-            html_attributes($this->attributes),
+            $this->renderAttributes(),
             $this->value
         );
     }
 
     /**
-     * Renderiza el widget de tipo div.
+     * Renderiza el widget de tipo `button`.
      *
      * @return string El HTML renderizado del widget.
      */
-    protected function renderDivWidget(): string
-    {
-        return sprintf(
-            '<div %s>%s</div>',
-            html_attributes($this->attributes),
-            $this->value
-        );
-    }
-
-    /**
-     * Renderiza el widget de tipo hidden.
-     *
-     * @return string El HTML con el campo Hidden renderizado.
-     */
-    protected function renderHiddenWidget(): string
-    {
-        $this->attributes['type'] = 'hidden';
-        return $this->renderDefaultWidget();
-    }
-
-    /**
-     * Renderiza el widget de tipo button.
-     *
-     * @return string El HTML con el campo del Button renderizado.
-     */
     protected function renderButtonWidget(): string
     {
-        // En caso de no tener tipo por defecto se asigna tipo 'button'.
-        $this->attributes['type'] = $this->attributes['type'] ?? 'button';
         return sprintf(
             '<button %s>%s</button>',
-            html_attributes($this->attributes),
+            $this->renderAttributes(),
             $this->value
         );
     }
 
     /**
-     * Renderiza el widget de tipo password.
+     * Renderiza el widget de tipo `password`.
      *
-     * Renderiza un campo de entrada de contraseña con un botón para mostrar/ocultar y copiar la contraseña.
+     * Renderiza un campo de entrada de contraseña con botones que permiten:
      *
-     * @return string El HTML con el campo Password renderizado.
+     *   - Mostrar y ocultar la contraseña.
+     *   - Copiar la contraseña.
+     *
+     * @return string El HTML renderizado del widget.
      */
     protected function renderPasswordWidget(): string
     {
-        $this->attributes['type'] = 'password';
         return sprintf(
             '<div class="input-group">%s%s%s</div>',
-            $this->renderDefaultWidget(),
+            $this->renderInputWidget(),
             '<a class="input-group-text" style="cursor:pointer;text-decoration:none" onclick="Form.showPassword(this)"><i class="fa-regular fa-eye fa-fw"></i></a>',
             '<a class="input-group-text" style="cursor:pointer;text-decoration:none" onclick="__.copy(this.parentNode.querySelector(\'input\').value, \'Copiado.\')"><i class="fa-regular fa-copy fa-fw"></i></a>'
         );
     }
 
     /**
-     * Renderiza el widget de tipo bool.
+     * Renderiza el widget de tipo `bool`.
      *
-     * Renderiza un campo de selección de opciones booleanas, por defecto, 0: No y 1: Yes.
+     * Renderiza un campo de selección de opciones booleanas. Por defecto se
+     * utilizan los valores:
      *
-     * @return string El HTML con el campo Bool renderizado.
-     * @throws \Exception Si no se proporcionan exactamente 2 opciones.
+     *   - `0` para No.
+     *   - `1` para Si.
+     *
+     * @return string El HTML renderizado del widget.
+     * @throws DomainException Si no se proporcionan exactamente 2 opciones.
      */
     protected function renderBoolWidget(): string
     {
-        // Si no se proporciona $this->value, se utiliza por defecto ['No', 'Yes'].
-        $options = $this->value ?? ['No', 'Yes'];
-        // Asegura que $options sea un array con exactamente dos elementos.
-        if (count($options) !== 2) {
-            throw new \Exception("Expected exactly 2 options for the boolean widget.");
+        // Obtener los tag "options" (están en "choices").
+        $this->options['choices'] = $this->options['choices'] ?? [
+            0 => __('No'),
+            1 => __('Si'),
+        ];
+
+        // Asegura que "choices" sea un `array` con exactamente dos elementos.
+        if (count($this->options['choices']) !== 2) {
+            throw new DomainException(__(
+                'Un campo booleano debe tener exactamente 2 opciones.'
+            ));
         }
-        $html = '';
-        foreach ($options as $key => $option) {
-            // Verifica que $option sea un string.
-            if (is_string($option)) {
-                // Determina cuál opción debería estar seleccionada.
-                $selected = ($this->attributes['value'] ?? '') === $key ? ' selected' : '';
-                $html .= sprintf(
-                    '<option value="%s"%s>%s</option>',
-                    htmlspecialchars($key),
-                    $selected,
-                    htmlspecialchars($option)
-                );
-            }
-        }
-        return sprintf(
-            '<select %s>%s</select>',
-            html_attributes($this->attributes),
-            $html
-        );
+
+        // Renderizar como campo `select`.
+        return $this->renderSelectWidget();
     }
 
     /**
-     * Renderiza el widget de tipo select.
+     * Renderiza el widget de tipo `select`.
      *
      * Renderiza un campo de selección de opciones.
      *
-     * @return string El HTML con el campo Select renderizado.
+     * @return string El HTML renderizado del widget.
      */
     protected function renderSelectWidget(): string
     {
+        // Obtener los tag "options" (están en "choices").
+        $choices = $this->normalizeChoices($this->options['choices'] ?? []);
+
+        // Renderizar las opciones del campo `select`.
         $html = '';
-        $this->value = is_array($this->value) ? $this->value : [];
-        if (!empty($this->value)) {
-            foreach ($this->value as $option) {
-                if (isset($option['value'], $option['label']) && is_string($option['value']) && is_string($option['label'])) {
-                    // Verifica si la opción debe estar seleccionada, basada en la clave 'selected'
-                    $selected = !empty($option['selected']) ? ' selected' : '';
-                    $html .= sprintf(
-                        '<option value="%s" %s>%s</option>',
-                        htmlspecialchars($option['value']),
-                        $selected,
-                        htmlspecialchars($option['label'])
-                    );
-                }
-            }
+        foreach ($choices as $choice) {
+            // Determinar si la opción debería estar seleccionada.
+            $selected = ($this->value ?? '') == $choice['value']
+                ? ' selected'
+                : ''
+            ;
+
+            // Renderizar, y agregar al HTML, el tag `option`.
+            $html .= sprintf(
+                '<option value="%s"%s>%s</option>',
+                $this->sanitize((string) $choice['value']),
+                $selected,
+                $this->sanitize((string) $choice['label'])
+            );
         }
+
+        // Entregar el campo renderizado.
         return sprintf(
             '<select %s>%s</select>',
-            html_attributes($this->attributes),
+            $this->renderAttributes(),
             $html
         );
     }
 
     /**
-     * Renderiza el widget de tipo file.
+     * Renderiza el widget de tipo `file`.
      *
      * Renderiza una tabla con campos de archivo.
      *
-     * @return string El HTML con el campo File renderizado.
+     * @return string El HTML renderizado del widget.
      */
     protected function renderFileWidget(): string
     {
-        $this->attributes['type'] = 'file';
-        $this->attributes['name'] = $this->attributes['name'] ?? $this->name;
-        return $this->renderDefaultWidget();
+        return $this->renderInputWidget();
     }
 
     /**
-     * Renderiza el widget de tipo files.
+     * Renderiza el widget de tipo `files`.
      *
-     * Renderiza una tabla con campos de archivo, con la posibilidad de añadir o eliminar filas.
+     * Renderiza una tabla con campos de archivo, con la posibilidad de añadir o
+     * eliminar filas para múltiples archivos (uno por fila).
      *
-     * @return string El HTML renderizado del widget Files.
-     *
+     * @return string El HTML renderizado del widget.
      */
     protected function renderFilesWidget(): string
     {
-        // Establece el nombre del widget.
-        $this->name = 'table_js';
-        // Usa 'label' como título si 'title' no está definido.
-        $this->attributes['titles'] = (array)($this->attributes['title'] ?? $this->attributes['label']);
-        // Configura los atributos del input de archivo, utilizando valores predeterminados si no están definidos.
-        $this->attributes['inputs'] = [
+        // Definir el título de la columna de los archivos en la tabla.
+        $titles = [
+            $this->attributes['title']
+                ?? $this->options['field']['label']
+                ?? __('Archivos')
+        ];
+
+        // Definir el campo que se usará en la tabla.
+        $fields = [
             [
-                'name' => 'file',
-                'attributes' => [
-                    'class' => $this->attributes['class'] ?? 'form-control',
-                    'multiple' => $this->attributes['multiple'] ?? false,
-                ],
+                'widget' => 'file',
+                'name' => $this->options['field']['name'],
             ],
         ];
-        // Renderiza el widget con los atributos configurados.
-        return $this->render();
+
+        // Agregar "titles" y "fields" a las opciones que se pasarán al widget
+        // que generará la tabla dinámica.
+        $this->options['titles'] = $titles;
+        $this->options['fields'] = $fields;
+        $this->options['dynamic'] = true;
+
+        // Renderiza el widget con las opciones configuradas.
+        return $this->renderTableWidget();
     }
 
+    /**
+     * Renderiza el widget de tipo `table`.
+     *
+     * Por defecto se crea una tabla con filas fijas, no permite agregar nuevas
+     * filas. O sea, es una tabla estática, sin usar JS para agregar filas.
+     *
+     * @return string El HTML renderizado del widget.
+     */
     protected function renderTableWidget(): string
     {
-        $this->attributes['js'] = false;
-        return $this->renderTableJsWidget();
+        // Normalizar opciones de la tabla.
+        $options = $this->normalizeTableOptions($this->options);
+
+        // Renderizar la fila de los widgets sin valores por defecto.
+        $widgetsRow = $this->renderTableRowWidgets(
+            $options['widgets'],
+            [], // Sin valores por defecto.
+            $options['dynamic']
+        );
+
+        // Buffer para la tabla que se generará.
+        $buffer = '';
+
+        // Agregar definición en javascript de los widgets renderizados de la
+        // tabla para ser insertados posteriormente de manera dinámica si así
+        // fue solicitado.
+        if ($options['dynamic']) {
+            $buffer .= sprintf(
+                '<script> window["inputsJS_%s"] = %s;</script>',
+                $this->attributes['id'],
+                json_encode($widgetsRow)
+            );
+        }
+
+        // Abrir tag `table`.
+        $buffer .= sprintf(
+            '<table class="table table-striped" id="%s" style="width:%s">',
+            $this->attributes['id'],
+            $options['width']
+        );
+
+        // Agregar tag `thead` con los títulos de las columnas.
+        $buffer .= '<thead><tr>';
+        foreach ($options['titles'] as $title) {
+            $buffer .= sprintf(
+                '<th>%s</th>',
+                $title
+            );
+        }
+
+        // Agregar la columna para agregar una nueva fila si es tabla dinámica.
+        if ($options['dynamic']) {
+            $buffer .= sprintf(
+                '<th style="width:1px;"><a href="javascript:Form.addJS(\'%s\', undefined, %s)" title="Agregar fila [%s]" accesskey="%s" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus fa-fw"></i></a></th>',
+                $this->attributes['id'],
+                $options['callback'],
+                $options['accesskey'],
+                $options['accesskey']
+            );
+        }
+        $buffer .= '</tr></thead>';
+
+        // Abrir tag `tbody`.
+        $buffer .= '<tbody>';
+
+        // Si no hay valores pasados a la tabla se agrega una fila vacía con los
+        // widgets.
+        if (empty($options['values'])) {
+            $buffer .= $widgetsRow;
+        }
+
+        // Hay valores pasados, se agrega una fila por cada arreglo de valores.
+        else {
+            // Cada elemento en `$options['values']` representa una fila de la
+            // tabla que se está renderizando.
+            foreach ($options['values'] as $values) {
+                $buffer .= $this->renderTableRowWidgets(
+                    $options['widgets'],
+                    $values, // Valores de la fila de widgets que se renderiza.
+                    $options['dynamic']
+                );
+            }
+        }
+
+        // Cerrar tags `tbody` y `table`.
+        $buffer .= '</tbody></table>';
+
+        // Entregar el buffer con el HTML renderizado con la tabla.
+        return $buffer;
     }
 
     /**
@@ -390,119 +558,11 @@ class View_Form_Widget implements \ArrayAccess
      *
      * @return string El HTML renderizado del widget.
      */
-    protected function renderTableJsWidget(): string
+    protected function renderTableDynamicWidget(): string
     {
-        // Inicializar atributos con valores por defecto si no están disponibles.
-        $this->attributes['titles'] = $this->attributes['titles'] ?? [];
-        $this->attributes['table'] = $this->attributes['table'] ?? [];
-        $this->attributes['inputs'] = $this->attributes['inputs'] ?? [];
-        $this->attributes['width'] = $this->attributes['width'] ?? '100%';
-        $this->attributes['accesskey'] = $this->attributes['accesskey'] ?? '+';
-        $this->attributes['callback'] = $this->attributes['callback'] ?? 'undefined';
-        $this->attributes['cols_width'] = $this->attributes['cols_width'] ?? [];
-        $this->attributes['values'] = $this->attributes['values'] ?? null;
-        $this->attributes['js'] = $this->attributes['js'] ?? true;
-        // Determinar ancho de columnas si no fue indicado.
-        if (empty($this->attributes['cols_width'])) {
-            $this->attributes['cols_width'] = array_fill(0, count($this->attributes['titles']), '100px');
-        }
-        // Determinar estilos de columnas, ocultar si es tipo 'hidden'.
-        $cols_style = array_map(function ($input) {
-            return (!empty($input['attributes']['type']) && $input['attributes']['type'] === 'hidden')
-                ? ' style="display:none"'
-                : '';
-        }, $this->attributes['inputs']);
-        // Botón de borrado de la fila.
-        $deleteButton = $this->attributes['js']
-        ? '<td><a class="' . $this->attributes['id'] . '_eliminar btn btn-danger btn-sm" href="" onclick="Form.delJS(this); return false" title="Eliminar fila"><i class="fa-solid fa-times fa-fw"></i></a></td>'
-        : '';
-        // Generar inputs
-        $inputs = '<tr>';
-        // Guardar el estado original de name y attributes.
-        $originalName = $this->name;
-        $originalAttributes = $this->attributes;
-        foreach ($this->attributes['inputs'] as $col_i => $input) {
-            // Configurar los atributos y el nombre para el input actual.
-            $this->name = $input['name'];
-            $this->attributes = $input['attributes'] ?? [];
-            // Renderizar el input.
-            $renderedInput = $this->render($input);
-            // Restaurar el estado original.
-            $this->name = $originalName;
-            $this->attributes = $originalAttributes;
-            // Añadir la celda con el input renderizado.
-            $inputs .= '<td' . ($cols_style[$col_i] ?? '') . '>' . rtrim($renderedInput) . '</td>';
-        }
-        if (!empty($this->attributes['js'])) {
-            $inputs .= $deleteButton;
-        }
-        $inputs .= '</tr>';
-        // Determinar valores iniciales.
-        $values = '';
-        if (!empty($this->attributes['values'])) {
-            foreach ($this->attributes['values'] as $value) {
-                $values .= '<tr>';
-                foreach ($this->attributes['inputs'] as $col_i => $input) {
-                    $inputValue = $value[$col_i] ?? '';
-                    $input['attributes']['value'] = is_array($inputValue) ? $inputValue['value'] : $inputValue;
-                    // Guardar el estado original de name y attributes.
-                    $this->name = $input['name'];
-                    $this->attributes = $input['attributes'] ?? [];
-                    // Renderizar el input.
-                    $renderedInput = $this->render($input);
-                    // Restaurar el estado original.
-                    $this->name = $originalName;
-                    $this->attributes = $originalAttributes;
-                    // Añadir la celda con el input renderizado.
-                    $values .= '<td' . ($cols_style[$col_i] ?? '') . '>' . rtrim($renderedInput) . '</td>';
-                }
-                if (!empty($this->attributes['js'])) {
-                    $values .= $deleteButton;
-                }
-                $values .= '</tr>';
-            }
-        } elseif (isset($this->attributes['inputs'][0]['name']) && isset($_POST[$this->attributes['inputs'][0]['name']])) {
-            $rows_count = count($_POST[$this->attributes['inputs'][0]['name']]);
-            for ($i = 0; $i < $rows_count; $i++) {
-                $values .= '<tr>';
-                foreach ($this->attributes['inputs'] as $col_i => $input) {
-                    $input['attributes']['value'] = $_POST[$input['name']][$i] ?? '';
-                    // Configurar los atributos y el nombre para el input actual.
-                    $this->name = $input['name'];
-                    $this->attributes = $input['attributes'] ?? [];
-                    // Renderizar el input.
-                    $renderedInput = $this->render($input);
-                    // Restaurar el estado original.
-                    $this->name = $originalName;
-                    $this->attributes = $originalAttributes;
-                    // Añadir la celda con el input renderizado.
-                    $values .= '<td' . ($cols_style[$col_i] ?? '') . '>' . rtrim($renderedInput) . '</td>';
-                }
-                if ($this->attributes['js']) {
-                    $values .= $deleteButton;
-                }
-                $values .= '</tr>';
-            }
-        } else {
-            $values = $inputs;
-        }
-        // Genera tabla.
-        $buffer = '';
-        if (!empty($this->attributes['js'])) {
-            $buffer .= '<script> window["inputsJS_' . $this->attributes['id'] . '"] = ' . json_encode($inputs) . ';</script>';
-        }
-        $buffer .= '<table class="table table-striped" id="' . $this->attributes['id'] . '" style="width:' . htmlspecialchars($this->attributes['width']) . '">';
-        $buffer .= '<thead><tr>';
-        foreach ($this->attributes['titles'] as $title) {
-            $buffer .= '<th>' . htmlspecialchars($title) . '</th>';
-        }
-        if ($this->attributes['js']) {
-            $buffer .= '<th style="width:1px;"><a href="javascript:Form.addJS(\'' . htmlspecialchars($this->attributes['id']) . '\', undefined, ' . htmlspecialchars($this->attributes['callback']) . ')" title="Agregar fila [' . htmlspecialchars($this->attributes['accesskey']) . ']" accesskey="' . htmlspecialchars($this->attributes['accesskey']) . '" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus fa-fw"></i></a></th>';
-        }
-        $buffer .= '</tr></thead>';
-        $buffer .= '<tbody>' . $values . '</tbody>';
-        $buffer .= '</table>';
-        return $buffer;
+        $this->options['dynamic'] = true;
+
+        return $this->renderTableWidget();
     }
 
     /**
@@ -510,21 +570,13 @@ class View_Form_Widget implements \ArrayAccess
      *
      * Renderiza un campo de checkbox.
      *
-     * @return string El HTML con el campo Checkbox renderizado.
+     * @return string El HTML renderizado del widget.
      */
     protected function renderCheckboxWidget(): string
     {
-        // Establecer el tipo de input como checkbox.
-        $this->attributes['type'] = 'checkbox';
-        // Asegurarse de que el atributo 'name' esté presente.
-        $this->attributes['name'] = $this->attributes['name'] ?? $this->name;
-        // Establecer el valor si no está ya establecido en los atributos.
-        $this->attributes['value'] = $this->attributes['value'] ?? $this->value;
-        return sprintf(
-            '<input %s/> %s',
-            html_attributes($this->attributes),
-            htmlspecialchars($this->attributes['value']),
-        );
+        $this->value = $this->value ?? 1;
+
+        return $this->renderInputWidget();
     }
 
     /**
@@ -532,142 +584,164 @@ class View_Form_Widget implements \ArrayAccess
      *
      * Renderiza campos con multiples checkbox.
      *
-     * @return string El HTML con el campo Checkboxes múltiples renderizado.
+     * @return string El HTML renderizado del widget.
      */
     protected function renderCheckboxesWidget(): string
     {
-        $html = '';
-        $this->value = is_array($this->value) ? $this->value : [];
-        if (!empty($this->value)) {
-            foreach ($this->value as $index => $option) {
-                if (isset($option['value'], $option['label']) && is_string($option['value']) && is_string($option['label'])) {
-                    $checked = !empty($option['checked']) ? ' checked' : '';
-                    $id = htmlspecialchars($option['id'] ?? $this->name . '_' . $index);
-                    $html .= sprintf(
-                        '<input type="checkbox" id="%s" name="%s[]" value="%s" %s %s> <label for=%s>%s</label><br>',
-                        $id,
-                        htmlspecialchars($this->name),
-                        htmlspecialchars($option['value']),
-                        html_attributes($this->attributes),
-                        $checked,
-                        $id,
-                        htmlspecialchars($option['label'])
-                    );
-                }
-            }
+        // Obtener los tag "checkbox" (están en "choices").
+        $choices = $this->normalizeChoices($this->options['choices'] ?? []);
+        $this->value = $this->value ?? [];
+
+        // Asignar clase CSS por defecto.
+        if (empty($this->attributes['class'])) {
+            $this->attributes['class'] = 'form-check-input';
         }
+
+        // Renderizar checkboxes.
+        $html = '';
+        foreach ($choices as $index => $choice) {
+            // Determinar si el checkbox debería estar seleccionada.
+            $checked = in_array($choice['value'], $this->value)
+                ? ' checked'
+                : ''
+            ;
+
+            // Determinar ID del checkbox que se está renderizando.
+            $choice['id'] = $choice['id'] ?? ($this->name . '_' . $index);
+
+            // Renderizar el checkbox.
+            $html .= sprintf(
+                '<input type="checkbox" id="%s" name="%s[]" value="%s" %s %s> <label for=%s>%s</label><br>',
+                $choice['id'],
+                $this->sanitize($this->name),
+                $this->sanitize($choice['value']),
+                $this->renderAttributes(),
+                $checked,
+                $choice['id'],
+                $this->sanitize($choice['label'])
+            );
+        }
+
+        // Entregar los inputs con los checkboxes renderizados.
         return sprintf('<div>%s</div>', $html);
     }
 
     /**
-     * Renderiza el widget de TableCheck.
+     * Renderiza el widget de tipo `table_checkboxes`.
      *
-     * Renderiza una tabla de checkbox.
+     * Renderiza una tabla donde cada fila tiene un widget de tipo `checkbox`
+     * para "seleccionar" la fila.
      *
      * @return string El HTML renderizado del widget.
      */
-    protected function renderTableCheckWidget(): string
+    protected function renderTableCheckboxesWidget(): string
     {
-        // Si la tabla no tiene datos, devuelve un '-'.
-        if (empty($this->attributes['table'])) {
+        // Si no hay filas que renderizar se entrega un "-".
+        if (empty($this->options['rows'])) {
             return '-';
         }
-        // Configuración por defecto.
-        $this->attributes['id'] = $this->attributes['id'] ?? $this->attributes['name'];
-        $this->attributes['titles'] = $this->attributes['titles'] ?? [];
-        $this->attributes['width'] = $this->attributes['width'] ?? '100%';
-        $this->attributes['mastercheck'] = $this->attributes['mastercheck'] ?? false;
-        $this->attributes['checked'] = $this->attributes['checked'] ?? ($_POST[$this->attributes['name']] ?? []);
-        $this->attributes['display-key'] = $this->attributes['display-key'] ?? true;
-        // Determinar la clave primaria.
-        if (!isset($this->attributes['key'])) {
-            $this->attributes['key'] = array_keys($this->attributes['table'][0])[0];
+
+        // Crear los widgets. Se crean N widgets `div` y un `checkbox` para cada
+        // fila de la tabla.
+        $this->options['widgets'] = [];
+        foreach ($this->options['titles'] as $index => $title) {
+            $this->options['widgets'][] = new self('div', null);
         }
-        if (!is_array($this->attributes['key'])) {
-            $this->attributes['key'] = [$this->attributes['key']];
-        }
-        // Iniciar el buffer para la tabla.
-        $buffer = sprintf(
-            '<table id="%s" class="table table-striped" style="width:%s">',
-            htmlspecialchars($this->attributes['id']),
-            htmlspecialchars($this->attributes['width'])
+        $this->options['widgets'][] =  new self(
+            'checkbox',
+            null,
+            [
+                'type' => 'checkbox',
+                'class' => 'form-check-input',
+            ]
         );
-        // Generar el encabezado de la tabla.
-        $buffer .= '<thead><tr>';
-        foreach ($this->attributes['titles'] as $title) {
-            $buffer .= sprintf('<th>%s</th>', htmlspecialchars($title));
-        }
-        // Checkbox maestro en el encabezado.
-        $checked = $this->attributes['mastercheck'] ? ' checked="checked"' : '';
-        $buffer .= sprintf(
-            '<th><input type="checkbox"%s onclick="Form.checkboxesSet(\'%s\', this.checked)" /></th>',
-            $checked,
-            htmlspecialchars($this->attributes['name'])
+
+        // Agregar el checkbox global a los títulos.
+        $globalCheckboxWidget = new self(
+            'checkbox',
+            $this->value === true,
+            [
+                'type' => 'checkbox',
+                'onclick' => sprintf(
+                    'Form.checkboxesSet(\'%s\', this.checked)',
+                    $this->attributes['name']
+                ),
+                'class' => 'form-check-input',
+            ]
         );
-        $buffer .= '</tr></thead><tbody>';
-        // Número de claves primarias.
-        $n_keys = count($this->attributes['key']);
-        // Generar filas de la tabla.
-        foreach ($this->attributes['table'] as $row) {
-            $key = [];
-            foreach ($this->attributes['key'] as $k) {
-                $key[] = $row[$k];
-            }
-            $key = implode(';', $key);
-            // Agregar fila.
-            $buffer .= '<tr>';
-            $count = 0;
+        $this->options['titles'][] = $globalCheckboxWidget->render();
+
+        // Determinar los valores que se asignarán a la tabla.
+        $this->options['values'] = [];
+        foreach ($this->options['rows'] as $row) {
+            $value = [];
             foreach ($row as $col) {
-                if ($this->attributes['display-key'] || $count >= $n_keys) {
-                    $buffer .= sprintf('<td>%s</td>', htmlspecialchars($col));
-                }
-                $count++;
+                $value[] = $col;
             }
-            // Checkbox en cada fila.
-            $checked = (in_array($key, $this->attributes['checked']) || $this->attributes['mastercheck']) ? ' checked="checked"' : '';
-            $buffer .= sprintf(
-                '<td style="width:1px"><input type="checkbox" name="%s[]" value="%s"%s /></td>',
-                htmlspecialchars($this->attributes['name']),
-                htmlspecialchars($key),
-                $checked
-            );
-            $buffer .= '</tr>';
+            $value[] = $row['id'] ?? $row[0];
+            $this->options['values'][] = $value;
         }
-        // Cerrar la tabla.
-        $buffer .= '</tbody></table>';
-        return $buffer;
+
+        // Renderizar la tabla con las opciones correspondientes.
+        return $this->renderTableWidget();
     }
 
     /**
-     * Renderiza el widget de radio.
+     * Renderiza el widget de tipo `radio`.
      *
-     * Renderiza un campo de selección de radio.
+     * Renderiza un campo de radio.
      *
-     * @return string El HTML con el campo Radio renderizado.
+     * @return string El HTML renderizado del widget.
      */
     protected function renderRadioWidget(): string
     {
-        {
-            $html = '';
-            $this->value = is_array($this->value) ? $this->value : [];
-            if (!empty($this->value)) {
-                foreach ($this->value as $index => $option) {
-                    if (isset($option['value'], $option['label']) && is_string($option['value']) && is_string($option['label'])) {
-                        $checked = !empty($option['checked']) ? ' checked' : '';
-                        $id = htmlspecialchars($option['id'] ?? $this->name . '_' . $index);
-                        $html .= sprintf(
-                            '<input type="radio" id="%s" name="%s" value="%s"%s> <label>%s</label><br>',
-                            $id,
-                            htmlspecialchars($this->name),
-                            htmlspecialchars($option['value']),
-                            $checked,
-                            htmlspecialchars($option['label'])
-                        );
-                    }
-                }
-            }
-            return sprintf('<div>%s</div>', $html);
+        return $this->renderInputWidget();
+    }
+
+    /**
+     * Renderiza el widget de `radios`.
+     *
+     * Renderiza un campo de selección de radio.
+     *
+     * @return string El HTML renderizado del widget.
+     */
+    protected function renderRadiosWidget(): string
+    {
+        // Obtener los tag "radio" (están en "choices").
+        $choices = $this->normalizeChoices($this->options['choices'] ?? []);
+
+        // Asignar clase CSS por defecto.
+        if (empty($this->attributes['class'])) {
+            $this->attributes['class'] = 'form-check-input';
         }
+
+        // Renderizar radios.
+        $html = '';
+        foreach ($choices as $index => $choice) {
+            // Determinar si el radio debería estar seleccionada.
+            $checked = $choice['value'] == $this->value
+                ? ' checked'
+                : ''
+            ;
+
+            // Determinar ID del radio que se está renderizando.
+            $choice['id'] = $choice['id'] ?? ($this->name . '_' . $index);
+
+            // Renderizar el radio.
+            $html .= sprintf(
+                '<input type="radio" id="%s" name="%s[]" value="%s" %s %s> <label for=%s>%s</label><br>',
+                $choice['id'],
+                $this->sanitize($this->name),
+                $this->sanitize($choice['value']),
+                $this->renderAttributes(),
+                $checked,
+                $choice['id'],
+                $this->sanitize($choice['label'])
+            );
+        }
+
+        // Entregar los inputs con los radios renderizados.
+        return sprintf('<div>%s</div>', $html);
     }
 
     /**
@@ -677,52 +751,218 @@ class View_Form_Widget implements \ArrayAccess
      *
      * @return string El HTML renderizado del widget.
      */
-    protected function renderTableRadioWidget(): string
+    protected function renderTableRadiosWidget(): string
     {
-        // Configuración por defecto.
-        $this->attributes['id'] = $this->attributes['id'] ?? $this->attributes['name'];
-        $this->attributes['options'] = $this->attributes['options'] ?? [];
-        $this->attributes['titles'] = $this->attributes['titles'] ?? [];
-        $this->attributes['table'] = $this->attributes['table'] ?? [];
-        $this->attributes['width'] = $this->attributes['width'] ?? '100%';
-        // Iniciar el buffer para la tabla.
-        $buffer = sprintf(
-            '<table id="%s" class="table table-striped" style="width:%s">',
-            htmlspecialchars($this->attributes['id']),
-            htmlspecialchars($this->attributes['width'])
-        );
-        // Generar el encabezado de la tabla.
-        $buffer .= '<thead><tr>';
-        foreach ($this->attributes['titles'] as $title) {
-            $buffer .= sprintf('<th>%s</th>', htmlspecialchars($title));
+        // Si no hay filas que renderizar se entrega un "-".
+        if (empty($this->options['rows'])) {
+            return '-';
         }
-        $buffer .= '</tr></thead><tbody>';
-        // Obtener las claves de las opciones.
-        foreach ($this->attributes['table'] as $key => $row) {
-            // Saltar la fila si faltan datos esenciales.
-            if (!isset($row['name'], $row['description'])) {
-                continue;
-            }
-            $buffer .= '<tr>';
-            $buffer .= sprintf('<td>%s</td>', htmlspecialchars($row['name']));
-            $buffer .= sprintf('<td>%s</td>', htmlspecialchars($row['description']));
-            foreach ($this->attributes['options'] as $value => $label) {
-                $inputName = sprintf('%s_%s', $row['name'], $key);
-                $isChecked = isset($_POST[$inputName]) && $_POST[$inputName] == $value;
-                $checked = $isChecked ? 'checked="checked"' : '';
-                $buffer .= sprintf(
-                    '<td><input type="radio" name="%s" value="%s" %s /></td>',
-                    htmlspecialchars($inputName),
-                    htmlspecialchars($value),
-                    $checked,
-                    htmlspecialchars($label)
-                );
-            }
-            $buffer .= '</tr>';
+        $n_cols = count($this->options['rows'][0]);
+
+        // Crear los widgets. Se crean N widgets `div` y un `checkbox` para cada
+        // fila de la tabla.
+        $this->options['widgets'] = [];
+        for ($i = 0; $i < $n_cols; $i++) {
+            $this->options['widgets'][] = new self('div', null);
         }
-        // Cerrar la tabla.
-        $buffer .= '</tbody></table>';
-        return $buffer;
+
+        // Agregar un radio por cada opción que exista.
+        $n_radios = count($this->options['titles']) - $n_cols;
+        for ($i = 0; $i < $n_radios; $i++) {
+            $this->options['widgets'][] =  new self(
+                'radio',
+                null,
+                [
+                    'type' => 'radio',
+                    'class' => 'form-check-input',
+                ]
+            );
+        }
+
+        // Determinar los valores que se asignarán a la tabla.
+        $this->options['values'] = [];
+        foreach ($this->options['rows'] as $row) {
+            $value = [];
+            foreach ($row as $col) {
+                $value[] = $col;
+            }
+            $value[] = $row['id'] ?? $row[0];
+            $this->options['values'][] = $value;
+        }
+
+        // Renderizar la tabla con las opciones correspondientes.
+        return $this->renderTableWidget();
     }
 
+    /**
+     * Sanitiza el parámetro pasado y lo entrega como string.
+     *
+     * @param mixed $string
+     * @return string
+     */
+    protected function sanitize($string): string
+    {
+        return htmlspecialchars((string) $string);
+    }
+
+    /**
+     * Entrega los atributos del widget como un string para incluirlo en el
+     * HTML del widget renderizado.
+     *
+     * @return string
+     */
+    protected function renderAttributes(): string
+    {
+        return html_attributes($this->attributes);
+    }
+
+    /**
+     * Renderiza la fila de los widgets en un widget de tipo `table` o que se
+     * crea utilizando una tabla.
+     *
+     * @param array $widgets Instancias de los widgets a renderizar.
+     * @param array $values Lista con los valores para los widgets de la fila.
+     * @param bool $deleteButton `true` si se debe renderizar el botón eliminar.
+     * @return string
+     */
+    protected function renderTableRowWidgets(
+        array $widgets,
+        array $values,
+        bool $deleteButton
+    ): string {
+        // Iniciar la fila de widgets.
+        $widgetsRow = '<tr>';
+
+        // Renderizar cada columna con su widget.
+        foreach($widgets as $index => $widget) {
+            $widget = clone $widget;
+            $widgetsRow .= sprintf(
+                '<td %s>%s</td>',
+                html_attributes($options['cols_attributes'][$index] ?? []),
+                $widget->render([
+                    'value' => $values[$index] ?? null,
+                ])
+            );
+        }
+
+        // Botón de borrado de la fila (si es tabla dinámica).
+        if ($deleteButton) {
+            $widgetsRow .= sprintf(
+                '<td><a class="%s_eliminar btn btn-danger btn-sm" href="" onclick="Form.delJS(this); return false" title="Eliminar fila"><i class="fa-solid fa-times fa-fw"></i></a></td>',
+                $this->attributes['id']
+            );
+        }
+
+        // Terminar la fila de widgets.
+        $widgetsRow .= '</tr>';
+
+        // Entregar la fila renderizada de los widgets.
+        return $widgetsRow;
+    }
+
+    /**
+     * Normaliza un arreglo de choices.
+     *
+     * Entrega un arreglo de arreglos asociativos. Donde cada choice tiene un
+     * índice `value` y un índice `label`.
+     *
+     * @param array $choices
+     * @return array
+     */
+    protected function normalizeChoices(array $choices): array
+    {
+        // Arreglo para las choices normalizadas.
+        $normalized = [];
+
+        // Recorrer cada choice y normalizar.
+        foreach ($choices as $key => $choice) {
+            // Si $choice no es un arreglo se pasó en $key el "value" y en
+            // $choice el label.
+            if (!is_array($choice)) {
+                $choice = [
+                    'value' => $key,
+                    'label' => $choice,
+                ];
+            }
+
+            // Normalizar el arreglo dejando los datos desde sus posibles
+            // orígenes.
+            $choice['value'] = $choice['value'] ?? array_values($choice)[0];
+            $choice['label'] = $choice['label'] ?? array_values($choice)[1];
+            $choice['id'] = $choice['id'] ?? array_values($choice)[2] ?? null;
+
+            // Agregar $choice normalizada.
+            $normalized[] = $choice;
+        }
+
+        // Entregar choices normalizadas.
+        return $normalized;
+    }
+
+    /**
+     * Normaliza las opciones para renderizar los widget que generan tablas.
+     *
+     * @param array $options
+     * @return array
+     */
+    protected function normalizeTableOptions(array $options): array
+    {
+        // Definir opciones por defecto si no fueron asignadas.
+        $options = array_merge(
+            [
+                // Definición principal de títulos y widgets para las filas.
+                'titles' => [],
+                'widgets' => [],
+
+                // Definición secundaria, que permite generar los títulos y los
+                // widgets para dar más flexibilidad en la creación de los
+                // formularios.
+                'fields' => [],
+                'values' => [],
+
+                // Estilos para la tabla, ancho tabla, ancho columnas y estilos.
+                'width' => '100%', // Máximo ancho de la tabla.
+                'cols_width' => [], // Mismo ancho de las columnas.
+                'cols_attributes' => [], // Atributos para los tag `td`.
+
+                // Opciones cuando se permiten agregar filas dinámicamente.
+                'dynamic' => false, // Con `true` usará JS para filas dinámicas.
+                'accesskey' => '+', // Si hay más de una tabla se debe definir.
+                'callback' => 'undefined', // Ejecutar función al agregar fila.
+            ],
+            $options
+        );
+
+        // Crear los widgets si lo que se pasó fueron fields y valores.
+        if (empty($options['widgets']) && !empty($options['fields'])) {
+            foreach ($options['fields'] as $index => $fieldOptions) {
+                // Crear el campo del formulario.
+                $field = new View_Form_Field($fieldOptions);
+
+                // Asignar el widget del formulario.
+                $options['widgets'][] = $field['widget'];
+            }
+        }
+
+        // Determinar ancho de columnas si no fue especificado en las opciones.
+        if (empty($options['cols_width'])) {
+            $options['cols_width'] = array_fill(
+                0,
+                count($options['titles']),
+                '100px'
+            );
+        }
+
+        // Revisar los estilos de las columnas, donde los widgets ocultos no se
+        // muestran en la tabla dichas columnas.
+        foreach ($options['widgets'] as $index => $widget) {
+            // Si el widget es un campo oculto, la columna se oculta.
+            if ($widget['type'] === 'hidden') {
+                $options['cols_attributes'][$index]['class'] = 'd-none';
+            }
+        }
+
+        // Entregar opciones normalizadas.
+        return $options;
+    }
 }

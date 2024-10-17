@@ -38,7 +38,7 @@ class View_Form_Model extends View_Form
      * @param array $options Opciones para construir el formulario.
      * @return array
      */
-    public static function buildForm(array $options): array
+    protected static function buildForm(array $options): array
     {
         // Determinar los campos del formulario, instancias de View_Form_Field.
         $fields = [];

@@ -703,15 +703,24 @@ function html_attributes(?array $attributes): string
     if (empty($attributes)) {
         return '';
     }
+
     $attributes = array_filter($attributes, function($value) {
         return $value !== null && $value !== false && $value !== '';
     });
+
     return implode(' ', array_map(
         function($key, $value) {
             if ($value === true) {
-                return sprintf('%s', e($key));
+                return sprintf(
+                    '%s',
+                    e($key)
+                );
             } else {
-                return sprintf('%s="%s"', e($key), e($value));
+                return sprintf(
+                    '%s="%s"',
+                    e($key),
+                    str_replace('&#039;', '\'', e($value))
+                );
             }
         },
         array_keys($attributes),
