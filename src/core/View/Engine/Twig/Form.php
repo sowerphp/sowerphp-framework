@@ -228,7 +228,7 @@ final class View_Engine_Twig_Form extends AbstractExtension
                         %s
                     </div>
                     <div class="col-sm-10">
-                        %s
+                        <div class="input-group">%s</div>
                         %s
                         %s
                     </div>
@@ -279,7 +279,7 @@ final class View_Engine_Twig_Form extends AbstractExtension
             'required_label' => true,
         ], $options);
 
-        // Si el field no existe error.
+        // Crear, y validar, el campo pasado.
         $field = $this->createField($field);
 
         // Obtener el nombre, etiqueta e ID del campo.
@@ -330,7 +330,7 @@ final class View_Engine_Twig_Form extends AbstractExtension
      */
     public function function_form_widget($field, array $options = []): Markup
     {
-        // Si el field no existe error.
+        // Crear, y validar, el campo pasado.
         $field = $this->createField($field);
 
         // Generar el HTML del widget.
@@ -346,6 +346,35 @@ final class View_Engine_Twig_Form extends AbstractExtension
     }
 
     /**
+     * Renderiza el widget (campo de entrada) de un campo del formulario y lo
+     * entrega separado en los elementos de un input group.
+     *
+     * @param object|array $field El campo del formulario.
+     * @param array $options Opciones adicionales para personalizar el widget.
+     * Algunas opciones son:
+     *   - `attr` (array): Atributos HTML para el widget del campo.
+     *     Ejemplo: `['class' => 'form-control', 'placeholder' => 'Enter your name']`.
+     * @return array El HTML renderizado del widget dividido en su input group
+     * (si existe), índices: prepend, input y append.
+     */
+    public function function_form_input_group($field, array $options = []): array
+    {
+        // Crear, y validar, el campo pasado.
+        $field = $this->createField($field);
+
+        // Generar el HTML del widget.
+        $inputGroup = $field['widget']->renderInputGroup($options);
+
+        // Marcar el campo como renderizado.
+        if (!empty($field['name'])) {
+            $this->markFieldAsRendered($field['name']);
+        }
+
+        // Entregar el widget renderizado.
+        return $inputGroup;
+    }
+
+    /**
      * Renderiza los errores asociados a un campo.
      *
      * @param object|array $field La configuración del campo.
@@ -353,7 +382,7 @@ final class View_Engine_Twig_Form extends AbstractExtension
      */
     public function function_form_errors($field): Markup
     {
-        // Si el field no existe error.
+        // Crear, y validar, el campo pasado.
         $field = $this->createField($field);
 
         // Obtener los errores del campo.
@@ -386,7 +415,7 @@ final class View_Engine_Twig_Form extends AbstractExtension
      */
     public function function_form_help($field): Markup
     {
-        // Si el field no existe error.
+        // Crear, y validar, el campo pasado.
         $field = $this->createField($field);
 
         // Obtener el texto de ayuda del campo.
@@ -795,54 +824,51 @@ final class View_Engine_Twig_Form extends AbstractExtension
             }
             $html .= '<div class="row g-3">';
             foreach ($row as $fieldName) {
-                if (isset($form['fields'][$fieldName])) {
-                    $field = $form['fields'][$fieldName];
-                    $errors = $this->function_form_errors($field);
-                    $help = $this->function_form_help($field);
-                    $label = $field['label'] ?? null;
-                    $html .= '<div class="col">';
-                    $html .= sprintf(
-                        '<div class="%smb-3">',
-                        $label ? 'form-floating ' : ''
-                    );
-                    $html .= $this->function_form_widget(
-                        $field,
+                if (!isset($form['fields'][$fieldName])) {
+                    continue;
+                }
+                $field = $form['fields'][$fieldName];
+                $errors = $this->function_form_errors($field);
+                $help = $this->function_form_help($field);
+                $label = $field['label'] ?? null;
+                $html .= '<div class="col">';
+                $html .= '<div class="input-group mb-3">';
+                if ($label) {
+                    $inputGroup = $this->function_form_input_group($field);
+                    $html .= $inputGroup['prepend'];
+                    $html .= '<div class="form-floating">';
+                    $html .= $inputGroup['input'];
+                    $html .= $this->function_form_label($field,
                         [
-                            'attr' => [
-                                'class' => 'form-control',
+                            'label_attr' => [
+                                // No se puede usar form-label por lo que se
+                                // quita si existe.
+                                'class' => '',
                             ],
+                            'required_label' =>
+                                ' <sup><i class="fa-solid fa-asterisk small text-danger"></i></sup>'
+                            ,
                         ]
                     );
-                    if ($label) {
-                        $html .= $this->function_form_label(
-                            $field,
-                            [
-                                'label_attr' => [
-                                    // No se puede usar form-label por lo que se
-                                    // quita si existe.
-                                    'class' => '',
-                                ],
-                                'required_label' =>
-                                    ' <sup><i class="fa-solid fa-asterisk small text-danger"></i></sup>'
-                                ,
-                            ]
-                        );
-                    }
-                    if ($errors) {
-                        $html .= sprintf(
-                            '<div class="invalid-feedback d-block">%s</div>',
-                            $errors
-                        );
-                    }
-                    if ($help) {
-                        $html .= sprintf(
-                            '<div class="form-text">%s</div>',
-                            $help
-                        );
-                    }
-                    $html .= '</div>'; // Cerrar div de form-floating (interior col).
                     $html .= '</div>';
+                    $html .= $inputGroup['append'];
+                } else {
+                    $html .= $this->function_form_widget($field);
                 }
+                if ($errors) {
+                    $html .= sprintf(
+                        '<div class="invalid-feedback d-block">%s</div>',
+                        $errors
+                    );
+                }
+                if ($help) {
+                    $html .= sprintf(
+                        '<div class="form-text">%s</div>',
+                        $help
+                    );
+                }
+                $html .= '</div>'; // Cerrar div de input-group (interior col).
+                $html .= '</div>';
             }
             $html .= '</div>'; // Cerrar fila.
         }

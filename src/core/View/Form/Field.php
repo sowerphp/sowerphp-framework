@@ -277,6 +277,10 @@ class View_Form_Field implements ArrayAccess
             'fields' => $options['fields'] ?? [],
             'values' => $options['values'] ?? [],
             'rows' => $options['rows'] ?? [],
+
+            // Elementos para inputs groups.
+            'prepend' => $options['prepend'] ?? null,
+            'append' => $options['append'] ?? null,
         ];
         $this->widget = $this->createWidget($widgetData, $widgetOptions);
     }
@@ -460,6 +464,7 @@ class View_Form_Field implements ArrayAccess
             // Tipos de widgets propios del framework.
             'default',
             'datetime',
+            'telephone',
             // Valores de "type" oficiales de un tag "input" de HTML 5.
             'button',
             'checkbox',

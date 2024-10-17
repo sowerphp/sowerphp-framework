@@ -25,6 +25,7 @@ namespace sowerphp\core;
 
 use ArrayAccess;
 use DomainException;
+use DOMDocument;
 use Illuminate\Support\Str;
 use ReflectionClass;
 
@@ -143,6 +144,7 @@ class View_Form_Widget implements ArrayAccess
     /**
      * Renderiza el widget del campo del formulario generando su HTML.
      *
+     * @param array $options Opciones adicionales para el renderizado.
      * @return string El HTML renderizado del widget.
      */
     public function render(array $options = []): string
@@ -172,7 +174,87 @@ class View_Form_Widget implements ArrayAccess
         }
 
         // Renderizar el widget con un método específico.
-        return $this->$method();
+        $widgetHtml = $this->$method();
+
+        // Agregar prepend y append si corresponde.
+        $html = sprintf(
+            '%s%s%s',
+            $this->options['prepend'] ?? '',
+            $widgetHtml,
+            $this->options['append'] ?? ''
+        );
+
+        // Entregar el HTML renderizado.
+        return $html;
+    }
+
+    /**
+     * Renderiza el widget del campo del formulario generando su HTML y lo
+     * entrega separado en los elementos de un input group.
+     *
+     * @return array El HTML renderizado del widget dividido en su input group
+     * (si existe), índices: prepend, input y append.
+     */
+    public function renderInputGroup(array $options): array
+    {
+        $html = $this->render($options);
+
+        return $this->splitInputGroup($html);
+    }
+
+    /**
+     * Recibe el HTML de un widget renderizado que puede ser en formato para
+     * "input group" y lo divide en sus 3 partes.
+     *
+     * @param string $html String HTML con el widget renderizado.
+     * @return array El HTML renderizado del widget dividido en su input group
+     * (si existe), índices: prepend, input y append.
+     */
+    protected function splitInputGroup(string $html): array
+    {
+        // Cargar el HTML renderizado del widget.
+        $html = '<body>' . $html . '</body>';
+        $dom = new DOMDocument();
+        @$dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+        // Valores base para las partes del input group.
+        $prepend = '';
+        $append = '';
+        $input = null;
+
+        // Recorrer los elementos para buscar las partes del input group.
+        $elements = $dom->getElementsByTagName('body')->item(0)->childNodes;
+        foreach ($elements as $element) {
+            // Detectar el input o select.
+            if (
+                $input === null
+                && (in_array($element->nodeName, ['input', 'select'], true))
+            ) {
+                $input = $dom->saveHTML($element);
+            }
+
+            // Clasificar elementos con la clase 'input-group-text'.
+            else if ($element->hasAttributes()) {
+                $class = $element->attributes->getNamedItem('class');
+                if (
+                    $class
+                    && strpos($class->nodeValue, 'input-group-text') !== false
+                ) {
+                    if ($input === null) {
+                        $prepend .= $dom->saveHTML($element);
+                    } else {
+                        $append .= $dom->saveHTML($element);
+                    }
+                }
+            }
+        }
+
+        // Entregar el arreglo con las partes del input group.
+        return [
+            'prepend' => $prepend,
+            'input' => $input ?? '',
+            'append' => $append,
+        ];
     }
 
     /**
@@ -202,6 +284,8 @@ class View_Form_Widget implements ArrayAccess
      */
     protected function renderDefaultWidget(): string
     {
+        $this->attributes['type'] = 'text';
+
         return $this->renderInputWidget();
     }
 
@@ -337,10 +421,10 @@ class View_Form_Widget implements ArrayAccess
     protected function renderPasswordWidget(): string
     {
         return sprintf(
-            '<div class="input-group">%s%s%s</div>',
+            '%s%s%s',
             $this->renderInputWidget(),
             '<a class="input-group-text" style="cursor:pointer;text-decoration:none" onclick="Form.showPassword(this)"><i class="fa-regular fa-eye fa-fw"></i></a>',
-            '<a class="input-group-text" style="cursor:pointer;text-decoration:none" onclick="__.copy(this.parentNode.querySelector(\'input\').value, \'Copiado.\')"><i class="fa-regular fa-copy fa-fw"></i></a>'
+            '<a class="input-group-text" style="cursor:pointer;text-decoration:none" onclick="__.copy(this.parentNode.querySelector(\'input\').value, \'Copiado.\')"><i class="fa-regular fa-copy fa-fw"></i></a>',
         );
     }
 
@@ -411,6 +495,20 @@ class View_Form_Widget implements ArrayAccess
             $this->renderAttributes(),
             $html
         );
+    }
+
+    /**
+     * Renderiza el widget de tipo `telephone`.
+     *
+     * Renderiza un campo de teléfono.
+     *
+     * @return string El HTML renderizado del widget.
+     */
+    protected function renderTelephoneWidget(): string
+    {
+        $this->attributes['type'] = 'tel';
+
+        return $this->renderInputWidget();
     }
 
     /**
@@ -837,7 +935,7 @@ class View_Form_Widget implements ArrayAccess
         foreach($widgets as $index => $widget) {
             $widget = clone $widget;
             $widgetsRow .= sprintf(
-                '<td %s>%s</td>',
+                '<td %s><div class="input-group">%s</div></td>',
                 html_attributes($options['cols_attributes'][$index] ?? []),
                 $widget->render([
                     'value' => $values[$index] ?? null,
