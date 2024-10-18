@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -560,6 +562,7 @@ class View_Form_Field implements ArrayAccess
             $attributes['placeholder'] = $widget['placeholder'] ?? null;
             $attributes['class'] = 'form-control ' . ($widget['class'] ?? '');
         }
+
         // Ajustar class del elemento.
         $valid = empty($options['errors']) ? '' : ' is-invalid';
         $attributes['class'] = trim(($attributes['class'] ?? '') . $valid);

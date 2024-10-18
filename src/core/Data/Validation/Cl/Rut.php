@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -27,7 +29,6 @@ use Illuminate\Contracts\Validation\Rule;
 
 class Data_Validation_Cl_Rut implements Rule
 {
-
     /**
      * Determina si el valor es un RUT válido.
      *
@@ -102,5 +103,4 @@ class Data_Validation_Cl_Rut implements Rule
     {
         return __('El campo :attribute debe ser un RUT válido.');
     }
-
 }

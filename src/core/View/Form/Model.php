@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>

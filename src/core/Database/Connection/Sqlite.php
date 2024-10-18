@@ -31,7 +31,6 @@ namespace sowerphp\core;
  */
 class Database_Connection_Sqlite extends Database_Connection
 {
-
     /**
      * Asigna un límite para la obtención de filas en la consulta SQL.
      *
@@ -44,5 +43,4 @@ class Database_Connection_Sqlite extends Database_Connection
     {
         return $query . ' LIMIT ' . $offset . ',' . $records;
     }
-
 }

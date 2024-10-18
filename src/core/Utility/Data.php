@@ -29,7 +29,6 @@ namespace sowerphp\core;
  */
 class Utility_Data
 {
-
     /**
      * Método que limpia datos de tipo texto (string).
      *
@@ -56,6 +55,7 @@ class Utility_Data
         if (!empty($options['l'])) {
             $data = substr($data, 0, $options['l']);
         }
+
         return $data;
     }
 
@@ -81,7 +81,7 @@ class Utility_Data
                 $emails[] = $e;
             }
         }
+
         return $emails;
     }
-
 }

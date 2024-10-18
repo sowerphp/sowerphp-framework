@@ -27,7 +27,6 @@ use Illuminate\Config\Repository;
 
 class Service_Config implements Interface_Service, \ArrayAccess
 {
-
     /**
      * Repositorio de configuración.
      *
@@ -142,6 +141,7 @@ class Service_Config implements Interface_Service, \ArrayAccess
         // mediante el archivo phpunit.xml (u otro método) y no usar el archivo
         // de configuración normal .env
         $this->set(['app.env' => $_ENV['APP_ENV'] ?? $this->get('app.env')]);
+
         // Cargar variables desde archivo de variables de entorno.
         $env_file = $this->layersService->getProjectPath();
         $env = \Dotenv\Dotenv::createMutable($env_file, '.env');
@@ -171,6 +171,7 @@ class Service_Config implements Interface_Service, \ArrayAccess
                 $this->loadConfiguration($filepath);
             }
         }
+
         // Cargar las configuraciones del directorio project:/config/
         $configDir = $this->layersService->getProjectPath('/config');
         foreach (glob($configDir . '/*.php') as $filepath) {
@@ -196,6 +197,7 @@ class Service_Config implements Interface_Service, \ArrayAccess
             );
             die($message);
         }
+
         // Si la configuración es de módulos se registran.
         if ($key == 'modules') {
             $config = $this->moduleService->normalizeModulesConfig($config);
@@ -207,6 +209,7 @@ class Service_Config implements Interface_Service, \ArrayAccess
             );
             $this->moduleService->registerModule($config['modules']);
         }
+
         // Estandarizar configuración (como si estuviese en config.php).
         if ($key != 'config') {
             $configOld = $config;
@@ -215,6 +218,7 @@ class Service_Config implements Interface_Service, \ArrayAccess
                 $config[$key . '.' . $var] = $val;
             }
         }
+
         // Guardar configuración en repositorio.
         $this->set($config);
     }
@@ -309,8 +313,11 @@ class Service_Config implements Interface_Service, \ArrayAccess
         if ($selector === null) {
             return $this->repository;
         }
-        // Entregar una configuración específica.
+
+        // Buscar una configuración específica.
         $value = $this->get($selector, $default);
+
+        // Entregar un repositorio con la configuración.
         return new Repository([$selector => $value]);
     }
 
@@ -333,6 +340,7 @@ class Service_Config implements Interface_Service, \ArrayAccess
                 $this->set($key, $val);
             }
         }
+
         // Guardar la configuración pasada mediante la llave $config.
         else {
             // Si $val es un arreglo, se obtiene su valor para hacer un merge.
@@ -407,5 +415,4 @@ class Service_Config implements Interface_Service, \ArrayAccess
     {
         return call_user_func_array([$this->repository, $method], $parameters);
     }
-
 }

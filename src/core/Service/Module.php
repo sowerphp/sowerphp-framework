@@ -25,7 +25,6 @@ namespace sowerphp\core;
 
 class Service_Module implements Interface_Service
 {
-
     /**
      * Aplicación.
      *
@@ -97,8 +96,8 @@ class Service_Module implements Interface_Service
     /**
      * Registrar un módulo para su uso.
      *
-     * @param string|array $module Nombre del módulo o un arreglo de módulos
-     * con sus configuraciones.
+     * @param string|array $module Nombre del módulo o un arreglo de módulos con
+     * sus configuraciones.
      * @param array $config Arreglo con configuración del módulo.
      */
     public function registerModule($module, array $config = []): void
@@ -111,12 +110,14 @@ class Service_Module implements Interface_Service
                 if ($conf === false) {
                     $this->unregisterModule($name);
                 }
+
                 // Registrar el módulo.
                 else {
                     $this->registerModule($name, $conf);
                 }
             }
         }
+
         // Procesar un módulo con su configuración.
         else {
             // Asignar opciones por defecto.
@@ -126,6 +127,7 @@ class Service_Module implements Interface_Service
                 // El módulo no se encuentra cargado.
                 'loaded' => false,
             ], $config);
+
             // Guardar configuración del modulo y cargarlo.
             $this->modules[$module] = $config;
             $this->loadModule($module);
@@ -159,9 +161,10 @@ class Service_Module implements Interface_Service
         if ($this->modules[$module]['loaded']) {
             return $this->modules[$module];
         }
-        // Si no se indicó el path donde se encuentra el módulo se
-        // deberá determinar, se buscarán todos los paths donde el
-        // módulo pueda existir.
+
+        // Si no se indicó el path donde se encuentra el módulo se deberá
+        // determinar, se buscarán todos los paths donde el módulo pueda
+        // existir.
         if (!isset($this->modules[$module]['paths'][0])) {
             $this->modules[$module]['paths'] = [];
             $paths = $this->layersService->getPaths();
@@ -176,8 +179,9 @@ class Service_Module implements Interface_Service
                 }
             }
         }
-        // Si se indicó se verifica que exista y se agrega como único
-        // path para el módulo al arreglo.
+
+        // Si se indicó se verifica que exista y se agrega como único path para
+        // el módulo al arreglo.
         else {
             // Si el directorio existe se agrega.
             if (is_dir($this->modules[$module]['paths'])) {
@@ -185,12 +189,14 @@ class Service_Module implements Interface_Service
                     $this->modules[$module]['paths'],
                 ];
             }
+
             // Si no existe se elimina el path para generar error
             // posteriormente.
             else {
                 $this->modules[$module]['paths'] = [];
             }
         }
+
         // Si el módulo no fue encontrado se lanza una excepción.
         if (!isset($this->modules[$module]['paths'][0])) {
             throw new \Exception(__(
@@ -198,11 +204,13 @@ class Service_Module implements Interface_Service
                 $module
             ));
         }
+
         // Cargar archivos del módulo desde todas sus capas.
         $this->loadFiles($module, [
             '/App/helpers.php',
         ]);
         $this->loadConfigurations($module);
+
         // Indicar que el módulo fue cargado.
         $this->modules[$module]['loaded'] = true;
         return $this->modules[$module];
@@ -282,6 +290,7 @@ class Service_Module implements Interface_Service
         $filename = '/Module/'
             . str_replace('.', '/Module/', $module) . $filename
         ;
+
         return app('layers')->getFilePath($filename);
     }
 
@@ -305,12 +314,13 @@ class Service_Module implements Interface_Service
     {
         $modules = array_keys($this->modules);
         sort($modules);
+
         return $modules;
     }
 
     /**
-     * Determinar si el recurso de una URL corresponde a un módulo y entregar
-     * el nombre del módulo determinado.
+     * Determinar si el recurso de una URL corresponde a un módulo y entregar el
+     * nombre del módulo determinado.
      *
      * @param string $url Solicitud realizada (sin la base de la aplicación).
      * @return string|null Nombre del módulo si es que existe uno en la URL.
@@ -319,10 +329,12 @@ class Service_Module implements Interface_Service
     {
         // Separar por "/".
         $partes = explode('/', $url);
+
         // Quitar primer elemento, ya que si parte con / entonces será vacío.
         if (!strlen($partes[0])) {
             array_shift($partes);
         }
+
         // Determinar hasta que elemento de la url corresponde a parte de un
         // módulo.
         $npartes = count($partes);
@@ -334,13 +346,15 @@ class Service_Module implements Interface_Service
                 $module[] = Utility_Inflector::camelize($partes[$j]);
             }
             $module = implode('.', $module);
+
             // Determinar si dicho modulo existe.
             if (array_key_exists($module, $this->modules)) {
                 $hasta = $i;
             }
         }
-        // Si $hasta es mayor a -1 existe un módulo, por lo que se determina
-        // su nombre y se entrega.
+
+        // Si $hasta es mayor a -1 existe un módulo, por lo que se determina su
+        // nombre y se entrega.
         if ($hasta >= 0) {
             // Armar nombre final del modulo (considerando hasta $hasta partes
             // del arreglo de partes).
@@ -348,11 +362,14 @@ class Service_Module implements Interface_Service
             for($i=0; $i<=$hasta; ++$i) {
                 $module[] = Utility_Inflector::camelize($partes[$i]);
             }
+
             // Armar nombre del módulo como string.
             $module = implode('.', $module);
+
             // Retornar nombre del modulo.
             return $module;
         }
+
         // No se encontró módulo, por lo que se retorna null.
         else {
             return null;
@@ -381,6 +398,7 @@ class Service_Module implements Interface_Service
                 }
             }
         }
+
         // No se encontró un namespace que coincidera con la clase o no
         // contenía un módulo la clase a partir del namespace de la capa.
         return null;
@@ -402,6 +420,7 @@ class Service_Module implements Interface_Service
             }
             return [];
         }
+
         // Si se pidieron todos los paths se determinan.
         $paths = [];
         foreach ($this->modules as $module => $config) {
@@ -429,6 +448,7 @@ class Service_Module implements Interface_Service
         if (!isset($module_nav[0])) {
             $module_nav = [['menu' => $module_nav]];
         }
+
         return $module_nav;
     }
 
@@ -460,11 +480,13 @@ class Service_Module implements Interface_Service
             if (is_numeric($module)) {
                 $normalizedModules[$config] = [];
             }
+
             // Se pasó nombre de módulo como índice y su ruta como
             // configuración.
             else if (is_string($config)) {
                 $normalizedModules[$module]['paths'] = [$config];
             }
+
             // Se pasó nombre de módulo como índice y su configuración.
             // La configuración podría ser:
             //  - array: para registrar el módulo.
@@ -473,6 +495,7 @@ class Service_Module implements Interface_Service
                 $normalizedModules[$module] = $config;
             }
         }
+
         return $normalizedModules;
     }
 
@@ -513,6 +536,7 @@ class Service_Module implements Interface_Service
                     'namespace' => $layerNamespace,
                 ];
             }
+
             // Iterar los módulos encontrados (si existen) y extraer las rutas
             // que coincidan con la capa que estamos iterando.
             foreach ($modules as $moduleName => $modulePaths) {
@@ -638,5 +662,4 @@ class Service_Module implements Interface_Service
         // Entregar todas las clases encontradas.
         return $classes;
     }
-
 }

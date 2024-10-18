@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -29,7 +31,6 @@ namespace sowerphp\core;
  */
 class Facade_Session_Message
 {
-
     /**
      * Plantilla para el renderizado de los mensajes de la sesión.
      *
@@ -138,9 +139,11 @@ class Facade_Session_Message
     public static function readAll(): array
     {
         $messages = session('status.messages', []);
+
         $messages = array_map(function($message) {
             return array_merge($message, self::$config[$message['type']]);
         }, $messages);
+
         return $messages;
     }
 
@@ -157,6 +160,7 @@ class Facade_Session_Message
         foreach ($messages as $message) {
             $buffer .= self::render($message);
         }
+
         return $buffer;
     }
 
@@ -177,5 +181,4 @@ class Facade_Session_Message
             message_format($message['text'])
         );
     }
-
 }

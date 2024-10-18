@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -28,7 +30,6 @@ namespace sowerphp\core;
  */
 abstract class View_Engine
 {
-
     /**
      * Servicio de capas de la aplicación.
      *
@@ -64,5 +65,4 @@ abstract class View_Engine
     protected function boot(): void
     {
     }
-
 }

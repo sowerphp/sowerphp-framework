@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -33,7 +35,6 @@ use Twig\TwigFilter;
  */
 class View_Engine_Twig extends View_Engine
 {
-
     /**
      * Posibles rutas para la búsqueda de vistas.
      *
@@ -81,13 +82,16 @@ class View_Engine_Twig extends View_Engine
         // vistas.
         $this->viewPaths = array_values($this->layersService->getPaths());
         $loader = new FilesystemLoader($this->viewPaths);
+
         // Definir el caché en el directorio estándar si es producción.
         $config = [];
         if (config('app.env') != 'local') {
             $config['cache'] = storage_path($this->cachePath);
         }
+
         // Crear el entorno de Twig con el cargador y configuración.
         $this->twig = new Environment($loader, $config);
+
         // Cargar las extensiones que estarán disponibles en las plantillas.
         $extensions = config('app.ui.twig.extensions', $this->extensions);
         foreach ($extensions as $extension) {
@@ -96,7 +100,7 @@ class View_Engine_Twig extends View_Engine
     }
 
     /**
-     * Renderizar una plantilla Twig y devolver el resultado como una cadena.
+     * Renderiza una plantilla Twig y devolver el resultado como una cadena.
      *
      * @param string $filepath Ruta a la plantilla Twig que se va a renderizar.
      * @param array $data Datos que se pasarán a la plantilla Twig para su uso
@@ -109,8 +113,11 @@ class View_Engine_Twig extends View_Engine
         if (isset($data['_content'])) {
             return $this->renderWithContent($filepath, $data);
         }
+
         // Renderizar la plantilla de manera normal (sin contenido en datos).
         $relativePath = substr(str_replace($this->viewPaths, '', $filepath), 1);
+
+        // Entregar plantilla renderizada.
         return $this->twig->render($relativePath, $data);
     }
 
@@ -142,6 +149,7 @@ class View_Engine_Twig extends View_Engine
         );
         unset($data['_content']);
         $template = $this->twig->createTemplate($templateContent);
+
         return $template->render($data);
     }
 
@@ -204,5 +212,4 @@ class View_Engine_Twig extends View_Engine
     {
         return call_user_func_array([$this->twig, $method], $parameters);
     }
-
 }

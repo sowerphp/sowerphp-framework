@@ -27,7 +27,6 @@ namespace sowerphp\core;
  * String handling methods.
  */
 class Utility_String {
-
 	/**
 	 * Generate a random UUID
 	 *
@@ -96,8 +95,14 @@ class Utility_String {
 
 		list($timeMid, $timeLow) = explode(' ', microtime());
 		$uuid = sprintf(
-			"%08x-%04x-%04x-%02x%02x-%04x%08x", (int)$timeLow, (int)substr($timeMid, 2) & 0xffff,
-			mt_rand(0, 0xfff) | 0x4000, mt_rand(0, 0x3f) | 0x80, mt_rand(0, 0xff), $pid, $node
+			"%08x-%04x-%04x-%02x%02x-%04x%08x",
+			(int) $timeLow,
+			(int) substr($timeMid, 2) & 0xffff,
+			mt_rand(0, 0xfff) | 0x4000,
+			mt_rand(0, 0x3f) | 0x80,
+			mt_rand(0, 0xff),
+			$pid,
+			$node
 		);
 
 		return $uuid;
@@ -490,5 +495,4 @@ class Utility_String {
         ];
         return str_replace($from, $to, $string);
     }
-
 }

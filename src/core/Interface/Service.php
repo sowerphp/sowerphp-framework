@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -25,7 +27,6 @@ namespace sowerphp\core;
 
 interface Interface_Service
 {
-
     /**
      * Registra el servicio en el contenedor.
      */
@@ -40,5 +41,4 @@ interface Interface_Service
      * Finaliza el servicio.
      */
     public function terminate(): void;
-
 }

@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class Network_Messenger_Message_Job
 {
-
     /**
      * El nombre del comando.
      *
@@ -57,8 +56,11 @@ class Network_Messenger_Message_Job
      * @param array $arguments Los argumentos del comando.
      * @param array $options Las opciones del comando.
      */
-    public function __construct(string $command, array $arguments = [], array $options = [])
-    {
+    public function __construct(
+        string $command,
+        array $arguments = [],
+        array $options = []
+    ) {
         $this->command = $command;
         $this->arguments = $arguments;
         $this->options = $options;
@@ -93,5 +95,4 @@ class Network_Messenger_Message_Job
     {
         return $this->options;
     }
-
 }

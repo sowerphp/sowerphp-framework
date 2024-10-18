@@ -33,7 +33,6 @@ use sowerphp\core\Network_Request as Request;
  */
 class Service_Http_Captcha implements Interface_Service
 {
-
     protected $jsAlreadyIncluded = false;
 
     /**
@@ -64,7 +63,7 @@ class Service_Http_Captcha implements Interface_Service
     }
 
     /**
-     * Método que valida que el captcha esté ok en el backend.
+     * Valida que el captcha esté ok en el backend.
      */
     public function check(Request $request): bool
     {
@@ -72,6 +71,7 @@ class Service_Http_Captcha implements Interface_Service
         if (!$captcha_private_key) {
             return true;
         }
+
         $recaptchaToken = $request->get('recaptcha-token', '');
         $remoteIp = $request->fromIp();
         $recaptcha = new ReCaptcha($captcha_private_key);
@@ -80,11 +80,12 @@ class Service_Http_Captcha implements Interface_Service
             $errors = $resp->getErrorCodes();
             throw new \Exception(implode(' / ', $errors));
         }
+
         return true;
     }
 
     /**
-     * Método que genera genera el código que va en el formulario.
+     * Genera el código que va en el formulario.
      */
     public function render(string $form, ?string $action = null): string
     {
@@ -92,6 +93,7 @@ class Service_Http_Captcha implements Interface_Service
         if (empty($captcha_public_key)) {
             return '';
         }
+
         if ($action === null) {
             $action = $form . '_action';
         }
@@ -101,22 +103,25 @@ class Service_Http_Captcha implements Interface_Service
             google_recaptcha_v3_form("' . $form . '", "' . $action . '");
         });
         </script>' . "\n";
+
         return $buffer;
     }
 
     /**
-     * Método que genera genera el código javascript general a todos los formularios
+     * Genera el código javascript general a todos los formularios.
      */
     protected function renderJs(): string
     {
         if ($this->jsAlreadyIncluded) {
             return '';
         }
+
         $this->jsAlreadyIncluded = true;
         $captcha_public_key = config('services.recaptcha.public_key');
         if (empty($captcha_public_key)) {
             return '';
         }
+
         $buffer = '<script src="https://www.google.com/recaptcha/api.js?render=' . $captcha_public_key . '"></script>';
         $buffer .= '<script>
         function google_recaptcha_v3_form(formId, action) {
@@ -159,7 +164,7 @@ class Service_Http_Captcha implements Interface_Service
             });
         }
         </script>' . "\n";
+
         return $buffer;
     }
-
 }

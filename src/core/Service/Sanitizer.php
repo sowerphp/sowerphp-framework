@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class Service_Sanitizer implements Interface_Service
 {
-
     /**
      * Filtros disponibles para usar en la sanitización con filter_var().
      *
@@ -86,6 +85,7 @@ class Service_Sanitizer implements Interface_Service
                 $value = $this->sanitizeValue($value, $rule);
             }
         }
+
         return $data;
     }
 
@@ -101,6 +101,7 @@ class Service_Sanitizer implements Interface_Service
         if ($value === null) {
             return $value;
         }
+
         $aux = explode(':', $rule, 2);
         $type = $aux[0];
         $parametersString = $aux[1] ?? null;
@@ -109,6 +110,7 @@ class Service_Sanitizer implements Interface_Service
             : []
         ;
         array_unshift($parameters, (string)$value);
+
         return call_user_func_array([$this, $type], $parameters);
     }
 
@@ -121,6 +123,7 @@ class Service_Sanitizer implements Interface_Service
     protected function remove_non_printable(string $value): string
     {
         $result = preg_replace('/[\x00-\x1F\x7F]/u', '', $value);
+
         return $result !== null ? $result : $value;
     }
 
@@ -215,6 +218,7 @@ class Service_Sanitizer implements Interface_Service
                 return mb_substr($value, strlen($prefix));
             }
         }
+
         return $value;
     }
 
@@ -225,6 +229,7 @@ class Service_Sanitizer implements Interface_Service
                 return mb_substr($value, 0, -strlen($suffix));
             }
         }
+
         return $value;
     }
 
@@ -241,6 +246,7 @@ class Service_Sanitizer implements Interface_Service
     protected function keep_by_regex(string $value, string $regex)
     {
         preg_match_all($regex, $value, $matches);
+
         return implode('', $matches[0]);
     }
 
@@ -255,12 +261,13 @@ class Service_Sanitizer implements Interface_Service
         if (empty($value)) {
             return null;
         }
+
         // Si el RUT no es numérico, entonces se pasó con guión y DV.
         if (!is_numeric($value)) {
             $value = explode('-', str_replace('.', '', $value))[0];
         }
+
         // Entregar el RUT sanitizado.
         return (int) $value;
     }
-
 }

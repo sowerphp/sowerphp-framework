@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -30,7 +32,6 @@ use Illuminate\Contracts\Auth\Authenticatable;
  */
 class Auth_Guard_Web extends Auth_Guard
 {
-
     protected $cacheService;
     protected $sessionService;
     protected $sessionKey = 'session.auth';
@@ -64,9 +65,11 @@ class Auth_Guard_Web extends Auth_Guard
             && !empty($sessionUser['hash'])
         ) {
             $this->sessionHash = $sessionUser['hash'];
+
             // Usuario podría estar en caché, si lo está se saca de ahí.
             $cacheKey = $this->sessionKey . '.' . $sessionUser['id'];
             $this->user = $this->cacheService->get($cacheKey);
+
             // Si el usuario no estaba en la caché, se instancia.
             if (!$this->user) {
                 try {
@@ -77,6 +80,7 @@ class Auth_Guard_Web extends Auth_Guard
                     $this->user = null;
                 }
             }
+
             // Si se logró obtener el usuario se asignan sus grupos, permisos
             // y se guarda (actualiza) en la caché para futuras consultas.
             if ($this->user) {
@@ -90,15 +94,17 @@ class Auth_Guard_Web extends Auth_Guard
     /**
      * Método que guarda el usuario autenticado en la caché.
      *
-     * @return boolean True si fue posible guardar al usuario, false si no.
+     * @return bool `true` si fue posible guardar al usuario, `false` si no.
      */
     public function save(): bool
     {
         if ($this->guest()) {
             return false;
         }
+
         $cacheKey = $this->sessionKey . '.' . $this->user->id;
         $cacheExpires = config('session.lifetime') * 60;
+
         return $this->cacheService->set($cacheKey, $this->user, $cacheExpires);
     }
 
@@ -113,11 +119,13 @@ class Auth_Guard_Web extends Auth_Guard
         if (!parent::check()) {
             return false;
         }
+
         // Validar que usuario esté asignado.
         $user = $this->user();
         if (!$user) {
             return false;
         }
+
         // Validar múltiples logins.
         if ($this->sessionHash != $user->getRememberToken()) {
             $this->logout();
@@ -126,6 +134,7 @@ class Auth_Guard_Web extends Auth_Guard
                 $user->usuario
             ));
         }
+
         // Todo ok.
         return true;
     }
@@ -143,6 +152,7 @@ class Auth_Guard_Web extends Auth_Guard
         if ($user === null) {
             return $this->error(__('Usuario solicitado no existe.'));
         }
+
         // Validar que el usuario esté activo.
         if (!$user->isActive()) {
             return $this->error(__(
@@ -150,6 +160,7 @@ class Auth_Guard_Web extends Auth_Guard
                 $user->usuario
             ));
         }
+
         // Validar intentos de sesión.
         if (!$user->contrasenia_intentos) {
             return $this->error(__(
@@ -157,6 +168,7 @@ class Auth_Guard_Web extends Auth_Guard
                 $user->usuario
             ));
         }
+
         // Validar el captcha.
         // Se valida el captcha solo si ya hubo un intento de sesión fallido.
         $max_login_attempts = config('auth.max_login_attempts');
@@ -173,6 +185,7 @@ class Auth_Guard_Web extends Auth_Guard
                 ) . ' ' . $e->getMessage());
             }
         }
+
         // Validar credenciales.
         if (!$this->provider->validateCredentials($user, $credentials)) {
             if ($max_login_attempts) {
@@ -180,6 +193,7 @@ class Auth_Guard_Web extends Auth_Guard
             }
             return $this->error(__('Contraseña inválida.'));
         }
+
         // Validar Token 2FA.
         $auth2_token = $credentials['2fa_token']
             ?? $credentials['auth2_token']
@@ -194,6 +208,7 @@ class Auth_Guard_Web extends Auth_Guard
                 $e->getMessage()
             ));
         }
+
         // Todas las validaciones pasaron.
         // Crear sesión del usuario.
         $this->setUser($user);
@@ -268,5 +283,4 @@ class Auth_Guard_Web extends Auth_Guard
         $this->createSession();
         return true;
     }*/
-
 }

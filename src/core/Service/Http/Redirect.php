@@ -30,7 +30,6 @@ namespace sowerphp\core;
  */
 class Service_Http_Redirect extends Network_Response implements Interface_Service
 {
-
     /**
      * Servicio de enrutamiento.
      *
@@ -89,12 +88,15 @@ class Service_Http_Redirect extends Network_Response implements Interface_Servic
         // Asignar URL de la redirección.
         $url = $to ? ($to[0] == '/' ? url($to) : $to) : url();
         $this->header('Location', $url);
+
         // Asignar estado HTTP de la dirección.
         $this->status($status);
+
         // Asignar cabeceras HHTP de la redirección.
         foreach ($headers as $name => $value) {
             $this->header($name, $value);
         }
+
         // Entregar la instancia del servicio para usar o encadenar.
         return $this;
     }
@@ -109,6 +111,7 @@ class Service_Http_Redirect extends Network_Response implements Interface_Servic
     public function back(int $status = 302, array $headers = []): self
     {
         $url = request()->headers->get('referer') ?? '/';
+
         return $this->to($url, $status, $headers);
     }
 
@@ -132,6 +135,7 @@ class Service_Http_Redirect extends Network_Response implements Interface_Servic
         if ($url === null) {
             throw new \Exception(__('No se encontró la ruta HTTP "%s".', $name));
         }
+
         return $this->to($url, $status, $headers);
     }
 
@@ -153,6 +157,7 @@ class Service_Http_Redirect extends Network_Response implements Interface_Servic
         } else {
             session()->flash($key, $value);
         }
+
         return $this;
     }
 
@@ -220,6 +225,7 @@ class Service_Http_Redirect extends Network_Response implements Interface_Servic
             $errors = ['error' => $errors];
         }
         $this->with('errors.' . $key, $errors);
+
         return $this;
     }
 
@@ -237,6 +243,7 @@ class Service_Http_Redirect extends Network_Response implements Interface_Servic
     {
         $input = $input ?: request()->input();
         session()->flashInput($input);
+
         return $this;
     }
 
@@ -250,5 +257,4 @@ class Service_Http_Redirect extends Network_Response implements Interface_Servic
         $this->send();
         exit();
     }
-
 }

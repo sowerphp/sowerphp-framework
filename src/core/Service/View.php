@@ -30,7 +30,6 @@ use Illuminate\Support\Str;
  */
 class Service_View implements Interface_Service
 {
-
     /**
      * Instancia de la aplicación.
      *
@@ -148,6 +147,7 @@ class Service_View implements Interface_Service
         $response = response();
         $body = $this->render($view, $data);
         $response->body($body);
+
         return $response;
     }
 
@@ -168,6 +168,7 @@ class Service_View implements Interface_Service
                 $view
             ));
         }
+
         // Obtener motor de renderizado para la vista.
         $engine = $this->getEngineByExtension($filepath);
         if (!$engine) {
@@ -177,9 +178,11 @@ class Service_View implements Interface_Service
                 $view
             ));
         }
+
         // Normalizar los datos que se utilizarán para el renderizado de la
         // vista y, eventualmente, del layout.
         $data = $this->normalizeData($data);
+
         // Renderizar la vista con el motor encontrado.
         return $engine->render($filepath, $data);
     }
@@ -199,6 +202,7 @@ class Service_View implements Interface_Service
         if (!isset($data['_content'])) {
             $data['_content'] = '';
         }
+
         return $this->render($layout, $data);
     }
 
@@ -215,21 +219,25 @@ class Service_View implements Interface_Service
         if (array_key_exists($view, $this->views)) {
             return $this->views[$view];
         }
+
         // Localizar vista absoluta.
         $this->views[$view] = $this->resolveViewAbsolute($view);
         if ($this->views[$view]) {
             return $this->views[$view];
         }
+
         // Localizar vista relativa.
         $this->views[$view] = $this->resolveViewRelative($view, $module);
         if ($this->views[$view]) {
             return $this->views[$view];
         }
+
         // Localizar vista especial.
         $this->views[$view] = $this->resolveViewSpecial($view);
         if ($this->views[$view]) {
             return $this->views[$view];
         }
+
         // No se encontró la vista, se recuerda y retorna null.
         $this->views[$view] = null;
         return $this->views[$view];
@@ -247,15 +255,18 @@ class Service_View implements Interface_Service
         if ($view[0] != '/') {
             return null;
         }
+
         if (is_readable($view)) {
             return $view;
         }
+
         foreach($this->engines as $extension => $engine) {
             $filepath = $view . $extension;
             if (is_readable($filepath)) {
                 return $filepath;
             }
         }
+
         return null;
     }
 
@@ -287,6 +298,7 @@ class Service_View implements Interface_Service
                     : '/View/Template/' . $view
             )
         ;
+
         // Armar listado de archivos que se podrían buscar según la
         // extensión que se haya incluído en la vista o, si no se incluyó,
         // las extensiones de los motores de renderizado.
@@ -299,6 +311,7 @@ class Service_View implements Interface_Service
                 $viewFiles[] = $baseFilepath  . $extension;
             }
         }
+
         // Se busca la vista por cada extensión en las rutas de las capas.
         $paths = $this->layersService->getPaths();
         foreach ($paths as $path) {
@@ -309,6 +322,7 @@ class Service_View implements Interface_Service
                 }
             }
         }
+
         // No se encontró la vista, se retorna NULL.
         return null;
     }
@@ -329,6 +343,7 @@ class Service_View implements Interface_Service
         if (!in_array($view, $this->specialViews)) {
             return null;
         }
+
         return $this->resolveViewRelative($view, ''); // '' -> sin módulo.
     }
 
@@ -359,12 +374,15 @@ class Service_View implements Interface_Service
             ? request()
             : null
         ;
+
         // Agregar variables de autenticación y usuario.
         $data['auth'] = app('auth');
         $data['user'] = user();
+
         // Diferentes menús que se podrían utilizar.
         $data['_nav_website'] = (array)config('nav.website');
         $data['_nav_app'] = (array)config('nav.app');
+
         // Agregar variables por defecto que se pasarán a la vista.
         $data['_url'] = url();
         if ($request) {
@@ -373,6 +391,7 @@ class Service_View implements Interface_Service
             $data['_route'] = $request->getRouteConfig();
         }
         $data['__view_app_name'] = config('app.name');
+
         // Página que se está viendo.
         if (!empty($data['_request'])) {
             $slash = strpos($data['_request'], '/', 1);
@@ -383,16 +402,19 @@ class Service_View implements Interface_Service
         } else {
             $data['_page'] = config('app.ui.homepage');
         }
+
         // Asignar el layout por defecto para el renderizado.
         if (($data['__view_layout'] ?? null) === null) {
             $data['__view_layout'] = $this->getLayout();
         }
+
         // Asignar el título de la página si no está asignado.
         if (empty($data['__view_title'])) {
             $data['__view_title'] = config('app.name')
                 . (($data['_request'] ?? null) ? (': ' . $data['_request']) : '')
             ;
         }
+
         // Preparar __view_header pues viene como arreglo y debe ser string.
         $__view_header = '';
         if (isset($data['__view_header'])) {
@@ -414,6 +436,7 @@ class Service_View implements Interface_Service
             }
         }
         $data['__view_header'] = $__view_header;
+
         // Entregar los datos preparados.
         return $data;
     }
@@ -433,6 +456,7 @@ class Service_View implements Interface_Service
         if ($session) {
             return $session->get('config.app.ui.layout', $this->defaultLayout);
         }
+
         return $this->defaultLayout;
     }
 
@@ -451,6 +475,7 @@ class Service_View implements Interface_Service
                 return $extension;
             }
         }
+
         return null;
     }
 
@@ -465,6 +490,7 @@ class Service_View implements Interface_Service
     protected function getEngineByExtension(string $filename): ?object
     {
         $extension = $this->getViewExtension($filename);
+
         return $extension ? $this->engines[$extension] : null;
     }
 
@@ -484,7 +510,7 @@ class Service_View implements Interface_Service
             $layout = 'Layout/' . $this->defaultLayout;
             $filepath = $this->resolveView($layout, '');
         }
+
         return $filepath;
     }
-
 }

@@ -36,7 +36,7 @@ class Utility_Date
      * Método que valida si la fecha es o no válida según el formato.
      * @param date Fecha que se quiere validar.
      * @param format Formato que se quiere validar.
-     * @return bool =true si la fecha está ok.
+     * @return bool `true` si la fecha está ok.
      * @link https://stackoverflow.com/a/13194398/3333009
      */
     public static function check($date, $format = 'Y-m-d')
@@ -158,7 +158,7 @@ class Utility_Date
      * Método que indica si una fecha es el último día laboral del mes.
      * @param fecha Fecha que se quiere saber si es el último día laboral del mes.
      * @param feriados Arreglo con los feriados del mes (si no se pasa solo se omitirán fin de semanas).
-     * @return bool =true si es el último día laboral del mes.
+     * @return bool `true` si es el último día laboral del mes.
      */
     public static function isLastWorkingDay($fecha, $feriados = [])
     {

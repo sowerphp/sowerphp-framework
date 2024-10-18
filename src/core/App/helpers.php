@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -21,9 +23,26 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
+use Illuminate\Contracts\Auth\Authenticatable;
+use League\Flysystem\Filesystem;
+use sowerphp\core\App;
+use sowerphp\core\Auth_Guard;
+use sowerphp\core\Database_Connection;
+use sowerphp\core\Network_Mail_Mailbox;
+use sowerphp\core\Network_Request;
+use sowerphp\core\Network_Response;
+use sowerphp\core\Model;
+use sowerphp\core\Service_Cache;
+use sowerphp\core\Service_Http_Client;
+use sowerphp\core\Service_Http_Redirect;
+use sowerphp\core\Service_Http_Router;
+use sowerphp\core\Service_Model;
+use sowerphp\core\Service_View;
+use Symfony\Component\Mailer\Mailer;
+
 /**
- * Función global para acceder a las instancias almacenadas en el
- * contenedor de servicio de una clase, por defecto App.
+ * Permite acceder a las instancias almacenadas en el contenedor de servicios de
+ * la aplicación. Por defecto entrega la instancia de la aplicación.
  *
  * @param string|null $key La clave del servicio que se desea obtener.
  * @param array $parameters Parámetros adicionales para la creación de
@@ -33,10 +52,12 @@
  */
 function app(string $key = null, array $parameters = []): object
 {
-    $instance = \sowerphp\core\App::getInstance();
+    $instance = App::getInstance();
+
     if ($key === null) {
         return $instance;
     }
+
     return empty($parameters)
         ? $instance->getService($key)
         : $instance->getService($key, $parameters)
@@ -44,12 +65,12 @@ function app(string $key = null, array $parameters = []): object
 }
 
 /**
- * Obtener una instancia de almacenamiento.
+ * Obtiene una instancia de almacenamiento.
  *
  * @param string|null $disk Nombre del disco que se desea usar.
- * @return \League\Flysystem\Filesystem
+ * @return Filesystem
  */
-function storage(?string $disk = null): \League\Flysystem\Filesystem
+function storage(?string $disk = null): Filesystem
 {
     return app('storage')->disk($disk);
 }
@@ -64,8 +85,8 @@ function storage(?string $disk = null): \League\Flysystem\Filesystem
  * Además, si la ruta se pasa y se determina que es un directorio se verificará
  * si existe, si no existe se tratará de crear.
  *
- * @param string|null $path Ruta adicional para concatenar con el directorio
- * de almacenamiento.
+ * @param string|null $path Ruta adicional para concatenar con el directorio de
+ * almacenamiento.
  * @return string Ruta completa al directorio de almacenamiento, incluyendo la
  * ruta adicional si se proporciona.
  */
@@ -78,6 +99,7 @@ function storage_path(?string $path = null): string
             $storage->createDirectory($path);
         }
     }
+
     return app('layers')->getStoragePath($path);
 }
 
@@ -85,13 +107,13 @@ function storage_path(?string $path = null): string
  * Obtiene la ruta al directorio de recursos.
  *
  * Este método utiliza el servicio 'layers' registrado en la aplicación para
- * obtener el directorio de recursos. Si se proporciona un camino
- * adicional, se concatenará con el directorio de recursos.
+ * obtener el directorio de recursos. Si se proporciona un camino adicional, se
+ * concatenará con el directorio de recursos.
  *
- * @param string|null $path Ruta adicional para concatenar con el directorio
- * de recursos.
- * @return string Ruta completa al directorio de recursos, incluyendo la
- * ruta adicional si se proporciona.
+ * @param string|null $path Ruta adicional para concatenar con el directorio de
+ * recursos.
+ * @return string Ruta completa al directorio de recursos, incluyendo la ruta
+ * adicional si se proporciona.
  */
 function resource_path(?string $path = null): string
 {
@@ -99,7 +121,8 @@ function resource_path(?string $path = null): string
 }
 
 /**
- * Función global para acceder a la configuración de la aplicación.
+ * Accede a la configuración de la aplicación.
+ *
  * @param string $selector Variable / parámetro que se desea leer.
  * @param mixed $default Valor por defecto de la variable buscada.
  * @return mixed Valor determinado de la variable (real, defecto o null).
@@ -110,7 +133,7 @@ function config(string $selector, $default = null)
 }
 
 /**
- * Función auxiliar para interactuar con la sesión.
+ * Permite interactuar con la sesión.
  *
  * @param string|null $key
  * @param mixed $default
@@ -143,9 +166,9 @@ function session($key = null, $default = null)
 /**
  * Obtiene el servicio de caché.
  *
- * @return \sowerphp\core\Service_Cache
+ * @return Service_Cache
  */
-function cache(): \sowerphp\core\Service_Cache
+function cache(): Service_Cache
 {
     return app('cache');
 }
@@ -154,9 +177,9 @@ function cache(): \sowerphp\core\Service_Cache
  * Obtiene una conexión a la base de datos.
  *
  * @param string|null $name Nombre de la conexión.
- * @return \sowerphp\core\Database_Connection
+ * @return Database_Connection
  */
-function database(?string $name = null): \sowerphp\core\Database_Connection
+function database(?string $name = null): Database_Connection
 {
     return app('database')->connection($name);
 }
@@ -165,9 +188,9 @@ function database(?string $name = null): \sowerphp\core\Database_Connection
  * Obtiene la guard de autenticación solicitada o del contexto de la llamada.
  *
  * @param string|null $guard La guard que se está autenticando (web o api).
- * @return \sowerphp\core\Auth_Guard
+ * @return Auth_Guard
  */
-function auth(?string $guard = null): \sowerphp\core\Auth_Guard
+function auth(?string $guard = null): Auth_Guard
 {
     return app('auth')->guard($guard);
 }
@@ -175,17 +198,17 @@ function auth(?string $guard = null): \sowerphp\core\Auth_Guard
 /**
  * Obtiene al usuario autenticado en la aplicación.
  *
- * @param \Illuminate\Contracts\Auth\Authenticatable|null $guard
+ * @param Authenticatable|null $guard
  */
-function user(?string $guard = null): ?\Illuminate\Contracts\Auth\Authenticatable
+function user(?string $guard = null): ?Authenticatable
 {
     return auth($guard)->check() ? auth($guard)->user() : null;
 }
 
 /**
- * Función para traducción de strings mediante le servicio de lenguages con
- * soporte de interpolación mixta. Permite utilizar tanto el formato de
- * placeholders de Python (%(name)s) como el de sprintf (%s, %d).
+ * Traducción de strings mediante le servicio de lenguages con soporte de
+ * interpolación mixta. Permite utilizar tanto el formato de placeholders de
+ * Python (%(name)s) como el de sprintf (%s, %d).
  *
  * Esta función determina los valores que se usarán para reemplazar.
  * Es necesario hacer esto porque app('translator')->get() recibe siempre un
@@ -194,8 +217,8 @@ function user(?string $guard = null): ?\Illuminate\Contracts\Auth\Authenticatabl
  * usar en el futuro).
  *
  * @param string $string Texto que se desea traducir.
- * @param mixed ...$args Argumentos para reemplazar en el string, pueden
- * ser un arreglo asociativo o valores individuales.
+ * @param mixed ...$args Argumentos para reemplazar en el string, pueden ser un
+ * arreglo asociativo o valores individuales.
  * @return string Texto traducido con los placeholders reemplazados.
  */
 function __(string $string, ...$args): string
@@ -204,6 +227,7 @@ function __(string $string, ...$args): string
         ? $args[0]
         : array_slice(func_get_args(), 1)
     ;
+
     return app('translator')->get($string, $replace);
 }
 
@@ -217,9 +241,9 @@ function __(string $string, ...$args): string
  * del evento. Este parámetro es opcional y por defecto es un arreglo vacío.
  * @param bool $halt Indica si se debe detener la ejecución tras la primera
  * respuesta válida de un listener. Este parámetro es opcional y por defecto es
- * false.
- * @return array|null Retorna un arreglo con las respuestas de los listeners.
- * Si el parámetro $halt es true, retorna la primera respuesta válida.
+ * `false`.
+ * @return mixed|array|null Retorna un arreglo con las respuestas de los listeners.
+ * Si el parámetro `$halt` es `true`, retorna la primera respuesta válida.
  */
 function event($event, $payload = [], $halt = false)
 {
@@ -227,7 +251,7 @@ function event($event, $payload = [], $halt = false)
 }
 
 /**
- * Encriptar los datos con el encriptador configurado en la aplicación.
+ * Encripta los datos con el encriptador configurado en la aplicación.
  *
  * @param mixed $value Datos que se desean encriptar.
  * @param boolean $serialize Indica si se deben serializar los datos.
@@ -251,7 +275,7 @@ function decrypt($payload, $unserialize = true)
 }
 
 /**
- * Función global para trabajar con el servicio de modelos de la aplicación.
+ * Permite trabajar con el servicio de modelos de la aplicación.
  *
  * Si se pasa un modelo se obtendrá la instancia en vez del servicio.
  * Normalmente se pasará el modelo y la identificación del modelo (llave
@@ -260,14 +284,16 @@ function decrypt($payload, $unserialize = true)
  *
  * @param string|null $model Nombre del modelo que se desea obtener.
  * @param array ...$id Identificador del modelo en la base de datos.
- * @return \sowerphp\core\Service_Model|\sowerphp\core\Model
+ * @return Service_Model|Model
  */
 function model(?string $model = null, ...$id)
 {
     $modelService = app('model');
+
     if ($model === null) {
         return $modelService;
     }
+
     return $modelService->instantiate($model, ...$id);
 }
 
@@ -275,9 +301,9 @@ function model(?string $model = null, ...$id)
  * Obtiene un remitente de correo.
  *
  * @param string|null $name Nombre del remitente.
- * @return \Symfony\Component\Mailer\Mailer
+ * @return Mailer
  */
-function mailer(?string $name = null): \Symfony\Component\Mailer\Mailer
+function mailer(?string $name = null): Mailer
 {
     return app('mail')->mailer($name);
 }
@@ -286,9 +312,9 @@ function mailer(?string $name = null): \Symfony\Component\Mailer\Mailer
  * Obtiene un receptor de correo.
  *
  * @param string|null $name Nombre del receptor.
- * @return \sowerphp\core\Network_Mail_Mailbox
+ * @return Network_Mail_Mailbox
  */
-function mail_receiver(?string $name = null): \sowerphp\core\Network_Mail_Mailbox
+function mail_receiver(?string $name = null): Network_Mail_Mailbox
 {
     return app('mail')->receiver($name);
 }
@@ -296,9 +322,9 @@ function mail_receiver(?string $name = null): \sowerphp\core\Network_Mail_Mailbo
 /**
  * Obtiene una instancia del cliente HTTP.
  *
- * @return \sowerphp\core\Service_Http_Client
+ * @return Service_Http_Client
  */
-function http_client(): \sowerphp\core\Service_Http_Client
+function http_client(): Service_Http_Client
 {
     return app('http_client');
 }
@@ -306,8 +332,8 @@ function http_client(): \sowerphp\core\Service_Http_Client
 /**
  * Registra un mensaje en el logger.
  *
- * @param mixed $level El nivel del log (puede ser una cadena o una constante
- * de Monolog).
+ * @param mixed $level El nivel del log. Puede ser una cadena o una constante de
+ * Monolog.
  * @param string $message El mensaje a registrar.
  * @param array $context Contexto adicional para el mensaje.
  * @return void
@@ -323,24 +349,29 @@ function log_message($level, string $message, array $context = []): void
  * @param string $subject El asunto del correo.
  * @param string|array $content Un string con el contenido del correo o un
  * arreglo con índices: `text` y `html`.
- * @param string|array $to Un string con el correo electrónico del
- * destinatario o un arreglo con índices: `address` y `name`.
+ * @param string|array $to Un string con el correo electrónico del destinatario
+ * o un arreglo con índices: `address` y `name`.
  * @param array $attachments Arreglo con los archivos adjuntos del correo.
- * @param string|array $from Un string con el correo electrónico del
- * remitente o un arreglo con índices: `address` y `name`.
+ * @param string|array $from Un string con el correo electrónico del remitente o
+ * un arreglo con índices: `address` y `name`.
  * @return void
  */
-function send_email(string $subject, $content, $to, array $attachments = [], $from = null): void
-{
+function send_email(
+    string $subject,
+    $content,
+    $to,
+    array $attachments = [],
+    $from = null
+): void {
     app('notification')->sendEmail($subject, $content, $to, $attachments, $from);
 }
 
 /**
- * Función global para acceder al servicio de enrutamiento.
+ * Entrega el servicio de enrutamiento.
  *
- * @return \sowerphp\core\Service_Http_Router
+ * @return Service_Http_Router
  */
-function router()
+function router(): Service_Http_Router
 {
     return app('router');
 }
@@ -351,43 +382,45 @@ function router()
  * @param string|null $to La URL a la que redirigir.
  * @param int $status El código de estado HTTP de la redirección.
  * @param array $headers Encabezados adicionales para la respuesta.
- * @return \sowerphp\core\Service_Http_Redirect Objeto con servicio de redirección.
+ * @return Service_Http_Redirect Objeto con servicio de redirección.
  */
 function redirect(
     ?string $to = null,
     int $status = 302,
     array $headers = []
-): \sowerphp\core\Service_Http_Redirect
+): Service_Http_Redirect
 {
     $redirectService = app('redirect');
+
     if ($to === null) {
         return $redirectService;
     }
+
     return $redirectService->to($to, $status, $headers);
 }
 
 /**
- * Función global para acceder a la solicitud HTTP en curso.
+ * Permite acceder a la solicitud HTTP en curso.
  *
- * @return \sowerphp\core\Network_Request
+ * @return Network_Request
  */
-function request(): \sowerphp\core\Network_Request
+function request(): Network_Request
 {
     return app('request');
 }
 
 /**
- * Función global para acceder a la respuesta HTTP en curso.
+ * Permite cceder a la respuesta HTTP en curso.
  *
- * @return \sowerphp\core\Network_Response
+ * @return Network_Response
  */
-function response(): \sowerphp\core\Network_Response
+function response(): Network_Response
 {
     return app('response');
 }
 
 /**
- * Renderizar una vista.
+ * Renderiza una vista.
  *
  * La vista puede tener variables (opcionales) y además puede usar diferentes
  * motores para ser renderizada. También se permite que la vista sea
@@ -395,48 +428,54 @@ function response(): \sowerphp\core\Network_Response
  *
  * @param string $view Nombre de la vista que se desea renderizar.
  * @param array $data Variables que se pasarán a la vista al renderizar.
- * @return \sowerphp\core\Service_View|\sowerphp\core\Network_Response
+ * @return Service_View|Network_Response
  */
 function view(?string $view = null, array $data = [])
 {
     $viewService = app('view');
+
     if ($view === null) {
         return $viewService;
     }
+
     return $viewService->renderToResponse($view, $data);
 }
 
 /**
- * Función que entrega la ruta completa (URL) de un recurso (path) de la
- * aplicación.
+ * Entrega la ruta completa (URL) de un recurso (path) de la aplicación.
+ *
  * @param resource Recurso (path) que se desea resolver.
  * @return string URL completa que resuelve el recurso (path).
  */
 function url(string $resource = '/', ...$args): string
 {
     $resource = vsprintf($resource, $args);
-    $url = (string)config('app.url');
+    $url = (string) config('app.url');
+
     if (!$url) {
         try {
             $url = request()->getFullUrlWithoutQuery();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $url = null;
         }
     }
+
     if (!$url) {
-        throw new \Exception(__(
+        throw new Exception(__(
             'No fue posible determinar la URL completa del recurso %s.',
             $resource
         ));
     }
+
     return $resource == '/' ? $url : $url . $resource;
 }
 
 /**
- * Función para mostrar información relevante para depuración de una
- * variale.
+ * Muestra información relevante para depuración de una variale.
+ *
  * @param mixed $var Variable que se desea mostrar.
  * @param string $label Etiqueta de la variable, debería ser su nombre.
+ * @deprecated Se recomienda utilizar dump() o dd().
  */
 function debug($var, ?string $label = null)
 {
@@ -479,15 +518,13 @@ function debug($var, ?string $label = null)
 }
 
 /**
- * Función para formatear números con soporte para idioma y dígitos
- * decimales.
+ * Formatea números con soporte para idioma y dígitos decimales.
  *
  * @param mixed $n Número a formatear.
  * @param mixed $d Cantidad de decimales o true para usar 2. Si no se
  * proporciona, se asume 0.
- * @param string|null $language Idioma que se debe utilizar para
- * formatear el número. Si no se pasa, se utiliza la función
- * get_language() para obtenerlo.
+ * @param string|null $language Idioma que se debe utilizar para formatear el
+ * número. Si no se pasa, se utiliza la función get_language() para obtenerlo.
  * @return string Número formateado según la configuración regional.
  */
 function num($n, $d = 0, $language = null)
@@ -532,9 +569,10 @@ function num($n, $d = 0, $language = null)
 }
 
 /**
- * Función para dar formato a los mensajes de la aplicación.
- * @param string $string Mensaje al que se desea dar el formato
- * (contiene marcadores especiales).
+ * Da formato a los mensajes de la aplicación.
+ *
+ * @param string $string Mensaje al que se desea dar el formato, puede contener
+ * marcadores especiales.
  * @param bool $html Indica si el formato debe ser HTML o texto plano.
  * @return string Mensaje formateado en HTML o texto.
  */
@@ -583,10 +621,10 @@ function message_format(string $string, bool $html = true): string
 }
 
 /**
- * Determinar si un valor puede ser serializado.
+ * Determina si un valor puede ser serializado.
  *
  * @param mixed $value Valor que se desea saber si puede ser serializado.
- * @return bool =true si el valor puede ser serializado.
+ * @return bool `true` si el valor puede ser serializado.
  */
 function is_serializable($value): bool
 {
@@ -605,10 +643,10 @@ function is_serializable($value): bool
 }
 
 /**
- * Determinar si los datos están serializados.
+ * Determina si los datos están serializados.
  *
  * @param mixed $data Datos que se desea saber si están serializados.
- * @return bool =true si los datos están serialiados.
+ * @return bool `true` si los datos están serialiados.
  */
 function is_serialized($data): bool
 {
@@ -645,15 +683,14 @@ function is_serialized($data): bool
  * split escapados.
  *
  * Esta función permite convertir una cadena de parámetros separados por un
- * delimitador especificado en un arreglo. El delimitador puede ser
- * cualquier carácter, y las instancias de dicho delimitador que estén
- * escapadas serán tratadas como parte del valor del parámetro en lugar de
- * como un separador.
+ * delimitador especificado en un arreglo. El delimitador puede ser cualquier
+ * carácter, y las instancias de dicho delimitador que estén escapadas serán
+ * tratadas como parte del valor del parámetro en lugar de como un separador.
  *
- * @param string $parametersString El string de parámetros, donde los
- * parámetros están separados por un carácter especificado.
- * @param string $delimiter El carácter utilizado para separar los
- * parámetros (por defecto es una coma).
+ * @param string $parametersString El string de parámetros, donde los parámetros
+ * están separados por un carácter especificado.
+ * @param string $delimiter El carácter utilizado para separar los parámetros.
+ * Por defecto es una coma.
  * @return array Arreglo de parámetros.
  *
  * @example

@@ -34,7 +34,6 @@ use Illuminate\Contracts\Auth\Authenticatable;
  */
 class Model_Usuario extends Model implements Authenticatable
 {
-
     /**
      * Metadatos del modelo.
      *
@@ -197,9 +196,19 @@ class Model_Usuario extends Model implements Authenticatable
         ],
     ];
 
-    // atributos para caché
-    protected $groups = null; ///< Grupos a los que pertenece el usuario
-    protected $auths = null; ///< Permisos que tiene el usuario
+    /**
+     * Grupos a los que pertenece el usuario.
+     *
+     * @var array
+     */
+    protected $groups = null;
+
+    /**
+     * Permisos que tiene el usuario.
+     *
+     * @var array
+     */
+    protected $auths = null;
 
     /**
      * Obtiene el usuario solicitado.
@@ -210,9 +219,11 @@ class Model_Usuario extends Model implements Authenticatable
     protected function retrieve(array $id, array $options = []): ?stdClass
     {
         $realId = $this->getPluralInstance()->getIdFromCredentials($id);
+
         if ($realId === null) {
             return null;
         }
+
         return parent::retrieve(['id' => $realId]);
     }
 
@@ -242,7 +253,7 @@ class Model_Usuario extends Model implements Authenticatable
 
     /**
      * Método que revisa si el nombre de usuario ya existe en la base de datos.
-     * @return bool =true si el nombre de usuario ya existe.
+     * @return bool `true` si el nombre de usuario ya existe.
      */
     public function checkIfUserAlreadyExists(): bool
     {
@@ -269,7 +280,7 @@ class Model_Usuario extends Model implements Authenticatable
     /**
      * Método que revisa si el email ya existe en la base de datos.
      *
-     * @return bool =true si el correo ya existe.
+     * @return bool `true` si el correo ya existe.
      */
     public function checkIfEmailAlreadyExists(): bool
     {
@@ -295,7 +306,7 @@ class Model_Usuario extends Model implements Authenticatable
 
     /**
      * Método que revisa si el hash del usuario ya existe en la base de datos.
-     * @return bool =true si el hash ya existe.
+     * @return bool `true` si el hash ya existe.
      */
     public function checkIfHashAlreadyExists(): bool
     {
@@ -324,7 +335,7 @@ class Model_Usuario extends Model implements Authenticatable
      *
      * @param string $new Contraseña nueva en texto plano.
      * @param string|null $old Contraseña actual en texto plano.
-     * @return bool =true si la contraseña pudo ser cambiada.
+     * @return bool `true` si la contraseña pudo ser cambiada.
      */
     public function savePassword(string $new, string $old = null): bool
     {
@@ -335,7 +346,7 @@ class Model_Usuario extends Model implements Authenticatable
      * Método que cambia la contraseña del usuario en la base de datos.
      *
      * @param string $new Contraseña nueva en texto plano.
-     * @return bool =true si la contraseña pudo ser cambiada.
+     * @return bool `true` si la contraseña pudo ser cambiada.
      */
     private function savePasswordLocal(string $new): bool
     {
@@ -368,7 +379,7 @@ class Model_Usuario extends Model implements Authenticatable
      * del usuario almacenada en la base de datos.
      *
      * @param string $password Contrasela que se desea verificar.
-     * @return bool =true si la contraseña coincide con la de la base de datos.
+     * @return bool `true` si la contraseña coincide con la de la base de datos.
      */
     public function checkPassword(string $password): bool
     {
@@ -385,7 +396,7 @@ class Model_Usuario extends Model implements Authenticatable
     /**
      * Método que indica si el usuario está o no activo.
      *
-     * @return bool =true si el usuario está activo.
+     * @return bool `true` si el usuario está activo.
      */
     public function isActive(): bool
     {
@@ -495,7 +506,7 @@ class Model_Usuario extends Model implements Authenticatable
      * que están en la consulta.
      *
      * @param array $grupos Arreglo con los grupos que se desean revisar.
-     * @return bool =true si pertenece a todos los grupos que se solicitaron.
+     * @return bool `true` si pertenece a todos los grupos que se solicitaron.
      */
     public function inAllGroups(array $grupos = []): bool
     {
@@ -625,7 +636,7 @@ class Model_Usuario extends Model implements Authenticatable
      * Método que verifica si el usuario tiene permiso para acceder a cierto
      * recurso.
      *
-     * @return bool =true si tiene permiso.
+     * @return bool `true` si tiene permiso.
      */
     public function auth($recurso): bool
     {
@@ -709,7 +720,7 @@ class Model_Usuario extends Model implements Authenticatable
      * Método que crea el token para el usuario.
      *
      * @param array $data Datos que se usarán para crear el token.
-     * @return bool =true si el token pudo ser creado.
+     * @return bool `true` si el token pudo ser creado.
      */
     public function createAuth2(array $data = []): bool
     {
@@ -722,7 +733,7 @@ class Model_Usuario extends Model implements Authenticatable
     /**
      * Método que destruye el token en la autorización secundaria.
      *
-     * @return bool =true si el token pudo ser destruído.
+     * @return bool `true` si el token pudo ser destruído.
      */
     public function destroyAuth2(array $data = []): bool
     {
@@ -736,7 +747,7 @@ class Model_Usuario extends Model implements Authenticatable
      * Método que valida el estado de todas las autorizaciones secundarias
      * que el usuario pudiese tener habilitadas.
      *
-     * @return bool =true si todo está ok o Exception con el error si falla.
+     * @return bool `true` si todo está ok o Exception con el error si falla.
      */
     public function checkAuth2($token): bool
     {

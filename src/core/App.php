@@ -24,7 +24,6 @@
 namespace sowerphp\core;
 
 use Illuminate\Container\Container;
-use stdClass;
 
 /**
  * Clase principal de la aplicación.
@@ -36,7 +35,6 @@ use stdClass;
  */
 class App
 {
-
     /**
      * Instancia única de la clase App.
      *
@@ -86,8 +84,8 @@ class App
     ];
 
     /**
-     * Servicios cuando la aplicación se ejecuta en modo HTTP que son
-     * cargados por defecto.
+     * Servicios cuando la aplicación se ejecuta en modo HTTP que son cargados
+     * por defecto.
      *
      * @var array
      */
@@ -147,6 +145,7 @@ class App
                 return null;
             }
         }
+
         return self::$instance;
     }
 
@@ -162,6 +161,7 @@ class App
         } else {
             $this->type = php_sapi_name() === 'cli' ? 'console' : 'http';
         }
+
         return $this->type;
     }
 
@@ -188,6 +188,7 @@ class App
         } catch (\Throwable $throwable) {
             $result = $kernel->handleThrowable($throwable);
         }
+
         return $result;
     }
 
@@ -225,6 +226,7 @@ class App
                 $key
             ));
         }
+
         return $this->container->make($key, $parameters);
     }
 
@@ -249,6 +251,7 @@ class App
         $file = $throwable->getFile();
         $line = $throwable->getLine();
         $trace = $throwable->getTraceAsString();
+
         // Armar mensaje con el detalle del error o excepción.
         $error = sprintf(
             'Se capturó %s (%s de nivel %s):' . "\n\n"
@@ -258,6 +261,7 @@ class App
                 . '%s'
             , $class, $type, $severity, $message, $file, $line, $trace
         );
+
         // Generar mensaje con el error o excepción.
         header('Content-Type: text/plain; charset=UTF-8');
         echo $error;
@@ -479,6 +483,7 @@ class App
                 $this->container->instance(get_class($service), $service);
             }
         }
+
         // Si $service es una clase, usar singleton para registrar.
         else if (is_string($service)) {
             // Verificar que la clase del servicio exista.
@@ -489,12 +494,14 @@ class App
                     $key
                 ));
             }
+
             // Registrar.
             $this->container->singleton($key, $service);
             if ($service != $key) {
                 $this->container->singleton($service, $service);
             }
         }
+
         // Si $service es otra cosa, lanzar una excepción.
         else {
             throw new \InvalidArgumentException(sprintf(
@@ -534,8 +541,8 @@ class App
                 'cache' => cache()->getStats(),
             ];
         }
+
         // Entregar estadísticas.
         return $this->stats;
     }
-
 }

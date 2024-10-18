@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -44,7 +46,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Console_Command_App_Setup extends Command
 {
-
     /**
      * Nombre del comando.
      *
@@ -61,7 +62,8 @@ class Console_Command_App_Setup extends Command
     {
         $this
             ->setDescription('Inicializa la aplicación después de la instalación.')
-            ->setHelp('Este comando permite crear la estructura de directorios necesaria, establecer permisos y realizar cualquier otra configuración inicial.');
+            ->setHelp('Este comando permite crear la estructura de directorios necesaria, establecer permisos y realizar cualquier otra configuración inicial.')
+        ;
     }
 
     /**
@@ -77,5 +79,4 @@ class Console_Command_App_Setup extends Command
         $output->writeln(__('Comando %s no está implementado.', static::$defaultName));
         return Command::FAILURE;
     }
-
 }

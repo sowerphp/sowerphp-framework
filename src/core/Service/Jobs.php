@@ -30,7 +30,6 @@ use Symfony\Component\Messenger\Envelope;
  */
 class Service_Jobs implements Interface_Service
 {
-
     /**
      * Servicio de mensajes.
      *
@@ -99,7 +98,7 @@ class Service_Jobs implements Interface_Service
             $options
         );
         $envelope = $this->messengerService->send($job);
+
         return $envelope;
     }
-
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -43,7 +45,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Console_Command_Router_List extends Command
 {
-
     /**
      * Nombre del comando.
      *
@@ -60,7 +61,8 @@ class Console_Command_Router_List extends Command
     {
         $this
             ->setDescription('Lista todas las rutas registradas en la aplicación.')
-            ->setHelp('Este comando permite ver todas las rutas definidas en la aplicación.');
+            ->setHelp('Este comando permite ver todas las rutas definidas en la aplicación.')
+        ;
     }
 
     /**
@@ -75,5 +77,4 @@ class Console_Command_Router_List extends Command
         $output->writeln(__('Comando %s no está implementado.', static::$defaultName));
         return Command::FAILURE;
     }
-
 }

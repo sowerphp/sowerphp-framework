@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -28,9 +30,9 @@ namespace sowerphp\core;
  */
 class View_Engine_Php extends View_Engine
 {
-
     /**
-     * Renderizar un archivo PHP y devolver el resultado como una cadena.
+     * Renderiza un archivo PHP y devolver el resultado como una cadena.
+     *
      * Además, si se ha solicitado, se entregará el contenido dentro de un
      * layout que también se renderizará con PHP.
      *
@@ -47,6 +49,7 @@ class View_Engine_Php extends View_Engine
             return $content;
         }
         $data['_content'] = $content;
+
         // Renderizar el layout solicitado con el contenido previamente
         // determinado ya incluído en los datos del layout.
         $extension = substr(
@@ -57,6 +60,8 @@ class View_Engine_Php extends View_Engine
             $data['__view_layout'] .= '.php';
         }
         $layout = $this->viewService->resolveLayout($data['__view_layout']);
+
+        // Entregar HTML renderizado.
         return $this->renderPhp($layout, $data);
     }
 
@@ -79,7 +84,7 @@ class View_Engine_Php extends View_Engine
                 $__data[$var] = $val;
             }
         }
+
         return ob_get_clean();
     }
-
 }

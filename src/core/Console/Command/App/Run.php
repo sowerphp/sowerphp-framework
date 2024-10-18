@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -45,7 +47,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Console_Command_App_Run extends Command
 {
-
     /**
      * Nombre del comando.
      *
@@ -62,7 +63,8 @@ class Console_Command_App_Run extends Command
     {
         $this
             ->setDescription('Inicia la aplicación.')
-            ->setHelp('Este comando permite inicializar y ejecutar la aplicación.');
+            ->setHelp('Este comando permite inicializar y ejecutar la aplicación.')
+        ;
     }
 
     /**
@@ -78,5 +80,4 @@ class Console_Command_App_Run extends Command
         $output->writeln(__('Comando %s no está implementado.', static::$defaultName));
         return Command::FAILURE;
     }
-
 }

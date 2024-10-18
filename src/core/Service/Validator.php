@@ -32,7 +32,6 @@ use Illuminate\Validation\DatabasePresenceVerifier;
  */
 class Service_Validator implements Interface_Service
 {
-
     /**
      * Aplicación.
      *
@@ -123,6 +122,7 @@ class Service_Validator implements Interface_Service
             );
             $this->validatorFactory->setPresenceVerifier($presenceVerifier);
         }
+
         return $this->validatorFactory;
     }
 
@@ -157,6 +157,7 @@ class Service_Validator implements Interface_Service
         if ($validator->fails()) {
             throw new ValidationException($validator);
         }
+
         return $validator->validated();
     }
 
@@ -186,6 +187,7 @@ class Service_Validator implements Interface_Service
             'messages' => [],
             'customAttributes' => [],
         ];
+
         // Iterar cada uno de los parámetros solicitados.
         foreach ($params as $param => &$config) {
             // Si se pasó el nombre del parámetro solamente se corrige y se
@@ -194,6 +196,7 @@ class Service_Validator implements Interface_Service
                 $param = $config;
                 $config = null;
             }
+
             // Si la configuración no es arreglo, entonces se pasó solo el
             // valor por defecto. Entonces se armga el arreglo config con dicho
             // valor por defecto.
@@ -202,6 +205,7 @@ class Service_Validator implements Interface_Service
                     'default' => $config,
                 ];
             }
+
             // Se asegura que la configuración del parámetro tenga todos los
             // índices con su configuración por defecto.
             $config = array_merge([
@@ -211,6 +215,7 @@ class Service_Validator implements Interface_Service
                 'callback' => null,
                 'messages' => [],
             ], $config);
+
             // Armar argumentos para el método Request::validate() que validará
             // lo solicitado.
             $validateArgs['rules'][$param] = $config['rules'];
@@ -218,9 +223,11 @@ class Service_Validator implements Interface_Service
                 $validateArgs['messages'][$param . '.'. $key] = $value;
             }
             $validateArgs['customAttributes'][$param] = $config['name'];
+
             // Armar datos por defecto.
             $default[$param] = $config['default'];
         }
+
         // Obtener los datos validados.
         try {
             $validatedData = array_merge($default, $this->validate(
@@ -237,6 +244,7 @@ class Service_Validator implements Interface_Service
             $errorMessage = implode(' ', $errorMessage);
             throw $e;
         }
+
         // Aplicar callback a los datos (solo si no son el valor por defecto).
         foreach ($validatedData as $param => &$value) {
             if ($value !== $params[$param]['default']) {
@@ -248,6 +256,7 @@ class Service_Validator implements Interface_Service
                 }
             }
         }
+
         // Entregar los datos encontrados.
         return $validatedData;
     }
@@ -264,6 +273,7 @@ class Service_Validator implements Interface_Service
         $rules = $this->generateValidationRulesDefault($config);
         //$rules = $this->generateValidationRulesString($config, $rules);
         //$rules = $this->generateValidationRulesInt($config, $rules);
+
         return $rules['create'] != $rules['edit'] ? $rules : $rules['create'];
     }
 
@@ -280,21 +290,25 @@ class Service_Validator implements Interface_Service
     protected function generateValidationRulesDefault(array $config): array
     {
         $rules = ['create' => [], 'edit' => []];
+
         // El valor es obligatorio.
         if (!empty($config['required']) && empty($config['auto'])) {
             // Obligatorio siempre.
             if ($config['required'] === true) {
                 $rules['create'][] = $rules['edit'][] = 'required';
             }
+
             // Obligatorio al crear.
             if (!empty($config['required']['create'])) {
                 $rules['create'][] = 'required';
             }
+
             // Obligatorio al editar.
             if (!empty($config['required']['edit'])) {
                 $rules['edit'][] = 'required';
             }
         }
+
         // El valor tiene largo mínimo o máximo.
         if (isset($config['min_length'])) {
             $rules['create'][] = $rules['edit'][] =
@@ -306,6 +320,7 @@ class Service_Validator implements Interface_Service
                 'max:' . $config['max_length']
             ;
         }
+
         // El valor debe estar en un rango de mínimo o máximo.
         if (isset($config['min_value'])) {
             $rules['create'][] = $rules['edit'][] =
@@ -317,15 +332,18 @@ class Service_Validator implements Interface_Service
                 'max:' . $config['max_value']
             ;
         }
+
         // El valor debe estar dentro de una lista de opciones.
         if (!empty($config['choices'])) {
             $rules['create'][] = $rules['edit'][] =
                 'in:' . implode(',', array_keys($config['choices']))
             ;
         }
+
         // El valor debe ser único.
         if (!empty($config['unique'])) {
             $n_ignore = count($config['unique']['ignore']);
+
             // PK normal.
             if ($n_ignore == 1) {
                 $unique = 'unique:'
@@ -339,6 +357,7 @@ class Service_Validator implements Interface_Service
                     . ',' . $pk
                 ;
             }
+
             // PK compuesta.
             else {
                 $rules['create'][] = new Data_Validation_UniqueComposite(
@@ -354,8 +373,8 @@ class Service_Validator implements Interface_Service
                 );
             }
         }
+
         // Entregar las reglas determinadas.
         return $rules;
     }
-
 }

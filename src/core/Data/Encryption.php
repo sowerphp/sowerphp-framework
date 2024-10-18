@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -30,7 +32,6 @@ use Illuminate\Contracts\Encryption\Encrypter as EncrypterContract;
  */
 abstract class Data_Encryption implements EncrypterContract
 {
-
     /**
      * Clave de encriptación.
      *
@@ -56,5 +57,4 @@ abstract class Data_Encryption implements EncrypterContract
         $this->key = $key;
         $this->cipher = $cipher;
     }
-
 }

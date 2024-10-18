@@ -23,17 +23,19 @@
 
 namespace sowerphp\core;
 
+use ReflectionClass;
+use ReflectionProperty;
+
 /**
  * Trait genérico con métodos para trabajar con objetos (instancias) de
  * cualquier tipo.
  */
 trait Trait_Object
 {
-
     /**
      * Objeto ReflectionClass para la clase actual.
      *
-     * @var \ReflectionClass
+     * @var ReflectionClass
      */
     protected $reflector;
 
@@ -51,13 +53,14 @@ trait Trait_Object
     /**
      * Obtiene el objeto ReflectionClass para la clase actual.
      *
-     * @return \ReflectionClass
+     * @return ReflectionClass
      */
     protected function getReflector()
     {
         if (!isset($this->reflector)) {
-            $this->reflector = new \ReflectionClass($this);
+            $this->reflector = new ReflectionClass($this);
         }
+
         return $this->reflector;
     }
 
@@ -69,7 +72,7 @@ trait Trait_Object
     protected function getPublicProperties(): array
     {
         return $this->getReflector()->getProperties(
-            \ReflectionProperty::IS_PUBLIC
+            ReflectionProperty::IS_PUBLIC
         );
     }
 
@@ -87,6 +90,7 @@ trait Trait_Object
                 $this->$property = $attributes[$property];
             }
         }
+
         return $this;
     }
 
@@ -106,7 +110,7 @@ trait Trait_Object
                 $this->$name = $attributes[$name];
             }
         }
+
         return $this;
     }
-
 }

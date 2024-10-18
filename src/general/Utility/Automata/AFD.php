@@ -61,7 +61,7 @@ class Utility_Automata_AFD
     /**
      * Método que evalua la entrada según las transiciones del autómata
      * @param input Entrada para el AFD (un string o un arreglo de símbolos)
-     * @return bool =true si el estado de detención es de aceptación
+     * @return bool `true` si el estado de detención es de aceptación
      */
     public function run($input)
     {

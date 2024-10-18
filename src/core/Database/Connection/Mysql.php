@@ -31,7 +31,6 @@ namespace sowerphp\core;
  */
 class Database_Connection_Mysql extends Database_Connection
 {
-
     /**
      * Asigna un límite para la obtención de filas en la consulta SQL.
      *
@@ -56,12 +55,14 @@ class Database_Connection_Mysql extends Database_Connection
         if (!$datetime) {
             $datetime = 'NOW()';
         }
+
         $formats = [
             'Ym' => '%Y%m',
             'Y' => '%Y',
             'm' => '%m',
             'd' => '%e',
         ];
+
         return 'DATE_FORMAT(' . $datetime . ', "' . $formats[$format] . '")';
     }
 
@@ -194,7 +195,7 @@ class Database_Connection_Mysql extends Database_Connection
             ':database' => $this->getConfig()['database'],
             ':table' => $table,
         ]);
+
         return is_array($fks) ? $fks : [];
     }
-
 }

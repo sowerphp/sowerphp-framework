@@ -31,7 +31,6 @@ use Illuminate\Support\Str;
  */
 class Network_Request extends Request
 {
-
     /**
      * URL completa, partiendo desde HTTP o HTTPS según corresponda.
      *
@@ -99,6 +98,7 @@ class Network_Request extends Request
         $request->setUserResolver(function() {
             return user();
         });
+
         return $request;
     }
 
@@ -116,6 +116,7 @@ class Network_Request extends Request
                 $this->sessionService = null;
             }
         }
+
         return $this->sessionService;
     }
 
@@ -133,6 +134,7 @@ class Network_Request extends Request
                 $this->validatorService = null;
             }
         }
+
         return $this->validatorService;
     }
 
@@ -202,6 +204,7 @@ class Network_Request extends Request
             }
             $this->fullUrlWithoutQuery = $url;
         }
+
         return $this->fullUrlWithoutQuery;
     }
 
@@ -229,6 +232,7 @@ class Network_Request extends Request
             }
             $this->baseUrlWithoutSlash = $base;
         }
+
         return $this->baseUrlWithoutSlash;
     }
 
@@ -274,6 +278,7 @@ class Network_Request extends Request
             $this->requestUriDecoded = $request;
             $this->removeFromQueryString($this->requestUriDecoded);
         }
+
         return $this->requestUriDecoded;
     }
 
@@ -313,12 +318,14 @@ class Network_Request extends Request
             $router = router();
             $this->routeConfig = $router->parse($this);
             $router->checkRouteConfig($this->routeConfig); // Lanza excepción.
+
             // Agregar información de las URL, que se deriva de los datos de la
             // ruta parseada previamente.
             $this->routeConfig['url'] = $this->getRouteConfigUrl(
                 $this->routeConfig
             );
         }
+
         return $this->routeConfig;
     }
 
@@ -335,9 +342,11 @@ class Network_Request extends Request
             ? ('/' . implode('/', $url['module']))
             : ''
         ;
+
         // Determinar parte de la URL que correspone al controlador.
         $url['controller'] = $url['module'] . '/' . $config['controller'];
         $url['action'] = $url['controller'] . '/' . $config['action'];
+
         // Entregar las partes de la URL determinadas.
         return $url;
     }
@@ -576,6 +585,7 @@ class Network_Request extends Request
         $api_prefix = strpos($this->getRequestUriDecoded(), '/api/') === 0;
         $accept_header = $this->headers->get('Accept');
         $accept_json = Str::contains($accept_header, 'application/json');
+
         return $api_prefix || $accept_json;
     }
 
@@ -597,6 +607,7 @@ class Network_Request extends Request
             $pos = strrpos($this->getRequestUriDecoded(), $find) + strlen($find);
             $this->apiResource = substr($this->getRequestUriDecoded(), 0, $pos);
         }
+
         return $this->apiResource;
     }
 
@@ -613,6 +624,7 @@ class Network_Request extends Request
             $ips = explode(', ', getenv('HTTP_X_FORWARDED_FOR'));
             return $ips[count($ips) - 1];
         }
+
         return $_SERVER['REMOTE_ADDR'];
     }
 
@@ -626,6 +638,7 @@ class Network_Request extends Request
     public function fromHostname(bool $get_from_proxy = false): ?string
     {
         $host = gethostbyaddr($this->fromIp($get_from_proxy));
+
         return $host ?: null;
     }
 
@@ -642,9 +655,11 @@ class Network_Request extends Request
     public function fromGeolocation(): ?array
     {
         $ip = $this->fromIp();
+
         if (function_exists('geoip_record_by_name')) {
             $location = @geoip_record_by_name($ip);
         }
+
         if (!isset($location)) {
             $response = \sowerphp\core\Network_Http_Socket::get(
                 'https://freegeoip.net/json/' . $ip
@@ -654,7 +669,7 @@ class Network_Request extends Request
                 : null
             ;
         }
+
         return $location ?: null;
     }
-
 }

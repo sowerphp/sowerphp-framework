@@ -31,7 +31,6 @@ namespace sowerphp\core;
  */
 class Database_Connection_Pgsql extends Database_Connection
 {
-
     /**
      * Asigna un límite para la obtención de filas en la consulta SQL.
      *
@@ -56,12 +55,14 @@ class Database_Connection_Pgsql extends Database_Connection
         if (!$datetime) {
             $datetime = 'NOW()';
         }
+
         $formats = [
             'Ym' => 'YYYYmm',
             'Y' => 'YYYY',
             'm' => 'mm',
             'd' => 'DD',
         ];
+
         return 'TO_CHAR(' . $datetime .', \'' . $formats[$format] . '\')'
             . ($cast ? ('::' . $cast) : '')
         ;
@@ -122,6 +123,7 @@ class Database_Connection_Pgsql extends Database_Connection
                 }
             }
         }
+
         return count($select) > 1 ? $select : array_shift($select);
     }
 
@@ -145,10 +147,12 @@ class Database_Connection_Pgsql extends Database_Connection
             ':database' => $this->getConfig()['database'],
             ':schema' => $this->getConfig()['schema'],
         ]);
+
         // Buscar comentarios de las tablas.
         foreach($tables as &$table) {
             $table['comment'] = $this->getCommentFromTable($table['name']);
         }
+
         // Retornar tablas.
         return $tables;
     }
@@ -217,6 +221,7 @@ class Database_Connection_Pgsql extends Database_Connection
             ':schema' => $this->getConfig()['schema'],
             ':table' => $table,
         ]);
+
         // Buscar los comentarios para las columnas.
         foreach($cols as &$col) {
             $col['comment'] = $this->getValue('
@@ -243,6 +248,7 @@ class Database_Connection_Pgsql extends Database_Connection
                 ':colname' => $col['name'],
             ]);
         }
+
         // Retornar columnas de la tabla.
         return $cols;
     }
@@ -320,7 +326,7 @@ class Database_Connection_Pgsql extends Database_Connection
             ':schema' => $this->getConfig()['schema'],
             ':table' => $table,
         ]);
+
         return is_array($fks) ? $fks : [];
     }
-
 }

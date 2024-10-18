@@ -30,7 +30,6 @@ use Doctrine\Inflector\InflectorFactory;
  */
 class Service_Inflector  implements Interface_Service
 {
-
     /**
      * Servicio de configuración.
      *
@@ -69,6 +68,7 @@ class Service_Inflector  implements Interface_Service
     {
         // Asignar el estado inicial.
         Utility_Inflector::reset();
+
         // Cargar reglas de Inflector para el idioma de la aplicación.
         $inflector_rules = (array)$this->configService->get(
             'inflector.' . $this->configService->get('app.locale')
@@ -121,5 +121,4 @@ class Service_Inflector  implements Interface_Service
     {
         return call_user_func_array([$this->inflector, $method], $parameters);
     }
-
 }

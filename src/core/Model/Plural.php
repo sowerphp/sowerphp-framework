@@ -23,6 +23,7 @@
 
 namespace sowerphp\core;
 
+use Exception;
 use Illuminate\Config\Repository;
 use Illuminate\Support\Collection;
 use sowerphp\core\Database_QueryBuilder as QueryBuilder;
@@ -34,7 +35,6 @@ use sowerphp\core\Database_QueryBuilder as QueryBuilder;
  */
 abstract class Model_Plural
 {
-
     /**
      * Se utiliza el trait de objetos para las funcionalidades básicas de un
      * objeto del modelo.
@@ -77,6 +77,7 @@ abstract class Model_Plural
             }
         }
         $this->metadata = $metadata;
+
         // Asignar la conexión a la base de datos.
         $this->db = $this->getDatabaseConnection();
     }
@@ -103,6 +104,7 @@ abstract class Model_Plural
         if (!($this->metadata instanceof Repository)) {
             $this->metadata = new Repository($this->metadata);
         }
+
         // Entregar todos los metadatos o la llave solicitada.
         return $key ? $this->metadata[$key] : $this->metadata;
     }
@@ -120,6 +122,7 @@ abstract class Model_Plural
         if (!isset($this->db)) {
             $this->db = database($this->getMetadata('model.db_name'));
         }
+
         return $this->db;
     }
 
@@ -137,7 +140,7 @@ abstract class Model_Plural
             foreach ($this->getMetadata('model.ordering') as $ordering) {
                 $column = $ordering;
                 $order = 'asc';
-                if ($column[0] == '-') {
+                if ($column[0] === '-') {
                     $column = substr($column, 1);
                     $order = 'desc';
                 }
@@ -147,6 +150,7 @@ abstract class Model_Plural
                 ];
             }
         }
+
         // Obtejer objeto query usando el QueryBuilder y SmartQuery.
         return $this->getDatabaseConnection()->query()->smartQuery(
             $parameters,
@@ -165,7 +169,8 @@ abstract class Model_Plural
     public function choices(array $parameters = []): array
     {
         $choices = $this->filter($parameters);
-        return $choices;
+
+        return $choices->all();
     }
 
     /**
@@ -177,6 +182,7 @@ abstract class Model_Plural
     public function count(array $parameters): int
     {
         $query = $this->query($parameters);
+
         return $query->count();
     }
 
@@ -192,9 +198,11 @@ abstract class Model_Plural
     public function filter(array $parameters, ?bool $stdClass = false): Collection
     {
         $query = $this->query($parameters);
+
         if (!$stdClass) {
             $query->setMapClass($this->getMetadata('model.singular'));
         }
+
         return $query->get();
     }
 
@@ -215,22 +223,25 @@ abstract class Model_Plural
         // Generar filtros con la PK.
         $results = $this->filter(['filters' => $filters], $stdClass);
         $n_results = $results->count();
+
         // Excepción equivalente a: DoesNotExist.
         if ($n_results === 0) {
-            throw new \Exception(__(
+            throw new Exception(__(
                 'No se encontró un registro para %s::retrieve(%s).',
                 $this->getMetadata('model.label'),
                 implode(', ', array_values($filters))
             ), 404);
         }
+
         // Excepción equivalente a: MultipleObjectsReturned.
         else if ($n_results > 1) {
-            throw new \Exception(__(
+            throw new Exception(__(
                 'Se obtuvo más de un registro para %s::retrieve(%s).',
                 $this->getMetadata('model.label'),
                 implode(', ', array_values($filters))
             ), 409);
         }
+
         // Se encontró exactamente un resultado (como se espera para una PK).
         return $results[0];
     }
@@ -610,5 +621,4 @@ abstract class Model_Plural
             ORDER BY ' . $name
         );
     }
-
 }

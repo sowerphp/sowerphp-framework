@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -28,9 +30,8 @@ namespace sowerphp\core;
  */
 class View_Engine_Blade extends View_Engine
 {
-
     /**
-     * Renderizar una plantilla blade y devolver el resultado como una cadena.
+     * Renderiza una plantilla blade y devolver el resultado como una cadena.
      *
      * @param string $filepath Ruta a la plantilla blade que se va a renderizar.
      * @param array $data Datos que se pasarán a la plantilla blade para su uso
@@ -41,5 +42,4 @@ class View_Engine_Blade extends View_Engine
     {
         throw new \Exception('Plantillas blade actualmente no soportadas.');
     }
-
 }

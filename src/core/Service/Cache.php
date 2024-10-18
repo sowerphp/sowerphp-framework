@@ -35,7 +35,6 @@ use Illuminate\Redis\RedisManager;
  */
 class Service_Cache implements Interface_Service
 {
-
     /**
      * Aplicación.
      *
@@ -86,6 +85,7 @@ class Service_Cache implements Interface_Service
     public function register(): void
     {
         $container = $this->app->getContainer();
+
         // Registrar redis en el contenedor de la aplicación si no existe.
         if (!$container->bound('redis')) {
             $this->app->getContainer()->singleton('redis', function ($app) {
@@ -98,6 +98,7 @@ class Service_Cache implements Interface_Service
                 ]);
             });
         }
+
         // Instanciar administrador de caché.
         $this->cacheManager = new CacheManager(
             $this->app->getContainer()
@@ -131,6 +132,7 @@ class Service_Cache implements Interface_Service
     public function store(?string $name = null): Repository
     {
         $name = $name ?? $this->cacheManager->getDefaultDriver();
+
         return $this->cacheManager->store($name);
     }
 
@@ -140,7 +142,7 @@ class Service_Cache implements Interface_Service
      * @param string $key Clave que tendrá el elemento en la caché.
      * @param mixed $value Valor del elemento en la caché.
      * @param int $expires Tiempo en segundos que se debe almacenar en memoria.
-     * @return bool =true si se pudo asignar el elemento en la caché.
+     * @return bool `true` si se pudo asignar el elemento en la caché.
      */
     public function set(string $key, $value, int $expires = 600): bool
     {
@@ -149,6 +151,7 @@ class Service_Cache implements Interface_Service
         if ($status) {
             $this->stats['assigned']++;
         }
+
         return $status;
     }
 
@@ -165,6 +168,7 @@ class Service_Cache implements Interface_Service
         if ($result !== null) {
             $this->stats['retrieved']++;
         }
+
         return $result;
     }
 
@@ -183,6 +187,7 @@ class Service_Cache implements Interface_Service
             : 0
         ;
         $this->stats['hitsPercentage'] = round($this->stats['hitsRatio'] * 100, 2);
+
         return $this->stats;
     }
 
@@ -216,5 +221,4 @@ class Service_Cache implements Interface_Service
     {
         return new Adapter_CacheItemPool($this->store($name));
     }
-
 }

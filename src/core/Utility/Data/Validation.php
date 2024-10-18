@@ -29,16 +29,21 @@ namespace sowerphp\core;
  */
 class Utility_Data_Validation
 {
-
+    /**
+     * Expresiones regulares para validar campos.
+     *
+     * @var array
+     */
     public static $regexs = [
         'email' => '/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/',
         'date' => '/^\d{4}[\-](0?[1-9]|1[012])[\-](0?[1-9]|[12][0-9]|3[01])$/',
         'telephone' => '/^\+\d{1,4}[ ]([1-9]{1}|\d{1,2})[ ]\d{7,8}$/',
-    ]; ///< Expresiones regulares para validar campos
+    ];
 
     /**
      * Método para realizar validaciones a cierto dato, por ejemplo si es o no
-     * un email o un número entero
+     * un email o un número entero.
+     *
      * @param data Dato que se quiere validar
      * @param rules Reglas que se revisarán para validar el dato
      * @return mixed =true si todo va ok, =false o =string si hubo un error al validar
@@ -78,7 +83,7 @@ class Utility_Data_Validation
     /**
      * Método que valida que el dato no sea vacío
      * @param data Dato que se quiere validar
-     * @return bool =true si no es vacio
+     * @return bool `true` si no es vacio
      * @deprecated Utilizar Service_Validator con app('validator').
      */
     public static function check_notempty($data)
@@ -89,7 +94,7 @@ class Utility_Data_Validation
     /**
      * Método que valida que el dato sea una representación de un entero
      * @param data Dato que se quiere validar
-     * @return bool =true si es un entero
+     * @return bool `true` si es un entero
      * @deprecated Utilizar Service_Validator con app('validator').
      */
     public static function check_integer($data)
@@ -100,7 +105,7 @@ class Utility_Data_Validation
     /**
      * Método que valida que el dato sea un RUT válido
      * @param data Dato que se quiere validar
-     * @return bool =true si es un RUT válido
+     * @return bool `true` si es un RUT válido
      * @deprecated Utilizar Service_Validator con app('validator').
      */
     public static function check_rut($data)
@@ -110,5 +115,4 @@ class Utility_Data_Validation
         }
         return \sowerphp\app\Utility_Rut::check($data);
     }
-
 }

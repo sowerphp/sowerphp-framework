@@ -30,7 +30,6 @@ use Carbon\Carbon;
  */
 class Service_Caster implements Interface_Service
 {
-
     /**
      * Registra el servicio de casteo de datos.
      *
@@ -73,6 +72,7 @@ class Service_Caster implements Interface_Service
                 $value = $this->$method($value, $rule);
             }
         }
+
         return $data;
     }
 
@@ -205,5 +205,4 @@ class Service_Caster implements Interface_Service
                 return $value;
         }
     }
-
 }

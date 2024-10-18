@@ -23,19 +23,20 @@
 
 namespace sowerphp\core;
 
-use stdClass;
+use ArrayAccess;
 use Illuminate\Config\Repository;
 use Illuminate\Support\Str;
+use JsonSerializable;
 use sowerphp\core\Database_QueryBuilder as QueryBuilder;
+use stdClass;
 
 /**
  * Clase abstracta para todos los modelos.
  *
  * Permite trabajar con un registro de la tabla.
  */
-abstract class Model implements \ArrayAccess, \JsonSerializable
+abstract class Model implements ArrayAccess, JsonSerializable
 {
-
     /**
      * Se utiliza el trait de objetos para las funcionalidades básicas de un
      * objeto del modelo.
@@ -70,21 +71,25 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     /**
      * Establecer a NULL.
      *
-     * Esta constante representa la acción de establecer el valor del campo relacionado a NULL cuando el registro relacionado se elimina.
+     * Esta constante representa la acción de establecer el valor del campo
+     * relacionado a NULL cuando el registro relacionado se elimina.
      */
     const SET_NULL = 'SET_NULL';
 
     /**
      * Establecer al valor por defecto.
      *
-     * Esta constante representa la acción de establecer el valor del campo relacionado al valor por defecto cuando el registro relacionado se elimina.
+     * Esta constante representa la acción de establecer el valor del campo
+     * relacionado al valor por defecto cuando el registro relacionado se
+     * elimina.
      */
     const SET_DEFAULT = 'SET_DEFAULT';
 
     /**
      * No hacer nada.
      *
-     * Esta constante representa la acción de no hacer nada cuando el registro relacionado se elimina.
+     * Esta constante representa la acción de no hacer nada cuando el registro
+     * relacionado se elimina.
      */
     const DO_NOTHING = 'DO_NOTHING';
 
@@ -93,7 +98,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos Enteros y Flotantes.
      *
-     * Este tipo representa una columna de incremento grande en la base de datos.
+     * Este tipo representa una columna de incremento grande en la base de
+     * datos.
      *
      * @param string|null $column Nombre de la columna.
      * @example bigIncrements('id')
@@ -181,7 +187,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos Enteros y Flotantes.
      *
-     * Este tipo representa una columna de incremento mediano en la base de datos.
+     * Este tipo representa una columna de incremento mediano en la base de
+     * datos.
      *
      * @param string|null $column Nombre de la columna.
      * @example mediumIncrements('id')
@@ -205,7 +212,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos Enteros y Flotantes.
      *
-     * Este tipo representa una columna de incremento pequeño en la base de datos.
+     * Este tipo representa una columna de incremento pequeño en la base de
+     * datos.
      *
      * @param string|null $column Nombre de la columna.
      * @example smallIncrements('id')
@@ -229,7 +237,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos Enteros y Flotantes.
      *
-     * Este tipo representa una columna de incremento diminuto en la base de datos.
+     * Este tipo representa una columna de incremento diminuto en la base de
+     * datos.
      *
      * @param string|null $column Nombre de la columna.
      * @example tinyIncrements('id')
@@ -253,7 +262,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos Enteros y Flotantes.
      *
-     * Este tipo representa una columna de entero grande sin signo en la base de datos.
+     * Este tipo representa una columna de entero grande sin signo en la base de
+     * datos.
      *
      * @param string $column Nombre de la columna.
      * @example unsignedBigInteger('votes')
@@ -265,7 +275,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos Enteros y Flotantes.
      *
-     * Este tipo representa una columna de número decimal sin signo en la base de datos.
+     * Este tipo representa una columna de número decimal sin signo en la base
+     * de datos.
      *
      * @param string $column Nombre de la columna.
      * @param int|null $precision Precisión del número decimal (opcional).
@@ -291,7 +302,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos Enteros y Flotantes.
      *
-     * Este tipo representa una columna de entero mediano sin signo en la base de datos.
+     * Este tipo representa una columna de entero mediano sin signo en la base
+     * de datos.
      *
      * @param string $column Nombre de la columna.
      * @example unsignedMediumInteger('votes')
@@ -303,7 +315,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos Enteros y Flotantes.
      *
-     * Este tipo representa una columna de entero pequeño sin signo en la base de datos.
+     * Este tipo representa una columna de entero pequeño sin signo en la base
+     * de datos.
      *
      * @param string $column Nombre de la columna.
      * @example unsignedSmallInteger('votes')
@@ -315,7 +328,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos Enteros y Flotantes.
      *
-     * Este tipo representa una columna de entero diminuto sin signo en la base de datos.
+     * Este tipo representa una columna de entero diminuto sin signo en la base
+     * de datos.
      *
      * @param string $column Nombre de la columna.
      * @example unsignedTinyInteger('votes')
@@ -365,7 +379,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos de Cadenas de Texto.
      *
-     * Este tipo representa una columna de tipo texto mediano en la base de datos.
+     * Este tipo representa una columna de tipo texto mediano en la base de
+     * datos.
      *
      * @param string $column Nombre de la columna.
      * @example mediumText('description')
@@ -425,7 +440,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos de Fecha y Hora.
      *
-     * Este tipo representa una columna de tipo fecha y hora en la base de datos.
+     * Este tipo representa una columna de tipo fecha y hora en la base de
+     * datos.
      *
      * @param string $column Nombre de la columna.
      * @example dateTime('created_at')
@@ -437,7 +453,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos de Fecha y Hora.
      *
-     * Este tipo representa una columna de tipo fecha y hora con zona horaria en la base de datos.
+     * Este tipo representa una columna de tipo fecha y hora con zona horaria en
+     * la base de datos.
      *
      * @param string $column Nombre de la columna.
      * @example dateTimeTz('created_at')
@@ -461,7 +478,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos de Fecha y Hora.
      *
-     * Este tipo representa una columna de tipo hora con zona horaria en la base de datos.
+     * Este tipo representa una columna de tipo hora con zona horaria en la base
+     * de datos.
      *
      * @param string $column Nombre de la columna.
      * @example timeTz('created_at')
@@ -618,7 +636,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos Geográficos.
      *
-     * Este tipo representa una columna de tipo multilinestring en la base de datos.
+     * Este tipo representa una columna de tipo multilinestring en la base de
+     * datos.
      *
      * @param string $column Nombre de la columna.
      * @example multilinestring('paths')
@@ -630,7 +649,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos Geográficos.
      *
-     * Este tipo representa una columna de tipo multipolygon en la base de datos.
+     * Este tipo representa una columna de tipo multipolygon en la base de
+     * datos.
      *
      * @param string $column Nombre de la columna.
      * @example multipolygon('areas')
@@ -642,7 +662,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Tipos Geográficos.
      *
-     * Este tipo representa una columna de tipo geometrycollection en la base de datos.
+     * Este tipo representa una columna de tipo geometrycollection en la base de
+     * datos.
      *
      * @param string $column Nombre de la columna.
      * @example geometrycollection('shapes')
@@ -678,7 +699,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Otros Tipos.
      *
-     * Este tipo representa una columna para relaciones polymorphic en la base de datos.
+     * Este tipo representa una columna para relaciones polymorphic en la base
+     * de datos.
      *
      * @param string $name Nombre de la relación.
      * @example morphs('taggable')
@@ -690,7 +712,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Otros Tipos.
      *
-     * Este tipo representa una columna nullable para relaciones polymorphic en la base de datos.
+     * Este tipo representa una columna nullable para relaciones polymorphic en
+     * la base de datos.
      *
      * @param string $name Nombre de la relación.
      * @example nullableMorphs('taggable')
@@ -702,7 +725,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Otros Tipos.
      *
-     * Este tipo representa una columna nullable UUID para relaciones polymorphic en la base de datos.
+     * Este tipo representa una columna nullable UUID para relaciones
+     * polymorphic en la base de datos.
      *
      * @param string $name Nombre de la relación.
      * @example nullableUuidMorphs('taggable')
@@ -714,7 +738,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Otros Tipos.
      *
-     * Este tipo representa una columna UUID para relaciones polymorphic en la base de datos.
+     * Este tipo representa una columna UUID para relaciones polymorphic en la
+     * base de datos.
      *
      * @param string $name Nombre de la relación.
      * @example uuidMorphs('taggable')
@@ -726,7 +751,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * Categoría: Otros Tipos.
      *
-     * Este tipo representa una columna de token de recordatorio en la base de datos.
+     * Este tipo representa una columna de token de recordatorio en la base de
+     * datos.
      *
      * @param string|null $column Nombre de la columna.
      * @example rememberToken()
@@ -958,7 +984,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'unique' => false,
         // Indica si el campo es la clave primaria de la tabla.
         'primary_key' => false,
-        // Indica que la llave foránea es virtual (no está materializada en la BD).
+        // Indica que la llave foránea es virtual (no materializada en la BD).
         'virtual_fk' => null,
         // Modelo relacionado con este campo.
         'relation' => null,
@@ -986,7 +1012,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         'max_digits' => null,
         // El número de decimales permitidos.
         'decimal_places' => null,
-        // Intervalos de incremento permitidos para, por ejemplo, números y fechas.
+        // Intervalos de incremento para, por ejemplo, números y fechas.
         'step' => null,
         // Opciones disponibles para el campo, usado en select inputs.
         'choices' => null,
@@ -1576,7 +1602,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *
      * @var array
      */
-    protected $variantFields = ['blank', 'required', 'validation'];
+    protected $variantFields = [
+        'blank',
+        'required',
+        'validation',
+    ];
 
     /**
      * Instancia de la clase plural asociada a este modelo singular.
@@ -1614,7 +1644,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      */
     protected function calculateFieldsHash(): string
     {
-        return hash('sha256', json_encode($this->attributes) . json_encode($this->configurations));
+        return hash(
+            'sha256',
+            json_encode($this->attributes) . json_encode($this->configurations)
+        );
     }
 
     /**
@@ -1637,6 +1670,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             }
             $this->pluralInstance = new $class($this->getMetadata());
         }
+
         return $this->pluralInstance;
     }
 
@@ -1665,7 +1699,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $this->metadata = $this->setMetadata($this->metadata);
         }
         $this->pluralInstance = $this->getPluralInstance();
-        self::$columnsInfo = $this->getColumnsInfo(); // TODO: eliminar al refactorizar.
+        self::$columnsInfo = $this->getColumnsInfo(); // TODO: Eliminar al refactorizar.
     }
 
     /**
@@ -1681,6 +1715,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $fields[] = $name;
             }
         }
+
         return $fields;
     }
 
@@ -1726,6 +1761,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             }
             $result = null;
         }
+
         return $result;
     }
 
@@ -1784,6 +1820,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $data[$attribute] = $value;
             }
         }
+
         return $data;
     }
 
@@ -1836,9 +1873,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Método que se llamará cuando se quiera serializar el objeto con
-     * json_encode() permite especificar qué atributos se deben serializar y
-     * cómomo se debe realizar dicha serialización.
+     * Se llama cuando se quiera serializar el objeto con json_encode().
+     *
+     * Permite especificar qué atributos se deben serializar y cómo se debe
+     * realizar dicha serialización.
      *
      * @return array
      */
@@ -1851,21 +1889,29 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $fields[] = $field;
             }
         }
+
         // Se obtienen los campos a serializar con sus valores.
         $data = $this->toArray($fields);
+
+        // Si no hay configuraciones se entregan los datos a serializar.
+        if (!$this->hasConfigurations()) {
+            return $data;
+        }
+
         // Obtener configuraciones que se deben serializar.
-        if ($this->hasConfigurations()) {
-            $configurations = [];
-            foreach ($this->getMetadata('configurations.fields') as $field => $config) {
-                $serializable = $config['serializable'] ?? false;
-                if ($serializable) {
-                    $configurations[$field] = $this->getConfiguration('config_' . $field);
-                }
-            }
-            if ($configurations) {
-                $data['configurations'] = $configurations;
+        $configurations = [];
+        foreach ($this->getMetadata('configurations.fields') as $field => $config) {
+            $serializable = $config['serializable'] ?? false;
+            if ($serializable) {
+                $configurations[$field] = $this->getConfiguration(
+                    'config_' . $field
+                );
             }
         }
+        if ($configurations) {
+            $data['configurations'] = $configurations;
+        }
+
         // Entregar los datos que se serializarán.
         return $data;
     }
@@ -1879,7 +1925,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      *   - Configuraciones del modelo (opciones extendidas en otra tabla).
      *
      * @param string $key El nombre del atributo.
-     * @return boolean `true` si el atributo está asignado, `false` si no.
+     * @return bool `true` si el atributo está asignado, `false` si no.
      */
     public function __isset(string $key): bool
     {
@@ -1890,13 +1936,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             if (!$this->config->has($idx)) {
                 return false;
             }
+
             // Si el índice existe se debe validar que no sea null.
             return $this->getConfiguration($key) !== null;
         }
+
         // Se solicita, probablemente, un atributo del modelo.
-        else {
-            return isset($this->attributes[$key]);
-        }
+        return isset($this->attributes[$key]);
     }
 
     /**
@@ -1916,6 +1962,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($this->isConfigurationField($key)) {
             return $this->getConfiguration($key);
         }
+
         // Se solicita, probablemente, un atributo del modelo.
         return $this->getAttribute($key);
     }
@@ -1938,6 +1985,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($this->isConfigurationField($key)) {
             $this->setConfiguration($key, $value);
         }
+
         // Se asigna, probablemente, un atributo del modelo.
         else {
             $this->setAttribute($key, $value);
@@ -1945,7 +1993,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Desasigna el valor de un atributo utilizando la sobrecarga de propiedades.
+     * Desasigna el valor de un atributo utilizando la sobrecarga de
+     * propiedades.
      *
      * Este método permite desasignar valores de:
      *
@@ -1975,6 +2024,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($label === null) {
             $label = ucfirst(Str::camel($attribute));
         }
+
         return $label;
     }
 
@@ -1992,12 +2042,15 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($label && method_exists($this, $accessor)) {
             return $this->$accessor();
         }
+
         // Obtener el valor desde el arreglo de atributos del modelo.
         $value = $this->attributes[$key] ?? $this->getDefaultValue($key);
+
         // Realizar casteo si corresponde.
         if ($this->hasCast($key)) {
             return $this->castForGet($key, $value);
         }
+
         // Entregar valor del atributo.
         return $value;
     }
@@ -2015,12 +2068,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($this->hasSanitization($key)) {
             $value = $this->sanitizeForSet($key, $value);
         }
+
         // Asignar con mutador (no se realiza cast automático).
         $label = $this->getAttributeLabel($key);
         $mutator = 'set' . $label . 'Attribute';
         if ($label && method_exists($this, $mutator)) {
             $this->$mutator($value);
         }
+
         // Asignar directamente haciendo cast si es necesario.
         else {
             if ($this->hasCast($key)) {
@@ -2028,6 +2083,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             }
             $this->attributes[$key] = $value;
         }
+
         // Entregar la misma instancia para encadenamiento.
         return $this;
     }
@@ -2073,11 +2129,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($value === null) {
             return $value;
         }
+
         $rules = $this->getSanitization($key);
         if (!$rules) {
             return $value;
         }
+
         $sanitized = app('sanitizer')->sanitize([$key => $value], $rules);
+
         return $sanitized[$key];
     }
 
@@ -2122,11 +2181,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($value === null) {
             return $value;
         }
+
         $rules = $this->getCast($key);
         if (!$rules) {
             return $value;
         }
+
         $casted = app('caster')->castForGet([$key => $value], [$rules]);
+
         return $casted[$key];
     }
 
@@ -2142,11 +2204,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($value === null) {
             return $value;
         }
+
         $rules = $this->getCast($key);
         if (!$rules) {
             return $value;
         }
+
         $casted = app('caster')->castForSet([$key => $value], [$rules]);
+
         return $casted[$key];
     }
 
@@ -2161,9 +2226,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         if ($this->isConfigurationField($key)) {
             $name = $this->getConfigurationName($key);
-            return (bool)$this->getMetadata('configurations.fields.' . $name . '.encrypt');
+            return (bool) $this->getMetadata(
+                'configurations.fields.' . $name . '.encrypt'
+            );
         } else {
-            return (bool)$this->getMetadata('fields.' . $key . '.encrypt');
+            return (bool) $this->getMetadata('fields.' . $key . '.encrypt');
         }
     }
 
@@ -2205,8 +2272,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Elimina (o desasigna) el valor de un atributo o configuración del
-     * modelo.
+     * Elimina (o desasigna) el valor de un atributo o configuración del modelo.
      *
      * @param string $offset
      * @return void
@@ -2236,12 +2302,18 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 if ($this->isConfigurationField($key)) {
                     $name = $this->getConfigurationName($key);
                     $verbose_name =
-                        $this->getMetadata('configurations.fields.' . $name . '.verbose_name')
-                        ?? $this->getMetadata('configurations.fields.' . $name . '.label')
+                        $this->getMetadata(
+                            'configurations.fields.' . $name . '.verbose_name'
+                        )
+                        ?? $this->getMetadata(
+                            'configurations.fields.' . $name . '.label'
+                        )
                         ?? $name
                     ;
                 } else {
-                    $verbose_name = $this->getMetadata('fields.' . $key . '.verbose_name');
+                    $verbose_name = $this->getMetadata(
+                        'fields.' . $key . '.verbose_name'
+                    );
                 }
                 throw new \Exception(__(
                     'El atributo "%s" (%s) no es asignable masivamente.',
@@ -2250,9 +2322,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 ), 422);
             }
         }
+
         if ($this->isDirty()) {
             $this->setExists(null);
         }
+
         return $this;
     }
 
@@ -2277,30 +2351,36 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($isFillable !== null) {
             return $isFillable;
         }
+
         // Determinar mediante atributos del modelo $fillable y $guarded.
         $default = false;
         $fillable = $this->fillable ?? [];
         $guarded = $this->guarded ?? [];
+
         // Si el atributo está explícitamente permitido se puede asignar
         // masivamente.
         if (in_array($key, $fillable)) {
             return true;
         }
+
         // Si todos los atributos están protegidos no se puede asignar
         // masivamente.
         if (in_array('*', $guarded)) {
             return false;
         }
+
         // Si el atributo está explícitamente protegido no se puede asignar
         // masivamente.
         if (in_array($key, $guarded)) {
             return false;
         }
+
         // Si todos los atributos están permitidos se puede asignar
         // masivamente.
         if (in_array('*', $fillable)) {
             return true;
         }
+
         // No se pudo determinar con los atributos, se entrega el permiso por
         // defecto.
         return $default;
@@ -2318,7 +2398,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         foreach ($attributes as $key => $value) {
             if (strpos($key, '__pivot_') === 0) {
                 if (!$this->__isset('pivot')) {
-                    $this->pivot = new \stdClass();
+                    $this->pivot = new stdClass();
                 }
                 $pivotAttribute = substr($key, 8);
                 $this->pivot->$pivotAttribute = $value;
@@ -2328,9 +2408,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $this->setAttribute($key, $value);
             }
         }
+
         if ($this->isDirty()) {
             $this->setExists(null);
         }
+
         return $this;
     }
 
@@ -2349,15 +2431,18 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if (!isset($config)) {
             return null;
         }
+
         // Obtener el atributo.
         $attribute = $this->getAttribute($key);
         if (!isset($attribute)) {
             return null;
         }
+
         // Si no es relación (ej: llave foránea), se entrega el atributo.
         if (!isset($config['relation'])) {
             return $attribute;
         }
+
         // Es una relación por lo que se obtiene el objeto asociado.
         return $this->getRelation($key);
     }
@@ -2383,6 +2468,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if (!isset($fields[0])) {
             $fields = array_keys((array)$this->attributes);
         }
+
         $array = [];
         foreach ($fields as $i => $field) {
             if ($resolveForeignKey) {
@@ -2399,6 +2485,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             }
             $array[$field] = $value;
         }
+
         return $array;
     }
 
@@ -2436,6 +2523,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $currentMetadata,
                 $extraMetadata,
             );
+
             // Unir los metadatos del modelo+extra con los del método.
             $newMetadata = $metadata instanceof Repository
                 ? $metadata->all()
@@ -2472,6 +2560,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if (!($this->metadata instanceof Repository)) {
             $this->metadata = new Repository($this->metadata);
         }
+
         return $key ? $this->metadata[$key] : $this->metadata;
     }
 
@@ -2495,11 +2584,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             // Metadatos de la configuración extendida del modelo.
             'configurations' => null,
         ], $metadata);
+
         // Normalizar la configuración general del modelo.
         $metadata['model'] = array_merge(
             $this->defaultModelConfig,
             $metadata['model']
         );
+
         // Agregar configuración del modelo que no se definieron y son
         // obligatorias.
         if ($metadata['model']['namespace'] === null) {
@@ -2514,28 +2605,44 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             );
         }
         if ($metadata['model']['db_table'] === null) {
-            list($aux, $singular) = explode('\Model_', $metadata['model']['singular']);
+            list($aux, $singular) = explode(
+                '\Model_',
+                $metadata['model']['singular']
+            );
             $metadata['model']['db_table'] = Str::snake($singular);
         }
         if ($metadata['model']['verbose_name'] === null) {
             if (!isset($singular)) {
-                list($aux, $singular) = explode('\Model_', $metadata['model']['singular']);
+                list($aux, $singular) = explode(
+                    '\Model_',
+                    $metadata['model']['singular']
+                );
             }
             $metadata['model']['verbose_name'] = $singular;
         }
         if ($metadata['model']['verbose_name_plural'] === null) {
             if (!isset($singular)) {
-                list($aux, $singular) = explode('\Model_', $metadata['model']['singular']);
+                list($aux, $singular) = explode(
+                    '\Model_',
+                    $metadata['model']['singular']
+                );
             }
-            $metadata['model']['verbose_name_plural'] = app('inflector')->pluralize(
-                $singular
-            );
+            $metadata['model']['verbose_name_plural'] =
+                app('inflector')->pluralize($singular)
+            ;
         }
         if ($metadata['model']['label'] === null) {
-            $module = app('module')->findModuleByClass($metadata['model']['singular']);
-            $metadata['model']['label'] = $module ?? $metadata['model']['singular'];
+            $module = app('module')->findModuleByClass(
+                $metadata['model']['singular']
+            );
+            $metadata['model']['label'] = $module
+                ?? $metadata['model']['singular']
+            ;
             if (!isset($singular)) {
-                list($aux, $singular) = explode('\Model_', $metadata['model']['singular']);
+                list($aux, $singular) = explode(
+                    '\Model_',
+                    $metadata['model']['singular']
+                );
             }
             $metadata['model']['label'] .= ':' . $singular;
         }
@@ -2547,8 +2654,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             );
         }
         if ($metadata['model']['list_per_page'] === null) {
-            $metadata['model']['list_per_page'] = config('app.ui.pagination.registers', 20);
+            $metadata['model']['list_per_page'] =
+                config('app.ui.pagination.registers', 20)
+            ;
         }
+
         // Normalizar la configuración de cada campo del modelo.
         $pkDefined = !empty($metadata['model']['primary_key']);
         foreach ($metadata['fields'] as $name => &$config) {
@@ -2556,18 +2666,21 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             if (!isset($config['type'])) {
                 $config['type'] = $this->defaultFieldConfig['type'];
             }
+
             // Definir largo mínimo y máximo si se especificó.
             if (array_key_exists('length', $config)) {
                 $config['min_length'] = $config['length'];
                 $config['max_length'] = $config['length'];
                 unset($config['length']);
             }
+
             // Asignar valores por defecto.
             $defaultConfig = array_merge(
                 $this->defaultFieldConfig,
                 $this->defaultFieldConfigByType[$config['type']] ?? [],
             );
             $config = array_merge($defaultConfig, $config);
+
             // Si es llave primaria se corrigen atributos y se agrega al listado.
             if ($config['primary_key']) {
                 if (!$pkDefined) {
@@ -2581,28 +2694,51 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                     ['for_id', 'urlencode']
                 );
             }
+
             // Revisión final de campos.
             $config = array_merge($config, [
-                'name' => $config['name'] ?? $name,
-                'label' => $config['label'] ?? ucfirst(Str::camel($name)),
-                'db_column' => $config['db_column'] ?? $name,
-                'cast' => $config['cast'] ?? $this->casts[$name] ?? null,
-                'verbose_name' => $config['verbose_name'] ?? ucfirst(str_replace('_', ' ', $name)),
-                'fillable' => $config['fillable'] ?? $this->isFillable($name),
+                'name' => $config['name']
+                    ?? $name
+                ,
+                'label' => $config['label']
+                    ?? ucfirst(Str::camel($name))
+                ,
+                'db_column' => $config['db_column']
+                    ?? $name
+                ,
+                'cast' => $config['cast']
+                    ?? $this->casts[$name]
+                    ?? null
+                ,
+                'verbose_name' => $config['verbose_name']
+                    ?? ucfirst(str_replace('_', ' ', $name))
+                ,
+                'fillable' => $config['fillable']
+                    ?? $this->isFillable($name)
+                ,
                 'required' => $config['required']
-                    ?? (!$config['auto'] && !($config['null'] || $config['blank'])),
-                'hidden' => $config['hidden'] ?? in_array($name, $this->hidden),
+                    ?? (
+                        !$config['auto']
+                        && !($config['null'] || $config['blank'])
+                    )
+                ,
+                'hidden' => $config['hidden']
+                    ?? in_array($name, $this->hidden)
+                ,
             ]);
+
             // Agregar sanitización según configuración.
             if ($config['max_length']) {
                 $config['sanitize'][] = 'substr:' . (int)$config['max_length'];
             }
+
             // Si es llave foránea se corrigen atributos.
             if ($config['relation']) {
                 if ($config['belongs_to']) {
                     $config['input_type'] = self::INPUT_SELECT;
                 }
             }
+
             // Corregir asignación de campos que pueden variar entre la
             // operación "create" y "edit".
             foreach ($this->variantFields as $field) {
@@ -2617,6 +2753,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 }
             }
         }
+
         // Si no se determinó una llave primaria, se debe agregar un campo de
         // manera automática llamado "id".
         if (empty($metadata['model']['primary_key'])) {
@@ -2634,10 +2771,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 )
             ], $metadata['fields']);
         }
+
         // Si no hay un campo ID se agrega uno que no será un campo real en la
-        // base de datos. Se autodeterminará y se utilizará para estandarizar
-        // el acceso y búsqueda de registros que tienen PK con un nombre
-        // diferente a ID o sobre todo aquellos modelos con PK compuestas.
+        // base de datos. Se autodeterminará y se utilizará para estandarizar el
+        // acceso y búsqueda de registros que tienen PK con un nombre diferente
+        // a ID o sobre todo aquellos modelos con PK compuestas.
         if (!isset($metadata['fields']['id'])) {
             // Definir configuración base del campo ID "falso".
             $idConfig = array_merge($this->defaultFieldConfig, [
@@ -2657,6 +2795,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 'hidden' => false,
                 'searchable' => false,
             ]);
+
             // Si la PK no es compuesta se usan las opciones base de la PK.
             if (!isset($metadata['model']['primary_key'][1])) {
                 $pkConfig = $metadata['fields'][$metadata['model']['primary_key'][0]];
@@ -2666,11 +2805,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 }
                 $idConfig['alias'] = $pkConfig['name'];
             }
+
             // Agregar campo ID.
             $metadata['fields'] = array_merge([
                 'id' => $idConfig,
             ], $metadata['fields']);
         }
+
         // Definir forma de ordenar y buscar registros si no se ha definido.
         if (empty($metadata['model']['ordering'])) {
             foreach ($metadata['model']['primary_key'] as $pk) {
@@ -2680,6 +2821,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if (empty($metadata['model']['get_latest_by'])) {
             $metadata['model']['get_latest_by'] = $metadata['model']['ordering'];
         }
+
         // Definir cómo obtener los campos de las choices del modelo.
         if (
             !isset($metadata['model']['choices']['id'])
@@ -2699,6 +2841,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 ?? null
             ;
         }
+
         // Entregar metadatos normalizados.
         return $metadata;
     }
@@ -2707,8 +2850,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Entrega los metadatos extras del modelo.
      *
      * Este método se debe sobreescribir en el modelo que quiera entregar un
-     * arreglo meta complementario al principal del modelo. Útil en herencias
-     * de herencias de este modelo base.
+     * arreglo meta complementario al principal del modelo. Útil en herencias de
+     * herencias de este modelo base.
      *
      * @param array $metadata Arreglo con los metadatos actuales.
      * @return array Arreglo con los metadatos adicionales o modificados.
@@ -2728,6 +2871,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($this->getMetadata('model.namespace') !== null) {
             return $this->getMetadata('model.namespace');
         }
+
         return $this->getReflector()->getNamespaceName();
     }
 
@@ -2773,6 +2917,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 ));
             }
         }
+
         return $values;
     }
 
@@ -2791,6 +2936,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($id) {
             return [$id];
         }
+
         return array_values($this->getPrimaryKeyValues());
     }
 
@@ -2809,18 +2955,24 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         $metadata = $this->getMetadata();
         $db_column = $metadata['fields.id.db_column'];
+
         // Obtener el valor desde el arreglo de atributos del modelo.
         if ($db_column) {
             $id = $this->attributes['id'] ?? null;
             return $id === null ? null : (int) $id;
         }
+
         // Obtener el valor desde la PK cuando es alias (PK no compuesta).
         $alias = $metadata['fields.id.alias'];
         if ($alias) {
             return $this->getAttribute($alias);
         }
+
         // Obtener el valor desde una PK compuesta.
-        return implode('/', $this->toArray($metadata['model.primary_key'], [], false));
+        return implode(
+            '/',
+            $this->toArray($metadata['model.primary_key'], [], false)
+        );
     }
 
     /**
@@ -2837,19 +2989,22 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $name = $this->getConfigurationName($attribute);
             $config = $this->getMetadata('configurations.fields.' . $name);
         }
+
         // Se solicita, probablemente, un atributo del modelo.
         else {
             $config = $this->getMetadata('fields.' . $attribute);
         }
+
         // Obtener valor por defecto de la configuración del atributo si existe.
         $default = $config['default'] ?? null;
         if ($default === null) {
             return null;
         }
         $type = $config['type'] ?? null;
-        // Revisar si el valor por defecto es una expresión que se deba
-        // procesar (calcular) para obtener el valor por defecto real.
-        // NOTE: este método solo para valores que no dependan de otros
+
+        // Revisar si el valor por defecto es una expresión que se deba procesar
+        // (calcular) para obtener el valor por defecto real.
+        // NOTE: Este método solo para valores que no dependan de otros
         // registros, por ejemplo, no sirve para determinar autoincrementales.
         if (is_callable($default)) {
             return $default($this);
@@ -2862,6 +3017,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 return date('Y-m-d');
             }
         }
+
         // Entregar el valor por defecto original de los metadados.
         return $default;
     }
@@ -2875,6 +3031,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     protected function getActions(): array
     {
         $metadata = $this->getMetadata();
+
         // Agregar las acciones por defecto si no se han especificado.
         if ($metadata['model.actions'] === null) {
             $actions = [];
@@ -2885,6 +3042,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             }
             $metadata['model.actions'] = $actions;
         }
+
         // Entregar las acciones del modelo.
         return $metadata['model.actions'];
     }
@@ -2899,6 +3057,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         // Generar reglas de valicación y obtener los metadatos generales.
         $data = $this->getMetadata()->all();
+
         // Agregar los campos que se deben listar por defecto si no se han
         // especificado.
         if ($data['model']['list_display'] === null) {
@@ -2909,8 +3068,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 }
             }
         }
+
         // Agregar las acciones del modelo.
         $data['model']['actions'] = $this->getActions();
+
         // Entregar los metadatos para los listados de registros.
         return $data;
     }
@@ -2925,8 +3086,10 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     {
         // Generar reglas de valicación y obtener los metadatos generales.
         $data = $this->getMetadata()->all();
+
         // Agregar las acciones del modelo.
         $data['model']['actions'] = $this->getActions();
+
         // Entregar los metadatos para mostrar un registro.
         return $data;
     }
@@ -2943,6 +3106,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         foreach ($data['fields'] as $field => &$config) {
             $config['initial_value'] = $this->getDefaultValue($field);
         }
+
         return $data;
     }
 
@@ -2963,6 +3127,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 ;
             }
         }
+
         return $data;
     }
 
@@ -2985,6 +3150,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             }
         }
         $data['relations_choices'] = $this->getRelationsChoices();
+
         return $data;
     }
 
@@ -3032,6 +3198,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 : []
             ;
         }
+
         return $rules;
     }
 
@@ -3073,10 +3240,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                         'ignore' => $ignore,
                     ];
                 }
+
                 // Generar reglas de validación con los datos del modelo.
                 $validation = $validatorService->generateValidationRules(
                     $config
                 );
+
                 // Asignar reglas de valicación.
                 $key = 'fields.' . $field . '.validation';
                 $this->metadata[$key] = (
@@ -3094,8 +3263,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Método que obtiene las relaciones del modelo con otros para la
-     * asignación de relaciones de llave foránea.
+     * Método que obtiene las relaciones del modelo con otros para la asignación
+     * de relaciones de llave foránea.
      *
      * @return array
      */
@@ -3118,6 +3287,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 ,
             ];
         }
+
         return $relations;
     }
 
@@ -3152,6 +3322,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             },
             ARRAY_FILTER_USE_KEY
         );
+
         return $columns;
     }
 
@@ -3227,6 +3398,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         } else if ($this->exists === false) {
             $this->fieldsHash = null;
         }
+
         return $this;
     }
 
@@ -3251,6 +3423,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $this->setExists(false);
             }
         }
+
         // Entregar el resultado que indica si el registro existe o no en la BD.
         return $this->exists;
     }
@@ -3649,10 +3822,12 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 return null;
             }
         }
+
         $relation = call_user_func_array(
             [model(), 'instantiate'],
             array_merge([$class], array_values($fields))
         );
+
         return $relation->exists() ? $relation : null;
     }
 
@@ -3702,7 +3877,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Define una relación "pertenece a muchos" (belongs to many) con otro modelo.
+     * Define una relación "pertenece a muchos" (belongs to many) con otro
+     * modelo.
      *
      * Anotación: @ORM\ManyToMany
      *
@@ -3742,11 +3918,13 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $source_table = $local_table;
                 $target_table = $through;
             }
+
             // La relación es con el modelo final.
             else if ($table === $related_table) {
                 $source_table = $related_table;
                 $target_table = $through;
             }
+
             // Si el modelo no coincide con el actual o el final, es una
             // relación intermedia.
             else {
@@ -3772,7 +3950,8 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $query->where("$through.$through_key", $this->$local_key);
         }
 
-        // Seleccionar los campos del modelo final y de la tabla intermedia con prefijo.
+        // Seleccionar los campos del modelo final y de la tabla intermedia con
+        // prefijo.
         $prefixedPivotColumns = [];
         foreach ($pivot_fields as $column) {
             $prefixedPivotColumns[] = "$through.$column as __pivot_$column";
@@ -3807,6 +3986,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             }
             return $this->getField($field);
         }
+
         // Si es un "accessor" getXyz() se procesa como getXyzField().
         // NOTE: esto debería ser temporal ya que la opción sin "Field" está
         // obsoleta y podría ser removida en el futuro. Se recomienda usar
@@ -3815,6 +3995,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if (preg_match($pattern, $method, $matches)) {
             return $this->__call($method . 'Field', $args);
         }
+
         // Si es un "accessor" xyz(), puede ser de un campo que tiene una
         // relación o directamente de una relación, se procesa con getRelation().
         foreach (['fields', 'relations'] as $section) {
@@ -3826,6 +4007,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 );
             }
         }
+
         // Si el método no existe se genera una excepción.
         throw new \Exception(__(
             'Método %s::%s() no existe.',
@@ -3866,6 +4048,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if (is_array($this->configurations)) {
             $this->configurations = new Repository($this->configurations);
         }
+
         return $this->configurations;
     }
 
@@ -3893,21 +4076,23 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $configModelDefaultMeta,
             $this->getMetadata('configurations.model') ?? []
         );
+
         return $configModelMeta;
     }
 
     /**
-     * Entrega los datos para una consulta específica de configuraciones
-     * de un registro.
+     * Entrega los datos para una consulta específica de configuraciones de un
+     * registro.
      *
      * @return Repository Arreglo con los datos para usar en la query.
-     * @throws Exception Si no están los datos necesarios para realizar la
-     * query a la tabla de configuraciones del registro.
+     * @throws Exception Si no están los datos necesarios para realizar la query
+     * a la tabla de configuraciones del registro.
      */
     protected function getConfigurationsQueryMetadata(): Repository
     {
         // Obtener los metadatos de las configuraciones.
         $modelMetadata = $this->getConfigurationsModelMetadata();
+
         // Armar la información para la query, incluye la FK y sus valores.
         $queryMetadata = [
             'db_table' => $modelMetadata['db_table'],
@@ -3919,6 +4104,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 'is_json' => $modelMetadata['fields']['is_json'],
             ],
         ];
+
         // Asignar la llave foránea del modelo de configuración.
         foreach ($modelMetadata['foreign_key'] as $configModelField => $modelField) {
             $modelValue = $this->getAttribute($modelField);
@@ -3931,6 +4117,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             }
             $queryMetadata['foreign_key'][$configModelField] = $modelValue;
         }
+
         // Entregar los datos de la query para configuraciones.
         return new Repository($queryMetadata);
     }
@@ -3949,12 +4136,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         } catch (\Exception $e) {
             return [];
         }
+
         // Armar y realizar la query a la tabla de configuraciones del modelo.
         $query = $this->getDatabaseConnection()->table($metadata['db_table']);
         foreach ($metadata['foreign_key'] as $field => $value) {
             $query->where($field, '=', $value);
         }
         $results = $query->get(array_values($metadata['fields']));
+
         // Armar arreglo con las configuraciones del modelo.
         $configurations = [];
         foreach ($results as $row) {
@@ -3963,6 +4152,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $key = $row->{$metadata['fields']['key']};
             $value = $row->{$metadata['fields']['value']};
             $is_json = $row->{$metadata['fields']['is_json']};
+
             // Desencriptar y decodificar JSON si es necesario.
             $attribute = 'config_' . $category . '_' . $key;
             if ($this->hasEncryption($attribute)) {
@@ -3975,9 +4165,11 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             if ($value != null && $is_json) {
                 $value = json_decode($value);
             }
+
             // Asignar valor a la configuración.
             $configurations[$category][$key] = $value;
         }
+
         // Entregar las configuraciones obtenidas desde la base de datos.
         return $configurations;
     }
@@ -3986,7 +4178,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Guarda la configuración asociada al registro del modelo en la base de
      * datos.
      *
-     * @return boolean `true` si fue posible guardar la configuración, `false`
+     * @return bool `true` si fue posible guardar la configuración, `false`
      * si no fue posible.
      */
     protected function saveConfigurations(): bool
@@ -4003,19 +4195,23 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 }
             }
         }
+
         // Si no hay configuraciones asignadas se retorna OK, ya que no fue
         // necesario guardar.
         if (empty($this->configurations)) {
             return true;
         }
+
         // Obtener metadatos del modelo de configuración.
         try {
             $metadata = $this->getConfigurationsQueryMetadata();
         } catch (\Exception $e) {
             return false;
         }
+
         // Obtener el arreglo de configuraciones y los metadatos de las mismas.
         $configurations = $this->config->all();
+
         // Iterar las configuraciones e ir guardando.
         foreach ($configurations as $category => $config) {
             foreach ($config as $key => $value) {
@@ -4029,6 +4225,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                     $value = json_encode($value);
                     $is_json = 1;
                 }
+
                 // Determinar llave primaria para filtrar y valores a guardar
                 // de la configuración asociada al modelo.
                 $primaryKeyValues = array_merge($metadata['foreign_key'], [
@@ -4039,6 +4236,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                     $metadata['fields']['value'] => $value,
                     $metadata['fields']['is_json'] => $is_json,
                 ];
+
                 // Realizar la consulta a la base de datos para guardar la
                 // configuración asociada al modelo.
                 $query = $this->getDatabaseConnection()->table($metadata['db_table']);
@@ -4058,6 +4256,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 }
             }
         }
+
         // Retornar que el guardado de la configuración pudo ser realizado.
         return true;
     }
@@ -4066,7 +4265,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
      * Indica si la llave de un campo es un campo de configuración o no.
      *
      * @param string $key Llave del campo que se desea revisar.
-     * @return boolean `true` si el campo es de configuración.
+     * @return bool `true` si el campo es de configuración.
      */
     protected function isConfigurationField(string $key): bool
     {
@@ -4088,6 +4287,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                 $attribute
             ));
         }
+
         return substr($attribute, 7);
     }
 
@@ -4122,6 +4322,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             $name[$position] = '.';
             return $name;
         }
+
         return str_replace('__', '.', $name);
     }
 
@@ -4141,6 +4342,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($label === null) {
             $label = ucfirst(Str::camel($name));
         }
+
         return $label;
     }
 
@@ -4162,23 +4364,28 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($label && method_exists($this, $accessor)) {
             return $this->$accessor();
         }
+
         // Determinar llave y obtener el valor de la configuración desde el
         // repositorio, si existe.
         $key = $this->getConfigurationKey($attribute);
         $value = $this->config->get($key) ?? $this->getDefaultValue($attribute);
+
         // Desencriptar si corresponde.
         if ($value !== null && $this->hasEncryption($attribute)) {
             $value = decrypt($value);
         }
+
         // Realizar casteo si corresponde.
         if ($this->hasCast($attribute)) {
             $value = $this->castForGet($attribute, $value);
         }
+
         // Buscar valor por defecto si no existe valor encontrado.
         if ($value === null) {
             $name = $this->getConfigurationName($attribute);
             $value = $this->getMetadata('configurations.fields.' . $name . '.default');
         }
+
         // Entregar valor de la configuración.
         return $value;
     }
@@ -4200,12 +4407,14 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         if ($this->hasSanitization($attribute)) {
             $value = $this->sanitizeForSet($attribute, $value);
         }
+
         // Asignar con mutador (no se realiza cast automático).
         $label = $this->getConfigurationLabel($attribute);
         $mutator = 'set' . $label . 'Configuration';
         if ($label && method_exists($this, $mutator)) {
             $this->$mutator($value);
         }
+
         // Asignar directamente haciendo cast si es necesario.
         else {
             if ($this->hasCast($attribute)) {
@@ -4213,15 +4422,18 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
             } else {
                 $value = $this->castConfigurationForSet($value);
             }
+
             // Encriptar si corresponde.
             if ($value !== null && $this->hasEncryption($attribute)) {
                 $value = encrypt($value);
             }
+
             // Determinar llave y asignar el valor en la configuración mediante
             // el repositorio,
             $key = $this->getConfigurationKey($attribute);
             $this->configurations[$key] = $value;
         }
+
         // Entregar la misma instancia para encadenamiento.
         return $this;
     }
@@ -4246,6 +4458,7 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
                     )
             )
         ;
+
         return (!is_string($value) || isset($value[0])) ? $value : null;
     }
 
@@ -4318,5 +4531,4 @@ abstract class Model implements \ArrayAccess, \JsonSerializable
         $this->{$name . '_size'} = $file['size'];
         $this->{$name . '_data'} = $file['data'];
     }
-
 }

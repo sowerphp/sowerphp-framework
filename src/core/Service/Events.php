@@ -31,7 +31,6 @@ use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventsDispatcher
  */
 class Service_Events extends IlluminateEventsDispatcher implements Interface_Service
 {
-
     /**
      * Instancia del Dispatcher de Illuminate.
      *
@@ -109,6 +108,7 @@ class Service_Events extends IlluminateEventsDispatcher implements Interface_Ser
         if (!isset($this->illuminateDispatcher)) {
             $this->illuminateDispatcher = $this;
         }
+
         return $this->illuminateDispatcher;
     }
 
@@ -122,7 +122,7 @@ class Service_Events extends IlluminateEventsDispatcher implements Interface_Ser
         if (!isset($this->symfonyDispatcher)) {
             $this->symfonyDispatcher = new SymfonyEventsDispatcher();
         }
+
         return $this->symfonyDispatcher;
     }
-
 }

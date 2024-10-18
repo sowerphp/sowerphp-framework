@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -30,7 +32,6 @@ use Illuminate\Encryption\Encrypter as EncrypterIlluminate;
  */
 class Data_Encryption_Aes extends EncrypterIlluminate
 {
-
     /**
      * Método que encripta datos usando mcrypt.
      */
@@ -40,6 +41,7 @@ class Data_Encryption_Aes extends EncrypterIlluminate
         if (is_string($value)) {
             $value = trim($value);
         }
+
         // Encriptar con el método padre.
         return parent::encrypt($value, $serialize);
     }
@@ -51,12 +53,13 @@ class Data_Encryption_Aes extends EncrypterIlluminate
     {
         // Desencriptar con el método padre.
         $value = parent::decrypt($payload, $unserialize);
+
         // Quitar espacios del string (si es string).
         if (is_string($value)) {
             $value = trim($value);
         }
+
         // Entregar el valor.
         return $value;
     }
-
 }

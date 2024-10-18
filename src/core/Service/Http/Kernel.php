@@ -25,7 +25,6 @@ namespace sowerphp\core;
 
 class Service_Http_Kernel implements Interface_Service
 {
-
     /**
      * Instancia de la aplicación.
      *
@@ -174,6 +173,7 @@ class Service_Http_Kernel implements Interface_Service
     public function handle(): int
     {
         $request = $this->request;
+
         // Procesar middlewares antes de manejar la solicitud.
         $request = $this->processMiddlewaresBefore(
             $request,
@@ -181,8 +181,10 @@ class Service_Http_Kernel implements Interface_Service
                 return $request;
             }
         );
+
         // Manejar la solicitud.
         $response = $this->handleRequest($request);
+
         // Procesar middlewares después de manejar la solicitud.
         $response = $this->processMiddlewaresAfter(
             $request,
@@ -191,6 +193,7 @@ class Service_Http_Kernel implements Interface_Service
                 return $response;
             }
         );
+
         // Enviar resultado y terminar la ejecución.
         return $response->send();
     }
@@ -220,6 +223,7 @@ class Service_Http_Kernel implements Interface_Service
             },
             $next
         );
+
         return $pipeline($request);
     }
 
@@ -251,6 +255,7 @@ class Service_Http_Kernel implements Interface_Service
             },
             $next
         );
+
         return $pipeline($request, $response);
     }
 
@@ -265,11 +270,13 @@ class Service_Http_Kernel implements Interface_Service
         foreach ($this->middlewares as $middleware) {
             $middlewares[] = new $middleware;
         }
-        // TODO: crear condicionalmente según ruta parseada.
+
+        // TODO: Crear condicionalmente según ruta parseada.
         // Quizás va en otro lado, en el Router y se pasa al kernel luego.
         /*foreach ($this->routeMiddlewares as $name => $middleware) {
             $middlewares[] = new $middleware;
         }*/
+
         return $middlewares;
     }
 
@@ -296,6 +303,7 @@ class Service_Http_Kernel implements Interface_Service
         if ($response) {
             return $response;
         }
+
         // Procesar la solicitud a través del servicio de rutas.
         return $this->handleRouterRequest($request);
     }
@@ -314,6 +322,7 @@ class Service_Http_Kernel implements Interface_Service
         if (!$filepath) {
             return null;
         }
+
         return response()->file($filepath);
     }
 
@@ -332,6 +341,7 @@ class Service_Http_Kernel implements Interface_Service
         if ($filename == '') {
             return null;
         }
+
         // Si hay más de dos slash en la url podría ser un módulo así que se
         // busca path para el módulo.
         $paths = null;
@@ -342,6 +352,7 @@ class Service_Http_Kernel implements Interface_Service
             if ($module) {
                 $paths = $this->moduleService->getPaths($module);
             }
+
             // Si existe el módulo en las rutas entonces si es un módulo lo que
             // se está pidiendo, y es un módulo ya cargado. Si este no fuera el
             // caso podría no ser un módulo o no estar cargado.
@@ -354,11 +365,13 @@ class Service_Http_Kernel implements Interface_Service
                 $filename = '/' . implode('/', $aux);
             }
         }
+
         // Si no están definidas las rutas para buscar el archivos, entonces no
         // era de módulo y se deberá buscar en las rutas base de la aplicación.
         if (!$paths) {
             $paths = $this->layersService->getPaths();
         }
+
         // Buscar el archivo solicitado en las rutas determinadas.
         $filepath = null;
         foreach ($paths as &$path) {
@@ -368,6 +381,8 @@ class Service_Http_Kernel implements Interface_Service
                 break;
             }
         }
+
+        // Entregar ruta del archivo si fue encontrada.
         return $filepath;
     }
 
@@ -382,6 +397,7 @@ class Service_Http_Kernel implements Interface_Service
     ): Network_Response
     {
         $routeConfig = $request->getRouteConfig();
+
         return $this->invokeControllerAction($routeConfig);
     }
 
@@ -399,8 +415,10 @@ class Service_Http_Kernel implements Interface_Service
             $config['action'],
             $config['parameters']
         );
+
         // Recibir resultado de la ejecución de la acción del controlador.
         $response = $this->response;
+
         // Se retorno algo desde el controlador:
         //   - Objeto Network_Response.
         //   - Datos para asignar al body.
@@ -410,6 +428,7 @@ class Service_Http_Kernel implements Interface_Service
             if (is_object($result) && $result instanceof Network_Response) {
                 $response = $result;
             }
+
             // La respuesta no es un objeto Network_Response. Se debe asignar
             // al cuerpo de la respuesta. Solo se asignará si no hay datos
             // previamente asignados al body de la respuesta.
@@ -419,17 +438,20 @@ class Service_Http_Kernel implements Interface_Service
                 if (is_string($result)) {
                     $response->body($result);
                 }
+
                 // Si no es string, se asume que se debe entregar como JSON.
                 else {
                     $response->json($result);
                 }
             }
         }
+
         // No se retornó algo desde el controlador, entonces se deberá ejecutar
         // el renderizado de la vista del controlador.
         else {
             $response = $controller->render();
         }
+
         // Retornar respuesta al handler de la solicitud HTTP.
         return $response;
     }
@@ -448,6 +470,7 @@ class Service_Http_Kernel implements Interface_Service
         } else {
             $response = $this->handleException($throwable);
         }
+
         return $response->send();
     }
 
@@ -497,7 +520,7 @@ class Service_Http_Kernel implements Interface_Service
                 'exception' => $exception,
             ],
         ]);
+
         return $response;
     }
-
 }

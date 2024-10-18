@@ -32,7 +32,6 @@ use PhpImap\IncomingMailAttachment;
  */
 class Network_Mail_Mailbox extends Mailbox
 {
-
     /**
      * Verifica si se está conectado al servidor IMAP.
      *
@@ -75,6 +74,7 @@ class Network_Mail_Mailbox extends Mailbox
     public function countUnreadMails(?string $folder = null): int
     {
         $status = $this->status($folder);
+
         return $status->unseen ?? 0;
     }
 
@@ -264,5 +264,4 @@ class Network_Mail_Mailbox extends Mailbox
     {
         $this->deleteMail($mailId);
     }
-
 }

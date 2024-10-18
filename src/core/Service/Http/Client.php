@@ -33,7 +33,6 @@ use Illuminate\Http\Client\Response;
  */
 class Service_Http_Client implements Interface_Service
 {
-
     /**
      * Instancia de Factory.
      *
@@ -131,5 +130,4 @@ class Service_Http_Client implements Interface_Service
     {
         return $this->httpFactory->getClient();
     }
-
 }

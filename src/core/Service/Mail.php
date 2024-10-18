@@ -36,7 +36,6 @@ use Symfony\Component\Mime\Address;
  */
 class Service_Mail implements Interface_Service
 {
-
     /**
      * Instancia de la aplicación
      *
@@ -131,6 +130,7 @@ class Service_Mail implements Interface_Service
         $config = $this->mailerService->config($name);
         $fromAddress = $config['from']['address'];
         $fromName = $config['from']['name'] ?? $fromAddress;
+
         return new Address($fromAddress, $fromName);
     }
 
@@ -145,6 +145,7 @@ class Service_Mail implements Interface_Service
         $config = $this->mailerService->config($name);
         $toAddress = $config['to']['address'];
         $toName = $config['to']['name'] ?? $toAddress;
+
         return new Address($toAddress, $toName);
     }
 
@@ -177,5 +178,4 @@ class Service_Mail implements Interface_Service
         // Enviar mensaje del correo electrónico en el $envelope.
         $this->mailer($name)->send($message, $envelope);
     }
-
 }

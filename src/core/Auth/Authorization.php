@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -30,7 +32,6 @@ namespace sowerphp\core;
  */
 class Auth_Authorization
 {
-
     /**
      * Lista de acciones permitidas sin necesidad de estar autenticado.
      *
@@ -167,27 +168,31 @@ class Auth_Authorization
         if ($action === null) {
             $action = $this->request->getRouteConfig()['action'];
         }
+
         // Si la acción se encuentra dentro de las permitidas sin tener que
         // estar autenticado se autoriza inmediatamente.
         if ($this->isActionAllowedWithoutLogin($action)) {
             return true;
         }
+
         // Cualquier validación ahora necesita al usuario asignado.
         // Si el usuario no está asignado se retorna falso.
         if (!$this->user) {
             return false;
         }
+
         // Si la acción se encuentra dentro de las que solo requieren un
         // usuario asignado se acepta.
         if ($this->isActionAllowedWithLogin($action)) {
             return true;
         }
+
         // Definir recurso que se verificará si no se pasó.
         if ($resource === null) {
             $resource = $this->request->getRequestUriDecoded();
         }
+
         // La acción requiere permisos, por lo que se debe validar
         return $this->checkResourcePermission($resource);
     }
-
 }

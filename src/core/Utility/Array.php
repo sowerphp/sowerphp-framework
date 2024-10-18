@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class Utility_Array
 {
-
     /**
      * Une dos o más arrays recursivamente.
      * @param array $array1
@@ -45,6 +44,7 @@ class Utility_Array
                 $merged [$key] = $value;
             }
         }
+
         return $merged;
     }
 
@@ -391,5 +391,4 @@ class Utility_Array
         }
         return $return;
     }
-
 }

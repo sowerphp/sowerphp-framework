@@ -347,7 +347,7 @@ class Utility_File
      * comprimir
      * @param string $filepath Directorio (o archivo) que se desea comprimir
      * @param array $options Arreglo con opciones para comprmir (format, download, delete)
-     * @return bool =true si se pudo comprimir el archivo, =false si no fue posible
+     * @return bool `true` si se pudo comprimir el archivo, =false si no fue posible
      * @todo Preparar datos si se pasa un arreglo
      */
     public static function compress($file, $options = [])

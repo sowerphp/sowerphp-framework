@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -33,12 +35,9 @@ use Illuminate\Database\Connection;
  * diferentes motores de bases de datos. Esta clase no se puede instanciar
  * directamente, sino que debe ser extendida por clases específicas del motor
  * de base de datos que implementen comportamientos específicos.
- *
- * @abstract
  */
 abstract class Database_Connection extends Connection
 {
-
     /**
      * Estadísticas de las llamadas a los métodos de la conexión a la base de
      * datos.
@@ -105,11 +104,13 @@ abstract class Database_Connection extends Connection
                 $this->executeRawQuery('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
                 $this->executeRawQuery('SET TRANSACTION READ WRITE');
             }
+
             // Serializar transacción en MySQL.
             else if ($this->getDriverName() == 'mysql') {
                 $this->executeRawQuery('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
             }
         }
+
         // Iniciar la transacción.
         try {
             parent::beginTransaction();
@@ -129,7 +130,7 @@ abstract class Database_Connection extends Connection
      * commit, se captura la excepción y se retorna false para indicar el fallo
      * de la operación.
      *
-     * @return bool =true si el commit fue exitoso, o =false en caso de error.
+     * @return bool `true` si el commit fue exitoso, o =false en caso de error.
      */
     public function commit(): bool
     {
@@ -141,6 +142,7 @@ abstract class Database_Connection extends Connection
                 return false;
             }
         }
+
         return false;
     }
 
@@ -170,6 +172,7 @@ abstract class Database_Connection extends Connection
                 return false;
             }
         }
+
         return false;
     }
 
@@ -194,6 +197,7 @@ abstract class Database_Connection extends Connection
         if ($this->transactionLevel()) {
             $this->rollBack();
         }
+
         // Lanzar una excepción con el mensaje de error proporcionado.
         throw new \Exception($message);
     }
@@ -225,10 +229,13 @@ abstract class Database_Connection extends Connection
         if(empty($query)) {
             $this->error('¡Consulta SQL no puede estar vacía!');
         }
+
         // Contabilizar la consulta SQL de esta conexión.
         $this->stats['queries']++;
+
         // Decidir si se usará PDO de solo lectura o lectura/escritura.
         $pdo = $useReadPdo ? $this->getPdoForSelect() : $this->getPdo();
+
         // Preparar la consulta SQL.
         $statement = $pdo->prepare($query);
         if ($statement === false) {
@@ -236,6 +243,7 @@ abstract class Database_Connection extends Connection
                 'No fue posible preparar la consulta SQL:' . "\n\n" . $query
             );
         }
+
         // Asignar parámetros para la ejecución de la consulta.
         foreach ($bindings as $key => &$param) {
             if (is_array($param)) {
@@ -246,6 +254,7 @@ abstract class Database_Connection extends Connection
                 $statement->bindParam($key, $param);
             }
         }
+
         // Realizar consulta SQL a la base de datos.
         try {
             $statement->execute();
@@ -257,6 +266,7 @@ abstract class Database_Connection extends Connection
                 implode("\n", $statement->errorInfo()) . "\n\n" . $query
             );
         }
+
         // Retornar identificador de la consulta SQL realizada
         return $statement;
     }
@@ -287,6 +297,7 @@ abstract class Database_Connection extends Connection
         $statement = $this->executeRawQuery($query, $bindings, true);
         $data = $statement->fetch(\PDO::FETCH_ASSOC);
         $statement->closeCursor();
+
         return !empty($data) ? $data : [];
     }
 
@@ -305,6 +316,7 @@ abstract class Database_Connection extends Connection
             $cols[] = $col;
         }
         $statement->closeCursor();
+
         return $cols;
     }
 
@@ -320,6 +332,7 @@ abstract class Database_Connection extends Connection
         $statement = $this->executeRawQuery($query, $bindings, true);
         $data = $statement->fetchColumn();
         $statement->closeCursor();
+
         return !empty($data) ? $data : '';
     }
 
@@ -383,8 +396,10 @@ abstract class Database_Connection extends Connection
         // Variables para datos y claves.
         $data = [];
         $columns = [];
+
         // Realizar consulta.
         $statement = $this->executeRawQuery($query, $bindings);
+
         // Obtener información de las columnas.
         $n_columns = $statement->columnCount();
         for($i=0; $i<$n_columns; ++$i) {
@@ -393,6 +408,7 @@ abstract class Database_Connection extends Connection
             unset($columns[$aux['name']]['name'], $aux);
         }
         $data[] = array_keys($columns);
+
         // Agregar las filas de la consulta.
         $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
         foreach ($result as $row) {
@@ -403,6 +419,7 @@ abstract class Database_Connection extends Connection
             }
             $data[] = $row;
         }
+
         // Retornar tabla con sus nombres de columnas.
         return $data;
     }
@@ -418,23 +435,29 @@ abstract class Database_Connection extends Connection
     {
         // Nombre de la tabla.
         $table['name'] = $tablename;
+
         // Obtener comentario de la tabla.
         $table['comment'] = $this->getCommentFromTable($table['name']);
+
         // Obtener llaves primarias de la tabla.
         $table['pk'] = $this->getPksFromTable($table['name']);
+
         // Obtener llaves foráneas de la tabla.
         $fkAux = $this->getFksFromTable($table['name']);
         $fk = [];
         foreach($fkAux as $aux) {
             $fk[array_shift($aux)] = $aux;
         }
+
         // Obtener columnas de la tabla.
         $columns = $this->getColsFromTable($table['name']);
+
         // Recorrer columnas para definir pk, fk, auto, null/not null, default
         // y comentario.
         foreach($columns as &$column) {
             // Definir null o not null.
             $column['null'] = $column['null'] == 'YES' ? 1 : 0;
+
             // Definir si es auto_increment (depende de la base de datos como
             // se hace).
             if ($this->getDriverName() == 'pgsql') {
@@ -444,6 +467,7 @@ abstract class Database_Connection extends Connection
                 $column['auto'] = $column['extra'] == 'auto_increment' ? 1 : 0;
                 unset ($column['extra']);
             }
+
             // Limpiar default, quitar lo que viene despues de ::
             if(!$column['auto']) {
                 $aux = explode('::', $column['default']);
@@ -452,10 +476,12 @@ abstract class Database_Connection extends Connection
                     $column['default'] = null;
                 }
             }
+
             // Definir fk.
             $column['fk'] = $fk[$column['name']] ?? null;
         }
         $table['columns'] = $columns;
+
         // Entregar información de la tabla.
         return $table;
     }
@@ -508,6 +534,7 @@ abstract class Database_Connection extends Connection
         foreach ($path as $p) {
             $select[] = 'NULL';
         }
+
         return count($select) > 1 ? $select : array_shift($select);
     }
 
@@ -565,5 +592,4 @@ abstract class Database_Connection extends Connection
     {
         return [];
     }
-
 }

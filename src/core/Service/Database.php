@@ -35,7 +35,6 @@ use Illuminate\Database\Capsule\Manager as Capsule;
  */
 class Service_Database implements Interface_Service
 {
-
     /**
      * Servicio de configuración.
      *
@@ -130,6 +129,7 @@ class Service_Database implements Interface_Service
         if (!$name || $name == 'default') {
             $name = $this->configService->get('database.default');
         }
+
         return $this->capsule->getConnection($name);
     }
 
@@ -144,6 +144,7 @@ class Service_Database implements Interface_Service
         if ($name) {
             $this->connection($name)->disconnect();
         }
+
         // Cerrar todas las conexiones.
         else {
             $connections = $this->getDatabaseManager()->getConnections();
@@ -165,5 +166,4 @@ class Service_Database implements Interface_Service
     {
         return $this->capsule->getDatabaseManager();
     }
-
 }

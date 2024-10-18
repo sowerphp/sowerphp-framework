@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -27,7 +29,7 @@ namespace sowerphp\core;
  * Cipher con mcrypt.
  *
  * El método de encriptación (cipher) mcrypt NO debe ser usado, jamás. Exite en
- * en SowerPHP solo por compatibilida con proyectos antiguos que lo usen que
+ * en SowerPHP solo por compatibilidad con proyectos antiguos que lo usen que
  * aun no hayan migrado a un método seguro: sodium o aes.
  *
  * @warning Obsoleto: https://wiki.php.net/rfc/mcrypt-viking-funeral
@@ -35,7 +37,6 @@ namespace sowerphp\core;
  */
 class Data_Encryption_Mcrypt extends Data_Encryption
 {
-
     /**
      * Constructor del encriptador usando mcrypt.
      *
@@ -52,12 +53,14 @@ class Data_Encryption_Mcrypt extends Data_Encryption
                 'mcrypt'
             ));
         }
+
         // Verificar largo de la clave.
         if (mb_strlen($key, '8bit') !== 32) {
             throw new \Exception(__(
                 'Se requiere una llave de 256 bits (32 caracteres si es llave ASCII).'
             ));
         }
+
         // Llamar al constructor de la clase padre.
         parent::__construct($key, $cipher);
     }
@@ -71,10 +74,12 @@ class Data_Encryption_Mcrypt extends Data_Encryption
         if (is_string($value)) {
             $value = trim($value);
         }
+
         // Serializar si es necesario.
         if ($serialize && is_serializable($value)) {
             $value = serialize($value);
         }
+
         // Encriptar.
         $iv_size = @mcrypt_get_iv_size(
             MCRYPT_RIJNDAEL_256,
@@ -89,6 +94,7 @@ class Data_Encryption_Mcrypt extends Data_Encryption
             $iv
         );
         $ciphertext_dec = $iv . $ciphertext;
+
         return base64_encode($ciphertext_dec);
     }
 
@@ -104,6 +110,7 @@ class Data_Encryption_Mcrypt extends Data_Encryption
                 'Error al usar base64_decode() en el payload.'
             ));
         }
+
         // Desencriptar.
         $iv_size = @mcrypt_get_iv_size(
             MCRYPT_RIJNDAEL_256,
@@ -118,16 +125,18 @@ class Data_Encryption_Mcrypt extends Data_Encryption
             MCRYPT_MODE_CBC,
             $iv_dec
         );
+
         // Deserializar si es necesario.
         if ($unserialize && is_serialized($value)) {
             $value = unserialize($value);
         }
+
         // Quitar espacios del string (si es string).
         if (is_string($value)) {
             $value = trim($value);
         }
+
         // Entregar el valor.
         return $value;
     }
-
 }

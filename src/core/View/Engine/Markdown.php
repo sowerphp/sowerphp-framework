@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -50,7 +52,6 @@ use Embed\Embed;
  */
 class View_Engine_Markdown extends View_Engine
 {
-
     /**
      * Instancia del convertidor de markdown.
      *
@@ -184,9 +185,10 @@ class View_Engine_Markdown extends View_Engine
     }
 
     /**
-     * Renderizar una plantilla markdown y devolver el resultado como una
-     * cadena. Además, si se ha solicitado, se entregará el contenido dentro de
-     * un layout que se renderizará con PHP.
+     * Renderiza una plantilla markdown y devolver el resultado como una cadena.
+     *
+     * Además, si se ha solicitado, se entregará el contenido dentro de un
+     * layout que se renderizará con PHP.
      *
      * @param string $filepath Ruta a la plantilla markdown que se va a
      * renderizar.
@@ -210,9 +212,11 @@ class View_Engine_Markdown extends View_Engine
                 );
             }
         }
+
         // Renderizar HTML a partir del contenido markdown.
         $result = $this->markdown->convert($content);
         $content = $result->getContent();
+
         // Reemplazos por diseño.
         $content = '<div class="markdown-body">' . $content . '</div>';
         $content = str_replace(
@@ -226,20 +230,24 @@ class View_Engine_Markdown extends View_Engine
             ],
             $content
         );
+
         // Si no se pidió un layout se entrega solo lo renderizado.
         if (empty($data['__view_layout'])) {
             return $content;
         }
         $data['_content'] = $content;
+
         // Acceder a los metadatos del Front Matter.
         if (method_exists($result, 'getFrontMatter')) {
             $frontMatter = $result->getFrontMatter();
             $data = array_merge($data, $frontMatter);
         }
+
         // Renderizar el layout solicitado con el contenido previamente
         // determinado ya incluído en los datos del layout.
         $layout = $this->viewService->resolveLayout($data['__view_layout']);
+
+        // Entregar el HTML renderizado.
         return $this->viewService->renderLayout($layout, $data);
     }
-
 }

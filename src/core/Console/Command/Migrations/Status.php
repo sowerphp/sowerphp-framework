@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -46,7 +48,6 @@ use Symfony\Component\Console\Helper\Table;
  */
 class Console_Command_Migrations_Status extends Command
 {
-
     /**
      * Nombre del comando.
      *
@@ -98,5 +99,4 @@ class Console_Command_Migrations_Status extends Command
         // Todo ok con la ejecución.
         return Command::SUCCESS;
     }
-
 }

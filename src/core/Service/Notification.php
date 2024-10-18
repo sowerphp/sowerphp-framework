@@ -32,7 +32,6 @@ use Symfony\Component\Mime\Part\DataPart;
 
 class Service_Notification implements Interface_Service
 {
-
     /**
      * @var NotifierInterface
      */
@@ -97,14 +96,25 @@ class Service_Notification implements Interface_Service
      * remitente o un arreglo con índices: `address` y `name`.
      * @return void
      */
-    public function sendEmail(string $subject, $content, $to, array $attachments = [], $from = null): void
-    {
+    public function sendEmail(
+        string $subject,
+        $content,
+        $to,
+        array $attachments = [],
+        $from = null
+    ): void {
         // Determinar el remitente.
         $sender = null;
         if ($from !== null) {
-            $fromAddress = is_string($from) ? $from : ($from['address'] ?? null);
+            $fromAddress = is_string($from)
+                ? $from
+                : ($from['address'] ?? null)
+            ;
             if (!empty($fromAddress)) {
-                $fromName = is_string($from) ? $from : ($from['name'] ?? $fromAddress);
+                $fromName = is_string($from)
+                    ? $from
+                    : ($from['name'] ?? $fromAddress)
+                ;
                 $sender = new Address($fromAddress, $fromName);
             }
         }
@@ -117,9 +127,15 @@ class Service_Notification implements Interface_Service
                 $to = [$to];
             }
             foreach ($to as $t) {
-                $toAddress = is_string($t) ? $t : ($t['address'] ?? null);
+                $toAddress = is_string($t)
+                    ? $t
+                    : ($t['address'] ?? null)
+                ;
                 if (!empty($toAddress)) {
-                    $toName = is_string($t) ? $t : ($t['name'] ?? $toAddress);
+                    $toName = is_string($t)
+                        ? $t
+                        : ($t['name'] ?? $toAddress)
+                    ;
                     $recipients[] = new Address($toAddress, $toName);
                 }
             }
@@ -154,12 +170,16 @@ class Service_Notification implements Interface_Service
             if (is_string($attachment) && file_exists($attachment)) {
                 $emailMessage->attachFromPath($attachment);
             }
+
             // Si el archivo adjunto es un arreglo viene en el formato $_FILES.
             else if (is_array($attachment)) {
                 // Determinar los datos del archivo.
                 $filedata = $attachment['data'] ?? null;
                 if ($filedata === null) {
-                    $filepath = $attachment['tmp_name'] ?? $attachment['name'] ?? null;
+                    $filepath = $attachment['tmp_name']
+                        ?? $attachment['name']
+                        ?? null
+                    ;
                     if ($filepath !== null && file_exists($filepath)) {
                         $filedata = file_get_contents($filepath);
                     }
@@ -167,11 +187,17 @@ class Service_Notification implements Interface_Service
                 if (empty($filedata)) {
                     continue;
                 }
+
                 // Determinar el nombre del archivo.
-                $filename = basename($attachment['name'] ?? $attachment['tmp_name'] ?? null);
+                $filename = basename(
+                    $attachment['name']
+                        ?? $attachment['tmp_name']
+                        ?? null
+                );
                 if (empty($filename)) {
                     continue;
                 }
+
                 // Adjuntar el archivo.
                 $emailMessage->attach(
                     $filedata,
@@ -179,6 +205,7 @@ class Service_Notification implements Interface_Service
                     $attachment['type'] ?? 'application/octet-stream'
                 );
             }
+
             // Si el archivo adjunto es una instancia de DataPart, lo añadimos
             // directamente.
             else if ($attachment instanceof DataPart) {
@@ -189,5 +216,4 @@ class Service_Notification implements Interface_Service
         // Enviar el mensaje utilizando tu método de envío personalizado.
         $this->mailService->send($emailMessage, $envelope);
     }
-
 }

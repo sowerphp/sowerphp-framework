@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 abstract class Controller
 {
-
     /**
      * Instancia de la solicitud.
      *
@@ -82,6 +81,7 @@ abstract class Controller
                 . '_' . $this->request->method()
             ;
         }
+
         // Validar permisos para acceder a la acción del controlador que se
         // desea ejecutar (invocar).
         if (!app('auth')->checkFullAuthorization($action)) {
@@ -117,10 +117,12 @@ abstract class Controller
         if (is_array($one)) {
             $data = $one;
         }
+
         // Si no se paso como arreglo se arma.
         else {
             $data = [$one => $two];
         }
+
         // Agregar a las variables que se usarán en la vista.
         $this->viewVars = array_merge($this->viewVars, $data);
     }
@@ -142,14 +144,17 @@ abstract class Controller
             $viewAction = $this->request->getRouteConfig()['action'];
             $view = $viewFolder . DIRECTORY_SEPARATOR . $viewAction;
         }
+
         // Asignar layout del usuario si hay sesión iniciada y tiene layout
         // asignado en su configuración.
         $user = user();
         if ($user && $user->config_app_ui_layout) {
             $this->viewVars['__view_layout'] = $user->config_app_ui_layout;
         }
+
         // Preparar los datos que se pasarán a la vista para ser renderizada.
         $data = array_merge($this->viewVars, $data);
+
         // Renderizar vista y retornar.
         return view($view, $data);
     }
@@ -177,14 +182,17 @@ abstract class Controller
                 405
             );
         }
+
         // Ejecutar la acción de la API.
         $result = app('invoker')->call($this, $method, $args);
+
         // Generar respuesta del servicio web ejecutado.
         if (is_object($result) && $result instanceof Network_Response) {
             $response = $result;
         } else {
             $response = $this->response->json($result);
         }
+
         // Entregar respuesta de la API.
         return $response;
     }
@@ -213,19 +221,23 @@ abstract class Controller
                     . ': ' . implode(' / ', $rest->getErrors())
             );
         }
+
         return $response;
     }
 
     /**
-     * Método que permite ejecutar un comando en la terminal.
+     * Ejecuta un comando en la terminal.
+     *
      * @deprecated Se debe usar servicio de jobs.
      */
     protected function shell($cmd, $log = false, &$output = [])
     {
         if ($log && !is_string($log)) {
-            $log = DIR_TMP . '/screen_' . $this->request->fromIp() . '_' . date('YmdHis') . '.log';
+            $log = DIR_TMP . '/screen_' . $this->request->fromIp()
+                . '_' . date('YmdHis') . '.log'
+            ;
         }
+
         return shell_exec_async($cmd, $log, $output);
     }
-
 }

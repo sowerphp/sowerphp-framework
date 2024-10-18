@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -32,7 +34,6 @@ use Illuminate\Contracts\Auth\Authenticatable;
  */
 abstract class Auth_Guard implements Guard
 {
-
     protected $name;
     protected $configService;
     protected $request;
@@ -101,6 +102,7 @@ abstract class Auth_Guard implements Guard
         if ($user === null) {
             return false;
         }
+
         return true;
     }
 
@@ -157,6 +159,7 @@ abstract class Auth_Guard implements Guard
         if (!$user) {
             return false;
         }
+
         return $this->provider->validateCredentials($user, $credentials);
     }
 
@@ -165,7 +168,7 @@ abstract class Auth_Guard implements Guard
      * guard al ser utilizada.
      *
      * @param string $message Mensaje con el error que ocurrió en la guard.
-     * @return boolean Se retornará falso siempre si la respuesta debe ser bool.
+     * @return bool Se retornará `false` siempre si la respuesta debe ser bool.
      */
     protected function error(string $message): bool
     {
@@ -173,8 +176,8 @@ abstract class Auth_Guard implements Guard
         if ($this->getConfig()['error_as_exception']) {
             throw new \Exception($message, 401);
         }
+
         // Retornar falso al ser error.
         return false;
     }
-
 }

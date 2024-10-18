@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -33,7 +35,6 @@ use Illuminate\Contracts\Cache\Repository as CacheRepository;
  */
 class Adapter_CacheItemPool implements CacheItemPoolInterface
 {
-
     /**
      * El repositorio de caché de Illuminate.
      *
@@ -60,6 +61,7 @@ class Adapter_CacheItemPool implements CacheItemPoolInterface
     public function getItem($key): CacheItemInterface
     {
         $value = $this->cache->get($key);
+
         return new CacheItem($key, $value, $value !== null);
     }
 
@@ -75,6 +77,7 @@ class Adapter_CacheItemPool implements CacheItemPoolInterface
         foreach ($keys as $key) {
             $items[$key] = $this->getItem($key);
         }
+
         return $items;
     }
 
@@ -124,6 +127,7 @@ class Adapter_CacheItemPool implements CacheItemPoolInterface
         foreach ($keys as $key) {
             $this->deleteItem($key);
         }
+
         return true;
     }
 
@@ -140,6 +144,7 @@ class Adapter_CacheItemPool implements CacheItemPoolInterface
             ? $item->getExpiresAt()->getTimestamp() - time()
             : null
         ;
+
         return $this->cache->put($item->getKey(), $item->get(), $expiration);
     }
 
@@ -167,7 +172,6 @@ class Adapter_CacheItemPool implements CacheItemPoolInterface
         // Implementación de commit si es necesario.
         return true;
     }
-
 }
 
 /**
@@ -175,7 +179,6 @@ class Adapter_CacheItemPool implements CacheItemPoolInterface
  */
 class CacheItem implements CacheItemInterface
 {
-
     /**
      * La clave del ítem de la caché.
      *
@@ -303,5 +306,4 @@ class CacheItem implements CacheItemInterface
     {
         return $this->expiresAt;
     }
-
 }

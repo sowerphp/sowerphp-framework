@@ -33,7 +33,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  */
 class Database_QueryBuilder extends QueryBuilder
 {
-
     /**
      * Clase a la que se mapearán los resultados.
      *
@@ -85,6 +84,7 @@ class Database_QueryBuilder extends QueryBuilder
         if (empty($parameters)) {
             return $query;
         }
+
         // Aplicar filtros.
         $filters = $parameters['filters'] ?? [];
         if (!empty($filters)) {
@@ -104,6 +104,7 @@ class Database_QueryBuilder extends QueryBuilder
             } else {
                 $searchable = $searchableReal;
             }
+
             // Agregar cada filtro pasado a la búsqueda de campos en el modelo.
             foreach ($filters as $field => $value) {
                 if ($field == 'search') {
@@ -124,6 +125,8 @@ class Database_QueryBuilder extends QueryBuilder
                 );
             }
         }
+
+        // Aplicar ordenamiento.
         if (!empty($parameters['sort'])) {
             foreach ($parameters['sort'] as $sort) {
                 $column = $sort['column'];
@@ -134,6 +137,7 @@ class Database_QueryBuilder extends QueryBuilder
                 $query->orderBy($column, $order);
             }
         }
+
         // Aplicar paginación.
         if (
             isset($parameters['pagination']['page'])
@@ -143,6 +147,7 @@ class Database_QueryBuilder extends QueryBuilder
             $limit = $parameters['pagination']['limit'];
             $query->skip(($page - 1) * $limit)->take($limit);
         }
+
         // Seleccionar las columnas deseadas si están especificadas.
         if (!empty($parameters['fields'])) {
             $selectFields = [];
@@ -158,14 +163,18 @@ class Database_QueryBuilder extends QueryBuilder
                     }
                     $field = $query->from . '.' . $db_column;
                 }
+
                 // Se agrega el campo a los que se seleccionarán.
                 $selectFields[] = $field;
             }
+
             // Agregar columna solicitada.
             $query->select($selectFields);
         }
+
         // Debug de la consulta SQL generada.
         // dd($query->toSql(), $query->getBindings());
+
         // Entregar query builder.
         return $query;
     }
@@ -417,6 +426,7 @@ class Database_QueryBuilder extends QueryBuilder
     {
         $pattern = '/(\|\||&&|\(|\)|[^|\&\(\)\s]+)/';
         preg_match_all($pattern, $value, $matches);
+
         return $matches[0];
     }
 
@@ -424,7 +434,7 @@ class Database_QueryBuilder extends QueryBuilder
      * Construye el árbol de expresiones a partir de los tokens.
      *
      * @param array $tokens Los tokens de la expresión.
-     * @return array La estructura del árbol que representa la expresión de filtro.
+     * @return array Estructura del árbol que representa la expresión de filtro.
      */
     protected function buildExpressionTree(array $tokens): array
     {
@@ -782,6 +792,7 @@ class Database_QueryBuilder extends QueryBuilder
         if (empty($values)) {
             return $this;
         }
+
         // Normalizar el tipo de la columna y normalizar valores según tipo.
         $columnType = $this->normalizeColumnType($config);
         if ($columnType == 'int') {
@@ -790,6 +801,7 @@ class Database_QueryBuilder extends QueryBuilder
         if ($columnType == 'float') {
             $values = array_map('floatval', $values);
         }
+
         // Agregar filtro "IN".
         return $this->whereIn($column, $values);
     }
@@ -827,6 +839,7 @@ class Database_QueryBuilder extends QueryBuilder
         if (empty($values)) {
             return $this;
         }
+
         // Normalizar el tipo de la columna y normalizar valores según tipo.
         $columnType = $this->normalizeColumnType($config);
         if ($columnType == 'int') {
@@ -835,6 +848,7 @@ class Database_QueryBuilder extends QueryBuilder
         if ($columnType == 'float') {
             $values = array_map('floatval', $values);
         }
+
         // Agregar filtro "NOT IN".
         return $this->whereNotIn($column, $values);
     }
@@ -872,6 +886,7 @@ class Database_QueryBuilder extends QueryBuilder
         if (!isset($values[1])) {
             return $this;
         }
+
         // Normalizar el tipo de la columna y normalizar valores según tipo.
         $columnType = $this->normalizeColumnType($config);
         if ($columnType == 'int') {
@@ -896,6 +911,7 @@ class Database_QueryBuilder extends QueryBuilder
             }
             $values[1] .= ' 23:59:59';
         }
+
         // Agregar filtro BETWEEN"
         return $this->whereBetween($column, [$values[0], $values[1]]);
     }
@@ -933,6 +949,7 @@ class Database_QueryBuilder extends QueryBuilder
         if (!isset($values[1])) {
             return $this;
         }
+
         // Normalizar el tipo de la columna y normalizar valores según tipo.
         $columnType = $this->normalizeColumnType($config);
         if ($columnType == 'int') {
@@ -957,6 +974,7 @@ class Database_QueryBuilder extends QueryBuilder
             }
             $values[1] .= ' 23:59:59';
         }
+
         // Agregar filtro BETWEEN"
         return $this->whereNotBetween($column, [$values[0], $values[1]]);
     }
@@ -992,8 +1010,10 @@ class Database_QueryBuilder extends QueryBuilder
         if (!isset($value[6])) {
             $value = '20' . $value;
         }
+
         // Normalizar el tipo de la columna.
         $columnType = $this->normalizeColumnType($config);
+
         // Aplicar el filtro según el tipo e columna.
         if ($columnType == 'carbon') {
             $year = (int)substr($value, 0, 4);
@@ -1005,6 +1025,7 @@ class Database_QueryBuilder extends QueryBuilder
                 ->whereDay($column, $day)
             ;
         }
+
         // Si no se puede aplicar el filtro retornar instancia solamente.
         return $this;
     }
@@ -1039,12 +1060,15 @@ class Database_QueryBuilder extends QueryBuilder
         if (!isset($value[2])) {
             $value = '20' . $value;
         }
+
         // Normalizar el tipo de la columna.
         $columnType = $this->normalizeColumnType($config);
+
         // Aplicar el filtro según el tipo e columna.
         if ($columnType == 'carbon') {
             return $this->whereYear($column, (int)$value);
         }
+
         // Si no se puede aplicar el filtro retornar instancia solamente.
         return $this;
     }
@@ -1079,8 +1103,10 @@ class Database_QueryBuilder extends QueryBuilder
         if (!isset($value[4])) {
             $value = '20' . $value;
         }
+
         // Normalizar el tipo de la columna.
         $columnType = $this->normalizeColumnType($config);
+
         // Aplicar el filtro según el tipo e columna.
         if ($columnType == 'carbon') {
             $year = (int)substr($value, 0, 4);
@@ -1090,6 +1116,7 @@ class Database_QueryBuilder extends QueryBuilder
                 ->whereMonth($column, $month)
             ;
         }
+
         // Si no se puede aplicar el filtro retornar instancia solamente.
         return $this;
     }
@@ -1210,6 +1237,7 @@ class Database_QueryBuilder extends QueryBuilder
         if (in_array($cast, ['date', 'datetime'])) {
             return 'carbon';
         }
+
         return null;
     }
 
@@ -1223,6 +1251,7 @@ class Database_QueryBuilder extends QueryBuilder
     public function setMapClass(string $class): self
     {
         $this->mapClass = $class;
+
         return $this;
     }
 
@@ -1334,5 +1363,4 @@ class Database_QueryBuilder extends QueryBuilder
 
         return $this;
     }
-
 }

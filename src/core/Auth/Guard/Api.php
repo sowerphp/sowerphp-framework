@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -30,7 +32,6 @@ use Illuminate\Contracts\Auth\Authenticatable;
  */
 class Auth_Guard_Api extends Auth_Guard
 {
-
     /**
      * Inicializa la guard.
      *
@@ -54,8 +55,8 @@ class Auth_Guard_Api extends Auth_Guard
         if ($user == null) {
             return null;
         }
-        // Validar el usuario.
-        // Generar y retornar token.
+
+        // Generar y retornar token (esto valida al usuario).
         $token = md5(hash('sha256', $user->getRememberToken()));
         return $token;
     }
@@ -74,15 +75,18 @@ class Auth_Guard_Api extends Auth_Guard
     {
         // Si hay un usuario con sesión iniciada en la web se usa ese.
         $user = $this->getAuthUserWeb();
+
         // Autenticar al usuario con los parámetros pasados a la API.
         if ($user === null) {
             $user = $this->getAuthUserApi($credentials);
         }
+
         // Si se encontró un usuario se asigna.
         if ($user !== null) {
             $this->setUser($user);
             return $this->user();
         }
+
         // Si no se encontró un usuario se retorna NULL.
         return null;
     }
@@ -96,6 +100,7 @@ class Auth_Guard_Api extends Auth_Guard
     {
         $auth_web = auth('web');
         $auth_web->boot();
+
         return $auth_web->user();
     }
 
@@ -118,6 +123,7 @@ class Auth_Guard_Api extends Auth_Guard
         if (!$this->provider->validateCredentials($user, $credentials)) {
             return null;
         }
+
         // Validaciones de contraseña y 2FA si se autentica con usuario y
         // contraseña. Si se autentica con el hash se ignoran estas validaciones.
         if ($user->hash != $credentials['password']) {
@@ -129,6 +135,7 @@ class Auth_Guard_Api extends Auth_Guard
                 ));
                 return null;
             }
+
             // Verificar token en sistema secundario de autorización.
             try {
                 $user->checkAuth2($credentials['2fa_token'] ?? null);
@@ -140,9 +147,11 @@ class Auth_Guard_Api extends Auth_Guard
                 ));
                 return null;
             }
+
             // Actualizar intentos de contraseña.
             $user->savePasswordRetry(config('auth.max_login_attempts'));
         }
+
         // Entregar el usuario encontrado.
         return $user;
     }
@@ -159,6 +168,7 @@ class Auth_Guard_Api extends Auth_Guard
     protected function getUserCredentials(): array
     {
         $credentials = [];
+
         // Buscar en la cabecera Authorization.
         $header = $this->request->headers->get('Authorization');
         if ($header) {
@@ -178,6 +188,7 @@ class Auth_Guard_Api extends Auth_Guard
                 $credentials['token'] = $value;
             }
         }
+
         // Buscar si vienen en la URL mediante GET.
         else {
             if (!empty($_GET['api_hash'])) {
@@ -199,10 +210,12 @@ class Auth_Guard_Api extends Auth_Guard
             ?? $credentials['token']
             ?? null
         ;
+
         // Si no se encontraron credenciales se retorna.
         if (empty($password)) {
             return [];
         }
+
         // Parche para soportar el hash pasado como usuario. Esto ya está
         // obsoleto y se recomienda usar la forma correcta al utilizar el HASH
         // del usuario con HTTP Basic Auth.
@@ -211,8 +224,10 @@ class Auth_Guard_Api extends Auth_Guard
         if ($password == 'X' && strlen($username) == 32) {
             list($username, $password) = [$password, $username];
         }
+
         // Se agrega las credenciales el token de autenticación si se pasó.
         $auth2_token = $_GET['2fa_token'] ?? $_GET['auth2_token'] ?? null;
+
         // Entregar credenciales encontradas.
         return [
             'username' => $username,
@@ -220,5 +235,4 @@ class Auth_Guard_Api extends Auth_Guard
             '2fa_token' => $auth2_token,
         ];
     }
-
 }

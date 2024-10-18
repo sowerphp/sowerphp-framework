@@ -1,22 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 /**
- * SowerPHP
- * Copyright (C) SowerPHP (http://sowerphp.org)
+ * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
+ * Copyright (C) SowerPHP <https://www.sowerphp.org>
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
- * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
- * publicada por la Fundación para el Software Libre, ya sea la versión
- * 3 de la Licencia, o (a su elección) cualquier versión posterior de la
- * misma.
+ * modificarlo bajo los términos de la Licencia Pública General Affero
+ * de GNU publicada por la Fundación para el Software Libre, ya sea la
+ * versión 3 de la Licencia, o (a su elección) cualquier versión
+ * posterior de la misma.
  *
  * Este programa se distribuye con la esperanza de que sea útil, pero
  * SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
  * MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.
- * Consulte los detalles de la Licencia Pública General Affero de GNU para
- * obtener una información más detallada.
+ * Consulte los detalles de la Licencia Pública General Affero de GNU
+ * para obtener una información más detallada.
  *
-* Debería haber recibido una copia de la Licencia Pública General
+ * Debería haber recibido una copia de la Licencia Pública General
  * Affero de GNU junto a este programa.
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
@@ -44,7 +46,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Console_Command_Config_Cache extends Command
 {
-
     /**
      * Nombre del comando.
      *
@@ -61,7 +62,8 @@ class Console_Command_Config_Cache extends Command
     {
         $this
             ->setDescription('Crea un archivo de caché para la configuración rápida.')
-            ->setHelp('Este comando permite leer la configuración de la aplicación y almacenarla en un formato de caché.');
+            ->setHelp('Este comando permite leer la configuración de la aplicación y almacenarla en un formato de caché.')
+        ;
     }
 
     /**
@@ -76,5 +78,4 @@ class Console_Command_Config_Cache extends Command
         $output->writeln(__('Comando %s no está implementado.', static::$defaultName));
         return Command::FAILURE;
     }
-
 }

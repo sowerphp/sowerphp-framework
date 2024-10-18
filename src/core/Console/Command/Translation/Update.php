@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -44,7 +46,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Console_Command_Translation_Update extends Command
 {
-
     /**
      * Nombre del comando.
      *
@@ -61,7 +62,8 @@ class Console_Command_Translation_Update extends Command
     {
         $this
             ->setDescription('Actualiza los archivos de traducción con mensajes faltantes.')
-            ->setHelp('Este comando permite actualizar los archivos de traducción con mensajes que faltan.');
+            ->setHelp('Este comando permite actualizar los archivos de traducción con mensajes que faltan.')
+        ;
     }
 
     /**
@@ -76,5 +78,4 @@ class Console_Command_Translation_Update extends Command
         $output->writeln(__('Comando %s no está implementado.', static::$defaultName));
         return Command::FAILURE;
     }
-
 }

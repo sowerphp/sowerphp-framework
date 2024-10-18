@@ -35,17 +35,6 @@ use sowerphp\core\Facade_Session_Message as SessionMessage;
  */
 class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
 {
-
-    protected $columnsView = [
-        'listar' => [
-            'id',
-            'nombre',
-            'usuario',
-            'email',
-            'activo',
-            'ultimo_ingreso_fecha_hora',
-        ],
-    ]; ///< Columnas que se deben mostrar en las vistas
     protected $deleteRecord = false; ///< Indica si se permite o no borrar registros
     protected $changeUsername = true; ///< Indica si se permite que se cambie el nombre de usuario
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -31,7 +33,6 @@ use Illuminate\Contracts\Validation\Rule;
  */
 class Data_Validation_UniqueComposite implements Rule, \JsonSerializable
 {
-
     protected $database;
     protected $table;
     protected $unique;
@@ -70,14 +71,17 @@ class Data_Validation_UniqueComposite implements Rule, \JsonSerializable
     public function passes($attribute, $value): bool
     {
         $query = database($this->database)->table($this->table);
+
         // Añadir las condiciones de las columnas para verificar la unicidad.
         foreach ($this->unique as $column => $value) {
             $query->where($column, $value);
         }
+
         // Añadir las condiciones para ignorar filas específicas.
         foreach ($this->ignore as $column => $value) {
             $query->where($column, '<>', $value);
         }
+
         // Validar buscando que no existan coincidencias.
         return !$query->exists();
     }
@@ -109,5 +113,4 @@ class Data_Validation_UniqueComposite implements Rule, \JsonSerializable
             'ignore' => $this->ignore,
         ];
     }
-
 }

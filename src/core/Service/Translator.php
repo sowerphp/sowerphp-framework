@@ -28,7 +28,6 @@ use Illuminate\Contracts\Translation\Translator;
 
 class Service_Translator implements Interface_Service, Translator
 {
-
     /**
      * Lenguaje por defecto.
      *
@@ -105,6 +104,7 @@ class Service_Translator implements Interface_Service, Translator
         if (!isset($this->translations[$locale])) {
             $this->translations[$locale] = $this->loadTranslations($locale);
         }
+
         return $locale;
     }
 
@@ -128,6 +128,7 @@ class Service_Translator implements Interface_Service, Translator
         foreach (glob("{$path}/*.php") as $file) {
             $translations[basename($file, '.php')] = require $file;
         }
+
         return $translations;
     }
 
@@ -150,6 +151,7 @@ class Service_Translator implements Interface_Service, Translator
     public function has(string $key, ?string $locale = null): bool
     {
         $locale = $this->loadLocale($locale);
+
         return isset($this->translations[$locale][$key]);
     }
 
@@ -208,18 +210,22 @@ class Service_Translator implements Interface_Service, Translator
     public function get($key, array $replace = [], $locale = null)
     {
         $locale = $this->loadLocale($locale);
+
         // Buscar la traducción por llave.
         $default = null;
         $translation = Arr::get($this->translations[$locale], $key, $default);
+
         // Si la trauducción no se encontró, podría haberse pasado directamente
         // el string que se desea traducir.
         if ($translation === null) {
             $translation = $this->searchAndTranslate($key, $locale);
         }
+
         // Si no hay atributos para reemplazar se retorna lo traducido.
         if (empty($replace)) {
             return $translation;
         }
+
         // Se reemplazan los atributos en el string traducido.
         return $this->replaceAttributes($translation, $replace);
     }
@@ -251,6 +257,7 @@ class Service_Translator implements Interface_Service, Translator
         if ($toLocale == $fallbackLocale) {
             return $string;
         }
+
         // Si los lenguajes son diferentes se debe buscar la llave del texto en
         // el lenguaje de origen y luego buscar el texto con esa llave en el
         // lenguaje de destino.
@@ -266,6 +273,7 @@ class Service_Translator implements Interface_Service, Translator
         if ($translation === null) {
             $translation = Arr::get($this->translations[$fallbackLocale], $string);
         }
+
         return $translation ?? $string;
     }
 
@@ -325,7 +333,7 @@ class Service_Translator implements Interface_Service, Translator
      * placeholders anónimos como "%s".
      * @return string La cadena con todos los placeholders reemplazados.
      */
-    protected function replaceAttributes($string, array $replace)
+    protected function replaceAttributes($string, array $replace): string
     {
         // Si se usó un arreglo asociativo se reemplaza con los posibles
         // placeholders que se pueden utilizar.
@@ -340,6 +348,7 @@ class Service_Translator implements Interface_Service, Translator
             }
             return strtr($string, $placeholders);
         }
+
         // Si se usó un arreglo con índices numéricos (no asociativo) se usaron
         // placeholders anónimos, como "%s", y se utiliza vsprintf para su
         // reemplazo.
@@ -399,10 +408,11 @@ class Service_Translator implements Interface_Service, Translator
      * @param string|null $locale
      * @return string
      */
-    public function choice($key, $number, array $replace = [], $locale = null)
+    public function choice($key, $number, array $replace = [], $locale = null): string
     {
         $locale = $this->loadLocale($locale);
         $translation = $this->getPluralTranslation($key, $number, $locale);
+
         return $this->replaceAttributes($translation, $replace);
     }
 
@@ -420,10 +430,11 @@ class Service_Translator implements Interface_Service, Translator
         if (!$translations) {
             return $key;
         }
+
         if (is_array($translations)) {
             return $translations[$number > 1 ? 'plural' : 'singular'] ?? $key;
         }
+
         return $translations;
     }
-
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -43,7 +45,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Console_Command_User_Create extends Command
 {
-
     /**
      * Nombre del comando.
      *
@@ -60,7 +61,8 @@ class Console_Command_User_Create extends Command
     {
         $this
             ->setDescription('Crea un nuevo usuario en el sistema.')
-            ->setHelp('Este comando permite crear un nuevo usuario en la base de datos.');
+            ->setHelp('Este comando permite crear un nuevo usuario en la base de datos.')
+        ;
     }
 
     /**
@@ -75,5 +77,4 @@ class Console_Command_User_Create extends Command
         $output->writeln(__('Comando %s no está implementado.', static::$defaultName));
         return Command::FAILURE;
     }
-
 }

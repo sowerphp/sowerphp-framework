@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -23,16 +25,16 @@
 
 namespace sowerphp\core;
 
-use sowerphp\core\Network_Request as Request;
+use sowerphp\autoload\Controller;
 use sowerphp\core\Facade_Session_Message as SessionMessage;
+use sowerphp\core\Network_Request as Request;
 
 /**
  * Clase que implementa los métodos para interacturar con registros de modelos
  * de la base de datos.
  */
-abstract class Controller_Model extends \sowerphp\autoload\Controller
+abstract class Controller_Model extends Controller
 {
-
     /**
      * Servicio de modelos.
      *
@@ -85,6 +87,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 get_class($this)
             );
         }
+
         return $this->modelClass;
     }
 
@@ -97,6 +100,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     {
         $modelClass = $this->getModelClass();
         $pluralInstance = (new $modelClass())->getPluralInstance();
+
         return $pluralInstance;
     }
 
@@ -108,13 +112,16 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         $instance = $this->modelService->instantiate(
             $this->getModelClass()
         );
+
         if (!in_array('list', $instance->getMetadata('model.default_permissions'))) {
             return redirect()->withError(__(
                 'No es posible listar registros de tipo %s.',
                 $instance->getMetadata('model.label')
             ))->back();
         }
+
         $data = $instance->getListData();
+
         return $this->render('index', [
             'data' => $data,
         ]);
@@ -129,6 +136,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $this->getModelClass(),
             ...$id
         );
+
         if (!$instance->exists()) {
             if (!$instance->exists()) {
                 return redirect()->withError(__(
@@ -138,16 +146,19 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 ))->back();
             }
         }
+
         if (!in_array('view', $instance->getMetadata('model.default_permissions'))) {
             return redirect()->withError(__(
                 'No es posible mostrar registros de tipo %s.',
                 $instance->getMetadata('model.label')
             ))->back();
         }
+
         $data = $instance->getShowData();
         foreach ($data['fields'] as $field => &$config) {
             $config['value'] = $instance->getAttribute($field);
         }
+
         return $this->render('show', [
             'instance' => $instance,
             'data' => $data,
@@ -163,6 +174,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         $instance = $this->modelService->instantiate(
             $this->getModelClass()
         );
+
         // Validar que el modelo permite la creación de registros.
         if (!in_array('add', $instance->getMetadata('model.default_permissions'))) {
             return redirect()->withError(__(
@@ -170,10 +182,12 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 $instance->getMetadata('model.label')
             ))->back();
         }
+
         // Crear formulario a partir de los metadados del modelo.
         $options = $this->getFormOptions($instance, 'create');
         $form = View_Form_Model::create($options);
         unset($options['form']);
+
         // Renderizar la vista con el formulario de creación.
         return $this->render('create', [
             'metadata' => $options,
@@ -190,9 +204,11 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         $instance = $this->modelService->instantiate(
             $this->getModelClass()
         );
+
         // Crear formulario a partir de los metadados del modelo.
         $options = $this->getFormOptions($instance, 'store');
         $form = View_Form_Model::create($options);
+
         // Validar formmulario.
         if (!$form->is_valid()) {
             return redirect()
@@ -201,6 +217,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 ->withErrors($form->errors, $form->errors_key)
             ;
         }
+
         // Obtener URL de la API que se deberá consumir.
         $routeConfig = $request->getRouteConfig();
         $url = sprintf(
@@ -208,28 +225,37 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $routeConfig['url']['controller'],
             $routeConfig['action']
         );
+
         // Consumir recurso de la API.
-        $response = libredte()->post($url, ['data' => $form->cleaned_data]);
+        $response = http_client()->post($url, ['data' => $form->cleaned_data]);
         $json = $response->json() ?? $response->body();
-        if (!$response->successful()) {
-            if (is_string($json)) {
-                $message = $json;
-                $status_code = $response->status();
-            } else {
-                $message = $json['message'];
-                if (!empty($json['errors'])) {
-                    foreach ($json['errors'] as $field => $errors) {
-                        foreach ($errors as $error) {
-                            $message .= ' ' . $error;
-                        }
+
+        // Si todo fue ok retornar inmediatamente con éxito.
+        if ($response->successful()) {
+            return redirect()
+                ->withSuccess($json['message'])
+                ->back($response->status())
+            ;
+        }
+
+        // Si hubo un problema determinar el error.
+        if (is_string($json)) {
+            $message = $json;
+            $status_code = $response->status();
+        } else {
+            $message = $json['message'];
+            if (!empty($json['errors'])) {
+                foreach ($json['errors'] as $field => $errors) {
+                    foreach ($errors as $error) {
+                        $message .= ' ' . $error;
                     }
                 }
-                $status_code = $json['status_code'];
             }
-            return redirect()->back($status_code)->withError($message)->withInput();
-        } else {
-            return redirect()->withSuccess($json['message'])->back(200);
+            $status_code = $json['status_code'];
         }
+
+        // Retornar una redirección con error.
+        return redirect()->back($status_code)->withError($message)->withInput();
     }
 
     /**
@@ -249,6 +275,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 implode(', ', $id)
             ))->back();
         }
+
         // Validar que el modelo permite la edición de registros.
         if (!in_array('change', $instance->getMetadata('model.default_permissions'))) {
             return redirect()->withError(__(
@@ -256,10 +283,12 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 $instance->getMetadata('model.label')
             ))->back();
         }
+
         // Crear formulario a partir de los metadados del modelo.
         $options = $this->getFormOptions($instance, 'edit');
         $form = View_Form_Model::create($options);
         unset($options['form']);
+
         // Renderizar la vista con el formulario de edición.
         return $this->render('edit', [
             'instance' => $instance,
@@ -277,9 +306,11 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
         $instance = $this->modelService->instantiate(
             $this->getModelClass()
         );
+
         // Crear formulario a partir de los metadados del modelo.
         $options = $this->getFormOptions($instance, 'update');
         $form = View_Form_Model::create($options);
+
         // Validar formmulario.
         if (!$form->is_valid()) {
             return redirect()
@@ -288,6 +319,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 ->withErrors($form->errors, $form->errors_key)
             ;
         }
+
         // Obtener URL de la API que se deberá consumir.
         $routeConfig = $request->getRouteConfig();
         $url = sprintf(
@@ -296,28 +328,37 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $routeConfig['action'],
             implode('/', $id)
         );
+
         // Consumir recurso de la API.
-        $response = libredte()->put($url, ['data' => $form->cleaned_data]);
+        $response = http_client()->put($url, ['data' => $form->cleaned_data]);
         $json = $response->json() ?? $response->body();
-        if (!$response->successful()) {
-            if (is_string($json)) {
-                $message = $json;
-                $status_code = $response->status();
-            } else {
-                $message = $json['message'];
-                if (!empty($json['errors'])) {
-                    foreach ($json['errors'] as $field => $errors) {
-                        foreach ($errors as $error) {
-                            $message .= ' ' . $error;
-                        }
+
+        // Si todo fue ok retornar inmediatamente con éxito.
+        if ($response->successful()) {
+            return redirect()
+                ->withSuccess($json['message'])
+                ->back($response->status())
+            ;
+        }
+
+        // Si hubo un problema determinar el error.
+        if (is_string($json)) {
+            $message = $json;
+            $status_code = $response->status();
+        } else {
+            $message = $json['message'];
+            if (!empty($json['errors'])) {
+                foreach ($json['errors'] as $field => $errors) {
+                    foreach ($errors as $error) {
+                        $message .= ' ' . $error;
                     }
                 }
-                $status_code = $json['status_code'];
             }
-            return redirect()->back($status_code)->withError($message)->withInput();
-        } else {
-            return redirect()->withSuccess($json['message'])->back($response->status());
+            $status_code = $json['status_code'];
         }
+
+        // Retornar una redirección con error.
+        return redirect()->back($status_code)->withError($message)->withInput();
     }
 
     /**
@@ -333,16 +374,31 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $routeConfig['action'],
             implode('/', $id)
         );
+
         // Consumir recurso de la API.
-        $response = libredte()->delete($url);
+        $response = http_client()->delete($url);
         $json = $response->json() ?? $response->body();
-        if (!$response->successful()) {
-            $message = is_string($json) ? $json : $json['message'];
-            $status_code = is_string($json) ? $response->status() : $json['status_code'];
-            return redirect()->back($status_code)->withError($message);
-        } else {
-            return redirect()->withSuccess($json['message'])->back($response->status());
+
+        // Si todo fue ok retornar inmediatamente con éxito.
+        if ($response->successful()) {
+            return redirect()
+                ->withSuccess($json['message'])
+                ->back($response->status())
+            ;
         }
+
+        // Si hubo un problema determinar el error.
+        $message = is_string($json)
+            ? $json
+            : $json['message']
+        ;
+        $status_code = is_string($json)
+            ? $response->status()
+            : $json['status_code']
+        ;
+
+        // Retornar una redirección con error.
+        return redirect()->back($status_code)->withError($message);
     }
 
     /**
@@ -370,11 +426,16 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 'files' => $request->file(),
                 'attributes' => [
                     'id' => $options['model']['db_table'] . 'ModelCreateForm',
-                    'action' => url($routeConfig['url']['controller'] . '/store'),
+                    'action' => url(
+                        $routeConfig['url']['controller']
+                            . '/store'
+                    ),
                     'onsubmit' => 'return validateModelCreateForm(this)',
                 ],
                 'submit_button' => [
-                    'label' => 'Crear nuevo ' . strtolower($options['model']['verbose_name']),
+                    'label' => 'Crear nuevo ' . strtolower(
+                        $options['model']['verbose_name']
+                    ),
                 ],
                 'layout' => $options['form']['layout']['create']
                     ?? $options['form']['layout']
@@ -395,13 +456,15 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                     'id' => $options['model']['db_table'] . 'ModelEditForm',
                     'action' => url(
                         $routeConfig['url']['controller']
-                        . '/update/'
-                        . $instance->id
+                            . '/update/'
+                            . $instance->id
                     ),
                     'onsubmit' => 'return validateModelEditForm(this)',
                 ],
                 'submit_button' => [
-                    'label' => 'Editar ' . strtolower($options['model']['verbose_name']),
+                    'label' => 'Editar ' . strtolower(
+                        $options['model']['verbose_name']
+                    ),
                 ],
                 'layout' => $options['form']['layout']['edit']
                     ?? $options['form']['layout']
@@ -434,6 +497,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     protected function getApiMetadata(string $action, array $metadata = []): array
     {
         $request = request();
+
         return array_merge([
             'action' => $action,
             'version' => $this->apiVersion,
@@ -460,9 +524,11 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 $pluralInstance->getMetadata('model.label')
             ));
         }
+
         // Obtener registros.
         $parameters = $request->getModelParametersFromUrl();
         $results = $pluralInstance->filter($parameters, $parameters['stdClass']);
+
         // Preparar respuesta formato estándar.
         if ($parameters['format'] == 'standard') {
             $metadataTotal = $pluralInstance->count([
@@ -518,6 +584,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 'data' => $results,
             ];
         }
+
         // Preparar respuesta formato Datatables.
         else if ($parameters['format'] == 'datatables') {
             $recordsTotal = $pluralInstance->count([]);
@@ -531,6 +598,7 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
                 'data' => $results,
             ];
         }
+
         // Entregar respuesta.
         return response()->json($body, 200);
     }
@@ -810,16 +878,19 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
     ): \sowerphp\core\Network_Response
     {
         $request = request();
+
         // Se debe determinar la vista automáticamente pues no fue indicada una
         // específica. Se renderizará la vista del Controller::action().
         if (!$view) {
             return parent::render($view, $data);
         }
+
         // Si la vista tiene '/' es porque se pidió una específica. Ya sea
         // mediante ruta absoluta o relativa y se deberá buscar esa.
         if (strpos($view, '/') !== false) {
             return parent::render($view, $data);
         }
+
         // Se indicó solo el nombre de la vista y no su ubicación (ni ruta
         // absoluta ni relativa). Se deberá determinar su ubicación.
         list($namespace, $ControllerName) = explode(
@@ -830,6 +901,8 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             $ControllerName . '/' . $view,
             (string)$request->getRouteConfig()['module']
         );
+
+        // Renderizar la vista.
         if ($filepath) {
             return parent::render($ControllerName . '/' . $view, $data);
         } else {
@@ -1172,5 +1245,4 @@ abstract class Controller_Model extends \sowerphp\autoload\Controller
             'data' => $Obj->{$campo.'_data'},
         ]);
     }
-
 }

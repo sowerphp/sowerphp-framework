@@ -75,7 +75,6 @@ use League\Flysystem\Local\LocalFilesystemAdapter;
  */
 class Service_Storage implements Interface_Service
 {
-
     /**
      * Almacenamiento por defecto que usa el servicio de almacenamiento.
      *
@@ -132,18 +131,21 @@ class Service_Storage implements Interface_Service
         $this->disks['local'] = new CustomFilesystem(
             new LocalFilesystemAdapter($this->paths['local'])
         );
+
         // Almacenamiento para archivos estáticos públicos.
         // Estos archivos son accesibles mediante la URL (/static).
         $this->paths['static'] = $this->layersService->getStaticPath();
         $this->disks['static'] = new CustomFilesystem(
             new LocalFilesystemAdapter($this->paths['static'])
         );
+
         // Almacenamiento para archivos estáticos privados.
         // Estos archivos son accesibles mediante la URL (/private).
         $this->paths['private'] = $this->getFullPath('/private', 'local');
         $this->disks['private'] = new CustomFilesystem(
             new LocalFilesystemAdapter($this->paths['private'])
         );
+
         // Almacenamiento para archivos temporales.
         $this->paths['tmp'] = $this->layersService->getTmpPath();
         $this->disks['tmp'] = new CustomFilesystem(
@@ -174,8 +176,8 @@ class Service_Storage implements Interface_Service
                 'El almacenamiento "%s" no está configurado para ser usado.',
                 $name
             ));
-
         }
+
         return $this->disks[$name];
     }
 
@@ -195,6 +197,7 @@ class Service_Storage implements Interface_Service
                 new LocalFilesystemAdapter($this->paths[$key])
             );
         }
+
         return $this->disks[$key];
     }
 
@@ -210,6 +213,7 @@ class Service_Storage implements Interface_Service
     {
         $basePath = $this->path($name) ?? '';
         $path = $this->normalizePath($path ?? '');
+
         return $basePath . $path;
     }
 
@@ -227,8 +231,8 @@ class Service_Storage implements Interface_Service
                 'El almacenamiento "%s" no está configurado para ser usado.',
                 $name
             ));
-
         }
+
         return $this->paths[$name] ?? null;
     }
 
@@ -249,6 +253,7 @@ class Service_Storage implements Interface_Service
             }
             return $path;
         }
+
         return '';
     }
 
@@ -265,7 +270,6 @@ class Service_Storage implements Interface_Service
  */
 class CustomFilesystem extends Filesystem
 {
-
     /**
      * Determina si una ruta es probablemente un directorio.
      *
@@ -313,5 +317,4 @@ class CustomFilesystem extends Filesystem
             && $this->mimeType($path) === 'directory'
         ;
     }
-
 }

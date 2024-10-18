@@ -30,7 +30,6 @@ namespace sowerphp\core;
  */
 class Network_Response //extends Response
 {
-
     /**
      * Tipos de datos mime de los archivos según su extensión.
      */
@@ -79,39 +78,51 @@ class Network_Response //extends Response
             if (!$status) {
                 $status = 200;
             }
+
             // Si el código no es un númerp, ejemplo "42P01" (que es un error
             // de PostgreSQL) se normaliza a un número.
             else if (!is_numeric($status)) {
+                // Asignar código de error original como cabecera personalizada.
                 $this->header('X-Original-Error-Code', $status);
+
                 // Error 409 (Conflict): Este código indica que hay un problema
                 // con el estado de la solicitud o del recurso que impide su
                 // procesamiento.
                 $status = 409;
             }
+
             // Si el código es menor que 200, se asume que es un código de
             // error no estándar y se reasigna a 409, con el código original en
             // una cabecera.
             else if ($status < 200) {
+                // Asignar código de error original como cabecera personalizada.
                 $this->header('X-Original-Error-Code', $status);
+
                 // Error 409 (Conflict): Este código indica que hay un problema
                 // con el estado de la solicitud o del recurso que impide su
                 // procesamiento.
                 $status = 409;
             }
+
             // Si el código es mayor o igual que 500 se cambia a un código del
             // rango 400, porque no se pueden devolver este tipo de códigos en
             // AWS (por el Health Status de los Load Balancer, ej en AWS EB).
             else if ($status >= 500) {
+                // Asignar código de error original como cabecera personalizada.
                 $this->header('X-Original-Error-Code', $status);
+
                 // Error 422 (Unprocessable Entity): Este código indica que el
                 // servidor entiende el tipo de contenido de la solicitud, y la
                 // sintaxis de la solicitud es correcta, pero no pudo procesar
                 // las instrucciones contenidas.
                 $status = 422;
             }
+
             // Asignar el código de estado HTTP pasado o determinado.
             $this->responseData['status'] = $status;
         }
+
+        // Retornar código HTTP real asignado.
         return $this->responseData['status'];
     }
 
@@ -133,6 +144,7 @@ class Network_Response //extends Response
                 $this->responseData['headers']['Content-Type'] = $mimetype;
             }
         }
+
         return $this->responseData['headers']['Content-Type'] ?? null;
     }
 
@@ -148,6 +160,7 @@ class Network_Response //extends Response
         if ($header !== null && $value !== null) {
             $this->responseData['headers'][$header] = $value;
         }
+
         return $this->responseData['headers'];
     }
 
@@ -162,6 +175,7 @@ class Network_Response //extends Response
         if ($body || $body === null) {
             $this->responseData['body'] = (string)$body;
         }
+
         return $this->responseData['body'];
     }
 
@@ -187,14 +201,17 @@ class Network_Response //extends Response
     {
         // Enviar el código de estado HTTP de la respuesta.
         http_response_code($this->responseData['status']);
+
         // Enviar las cabeceras de la respuesta.
         foreach ($this->responseData['headers'] as $header => $value) {
             header($header . ': '. $value);
         }
+
         // Enviar el cuerpo de la respuesta.
         if ($this->responseData['body']) {
             echo $this->responseData['body'];
         }
+
         // Entregar respuesta para el manejador (y pasar al kernel).
         return $this->responseData['status'] < 400 ? 0 : 1;
     }
@@ -224,6 +241,7 @@ class Network_Response //extends Response
             // Segundos que se recomienda tener el archivo en caché.
             'cache' => 86400,
         ], $options);
+
         // Si el archivo que se pasó es la ruta se genera el arreglo con los
         // datos del archivo en el formato estándar de $_FILES.
         if (!is_array($file)) {
@@ -246,6 +264,7 @@ class Network_Response //extends Response
                 $file['size']
             );
         }
+
         // Si los datos son un recurso se obtiene su contenido.
         if (is_resource($file['data'])) {
             $resource = $file['data'];
@@ -253,6 +272,7 @@ class Network_Response //extends Response
             $file['data'] = stream_get_contents($resource);
             fclose($resource);
         }
+
         // Armar datos de la respuesta.
         $this->responseData['headers']['Content-Type'] =
             $file['type'] . '; charset=' . $options['charset']
@@ -272,6 +292,7 @@ class Network_Response //extends Response
         $this->responseData['headers']['Pragma'] ='cache';
         $this->responseData['headers']['Content-Length'] = $file['size'];
         $this->responseData['body'] = $file['data'];
+
         // Retornar objeto de la respuesta.
         return $this;
     }
@@ -312,6 +333,7 @@ class Network_Response //extends Response
             $extension = substr($filename, strrpos($filename, '.') + 1);
             $options['mimetype'] = $this->mimeTypes[$extension] ?? null;
         }
+
         // Asignar datos de la respuesta.
         if ($options['mimetype']) {
             if ($options['charset'] !== null) {
@@ -335,6 +357,7 @@ class Network_Response //extends Response
             $this->responseData['body'] = $content;
         }
         $this->send();
+
         exit(); // TODO: refactorizar para no cerrar acá pues detiene controlador.
     }
 
@@ -363,6 +386,7 @@ class Network_Response //extends Response
             $this->header($header, $value);
         }
         $this->body(json_encode($data, $options) . "\n");
+
         // Retornar objeto de la respuesta.
         return $this;
     }
@@ -382,6 +406,7 @@ class Network_Response //extends Response
             'status_code' => $status_code,
             'message' => $e->getMessage(),
         ];
+
         // Agregar datos que son para ambiente no productivo.
         if (config('app.env') != 'production') {
             $body['trace'] = array_filter(array_map(function($caller) {
@@ -397,8 +422,8 @@ class Network_Response //extends Response
                 return $trace !== null;
             });
         }
+
         // Entregar respuesta JSON de la excepción.
         return $this->json($body, $status_code);
     }
-
 }

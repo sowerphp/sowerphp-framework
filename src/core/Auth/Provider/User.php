@@ -31,7 +31,6 @@ use Illuminate\Contracts\Auth\Authenticatable;
  */
 class Auth_Provider_User implements UserProvider
 {
-
     protected $model;
 
     public function __construct(Service_Config $configService)
@@ -51,6 +50,7 @@ class Auth_Provider_User implements UserProvider
     {
         $userClass = $this->model;
         $user = new $userClass($identifier);
+
         return $user->usuario ? $user : null;
     }
 
@@ -99,9 +99,11 @@ class Auth_Provider_User implements UserProvider
         $class = $this->model;
         $user = new $class();
         $id = $user->getPluralInstance()->getIdFromCredentials($credentials);
+
         if ($id === null) {
             return null;
         }
+
         // Instanciar el objeto del usuario.
         return $this->retrieveById($id);
     }
@@ -125,16 +127,18 @@ class Auth_Provider_User implements UserProvider
             ?? $credentials['token']
             ?? ''
         ;
+
         // Validar credenciales mediante el hash.
-        if ($username == 'X' && strlen($password) == 32) {
+        if ($username === 'X' && strlen($password) === 32) {
             return $user->hash == $password;
         }
+
         // Validar credenciales mediante contraseña.
         if ($password) {
             return $user->checkPassword($password);
         }
+
         // No se pudo validar.
         return false;
     }
-
 }

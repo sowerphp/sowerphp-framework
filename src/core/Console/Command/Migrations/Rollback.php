@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -43,7 +45,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Console_Command_Migrations_Rollback extends Command
 {
-
     /**
      * Nombre del comando.
      *
@@ -60,7 +61,8 @@ class Console_Command_Migrations_Rollback extends Command
     {
         $this
             ->setDescription('Revierte las últimas migraciones de base de datos aplicadas.')
-            ->setHelp('Este comando permite revertir las migraciones recientes en la base de datos.');
+            ->setHelp('Este comando permite revertir las migraciones recientes en la base de datos.')
+        ;
     }
 
     /**
@@ -75,5 +77,4 @@ class Console_Command_Migrations_Rollback extends Command
         $output->writeln(__('Comando %s no está implementado.', static::$defaultName));
         return Command::FAILURE;
     }
-
 }

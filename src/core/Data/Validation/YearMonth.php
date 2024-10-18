@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -27,7 +29,6 @@ use Illuminate\Contracts\Validation\Rule;
 
 class Data_Validation_YearMonth implements Rule
 {
-
     /**
      * Determina si el valor es un periodo válido en formato YYYYMM.
      *
@@ -43,7 +44,7 @@ class Data_Validation_YearMonth implements Rule
         }
 
         // Validar el mes.
-        $month = (int)substr($value, 4, 2);
+        $month = (int) substr($value, 4, 2);
         if ($month < 1 || $month > 12) {
             return false;
         }
@@ -64,5 +65,4 @@ class Data_Validation_YearMonth implements Rule
             date('Ym')
         );
     }
-
 }

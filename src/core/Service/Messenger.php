@@ -49,7 +49,6 @@ use Symfony\Component\Messenger\EventListener\StopWorkerOnRestartSignalListener;
  */
 class Service_Messenger implements Interface_Service
 {
-
     /**
      * Contenedor para los transportadores de mensajes.
      *
@@ -166,6 +165,8 @@ class Service_Messenger implements Interface_Service
             new SendersLocator($sendersMap, $this->container)
         );
         $sendMessageMiddleware->setLogger($this->logService);
+
+        // Entregar el middleware del localizador de remitentes.
         return $sendMessageMiddleware;
     }
 
@@ -185,6 +186,7 @@ class Service_Messenger implements Interface_Service
                 $handlers[$message][] = new $messageHandler();
             }
         }
+
         return new HandleMessageMiddleware(
             new HandlersLocator($handlers)
         );
@@ -211,6 +213,7 @@ class Service_Messenger implements Interface_Service
         if (!isset($this->container[$key])) {
             $this->container->instance($key, $this->loadTransport($name));
         }
+
         return $this->container[$key];
     }
 
@@ -246,11 +249,14 @@ class Service_Messenger implements Interface_Service
                     $this->getHandleMessageMiddleware(),
                 ]);
                 return new SyncTransport($syncBus);
+
             case 'redis':
                 $redisConnection = RedisConnection::fromDsn($dsn);
                 return new RedisTransport($redisConnection, $this->serializer);
+
             case 'gearman':
                 return new Network_Messenger_Transport_Gearman($dsn, $this->serializer);
+
             default:
                 throw new \InvalidArgumentException(__(
                     'Transportador %s no soportado en los mensajes',
@@ -272,6 +278,7 @@ class Service_Messenger implements Interface_Service
     {
         $envelope = new Envelope($message);
         $envelope = $envelope->with(new BusNameStamp($this->busName));
+
         return $this->bus->dispatch($envelope);
     }
 
@@ -286,9 +293,12 @@ class Service_Messenger implements Interface_Service
      * @param string|null $transportName
      * @return Envelope
      */
-    public function sendWithoutBus(object $message, ?string $transportName = null): Envelope
-    {
+    public function sendWithoutBus(
+        object $message,
+        ?string $transportName = null
+    ): Envelope {
         $transport = $this->transport($transportName);
+
         return $transport->send(new Envelope($message));
     }
 
@@ -351,5 +361,4 @@ class Service_Messenger implements Interface_Service
         // Entregar los comandos del servicio.
         return [$consumeMessagesCommand, $stopWorkersCommand];
     }
-
 }

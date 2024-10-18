@@ -33,7 +33,6 @@ use Psr\Log\LoggerTrait;
  */
 class Service_Log implements Interface_Service, LoggerInterface
 {
-
     // Usar LoggerTrait para implementar métodos básicos de LoggerInterface.
     use LoggerTrait;
 
@@ -126,5 +125,4 @@ class Service_Log implements Interface_Service, LoggerInterface
             ));
         }
     }
-
 }

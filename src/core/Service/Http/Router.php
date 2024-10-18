@@ -31,7 +31,6 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 class Service_Http_Router implements Interface_Service
 {
-
     /**
      * Instancia de la aplicación.
      *
@@ -154,10 +153,12 @@ class Service_Http_Router implements Interface_Service
         foreach (glob($routesDir . '/*.php') as $filepath) {
             require_once $filepath;
         }
+
         // Cargar las rutas de cada capa de la aplicación.
         $this->layersService->loadFiles([
             '/App/routes.php',
         ]);
+
         // Cargar las rutas de cada módulo (en todos sus directorios).
         $modules = $this->moduleService->getLoadedModules();
         foreach ($modules as $module) {
@@ -189,6 +190,7 @@ class Service_Http_Router implements Interface_Service
                 request()
             );
         }
+
         return $this->urlGenerator;
     }
 
@@ -224,6 +226,7 @@ class Service_Http_Router implements Interface_Service
         if (!isset($config['controller'])) {
             return $config;
         }
+
         return $this->normalizeRouteConfig($config);
     }
 
@@ -243,16 +246,19 @@ class Service_Http_Router implements Interface_Service
         try {
             $route = $this->router->getRoutes()->match($request);
         }
+
         // Resolver ruta usando el sistema de rutas antiguo de SowerPHP que
         // se configuraron con Service_Http_Router::connect().
         catch (NotFoundHttpException $e) {
             return $this->getRouteConfig($request->getRequestUriDecoded());
         }
+
         // Si la ruta es de Illuminate\Routing\Router se procesa.
         $actionName = explode('@', $route->getActionName());
         $actionClass = $actionName[0];
         $actionMethod = $actionName[1] ?? null;
         $parameters = $route->parameters();
+
         // La ruta es una redirección de Illuminate.
         if ($actionClass == '\Illuminate\Routing\RedirectController') {
             return [
@@ -261,11 +267,13 @@ class Service_Http_Router implements Interface_Service
                 'parameters' => $parameters,
             ];
         }
+
         // La ruta es una función anónima que entrega la configuración.
         else if ($actionClass == 'Closure') {
             $action = $route->getAction('uses');
             return call_user_func_array($action, $parameters);
         }
+
         // Se obtuvo una clase específica que se debe ejecutar, ya resuelta.
         // Esto ocurrirá cuando no se procesa con la ruta por defecto sino por
         // una que haya sido asignada por los métodos de $this->router.
@@ -288,6 +296,7 @@ class Service_Http_Router implements Interface_Service
     protected function normalizeRouteConfig(array $config): array
     {
         $prefixes = ['Controller_', 'Controller'];
+
         // Configuración base normalizada.
         $routeConfig = [
             'module' => $config['module'] ?? null,
@@ -296,6 +305,7 @@ class Service_Http_Router implements Interface_Service
             'action' => $config['action'] ?? 'index',
             'parameters' => $config['parameters'] ?? [],
         ];
+
         // Si venía una FQCN se normaliza el controlador para dejarlo solo.
         if (strpos($routeConfig['controller'], '\\') !== false) {
             $routeConfig['class'] = $routeConfig['controller'];
@@ -306,19 +316,23 @@ class Service_Http_Router implements Interface_Service
                 $aux[count($aux) - 1]
             );
         }
+
         // Se aplana el controlador.
         $routeConfig['controller'] = Str::snake($routeConfig['controller']);
+
         // Se determina la base de la clase asociada al controlador.
         if (!isset($routeConfig['class'])) {
             $routeConfig['class'] = ucfirst(Str::camel(
                 $routeConfig['controller']
             ));
         }
+
         // Armar el controlador correcto si no fue especificado como FQCN
         // (Fully Qualified Class Name).
         if ($routeConfig['class'][0] != '\\') {
             // Agregar prefijo "Controller_" a la clase.
             $routeConfig['class'] = 'Controller_' . $routeConfig['class'];
+
             // Agregar módulo a la clase si existe.
             if (!empty($routeConfig['module'])) {
                 if (
@@ -333,16 +347,19 @@ class Service_Http_Router implements Interface_Service
                 }
             }
         }
+
         // Si la clase no es un FQCN se agrega el namespace de autocarga.
         if ($routeConfig['class'][0] != '\\') {
             $routeConfig['class'] =
                 '\\sowerphp\\autoload\\' . $routeConfig['class']
             ;
         }
+
         // Se decodifican los parámetros de la URL que son parte del PATH.
         foreach ($routeConfig['parameters'] as &$parameter) {
             $parameter = rawurldecode($parameter);
         }
+
         // Entregar configuración normalizada.
         return $routeConfig;
     }
@@ -362,10 +379,12 @@ class Service_Http_Router implements Interface_Service
                 ucfirst(Str::camel($config['controller']))
             ), 404);
         }
+
         // Verificar que la acción (método del controlador) no sea privado.
         try {
             $method = new \ReflectionMethod($config['class'], $config['action']);
         }
+
         // Si la acción (método del controlador) no existe se genera un error.
         catch (\ReflectionException $e) {
             throw new \Exception(__(
@@ -381,6 +400,7 @@ class Service_Http_Router implements Interface_Service
                 $config['action']
             ), 405);
         }
+
         // Verificar la cantidad de parámetros que se deben pasar a la acción.
         $n_requestArgs = count($config['parameters']);
         $n_requiredArgs = 0;
@@ -401,6 +421,7 @@ class Service_Http_Router implements Interface_Service
                 $n_requiredArgs++;
             }
         }
+
         if ($n_requestArgs < $n_requiredArgs) {
             throw new \Exception(__(
                 'Argumentos insuficientes para la acción %s::%s(%s).',
@@ -448,6 +469,7 @@ class Service_Http_Router implements Interface_Service
         $withRegexp = strpos($route, ':') !== false;
         $withParameters = strpos($route, '*') !== false;
         $type = $withRegexp || $withParameters ? 'dynamic' : 'static';
+
         // Si la ruta es dinámica, se determinan procesa según si es con
         // expresión regular o solo parámetros.
         if ($type == 'dynamic') {
@@ -469,6 +491,7 @@ class Service_Http_Router implements Interface_Service
                 krsort($this->routes['dynamic']['regexp']);
             }
         }
+
         // Si la ruta es estática se asigna la configuración normalizada.
         else {
             $normalizedConfig = [
@@ -506,21 +529,25 @@ class Service_Http_Router implements Interface_Service
         if ($resource[0] != '/') {
             $resource = '/' . $resource;
         }
+
         // Buscar configuración de ruta conectada estática.
         $config = $this->getRouteConfigConnectedStatic($resource);
         if ($config) {
             return $config;
         }
+
         // Buscar configuración de ruta conectada dinámica.
         $config = $this->getRouteConfigConnectedDynamic($resource);
         if ($config) {
             return $config;
         }
+
         // Buscar configuración de página estática.
         $config = $this->getRouteConfigStaticPage($resource);
         if ($config) {
             return $config;
         }
+
         // Buscar configuración de ruta automáfica (no conectada).
         return $this->getRouteConfigAutomagically($resource);
     }
@@ -562,6 +589,7 @@ class Service_Http_Router implements Interface_Service
         if (!$filepath) {
             return null;
         }
+
         return [
             'module' => $module,
             'controller' => 'app',
@@ -583,6 +611,7 @@ class Service_Http_Router implements Interface_Service
         if (!$module) {
             return $resource;
         }
+
         return substr(
             Utility_String::replaceFirst(
                 str_replace('.', '/', Utility_Inflector::underscore($module)),
@@ -611,12 +640,14 @@ class Service_Http_Router implements Interface_Service
         if ($config) {
             return $config;
         }
+
         // Buscar rutas dinámicas que tienen parámetros que se deben pasar a
         // la acción del controlador.
         $config = $this->getRouteConfigConnectedDynamicWithParameters($resource);
         if ($config) {
             return $config;
         }
+
         // No se encontró una configuración válida de ruta conectada dinámica.
         return null;
     }
@@ -638,6 +669,7 @@ class Service_Http_Router implements Interface_Service
             'action' => null,
             'parameters' => [],
         ];
+
         // Iterar cada ruta dinámica para buscar coincidencia con el recurso.
         $resource_parts = explode('/', $resource);
         $n_resource_parts = count($resource_parts);
@@ -650,21 +682,22 @@ class Service_Http_Router implements Interface_Service
             if ($n_resource_parts < $n_route_parts) {
                 continue;
             }
-            // Revisar cada una de las partes del recurso y ver si coinciden
-            // con cada una de las partes de la ruta.
+
+            // Revisar cada una de las partes del recurso y ver si coinciden con
+            // cada una de las partes de la ruta.
             $match = true;
             for ($i = 0; $i < $n_route_parts; $i++) {
-                // Si la parte $i del recurso es igual a la de la ruta
-                // se pasa a la siguiente, porque no es parte variable.
+                // Si la parte $i del recurso es igual a la de la ruta se pasa a
+                // la siguiente, porque no es parte variable.
                 if ($resource_parts[$i] == $route_parts[$i]) {
                     continue;
                 }
-                // Si la parte es un parámetro variable del recurso (URL), o
-                // sea parte con ":", se asigna la parte donde corresponda
-                // (controlador, acción o variable acción).
-                // Se asignará solo si se logra validar con su expresión
-                // regular, si no pasa la validación se indica que no hubo
-                // coincidencia.
+
+                // Si la parte es un parámetro variable del recurso (URL), o sea
+                // parte con ":", se asigna la parte donde corresponda
+                // (controlador, acción o variable acción). Se asignará solo si
+                // se logra validar con su expresión regular, si no pasa la
+                // validación se indica que no hubo coincidencia.
                 else if ($route_parts[$i][0] == ':') {
                     // Verificar formato de la parte contra su expresión
                     // regular. Si no hace match, se rompe este ciclo de partes
@@ -674,6 +707,7 @@ class Service_Http_Router implements Interface_Service
                         $match = false;
                         break;
                     }
+
                     // Asignar la parte donde corresponda.
                     if ($route_parts[$i] == ':controller') {
                         $config['controller'] = $resource_parts[$i];
@@ -684,10 +718,12 @@ class Service_Http_Router implements Interface_Service
                     else {
                         $config['parameters'][] = $resource_parts[$i];
                     }
+
                     // Como se logró usar la parte, se pasa a la siguiente
                     // parte de la ruta.
                     continue;
                 }
+
                 // Si la parte es "*" significa que todo desde $i en el recurso
                 // son parámetros de la acción. Por lo que se asignan los
                 // parámetros y se dejan de procesar las partes.
@@ -700,12 +736,14 @@ class Service_Http_Router implements Interface_Service
                     }
                     break;
                 }
+
                 // Si no se logró hacer match, se rompe la ejecución, pues no
                 // se podrá determinar la configuración analizando las partes
                 // del recurso y comparando con las partes de la ruta.
                 $match = false;
                 break;
             }
+
             // Si todas las partes de la ruta hicieron match con las partes del
             // recurso entonces se encontró (y armó) la configuración de la
             // ruta. Por lo que se entrega retornándola.
@@ -713,6 +751,7 @@ class Service_Http_Router implements Interface_Service
                 return $config;
             }
         }
+
         // Ninguna ruta hizo match, por lo que se retorna null.
         return null;
     }
@@ -739,6 +778,7 @@ class Service_Http_Router implements Interface_Service
             'action' => null,
             'parameters' => [],
         ];
+
         // Iterar cada ruta dinámica para buscar coincidencia con el recurso.
         foreach ($this->routes['dynamic']['parameters'] as $route => $routeConfig) {
             $route = substr($route, 0, -1);
@@ -748,9 +788,11 @@ class Service_Http_Router implements Interface_Service
                     '/',
                     str_replace($route, '', $resource)
                 );
+
                 return $config;
             }
         }
+
         // Ninguna ruta hizo match, por lo que se retorna null.
         return null;
     }
@@ -788,11 +830,13 @@ class Service_Http_Router implements Interface_Service
         } else {
             $isApiRoute = false;
         }
+
         // Buscar si existe un módulo en el recurso de la URL y asignarlo a la
         // configuración base de la ruta.
         $config = [
             'module' => $this->moduleService->findModuleByResource($resource),
         ];
+
         // Obtener la página de la ruta (sin módulo si existiese), luego
         // obtener las partes de la página de la ruta y con eso su configuración.
         $page = $this->removeModuleFromResource($resource, $config['module']);
@@ -800,17 +844,20 @@ class Service_Http_Router implements Interface_Service
         $config['controller'] = isset($parts[0]) ? array_shift($parts) : null;
         $config['action'] = isset($parts[0]) ? array_shift($parts) : 'index';
         $config['parameters'] = $parts;
+
         // Si no hay controlador y es un módulo se asigna un controlador
         // estándar para cargar la página con el menú del módulo.
         if (empty($config['controller']) && !empty($config['module'])) {
             $config['controller'] = 'app';
             $config['action'] = 'module';
         }
+
         // Se ajusta configuración encontrada si es API.
         if ($isApiRoute) {
             array_unshift($config['parameters'], $config['action']);
             $config['action'] = 'api';
         }
+
         // Retornar configuración de la ruta determinada.
         return $config;
     }
@@ -827,13 +874,23 @@ class Service_Http_Router implements Interface_Service
      */
     public function __call($method, $parameters)
     {
-        $routeMethods = ['get', 'post', 'put', 'delete', 'patch', 'options', 'any', 'redirect'];
+        $routeMethods = [
+            'get',
+            'post',
+            'put',
+            'delete',
+            'patch',
+            'options',
+            'any',
+            'redirect',
+        ];
+
         if (in_array($method, $routeMethods)) {
             if (!empty($this->prefix)) {
                 $parameters[0] = $this->prefix . $parameters[0];
             }
         }
+
         return call_user_func_array([$this->router, $method], $parameters);
     }
-
 }

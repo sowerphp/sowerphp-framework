@@ -30,7 +30,6 @@ use Illuminate\Support\Str;
  */
 class Service_Http_Auth implements Interface_Service
 {
-
     protected $app;
     protected $configService;
     protected $request;
@@ -127,6 +126,7 @@ class Service_Http_Auth implements Interface_Service
         if (!isset($this->guards[$name])) {
             throw new \Exception(__('Guard %s no está configurada.', $name));
         }
+
         return $this->guards[$name];
     }
 
@@ -138,5 +138,4 @@ class Service_Http_Auth implements Interface_Service
     {
         return call_user_func_array([$this->authorization, $method], $parameters);
     }
-
 }

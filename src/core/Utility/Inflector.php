@@ -28,11 +28,10 @@ namespace sowerphp\core;
  *
  * Inflector pluralizes and singularizes English nouns.
  *
- * @link          http://book.cakephp.org/2.0/en/core-utility-libraries/inflector.html
+ * @link http://book.cakephp.org/2.0/en/core-utility-libraries/inflector.html
  */
 class Utility_Inflector
 {
-
 	/**
 	 * Plural inflector rules
 	 *

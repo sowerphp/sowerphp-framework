@@ -33,7 +33,6 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
  */
 class Network_Messenger_Handler_Job implements MessageHandlerInterface
 {
-
     /**
      * Servicio de kernel para la ejecución de comandos de la consola.
      *
@@ -59,6 +58,7 @@ class Network_Messenger_Handler_Job implements MessageHandlerInterface
         $command = $job->getCommand();
         $arguments = $job->getArguments();
         $options = $job->getOptions();
+
         return $this->executeCommand($command, $arguments, $options);
     }
 
@@ -91,7 +91,8 @@ class Network_Messenger_Handler_Job implements MessageHandlerInterface
             log_message('debug', __(
                 'Comando %s ejecutado con estado %s', $command, $status
             ));
-            return (object)[
+
+            return (object) [
                 'status' => $status,
                 'output' => $output->fetch(),
             ];
@@ -102,7 +103,8 @@ class Network_Messenger_Handler_Job implements MessageHandlerInterface
                 $e->getMessage()
             );
             log_message('error', $error);
-            return (object)[
+
+            return (object) [
                 'status' => 1,
                 'output' => $error,
             ];
@@ -127,6 +129,7 @@ class Network_Messenger_Handler_Job implements MessageHandlerInterface
             $this->kernelService->register();
             $this->kernelService->boot();
         }
+
         return $this->kernelService;
     }
 
@@ -140,7 +143,7 @@ class Network_Messenger_Handler_Job implements MessageHandlerInterface
         if (!isset($this->console)) {
             $this->console = $this->getKernel()->getConsole();
         }
+
         return $this->console;
     }
-
 }

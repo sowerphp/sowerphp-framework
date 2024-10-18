@@ -25,13 +25,13 @@ namespace sowerphp\core;
 
  /**
  * Servicio para administrar las capas de la aplicación.
+ *
  * Cada capa tiene su propia ubicación y namespace base, que puede o no tener
  * otros namespaces en subniveles. Si existen namespaces inferiores serán
  * módulos de la capa (no se usa PSR-4).
  */
 class Service_Layers implements Interface_Service
 {
-
     /**
      * Arreglo con los archivos dentro de una ruta que representan puntos desde
      * donde se puede lanzar la aplicación.
@@ -168,6 +168,7 @@ class Service_Layers implements Interface_Service
             define('DIR_STATIC', $this->getStaticPath());
             define('DIR_TMP', $this->getTmpPath());
         }
+
         // Entregar el arreglo asociativo de directorios.
         return $this->directories;
     }
@@ -184,6 +185,7 @@ class Service_Layers implements Interface_Service
         if (!isset($this->directories['framework'])) {
             $this->directories['framework'] = dirname(dirname(dirname(__DIR__)));
         }
+
         // Retornar el directorio determinado o la ruta dentro del directorio.
         return $this->directories['framework'] . $this->normalizePath($path);
     }
@@ -209,8 +211,10 @@ class Service_Layers implements Interface_Service
             $pattern = '#(' . implode('|', array_map(function($file) {
                 return preg_quote($file, '#');
             }, $this->startFiles)) . ')$#';
+
             // Obtener el rastreo de depuración
             $backtrace = debug_backtrace();
+
             // Iterar a través del rastreo para encontrar una ruta de archivo
             // coincidente.
             foreach ($backtrace as $caller) {
@@ -225,6 +229,7 @@ class Service_Layers implements Interface_Service
                 }
             }
         }
+
         // Retornar el directorio determinado o la ruta dentro del directorio.
         return $this->directories['project'] . $this->normalizePath($path);
     }
@@ -245,6 +250,7 @@ class Service_Layers implements Interface_Service
                 DIRECTORY_SEPARATOR . 'storage'
             );
         }
+
         // Retornar el directorio determinado o la ruta dentro del directorio.
         return $this->directories['storage'] . $this->normalizePath($path);
     }
@@ -265,6 +271,7 @@ class Service_Layers implements Interface_Service
                 DIRECTORY_SEPARATOR . 'resources'
             );
         }
+
         // Retornar el directorio determinado o la ruta dentro del directorio.
         return $this->directories['resource'] . $this->normalizePath($path);
     }
@@ -285,6 +292,7 @@ class Service_Layers implements Interface_Service
                 DIRECTORY_SEPARATOR . 'static'
             );
         }
+
         // Retornar el directorio determinado o la ruta dentro del directorio.
         return $this->directories['static'] . $this->normalizePath($path);
     }
@@ -310,6 +318,7 @@ class Service_Layers implements Interface_Service
                 $this->directories['tmp'] = sys_get_temp_dir();
             }
         }
+
         // Retornar el directorio determinado o la ruta dentro del directorio.
         return $this->directories['tmp'] . $this->normalizePath($path);
     }
@@ -331,6 +340,7 @@ class Service_Layers implements Interface_Service
             }
             return $path;
         }
+
         return '';
     }
 
@@ -351,6 +361,7 @@ class Service_Layers implements Interface_Service
                 ];
             }
         }
+
         // Entregar listado de capas.
         return $this->layers;
     }
@@ -394,6 +405,7 @@ class Service_Layers implements Interface_Service
     public function getLayer(string $layer): ?array
     {
         $layer = str_replace(DIRECTORY_SEPARATOR, '\\', $layer);
+
         return $this->layers[$layer] ?? null;
     }
 
@@ -410,6 +422,7 @@ class Service_Layers implements Interface_Service
                 return $layer['path'];
             }, $this->getLayers());
         }
+
         // Entregar el listado de rutas de la aplicación
         return $this->paths;
     }
@@ -426,6 +439,7 @@ class Service_Layers implements Interface_Service
         if (!isset($this->pathsReverse)) {
             $this->pathsReverse = array_reverse($this->getPaths());
         }
+
         // Entregar el listado de rutas invertidas de la aplicación.
         return $this->pathsReverse;
     }
@@ -446,6 +460,7 @@ class Service_Layers implements Interface_Service
     public function getFilePath(string $filename): ?string
     {
         $filename = $this->normalizePath($filename);
+
         // Si la ruta absoluta al archivo no está determinada se busca.
         if (!isset($this->filepaths[$filename])) {
             $paths = $this->getPaths();
@@ -458,6 +473,7 @@ class Service_Layers implements Interface_Service
                 }
             }
         }
+
         return $this->filepaths[$filename] !== false
             ? $this->filepaths[$filename]
             : null
@@ -489,5 +505,4 @@ class Service_Layers implements Interface_Service
     {
         $this->loadFiles($files, true);
     }
-
 }

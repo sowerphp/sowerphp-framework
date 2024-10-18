@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -23,14 +25,15 @@
 
 namespace sowerphp\core;
 
+use sowerphp\autoload\Controller;
+
 /**
  * Clase para manejar acciones específicas con páginas que no requieren
  * ejecutar una acción o bien esta es parametrizable y se ejecuta en base a
  * configuraciones.
  */
-class Controller_App extends \sowerphp\autoload\Controller
+class Controller_App extends Controller
 {
-
     /**
      * Método que se ejecuta antes de ejecutar la acción del controlador.
      */
@@ -42,6 +45,7 @@ class Controller_App extends \sowerphp\autoload\Controller
             'redirect',
         );
         app('auth')->allowActionsWithLogin('session');
+
         // Sólo se inicializa el controlador padre si el método método (acción)
         // que se ejecutará no es error(). Pues al ser un error ya viene de un
         // controlador que inicializó previamente el controlador padre.
@@ -81,6 +85,7 @@ class Controller_App extends \sowerphp\autoload\Controller
     public function page(?string $page = null): Network_Response
     {
         $page = $page ? $page : config('app.ui.homepage');
+
         return $this->render('Pages' . $page);
     }
 
@@ -96,12 +101,14 @@ class Controller_App extends \sowerphp\autoload\Controller
 
         // Menú del módulo.
         $module_nav = $moduleService->getModuleNav($module);
+
         // Nombre del módulo para URL.
         $module_url = str_replace(
             '.',
             '/',
             \sowerphp\core\Utility_Inflector::underscore($module)
         );
+
         // Verificar permisos.
         $auth = app('auth');
         foreach ($module_nav as $category_id => &$category) {
@@ -114,6 +121,7 @@ class Controller_App extends \sowerphp\autoload\Controller
                         'icon' => 'fa-solid fa-link',
                     ];
                 }
+
                 // Si es un arreglo colocar opciones por defecto.
                 else {
                     $info = array_merge([
@@ -122,6 +130,7 @@ class Controller_App extends \sowerphp\autoload\Controller
                         'icon' => 'fa-solid fa-link',
                     ], $info);
                 }
+
                 // Verificar permisos para acceder al enlace.
                 if (!$auth->checkResourcePermission('/' . $module_url . $link)) {
                     unset($module_nav[$category_id]['menu'][$link]);
@@ -134,11 +143,13 @@ class Controller_App extends \sowerphp\autoload\Controller
                 unset($module_nav[$category_id]);
             }
         }
+
         // Si existe una vista para el del modulo se usa sino la por defecto.
         $view = app('view')->resolveViewRelative('Module/index', $module);
         if ($view === null) {
             $view = 'App/module';
         }
+
         // Renderizar la vista.
         return $this->render($view, [
             'title' => config('modules.' . $module . '.title')
@@ -159,6 +170,7 @@ class Controller_App extends \sowerphp\autoload\Controller
     public function redirect(string $destination, int $status = 302): Network_Response
     {
         session()->reflash();
+
         return redirect($destination, $status);
     }
 
@@ -171,6 +183,7 @@ class Controller_App extends \sowerphp\autoload\Controller
     public function error($exception): Network_Response
     {
         ob_clean();
+
         // Es una solicitud mediante un servicio web.
         $request = request();
         if ($request->isApiRequest()) {
@@ -180,6 +193,7 @@ class Controller_App extends \sowerphp\autoload\Controller
                 $status
             );
         }
+
         // Es una solicitud mediante la interfaz web.
         $data = [
             'exception' => get_class($exception),
@@ -188,16 +202,17 @@ class Controller_App extends \sowerphp\autoload\Controller
             'code' => $exception->getCode(),
             'severity' => $exception->severity ?? LOG_ERR,
         ];
+
         // Armar datos para la vista HTML (web).
         $data['error_reporting'] = config('app.debug');
         $layersService = app('layers');
         $data['message'] = htmlspecialchars($data['message']);
         $data['trace'] = $layersService->obfuscatePath($data['trace']);
         $data['soporte'] = config('mail.to.address') !== null;
+
         // Renderizar página de error.
         $response = $this->render('App/error', $data);
         $response->status($data['code']);
         return $response;
     }
-
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -44,7 +46,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Console_Command_App_Check extends Command
 {
-
     /**
      * Nombre del comando.
      *
@@ -61,7 +62,8 @@ class Console_Command_App_Check extends Command
     {
         $this
             ->setDescription('Verifica el estado general de la aplicación.')
-            ->setHelp('Este comando permite realizar una verificación del estado general de la aplicación.');
+            ->setHelp('Este comando permite realizar una verificación del estado general de la aplicación.')
+        ;
     }
 
     /**
@@ -77,5 +79,4 @@ class Console_Command_App_Check extends Command
         $output->writeln(__('Comando %s no está implementado.', static::$defaultName));
         return Command::FAILURE;
     }
-
 }

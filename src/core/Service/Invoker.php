@@ -30,7 +30,6 @@ namespace sowerphp\core;
  */
 class Service_Invoker
 {
-
     /**
      * Contenedor de servicios para resolver dependencias.
      */
@@ -133,12 +132,14 @@ class Service_Invoker
             if ($type && class_exists($type)) {
                 $params[] = $this->container->make($type);
             }
+
             // Añadir todos los parámetros restantes si el parámetro es de
             // largo variable.
             else if ($param->isVariadic()) {
                 $params = array_merge($params, array_slice($parameters, $i));
                 break;
             }
+
             // Añadir parámetro por nombre, índice o valor por defecto.
             else {
                 $params[] = $parameters[$param->getName()]
@@ -149,12 +150,13 @@ class Service_Invoker
                                     : null
                             )
                 ;
+
                 // Pasar al siguiente parámetro.
                 $i++;
             }
         }
+
         // Entregar la lista de parámetros determinados.
         return $params;
     }
-
 }

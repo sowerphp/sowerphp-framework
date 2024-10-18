@@ -30,7 +30,6 @@ use Illuminate\Contracts\Encryption\Encrypter as EncrypterContract;
  */
 class Service_Encryption implements Interface_Service
 {
-
     /**
      * Servicio de configuración.
      *
@@ -132,6 +131,7 @@ class Service_Encryption implements Interface_Service
             $cipher = $this->getEncrypterCipher();
             $this->encrypter = $this->getEncrypterInstance($key, $cipher);
         }
+
         return $this->encrypter;
     }
 
@@ -149,10 +149,12 @@ class Service_Encryption implements Interface_Service
                 'app.key'
             ));
         }
+
         if (strpos($key, 'base64:') === 0) {
             list($codificationMethod, $codedKey) = explode(':', $key);
             return base64_decode($codedKey);
         }
+
         return $key;
     }
 
@@ -171,6 +173,7 @@ class Service_Encryption implements Interface_Service
         if (empty($cipher)) {
             $cipher = $this->defaultCipher;
         }
+
         return $cipher;
     }
 
@@ -192,9 +195,11 @@ class Service_Encryption implements Interface_Service
                 $cipher
             ));
         }
+
         $class = '\sowerphp\autoload\Data_Encryption_'
             . $this->cipherMethods[$cipher]
         ;
+
         return $class;
     }
 
@@ -210,6 +215,7 @@ class Service_Encryption implements Interface_Service
     {
         $class = $this->getEncrypterClass($cipher);
         $encrypter = new $class($key, $cipher);
+
         return $encrypter;
     }
 
@@ -238,5 +244,4 @@ class Service_Encryption implements Interface_Service
     {
         return $this->getEncrypter()->decrypt($payload, $unserialize);
     }
-
 }

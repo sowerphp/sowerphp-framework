@@ -34,7 +34,6 @@ use Symfony\Component\Messenger\Stamp\StampInterface;
  */
 class Network_Messenger_Stamp_GearmanJobSubmitted implements StampInterface
 {
-
     /**
      * El identificador del trabajo Gearman.
      *
@@ -61,5 +60,4 @@ class Network_Messenger_Stamp_GearmanJobSubmitted implements StampInterface
     {
         return $this->jobHandle;
     }
-
 }

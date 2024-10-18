@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -44,7 +46,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Console_Command_Log_Rotate extends Command
 {
-
     /**
      * Nombre del comando.
      *
@@ -61,7 +62,8 @@ class Console_Command_Log_Rotate extends Command
     {
         $this
             ->setDescription('Rota los archivos de log.')
-            ->setHelp('Este comando permite archivar los logs antiguos y comenzar nuevos archivos de log.');
+            ->setHelp('Este comando permite archivar los logs antiguos y comenzar nuevos archivos de log.')
+        ;
     }
 
     /**
@@ -76,5 +78,4 @@ class Console_Command_Log_Rotate extends Command
         $output->writeln(__('Comando %s no está implementado.', static::$defaultName));
         return Command::FAILURE;
     }
-
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -27,7 +29,6 @@ use Illuminate\Contracts\Validation\Rule;
 
 class Data_Validation_BooleanAsInteger implements Rule
 {
-
     /**
      * Determina si el valor es booleano, que puede ser booleano real o un
      * entero que representa un booleano (1 para true y 0 para false).
@@ -67,5 +68,4 @@ class Data_Validation_BooleanAsInteger implements Rule
     {
         return 'El campo :attribute debe ser un valor booleano (1 o 0).';
     }
-
 }

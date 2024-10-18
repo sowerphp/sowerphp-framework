@@ -39,7 +39,6 @@ use GearmanWorker;
  */
 class Network_Messenger_Transport_Gearman implements TransportInterface
 {
-
     /**
      * Cliente Gearman.
      *
@@ -249,5 +248,4 @@ class Network_Messenger_Transport_Gearman implements TransportInterface
         // Por defecto, asumimos que el trabajo ha fallado.
         return (object)['state' => 'FAILURE', 'progress' => $progress];
     }*/
-
 }

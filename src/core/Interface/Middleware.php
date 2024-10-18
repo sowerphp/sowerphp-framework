@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -23,22 +25,23 @@
 
 namespace sowerphp\core;
 
+use Closure;
+
 /**
  * Interfaz para los middlewares.
  */
 interface Interface_Middleware
 {
-
     /**
      * Maneja una solicitud antes de llegar al controlador.
      *
      * @param Network_Request $request
-     * @param \Closure $next
+     * @param Closure $next
      * @return mixed
      */
     public function handleBefore(
         Network_Request $request,
-        \Closure $next
+        Closure $next
     ): Network_Request;
 
     /**
@@ -47,13 +50,12 @@ interface Interface_Middleware
      *
      * @param Network_Request $request
      * @param Network_Response $response
-     * @param \Closure $next
+     * @param Closure $next
      * @return mixed
      */
     public function handleAfter(
         Network_Request $request,
         Network_Response $response,
-        \Closure $next
+        Closure $next
     ): Network_Response;
-
 }

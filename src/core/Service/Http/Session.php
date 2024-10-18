@@ -35,7 +35,6 @@ use Illuminate\Filesystem\Filesystem;
  */
 class Service_Http_Session implements Interface_Service
 {
-
     /**
      * Configuración por defecto de la sesión del usuario.
      *
@@ -153,6 +152,7 @@ class Service_Http_Session implements Interface_Service
             // Asignar el administrador de la sesión.
             $this->sessionManager = new SessionManager($container);
         }
+
         // Entregar el administrador de la sesión.
         return $this->sessionManager;
     }
@@ -301,6 +301,7 @@ class Service_Http_Session implements Interface_Service
             'config.app.locale',
             $this->translatorService->getFallback()
         ));
+
         // Layout por defecto de la aplicación.
         if (!$this->get('config.app.ui.layout')) {
             $this->put('config.app.ui.layout', config('app.ui.layout'));
@@ -340,6 +341,7 @@ class Service_Http_Session implements Interface_Service
     public function getCookieParams(): array
     {
         $config = $this->sessionManager->getSessionConfig();
+
         return [
             'lifetime' => $config['lifetime'],
             'path' => $config['path'],
@@ -374,6 +376,7 @@ class Service_Http_Session implements Interface_Service
     {
         $token = bin2hex(random_bytes(32));
         $this->flash('csrf_token', $token);
+
         return $token;
     }
 
@@ -398,5 +401,4 @@ class Service_Http_Session implements Interface_Service
             $parameters
         );
     }
-
 }

@@ -50,7 +50,6 @@ namespace sowerphp\core;
  */
 class Service_Autoload implements Interface_Service
 {
-
     /**
      * Servicio de capas.
      *
@@ -117,6 +116,7 @@ class Service_Autoload implements Interface_Service
     protected function getClassAlias(string $class): ?string
     {
         $key = 'autoload.alias.' . $class;
+
         return $this->configService->get($key);
     }
 
@@ -140,6 +140,7 @@ class Service_Autoload implements Interface_Service
         if (strpos($class, $prefix) !== 0) {
             return null;
         }
+
         return str_replace($prefix, '', $class);
     }
 
@@ -161,11 +162,13 @@ class Service_Autoload implements Interface_Service
     {
         $filename = str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
         $has_module = strpos($class, '\\') !== false;
+
         // Si no tiene módulo solo se antepone el separador de directorio para
         // indicar que se buscará desde la "raíz" de la capa.
         if (!$has_module) {
             return DIRECTORY_SEPARATOR . $filename;
         }
+
         // Si tiene módulo la clase se arma el nombre completo considerando la
         // ruta hacia el módulo y, eventuales, submódulos.
         $module_dir_for_path =
@@ -173,6 +176,7 @@ class Service_Autoload implements Interface_Service
         ;
         $filename_parts = explode('\\', $filename);
         $filename_parts_count = count($filename_parts);
+
         return $module_dir_for_path
             . implode(
                 $module_dir_for_path,
@@ -181,7 +185,8 @@ class Service_Autoload implements Interface_Service
                     0,
                     $filename_parts_count - 1
                 )
-            ) . DIRECTORY_SEPARATOR
+            )
+            . DIRECTORY_SEPARATOR
             . $filename_parts[$filename_parts_count-1]
         ;
     }
@@ -205,6 +210,7 @@ class Service_Autoload implements Interface_Service
                 return '\\' . $namespace . '\\' . $class;
             }
         }
+
         return null;
     }
 
@@ -212,7 +218,7 @@ class Service_Autoload implements Interface_Service
      * Método que realiza la autocarga de clases.
      *
      * @param string $class Clase que se desea cargar.
-     * @return bool =true si se encontró y cargó la clase.
+     * @return bool `true` si se encontró y cargó la clase.
      */
     public function autoloader(string $class): bool
     {
@@ -230,6 +236,7 @@ class Service_Autoload implements Interface_Service
             }
             return class_alias($class, $alias_class);
         }
+
         // Buscar nombre de la clase, si no se encuentra solo se verifica si
         // existe. Si no está definida, al buscar si existe, se usará la
         // autocarga de composer para determinar si la clase existe.
@@ -237,14 +244,16 @@ class Service_Autoload implements Interface_Service
         if (!$autoload_class) {
             return class_exists($class);
         }
+
         // Buscar la clase con carga automática.
         $real_class = $this->loadClass($autoload_class);
+
         // Cargar la clase encontrada y crear alias.
         if ($real_class && class_exists($real_class)) {
             return class_alias($real_class, $class);
         }
+
         // Si no se encontró la clase con la carga automática retornar false.
         return false;
     }
-
 }

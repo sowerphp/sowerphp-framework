@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * SowerPHP: Simple and Open Web Ecosystem Reimagined for PHP.
  * Copyright (C) SowerPHP <https://www.sowerphp.org>
@@ -28,7 +30,6 @@ namespace sowerphp\core;
  */
 class Data_Encryption_Sodium extends Data_Encryption
 {
-
     /**
      * Constructor del encriptador usando sodium.
      *
@@ -45,6 +46,7 @@ class Data_Encryption_Sodium extends Data_Encryption
                 'sodium'
             ));
         }
+
         // Verificar que exista la función sodium_crypto_secretbox_open().
         if (!function_exists('sodium_crypto_secretbox_open')) {
             throw new \Exception(__(
@@ -52,12 +54,14 @@ class Data_Encryption_Sodium extends Data_Encryption
                 'sodium'
             ));
         }
+
         // Verificar largo de la clave.
         if (mb_strlen($key, '8bit') !== 32) {
             throw new \Exception(__(
                 'Se requiere una llave de 256 bits (32 caracteres si es llave ASCII).'
             ));
         }
+
         // Llamar al constructor de la clase padre.
         parent::__construct($key, $cipher);
     }
@@ -72,10 +76,12 @@ class Data_Encryption_Sodium extends Data_Encryption
         if (is_string($value)) {
             $value = trim($value);
         }
+
         // Serializar si es necesario.
         if ($serialize && is_serializable($value)) {
             $value = serialize($value);
         }
+
         // Encriptar.
         $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
         $ciphertext_dec = $nonce . sodium_crypto_secretbox(
@@ -83,7 +89,11 @@ class Data_Encryption_Sodium extends Data_Encryption
             $nonce,
             $this->key
         );
+
+        // Borrar valor de la memoria de manera segura.
         sodium_memzero($value);
+
+        // Entregar el texto cifrado en base64.
         return base64_encode($ciphertext_dec);
     }
 
@@ -100,6 +110,7 @@ class Data_Encryption_Sodium extends Data_Encryption
                 'Error al usar base64_decode() en el payload.'
             ));
         }
+
         // Desencriptar.
         if (mb_strlen($payload, '8bit') < (SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES)) {
             throw new \Exception(__(
@@ -114,17 +125,21 @@ class Data_Encryption_Sodium extends Data_Encryption
                 'El mensaje fue manipulado después de ser encriptado, no es válido.'
             ));
         }
+
+        // Borrar valor de la memoria de manera segura.
         sodium_memzero($ciphertext);
+
         // Deserializar si es necesario.
         if ($unserialize && is_serialized($value)) {
             $value = unserialize($value);
         }
+
         // Quitar espacios del string (si es string).
         if (is_string($value)) {
             $value = trim($value);
         }
+
         // Entregar el valor.
         return $value;
     }
-
 }
