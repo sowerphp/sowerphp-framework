@@ -674,6 +674,15 @@ class View_Form_Widget implements ArrayAccess
     {
         $this->value = $this->value ?? 1;
 
+        if (!isset($this->attributes['checked'])) {
+            $this->attributes['checked'] = in_array(
+                $this->value,
+                (array) ($this->options['checked'] ?? [])
+            );
+        }
+
+        $this->attributes['role'] = 'switch';
+
         return $this->renderInputWidget();
     }
 
@@ -745,19 +754,51 @@ class View_Form_Widget implements ArrayAccess
         foreach ($this->options['titles'] as $index => $title) {
             $this->options['widgets'][] = new self('div', null);
         }
-        $this->options['widgets'][] =  new self(
+        $this->options['widgets'][] = new self(
             'checkbox',
             null,
             [
+                'name' => $this->options['field']['name'],
                 'type' => 'checkbox',
                 'class' => 'form-check-input',
+            ],
+            [
+                'checked' => $this->value,
             ]
         );
+
+        // Determinar los valores que se asignarán a la tabla.
+        $ids = [];
+        $this->options['values'] = [];
+        foreach ($this->options['rows'] as $row) {
+            $value = [];
+            foreach ($row as $col) {
+                $value[] = $col;
+            }
+            $id = $row['id'] ?? $row[0];
+            $value[] = $id;
+            $ids[] = $id;
+            $this->options['values'][] = $value;
+        }
+
+        // Determinar si todos los checkbox deben estar chequeados.
+        $allChecked = false;
+        $indeterminate = false;
+        if (is_array($this->value)) {
+            if (!empty($this->value)) {
+                sort($this->value);
+                sort($ids);
+                $allChecked = $this->value == $ids;
+                $indeterminate = !$allChecked;
+            }
+        } else {
+            $allChecked = $this->value === true;
+        }
 
         // Agregar el checkbox global a los títulos.
         $globalCheckboxWidget = new self(
             'checkbox',
-            $this->value === true,
+            null,
             [
                 'type' => 'checkbox',
                 'onclick' => sprintf(
@@ -765,20 +806,11 @@ class View_Form_Widget implements ArrayAccess
                     $this->attributes['name']
                 ),
                 'class' => 'form-check-input',
+                'checked' => $allChecked,
+                'indeterminate' => $indeterminate,
             ]
         );
         $this->options['titles'][] = $globalCheckboxWidget->render();
-
-        // Determinar los valores que se asignarán a la tabla.
-        $this->options['values'] = [];
-        foreach ($this->options['rows'] as $row) {
-            $value = [];
-            foreach ($row as $col) {
-                $value[] = $col;
-            }
-            $value[] = $row['id'] ?? $row[0];
-            $this->options['values'][] = $value;
-        }
 
         // Renderizar la tabla con las opciones correspondientes.
         return $this->renderTableWidget();
@@ -793,6 +825,31 @@ class View_Form_Widget implements ArrayAccess
      */
     protected function renderRadioWidget(): string
     {
+        // Extraer valores que se pasaron como valores pero en realidad son
+        // diferentes opciones del widget que vienen en un arreglo en los
+        // valores para hacer fácil el traspaso de datos desde una tabla al
+        // widget.
+        if (is_array($this->value)) {
+            $this->options['name_id'] = $this->value['name_id'] ?? null;
+            $this->attributes['checked'] = $this->value['checked'];
+            $this->value = $this->value['value'];
+        }
+
+        // Si se debe agregar un ID  al nombre, esto es necesario al renderizar
+        // radios de tablas. Pues cada fila debe tener su propio nombre de
+        // radios y no se deben repetir con los de las otras filas.
+        if (
+            ($this->options['name_id'] ?? null) !== null
+            && !empty($this->attributes['name'])
+        ) {
+            $this->attributes['name'] = sprintf(
+                'id_%s_%s',
+                $this->options['name_id'],
+                $this->attributes['name']
+            );
+        }
+
+        // Renderizar el widget.
         return $this->renderInputWidget();
     }
 
@@ -827,7 +884,7 @@ class View_Form_Widget implements ArrayAccess
 
             // Renderizar el radio.
             $html .= sprintf(
-                '<input type="radio" id="%s" name="%s[]" value="%s" %s %s> <label for=%s>%s</label><br>',
+                '<input type="radio" id="%s" name="%s" value="%s" %s %s> <label for=%s>%s</label><br>',
                 $choice['id'],
                 $this->sanitize($this->name),
                 $this->sanitize($choice['value']),
@@ -843,7 +900,7 @@ class View_Form_Widget implements ArrayAccess
     }
 
     /**
-     * Renderiza el widget de TableRadios.
+     * Renderiza el widget de tipo `table_radios`.
      *
      * Renderiza una tabla con campos de radio.
      *
@@ -869,8 +926,9 @@ class View_Form_Widget implements ArrayAccess
         for ($i = 0; $i < $n_radios; $i++) {
             $this->options['widgets'][] =  new self(
                 'radio',
-                null,
+                $this->options['choices'][$i],
                 [
+                    'name' => $this->options['field']['name'],
                     'type' => 'radio',
                     'class' => 'form-check-input',
                 ]
@@ -880,12 +938,30 @@ class View_Form_Widget implements ArrayAccess
         // Determinar los valores que se asignarán a la tabla.
         $this->options['values'] = [];
         foreach ($this->options['rows'] as $row) {
+            // Agregar las columnas de datos asociados a los radios.
             $value = [];
             foreach ($row as $col) {
                 $value[] = $col;
             }
-            $value[] = $row['id'] ?? $row[0];
+
+            // Agregar los valores de los radios a las columnas de las filas.
+            $id = $row['id'] ?? $row[0];
+            $checked = $this->value[$id] ?? null;
+            for ($i = 0; $i < $n_radios; $i++) {
+                $value[] = [
+                    'value' => $this->options['choices'][$i],
+                    'checked' => $this->options['choices'][$i] == $checked,
+                    'name_id' => $id,
+                ];
+            }
+
+            // Agregar los valores de la fila.
             $this->options['values'][] = $value;
+        }
+
+        // Agregar estilo centrado para los radios.
+        for ($i = $n_cols; $i < $n_cols + $n_radios; $i++) {
+            $this->options['cols_attributes'][$i]['class'] = 'text-center';
         }
 
         // Renderizar la tabla con las opciones correspondientes.
@@ -936,9 +1012,31 @@ class View_Form_Widget implements ArrayAccess
             $widget = clone $widget;
             $widgetsRow .= sprintf(
                 '<td %s><div class="input-group">%s</div></td>',
-                html_attributes($options['cols_attributes'][$index] ?? []),
+                html_attributes($this->options['cols_attributes'][$index] ?? []),
                 $widget->render([
                     'value' => $values[$index] ?? null,
+                    'attributes' => [
+                        // Se quita el ID del widget en la fila pues no se está
+                        // determinando de manera correcta. Hay 2 casos:
+                        //   - Cuando se crea con valores por defecto.
+                        //   - Cuando se crea como plantilla para el javascript.
+                        // El caso del JS es más complicado pues implica asignar
+                        // el ID correcto al momento de agregar la fila con JS.
+                        // Por ahora no se dará soporte a ID en los campos de
+                        // tablas. En el futuro se podría agregar, aunque nunca
+                        // ha sido necesario (hasta la fecha).
+                        'id' => null,
+                        // Se ajuste el nombre del campo (si existe) para que
+                        // sea un arreglo de campos.
+                        'name' => !empty($widget['attributes']['name'])
+                            ? (
+                                ($widget['attributes']['type'] ?? null) !== 'radio'
+                                    ? $widget['attributes']['name'] . '[]'
+                                    : $widget['attributes']['name']
+                            )
+                            : null
+                        ,
+                    ],
                 ])
             );
         }
