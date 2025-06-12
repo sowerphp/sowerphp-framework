@@ -78,34 +78,37 @@ class Network_Request extends Request
     public function getRequestUriDecoded(): string
     {
         if (!isset($this->requestUriDecoded)) {
-            if (!isset($_SERVER['QUERY_STRING'])) {
-                $request = '';
-            } else {
-                // Obtener ruta que se uso sin "/" (base) inicial
-                $uri = (isset($_SERVER['QUERY_STRING'][0]) && $_SERVER['QUERY_STRING'][0] == '/')
-                    ? substr($_SERVER['QUERY_STRING'], 1)
-                    : $_SERVER['QUERY_STRING']
-                ;
-                if (strpos($_SERVER['REQUEST_URI'], '/?' . $uri) !== false) {
-                    $uri = '';
-                }
-                // verificar si se pasaron variables GET
-                $inicio_variables_get = strpos($uri, '&');
-                // Asignar uri
-                $request = $inicio_variables_get === false
-                    ? $uri
-                    : substr($uri, 0, $inicio_variables_get)
-                ;
-                // Agregar slash inicial de la uri
-                if (!isset($request) || (isset($request[0]) && $request[0] != '/')) {
-                    $request = '/' . $request;
-                }
-                // Decodificar url
-                $request = urldecode($request);
-            }
-            $this->requestUriDecoded = $request;
-            unset($_GET[$this->requestUriDecoded]);
+            $aux = explode('?', $this->getRequestUri());
+            $this->requestUriDecoded = $aux[0];
+            // if (!isset($_SERVER['QUERY_STRING'])) {
+            //     $request = '';
+            // } else {
+            //     // Obtener ruta que se uso sin "/" (base) inicial
+            //     $uri = (isset($_SERVER['QUERY_STRING'][0]) && $_SERVER['QUERY_STRING'][0] == '/')
+            //         ? substr($_SERVER['QUERY_STRING'], 1)
+            //         : $_SERVER['QUERY_STRING']
+            //     ;
+            //     if (strpos($_SERVER['REQUEST_URI'], '/?' . $uri) !== false) {
+            //         $uri = '';
+            //     }
+            //     // verificar si se pasaron variables GET
+            //     $inicio_variables_get = strpos($uri, '&');
+            //     // Asignar uri
+            //     $request = $inicio_variables_get === false
+            //         ? $uri
+            //         : substr($uri, 0, $inicio_variables_get)
+            //     ;
+            //     // Agregar slash inicial de la uri
+            //     if (!isset($request) || (isset($request[0]) && $request[0] != '/')) {
+            //         $request = '/' . $request;
+            //     }
+            //     // Decodificar url
+            //     $request = urldecode($request);
+            // }
+            // $this->requestUriDecoded = $request;
+            // unset($_GET[$this->requestUriDecoded]);
         }
+
         return $this->requestUriDecoded;
     }
 
