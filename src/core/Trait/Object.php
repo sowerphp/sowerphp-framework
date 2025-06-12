@@ -42,7 +42,7 @@ trait Trait_Object
      * Método para setear los atributos de la clase.
      * @param array Arreglo con los datos que se deben asignar.
      */
-    public function set(array $array)
+    public function set($array)
     {
         $props = (new \ReflectionClass($this))->getProperties(
             \ReflectionProperty::IS_PUBLIC
