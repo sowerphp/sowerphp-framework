@@ -166,7 +166,7 @@ class App
     }
 
     /**
-     * Método que ejecuta la aplicación web.
+     * Ejecuta la aplicación web.
      * Se encarga de despachar la aplicación HTTP o lanzar la CLI.
      *
      * @return int Código de ejecución de la aplicación.

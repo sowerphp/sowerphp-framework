@@ -273,7 +273,7 @@ class Utility_Inflector
 	 */
 	public static function reset() {
 		if (empty(self::$_initialState)) {
-			self::$_initialState = get_class_vars('Utility_Inflector');
+			self::$_initialState = get_class_vars(self::class);
 			return;
 		}
 		foreach (self::$_initialState as $key => $val) {

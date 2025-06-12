@@ -33,7 +33,7 @@ class View_Helper_Form
     private $_cols_label; ///< Columnas de la grilla para la etiqueta
 
     /**
-     * Método que inicia el código del formulario
+     * Inicia el código del formulario
      * @param style Estilo del formulario que se renderizará
      * @param cols_label Cantidad de columnas de la grilla para la etiqueta
      */
@@ -62,7 +62,7 @@ class View_Helper_Form
     }
 
     /**
-     * Método que inicia el código del formulario
+     * Inicia el código del formulario
      * @param config Arreglo con la configuración para el formulario
      * @return string Código HTML de lo solicitado
      */

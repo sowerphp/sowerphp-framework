@@ -237,7 +237,7 @@ class Service_Storage implements Interface_Service
     }
 
     /**
-     * Método que normaliza un path. Esto lo hace incorporando el "slash"
+     * Normaliza un path. Esto lo hace incorporando el "slash"
      * inicial. Con esto el path quedará desde la "raíz". Y esa "raíz" podrá
      * ser la raíz real del sistema de archivos o la raíz de uno de los
      * directorios de los discos de almacenamiento.

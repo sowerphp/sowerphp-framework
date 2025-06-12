@@ -283,7 +283,7 @@ class Controller_Bd extends \sowerphp\autoload\Controller
     }
 
     /**
-     * Método que busca las bases de datos configuradas en la aplicación y las
+     * Busca las bases de datos configuradas en la aplicación y las
      * asigna para la vista como un arreglo asociativo.
      */
     private function _setDatabases()

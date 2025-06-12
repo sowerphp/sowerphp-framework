@@ -62,7 +62,7 @@ class Controller_Contacto extends Controller
     }
 
     /**
-     * Método que procesará el formulario de contacto.
+     * Procesará el formulario de contacto.
      */
     public function send(Request $request)
     {

@@ -40,7 +40,7 @@ class Utility_Mapas_Google
     }
 
     /**
-     * Método que entrega las coordenadas geográficas a partir de una dirección
+     * Entrega las coordenadas geográficas a partir de una dirección
      */
     public function getCoordenadas($direccion)
     {

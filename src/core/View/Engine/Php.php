@@ -54,7 +54,7 @@ class View_Engine_Php extends View_Engine
         // determinado ya incluído en los datos del layout.
         $extension = substr(
             $data['__view_layout'],
-            strrpos($data['__view_layout'], '.')
+            (int) strrpos($data['__view_layout'], '.')
         );
         if ($extension != '.php') {
             $data['__view_layout'] .= '.php';
@@ -66,7 +66,7 @@ class View_Engine_Php extends View_Engine
     }
 
     /**
-     * Método que toma un archivo PHP y lo renderiza reemplazando las variables
+     * Toma un archivo PHP y lo renderiza reemplazando las variables
      * que existan en dicho archivo.
      *
      * @param string $__view_filepath Ruta absoluta al archivo PHP.

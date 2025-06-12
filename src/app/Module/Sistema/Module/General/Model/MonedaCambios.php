@@ -32,7 +32,6 @@ use sowerphp\autoload\Model_Plural;
  */
 class Model_MonedaCambios extends Model_Plural
 {
-
     private $decimales = [
         'CLP' => 0,
         'CLF' => 2,
@@ -41,7 +40,7 @@ class Model_MonedaCambios extends Model_Plural
     ];
 
     /**
-     * Método que busca los valores de varias monedas al mismo tiempo para un
+     * Busca los valores de varias monedas al mismo tiempo para un
      * día determinado
      */
     public function getValor($monedas, $dia = null)
@@ -74,7 +73,7 @@ class Model_MonedaCambios extends Model_Plural
     }
 
     /**
-     * Método que busca los valores de varias monedas al mismo tiempo para un
+     * Busca los valores de varias monedas al mismo tiempo para un
      * rango de días determinados
      */
     public function getValores($monedas, $fecha_desde = null, $fecha_hasta)
@@ -108,7 +107,7 @@ class Model_MonedaCambios extends Model_Plural
     }
 
     /**
-     * Método que convierte un monto de una moneda a otra
+     * Convierte un monto de una moneda a otra
      */
     public function convertir($desde, $a, $monto, $fecha = null, $decimales = null)
     {
@@ -130,11 +129,10 @@ class Model_MonedaCambios extends Model_Plural
     }
 
     /**
-     * Método que entrega los decimales asociados a una moneda
+     * Entrega los decimales asociados a una moneda
      */
     public function getDecimales($moneda)
     {
         return isset($this->decimales[$moneda]) ? $this->decimales[$moneda] : 2;
     }
-
 }

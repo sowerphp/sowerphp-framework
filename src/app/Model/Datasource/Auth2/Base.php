@@ -34,7 +34,7 @@ abstract class Model_Datasource_Auth2_Base
     protected $need_token = false; ///< Por defecto los métodos no requieren token, se debe indicar en cada clase
 
     /**
-     * Método que entrega el código del método de autenticación secundaria
+     * Entrega el código del método de autenticación secundaria
      */
     public function getCode()
     {
@@ -42,7 +42,7 @@ abstract class Model_Datasource_Auth2_Base
     }
 
     /**
-     * Método que entrega todas las autenticaciones secundarias disponibles en la aplicación
+     * Entrega todas las autenticaciones secundarias disponibles en la aplicación
      */
     public function getName()
     {
@@ -58,7 +58,7 @@ abstract class Model_Datasource_Auth2_Base
     }
 
     /**
-     * Método que crea el secreto en caso que sea requerido para hacer el pareo
+     * Crea el secreto en caso que sea requerido para hacer el pareo
      * Por defecto no se usa y se entrega falso
      */
     public function createSecret($user = null)
@@ -67,7 +67,7 @@ abstract class Model_Datasource_Auth2_Base
     }
 
     /**
-     * Método que indica si el método de autenticación secundaria usa o no un token
+     * Indica si el método de autenticación secundaria usa o no un token
      */
     public function needToken()
     {

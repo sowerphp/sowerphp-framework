@@ -137,7 +137,7 @@ class Service_Cache implements Interface_Service
     }
 
     /**
-     * Método que guarda en memoria un valor a ser cacheado.
+     * Guarda en memoria un valor a ser cacheado.
      *
      * @param string $key Clave que tendrá el elemento en la caché.
      * @param mixed $value Valor del elemento en la caché.

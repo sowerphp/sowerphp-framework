@@ -519,7 +519,7 @@ class Controller_Usuarios extends \sowerphp\autoload\Controller_Model
     }
 
     /**
-     * Método que asigna los grupos que el usuario logueado puede asignar al
+     * Asigna los grupos que el usuario logueado puede asignar al
      * crear o editar un usuario.
      */
     private function setGruposAsignables()

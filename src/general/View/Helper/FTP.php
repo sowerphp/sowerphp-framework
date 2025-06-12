@@ -48,7 +48,7 @@ class View_Helper_FTP
     }
 
     /**
-     * Método que descarga un archivo desde el servidor FTP
+     * Descarga un archivo desde el servidor FTP
      * @param file Archivo que se desea descargar
      */
     private function download($file)
@@ -62,7 +62,7 @@ class View_Helper_FTP
     }
 
     /**
-     * Método que genera la tabla con el contenido de un directorio del servidor FTP
+     * Genera la tabla con el contenido de un directorio del servidor FTP
      * @param dir Directorio que se desea explorar
      */
     private function browse($dir)
@@ -93,7 +93,7 @@ class View_Helper_FTP
     }
 
     /**
-     * Método que genera el breadcrumb a partir de un ruta
+     * Genera el breadcrumb a partir de un ruta
      * @param path Ruta de los directorios
      * @return string Breadcrumb con la ruta de los directorios
      */

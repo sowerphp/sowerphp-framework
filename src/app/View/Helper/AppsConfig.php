@@ -42,7 +42,7 @@ class View_Helper_AppsConfig
     }
 
     /**
-     * Método que generará la configuración de una aplicación.
+     * Generará la configuración de una aplicación.
      * Para generar la de múltiples aplicaciones se deberá iterar con este
      * método.
      */

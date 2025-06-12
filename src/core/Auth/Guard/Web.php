@@ -92,7 +92,7 @@ class Auth_Guard_Web extends Auth_Guard
     }
 
     /**
-     * Método que guarda el usuario autenticado en la caché.
+     * Guarda el usuario autenticado en la caché.
      *
      * @return bool `true` si fue posible guardar al usuario, `false` si no.
      */
@@ -249,7 +249,7 @@ class Auth_Guard_Web extends Auth_Guard
     }
 
     /**
-     * Método que realiza el login del usuario a través de preautenticación
+     * Realiza el login del usuario a través de preautenticación
      */
     /*public function preauth($token, $usuario = null, $auth2_token = null)
     {

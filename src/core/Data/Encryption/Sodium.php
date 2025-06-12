@@ -67,7 +67,7 @@ class Data_Encryption_Sodium extends Data_Encryption
     }
 
     /**
-     * Método que encripta datos usando sodium.
+     * Encripta datos usando sodium.
      * @link https://stackoverflow.com/a/52688846
      */
     public function encrypt($value, $serialize = true): string
@@ -98,7 +98,7 @@ class Data_Encryption_Sodium extends Data_Encryption
     }
 
     /**
-     * Método que desencripta datos usando sodium.
+     * Desencripta datos usando sodium.
      * @link https://stackoverflow.com/a/52688846
      */
     public function decrypt($payload, $unserialize = true)

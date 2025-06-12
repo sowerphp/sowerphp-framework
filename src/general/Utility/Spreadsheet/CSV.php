@@ -165,7 +165,7 @@ final class Utility_Spreadsheet_CSV
     }
 
     /**
-     * Método que determina el delimitador que se deberá usar para trabajar con
+     * Determina el delimitador que se deberá usar para trabajar con
      * el archivo CSV.
      *
      * @param string|null $delimiter Delimitador en caso que se quiera tratar

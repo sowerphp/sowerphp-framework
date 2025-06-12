@@ -46,7 +46,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega el nombre de la app si se usa como string el objeto
+     * Entrega el nombre de la app si se usa como string el objeto
      */
     public function __toString()
     {
@@ -54,7 +54,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega el ID de la aplicación en base a su namespace de PHP y su código
+     * Entrega el ID de la aplicación en base a su namespace de PHP y su código
      */
     public function getID()
     {
@@ -62,7 +62,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega el namespace de la aplicación (grupo de la app, no el de PHP)
+     * Entrega el namespace de la aplicación (grupo de la app, no el de PHP)
      */
     protected function getNamespace()
     {
@@ -70,7 +70,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega el namespace de la aplicación que se instanció
+     * Entrega el namespace de la aplicación que se instanció
      */
     protected function getNamespacePHP()
     {
@@ -79,7 +79,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega el prefijo de la configuración
+     * Entrega el prefijo de la configuración
      */
     protected function getConfigName()
     {
@@ -87,7 +87,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que indica si la app está o no activa
+     * Indica si la app está o no activa
      */
     public function getActiva()
     {
@@ -95,7 +95,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega el código de la app
+     * Entrega el código de la app
      */
     public function getCodigo()
     {
@@ -108,7 +108,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega el nombre de la app
+     * Entrega el nombre de la app
      */
     public function getNombre()
     {
@@ -123,7 +123,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega la descripción de la app
+     * Entrega la descripción de la app
      */
     public function getDescripcion()
     {
@@ -131,7 +131,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega la URL de la APP
+     * Entrega la URL de la APP
      */
     public function getURL($clean = false)
     {
@@ -139,7 +139,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega el logo de la APP
+     * Entrega el logo de la APP
      */
     public function getLogo()
     {
@@ -147,7 +147,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega el icono de la APP
+     * Entrega el icono de la APP
      */
     public function getIcon()
     {
@@ -155,7 +155,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega el código HTML de la página de configuración de la aplicación
+     * Entrega el código HTML de la página de configuración de la aplicación
      * @param form Objeto con el formulario que se está usando para construir la página de configuración
      */
     public function getConfigPageHTML(\sowerphp\general\View_Helper_Form $form): string
@@ -174,7 +174,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que asigna la configuración de la aplicación procesando el
+     * Asigna la configuración de la aplicación procesando el
      * formulario enviado por POST.
      *
      * @return array|null Arreglo con la configuración determinada.
@@ -198,7 +198,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que obtiene la configuración de la aplicación
+     * Obtiene la configuración de la aplicación
      */
     public function getConfig()
     {
@@ -206,7 +206,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que asigna la configuración de la aplicación al objeto (no guarda)
+     * Asigna la configuración de la aplicación al objeto (no guarda)
      */
     public function setConfig($config)
     {
@@ -217,7 +217,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega el valor de una variable de la app si existe
+     * Entrega el valor de una variable de la app si existe
      */
     public function getVar($var)
     {
@@ -230,7 +230,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que asigna las variables de la aplicación.
+     * Asigna las variables de la aplicación.
      */
     public function setVars(array $vars)
     {
@@ -238,7 +238,7 @@ abstract class Utility_Apps_Base_Apps
     }
 
     /**
-     * Método que entrega el código de la aplicación de alguna parte de la
+     * Entrega el código de la aplicación de alguna parte de la
      * página.
      */
     public function getPageCode(string $page, array $vars = []): string

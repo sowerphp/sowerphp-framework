@@ -33,7 +33,7 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
     protected $x; ///< Para la columna ctual (parte en 0)
 
     /**
-     * Método que guarda la planilla en el sistema de archivos
+     * Guarda la planilla en el sistema de archivos
      * @param file Ruta completa donde guardar la planilla en el sistema de archivos
      * @param type Tipo de archivo que se generará (formato de la planilla)
      */
@@ -44,7 +44,7 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
     }
 
     /**
-     * Método que descarga la planilla a través el navegador
+     * Descarga la planilla a través el navegador
      * @param file Nombre del archivo que se descargará
      * @param type Tipo de archivo que se generará (formato de la planilla)
      */
@@ -143,7 +143,7 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
     }
 
     /**
-     * Método que asigna un valor a una celda unida
+     * Asigna un valor a una celda unida
      */
     public function setMergeCellValue($value, $start, $end)
     {
@@ -154,7 +154,7 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
     }
 
     /**
-     * Método que asigna un valor a una celda unida y la rota
+     * Asigna un valor a una celda unida y la rota
      */
     public function setRotateCellValue($value, $col, $end)
     {
@@ -166,7 +166,7 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
     }
 
     /**
-     * Método que activa el tamaño automático de columnas
+     * Activa el tamaño automático de columnas
      * @param cell Celda (o rango de celdas) que se quiere modificar
      * @param sheet Índice de la hoja donde está la celda que se quiere modificar
      */

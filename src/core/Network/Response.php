@@ -165,7 +165,7 @@ class Network_Response //extends Response
     }
 
     /**
-     * Método que asigna el cuerpo de la respuesta o lo recupera.
+     * Asigna el cuerpo de la respuesta o lo recupera.
      *
      * @param string $body Contenido a asignar al cuerpo.
      * @return string Contenido de la respuesta está asignado.
@@ -180,7 +180,7 @@ class Network_Response //extends Response
     }
 
     /**
-     * Método que entrega el tamaño de los datos que se entregarán como
+     * Entrega el tamaño de los datos que se entregarán como
      * respuesta.
      *
      * @return int Tamaño de los datos del cuerpo que se entregarán o -1.
@@ -298,7 +298,7 @@ class Network_Response //extends Response
     }
 
     /**
-     * Método que envía un contenido al navegador.
+     * Envía un contenido al navegador.
      *
      * El método está diseñado para enviar datos (ej: archivos) en memoria e
      * informando que no se use caché. Además una vez envía los datos termina

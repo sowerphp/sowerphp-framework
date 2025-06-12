@@ -308,7 +308,7 @@ class Utility_File
     }
 
     /**
-     * Método que cuenta la cantidad de líneas que un archivo posee
+     * Cuenta la cantidad de líneas que un archivo posee
      * @param string $file Ruta hacia el fichero
      * @return int Cantidad de líneas del fichero
      * @link http://stackoverflow.com/a/20537130
@@ -325,7 +325,7 @@ class Utility_File
     }
 
     /**
-     * Método que entrega el mimetype de un archivo
+     * Entrega el mimetype de un archivo
      * @param string $file Ruta hacia el fichero
      * @return string Mimetype del fichero o =false si no se pudo determinar
      * @link http://stackoverflow.com/a/23287361
@@ -507,7 +507,7 @@ class Utility_File
     }
 
     /**
-     * Método que sanitiza el nombre de un archivo para ser usado en el sistema de archivos
+     * Sanitiza el nombre de un archivo para ser usado en el sistema de archivos
      * @param string $filename nombre del archivo que se desea limpiar el nombre
      * @return string Nombre del archivo ya normalizado y limpiado para ser usado en el sistema de archivos
      */

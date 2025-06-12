@@ -30,7 +30,7 @@ class Utility_Rut
 {
 
     /**
-     * Método que valida el RUT ingresado
+     * Valida el RUT ingresado
      * @param mixed $rut RUT con dígito verificador (puntos son opcionales)
      * @return bool
      */

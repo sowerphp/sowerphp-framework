@@ -282,7 +282,7 @@ class Shell_Command_CodeGenerator extends \sowerphp\autoload\Shell
     }
 
     /**
-     * Método que asigna el nombre del módulo y su url
+     * Asigna el nombre del módulo y su url
      * @param modulo Nombre del módulo donde se generarán los archivos
      */
     private function setModuleUrl($modulo = '')
@@ -302,7 +302,7 @@ class Shell_Command_CodeGenerator extends \sowerphp\autoload\Shell
     }
 
     /**
-     * Método que genera el código para la clase final de modelos
+     * Genera el código para la clase final de modelos
      * @param database Nombre de la conexión a la base de datos
      */
     private function generateModel($database)
@@ -382,7 +382,7 @@ class Shell_Command_CodeGenerator extends \sowerphp\autoload\Shell
     }
 
     /**
-     * Método que genera el código para la clase final del controlador
+     * Genera el código para la clase final del controlador
      */
     private function generateController()
     {

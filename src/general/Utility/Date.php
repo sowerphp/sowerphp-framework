@@ -33,7 +33,7 @@ class Utility_Date
     public static $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
     /**
-     * Método que valida si la fecha es o no válida según el formato.
+     * Valida si la fecha es o no válida según el formato.
      * @param date Fecha que se quiere validar.
      * @param format Formato que se quiere validar.
      * @return bool `true` si la fecha está ok.
@@ -84,7 +84,7 @@ class Utility_Date
     }
 
     /**
-     * Método que resta días hábiles a una fecha.
+     * Resta días hábiles a una fecha.
      * @param fecha Desde donde empezar.
      * @param dias Días que se deben restar a la fecha.
      * @param feriados Días que no se deberán considerar al restar.
@@ -119,7 +119,7 @@ class Utility_Date
     }
 
     /**
-     * Método que obtiene el número de día hábil dentro de un mes que
+     * Obtiene el número de día hábil dentro de un mes que
      * corresponde el día de la fecha que se está pasando.
      * @param fecha Fecha que se quiere saber que día hábil del mes correspone.
      * @param feriados Arreglo con los feriados del mes (si no se pasa solo se omitirán fin de semanas).
@@ -139,7 +139,7 @@ class Utility_Date
     }
 
     /**
-     * Método que obtiene la fecha de un día hábil X en un mes.
+     * Obtiene la fecha de un día hábil X en un mes.
      * @param anio Año del día hábil que se busca.
      * @param mes Mes del día hábil que se busca.
      * @param dia_habil Número de día hábil dentro del mes y año que se busca.
@@ -155,7 +155,7 @@ class Utility_Date
     }
 
     /**
-     * Método que indica si una fecha es el último día laboral del mes.
+     * Indica si una fecha es el último día laboral del mes.
      * @param fecha Fecha que se quiere saber si es el último día laboral del mes.
      * @param feriados Arreglo con los feriados del mes (si no se pasa solo se omitirán fin de semanas).
      * @return bool `true` si es el último día laboral del mes.
@@ -172,7 +172,7 @@ class Utility_Date
     }
 
     /**
-     * Método que cuenta cuantos de los días de la variable 'days' existen en el
+     * Cuenta cuantos de los días de la variable 'days' existen en el
      * rango desde 'from' hasta 'to'.
      * @param from Desde cuando revisar.
      * @param to Hasta cuando revisar.
@@ -258,7 +258,7 @@ class Utility_Date
     }
 
     /**
-     * Método que calcula los años que han pasado a partir de una fecha.
+     * Calcula los años que han pasado a partir de una fecha.
      * @param fecha Desde cuando calcular los años.
      * @return int Años que han pasado desde la fecha indicada.
      * @link http://es.wikibooks.org/wiki/Programaci%C3%B3n_en_PHP/Ejemplos/Calcular_edad
@@ -270,7 +270,7 @@ class Utility_Date
     }
 
     /**
-     * Método que calcula cuanto tiempo ha pasado desde cierta fecha y hora y lo
+     * Calcula cuanto tiempo ha pasado desde cierta fecha y hora y lo
      * entrega en un string que representa dicho tiempo.
      * @param datetime Fecha y hora en cualquier formato soportado por clase \DateTime.
      * @param full Si se debe mostrar todo el string o solo una parte.
@@ -307,7 +307,7 @@ class Utility_Date
     }
 
     /**
-     * Método que calcula cuanto tiempo ha pasado desde cierta fecha y hora y lo
+     * Calcula cuanto tiempo ha pasado desde cierta fecha y hora y lo
      * entrega como la cantidad de días.
      * @param from Fecha desde cuando contar.
      * @param to Fecha hasta cuando contar (si es null será la fecha actual).
@@ -336,7 +336,7 @@ class Utility_Date
     }
 
     /**
-     * Método que obtiene la fecha a partir de un número serial.
+     * Obtiene la fecha a partir de un número serial.
      * @param n número serial.
      * @return string Fecha en formato YYYY-MM-DD.
      */
@@ -346,7 +346,7 @@ class Utility_Date
     }
 
     /**
-     * Método que obtiene un periodo (mes) siguiente a uno específicado.
+     * Obtiene un periodo (mes) siguiente a uno específicado.
      * @param periodo Período para el cual se quiere saber el siguiente o =null para actual.
      * @return int Periodo en formato YYYYMM.
      */
@@ -372,7 +372,7 @@ class Utility_Date
     }
 
     /**
-     * Método que obtiene un periodo (mes) anterior a uno específicado.
+     * Obtiene un periodo (mes) anterior a uno específicado.
      * @param periodo Período para el cual se quiere saber el anterior o =null para actual.
      * @return int Periodo en formato YYYYMM.
      */
@@ -398,7 +398,7 @@ class Utility_Date
     }
 
     /**
-     * Método que entrega el último día de un período.
+     * Entrega el último día de un período.
      * @return string Último día del período.
      */
     public static function lastDayPeriod($periodo = null)
@@ -412,7 +412,7 @@ class Utility_Date
     }
 
     /**
-     * Método que valida un período con formato AAAA y AAAAMM en un rango de años.
+     * Valida un período con formato AAAA y AAAAMM en un rango de años.
      */
     public static function validPeriod($period, $year_from = 2000, $year_to = 2100, $length = null)
     {
@@ -435,7 +435,7 @@ class Utility_Date
     }
 
     /**
-     * Método que valida un período con formato AAAA en un rango de años.
+     * Valida un período con formato AAAA en un rango de años.
      */
     public static function validPeriod4($period, $year_from = 2000, $year_to = 2100)
     {
@@ -443,7 +443,7 @@ class Utility_Date
     }
 
     /**
-     * Método que valida un período con formato AAAAMM en un rango de años.
+     * Valida un período con formato AAAAMM en un rango de años.
      */
     public static function validPeriod6($period, $year_from = 2000, $year_to = 2100)
     {
@@ -451,7 +451,7 @@ class Utility_Date
     }
 
     /**
-     * Método que calcula cuantos meses han pasado entre dos fecha.
+     * Calcula cuantos meses han pasado entre dos fecha.
      * @param from Fechas desde cuando contar.
      * @param to Fecha hasta cual contar.
      * @return int Meses que han pasado entre las fechas.
@@ -474,7 +474,7 @@ class Utility_Date
     }
 
     /**
-     * Método que obtiene la siguiente fecha a partir de una fecha y una frecuencia.
+     * Obtiene la siguiente fecha a partir de una fecha y una frecuencia.
      * @param fecha Fecha actual a la que se quiere obtener la siguiente.
      * @param tiempo Tiempo que se agregará a la fecha actual: A:año, M:mes, S:semana, D:día.
      * @param cantidad Cantidad de 'frecuencia' a agregar.
@@ -533,7 +533,7 @@ class Utility_Date
     }
 
     /**
-     * Método que obtiene la anterior fecha a partir de una fecha y una frecuencia.
+     * Obtiene la anterior fecha a partir de una fecha y una frecuencia.
      * @param fecha Fecha actual a la que se quiere obtener la anterior.
      * @param tiempo Tiempo que se quitará a la fecha actual: A:año, M:mes, S:semana, D:día.
      * @param cantidad Cantidad de 'frecuencia' a quitar.
@@ -545,7 +545,7 @@ class Utility_Date
     }
 
     /**
-     * Método que entrega el primer día de la semana.
+     * Entrega el primer día de la semana.
      * @return string Primer Día de la semana.
      */
     public static function firstDayWeek($date = null)
@@ -558,7 +558,7 @@ class Utility_Date
     }
 
     /**
-     * Método que entrega el último día de la semana.
+     * Entrega el último día de la semana.
      * @return string Último Día de la semana.
      */
     public static function lastDayWeek($date = null)
@@ -571,7 +571,7 @@ class Utility_Date
     }
 
     /**
-     * Método que entrega un listado de años.
+     * Entrega un listado de años.
      * @return array Arreglo decreciente con el listado de años.
      */
     public static function years($total_years, $from = null)
@@ -589,7 +589,7 @@ class Utility_Date
     }
 
     /**
-     * Método que entrega la cantidad de días que tiene un mes.
+     * Entrega la cantidad de días que tiene un mes.
      * @return int Cantidad de días.
      */
     public static function daysInMonth($periodo): int

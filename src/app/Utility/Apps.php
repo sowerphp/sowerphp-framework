@@ -45,7 +45,7 @@ class Utility_Apps
     }
 
     /**
-     * Método que entrega una sóla aplicación.
+     * Entrega una sóla aplicación.
      */
     public function getApp($app)
     {
@@ -54,7 +54,7 @@ class Utility_Apps
     }
 
     /**
-     * Método que entrega todas los aplicaciones disponibles.
+     * Entrega todas los aplicaciones disponibles.
      */
     public function getApps(array $filtros = [])
     {

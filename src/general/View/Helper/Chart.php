@@ -39,7 +39,7 @@ class View_Helper_Chart
     );
 
     /**
-     * Método que genera un gráfico
+     * Genera un gráfico
      * @param title Título del gráfico
      * @param series Datos del gráfico
      * @param type Tipo de gráfico que se desea generar

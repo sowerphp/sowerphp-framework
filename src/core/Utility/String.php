@@ -363,7 +363,7 @@ class Utility_String {
 
 
     /**
-     * Método que genera un string de manera aleatoria
+     * Genera un string de manera aleatoria
      * @param length Tamaño del string que se desea generar
      * @param uc Si se desea (=true) o no (=false) usar mayúsculas
      * @param n Si se desea (=true) o no (=false) usar números

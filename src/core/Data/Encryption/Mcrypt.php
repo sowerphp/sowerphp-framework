@@ -66,7 +66,7 @@ class Data_Encryption_Mcrypt extends Data_Encryption
     }
 
     /**
-     * Método que encripta datos usando mcrypt.
+     * Encripta datos usando mcrypt.
      */
     public function encrypt($value, $serialize = true): string
     {
@@ -99,7 +99,7 @@ class Data_Encryption_Mcrypt extends Data_Encryption
     }
 
     /**
-     * Método que desencripta datos encriptados usando mcrypt.
+     * Desencripta datos encriptados usando mcrypt.
      */
     public function decrypt($payload, $unserialize = true)
     {

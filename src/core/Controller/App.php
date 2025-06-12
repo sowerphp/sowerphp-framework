@@ -35,7 +35,7 @@ use sowerphp\autoload\Controller;
 class Controller_App extends Controller
 {
     /**
-     * Método que se ejecuta antes de ejecutar la acción del controlador.
+     * Se ejecuta antes de ejecutar la acción del controlador.
      */
     public function boot(): void
     {

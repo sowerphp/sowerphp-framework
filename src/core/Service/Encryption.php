@@ -220,7 +220,7 @@ class Service_Encryption implements Interface_Service
     }
 
     /**
-     * Método que encripta los datos con el encriptador configurado en el
+     * Encripta los datos con el encriptador configurado en el
      * servicio.
      *
      * @param mixed $value Datos que se desean encriptar.
@@ -233,7 +233,7 @@ class Service_Encryption implements Interface_Service
     }
 
     /**
-     * Método que desencripta los datos con el encriptador configurado en el
+     * Desencripta los datos con el encriptador configurado en el
      * servicio.
      *
      * @param mixed $value Datos que se desean desencriptar.

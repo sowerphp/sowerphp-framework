@@ -36,7 +36,7 @@ final class Utility_Spreadsheet_JSON
     }
 
     /**
-     * Método que genera un string JSON a partir de una tabla en un arreglo
+     * Genera un string JSON a partir de una tabla en un arreglo
      * bidimensional
      */
     public static function generate($data, $id)

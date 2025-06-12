@@ -79,7 +79,7 @@ class Model_Afd extends Model
     }
 
     /**
-     * Método que guarda el AFD
+     * Guarda el AFD
      * @param estados Arreglo con arreglo de codigos y nombres de estados
      * @param transiciones Arreglo con arreglo de desdes, valor y hastas de las transiciones
      */
@@ -100,7 +100,7 @@ class Model_Afd extends Model
     }
 
     /**
-     * Método que guarda los estados del AFD
+     * Guarda los estados del AFD
      * @param codigo Arreglo con los códigos de los estados
      * @param nombres Arreglo con los nombres/glosas de los estados
      */
@@ -127,7 +127,7 @@ class Model_Afd extends Model
     }
 
     /**
-     * Método que guarda los transiciones del AFD
+     * Guarda los transiciones del AFD
      * @param desdes Arreglo con los estados desde
      * @param valores Arreglo con los valores que hacen pasar desde "desde" a "hasta"
      * @param hastas Arreglo con los estados hasta
@@ -158,7 +158,7 @@ class Model_Afd extends Model
     }
 
     /**
-     * Método que entrega el listado de estados del AFD
+     * Entrega el listado de estados del AFD
      * @param prefix Prefijo que se debe usar en el nombre de la columna (clave en el arreglo)
      * @return array Tabla con los estados: código y nombre
      */
@@ -173,7 +173,7 @@ class Model_Afd extends Model
     }
 
     /**
-     * Método que entrega el listado de transiciones del AFD
+     * Entrega el listado de transiciones del AFD
      * @return array Tabla con las transiciones: hasta, valor y desde
      */
     public function getTransicionesTabla()
@@ -187,7 +187,7 @@ class Model_Afd extends Model
     }
 
     /**
-     * Método que entrega el listado de transiciones del AFD normalizadas para
+     * Entrega el listado de transiciones del AFD normalizadas para
      * ser utilizadas con la utilidad \sowerphp\general\Utility_Automada_AFD
      * @return array Arreglo en formato requerido por Utility_Automada_AFD
      */

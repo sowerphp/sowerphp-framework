@@ -146,7 +146,7 @@ class Utility_Array
     }
 
     /**
-     * Método que toma un arreglo con un formato de tabla el cual contiene
+     * Toma un arreglo con un formato de tabla el cual contiene
      * un encabezado y detalle, ejemplo:
      *
      *   $arreglo = array (
@@ -260,7 +260,7 @@ class Utility_Array
     }
 
     /**
-     * Método que toma la primera columna de una tabla y la convierte en el
+     * Toma la primera columna de una tabla y la convierte en el
      * índice de un arreglo asociativo, donde las otras columnas o columna son
      * los valores que tiene dicho índice.
      * @param array $table Tabla que se desea convertir.
@@ -294,7 +294,7 @@ class Utility_Array
     }
 
     /**
-     * Método que toma un arreglo asociativo de items, donde cada item contiene
+     * Toma un arreglo asociativo de items, donde cada item contiene
      * un campo que hace referencia a otro item. De esta forma crea un árbol
      * jerárquico con los items.
      * @param array $items Listado de items que se deben buscar y procesar.
@@ -323,7 +323,7 @@ class Utility_Array
     }
 
     /**
-     * Método que convierte un árbol a un listado jerárquico.
+     * Convierte un árbol a un listado jerárquico.
      * Listo para usar en un campo select y con la jerarquía del árbol.
      * @param array $tree Árbol.
      * @param field_name Nombre del campo que contiene el nombre/glosa del item del árbol.
@@ -344,7 +344,7 @@ class Utility_Array
     }
 
     /**
-     * Método que convierte un árbol a arreglo asociativo con la glosa con los espacios del nivel.
+     * Convierte un árbol a arreglo asociativo con la glosa con los espacios del nivel.
      * Listo para usar en un campo select y con la jerarquía del árbol pero con todos los datos.
      * @param array $tree Árbol.
      * @param field_name Nombre del campo que contiene el nombre/glosa del item del árbol.
@@ -369,7 +369,7 @@ class Utility_Array
     }
 
     /**
-     * Método que entrega todos los sub conjuntos de un arreglo
+     * Entrega todos los sub conjuntos de un arreglo
      * @link https://stackoverflow.com/a/6092999/3333009
      */
     public static function subsets(array $in, int $minLength = 1): array

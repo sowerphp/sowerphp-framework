@@ -60,7 +60,7 @@ class Utility_Data
     }
 
     /**
-     * Método que obtiene los correos electrónicos desde un string.
+     * Obtiene los correos electrónicos desde un string.
      *
      * @param string $listado Listado de correos electrónicos.
      * @return array Listado de correos que hay en el listado.

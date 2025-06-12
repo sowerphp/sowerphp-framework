@@ -137,7 +137,7 @@ class View_Helper_Table
     }
 
     /**
-     * Método que genera la tabla en HTML a partir de un arreglo
+     * Genera la tabla en HTML a partir de un arreglo
      * @param table Tabla que se generará
      * @todo Programar opción para no mostrar todas las columnas
      */

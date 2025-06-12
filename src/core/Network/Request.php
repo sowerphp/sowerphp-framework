@@ -182,7 +182,7 @@ class Network_Request extends Request
     }
 
     /**
-     * Método que determina la URL utiliza para acceder a la aplicación, esto
+     * Determina la URL utiliza para acceder a la aplicación, esto
      * es: protocolo/esquema, dominio y ruta base dentro del dominio).
      *
      * @return string URL completa para acceder a la aplicación web.
@@ -209,102 +209,52 @@ class Network_Request extends Request
     }
 
     /**
-     * Método que determina la ruta base dentro del dominio.
+     * Determina la ruta base dentro del dominio.
      *
      * @return string Base de la URL.
      */
     public function getBaseUrlWithoutSlash(): string
     {
-        if (!isset($this->baseUrlWithoutSlash)) {
-            if (!isset($_SERVER['REQUEST_URI'])) {
-                $base = '';
-            } else {
-                $parts = explode('?', urldecode($_SERVER['REQUEST_URI']));
-                $last = strrpos($parts[0], $this->getRequestUriDecoded());
-                $base = $last !== false
-                    ? substr($parts[0], 0, $last)
-                    : $parts[0]
-                ;
-                $position = strlen($base) - 1;
-                if ($position >= 0 && $base[$position] == '/') {
-                    $base = substr($base, 0, -1);
-                }
-            }
-            $this->baseUrlWithoutSlash = $base;
-        }
+        // if (!isset($this->baseUrlWithoutSlash)) {
+        //     if (!isset($_SERVER['REQUEST_URI'])) {
+        //         $base = '';
+        //     } else {
+        //         $parts = explode('?', urldecode($_SERVER['REQUEST_URI']));
+        //         $last = strrpos($parts[0], $this->getRequestUriDecoded());
+        //         $base = $last !== false
+        //             ? substr($parts[0], 0, $last)
+        //             : $parts[0]
+        //         ;
+        //         $position = strlen($base) - 1;
+        //         if ($position >= 0 && $base[$position] == '/') {
+        //             $base = substr($base, 0, -1);
+        //         }
+        //     }
+        //     $this->baseUrlWithoutSlash = $base;
+        // }
 
-        return $this->baseUrlWithoutSlash;
+        // return $this->baseUrlWithoutSlash;
+
+        return '';
     }
 
     /**
-     * Método que determina la solicitud utilizada para acceder a la página.
+     * Determina la solicitud utilizada para acceder a la página.
      *
      * @return string Solicitud completa para la página consultada.
      */
     public function getRequestUriDecoded(): string
     {
         if (!isset($this->requestUriDecoded)) {
-            if (!isset($_SERVER['QUERY_STRING'])) {
-                $request = '';
-            } else {
-                // Obtener ruta que se uso sin "/" (base) inicial.
-                $uri = (
-                    isset($_SERVER['QUERY_STRING'][0])
-                    && $_SERVER['QUERY_STRING'][0] == '/'
-                )
-                    ? substr($_SERVER['QUERY_STRING'], 1)
-                    : $_SERVER['QUERY_STRING']
-                ;
-                if (strpos($_SERVER['REQUEST_URI'], '/?' . $uri) !== false) {
-                    $uri = '';
-                }
-                // Verificar si se pasaron variables GET.
-                $inicio_variables_get = strpos($uri, '&');
-                // Asignar URI.
-                $request = $inicio_variables_get === false
-                    ? $uri
-                    : substr($uri, 0, $inicio_variables_get)
-                ;
-                // Agregar slash inicial de la URI.
-                if (
-                    !isset($request)
-                    || (isset($request[0]) && $request[0] != '/')
-                ) {
-                    $request = '/' . $request;
-                }
-                // Decodificar URL.
-                $request = urldecode($request);
-            }
-            $this->requestUriDecoded = $request;
-            $this->removeFromQueryString($this->requestUriDecoded);
+            $aux = explode('?', $this->getRequestUri());
+            $this->requestUriDecoded = $aux[0];
         }
 
         return $this->requestUriDecoded;
     }
 
     /**
-     * Quita un índice pasago como QUERY de la URL.
-     *
-     * Esto se hace tanto para el request heredado de Illuminate como para $_GET.
-     *
-     * @param string $key
-     * @return void
-     */
-    protected function removeFromQueryString(string $key): void
-    {
-        $queryParams = $this->query();
-        unset($queryParams[$key]);
-        $newQueryString = http_build_query($queryParams);
-        $urlWithoutQueryString = $this->url();
-        $this->server->set(
-            'REQUEST_URI',
-            $urlWithoutQueryString . ($newQueryString ? '?' . $newQueryString : '')
-        );
-        $_GET = $queryParams;
-    }
-
-    /**
-     * Método que asigna o entrega los parámetros de la solicitud.
+     * Asigna o entrega los parámetros de la solicitud.
      *
      * @param array|null $params
      * @return array
@@ -332,16 +282,23 @@ class Network_Request extends Request
     protected function getRouteConfigUrl(array $config): array
     {
         $url = [];
+
         // Determinar parte de la URL que corresponde al módulo.
-        $modules = explode('.', (string)$config['module']);
-        $url['module'] = [];
-        foreach ($modules as &$p) {
-            $url['module'][] = \sowerphp\core\Utility_Inflector::underscore($p);
+        $configModule = trim((string)$config['module']);
+        if (empty($configModule)) {
+            $url['module'] = '';
+        } else {
+            $modules = explode('.', $configModule);
+            $url['module'] = [];
+            foreach ($modules as &$p) {
+                $url['module'][] = \sowerphp\core\Utility_Inflector::underscore($p);
+            }
+
+            $url['module'] = $url['module']
+                ? ('/' . implode('/', $url['module']))
+                : ''
+            ;
         }
-        $url['module'] = $url['module']
-            ? ('/' . implode('/', $url['module']))
-            : ''
-        ;
 
         // Determinar parte de la URL que correspone al controlador.
         $url['controller'] = $url['module'] . '/' . $config['controller'];
@@ -352,7 +309,7 @@ class Network_Request extends Request
     }
 
     /**
-     * Método que entrega la parte de la URL del módulo que está relacionado
+     * Entrega la parte de la URL del módulo que está relacionado
      * con la solicitud.
      *
      * @return string
@@ -363,7 +320,7 @@ class Network_Request extends Request
     }
 
     /**
-     * Método que entrega la parte de la URL del controlador que está
+     * Entrega la parte de la URL del controlador que está
      * relacionado con la solicitud.
      *
      * @return string
@@ -374,7 +331,7 @@ class Network_Request extends Request
     }
 
     /**
-     * Método que entrega la parte de la URL de la acción que está relacionada
+     * Entrega la parte de la URL de la acción que está relacionada
      * con la solicitud.
      *
      * @return string

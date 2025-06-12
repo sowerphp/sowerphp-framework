@@ -252,7 +252,7 @@ class Model_Usuario extends Model implements Authenticatable
     }*/
 
     /**
-     * Método que revisa si el nombre de usuario ya existe en la base de datos.
+     * Revisa si el nombre de usuario ya existe en la base de datos.
      * @return bool `true` si el nombre de usuario ya existe.
      */
     public function checkIfUserAlreadyExists(): bool
@@ -278,7 +278,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que revisa si el email ya existe en la base de datos.
+     * Revisa si el email ya existe en la base de datos.
      *
      * @return bool `true` si el correo ya existe.
      */
@@ -305,7 +305,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que revisa si el hash del usuario ya existe en la base de datos.
+     * Revisa si el hash del usuario ya existe en la base de datos.
      * @return bool `true` si el hash ya existe.
      */
     public function checkIfHashAlreadyExists(): bool
@@ -331,7 +331,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que cambia la contraseña del usuario.
+     * Cambia la contraseña del usuario.
      *
      * @param string $new Contraseña nueva en texto plano.
      * @param string|null $old Contraseña actual en texto plano.
@@ -343,7 +343,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que cambia la contraseña del usuario en la base de datos.
+     * Cambia la contraseña del usuario en la base de datos.
      *
      * @param string $new Contraseña nueva en texto plano.
      * @return bool `true` si la contraseña pudo ser cambiada.
@@ -363,7 +363,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que calcula el hash para la contraseña según el algoritmo más
+     * Calcula el hash para la contraseña según el algoritmo más
      * fuerte disponible en PHP y usando un salt automático.
      *
      * @param string $password Contraseña que se desea encriptar.
@@ -375,7 +375,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que revisa si la contraseña entregada es igual a la contraseña
+     * Revisa si la contraseña entregada es igual a la contraseña
      * del usuario almacenada en la base de datos.
      *
      * @param string $password Contrasela que se desea verificar.
@@ -394,7 +394,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que indica si el usuario está o no activo.
+     * Indica si el usuario está o no activo.
      *
      * @return bool `true` si el usuario está activo.
      */
@@ -404,7 +404,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que entrega un arreglo con los datos del último acceso del
+     * Entrega un arreglo con los datos del último acceso del
      * usuario.
      *
      * @return array Arreglo con índices: fecha_hora, desde y hash.
@@ -419,7 +419,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que actualiza el último ingreso del usuario.
+     * Actualiza el último ingreso del usuario.
      */
     public function createRememberToken(string $ip): string
     {
@@ -445,7 +445,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que entrega el listado de grupos a los que pertenece el usuario.
+     * Entrega el listado de grupos a los que pertenece el usuario.
      *
      * @return array Arreglo asociativo con el GID como clave y el nombre del
      * grupo como valor.
@@ -516,7 +516,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que asigna los grupos al usuario, eliminando otros que no están
+     * Asigna los grupos al usuario, eliminando otros que no están
      * en el listado.
      *
      * @param array $grupos Arreglo con los GIDs de los grupos que se deben
@@ -557,7 +557,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que entrega los grupos a los que realmente pertenece un usuario
+     * Entrega los grupos a los que realmente pertenece un usuario
      * dado determinados grupos.
      */
     public function getGroups(array $groups = []): array
@@ -582,7 +582,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que entrega el listado de registros sobre los que el usuario tiene
+     * Entrega el listado de registros sobre los que el usuario tiene
      * permisos para acceder.
      *
      * @return array Listado de registros a los que el usuario tiene acceso.
@@ -596,7 +596,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que entrega los registros a los que tiene acceso el usuario dado
+     * Entrega los registros a los que tiene acceso el usuario dado
      * determinados grupos.
      */
     public function getAuths(array $groups = []): array
@@ -624,7 +624,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que asigna manualmente un listado de registros a los que el
+     * Asigna manualmente un listado de registros a los que el
      * usuario tiene acceso.
      */
     public function setAuths(array $auths = []): void
@@ -633,7 +633,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que verifica si el usuario tiene permiso para acceder a cierto
+     * Verifica si el usuario tiene permiso para acceder a cierto
      * recurso.
      *
      * @return bool `true` si tiene permiso.
@@ -683,7 +683,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que asigna los intentos de contraseña.
+     * Asigna los intentos de contraseña.
      */
     public function savePasswordRetry(int $intentos): void
     {
@@ -699,7 +699,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que entrega las autenticaciones secundarias que el usuario tiene
+     * Entrega las autenticaciones secundarias que el usuario tiene
      * habilitadas.
      *
      * @return array Arreglo con listado de instancias de la auth2 habilitadas.
@@ -717,7 +717,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que crea el token para el usuario.
+     * Crea el token para el usuario.
      *
      * @param array $data Datos que se usarán para crear el token.
      * @return bool `true` si el token pudo ser creado.
@@ -744,7 +744,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que valida el estado de todas las autorizaciones secundarias
+     * Valida el estado de todas las autorizaciones secundarias
      * que el usuario pudiese tener habilitadas.
      *
      * @return bool `true` si todo está ok o Exception con el error si falla.
@@ -762,7 +762,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que entrega el correo del usuario.
+     * Entrega el correo del usuario.
      *
      * @return string Cuenta de correo oficial del usuario.
      */
@@ -772,7 +772,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que entrega la URL del avatar del usuario.
+     * Entrega la URL del avatar del usuario.
      *
      * @param int $size Tamaño de la imagen en pixeles (un solo lado ya que es
      * cuadrada).
@@ -786,7 +786,7 @@ class Model_Usuario extends Model implements Authenticatable
     }
 
     /**
-     * Método que envía un correo al usuario.
+     * Envía un correo al usuario.
      */
     public function email($subject, $msg, $replyTo = null)
     {

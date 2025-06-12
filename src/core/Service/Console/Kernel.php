@@ -155,7 +155,7 @@ class Service_Console_Kernel implements Interface_Service
     }
 
     /**
-     * Método que ejecuta el comando solicitado.
+     * Ejecuta el comando solicitado.
      *
      * @return int Resultado de la ejecución del comando.
      */

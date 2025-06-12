@@ -196,7 +196,7 @@ class Service_Model implements Interface_Service
     }
 
     /**
-     * Método que determina el nombre del modelo asociado a un controlador.
+     * Determina el nombre del modelo asociado a un controlador.
      *
      * @param string $controller Clase FQCN del controlador.
      * @return string Clase del modelo singular asociado al controlador.

@@ -867,7 +867,7 @@ abstract class Controller_Model extends Controller
     }
 
     /**
-     * Método que busca la vista que se deberá renderizar.
+     * Busca la vista que se deberá renderizar.
      *
      * @param string $view Vista que se desea renderizar.
      * @param array $data Variables que se pasarán a la vista al renderizar.

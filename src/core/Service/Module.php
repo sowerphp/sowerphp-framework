@@ -249,7 +249,7 @@ class Service_Module implements Interface_Service
     }
 
     /**
-     * Método que carga archivos de cada capa en el orden reverso en que las
+     * Carga archivos de cada capa en el orden reverso en que las
      * capas fueron definidas.
      */
     protected function loadFilesReverse(string $module, array $files): void

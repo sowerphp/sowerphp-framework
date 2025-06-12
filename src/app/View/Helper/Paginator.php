@@ -62,7 +62,7 @@ class View_Helper_Paginator extends \sowerphp\general\View_Helper_Table
     }
 
     /**
-     * Método que generará el paginador y listará los registros disponibles
+     * Generará el paginador y listará los registros disponibles
      * @param data Registros que se deben renderizar
      * @param pages Cantidad total de páginas que tienen los registros
      * @param page Página que se está revisando o 0 para no usar el paginador
@@ -88,7 +88,7 @@ class View_Helper_Paginator extends \sowerphp\general\View_Helper_Table
     }
 
     /**
-     * Método que genera el paginador para el mantenedor
+     * Genera el paginador para el mantenedor
      * @param pages Cantidad total de páginas que tienen los registros
      * @param page Página que se está revisando o 0 para no usar el paginador
      * @param groupOfPages De a cuantas páginas se mostrará en el paginador

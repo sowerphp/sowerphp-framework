@@ -34,7 +34,7 @@ class Model_Grupos extends Model_Plural
 {
 
     /**
-     * Método que entrega los IDs de un listado de nombres de grupos
+     * Entrega los IDs de un listado de nombres de grupos
      * @param grupos Arreglo con los grupos que se quiere saber sus IDs
      * @return array Arreglo asociativo con grupo => id
      */
@@ -54,7 +54,7 @@ class Model_Grupos extends Model_Plural
     }
 
     /**
-     * Método que entrega las glosas de lo grupos a partir de sus IDs
+     * Entrega las glosas de lo grupos a partir de sus IDs
      * @param grupos Arreglo con los grupos que se buscan sus glosas
      * @return array Arreglo con las glosas de los grupos
      */
@@ -79,7 +79,7 @@ class Model_Grupos extends Model_Plural
     }
 
     /**
-     * Método que entrega los correos electrónicos de los usuarios que
+     * Entrega los correos electrónicos de los usuarios que
      * pertenecen a los grupos indicados
      * @param grupos Arreglo con los grupos que se buscan los email de sus usuarios
      * @return array Arreglo con los correos de los usuarios que pertenecen a esos grupos

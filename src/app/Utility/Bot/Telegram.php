@@ -58,7 +58,7 @@ class Utility_Bot_Telegram
     }
 
     /**
-     * Método que obtiene el objeto con el mensaje envíado al Bot
+     * Obtiene el objeto con el mensaje envíado al Bot
      * @return stdclass Objeto con el mensaje enviado al Bot
      */
     public function getMessage()
@@ -67,7 +67,7 @@ class Utility_Bot_Telegram
     }
 
     /**
-     * Método que obtiene el objeto de quien envió el mensaje al bot
+     * Obtiene el objeto de quien envió el mensaje al bot
      * @return stdclass Objeto con el remitente del mensaje al Bot
      */
     public function getFrom()
@@ -76,7 +76,7 @@ class Utility_Bot_Telegram
     }
 
     /**
-     * Método que obtiene el comando que está solicitando el usuario, ya sea un
+     * Obtiene el comando que está solicitando el usuario, ya sea un
      * texto o un comando especial por algo que haya enviado (por ejemplo una foto)
      * @return string|bool Comando que se deberá ejecutar o =false en caso de no existir un mensaje recibido
      */
@@ -109,7 +109,7 @@ class Utility_Bot_Telegram
     }
 
     /**
-     * Método que envía una respuesta a un usuario
+     * Envía una respuesta a un usuario
      * @param message Mensaje que se desea enviar al usuario
      * @param chat_id ID del chat con el usuario, sino se indica se asumirá es respuesta a mensaje previo enviado por usuario
      * @return array Arreglo con respuesta HTTP e índices: status, header y body.
@@ -123,7 +123,7 @@ class Utility_Bot_Telegram
     }
 
     /**
-     * Método que prepara el teclado y lo entrega como objeto json
+     * Prepara el teclado y lo entrega como objeto json
      * @param keyboard Layout del teclado o bien arreglo con las opciones más el layout en índice keyboard
      * @return string Objeto json reply_markup con el teclado
      */
@@ -140,7 +140,7 @@ class Utility_Bot_Telegram
     }
 
     /**
-     * Método que envía una respuesta a un usuario con un teclado personalizado
+     * Envía una respuesta a un usuario con un teclado personalizado
      * @param message Mensaje que se desea enviar al usuario
      * @param keyboard Layout, en arreglo, del teclado que se enviará
      * @param chat_id ID del chat con el usuario, sino se indica se asumirá es respuesta a mensaje previo enviado por usuario
@@ -155,7 +155,7 @@ class Utility_Bot_Telegram
     }
 
     /**
-     * Método que envía un archivo al usuario
+     * Envía un archivo al usuario
      * @param endpoint El método que se ejecutará en la API de Telegram
      * @param params Arreglo con los datos que se enviarán
      * @return array Arreglo con respuesta HTTP e índices: status, header y body.
@@ -178,7 +178,7 @@ class Utility_Bot_Telegram
     }
 
     /**
-     * Método que envía un documento al usuario
+     * Envía un documento al usuario
      * @param document file_id del documento en servidor de telegram o bien una URL HTTP con el documento a descargar (gif, pdf o zip)
      * @param caption Texto a enviar junto con el documento
      * @param chat_id Identificador del chat al que se envía el mensaje
@@ -199,7 +199,7 @@ class Utility_Bot_Telegram
     }
 
     /**
-     * Método que envía una fotografía al usuario
+     * Envía una fotografía al usuario
      * @param photo Ruta absoluta de la imagen que se desea enviar
      * @param caption Texto a enviar junto con la imagen
      * @param chat_id Identificador del chat al que se envía el mensaje
@@ -220,7 +220,7 @@ class Utility_Bot_Telegram
     }
 
     /**
-     * Método que envía una fotografía con un teclado al usuario
+     * Envía una fotografía con un teclado al usuario
      * @param photo Ruta absoluta de la imagen que se desea enviar
      * @param keyboard Objeto JSON con el Layout y opciones del teclado
      * @param caption Texto a enviar junto con la imagen
@@ -233,7 +233,7 @@ class Utility_Bot_Telegram
     }
 
     /**
-     * Método que envía un estado de acción de chat al usuario
+     * Envía un estado de acción de chat al usuario
      * @param action Acción que se informará al usuario
      * @param chat_id ID del chat con el usuario, sino se indica se asumirá es respuesta a mensaje previo enviado por usuario
      * @return array Arreglo con respuesta HTTP e índices: status, header y body.
@@ -247,7 +247,7 @@ class Utility_Bot_Telegram
     }
 
     /**
-     * Método que obtiene la información de un archivo para descargar
+     * Obtiene la información de un archivo para descargar
      * @param file_id ID del archivo que se desea obtener su información para descargar
      * @return array Arreglo con respuesta HTTP e índices: status, header y body.
      */
@@ -257,7 +257,7 @@ class Utility_Bot_Telegram
     }
 
     /**
-     * Método que descarga un archivo desde el servidor de telegram
+     * Descarga un archivo desde el servidor de telegram
      * @param file_id ID del archivo que se desea descargar
      * @return array Arreglo con los índices: id, name, size, path y data
      */

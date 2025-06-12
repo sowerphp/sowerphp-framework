@@ -30,7 +30,7 @@ class View_Helper_Maintainer extends View_Helper_Paginator
 {
 
     /**
-     * Método que generará el mantenedor y listará los registros disponibles
+     * Generará el mantenedor y listará los registros disponibles
      * @param data Registros que se deben renderizar
      * @param pages Cantidad total de páginas que tienen los registros
      * @param page Página que se está revisando o 0 para no usar el paginador

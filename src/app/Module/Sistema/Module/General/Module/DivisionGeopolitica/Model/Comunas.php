@@ -32,7 +32,6 @@ use sowerphp\autoload\Model_Plural;
  */
 class Model_Comunas extends Model_Plural
 {
-
     /**
      * Entrega la lista de comunas agrupadas por regiones.
      *
@@ -63,5 +62,4 @@ class Model_Comunas extends Model_Plural
         }
         return false;
     }
-
 }

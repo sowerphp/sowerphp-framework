@@ -47,7 +47,7 @@ class Model_Datasource_Auth2 extends Model_Datasource_Auth2_Base
     }
 
     /**
-     * Método que entrega todas las autenticaciones secundarias disponibles en la aplicación
+     * Entrega todas las autenticaciones secundarias disponibles en la aplicación
      */
     public static function getAll()
     {
@@ -60,7 +60,7 @@ class Model_Datasource_Auth2 extends Model_Datasource_Auth2_Base
     }
 
     /**
-     * Método que indica si hay alguna auth2 que use token
+     * Indica si hay alguna auth2 que use token
      */
     public static function tokenEnabled()
     {

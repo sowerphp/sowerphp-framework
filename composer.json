@@ -22,7 +22,7 @@
         "classmap": ["tests/"]
     },
     "require": {
-        "php": "^7.3 || ^8.0",
+        "php": "^7.4",
         "clue/graph": "~0.9.3",
         "embed/embed": "^4.4",
         "google/recaptcha": "~1.2.4",

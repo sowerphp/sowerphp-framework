@@ -32,7 +32,7 @@ class Utility_Google_Recaptcha
     private static $jsAlreadyIncluded = false;
 
     /**
-     * Método que genera genera el código javascript general a todos los formularios
+     * Genera genera el código javascript general a todos los formularios
      */
     public static function js()
     {
@@ -66,7 +66,7 @@ class Utility_Google_Recaptcha
     }
 
     /**
-     * Método que genera genera el código javascript que va en el formulario
+     * Genera genera el código javascript que va en el formulario
      */
     public static function form($form, $action = null)
     {
@@ -83,7 +83,7 @@ class Utility_Google_Recaptcha
     }
 
     /**
-     * Método que valida que el captcha esté ok en el backend
+     * Valida que el captcha esté ok en el backend
      */
     public static function check()
     {

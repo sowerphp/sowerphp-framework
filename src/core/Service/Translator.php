@@ -84,7 +84,7 @@ class Service_Translator implements Interface_Service, Translator
     }
 
     /**
-     * Método que carga un locale.
+     * Carga un locale.
      *
      * Se determina el locale que se usará (se puede llamar al método sin
      * parámetros) y se cargarán las traducciones del locale.

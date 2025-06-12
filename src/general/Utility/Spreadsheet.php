@@ -235,7 +235,7 @@ class Utility_Spreadsheet
     }
 
     /**
-     * Método que normaliza los datos del archivo en un arreglo (igual a arreglo en $_FILES)
+     * Normaliza los datos del archivo en un arreglo (igual a arreglo en $_FILES)
      * @param archivo Nombre del archivo
      */
     private static function archivo($archivo)

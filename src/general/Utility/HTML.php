@@ -30,7 +30,7 @@ class Utility_HTML
 {
 
     /**
-     * Método que entrega los tamaños de columnas para ser usados en un grid
+     * Entrega los tamaños de columnas para ser usados en un grid
      * de bootstrap
      * @param items Cantidad total de items a ubicar en lña grilla
      * @param max Cantida máxima de elementos en la grilla

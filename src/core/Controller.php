@@ -66,7 +66,7 @@ abstract class Controller
     }
 
     /**
-     * Método que se ejecuta al iniciar la ejecución del controlador.
+     * Se ejecuta al iniciar la ejecución del controlador.
      */
     public function boot(): void
     {
@@ -98,7 +98,7 @@ abstract class Controller
     }
 
     /**
-     * Método que se ejecuta al terminar la ejecución del controlador.
+     * Se ejecuta al terminar la ejecución del controlador.
      */
     public function terminate(): void
     {
@@ -206,14 +206,21 @@ abstract class Controller
     {
         $user = user();
         $hash = $user ? $user->hash : config('auth.api.default_token');
-        $rest = new \sowerphp\core\Network_Http_Rest();
-        $rest->setAuth($hash);
-        $rest->setAssoc($assoc);
+
+
+        $headers = [];
+        if ($hash) {
+            $headers['Authorization'] = 'Bearer ' . $hash;
+        }
+
         $url = url($recurso);
+
+        $client = http_client();
+
         if ($datos) {
-            $response = $rest->post($url, $datos);
+            $response = $client->post($url, $datos, $headers);
         } else {
-            $response = $rest->get($url);
+            $response = $client->get($url, $headers);
         }
         if ($response === false) {
             throw new \Exception(

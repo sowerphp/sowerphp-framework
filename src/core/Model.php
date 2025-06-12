@@ -3263,7 +3263,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     }
 
     /**
-     * Método que obtiene las relaciones del modelo con otros para la asignación
+     * Obtiene las relaciones del modelo con otros para la asignación
      * de relaciones de llave foránea.
      *
      * @return array

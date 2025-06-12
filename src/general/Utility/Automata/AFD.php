@@ -96,7 +96,7 @@ class Utility_Automata_AFD
     }
 
     /**
-     * Método que entrega el grafo del AFD
+     * Entrega el grafo del AFD
      *
      * Requiere que esté la biblioteca clue/graph de composer
      *
@@ -143,7 +143,7 @@ class Utility_Automata_AFD
     }
 
     /**
-     * Método que entrega los datos de la imagen PNG del grafo del AFD
+     * Entrega los datos de la imagen PNG del grafo del AFD
      *
      * Requiere: GraphViz y que esté la biblioteca graphp/graphviz de composer
      *

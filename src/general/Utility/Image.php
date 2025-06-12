@@ -358,7 +358,7 @@ class Utility_Image
     }
 
     /**
-     * Método que entrega un mapa de bits de la imagen
+     * Entrega un mapa de bits de la imagen
      */
     public static function bitmap($img) {
         $data = [];

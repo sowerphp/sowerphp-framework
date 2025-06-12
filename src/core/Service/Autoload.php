@@ -109,7 +109,7 @@ class Service_Autoload implements Interface_Service
     }
 
     /**
-     * Método que obtiene el alias de la clase desde la configuración.
+     * Obtiene el alias de la clase desde la configuración.
      *
      * @return string|null Alias de la clase si se encontró.
      */
@@ -121,7 +121,7 @@ class Service_Autoload implements Interface_Service
     }
 
     /**
-     * Método que obtiene el nombre la clase que se tratará de autocargar.
+     * Obtiene el nombre la clase que se tratará de autocargar.
      *
      * Es necesario determinar el nombre de la clase que se autocargará porque
      * solo se deben buscar clases donde su prefijo (namespace sin módulo):
@@ -145,7 +145,7 @@ class Service_Autoload implements Interface_Service
     }
 
     /**
-     * Método que construye el nombre del archivo donde se buscará la clase.
+     * Construye el nombre del archivo donde se buscará la clase.
      *
      * Se consideran la posibilidad de que la clase venga con uno o más
      * módulos; o, con uno o más subdirectorios dentro de la clase. Ejemplos:
@@ -192,7 +192,7 @@ class Service_Autoload implements Interface_Service
     }
 
     /**
-     * Método que realiza la búsqueda de la clase en las diferentes capas de la
+     * Realiza la búsqueda de la clase en las diferentes capas de la
      * aplicación. Si encuentra un archivo que corresponda a la clase buscada
      * asumirá que dentro estará la clase por lo que retornará el nombre
      * completo de la clase encontrada, su FQCN con la clase real.
@@ -215,7 +215,7 @@ class Service_Autoload implements Interface_Service
     }
 
     /**
-     * Método que realiza la autocarga de clases.
+     * Realiza la autocarga de clases.
      *
      * @param string $class Clase que se desea cargar.
      * @return bool `true` si se encontró y cargó la clase.

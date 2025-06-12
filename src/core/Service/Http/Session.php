@@ -129,7 +129,7 @@ class Service_Http_Session implements Interface_Service
     }
 
     /**
-     * Método que obtiene el administrador de la sesión.
+     * Obtiene el administrador de la sesión.
      *
      * @return void
      */
@@ -309,7 +309,7 @@ class Service_Http_Session implements Interface_Service
     }
 
     /**
-     * Método que guarda parámetros de rastreo (ej: UTM) para seguimiento de
+     * Guarda parámetros de rastreo (ej: UTM) para seguimiento de
      * campañas en la sesión. Así no se tienen que arrastrar por las URLs y se
      * puede saber estos datos para usar en otros lados (ej: formularios).
      */
@@ -353,7 +353,7 @@ class Service_Http_Session implements Interface_Service
     }
 
     /**
-     * Método que guarda la sesión.
+     * Guarda la sesión.
      *
      * Se utiliza un método propio para controlar que se guarde sólo si existe
      * el sesión manager.

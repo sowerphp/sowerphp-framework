@@ -324,7 +324,7 @@ class Service_Layers implements Interface_Service
     }
 
     /**
-     * Método que normaliza un path. Esto lo hace incorporando el "slash"
+     * Normaliza un path. Esto lo hace incorporando el "slash"
      * inicial. Con esto el path quedará desde la "raíz". Y esa "raíz" podrá
      * ser la raíz real del sistema de archivos o la raíz de uno de los
      * directorios de las capas.
@@ -481,7 +481,7 @@ class Service_Layers implements Interface_Service
     }
 
     /**
-     * Método que carga archivos de cada capa, por defecto, en el orden que las
+     * Carga archivos de cada capa, por defecto, en el orden que las
      * capas fueron definidas.
      */
     public function loadFiles(array $files, bool $reverse = false): void
@@ -498,7 +498,7 @@ class Service_Layers implements Interface_Service
     }
 
     /**
-     * Método que carga archivos de cada capa en el orden reverso en que las
+     * Carga archivos de cada capa en el orden reverso en que las
      * capas fueron definidas.
      */
     public function loadFilesReverse(array $files): void

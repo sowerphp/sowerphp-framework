@@ -30,7 +30,7 @@ class View_Helper_Dashboard
 {
 
     /**
-     * Método que genera las tarjetas para el dashboard
+     * Genera las tarjetas para el dashboard
      */
     public static function cards(array $cards, $config = null)
     {

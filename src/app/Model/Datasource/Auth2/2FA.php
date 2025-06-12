@@ -46,7 +46,7 @@ class Model_Datasource_Auth2_2FA extends Model_Datasource_Auth2_Base
     }
 
     /**
-     * Método que crea el código secreato para parear la aplicación
+     * Crea el código secreato para parear la aplicación
      * @param user Nombre del usuario que se desea parear
      */
     public function createSecret($user = null)
@@ -59,7 +59,7 @@ class Model_Datasource_Auth2_2FA extends Model_Datasource_Auth2_Base
     }
 
     /**
-     * Método que crea un token a partir del código entregado
+     * Crea un token a partir del código entregado
      */
     public function create(array $data = [])
     {
@@ -80,7 +80,7 @@ class Model_Datasource_Auth2_2FA extends Model_Datasource_Auth2_Base
     }
 
     /**
-     * Método que valida el estado del token con la autorización secundaria
+     * Valida el estado del token con la autorización secundaria
      */
     public function check(array $data = [])
     {

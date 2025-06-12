@@ -62,7 +62,7 @@ abstract class Database_Connection extends Connection
     }
 
     /**
-     * Método que entrega el driver de la base de datos de la conexión.
+     * Entrega el driver de la base de datos de la conexión.
      *
      * @return string Driver de la base de datos de la conexión.
      */

@@ -150,7 +150,7 @@ class Model_Usuarios extends Model_Plural
     }
 
     /**
-     * Método que entrega una estadística mensual con los usuarios que
+     * Entrega una estadística mensual con los usuarios que
      * iniciaron sesión por última vez.
      */
     public function getStatsLogin(int $limit = 12): array
@@ -174,7 +174,7 @@ class Model_Usuarios extends Model_Plural
     }
 
     /**
-     * Método que entrega el objeto del Usuario a partir del ID de Telegram.
+     * Entrega el objeto del Usuario a partir del ID de Telegram.
      */
     public function getUserByTelegramID(int $telegram_id)
     {
