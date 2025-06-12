@@ -1,6 +1,6 @@
 {
     "name": "sowerphp/sowerphp-framework",
-    "description": "Framework PHP hecho en Chile.",
+    "description": "Simple and Open Web Ecosystem Reimagined for PHP",
     "type": "library",
     "keywords": ["sowerphp", "framework"],
     "homepage": "https://www.sowerphp.org",
@@ -12,19 +12,19 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/sascocl/sowerphp/issues",
-        "source": "https://github.com/sascocl/sowerphp"
+        "issues": "https://github.com/sowerphp/sowerphp-framework/issues",
+        "source": "https://github.com/sowerphp/sowerphp-framework"
     },
     "autoload": {
         "classmap": ["src/"]
     },
     "require": {
-        "php": "^7.3 || ^8.0",
-        "clue/graph": "~0.9.3",
-        "google/recaptcha": "~1.2.4",
-        "graphp/graphviz": "~0.2.2",
+        "php": "^7.4",
+        "clue/graph": "0.9.3",
+        "google/recaptcha": "1.2.4",
+        "graphp/graphviz": "0.2.2",
         "guzzlehttp/guzzle": "^7",
-        "libchart/libchart": "~1.5.0",
+        "libchart/libchart": "1.5.0",
         "michelf/php-markdown": "1.7.0",
         "phpmailer/phpmailer": "^6.9.1",
         "phpoffice/phpspreadsheet": "1.25.2",
