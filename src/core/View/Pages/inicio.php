@@ -2,7 +2,7 @@
     <div class="container-fluid py-5">
         <img src="<?=$_base?>/img/logo.png" alt="Logo SowerPHP" class="float-end" />
         <h1 class="display-5 fw-bold">SowerPHP</h1>
-        <p class="col-md-8 fs-4">Framework PHP hecho en Chile.</p>
+        <p class="col-md-8 fs-4">Simple and Open Web Ecosystem Reimagined for PHP.</p>
         <a href="https://www.sowerphp.org" class="btn btn-primary btn-lg" type="button">Web de SowerPHP</a>
     </div>
 </div>
