@@ -4,26 +4,26 @@
 
 // crear formulario
 $form = new \sowerphp\general\View_Helper_Form ();
-echo $form->begin(array('onsubmit'=>'Form.check()'));
+echo $form->begin(['onsubmit'=>'Form.check()']);
 
 // opciones para select en caso que sea un campo boolean
-$optionsBoolean = array(
-    array('', 'Seleccione una opción'),
-    array('1', 'Si'),
-    array('0', 'No')
-);
+$optionsBoolean = [
+    ['', 'Seleccione una opción'],
+    ['1', 'Si'],
+    ['0', 'No'],
+];
 
 // agregar campos del formulario
 foreach ($columns as $column => &$info) {
     // se genera campo de input solo si no es una columna automática
     if (!$info['auto']) {
         // configuración base para campo
-        $input = array(
+        $input = [
             'name'  => $column,
             'label' => $info['name'],
             'help'  => $info['comment'],
-            'check' => (!$info['null']?['notempty']:[])
-        );
+            'check' => (!$info['null']?['notempty']:[]),
+        ];
         // si es un archivo
         $end = substr($column, -5);
         if (in_array($end, ['_data', '_name', '_type', '_size'])) {
@@ -44,21 +44,21 @@ foreach ($columns as $column => &$info) {
             echo $form->input($input);
         }
         // si es de tipo boolean se muestra lista desplegable
-        else if ($info['type']=='boolean' || $info['type']=='tinyint') {
+        elseif ($info['type']=='boolean' || $info['type']=='tinyint') {
             $input['type'] = 'select';
             $input['options'] = $optionsBoolean;
             if (isset($Obj)) $input['value'] = $Obj->{$column};
             echo $form->input($input);
         }
         // si es de tipo date se muestra calendario
-        else if ($info['type']=='date') {
+        elseif ($info['type']=='date') {
             $input['type'] = 'date';
             $input['check'][] = 'date';
             if (isset($Obj)) $input['value'] = $Obj->{$column};
             echo $form->input($input);
         }
         // si es llave foránea
-        else if ($info['fk']) {
+        elseif ($info['fk']) {
             $class = 'Model_'.\sowerphp\core\Utility_Inflector::camelize(
                 $info['fk']['table']
             );
@@ -66,14 +66,14 @@ foreach ($columns as $column => &$info) {
                 \sowerphp\core\Utility_Inflector::pluralize($info['fk']['table'])
             );
             $options = (new $classs())->getList();
-            array_unshift($options, array('', 'Seleccione una opción'));
+            array_unshift($options, ['', 'Seleccione una opción']);
             $input['type'] = 'select';
             $input['options'] = $options;
             if (isset($Obj)) $input['value'] = $Obj->{$column};
             echo $form->input($input);
         }
         // si es contraseña
-        else if (in_array($column, $contraseniaNames)) {
+        elseif (in_array($column, $contraseniaNames)) {
             $input['type'] = 'password';
             echo $form->input($input);
         }

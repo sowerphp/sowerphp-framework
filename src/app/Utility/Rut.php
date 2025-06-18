@@ -28,7 +28,6 @@ namespace sowerphp\app;
  */
 class Utility_Rut
 {
-
     /**
      * Método que valida el RUT ingresado
      * @param mixed $rut RUT con dígito verificador (puntos son opcionales)
@@ -118,5 +117,4 @@ class Utility_Rut
     {
         return self::normalizar_string($rut . self::dv($rut));
     }
-
 }

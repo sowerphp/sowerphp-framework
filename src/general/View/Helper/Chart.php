@@ -30,13 +30,12 @@ namespace sowerphp\general;
  */
 class View_Helper_Chart
 {
-
-    private $defaultOptions = array( ///< Opciones por defecto de los gráficos
+    private $defaultOptions = [ ///< Opciones por defecto de los gráficos
         'width' => 750,
         'height' => 300,
         'ratio' => 0.65,
         'padding' => [10, 1, 50, 70],
-    );
+    ];
 
     /**
      * Método que genera un gráfico
@@ -62,7 +61,7 @@ class View_Helper_Chart
             if ($type == 'Line') {
                 $chart->getPlot()->getPalette()->setLineColor($colors);
             }
-            else if ($type == 'VerticalBar') {
+            elseif ($type == 'VerticalBar') {
                 $chart->getPlot()->getPalette()->setBarColor($colors);
             }
         }
@@ -197,5 +196,4 @@ class View_Helper_Chart
         //renderizar
         $this->render($chart, $title, $dataSet, $options, $exit);
     }
-
 }

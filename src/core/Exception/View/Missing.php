@@ -30,5 +30,6 @@ namespace sowerphp\core;
 class Exception_View_Missing extends Exception
 {
     protected $_messageTemplate = 'Vista %s para acción %s::%s() no ha sido encontrada';
+
     protected $severity = LOG_DEBUG;
 }

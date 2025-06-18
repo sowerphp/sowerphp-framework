@@ -30,6 +30,6 @@ return [
     'modules' => [
         'Sistema',
         'Sistema.Usuarios' => ['autoLoad' => true],
-    ]
+    ],
 
 ];

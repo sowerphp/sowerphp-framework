@@ -30,7 +30,6 @@ namespace sowerphp\core;
  */
 class Utility_Data
 {
-
     protected static $default_crypt_method = 'sodium'; ///< método por defecto
 
     /**
@@ -230,5 +229,4 @@ class Utility_Data
         }
         return $emails;
     }
-
 }

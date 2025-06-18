@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app\Sistema\Notificaciones;
 
 /**
@@ -31,9 +31,9 @@ namespace sowerphp\app\Sistema\Notificaciones;
  */
 class Model_Notificaciones extends \Model_Plural_App
 {
-
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table = 'notificacion'; ///< Tabla del modelo
 
     /**
@@ -107,5 +107,4 @@ class Model_Notificaciones extends \Model_Plural_App
             WHERE para = :usuario AND leida = false
         ', [':usuario' => $usuario]);
     }
-
 }

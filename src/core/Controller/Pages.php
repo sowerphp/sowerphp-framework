@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class Controller_Pages extends \Controller_App
 {
-
     /**
      * Método que se ejecuta antes de ejecutar la acción del controlador.
      */
@@ -52,5 +51,4 @@ class Controller_Pages extends \Controller_App
             $this->render('Pages' . $page);
         }
     }
-
 }

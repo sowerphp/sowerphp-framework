@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del controlador
+
 namespace sowerphp\app\Sistema\Usuarios;
 
 /**
@@ -33,12 +33,15 @@ namespace sowerphp\app\Sistema\Usuarios;
  */
 class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
 {
-
     protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
+
     protected $columnsView = [
-        'listar'=>['id', 'nombre', 'usuario', 'email', 'activo', 'ultimo_ingreso_fecha_hora']
-    ]; ///< Columnas que se deben mostrar en las vistas
+        'listar'=>['id', 'nombre', 'usuario', 'email', 'activo', 'ultimo_ingreso_fecha_hora'],
+    ];
+
+ ///< Columnas que se deben mostrar en las vistas
     protected $deleteRecord = false; ///< Indica si se permite o no borrar registros
+
     protected $changeUsername = true; ///< Indica si se permite que se cambie el nombre de usuario
 
     /**
@@ -109,7 +112,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
     {
         $class = $this->Auth->settings['model'];
         $Usuario = new $class($id);
-        if(!$Usuario->exists()) {
+        if (!$Usuario->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Usuario no existe, no se puede forzar el cierre de la sesión.',
                 'error'
@@ -168,7 +171,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     );
                     $this->render('Usuarios/contrasenia_recuperar_step1');
                 }
-                else if (!$Usuario->activo) {
+                elseif (!$Usuario->activo) {
                     \sowerphp\core\Model_Datasource_Session::message(
                         'Usuario no activo. Primero deberás realizar la activación del usuario, luego podrás cambiar la contraseña.', 'error'
                     );
@@ -225,7 +228,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     );
                     $this->redirect('/usuarios/contrasenia/recuperar');
                 }
-                else if (empty ($_POST['contrasenia1']) || empty ($_POST['contrasenia2']) || $_POST['contrasenia1'] != $_POST['contrasenia2']) {
+                elseif (empty ($_POST['contrasenia1']) || empty ($_POST['contrasenia2']) || $_POST['contrasenia1'] != $_POST['contrasenia2']) {
                     \sowerphp\core\Model_Datasource_Session::message(
                         'Contraseña nueva inválida (en blanco o no coinciden).', 'warning'
                     );
@@ -255,12 +258,12 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
     private function contrasenia_recuperar_email($correo, $nombre, $usuario, $hash)
     {
         $this->layout = null;
-        $this->set (array(
+        $this->set ([
             'nombre'=>$nombre,
             'usuario'=>$usuario,
             'hash'=>$hash,
             'ip'=>$this->Auth->ip(),
-        ));
+        ]);
         $msg = $this->render('Usuarios/contrasenia_recuperar_email')->body();
         $email = new \sowerphp\core\Network_Email();
         $email->to($correo);
@@ -327,7 +330,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     if (empty($_POST['contrasenia'])) {
                         if ($Usuario->getEmailAccount()) {
                             $contrasenia = 'actual contraseña de correo '.$Usuario->getEmailAccount()->getEmail();
-                        } else if ($Usuario->getLdapPerson()) {
+                        } elseif ($Usuario->getLdapPerson()) {
                             $contrasenia = 'actual contraseña de cuenta '.$Usuario->getLdapPerson()->uid.' en LDAP';
                         }
                     } else {
@@ -338,11 +341,11 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
                     if (!empty($emailConfig['type']) && !empty($emailConfig['from'])) {
                         $layout = $this->layout;
                         $this->layout = null;
-                        $this->set(array(
+                        $this->set([
                             'nombre'=>$Usuario->nombre,
                             'usuario'=>$Usuario->usuario,
                             'contrasenia'=>$contrasenia,
-                        ));
+                        ]);
                         $msg = $this->render('Usuarios/crear_email')->body();
                         $this->layout = $layout;
                         $email = new \sowerphp\core\Network_Email();
@@ -369,13 +372,13 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         // setear variables
         $class::$columnsInfo['contrasenia']['null'] = true;
         $class::$columnsInfo['hash']['null'] = true;
-        $this->set(array(
+        $this->set([
             'accion' => 'Crear',
             'columns' => $class::$columnsInfo,
             'grupos_asignados' => (isset($_POST['grupos']) ? $_POST['grupos'] : []),
             'listarUrl' => '/sistema/usuarios/usuarios/listar' . $filterListar,
             'ldap' => config('ldap.default'),
-        ));
+        ]);
         $this->setGruposAsignables();
         $this->autoRender = false;
         $this->render ('Usuarios/crear_editar');
@@ -401,7 +404,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
         $class = $this->Auth->settings['model'];
         $Usuario = new $class($id);
         // si el registro que se quiere editar no existe error
-        if(!$Usuario->exists()) {
+        if (!$Usuario->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Registro ('.implode(', ', func_get_args()).') no existe, no se puede editar.',
                 'error'
@@ -409,18 +412,18 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             $this->redirect($redirect);
         }
         // si no se ha enviado el formulario se mostrará
-        if(!isset($_POST['submit'])) {
+        if (!isset($_POST['submit'])) {
             $class::$columnsInfo['contrasenia']['null'] = true;
             $grupos_asignados = $Usuario->groups();
             $this->setGruposAsignables();
-            $this->set(array(
+            $this->set([
                 'accion' => 'Editar',
                 'Obj' => $Usuario,
                 'columns' => $class::$columnsInfo,
                 'grupos_asignados' => array_keys($grupos_asignados),
                 'listarUrl' => $redirect,
                 'ldap' => config('ldap.default'),
-            ));
+            ]);
             $this->autoRender = false;
             $this->render ('Usuarios/crear_editar');
         }
@@ -585,7 +588,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             $this->redirect('/usuarios/perfil');
         }
         // procesar cambio de contraseña
-        else if (isset($_POST['cambiarContrasenia'])) {
+        elseif (isset($_POST['cambiarContrasenia'])) {
             // verificar que las contraseñas no sean vacías
             if (empty($_POST['contrasenia']) || empty(trim($_POST['contrasenia1'])) || empty($_POST['contrasenia2'])) {
                 \sowerphp\core\Model_Datasource_Session::message(
@@ -621,7 +624,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             $this->redirect('/usuarios/perfil');
         }
         // procesar creación de la autenticación secundaria
-        else if (isset($_POST['crearAuth2'])) {
+        elseif (isset($_POST['crearAuth2'])) {
             unset($_POST['crearAuth2']);
             try {
                 $this->Auth->User->createAuth2($_POST);
@@ -638,7 +641,7 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             $this->redirect('/usuarios/perfil#auth');
         }
         // procesar destrucción de la autenticación secundaria
-        else if (isset($_POST['destruirAuth2'])) {
+        elseif (isset($_POST['destruirAuth2'])) {
             unset($_POST['destruirAuth2']);
             try {
                 $this->Auth->User->destroyAuth2($_POST);
@@ -967,5 +970,4 @@ class Controller_Usuarios extends \sowerphp\app\Controller_Maintainer
             'grupos' => array_values($User->groups()),
         ];
     }
-
 }

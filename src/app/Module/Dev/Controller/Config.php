@@ -29,7 +29,6 @@ namespace sowerphp\app\Dev;
  */
 class Controller_Config extends \Controller_App
 {
-
     /**
      * Servicio web que permite obtener el nombre del layout de la aplicación
      */
@@ -61,5 +60,4 @@ class Controller_Config extends \Controller_App
     {
         $this->Api->send(app('module')->getLoadedModules(), 200);
     }
-
 }

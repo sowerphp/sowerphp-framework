@@ -29,7 +29,6 @@ namespace sowerphp\core;
  */
 class Controller_Error extends \Controller_App
 {
-
     public $error_reporting; ///< Si se debe o no mostrar los errores exactos de las páginas
 
     /**
@@ -61,5 +60,4 @@ class Controller_Error extends \Controller_App
         $this->set('soporte', config('email.default') !== null);
         $this->render('Error/error');
     }
-
 }

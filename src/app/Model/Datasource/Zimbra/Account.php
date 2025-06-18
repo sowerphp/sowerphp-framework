@@ -28,23 +28,36 @@ namespace sowerphp\app;
  */
 class Model_Datasource_Zimbra_Account extends Model_Datasource_Ldap_Person
 {
-
     public $zimbraId;
+
     public $zimbraAccountStatus;
+
     public $zimbraIsAdminAccount;
+
     public $zimbraMailStatus;
+
     public $zimbraMailDeliveryAddress;
+
     public $zimbraMailAlias;
+
     public $zimbraMailForwardingAddress;
+
     public $zimbraCreateTimestamp;
+
     public $zimbraLastLogonTimestamp;
+
     public $zimbraPasswordModifiedTime;
+
     public $zimbraPrefOutOfOfficeReplyEnabled;
+
     public $zimbraPrefOutOfOfficeReply;
+
     public $zimbraPrefOutOfOfficeStatusAlertOnLogin;
+
     public $zimbraAuthTokenValidityValue;
 
     protected $Zimbra; ///< Objeto que representa la conexión al servidor Zimbra
+
     protected $Ldap; ///< Objeto que representa la conexión al servidor LDAP
 
     /**
@@ -220,5 +233,4 @@ class Model_Datasource_Zimbra_Account extends Model_Datasource_Ldap_Person
     {
         return $this->zimbraMailDeliveryAddress;
     }
-
 }

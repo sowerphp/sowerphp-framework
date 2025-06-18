@@ -28,7 +28,6 @@ namespace sowerphp\general;
  */
 class Utility_Image
 {
-
     /**
      * Obtiene el área en la que se encuentran caras en una foto
      * @param photo Ruta de la imagen
@@ -198,9 +197,9 @@ class Utility_Image
         ob_start();
         if ($thumbnail['type'] == 'image/jpeg') {
             imagejpeg($dst);
-        } else if ($thumbnail['type'] == 'image/gif') {
-            imagegif($dst);
-        } else if ($thumbnail['type'] == 'image/png') {
+        } elseif ($thumbnail['type'] == 'image/gif') {
+            imagegif ($dst);
+        } elseif ($thumbnail['type'] == 'image/png') {
             imagepng($dst);
         }
         $thumbnail['size'] = ob_get_length();
@@ -230,9 +229,9 @@ class Utility_Image
             ob_start();
             if ($file['type'] == 'image/jpeg') {
                 imagejpeg($dst);
-            } else if ($file['type'] == 'image/gif') {
-                imagegif($dst);
-            } else if ($file['type'] == 'image/png') {
+            } elseif ($file['type'] == 'image/gif') {
+                imagegif ($dst);
+            } elseif ($file['type'] == 'image/png') {
                 imagepng($dst);
             }
             $file['size'] = ob_get_length();
@@ -254,9 +253,9 @@ class Utility_Image
         // guardar imagen en un archivo
         if ($file['type'] == 'image/jpeg') {
             imagejpeg($src, $file['tmp_name']);
-        } else if ($file['type'] == 'image/gif') {
-            imagegif($src, $file['tmp_name']);
-        } else if ($file['type'] == 'image/png') {
+        } elseif ($file['type'] == 'image/gif') {
+            imagegif ($src, $file['tmp_name']);
+        } elseif ($file['type'] == 'image/png') {
             imagepng($src, $file['tmp_name']);
         }
     }
@@ -288,9 +287,9 @@ class Utility_Image
         $ext = Utility_File::extension($file);
         if ($ext == 'jpg' || $ext == 'jpeg') {
             imagejpeg($dst);
-        } else if ($ext == 'gif') {
-            imagegif($dst);
-        } else if ($ext == 'png') {
+        } elseif ($ext == 'gif') {
+            imagegif ($dst);
+        } elseif ($ext == 'png') {
             imagepng($dst);
         }
         $image = [
@@ -327,10 +326,10 @@ class Utility_Image
         $mimetype = Utility_File::mimetype($file);
         if ($mimetype == 'image/png'){
             $src_img = imagecreatefrompng($file);
-        } else if ($mimetype == 'image/jpeg') {
+        } elseif ($mimetype == 'image/jpeg') {
             $src_img = imagecreatefromjpeg($file);
-        } else if ($mimetype == 'image/gif') {
-            $src_img = imagecreatefromgif($file);
+        } elseif ($mimetype == 'image/gif') {
+            $src_img = imagecreatefromgif ($file);
         }
         // generar imagen nueva
         $dst_img = imagecreatetruecolor($new_w, $new_h);
@@ -345,10 +344,10 @@ class Utility_Image
         // copiar imagen devuelta al archivo
         if ($mimetype == 'image/png') {
             imagepng($dst_img, $file, 9);
-        } else if ($mimetype == 'image/jpeg') {
+        } elseif ($mimetype == 'image/jpeg') {
             imagejpeg($dst_img, $file, 100);
-        } else if ($mimetype == 'image/gif') {
-            imagegif($dst_img, $file);
+        } elseif ($mimetype == 'image/gif') {
+            imagegif ($dst_img, $file);
         }
         // destruir imagenes usadas
         imagedestroy($src_img);
@@ -364,8 +363,8 @@ class Utility_Image
         $data = [];
         $w = imagesx($img);
         $h = imagesy($img);
-        for($y = 0; $y < $h; $y++) {
-            for($x = 0; $x < $w; $x++) {
+        for ($y = 0; $y < $h; $y++) {
+            for ($x = 0; $x < $w; $x++) {
                 $data[] = (bool)imagecolorat($img, $x, $y);
             }
         }
@@ -375,5 +374,4 @@ class Utility_Image
             'height' => $h,
         ];
     }
-
 }

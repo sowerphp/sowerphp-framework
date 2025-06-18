@@ -29,5 +29,6 @@ namespace sowerphp\core;
 class Exception_Model_Missing extends Exception
 {
     protected $_messageTemplate = 'Modelo %s no fue encontrado';
+
     protected $severity = LOG_DEBUG;
 }

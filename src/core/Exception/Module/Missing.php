@@ -28,8 +28,7 @@ namespace sowerphp\core;
  */
 class Exception_Module_Missing extends Exception
 {
-
     protected $_messageTemplate = 'Módulo %s no fue encontrado.';
-    protected $severity = LOG_NOTICE;
 
+    protected $severity = LOG_NOTICE;
 }

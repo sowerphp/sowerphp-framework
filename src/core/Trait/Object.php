@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 trait Trait_Object
 {
-
     /**
      * Método para convertir el objeto a un string.
      * @return string Nombre de la clase con que se instancio el objeto.
@@ -55,5 +54,4 @@ trait Trait_Object
         }
         return $this;
     }
-
 }

@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app\Sistema\General;
 
 /**
@@ -31,18 +31,19 @@ namespace sowerphp\app\Sistema\General;
  */
 class Model_Afd extends \Model_App
 {
-
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table = 'afd'; ///< Tabla del modelo
 
     // Atributos de la clase (columnas en la base de datos)
     public $codigo; ///< varchar(10) NOT NULL DEFAULT '' PK
+
     public $nombre; ///< varchar(50) NOT NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'codigo' => array(
+    public static $columnsInfo = [
+        'codigo' => [
             'name'      => 'Codigo',
             'comment'   => '',
             'type'      => 'varchar',
@@ -51,9 +52,9 @@ class Model_Afd extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => true,
-            'fk'        => null
-        ),
-        'nombre' => array(
+            'fk'        => null,
+        ],
+        'nombre' => [
             'name'      => 'Nombre',
             'comment'   => '',
             'type'      => 'varchar',
@@ -62,10 +63,10 @@ class Model_Afd extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
+            'fk'        => null,
+        ],
 
-    );
+    ];
 
     // Comentario de la tabla en la base de datos
     public static $tableComment = '';
@@ -74,6 +75,7 @@ class Model_Afd extends \Model_App
 
     // variables para guardar estados y transiciones
     public $estados = [];
+
     public $transiciones = [];
 
     /**
@@ -212,5 +214,4 @@ class Model_Afd extends \Model_App
         }
         return $transiciones;
     }
-
 }

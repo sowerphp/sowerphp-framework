@@ -28,10 +28,12 @@ namespace sowerphp\core;
  */
 abstract class Controller_Component
 {
-
     public $settings = []; ///< Opciones del componente
+
     public $controller; ///< Controlador que está cargando el componente
+
     protected $components = []; ///< Nombre de componentes que este componente utiliza
+
     protected $Components = null; ///< Colección de componentes que se cargarán
 
     /**
@@ -81,5 +83,4 @@ abstract class Controller_Component
     public function beforeRedirect($url = null, $status = null)
     {
     }
-
 }

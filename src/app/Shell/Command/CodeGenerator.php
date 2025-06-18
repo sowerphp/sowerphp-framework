@@ -28,14 +28,20 @@ namespace sowerphp\app;
  */
 class Shell_Command_CodeGenerator extends \Shell_App
 {
-
     public static $db; ///< Conexión a la base de datos
+
     public static $destination; ///< Destino de los archivos que se generan
+
     public static $module; ///< Módulo donde se encontrarán los archivos
+
     public static $module_url; ///< Url para acceder al módulo
+
     public static $namespace; ///< Namespace en el que se generarán los archivos
+
     public static $extension; //< Extensión donde se generarán los archivos
+
     private static $tables; ///< Tablas de la base de datos que se estarán procesando
+
     private static $nTables; ///< Cantidad de tablas que se estarán procesando
 
     /**
@@ -125,11 +131,11 @@ class Shell_Command_CodeGenerator extends \Shell_App
             return false;
         }
         // si solo hay una
-        else if ($encontradas == 1) {
+        elseif ($encontradas == 1) {
             return $keys[0];
         }
         // si hay más de una se debe elegir una
-        else if ($encontradas > 1) {
+        elseif ($encontradas > 1) {
             // mostrar bases disponibles
             $this->out('Bases de datos disponibles:');
             $i = 1;
@@ -179,14 +185,14 @@ class Shell_Command_CodeGenerator extends \Shell_App
         $encontradas = $i - 1;
         do {
             $opcion = (int)$this->in('Seleccionar un directorio para guardar archivos generados: ');
-        } while($opcion < 1 || $opcion > $encontradas);
+        } while ($opcion < 1 || $opcion > $encontradas);
         // la ubicación es la base de la aplicación
         if ($opcion == 1) {
             $this->setModuleUrl();
             return 'project:/src/website';
         }
         // la ubicación es un módulo dentro del proyecto principal
-        else if (isset($modulos[$opcion-2])) {
+        elseif (isset($modulos[$opcion-2])) {
             $modulo = $modulos[$opcion-2];
             $this->setModuleUrl($modulo);
             return 'project:/src/website/Module/' . str_replace('.', '/Module/', $modulo);
@@ -417,11 +423,10 @@ class Shell_Command_CodeGenerator extends \Shell_App
             $plantilla = file_get_contents($archivo);
         }
         // reemplazar variables en la plantilla
-        foreach($variables as $key => $valor) {
+        foreach ($variables as $key => $valor) {
             $plantilla = str_replace('{'.$key.'}', $valor, $plantilla);
         }
         // retornar plantilla ya procesada
         return $plantilla;
     }
-
 }

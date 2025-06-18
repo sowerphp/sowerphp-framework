@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del controlador
+
 namespace sowerphp\app\Sistema\Usuarios;
 
 /**
@@ -30,7 +30,6 @@ namespace sowerphp\app\Sistema\Usuarios;
  */
 class Controller_Email extends \Controller_App
 {
-
     /**
      * Acción que permite enviar correos masivos a los usuarios de ciertos
      * grupos de la aplicación
@@ -50,7 +49,7 @@ class Controller_Email extends \Controller_App
                 );
             } else {
                 $emails = $Grupos->emails($_POST['grupos']);
-                if(($key = array_search($this->Auth->User->email, $emails)) !== false) {
+                if (($key = array_search($this->Auth->User->email, $emails)) !== false) {
                     unset($emails[$key]);
                     sort($emails);
                 }
@@ -63,13 +62,13 @@ class Controller_Email extends \Controller_App
                     // preparar mensaje a enviar
                     $layout = $this->layout;
                     $this->layout = null;
-                    $this->set (array(
+                    $this->set ([
                         'mensaje' => $_POST['mensaje'],
                         'n_emails' => $n_emails,
                         'grupos' => $Grupos->getGlosas($_POST['grupos']),
                         'de_nombre' => $this->Auth->User->nombre,
                         'de_email' => $this->Auth->User->email,
-                    ));
+                    ]);
                     $msg = $this->render('Email/grupos_email')->body();
                     $this->layout = $layout;
                     // agrupar
@@ -132,5 +131,4 @@ class Controller_Email extends \Controller_App
             }
         }
     }
-
 }

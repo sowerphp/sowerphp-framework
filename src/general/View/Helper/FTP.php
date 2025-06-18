@@ -28,8 +28,8 @@ namespace sowerphp\general;
  */
 class View_Helper_FTP
 {
-
     private $ftp; ///< Conexión al servidor FTP
+
     private $rootDir; ///< Directorio raíz del explorador
 
     /**
@@ -83,7 +83,7 @@ class View_Helper_FTP
                 [
                     '<a href="?dir=/'.($link?$link.'/':$link).'"><span class="fa fa-folder"></span> ..</a>',
                     '',
-                    ''
+                    '',
                 ]
             );
         }
@@ -134,5 +134,4 @@ class View_Helper_FTP
         }
         return round($size, 1).' '.$units[$unit];
     }
-
 }

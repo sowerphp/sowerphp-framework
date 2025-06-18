@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
 /**
@@ -31,19 +31,21 @@ namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
  */
 class Model_Provincia extends \Model_App
 {
-
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table = 'provincia'; ///< Tabla del modelo
 
     // Atributos de la clase (columnas en la base de datos)
     public $codigo; ///< Código de la provincia: character(3) NOT NULL DEFAULT '' PK
+
     public $provincia; ///< Nombre de la provincia: character varying(30) NOT NULL DEFAULT ''
+
     public $region; ///< Región a la que pertenece la provincia: character(2) NOT NULL DEFAULT '' FK:region.codigo
 
     // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'codigo' => array(
+    public static $columnsInfo = [
+        'codigo' => [
             'name'      => 'Codigo',
             'comment'   => 'Código de la provincia',
             'type'      => 'character',
@@ -52,9 +54,9 @@ class Model_Provincia extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => true,
-            'fk'        => null
-        ),
-        'provincia' => array(
+            'fk'        => null,
+        ],
+        'provincia' => [
             'name'      => 'Provincia',
             'comment'   => 'Nombre de la provincia',
             'type'      => 'character varying',
@@ -63,9 +65,9 @@ class Model_Provincia extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'region' => array(
+            'fk'        => null,
+        ],
+        'region' => [
             'name'      => 'Region',
             'comment'   => 'Región a la que pertenece la provincia',
             'type'      => 'character',
@@ -74,16 +76,16 @@ class Model_Provincia extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => array('table' => 'region', 'column' => 'codigo')
-        ),
+            'fk'        => ['table' => 'region', 'column' => 'codigo'],
+        ],
 
-    );
+    ];
 
     // Comentario de la tabla en la base de datos
     public static $tableComment = 'Provincias de cada región del país';
 
-    public static $fkNamespace = array(
-        'Model_Region' => 'sowerphp\app\Sistema\General\DivisionGeopolitica'
-    ); ///< Namespaces que utiliza esta clase
+    public static $fkNamespace = [
+        'Model_Region' => 'sowerphp\app\Sistema\General\DivisionGeopolitica',
+    ]; ///< Namespaces que utiliza esta clase
 
 }

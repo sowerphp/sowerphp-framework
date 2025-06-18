@@ -28,7 +28,6 @@ namespace sowerphp\general;
  */
 class Controller_Module extends \Controller_App
 {
-
     /**
      * Método para autorizar la carga de index en caso que hay autenticación
      */
@@ -81,22 +80,22 @@ class Controller_Module extends \Controller_App
             foreach ($nav_module as $link => &$info) {
                 // si info no es un arreglo es solo el nombre y se arma
                 if (!is_array($info)) {
-                    $info = array(
+                    $info = [
                         'name' => $info,
                         'desc' => '',
                         'icon' => 'fa-solid fa-link',
-                    );
+                    ];
                 }
                 // si es un arreglo colocar opciones por defecto
                 else {
-                    $info = array_merge(array(
+                    $info = array_merge([
                         'name' => $link,
                         'desc' => '',
                         'icon' => 'fa-solid fa-link',
-                    ), $info);
+                    ], $info);
                 }
                 // Verificar permisos para acceder al enlace
-                if(!$this->Auth->check('/'.$module.$link)) {
+                if (!$this->Auth->check('/'.$module.$link)) {
                     unset($nav_module[$link]);
                 }
             }
@@ -116,15 +115,14 @@ class Controller_Module extends \Controller_App
                     $this->request->getParsedParams()['module']
                 );
             }
-            $this->set(array(
+            $this->set([
                 'title' => $title,
                 'nav' => $nav_module,
                 'module' => $module,
-            ));
+            ]);
             unset($title, $nav_module, $module);
             // renderizar
             $this->render('Module/index');
         }
     }
-
 }

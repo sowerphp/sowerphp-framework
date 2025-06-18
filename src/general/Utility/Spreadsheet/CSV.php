@@ -28,7 +28,6 @@ namespace sowerphp\general;
  */
 final class Utility_Spreadsheet_CSV
 {
-
     /**
      * Lee un archivo CSV
      * @param archivo archivo a leer (ejemplo índice tmp_name de un arreglo $_FILES)
@@ -104,8 +103,8 @@ final class Utility_Spreadsheet_CSV
         if ($fd === false) {
             throw new \Exception('No fue posible crear el archivo CSV');
         }
-        foreach($data as &$row) {
-            foreach($row as &$col) {
+        foreach ($data as &$row) {
+            foreach ($row as &$col) {
                 $col = rtrim(str_replace(['<br />', '<br/>', '<br>'], ', ', strip_tags($col, '<br>')), " \t\n\r\0\x0B,");
             }
             fputcsv($fd, $row, $delimiter, $enclosure);
@@ -132,5 +131,4 @@ final class Utility_Spreadsheet_CSV
         $delimiter = config('spreadsheet.csv.delimiter');
         return $delimiter ? $delimiter : ',';
     }
-
 }

@@ -28,7 +28,6 @@ namespace sowerphp\general;
  */
 class Utility_Google_Recaptcha
 {
-
     private static $jsAlreadyIncluded = false;
 
     /**
@@ -100,5 +99,4 @@ class Utility_Google_Recaptcha
             throw new \Exception(implode(' / ', $errors));
         }
     }
-
 }

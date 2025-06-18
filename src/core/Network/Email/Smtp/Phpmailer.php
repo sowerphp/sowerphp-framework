@@ -29,7 +29,6 @@ namespace sowerphp\core;
  */
 class Network_Email_Smtp_Phpmailer
 {
-
     protected $config = null; ///< Configuración para SMTP usando PHPMailer
 
     /**
@@ -77,7 +76,7 @@ class Network_Email_Smtp_Phpmailer
             $config['secure'] = $config['port'] == 25 ? false : null;
         }
         // Configuración para la conexión al servidor
-        $this->config = array(
+        $this->config = [
             'host' => $config['host'],
             'port' => $config['port'],
             'auth' => isset($config['auth']) ? (bool)$config['auth'] : true,
@@ -86,7 +85,7 @@ class Network_Email_Smtp_Phpmailer
             'secure' => $config['secure'] === false ? null : (!empty($config['secure']) ? $config['secure'] : 'ssl'), // ssl o tls
             'debug' => (int)$config['debug'],
             'verify_ssl' => isset($config['verify_ssl']) ? (bool)$config['verify_ssl'] : true,
-        );
+        ];
     }
 
     /**
@@ -117,7 +116,7 @@ class Network_Email_Smtp_Phpmailer
                     'verify_peer' => false,
                     'verify_peer_name' => false,
                     'allow_self_signed' => true,
-                ]
+                ],
             ];
         }
         // enviar mensaje
@@ -207,7 +206,7 @@ class Network_Email_Smtp_Phpmailer
                     $mail->addAttachment($file['tmp_name'], $file['name']);
                 }
                 // leer desde datos de una variable
-                else if (!empty($file['data'])) {
+                elseif (!empty($file['data'])) {
                     $mail->addStringAttachment($file['data'], $file['name']);
                 }
             }
@@ -215,5 +214,4 @@ class Network_Email_Smtp_Phpmailer
         // entregar objeto del correo
         return $mail;
     }
-
 }

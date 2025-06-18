@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del controlador
+
 namespace sowerphp\app\Sistema\General;
 
 /**
@@ -33,7 +33,6 @@ namespace sowerphp\app\Sistema\General;
  */
 class Controller_MonedaCambios extends \Controller_Maintainer
 {
-
     protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
 
     /**
@@ -50,9 +49,8 @@ class Controller_MonedaCambios extends \Controller_Maintainer
             $from => [
                 $to => [
                     $fecha => (float)(new Model_MonedaCambio($from, $to, $fecha))->valor,
-                ]
-            ]
+                ],
+            ],
         ];
     }
-
 }

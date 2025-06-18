@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class View_Helper_Pages_Md
 {
-
     /**
      * Método que renderiza una página en formato Markdown
      * @param file Archivo que se desea renderizar
@@ -49,5 +48,4 @@ class View_Helper_Pages_Md
             \Michelf\Markdown::defaultTransform($data)
         );
     }
-
 }

@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class Utility_Data_Validation
 {
-
     public static $regexs = [
         'email' => '/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/',
         'date' => '/^\d{4}[\-](0?[1-9]|1[012])[\-](0?[1-9]|[12][0-9]|3[01])$/',
@@ -56,16 +55,16 @@ class Utility_Data_Validation
                 }
             }
             // si existe un método para la regla se usa
-            else if (method_exists(__CLASS__, 'check_'.$rule)) {
+            elseif (method_exists(__CLASS__, 'check_'.$rule)) {
                 if (!call_user_func_array([__CLASS__, 'check_'.$rule], [$data])) {
                     return $rule;
                 }
             }
             // si el tipo de chequeo no existe error
             else {
-                throw new \sowerphp\core\Exception(array(
-                    sprintf ('Regla %s para validar datos no existe', $rule)
-                ));
+                throw new \sowerphp\core\Exception([
+                    sprintf ('Regla %s para validar datos no existe', $rule),
+                ]);
             }
         }
         // se pasaron todas las validaciones
@@ -104,5 +103,4 @@ class Utility_Data_Validation
         }
         return \sowerphp\app\Utility_Rut::check($data);
     }
-
 }

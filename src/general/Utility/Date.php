@@ -28,8 +28,8 @@ namespace sowerphp\general;
  */
 class Utility_Date
 {
-
     public static $dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
     public static $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
     /**
@@ -60,7 +60,7 @@ class Utility_Date
         if ($dias == 0) {
             if ($dia == 6) {
                 $end = $start + 2 * 86400;
-            } else if ($dia == 7) {
+            } elseif ($dia == 7) {
                 $end = $start + 86400;
             }
         } else {
@@ -98,7 +98,7 @@ class Utility_Date
         if ($dias == 0) {
             if ($dia == 6) {
                 $end = $start - 86400;
-            } else if ($dia == 7) {
+            } elseif ($dia == 7) {
                 $end = $start - 2 * 86400;
             }
         } else {
@@ -129,7 +129,7 @@ class Utility_Date
     {
         list($anio, $mes, $dia) = explode('-', $fecha);
         $desde = $anio.'-'.$mes.'-01';
-        for($i=0; $i<$dia; $i++) {
+        for ($i=0; $i<$dia; $i++) {
             $f = self::addWorkingDays($desde, $i, $feriados);
             if ($f == $fecha) {
                 return $i+1;
@@ -185,7 +185,7 @@ class Utility_Date
         $count = 0;
         $date = strtotime($from);
         $end = strtotime($to);
-        while($date <= $end) {
+        while ($date <= $end) {
             $dayOfTheWeek = date('N', $date);
             if ($excludeWeekend && ($dayOfTheWeek==6 || $dayOfTheWeek==7)) {
                 $date += 86400;
@@ -226,11 +226,11 @@ class Utility_Date
         if ($letrasFormato == 'l') {
             $dia = strtolower ($dia);
             $mes = strtolower ($mes);
-        } else if ($letrasFormato == 'u') {
+        } elseif ($letrasFormato == 'u') {
             $dia = strtoupper ($dia);
             $mes = strtoupper ($mes);
         }
-        return str_replace(array('DIA', 'MES'), array($dia, $mes), $fecha);
+        return str_replace(['DIA', 'MES'], [$dia, $mes], $fecha);
     }
 
     /**
@@ -244,13 +244,13 @@ class Utility_Date
         if ($invertir) {
             if (strlen($fecha) == 6) {
                 return $fecha[2].$fecha[3].$fecha[4].$fecha[5].'-'.$fecha[0].$fecha[1];
-            } else if (strlen($fecha) == 8) {
+            } elseif (strlen($fecha) == 8) {
                 return $fecha[4].$fecha[5].$fecha[6].$fecha[7].'-'.$fecha[2].$fecha[3].'-'.$fecha[0].$fecha[1];
             }
         } else {
             if (strlen($fecha) == 6) {
                 return $fecha[0].$fecha[1].$fecha[2].$fecha[3].'-'.$fecha[4].$fecha[5];
-            } else if (strlen($fecha) == 8) {
+            } elseif (strlen($fecha) == 8) {
                 return $fecha[0].$fecha[1].$fecha[2].$fecha[3].'-'.$fecha[4].$fecha[5].'-'.$fecha[6].$fecha[7];
             }
         }
@@ -284,7 +284,7 @@ class Utility_Date
         $diff = $now->diff($ago);
         $diff->w = floor($diff->d / 7);
         $diff->d -= $diff->w * 7;
-        $string = array(
+        $string = [
             'y' => 'año',
             'm' => 'mes',
             'w' => 'semana',
@@ -292,7 +292,7 @@ class Utility_Date
             'h' => 'hora',
             'i' => 'minuto',
             's' => 'segundo',
-        );
+        ];
         foreach ($string as $k => &$v) {
             if ($diff->$k) {
                 $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? ($k=='m'?'es':'s') : '');
@@ -424,7 +424,7 @@ class Utility_Date
             $period = (int)$period;
             return ($period >= $year_from && $period <= $year_to);
         }
-        else if ($n_period == 6) {
+        elseif ($n_period == 6) {
             $year = (int)substr((string)$period, 0, 4);
             $month = (int)substr((string)$period, 4);
             return ($year >= $year_from && $year <= $year_to && $month >= 1 && $month <= 12);
@@ -493,7 +493,7 @@ class Utility_Date
             }
             return $y.'-'.$m.'-'.$d;
         }
-        else if ($tiempo == 'M') {
+        elseif ($tiempo == 'M') {
             list($y, $m, $d) = explode('-', $fecha);
             $siguientePeriodo = $y.$m;
             for ($i=0; $i<$cantidad; $i++) {
@@ -507,15 +507,15 @@ class Utility_Date
             list($y, $m, $d) = explode('-', $siguienteFecha);
             if ($m == '02' && $d > 28) {
                 $d = 28;
-            } else if (in_array($m, ['04', '06', '09', '11']) && $d > 30) {
+            } elseif (in_array($m, ['04', '06', '09', '11']) && $d > 30) {
                 $d = 30;
             }
             return $y.'-'.$m.'-'.$d;
         }
-        else if ($tiempo == 'S') {
+        elseif ($tiempo == 'S') {
             return self::getNext($fecha, 'D', 7*$cantidad, $operacion);
         }
-        else if ($tiempo == 'D') {
+        elseif ($tiempo == 'D') {
             $date = new \DateTime($fecha);
             if ($operacion == '+') {
                 $date->add(new \DateInterval('P'.$cantidad.'D'));
@@ -524,7 +524,7 @@ class Utility_Date
             }
             return $date->format('Y-m-d');
         }
-        else if (is_numeric($tiempo)) {
+        elseif (is_numeric($tiempo)) {
             return self::getNext($fecha, 'M', (int)$tiempo, $operacion);
         }
         else {
@@ -599,6 +599,4 @@ class Utility_Date
         $date = new \DateTime("$anio-$mes-01");
         return (int)$date->format('t');
     }
-
-
 }

@@ -25,7 +25,6 @@ namespace sowerphp\core;
 
 class Service_Http_Session implements Interface_Service, Interface_Service_Session
 {
-
     //protected $sessionManager;
     //protected $store;
     protected $request;
@@ -186,7 +185,7 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
         // Armar el arreglo necesario para realizar la escritura.
         $write = $key;
         if (!is_array($key)) {
-            $write = array($key => $value);
+            $write = [$key => $value];
         }
         // Por cada elemento del arreglo escribir los datos de la sesión.
         foreach ($write as $key => $val) {
@@ -242,21 +241,23 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
             session_write_close();
         }
     }
-
 }
 
 interface Interface_Service_Session
 {
     public function start(): void;
+
     public function get(string $key, $default = null);
+
     public function put(string $key, $value): void;
+
     public function forget(string $key): void;
+
     public function flush(): void;
 }
 
 class Model_Datasource_Session
 {
-
     public static function read(?string $key = null)
     {
         return app('session')->get($key);
@@ -295,7 +296,6 @@ class Model_Datasource_Session
             return Model_Datasource_Session_Message::flush();
         }
     }
-
 }
 
 /**
@@ -303,7 +303,6 @@ class Model_Datasource_Session
  */
 class Model_Datasource_Session_Message
 {
-
     public static function info(string $message): void
     {
         self::write($message, 'info');
@@ -345,7 +344,7 @@ class Model_Datasource_Session_Message
         if ($type == 'ok') {
             $type = 'success';
         }
-        else if ($type == 'error') {
+        elseif ($type == 'error') {
             $type = 'danger';
         }
         $messages = self::flush();
@@ -366,5 +365,4 @@ class Model_Datasource_Session_Message
         app('session')->forget('session.messages');
         return $messages ? (array)$messages : [];
     }
-
 }

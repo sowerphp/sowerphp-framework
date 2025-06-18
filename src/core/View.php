@@ -28,13 +28,18 @@ namespace sowerphp\core;
  */
 class View
 {
-
     protected $request; ///< Objeto Request
+
     protected $response; ///< Objeto Response
+
     public $viewVars = []; ///< Variables que se pasarán al renderizar la vista
+
     private $layout; ///< Tema que se debe usar para renderizar la página
+
     private $defaultLayout = 'bootstrap'; ///< Layout por defecto
+
     protected static $_viewsLocation; ///< Listado de vistas que se han buscado
+
     protected static $extensions = null; ///< Listado de extensiones
 
     /**
@@ -77,20 +82,20 @@ class View
                 if ($this->request->getParsedParams()['controller'] == 'pages') {
                     $this->render('/error/404');
                 } else {
-                    throw new Exception_View_Missing(array(
+                    throw new Exception_View_Missing([
                         'view' => $page,
                         'controller' => Utility_Inflector::camelize(
                             $this->request->getParsedParams()['controller']
                         ),
                         'action' => $this->request->getParsedParams()['action'],
-                    ));
+                    ]);
                 }
             } else {
-                throw new Exception_View_Missing(array(
+                throw new Exception_View_Missing([
                     'view' => $page,
                     'controller' => 'Controller',
                     'action' => 'action',
-                ));
+                ]);
             }
         }
         // preparar _header_extra (se hace antes de renderizar la página para
@@ -221,7 +226,7 @@ class View
         }
         // si la vista parte con / entonces se está pasando la ruta y solo falta su extension
         if ($view[0] == '/') {
-            foreach(self::$extensions as $extension) {
+            foreach (self::$extensions as $extension) {
                 if (is_readable($view . '.' . $extension)) {
                     self::$_viewsLocation[$view] = $view . '.' . $extension;
                     return $view . '.' . $extension;
@@ -234,7 +239,7 @@ class View
             ? ('/Module/' . str_replace('.', '/Module/', $module))
             : ''
         ) . '/View/' . $view . '.';
-        foreach(self::$extensions as $extension) {
+        foreach (self::$extensions as $extension) {
             $filename = $base_location . $extension;
             $location = app('layers')->getFilePath($filename);
             if ($location) {
@@ -265,5 +270,4 @@ class View
         // si no se encontró el archivo de la vista se retorna falso
         return false;
     }
-
 }

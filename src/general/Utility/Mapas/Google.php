@@ -28,7 +28,6 @@ namespace sowerphp\general;
  */
 class Utility_Mapas_Google
 {
-
     private $api_key; ///< Llave para la API de Google Maps
 
     /**
@@ -59,5 +58,4 @@ class Utility_Mapas_Google
         }
         return [$response['body']['results'][0]['geometry']['location']['lat'], $response['body']['results'][0]['geometry']['location']['lng']];
     }
-
 }

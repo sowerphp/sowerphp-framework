@@ -25,13 +25,16 @@ namespace sowerphp\core;
 
 class Service_Http_Kernel implements Interface_Service
 {
-
     protected $layersService;
+
     protected $moduleService;
+
     protected $configService;
+
     protected $sessionService;
 
     protected $request;
+
     protected $response;
 
     public function __construct(
@@ -183,11 +186,11 @@ class Service_Http_Kernel implements Interface_Service
             $request->getParsedParams()['module'] ?? null
         );
         if (!$reflection) {
-            throw new Exception_Controller_Missing(array(
+            throw new Exception_Controller_Missing([
                 'class' => 'Controller_'.Utility_Inflector::camelize(
                     $request->getParsedParams()['controller']
-                )
-            ));
+                ),
+            ]);
         }
         // Instanciar controlador.
         $response = $this->getResponse();
@@ -201,7 +204,7 @@ class Service_Http_Kernel implements Interface_Service
         // terminan antes como archivos y ya dejan algo en el body).
         if ($controller->autoRender) {
             $response = $controller->render();
-        } else if ($response->body() === null) {
+        } elseif ($response->body() === null) {
             $response->body($result);
         }
         // Terminar tareas controlador.
@@ -221,9 +224,9 @@ class Service_Http_Kernel implements Interface_Service
         if (!empty($module)) {
             $this->moduleService->loadModule($module);
             if (!$this->moduleService->isModuleLoaded($module)) {
-                throw new Exception_Module_Missing(array(
-                    'module' => $module
-                ));
+                throw new Exception_Module_Missing([
+                    'module' => $module,
+                ]);
             }
         }
         // Determinar nombre de la clase que se cargará mágicamente.
@@ -326,5 +329,4 @@ class Service_Http_Kernel implements Interface_Service
             $response->send();
         }
     }
-
 }

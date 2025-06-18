@@ -31,7 +31,6 @@ use Illuminate\Support\Str;
  */
 class Network_Request extends Request
 {
-
     /**
      * URI usada para la consulta desde la aplicacion, o sea, sin base,
      * iniciando con "/".
@@ -192,5 +191,4 @@ class Network_Request extends Request
         $accept_json = Str::contains($accept_header, 'application/json');
         return $api_prefix || $accept_json;
     }
-
 }

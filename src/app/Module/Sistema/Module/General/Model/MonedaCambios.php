@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app\Sistema\General;
 
 /**
@@ -31,9 +31,9 @@ namespace sowerphp\app\Sistema\General;
  */
 class Model_MonedaCambios extends \Model_Plural_App
 {
-
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table = 'moneda_cambio'; ///< Tabla del modelo
 
     private $decimales = [
@@ -139,5 +139,4 @@ class Model_MonedaCambios extends \Model_Plural_App
     {
         return isset($this->decimales[$moneda]) ? $this->decimales[$moneda] : 2;
     }
-
 }

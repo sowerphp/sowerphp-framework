@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
 /**
@@ -31,19 +31,21 @@ namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
  */
 class Model_Comuna extends \Model_App
 {
-
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table = 'comuna'; ///< Tabla del modelo
 
     // Atributos de la clase (columnas en la base de datos)
     public $codigo; ///< Código de la comuna: character(5) NOT NULL DEFAULT '' PK
+
     public $comuna; ///< Nombre de la comuna: character varying(40) NOT NULL DEFAULT ''
+
     public $provincia; ///< Provincia a la que pertenece la comuna: character(3) NOT NULL DEFAULT '' FK:provincia.codigo
 
     // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'codigo' => array(
+    public static $columnsInfo = [
+        'codigo' => [
             'name'      => 'Codigo',
             'comment'   => 'Código de la comuna',
             'type'      => 'character',
@@ -52,9 +54,9 @@ class Model_Comuna extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => true,
-            'fk'        => null
-        ),
-        'comuna' => array(
+            'fk'        => null,
+        ],
+        'comuna' => [
             'name'      => 'Comuna',
             'comment'   => 'Nombre de la comuna',
             'type'      => 'character varying',
@@ -63,9 +65,9 @@ class Model_Comuna extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'provincia' => array(
+            'fk'        => null,
+        ],
+        'provincia' => [
             'name'      => 'Provincia',
             'comment'   => 'Provincia a la que pertenece la comuna',
             'type'      => 'character',
@@ -74,16 +76,16 @@ class Model_Comuna extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => array('table' => 'provincia', 'column' => 'codigo')
-        ),
+            'fk'        => ['table' => 'provincia', 'column' => 'codigo'],
+        ],
 
-    );
+    ];
 
     // Comentario de la tabla en la base de datos
     public static $tableComment = 'Comunas de cada provincia del país';
 
-    public static $fkNamespace = array(
-        'Model_Provincia' => 'sowerphp\app\Sistema\General\DivisionGeopolitica'
-    ); ///< Namespaces que utiliza esta clase
+    public static $fkNamespace = [
+        'Model_Provincia' => 'sowerphp\app\Sistema\General\DivisionGeopolitica',
+    ]; ///< Namespaces que utiliza esta clase
 
 }

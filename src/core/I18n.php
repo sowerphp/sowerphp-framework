@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class I18n
 {
-
     public static $locale = [
         'es' => 'es_CL.utf8',
         'en' => 'en_US.utf8',
@@ -114,5 +113,4 @@ class I18n
         }
         return is_dir(app('layers')->getProjectDir('/resources/locale/' . $locale));
     }
-
 }

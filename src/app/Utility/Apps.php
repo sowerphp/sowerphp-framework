@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app;
 
 /**
@@ -30,7 +30,6 @@ namespace sowerphp\app;
  */
 class Utility_Apps
 {
-
     protected $config; ///< Configuración principal de las aplicaciones
 
     /**
@@ -104,5 +103,4 @@ class Utility_Apps
         // entregar apps como objetos
         return $apps;
     }
-
 }

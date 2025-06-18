@@ -29,7 +29,6 @@ namespace sowerphp\core;
  */
 class Network_Transfer
 {
-
     protected $config = []; ///< Configuración del servidor
 
     /**
@@ -181,5 +180,4 @@ class Network_Transfer
         // cerrar conexión
         ftp_close($connection);
     }
-
 }

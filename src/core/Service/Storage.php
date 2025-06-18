@@ -74,7 +74,6 @@ use League\Flysystem\Local\LocalFilesystemAdapter;
  */
 class Service_Storage implements Interface_Service
 {
-
     /**
      * Listado de conexiones a dispositivos de almacenamiento ("discos")
      * que puede utilizar este servicio.
@@ -138,5 +137,4 @@ class Service_Storage implements Interface_Service
             $name
         ));
     }
-
 }

@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app;
 
 /**
@@ -30,12 +30,16 @@ namespace sowerphp\app;
  */
 abstract class Utility_Apps_Base_Apps
 {
-
     protected $nombre = null; ///< Nombre de la aplicación
+
     protected $activa = false; ///< Indica si la aplicación está activa (disponible para ser usada en la aplicación web)
+
     protected $config; ///< Configuración de la aplicación
+
     protected $vars = []; ///< Variables usadas por la aplicación pero que no son configurables por el usuario
+
     protected $directory; ///< Directorio de archivos de la aplicación
+
     protected $namespace = 'apps'; ///< nombre del grupo de las aplicaciones que heredan esta clase
 
     /**
@@ -247,5 +251,4 @@ abstract class Utility_Apps_Base_Apps
         header('location: '.$url);
         exit(0); // no hay otra opción, debe ser exit para que location funcione
     }
-
 }

@@ -41,7 +41,6 @@ namespace sowerphp\app;
  */
 class Controller_Component_Log extends \sowerphp\core\Controller_Component
 {
-
     public $settings = [
         'report' => [
             LOG_KERN => [
@@ -68,8 +67,11 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
             'attach' => false, // Si se debe o no adjuntar $_POST y $_FILES al email
         ],
         'syslog_facility' => LOG_LOCAL7,
-    ]; ///< Opciones por defecto del componente
+    ];
+
+ ///< Opciones por defecto del componente
     protected $Log = null; ///< Objeto para escribir eventos en la base de datos
+
     protected $User = null;
 
     /**
@@ -126,7 +128,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
                     $this->$method($message, $facility, $severity);
                 }
                 // se reporta a través de un handler (método de otra clase)
-                else if (is_array($method) && isset($method[1])) {
+                elseif (is_array($method) && isset($method[1])) {
                     $class = $method[0];
                     if (!class_exists($class)) {
                         throw new \Exception(
@@ -430,5 +432,4 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         }
         return $this->User;
     }
-
 }

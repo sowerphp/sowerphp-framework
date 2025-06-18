@@ -30,7 +30,6 @@ namespace sowerphp\core;
  */
 abstract class Model_Datasource
 {
-
     protected static $datasources; ///< Objetos con caché para fuentes de datos
 
     /**
@@ -54,9 +53,9 @@ abstract class Model_Datasource
         // se crea configuración
         $config = array_merge((array)config($datasource.'.'.$name), $config);
         if (empty($config)) {
-            throw new Exception_Model_Datasource_Database (array(
-                'msg' => 'No se encontró configuración '.$datasource.'.'.$name
-            ));
+            throw new Exception_Model_Datasource_Database ([
+                'msg' => 'No se encontró configuración '.$datasource.'.'.$name,
+            ]);
         }
         // si no está el nombre de la configuración se asigna
         if (!isset($config['conf'])) {
@@ -65,5 +64,4 @@ abstract class Model_Datasource
         // entregar configuración
         return $config;
     }
-
 }

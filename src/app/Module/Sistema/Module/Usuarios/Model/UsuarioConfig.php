@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app\Sistema\Usuarios;
 
 /**
@@ -31,21 +31,25 @@ namespace sowerphp\app\Sistema\Usuarios;
  */
 class Model_UsuarioConfig extends \Model_App
 {
-
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table = 'usuario_config'; ///< Tabla del modelo
 
     // Atributos de la clase (columnas en la base de datos)
     public $usuario; ///< integer(32) NOT NULL DEFAULT '' PK FK:usuario.id
+
     public $configuracion; ///< character varying(32) NOT NULL DEFAULT '' PK
+
     public $variable; ///< character varying(64) NOT NULL DEFAULT '' PK
+
     public $valor; ///< text() NULL DEFAULT ''
+
     public $json; ///< boolean() NOT NULL DEFAULT 'false'
 
     // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'usuario' => array(
+    public static $columnsInfo = [
+        'usuario' => [
             'name'      => 'Usuario',
             'comment'   => '',
             'type'      => 'integer',
@@ -54,9 +58,9 @@ class Model_UsuarioConfig extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => true,
-            'fk'        => array('table' => 'usuario', 'column' => 'id')
-        ),
-        'configuracion' => array(
+            'fk'        => ['table' => 'usuario', 'column' => 'id'],
+        ],
+        'configuracion' => [
             'name'      => 'Configuracion',
             'comment'   => '',
             'type'      => 'character varying',
@@ -65,9 +69,9 @@ class Model_UsuarioConfig extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => true,
-            'fk'        => null
-        ),
-        'variable' => array(
+            'fk'        => null,
+        ],
+        'variable' => [
             'name'      => 'Variable',
             'comment'   => '',
             'type'      => 'character varying',
@@ -76,9 +80,9 @@ class Model_UsuarioConfig extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => true,
-            'fk'        => null
-        ),
-        'valor' => array(
+            'fk'        => null,
+        ],
+        'valor' => [
             'name'      => 'Valor',
             'comment'   => '',
             'type'      => 'text',
@@ -87,9 +91,9 @@ class Model_UsuarioConfig extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'json' => array(
+            'fk'        => null,
+        ],
+        'json' => [
             'name'      => 'Json',
             'comment'   => '',
             'type'      => 'boolean',
@@ -98,16 +102,16 @@ class Model_UsuarioConfig extends \Model_App
             'default'   => 'false',
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
+            'fk'        => null,
+        ],
 
-    );
+    ];
 
     // Comentario de la tabla en la base de datos
     public static $tableComment = '';
 
-    public static $fkNamespace = array(
-        'Model_Usuario' => 'sowerphp\app\Sistema\Usuarios'
-    ); ///< Namespaces que utiliza esta clase
+    public static $fkNamespace = [
+        'Model_Usuario' => 'sowerphp\app\Sistema\Usuarios',
+    ]; ///< Namespaces que utiliza esta clase
 
 }

@@ -29,7 +29,6 @@ namespace sowerphp\app;
  */
 class Controller_App extends \sowerphp\core\Controller
 {
-
     // Componentes usados por el controlador.
     public $components = ['Auth', 'Api', 'Log'];
 
@@ -120,5 +119,4 @@ class Controller_App extends \sowerphp\core\Controller
         }
         return shell_exec_async($cmd, $log, $output);
     }
-
 }

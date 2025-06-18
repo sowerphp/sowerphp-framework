@@ -30,7 +30,6 @@ use Illuminate\Http\Response;
  */
 class Network_Response //extends Response
 {
-
     /**
      * Tipos de datos mime de los archivos según su extensión.
      */
@@ -298,5 +297,4 @@ class Network_Response //extends Response
         $this->send();
         exit(); // TODO: refactorizar para no cerrar acá pues detiene controlador.
     }
-
 }

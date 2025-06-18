@@ -28,7 +28,6 @@ namespace sowerphp\general;
  */
 final class Utility_Spreadsheet_JSON
 {
-
     /**
      * @todo Implementar método (debe ser el "inverso" de self::generate())
      */
@@ -56,7 +55,7 @@ final class Utility_Spreadsheet_JSON
         }
         foreach ($data as &$row) {
             $dato = [];
-            foreach($row as $key => &$col) {
+            foreach ($row as $key => &$col) {
                 $dato[$titles[$key]] = rtrim(str_replace('<br />', ', ', strip_tags($col, '<br>')), " \t\n\r\0\x0B,");
             }
             $datos[] = $dato;
@@ -66,5 +65,4 @@ final class Utility_Spreadsheet_JSON
         unset($titles, $data, $datos, $id);
         exit(0);
     }
-
 }

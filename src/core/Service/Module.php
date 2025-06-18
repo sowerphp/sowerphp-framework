@@ -25,10 +25,11 @@ namespace sowerphp\core;
 
 class Service_Module implements Interface_Service
 {
-
     // Dependencias de otros servicios.
     protected $app;
+
     protected $layersService;
+
     protected $configService;
 
     // Listado de modulos cargados.
@@ -259,7 +260,7 @@ class Service_Module implements Interface_Service
             // Armar nombre final del modulo (considerando hasta $hasta partes
             // del arreglo de partes).
             $module = [];
-            for($i=0; $i<=$hasta; ++$i) {
+            for ($i=0; $i<=$hasta; ++$i) {
                 $module[] = Utility_Inflector::camelize($partes[$i]);
             }
             // cargar módulo
@@ -279,11 +280,10 @@ class Service_Module implements Interface_Service
      */
     public function getModulePaths(string $module): ?array
     {
-        if(isset($this->modules[$module])) {
+        if (isset($this->modules[$module])) {
             return $this->modules[$module]['path'];
         } else {
             return null;
         }
     }
-
 }

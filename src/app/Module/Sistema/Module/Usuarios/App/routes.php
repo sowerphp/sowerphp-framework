@@ -21,56 +21,56 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-\sowerphp\core\Routing_Router::connect('/usuarios/ingresar', array(
+\sowerphp\core\Routing_Router::connect('/usuarios/ingresar', [
     'module' => 'Sistema.Usuarios',
     'controller' => 'usuarios',
     'action' => 'ingresar',
-));
+]);
 
-\sowerphp\core\Routing_Router::connect('/usuarios/ingresar/*', array(
+\sowerphp\core\Routing_Router::connect('/usuarios/ingresar/*', [
     'module' => 'Sistema.Usuarios',
     'controller' => 'usuarios',
     'action' => 'ingresar',
-));
+]);
 
-\sowerphp\core\Routing_Router::connect('/usuarios/salir', array(
+\sowerphp\core\Routing_Router::connect('/usuarios/salir', [
     'module' => 'Sistema.Usuarios',
     'controller' => 'usuarios',
     'action' => 'salir',
-));
+]);
 
-\sowerphp\core\Routing_Router::connect('/usuarios/perfil', array(
+\sowerphp\core\Routing_Router::connect('/usuarios/perfil', [
     'module' => 'Sistema.Usuarios',
     'controller' => 'usuarios',
     'action' => 'perfil',
-));
+]);
 
-\sowerphp\core\Routing_Router::connect('/usuarios/contrasenia/recuperar', array(
+\sowerphp\core\Routing_Router::connect('/usuarios/contrasenia/recuperar', [
     'module' => 'Sistema.Usuarios',
     'controller' => 'usuarios',
     'action' => 'contrasenia_recuperar',
-));
+]);
 
-\sowerphp\core\Routing_Router::connect('/usuarios/contrasenia/recuperar/*', array(
+\sowerphp\core\Routing_Router::connect('/usuarios/contrasenia/recuperar/*', [
     'module' => 'Sistema.Usuarios',
     'controller' => 'usuarios',
     'action' => 'contrasenia_recuperar',
-));
+]);
 
-\sowerphp\core\Routing_Router::connect('/usuarios/registrar', array(
+\sowerphp\core\Routing_Router::connect('/usuarios/registrar', [
     'module' => 'Sistema.Usuarios',
     'controller' => 'usuarios',
     'action' => 'registrar',
-));
+]);
 
-\sowerphp\core\Routing_Router::connect('/usuarios/preauth', array(
+\sowerphp\core\Routing_Router::connect('/usuarios/preauth', [
     'module' => 'Sistema.Usuarios',
     'controller' => 'usuarios',
     'action' => 'preauth',
-));
+]);
 
-\sowerphp\core\Routing_Router::connect('/usuarios/preauth/*', array(
+\sowerphp\core\Routing_Router::connect('/usuarios/preauth/*', [
     'module' => 'Sistema.Usuarios',
     'controller' => 'usuarios',
     'action' => 'preauth',
-));
+]);

@@ -28,8 +28,8 @@ namespace sowerphp\app;
  */
 class View_Helper_Paginator extends \sowerphp\general\View_Helper_Table
 {
-
     protected $options; ///< Opciones del mantenedor
+
     protected $form; ///< Formulario (objeto de FormHelper) que se está usando en el mantenedor
 
     /**
@@ -119,5 +119,4 @@ class View_Helper_Paginator extends \sowerphp\general\View_Helper_Table
         // retornar enlaces
         return $buffer;
     }
-
 }

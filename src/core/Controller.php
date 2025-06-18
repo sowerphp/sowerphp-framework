@@ -28,15 +28,22 @@ namespace sowerphp\core;
  */
 abstract class Controller
 {
-
     public $request; ///< Objeto Request
+
     public $response; ///< Objeto Response
+
     public $viewVars = []; ///< Variables que se pasarán al renderizar la vista
+
     public $autoRender = true; ///< Autorenderizar una vista asociada a una acción
+
     public $Components = null; ///< Colección de componentes que se cargarán
+
     public $components = []; ///< Nombre de componentes que este controlador utiliza
+
     public $layout; ///< Layout que se usará por defecto para renderizar
+
     public $View = null; ///< Objeto para la vista que utilizará el controlador
+
     protected $redirect = null; ///< Donde redireccionar una vez que se ha terminado de ejecutar la acción (incluyendo renderizado de vista)
 
     /**
@@ -56,11 +63,11 @@ abstract class Controller
             $this->Components->init($this);
         }
         // agregar variables por defecto que se pasarán a la vista
-        $this->set(array(
+        $this->set([
             '_base' => $this->request->getBaseUrlWithoutSlash(),
             '_request' => $this->request->getRequestUriDecoded(),
             '_url' => $this->request->getFullUrlWithoutQuery(),
-        ));
+        ]);
         // obtener layout por defecto (el de la sesión)
         $this->layout = app('session')->get('config.page.layout');
     }
@@ -148,22 +155,22 @@ abstract class Controller
             $method = new \ReflectionMethod($this, $this->request->getParsedParams()['action']);
             // Verificar que el método no sea privado
             if ($method->name[0] === '_' || !$method->isPublic()) {
-                throw new Exception_Controller_Action_Private(array(
+                throw new Exception_Controller_Action_Private([
                     'controller' => get_class($this),
-                    'action' => $this->request->getParsedParams()['action']
-                ));
+                    'action' => $this->request->getParsedParams()['action'],
+                ]);
             }
             // Verificar la cantidad de parámetros que se están pasando
             $n_args = count($this->request->getParsedParams()['pass']);
             if ($n_args<$method->getNumberOfRequiredParameters()) {
                 $args = [];
-                foreach($method->getParameters() as &$p) {
+                foreach ($method->getParameters() as &$p) {
                     $args[] = $p->isOptional() ? '['.$p->name.']' : $p->name;
                 }
                 throw new Exception_Controller_Action_Args_Missing([
                     'controller' => get_class($this),
                     'action' => $this->request->getParsedParams()['action'],
-                    'args' => implode(', ', $args)
+                    'args' => implode(', ', $args),
                 ]);
             }
             // Invocar el método con los argumentos de $request->getParsedParams()['pass']
@@ -174,10 +181,10 @@ abstract class Controller
         // Si el método no se encuentra
         } catch (\ReflectionException $e) {
             // Generar excepción
-            throw new Exception_Controller_Action_Missing(array(
+            throw new Exception_Controller_Action_Missing([
                     'controller' => get_class($this),
-                    'action' => $this->request->getParsedParams()['action']
-            ));
+                    'action' => $this->request->getParsedParams()['action'],
+            ]);
         }
     }
 
@@ -218,7 +225,7 @@ abstract class Controller
         }
         // Si no se paso como arreglo se arma
         else {
-            $data = array($one => $two);
+            $data = [$one => $two];
         }
         // Agregar a las variables que se usarán en la vista
         $this->viewVars = array_merge($this->viewVars, $data);
@@ -231,7 +238,7 @@ abstract class Controller
      */
     public function redirect(?string $url = null, int $status = 0): void
     {
-        $this->beforeRedirect(array($url, $status));
+        $this->beforeRedirect([$url, $status]);
         if (!$url) {
             $url = $this->request->getRequestUriDecoded();
         }
@@ -261,5 +268,4 @@ abstract class Controller
         }
         return $vars;
     }
-
 }

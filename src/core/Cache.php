@@ -32,10 +32,12 @@ namespace sowerphp\core;
  */
 class Cache
 {
-
     private $_cache = null; ///< Objeto Memcached
+
     private $_prefix; ///< Prefijo a utilizar en la clave del elemento en caché
+
     public static $setCount = 0; ///< Contador para sets realizados
+
     public static $getCount = 0; ///< Contador para gets realizados
 
     /**
@@ -204,5 +206,4 @@ class Cache
             return false;
         }
     }
-
 }

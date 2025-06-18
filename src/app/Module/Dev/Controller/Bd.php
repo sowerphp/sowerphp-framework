@@ -28,7 +28,6 @@ namespace sowerphp\app\Dev;
  */
 class Controller_Bd extends \Controller_App
 {
-
     /**
      * Acción que permite listar las tablas de una de las base de datos
      * configuradas y mostrar sus tablas y la información de las mismas
@@ -43,12 +42,12 @@ class Controller_Bd extends \Controller_App
             // procesar cada una de las tablas
             foreach ($tables as &$table) {
                 $info = $db->getInfoFromTable($table['name']);
-                $row = array(
+                $row = [
                     'name' => $info['name'],
                     'comment' => $info['comment'],
                     'columns' => [],
                     'pk' => implode('<br />', $info['pk']),
-                );
+                ];
                 // procesar cada columna para armar su
                 // información
                 foreach ($info['columns'] as &$column) {
@@ -67,10 +66,10 @@ class Controller_Bd extends \Controller_App
                 $data[] = $row;
             }
             // setear las variables para mostrar los datos de la bd
-            $this->set(array(
+            $this->set([
                 'database' => $_POST['database'],
-                'data' => $data
-            ));
+                'data' => $data,
+            ]);
         }
         // setear listado de bases de datos
         $this->_setDatabases();
@@ -115,12 +114,12 @@ class Controller_Bd extends \Controller_App
                 $updateQuery = 'UPDATE '.$table.' SET';
                 $insertQuery = 'INSERT INTO '.$table.' ('.implode(', ', array_keys($cols)).') VALUES ';
                 // contar registros totales (en el archivo) y existentes antes de hacer algo en la tabla
-                $registros = array(
+                $registros = [
                     'total' => count($data),
                     'existentes' => $db->getValue('SELECT COUNT(*) FROM '.$table),
                     'actualizados' => 0,
                     'insertados' => 0,
-                );
+                ];
                 // eliminar datos de la tabla en caso que se haya solicitado
                 if (isset($_POST['delete'])) {
                     $db->query('DELETE FROM '.$table);
@@ -221,15 +220,15 @@ class Controller_Bd extends \Controller_App
         // en caos que se haya seleccionado una base de datos
         if (isset($_POST['step1'])) {
             $db = &\sowerphp\core\Model_Datasource_Database::get($_POST['database']);
-            $this->set(array(
+            $this->set([
                 'database' => $_POST['database'],
                 'type' => $_POST['type'],
                 'tables' => $db->getTables(),
-            ));
+            ]);
             $this->render('Bd/descargar_step2');
         }
         // en caso que se hayan seleccionado las tablas descargar datos
-        else if (isset($_POST['step2'])) {
+        elseif (isset($_POST['step2'])) {
             $db = &\sowerphp\core\Model_Datasource_Database::get($_POST['database']);
             $data = [];
             foreach ($_POST['tables'] as &$table) {
@@ -238,11 +237,11 @@ class Controller_Bd extends \Controller_App
                     FROM '.$table.'
                 ');
             }
-            $this->set(array(
+            $this->set([
                 'id' => 'database_' . $_POST['database'],
                 'type' => $_POST['type'],
                 'data' => $data,
-            ));
+            ]);
             $this->render ('Bd/descargar_step3');
         }
         // en caso que no se haya seleccionado aun la bd
@@ -272,7 +271,7 @@ class Controller_Bd extends \Controller_App
                 if ($_POST['resultados'] == 'web') {
                     $this->set([
                         'data' => $data,
-                        'database' => $_POST['database']
+                        'database' => $_POST['database'],
                     ]);
                 } else {
                     \sowerphp\general\Utility_Spreadsheet_CSV::generate($data, 'query_'.$_POST['database'].'_'.date('U'));
@@ -296,5 +295,4 @@ class Controller_Bd extends \Controller_App
         }
         $this->set('databases', $databases);
     }
-
 }

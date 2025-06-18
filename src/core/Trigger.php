@@ -31,7 +31,6 @@ namespace sowerphp\core;
  */
 class Trigger
 {
-
     private static $handler; ///< Handler para los trigger que se ejecutarán
 
     /**
@@ -55,5 +54,4 @@ class Trigger
         // lanzar handler para el trigger
         return call_user_func_array(self::$handler, func_get_args());
     }
-
 }

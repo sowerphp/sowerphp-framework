@@ -28,8 +28,8 @@ namespace sowerphp\core;
  */
 class Exception extends \RuntimeException
 {
-
     protected $_messageTemplate = '%s'; ///< Mensaje que se utilizará al renderizar el error
+
     protected $severity = LOG_ERR; // Error conditions (http://en.wikipedia.org/wiki/Syslog#Severity_levels)
 
     /**
@@ -46,5 +46,4 @@ class Exception extends \RuntimeException
         // llamar al constructor con el error y el mensaje
         parent::__construct($message, $code);
     }
-
 }

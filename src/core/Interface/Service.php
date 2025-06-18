@@ -25,7 +25,6 @@ namespace sowerphp\core;
 
 interface Interface_Service
 {
-
     /**
      * Registra el servicio en el contenedor.
      */
@@ -35,5 +34,4 @@ interface Interface_Service
      * Inicializa el servicio.
      */
     public function boot();
-
 }

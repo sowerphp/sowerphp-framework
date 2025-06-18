@@ -31,21 +31,20 @@ define ('K_PATH_IMAGES', '');
  */
 class View_Helper_PDF extends \TCPDF
 {
-
     protected $margin_top; ///< Margen extra (al por defecto) para la parte de arriba de la página
 
-    protected $defaultOptions = array(
-        'font' => array ('family' => 'helvetica', 'size' => 10),
-        'header' => array (
-            'textcolor' => array (0,0,0),
-            'linecolor' => array (136, 137, 140),
+    protected $defaultOptions = [
+        'font' =>  ['family' => 'helvetica', 'size' => 10],
+        'header' =>  [
+            'textcolor' =>  [0,0,0],
+            'linecolor' =>  [136, 137, 140],
             'logoheight' => 20,
-        ),
-        'footer' => array (
-            'textcolor' => array (35, 31, 32),
-            'linecolor' => array (136, 137, 140),
-        ),
-        'table' => array (
+        ],
+        'footer' =>  [
+            'textcolor' =>  [35, 31, 32],
+            'linecolor' =>  [136, 137, 140],
+        ],
+        'table' =>  [
             'fontsize' => 10,
             'width' => 186,
             'height' => 6,
@@ -54,11 +53,11 @@ class View_Helper_PDF extends \TCPDF
             'borderwidth' => 0.1,
             'headerbackground' => [238, 238, 238],
             'headercolor' => [102, 102, 102],
-            'bodybackground' => array(224, 235, 255),
-            'bodycolor' => array(0,0,0),
+            'bodybackground' => [224, 235, 255],
+            'bodycolor' => [0,0,0],
             'colorchange' => true,
-        ),
-    );
+        ],
+    ];
 
     /**
      * Constructor de la clase
@@ -101,8 +100,8 @@ class View_Helper_PDF extends \TCPDF
             $this->defaultOptions['footer']['textcolor'],
             $this->defaultOptions['footer']['linecolor']
         );
-        $this->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-        $this->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+        $this->setHeaderFont([PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN]);
+        $this->setFooterFont([PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA]);
     }
 
     /**
@@ -140,7 +139,7 @@ class View_Helper_PDF extends \TCPDF
                 $widths[] = $width;
             }
         }
-        else if (is_array($cells)) {
+        elseif (is_array($cells)) {
             $width = floor($total/count($cells));
             foreach ($cells as $i) {
                 $widths[$i] = $width;
@@ -410,5 +409,4 @@ class View_Helper_PDF extends \TCPDF
         $this->textrendermode = $textrendermode;
         $this->textstrokewidth = $textstrokewidth;
     }
-
 }

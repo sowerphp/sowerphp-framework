@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class View_Helper_Pages_Php
 {
-
     /**
      * Método que evalua el archivo de la vista utilizando las variables
      * indicadas en $__dataForView
@@ -49,5 +48,4 @@ class View_Helper_Pages_Php
         }
         return ob_get_clean();
     }
-
 }

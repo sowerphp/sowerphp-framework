@@ -28,9 +28,10 @@ namespace sowerphp\app\Apps;
  */
 class Model_Imgur
 {
-
     private $config; ///< Configuración de la conexión
+
     private $rest; ///< Objeto para la conexión a la API
+
     private $url = 'https://api.imgur.com/3'; ///< URL base de la API
 
     /**
@@ -78,7 +79,7 @@ class Model_Imgur
             if (!empty($response['body']['message'])) {
                 throw new \Exception($response['body']['message'], $response['status']['code']);
             }
-            else if(!empty($response['body'])) {
+            elseif (!empty($response['body'])) {
                 throw new \Exception($response['body'], $response['status']['code']);
             }
             else {
@@ -122,5 +123,4 @@ class Model_Imgur
     {
         return $this->consume('delete', $resource, $data);
     }
-
 }

@@ -28,7 +28,6 @@ namespace sowerphp\app;
  */
 class Controller_Upload extends \Controller_App
 {
-
     /**
      * Servicio web para subir una imagen usando diferentes métodos
      */
@@ -45,5 +44,4 @@ class Controller_Upload extends \Controller_App
         $location = $Method->upload($_FILES['file']);
         $this->Api->send(['location' => $location]);
     }
-
 }

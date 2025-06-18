@@ -34,7 +34,9 @@ abstract class Model
 
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table; ///< Tabla del modelo
+
     protected $db; ///< Conexión a base de datos
 
     /**
@@ -304,17 +306,17 @@ abstract class Model
             }
         }
         // si la solicitud es un setAttribute()
-        else if ($request=='set') {
+        elseif ($request=='set') {
             $attribute = \sowerphp\core\Utility_Inflector::underscore(substr($method, 3));
             if (isset($this::$columnsInfo[$attribute])) {
                 return call_user_func_array([$this, 'setAttribute'], array_merge([$attribute], $args));
             }
         }
         // si el método no existe se genera una excepción
-        throw new Exception_Object_Method_Missing(array(
+        throw new Exception_Object_Method_Missing([
             'class' => get_class($this),
             'method' => $method,
-        ));
+        ]);
     }
 
     /**
@@ -328,9 +330,9 @@ abstract class Model
         $fkClass = $this::$fkNamespace['Model_'.$fk].'\Model_'.$fk;
         // si la clase no existe error
         if (!class_exists($fkClass)) {
-            throw new Exception_Model_Missing(array(
+            throw new Exception_Model_Missing([
                 'model' => $fkClass,
-            ));
+            ]);
         }
         $fkClasss = \sowerphp\core\Utility_Inflector::pluralize($fkClass);
         // tratar de recuperar con la clase plural (para usar caché)
@@ -487,5 +489,4 @@ abstract class Model
             $this->_database
         );
     }
-
 }

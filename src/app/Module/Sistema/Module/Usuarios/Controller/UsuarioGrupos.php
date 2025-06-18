@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del controlador
+
 namespace sowerphp\app\Sistema\Usuarios;
 
 /**
@@ -33,8 +33,8 @@ namespace sowerphp\app\Sistema\Usuarios;
  */
 class Controller_UsuarioGrupos extends \sowerphp\app\Controller_Maintainer
 {
-
     protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
+
     protected $deleteRecord = false; ///< Indica si se permite o no borrar registros
 
     public function editar($usuario)
@@ -42,5 +42,4 @@ class Controller_UsuarioGrupos extends \sowerphp\app\Controller_Maintainer
         $listar = base64_encode($this->request->getFullUrlWithoutQuery().$this->request->getBaseUrlWithoutSlash().'/sistema/usuarios/usuario_grupos/listar'.base64_decode($_GET['listar']));
         $this->redirect('/sistema/usuarios/usuarios/editar/'.$usuario.'?listar='.$listar);
     }
-
 }

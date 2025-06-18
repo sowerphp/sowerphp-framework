@@ -31,7 +31,6 @@ namespace sowerphp\core;
  */
 class Service_Layers implements Interface_Service
 {
-
     /**
      * Arreglo con los archivos dentro de una ruta que representan puntos desde
      * donde se puede lanzar la aplicación.
@@ -272,7 +271,7 @@ class Service_Layers implements Interface_Service
                         ['framework:', 'project:'],
                         [$this->getFrameworkDir(), $this->getProjectDir()],
                         $layer['directory']
-                    )
+                    ),
                 ];
             }
         }
@@ -457,5 +456,4 @@ class Service_Layers implements Interface_Service
         // Si no se encontró la clase con la carga automágica retornar false.
         return false;
     }
-
 }

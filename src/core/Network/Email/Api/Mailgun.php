@@ -30,8 +30,8 @@ namespace sowerphp\core;
  */
 class Network_Email_Api_Mailgun
 {
-
     protected $config = null; ///< Configuración para envíos usando Mailgun
+
     protected $mg; ///< Objeto de Mailgun para los envíos
 
     /**
@@ -113,14 +113,14 @@ class Network_Email_Api_Mailgun
                 if (!empty($file['tmp_name'])) {
                     $email['attachment'][] = [
                         'filePath' => $file['tmp_name'],
-                        'filename' => $file['name']
+                        'filename' => $file['name'],
                     ];
                 }
                 // leer desde datos de una variable
-                else if (!empty($file['data'])) {
+                elseif (!empty($file['data'])) {
                     $email['attachment'][] = [
                         'fileContent' => $file['data'],
-                        'filename' => $file['name']
+                        'filename' => $file['name'],
                     ];
                 }
             }
@@ -143,5 +143,4 @@ class Network_Email_Api_Mailgun
             ];
         }
     }
-
 }

@@ -35,7 +35,6 @@ use Illuminate\Container\Container;
  */
 class App
 {
-
     /**
      * Instancia única de la clase App.
      *
@@ -259,7 +258,7 @@ class App
             $this->container->instance(get_class($service), $service);
         }
         // Si $service es una clase, usar singleton para registrar.
-        else if (is_string($service)) {
+        elseif (is_string($service)) {
             // Verificar que la clase del servicio exista.
             if (!class_exists($service)) {
                 throw new \InvalidArgumentException(sprintf(
@@ -279,5 +278,4 @@ class App
             ));
         }
     }
-
 }

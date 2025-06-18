@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del controlador
+
 namespace sowerphp\app\Sistema\Notificaciones;
 
 /**
@@ -33,10 +33,10 @@ namespace sowerphp\app\Sistema\Notificaciones;
  */
 class Controller_Notificaciones extends \Controller_Maintainer
 {
-
     protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
+
     protected $columnsView = [
-        'listar'=>['id', 'fechahora', 'de', 'para', 'descripcion', 'leida']
+        'listar'=>['id', 'fechahora', 'de', 'para', 'descripcion', 'leida'],
     ]; ///< Columnas que se deben mostrar en las vistas
 
     public function beforeFilter()
@@ -103,5 +103,4 @@ class Controller_Notificaciones extends \Controller_Maintainer
         $Notificacion->leida();
         return true;
     }
-
 }

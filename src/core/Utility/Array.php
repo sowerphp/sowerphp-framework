@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class Utility_Array
 {
-
     /**
      * Determina si un arreglo es asociativo.
      *
@@ -67,7 +66,7 @@ class Utility_Array
     public static function fromTable(array $table): array
     {
         $array = [];
-        foreach($table as &$row) {
+        foreach ($table as &$row) {
             $array[array_shift($row)] = array_shift($row);
         }
         return $array;
@@ -234,7 +233,7 @@ class Utility_Array
             }
             // el item es igual a uno previamente guardado
             // en este caso se extrae solo el detalle
-            else if ($item[$id] == $d[$id]) {
+            elseif ($item[$id] == $d[$id]) {
                 $item[$detalle][] = array_slice($d, $camposEncabezado);
             }
             // es un nuevo item
@@ -402,5 +401,4 @@ class Utility_Array
         }
         return $return;
     }
-
 }

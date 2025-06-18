@@ -28,14 +28,15 @@ namespace sowerphp\core;
  */
 class Network_Email_Imap
 {
-
     protected $config = [
         'host' => 'localhost',
         'port' => 993,
         'ssl' => true,
         'sslcheck' => true,
         'folder' => 'INBOX',
-    ]; ///< Configuración para IMAP
+    ];
+
+ ///< Configuración para IMAP
     protected $link = null; ///< Conexión al servidor IMAP
 
     /**
@@ -251,7 +252,7 @@ class Network_Email_Imap
                     $this->getMessagePart($uid, $p, $this->messagePartNext($partno0), $message);
                 }
                 // buscar por extensión del archivo adjunto (si lo es)
-                else if (isset($filter['extension']) && (($p->ifdisposition && strtoupper($p->disposition) == 'ATTACHMENT') || (in_array($p->subtype, ['OCTET-STREAM', '*']) && ($p->ifparameters || $p->ifdparameters)))) {
+                elseif (isset($filter['extension']) && (($p->ifdisposition && strtoupper($p->disposition) == 'ATTACHMENT') || (in_array($p->subtype, ['OCTET-STREAM', '*']) && ($p->ifparameters || $p->ifdparameters)))) {
                     $extension = array_map('strtolower', $filter['extension']);
                     $add = false;
                     $params = $p->ifparameters ? $p->parameters : ( $p->ifdparameters ? $p->dparameters : [] );
@@ -302,7 +303,7 @@ class Network_Email_Imap
         // Any part may be encoded, even plain text messages, so check everything.
         if ($p->encoding == 4) {
             $data = quoted_printable_decode($data);
-        } else if ($p->encoding == 3) {
+        } elseif ($p->encoding == 3) {
             $data = base64_decode($data);
         }
 
@@ -352,7 +353,7 @@ class Network_Email_Imap
         // but AOL uses type 1 (multipart), which is not handled here.
         // There are no PHP functions to parse embedded messages,
         // so this just appends the raw source to the main message.
-        else if ($p->type == 2 && $data) {
+        elseif ($p->type == 2 && $data) {
             $message['body']['plain'] .= $data."\n\n";
         }
 
@@ -405,5 +406,4 @@ class Network_Email_Imap
     {
         return imap_setflag_full($this->link, $uid, $flag, ST_UID);
     }
-
 }

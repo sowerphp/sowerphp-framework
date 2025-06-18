@@ -28,9 +28,10 @@ namespace sowerphp\core;
  */
 abstract class Shell
 {
-
     public $stdout; ///< Atributo con el objeto para la salida de datos
+
     public $verbose = 0; ///< Nivel de "verbose" (cuanto "dice" el comando)
+
     protected $allow_multiple_instances = false; ///< Indica si el proceso permite o no múltiples instancias idénticas al mismo tiempo
 
     /**
@@ -89,7 +90,7 @@ abstract class Shell
         $time = microtime(true) - TIME_START;
         if ($time < 60) {
             $out->write('Proceso ejecutado en '.num($time,1).' segundos.'."\n");
-        } else if ($time < 3600) {
+        } elseif ($time < 3600) {
             $out->write('Proceso ejecutado en '.num($time/60,1).' minutos.'."\n");
         } else {
             $out->write('Proceso ejecutado en '.num($time/3600,1).' horas.'."\n");
@@ -103,5 +104,4 @@ abstract class Shell
     {
         return $this->allow_multiple_instances;
     }
-
 }

@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app\Sistema\General;
 
 /**
@@ -31,20 +31,23 @@ namespace sowerphp\app\Sistema\General;
  */
 class Model_AfdTransicion extends \Model_App
 {
-
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table = 'afd_transicion'; ///< Tabla del modelo
 
     // Atributos de la clase (columnas en la base de datos)
     public $afd; ///< varchar(10) NOT NULL DEFAULT '' PK FK:afd_estado.afd
+
     public $desde; ///< int(10) NOT NULL DEFAULT '0' PK FK:afd_estado.codigo
+
     public $valor; ///< varchar(5) NOT NULL DEFAULT '' PK
+
     public $hasta; ///< int(10) NOT NULL DEFAULT '' FK:afd_estado.codigo
 
     // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'afd' => array(
+    public static $columnsInfo = [
+        'afd' => [
             'name'      => 'Afd',
             'comment'   => '',
             'type'      => 'varchar',
@@ -53,9 +56,9 @@ class Model_AfdTransicion extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => true,
-            'fk'        => array('table' => 'afd_estado', 'column' => 'afd')
-        ),
-        'desde' => array(
+            'fk'        => ['table' => 'afd_estado', 'column' => 'afd'],
+        ],
+        'desde' => [
             'name'      => 'Desde',
             'comment'   => '',
             'type'      => 'int',
@@ -64,9 +67,9 @@ class Model_AfdTransicion extends \Model_App
             'default'   => '0',
             'auto'      => false,
             'pk'        => true,
-            'fk'        => array('table' => 'afd_estado', 'column' => 'codigo')
-        ),
-        'valor' => array(
+            'fk'        => ['table' => 'afd_estado', 'column' => 'codigo'],
+        ],
+        'valor' => [
             'name'      => 'Valor',
             'comment'   => '',
             'type'      => 'varchar',
@@ -75,9 +78,9 @@ class Model_AfdTransicion extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => true,
-            'fk'        => null
-        ),
-        'hasta' => array(
+            'fk'        => null,
+        ],
+        'hasta' => [
             'name'      => 'Hasta',
             'comment'   => '',
             'type'      => 'int',
@@ -86,18 +89,18 @@ class Model_AfdTransicion extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => false,
-            'fk'        => array('table' => 'afd_estado', 'column' => 'codigo')
-        ),
+            'fk'        => ['table' => 'afd_estado', 'column' => 'codigo'],
+        ],
 
-    );
+    ];
 
     // Comentario de la tabla en la base de datos
     public static $tableComment = '';
 
-    public static $fkNamespace = array(
+    public static $fkNamespace = [
         'Model_AfdEstado' => 'website\Sistema',
         'Model_AfdEstado' => 'website\Sistema',
-        'Model_AfdEstado' => 'website\Sistema'
-    ); ///< Namespaces que utiliza esta clase
+        'Model_AfdEstado' => 'website\Sistema',
+    ]; ///< Namespaces que utiliza esta clase
 
 }

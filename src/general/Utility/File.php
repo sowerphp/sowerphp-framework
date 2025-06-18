@@ -33,12 +33,14 @@ namespace sowerphp\general;
  */
 class Utility_File
 {
-
     // constantes para errores de la subida de archivos
     // errores propios de sowerphp no compatibles con los estándares de PHP
     const UPLOAD_ERROR = 1;
+
     const UPLOAD_ERROR_EXTENSION = 2;
+
     const UPLOAD_ERROR_MIMETYPE = 3;
+
     const UPLOAD_ERROR_SIZE = 4;
 
     /**
@@ -124,7 +126,7 @@ class Utility_File
     {
         $filesAux = scandir($dir);
         $files = [];
-        foreach($filesAux as &$file) {
+        foreach ($filesAux as &$file) {
             if ($file[0] != '.') {
                 $files[] = $file;
             }
@@ -218,7 +220,7 @@ class Utility_File
         $file['size'] = filesize($file_name);
         $file['data'] = fread(fopen($file_name, 'rb'), $file['size']);
         // si es una imagen se setean otros atributos (tamaño)
-        if (in_array($file['type'], array('image/jpeg', 'image/gif', 'image/png'))) {
+        if (in_array($file['type'], ['image/jpeg', 'image/gif', 'image/png'])) {
             list($file['w'], $file['h']) = getimagesize($file_name);
             $file['ratio'] = $file['w'] / $file['h'];
         }
@@ -240,7 +242,7 @@ class Utility_File
             // For each directory entry
             foreach ($dir_content as &$entry) {
                 // Unix symbolic shortcuts, we go
-                if (!in_array($entry, array ('.','..'))) {
+                if (!in_array($entry,  ['.','..'])) {
                     // We find the path from the beginning
                     $entry = $dir.DIRECTORY_SEPARATOR. $entry;
                     // This entry is not an issue: it clears
@@ -342,7 +344,7 @@ class Utility_File
         if (is_dir($file)) {
             if ($options['format'] == 'gz') {
                 $options['format'] = 'tar.gz';
-            } else if ($options['format'] == 'bz2') {
+            } elseif ($options['format'] == 'bz2') {
                 $options['format'] = 'tar.bz2';
             }
         }
@@ -366,7 +368,7 @@ class Utility_File
                 $zip->addFile($filepath, $file);
             }
             // agregar directorio al zip
-            else if (is_dir($filepath)) {
+            elseif (is_dir($filepath)) {
                 $Iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($filepath));
                 foreach ($Iterator as $f) {
                     if (!$f->isDir()) {
@@ -480,5 +482,4 @@ class Utility_File
             substr($filename, 0, strrpos($filename,'.'))
         ) . '.' . $extension;
     }
-
 }

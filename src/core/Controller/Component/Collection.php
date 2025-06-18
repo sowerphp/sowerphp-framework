@@ -28,8 +28,8 @@ namespace sowerphp\core;
  */
 class Controller_Component_Collection
 {
-
     protected $_Controller = null; ///< Controlador donde esta colección esta siendo inicializada
+
     protected $_loaded = []; ///< Arreglo con los componentes ya cargados
 
     /**
@@ -92,7 +92,7 @@ class Controller_Component_Collection
         } else {
             $module = '';
         }
-        return array($module, $name);
+        return [$module, $name];
     }
 
     /**
@@ -129,9 +129,9 @@ class Controller_Component_Collection
         // cargar clase para el componente, si no existe error
         $componentClass = 'Controller_Component_' . $component;
         if (!class_exists($componentClass)) {
-            throw new Exception_Controller_Component_Missing(array(
-                'class' => $componentClass
-            ));
+            throw new Exception_Controller_Component_Missing([
+                'class' => $componentClass,
+            ]);
         }
         // cargar componente
         $this->_loaded[$component] = new $componentClass($this, $settings);
@@ -149,8 +149,7 @@ class Controller_Component_Collection
     public function trigger($callback, $params = [])
     {
         foreach ($this->_loaded as $object) {
-            call_user_func_array(array($object, $callback), $params);
+            call_user_func_array([$object, $callback], $params);
         }
     }
-
 }

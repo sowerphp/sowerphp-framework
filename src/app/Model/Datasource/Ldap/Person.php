@@ -28,17 +28,26 @@ namespace sowerphp\app;
  */
 class Model_Datasource_Ldap_Person extends Model_Datasource_Ldap_Entry
 {
-
     public $dn;
+
     public $uid;
+
     public $cn;
+
     public $givenName;
+
     public $sn;
+
     public $displayName;
+
     public $title;
+
     public $company;
+
     public $mail;
+
     public $mobile;
+
     public $userPassword;
 
     protected $Ldap = null; ///< Objeto que representa la conexión al servidor LDAP
@@ -77,7 +86,7 @@ class Model_Datasource_Ldap_Person extends Model_Datasource_Ldap_Entry
     public function savePassword($new, $old = null)
     {
         $entry = [
-            'userPassword' => [$this->hashPassword($new)]
+            'userPassword' => [$this->hashPassword($new)],
         ];
         $status = $this->Ldap->modify($this->dn, $entry);
         if ($status) {
@@ -119,5 +128,4 @@ class Model_Datasource_Ldap_Person extends Model_Datasource_Ldap_Entry
         $salt = mhash_keygen_s2k(MHASH_SHA1, $plain, substr(pack('h*', md5(mt_rand())), 0, 8), 4);
         return '{SSHA}'.base64_encode(mhash(MHASH_SHA1, $plain.$salt).$salt);
     }
-
 }

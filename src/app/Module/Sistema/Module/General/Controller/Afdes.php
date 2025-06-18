@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del controlador
+
 namespace sowerphp\app\Sistema\General;
 
 /**
@@ -33,7 +33,6 @@ namespace sowerphp\app\Sistema\General;
  */
 class Controller_Afdes extends \Controller_Maintainer
 {
-
     protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
 
     public function beforeFilter()
@@ -55,12 +54,12 @@ class Controller_Afdes extends \Controller_Maintainer
             $Afd->nombre = $_POST['nombre'];
             $Afd->estados = [
                 'codigos' => $_POST['estado_codigo'],
-                'nombres' => $_POST['estado_nombre']
+                'nombres' => $_POST['estado_nombre'],
             ];
             $Afd->transiciones = [
                 'desdes' => $_POST['desde'],
                 'valores' => $_POST['valor'],
-                'hastas' => $_POST['hasta']
+                'hastas' => $_POST['hasta'],
             ];
             $Afd->save();
             \sowerphp\core\Model_Datasource_Session::message('AFD <em>'.$Afd->nombre.'</em> creado.', 'ok');
@@ -87,7 +86,7 @@ class Controller_Afdes extends \Controller_Maintainer
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         $Afd = new Model_Afd($codigo);
         // si el registro que se quiere editar no existe error
-        if(!$Afd->exists()) {
+        if (!$Afd->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'AFD <em>'.$codigo.'</em> no existe, no se puede editar.',
                 'error'
@@ -97,12 +96,12 @@ class Controller_Afdes extends \Controller_Maintainer
             );
         }
         // si no se ha enviado el formulario se mostrará
-        if(!isset($_POST['submit'])) {
-            $this->set(array(
+        if (!isset($_POST['submit'])) {
+            $this->set([
                 'Afd' => $Afd,
                 'accion' => 'Editar',
                 'listarUrl' => $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar,
-            ));
+            ]);
             // renderizar
             $this->autoRender = false;
             $this->render('Afdes/crear_editar');
@@ -113,12 +112,12 @@ class Controller_Afdes extends \Controller_Maintainer
             $Afd->nombre = $_POST['nombre'];
             $Afd->estados = [
                 'codigos' => $_POST['estado_codigo'],
-                'nombres' => $_POST['estado_nombre']
+                'nombres' => $_POST['estado_nombre'],
             ];
             $Afd->transiciones = [
                 'desdes' => $_POST['desde'],
                 'valores' => $_POST['valor'],
-                'hastas' => $_POST['hasta']
+                'hastas' => $_POST['hasta'],
             ];
             $Afd->save();
             \sowerphp\core\Model_Datasource_Session::message('AFD <em>'.$Afd->nombre.'</em> editado.', 'ok');
@@ -141,5 +140,4 @@ class Controller_Afdes extends \Controller_Maintainer
         $this->response->header('Content-type', 'image/png');
         $this->response->sendAndExit($image);
     }
-
 }

@@ -28,8 +28,8 @@ namespace sowerphp\general;
  */
 class View_Helper_Form
 {
-
     private $_style; ///< Formato del formulario que se renderizará (mantenedor u false)
+
     private $_cols_label; ///< Columnas de la grilla para la etiqueta
 
     /**
@@ -140,11 +140,11 @@ class View_Helper_Form
     {
         // transformar a arreglo en caso que no lo sea
         if (!is_array($config)) {
-            $config = array('name'=>$config, 'label'=>$config);
+            $config = ['name'=>$config, 'label'=>$config];
         }
         // asignar configuración
         $config = array_merge(
-            array(
+            [
                 'type' => 'text',
                 'default' => null,
                 'value' => null,
@@ -158,7 +158,7 @@ class View_Helper_Form
                 'style' => $this->_style,
                 'placeholder' => '',
                 'sanitize' => true,
-            ), $config
+            ], $config
         );
         if (!isset($config['default']) && isset($config['value'])) {
             $config['default'] = $config['value'];
@@ -225,7 +225,7 @@ class View_Helper_Form
             $buffer = '    '.$field."\n";
         }
         // si se debe aplicar estilo horizontal
-        else if ($config['style']=='horizontal') {
+        elseif ($config['style']=='horizontal') {
             $buffer = '    <div class="mb-3 row'.($config['notempty']?' required':'').'">'."\n";
             if (!empty($config['label'])) {
                 $required = $config['notempty'] ? '<span style="color:red"><strong>*</strong></span> ' : '';
@@ -239,14 +239,14 @@ class View_Helper_Form
             $buffer .= '    </div>'."\n";
         }
         // si se debe aplicar estilo inline
-        else if ($config['style']=='inline') {
+        elseif ($config['style']=='inline') {
             $buffer = '<div>';
             if ($config['type'] != 'checkbox') {
                 $buffer .= '<label class="visually-hidden"'.(isset($config['id'])?' for="'.$config['id'].'"':'').'>'.$config['label'].'</label>'."\n";
             }
             if (isset($config['addon-icon'])) {
                 $buffer .= '<div class="input-group-addon"><i class="fa fa-'.$config['addon-icon'].'" aria-hidden="true"></i></div>'."\n";
-            } else if (isset($config['addon-text'])) {
+            } elseif (isset($config['addon-text'])) {
                 $buffer .= '<div class="input-group-addon">'.$config['addon-text'].'</div>'."\n";
             }
             $buffer .= $field;
@@ -257,12 +257,12 @@ class View_Helper_Form
             $buffer .= '</div>'."\n";
         }
         // si se debe alinear
-        else if (isset($config['align'])) {
+        elseif (isset($config['align'])) {
             $width = !empty($config['width']) ? (';width:'.$config['width']) : '';
             $buffer = '<div style="text-align:'.$config['align'].$width.'">'.$field.$config['help'].'</div>'."\n";
         }
         // si se debe colocar un label
-        else if (!empty($config['id']) && !empty($config['label'])) {
+        elseif (!empty($config['id']) && !empty($config['label'])) {
             $width = !empty($config['width']) ? (' style="width:'.$config['width'].'"') : '';
             $buffer = '<div'.$width.'><label class="visually-hidden" for="'.$config['id'].'">'.$config['label'].'</label>'.$field.$config['help'].'</div>'."\n";
         }
@@ -340,10 +340,10 @@ class View_Helper_Form
     private function _input_textarea($config)
     {
         $config = array_merge(
-            array(
+            [
                 'rows'=>5,
-                'cols'=>10
-            ), $config
+                'cols'=>10,
+            ], $config
         );
         $id = isset($config['id']) ? ' id="'.$config['id'].'"' : '';
         $growup = !empty($config['growup']) ? 'ondblclick="Form.growup(this)"' : '';
@@ -484,7 +484,7 @@ class View_Helper_Form
                     '!null' => 'Con valor',
                 ];
                 $buffer .= '<optgroup label="Valores temporales">';
-                foreach($keys_not_in_options as $k) {
+                foreach ($keys_not_in_options as $k) {
                     $buffer .= '<option value="'.$k.'" selected="selected">'.(isset($values[$k])?$values[$k]:$k).'</option>';
                 }
                 $buffer .= '</optgroup>';
@@ -511,7 +511,7 @@ class View_Helper_Form
             'titles' => [$config['title']],
             'inputs' => [
                 ['type'=>'file', 'name'=>$config['name']],
-            ]
+            ],
         ]);
     }
 
@@ -528,7 +528,7 @@ class View_Helper_Form
             'inputs' => [],
             'width' => '100%',
             'accesskey' => '+',
-            'callback' => 'undefined'
+            'callback' => 'undefined',
         ], $config);
         // respaldar formato
         $formato = $this->_style;
@@ -693,7 +693,7 @@ class View_Helper_Form
 
     private function _input_tablecheck($config)
     {
-        if(!isset($config['table'][0])) {
+        if (!isset($config['table'][0])) {
             return '-';
         }
         // configuración por defecto
@@ -709,7 +709,7 @@ class View_Helper_Form
             $config['key'] = array_keys($config['table'][0])[0];
         }
         if (!is_array($config['key'])) {
-            $config['key'] = array($config['key']);
+            $config['key'] = [$config['key']];
         }
         $buffer = '<table id="'.$config['id'].'" class="table table-striped" style="width:'.$config['width'].'">';
         $buffer .= '<thead><tr>';
@@ -773,7 +773,7 @@ class View_Helper_Form
             'options' => [],
             'titles' => [],
             'table' => [],
-            'width' => '100%'
+            'width' => '100%',
         ], $config);
         $buffer = '<table id="'.$config['id'].'" class="table table-striped" style="width:'.$config['width'].'">';
         $buffer .= '<thead><tr>';
@@ -805,5 +805,4 @@ class View_Helper_Form
         $buffer .= '</tbody></table>';
         return $buffer;
     }
-
 }

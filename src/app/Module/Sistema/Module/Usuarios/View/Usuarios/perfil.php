@@ -17,72 +17,72 @@ $(function() { __.tabs_init(); });
                     <p>Aquí puede modificar los datos de su usuario.</p>
 <?php
 $form = new \sowerphp\general\View_Helper_Form();
-echo $form->begin(array(
+echo $form->begin([
     'id' => 'datosUsuario',
-    'onsubmit' => 'Form.check(\'datosUsuario\')'
-));
-echo $form->input(array(
+    'onsubmit' => 'Form.check(\'datosUsuario\')',
+]);
+echo $form->input([
     'name' => 'nombre',
     'label' => 'Nombre',
     'value' => $_Auth->User->nombre,
     'help' => 'Nombre real del usuario',
     'check' => 'notempty',
     'attr' => 'maxlength="50"',
-));
+]);
 if ($changeUsername) {
-    echo $form->input(array(
+    echo $form->input([
         'name' => 'usuario',
         'label' => 'Usuario',
         'value' => $_Auth->User->usuario,
         'help' => 'Nombre de usuario',
         'check' => 'notempty',
         'attr' => 'maxlength="30"',
-    ));
+    ]);
 }
-echo $form->input(array(
+echo $form->input([
     'name' => 'email',
     'label' => 'Email',
     'value' => $_Auth->User->email,
     'help' => 'Correo electrónico para uso dentro del sistema',
     'check' => 'notempty email',
     'attr' => 'maxlength="50"',
-));
-echo $form->input(array(
+]);
+echo $form->input([
     'type' => 'password',
     'name' => 'hash',
     'label' => 'Hash',
     'value' => $_Auth->User->hash,
     'help' => 'Código único para identificar el usuario (32 caracteres).<br />Si desea uno nuevo, borrar este y automáticamente se generará uno nuevo al guardar los cambios',
     'attr' => 'maxlength="32" autocomplete="off" onclick="this.select()"',
-));
-echo $form->input(array(
+]);
+echo $form->input([
     'type' => 'password',
     'name' => 'api_key',
     'label' => 'API key',
     'value' => base64_encode($_Auth->User->hash.':X'),
     'help' => 'Valor de la cabecera Authorization de HTTP para autenticar en la API usando solo la API key, la cual está basada en el hash del usuario',
     'attr' => 'readonly="readonly" onclick="this.select()"',
-));
+]);
 if ($_Auth->User->getLdapPerson() && $_Auth->User->getLdapPerson()->uid != $_Auth->User->usuario) {
-    echo $form->input(array(
+    echo $form->input([
         'type' => 'div',
         'label' => 'Usuario LDAP',
         'value' => $_Auth->User->getLdapPerson()->uid,
         'help' => 'Usuario LDAP asociado a la cuenta de usuario',
-    ));
+    ]);
 }
 if ($_Auth->User->getEmailAccount() && $_Auth->User->getEmailAccount()->getEmail() != $_Auth->User->email) {
-    echo $form->input(array(
+    echo $form->input([
         'type' => 'div',
         'label' => 'Email oficial',
         'value' => $_Auth->User->getEmailAccount()->getEmail(),
         'help' => 'Correo electrónico oficial del usuario',
-    ));
+    ]);
 }
-echo $form->end(array(
+echo $form->end([
     'name' => 'datosUsuario',
     'value' => 'Guardar cambios',
-));
+]);
 ?>
                 </div>
                 <div class="col-sm-3 text-center">
@@ -98,35 +98,35 @@ echo $form->end(array(
         <div role="tabpanel" class="tab-pane" id="contrasenia" aria-labelledby="contrasenia-tab">
             <p>A través del siguiente formulario puede cambiar su contraseña.</p>
 <?php
-echo $form->begin(array(
+echo $form->begin([
     'id' => 'cambiarContrasenia',
-    'onsubmit' => 'Form.check(\'cambiarContrasenia\')'
-));
-echo $form->input(array(
+    'onsubmit' => 'Form.check(\'cambiarContrasenia\')',
+]);
+echo $form->input([
     'type' => 'password',
     'name' => 'contrasenia',
     'label' => 'Contraseña actual',
     'help' => 'Contraseña actualmente usada por el usuario',
     'check' => 'notempty',
-));
-echo $form->input(array(
+]);
+echo $form->input([
     'type' => 'password',
     'name' => 'contrasenia1',
     'label' => 'Contraseña nueva',
     'help' => 'Contraseña que se quiere utilizar',
     'check' => 'notempty',
-));
-echo $form->input(array(
+]);
+echo $form->input([
     'type' => 'password',
     'name' => 'contrasenia2',
     'label' => 'Repetir contraseña',
     'help' => 'Repetir la contraseña que se haya indicado antes',
     'check' => 'notempty',
-));
-echo $form->end(array(
+]);
+echo $form->end([
     'name' => 'cambiarContrasenia',
     'value'=>'Cambiar contraseña',
-));
+]);
 ?>
         </div>
         <div role="tabpanel" class="tab-pane" id="auth" aria-labelledby="auth-tab">
@@ -140,34 +140,34 @@ if (!$_Auth->User->{'config_auth2_'.$method}) {
     echo '<p>Aquí podrá activar <a href="',$Auth2->getUrl(),'" target="_blank">',$Auth2->getName(),'</a> para proteger el acceso a su cuenta.</p>',"\n";
     echo $form->begin([
         'id' => 'crearToken'.$Auth2->getName(),
-        'onsubmit' => 'Form.check(\'crearToken'.$Auth2->getName().'\')'
+        'onsubmit' => 'Form.check(\'crearToken'.$Auth2->getName().'\')',
     ]);
-    echo $form->input(array(
+    echo $form->input([
         'type' => 'hidden',
         'name' => 'auth2',
         'value' => $Auth2->getName(),
-    ));
+    ]);
     $secret = $Auth2->createSecret($_Auth->User->usuario);
     if ($secret) {
-        echo $form->input(array(
+        echo $form->input([
             'type' => 'hidden',
             'name' => 'secret',
             'value' => $secret->text,
-        ));
-        echo $form->input(array(
+        ]);
+        echo $form->input([
             'type' => 'div',
             'name' => 'secretDisplay',
             'label' => 'Código pareo',
             'value' => '<img src="'.$secret->qr.'" class="img-fluid img-thumbnail" alt="QR para '.$Auth2->getName().'" />',
             'help' => 'Escanear el código QR o copiar el siguiente código en '.$Auth2->getName().': '.$secret->text,
-        ));
+        ]);
     }
-    echo $form->input(array(
+    echo $form->input([
         'name' => 'verification',
         'label' => 'Código verificación',
         'help' => 'Código de verificación para parear aplicación y proteger con '.$Auth2->getName(),
         'check' => 'notempty',
-    ));
+    ]);
     echo $form->end([
         'name' => 'crearAuth2',
         'value' => 'Proteger cuenta con '.$Auth2->getName(),
@@ -175,18 +175,18 @@ if (!$_Auth->User->{'config_auth2_'.$method}) {
 } else {
     echo '<p>Aquí podrá desasociar su cuenta de usuario con la protección entregada por <a href="',$Auth2->getUrl(),'" target="_blank">',$Auth2->getName(),'</a>.</p>',"\n";
     echo $form->begin([
-        'onsubmit' => '__.confirm(this, \'¿Está seguro de querer eliminar la protección con '.$Auth2->getName().'?\')'
+        'onsubmit' => '__.confirm(this, \'¿Está seguro de querer eliminar la protección con '.$Auth2->getName().'?\')',
     ]);
-    echo $form->input(array(
+    echo $form->input([
         'type' => 'hidden',
         'name' => 'auth2',
         'value' => $Auth2->getName(),
-    ));
-    echo $form->input(array(
+    ]);
+    echo $form->input([
         'type' => 'hidden',
         'name' => 'destruirAuth2',
         'value' => 1,
-    ));
+    ]);
     echo $form->end('Eliminar protección con '.$Auth2->getName());
 }
 ?>

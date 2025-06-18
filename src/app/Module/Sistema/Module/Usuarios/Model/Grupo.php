@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app\Sistema\Usuarios;
 
 /**
@@ -31,21 +31,23 @@ namespace sowerphp\app\Sistema\Usuarios;
  */
 class Model_Grupo extends \Model_App
 {
-
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table = 'grupo'; ///< Tabla del modelo
 
     public static $fkNamespace = []; ///< Namespaces que utiliza esta clase
 
     // Atributos de la clase (columnas en la base de datos)
     public $id; ///< Identificador (serial): integer(32) NOT NULL DEFAULT 'nextval('grupo_id_seq'::regclass)' AUTO PK
+
     public $grupo; ///< Nombre del grupo: character varying(30) NOT NULL DEFAULT ''
+
     public $activo; ///< Indica si el grupo se encuentra activo: boolean() NOT NULL DEFAULT 'true'
 
     // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'id' => array(
+    public static $columnsInfo = [
+        'id' => [
             'name'      => 'ID',
             'comment'   => 'Identificador (serial)',
             'type'      => 'integer',
@@ -54,9 +56,9 @@ class Model_Grupo extends \Model_App
             'default'   => "nextval('grupo_id_seq'::regclass)",
             'auto'      => true,
             'pk'        => true,
-            'fk'        => null
-        ),
-        'grupo' => array(
+            'fk'        => null,
+        ],
+        'grupo' => [
             'name'      => 'Grupo',
             'comment'   => 'Nombre del grupo',
             'type'      => 'character varying',
@@ -65,9 +67,9 @@ class Model_Grupo extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'activo' => array(
+            'fk'        => null,
+        ],
+        'activo' => [
             'name'      => 'Activo',
             'comment'   => 'Indica si el grupo se encuentra activo',
             'type'      => 'boolean',
@@ -76,12 +78,11 @@ class Model_Grupo extends \Model_App
             'default'   => "true",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
+            'fk'        => null,
+        ],
 
-    );
+    ];
 
     // Comentario de la tabla en la base de datos
     public static $tableComment = 'Grupos a los que puede pertenecer un usuario';
-
 }

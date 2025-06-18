@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
 {
-
     /**
      * Constructor de la clase
      *
@@ -39,12 +38,12 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
     public function __construct($config)
     {
         // definir configuración para el acceso a la base de datos
-        $this->config = array_merge(array(
+        $this->config = array_merge([
             'host' => 'localhost',
             'port' => '3306',
             'char' => 'utf8',
             'pers' => false,
-        ), $config);
+        ], $config);
         // realizar conexión a la base de datos
         parent::__construct(
             'mysql:host='.$this->config['host'].
@@ -56,7 +55,7 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
             [
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_SILENT,
                 \PDO::ATTR_PERSISTENT => (bool)$this->config['pers'],
-                \PDO::MYSQL_ATTR_COMPRESS => true
+                \PDO::MYSQL_ATTR_COMPRESS => true,
             ]
         );
     }
@@ -81,10 +80,10 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      */
     public function concat($par1, $par2)
     {
-        $separators = array(' ', ',', ', ', '-', ' - ', '|', ':', ': ');
+        $separators = [' ', ',', ', ', '-', ' - ', '|', ':', ': '];
         $concat = [];
         $parameters = func_get_args();
-        foreach($parameters as &$parameter) {
+        foreach ($parameters as &$parameter) {
             if (in_array($parameter, $separators)) {
                 $parameter = "'".$parameter."'";
             }
@@ -156,7 +155,7 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
                 column_name AS name
                 , SUBSTRING_INDEX(column_type, \'(\', 1) AS type
                 , IFNULL(character_maximum_length, numeric_precision) AS length
-                , IF(STRCMP(is_nullable,"NO"),"YES","NO") AS `null`
+                , if (STRCMP(is_nullable,"NO"),"YES","NO") AS `null`
                 , column_default AS `default`
                 , column_comment AS comment
                 , extra
@@ -212,5 +211,4 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
         ', [':database'=>$this->config['name'], ':table'=>$table]);
         return is_array($fks) ? $fks : [];
     }
-
 }

@@ -28,7 +28,6 @@ namespace sowerphp\app;
  */
 class Controller_Component_Auth extends \sowerphp\core\Controller_Component
 {
-
     public $settings = [ ///< Opciones por defecto
         'multipleLogins' => false,
         'maxLoginAttempts' => 3,
@@ -62,11 +61,17 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
             ],
         ],
     ];
+
     private $allowedActions = []; ///< Acciones sin login
+
     private $allowedActionsWithLogin = []; ///< Acciones con login
+
     private $session = null; ///< Información de la sesión del usuario
+
     public $User = false; ///< Usuario que se ha identificado en la sesión
+
     private $__logged = null;
+
     private $Cache; ///< Objeto para el caché
 
     /**
@@ -492,5 +497,4 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
             $this->controller->Log->write($message, $severity, LOG_AUTH);
         }
     }
-
 }

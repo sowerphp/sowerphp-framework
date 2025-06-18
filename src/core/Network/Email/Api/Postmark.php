@@ -30,8 +30,8 @@ namespace sowerphp\core;
  */
 class Network_Email_Api_Postmark
 {
-
     protected $config = null; ///< Configuración para envíos usando Postmark
+
     protected $pm; ///< Objeto de Postmark para los envíos
 
     /**
@@ -116,7 +116,7 @@ class Network_Email_Api_Postmark
                     );
                 }
                 // leer desde datos de una variable
-                else if (!empty($file['data'])) {
+                elseif (!empty($file['data'])) {
                     $attachments[] = \Postmark\Models\PostmarkAttachment::fromRawData(
                         $file['data'],
                         $file['name'],
@@ -146,5 +146,4 @@ class Network_Email_Api_Postmark
             ];
         }
     }
-
 }

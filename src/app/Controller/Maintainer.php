@@ -28,13 +28,18 @@ namespace sowerphp\app;
  */
 class Controller_Maintainer extends \Controller_App
 {
-
     protected $model = false; ///< Atributo con el namespace y clase del modelo singular
+
     protected $models = false; ///< Atributo con el namespace y clase del modelo plural
+
     protected $module_url; ///< Atributo con la url para acceder el módulo
+
     protected $deleteRecord = true; ///< Indica si se permite o no borrar registros
+
     protected $contraseniaNames = ['contrasenia', 'clave', 'password', 'pass']; ///< Posibles nombres de campo tipo contraseña
+
     protected $actionsColsWidth = 170; ///< Ancho de la columna de acciónes en acción listar
+
     protected $extraActions = []; ///< iconos extra para la columna de acciones
 
     /**
@@ -160,31 +165,31 @@ class Controller_Maintainer extends \Controller_App
                     $where[] = $var . ' IS NOT NULL';
                 }
                 // si el valor es null o 'null' se compara contra IS NULL
-                else if ($val === null || $val == 'null') {
+                elseif ($val === null || $val == 'null') {
                     $where[] = $var . ' IS NULL';
                 }
                 // si es una FK se filtra con igualdad
-                else if (!empty($model::$columnsInfo[$var]['fk'])) {
+                elseif (!empty($model::$columnsInfo[$var]['fk'])) {
                     $where[] = $var . ' = :' . $var;
                     $vars[':' . $var] = $val;
                 }
                 // si es un campo de texto se filtrará con LIKE
-                else if (in_array($model::$columnsInfo[$var]['type'], ['char', 'character varying', 'varchar', 'text'])) {
+                elseif (in_array($model::$columnsInfo[$var]['type'], ['char', 'character varying', 'varchar', 'text'])) {
                     $where[] = 'LOWER(' . $var . ') LIKE :' . $var;
                     $vars[':' . $var] = '%' . strtolower($val) . '%';
                 }
                 // si es un tipo fecha con hora se usará like
-                else if (in_array($model::$columnsInfo[$var]['type'], ['timestamp', 'timestamp without time zone'])) {
+                elseif (in_array($model::$columnsInfo[$var]['type'], ['timestamp', 'timestamp without time zone'])) {
                     $where[] = 'CAST(' . $var . ' AS TEXT) LIKE :' . $var;
                     $vars[':' . $var] = $val . ' %';
                 }
                 // si es un campo número entero se castea
-                else if (in_array($model::$columnsInfo[$var]['type'], ['smallint', 'integer', 'bigint', 'smallserial', 'serial', 'bigserial'])) {
+                elseif (in_array($model::$columnsInfo[$var]['type'], ['smallint', 'integer', 'bigint', 'smallserial', 'serial', 'bigserial'])) {
                     $where[] = $var . ' = :' . $var;
                     $vars[':' . $var] = (int)$val;
                 }
                 // si es un campo número decimal se castea
-                else if (in_array($model::$columnsInfo[$var]['type'], ['decimal', 'numeric', 'real', 'double precision'])) {
+                elseif (in_array($model::$columnsInfo[$var]['type'], ['decimal', 'numeric', 'real', 'double precision'])) {
                     $where[] = $var . ' = :' . $var;
                     $vars[':' . $var] = (float)$val;
                 }
@@ -234,7 +239,7 @@ class Controller_Maintainer extends \Controller_App
             $columns = $model::$columnsInfo;
         }
         // setear variables
-        $this->set(array(
+        $this->set([
             'module_url' => $this->module_url,
             'controller' => $this->request->getParsedParams()['controller'],
             'page' => $page,
@@ -255,7 +260,7 @@ class Controller_Maintainer extends \Controller_App
             'deleteRecord' => $this->deleteRecord,
             'actionsColsWidth' => $this->actionsColsWidth,
             'extraActions' => $this->extraActions,
-        ));
+        ]);
         // renderizar
         $this->renderView('listar');
     }
@@ -271,7 +276,7 @@ class Controller_Maintainer extends \Controller_App
             $Obj = new $this->model();
             $Obj->set($_POST);
             if (!$Obj->exists()) {
-                foreach($_FILES as $name => &$file) {
+                foreach ($_FILES as $name => &$file) {
                     if (!$file['error']) {
                         $Obj->setFile($name, $file);
                     }
@@ -295,7 +300,7 @@ class Controller_Maintainer extends \Controller_App
         }
         // setear variables
         $model = $this->model;
-        $this->set(array(
+        $this->set([
             'columnsInfo' => $model::$columnsInfo,
             'fkNamespace' => $model::$fkNamespace,
             'accion' => 'Crear',
@@ -303,7 +308,7 @@ class Controller_Maintainer extends \Controller_App
             'contraseniaNames' => $this->contraseniaNames,
             'listarUrl' => $this->module_url . $this->request->getParsedParams()['controller']
                 . '/listar' . $filterListar,
-        ));
+        ]);
         // renderizar
         $this->renderView('crear_editar');
     }
@@ -335,7 +340,7 @@ class Controller_Maintainer extends \Controller_App
                 }
             }
             $Obj->set($_POST);
-            foreach($_FILES as $name => &$file) {
+            foreach ($_FILES as $name => &$file) {
                 if (!$file['error']) {
                     $Obj->setFile($name, $file);
                 }
@@ -359,7 +364,7 @@ class Controller_Maintainer extends \Controller_App
             }
         }
         // renderizar la vista
-        $this->set(array(
+        $this->set([
             'Obj' => $Obj,
             'columns' => $model::$columnsInfo,
             'contraseniaNames' => $this->contraseniaNames,
@@ -367,7 +372,7 @@ class Controller_Maintainer extends \Controller_App
             'accion' => 'Editar',
             'listarUrl' => $this->module_url . $this->request->getParsedParams()['controller']
                 . '/listar' . $filterListar,
-        ));
+        ]);
         // renderizar
         $this->renderView('crear_editar');
     }
@@ -389,7 +394,7 @@ class Controller_Maintainer extends \Controller_App
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         $Obj = new $this->model(array_map('urldecode', func_get_args()));
         // si el registro que se quiere eliminar no existe error
-        if(!$Obj->exists()) {
+        if (!$Obj->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Registro (' . implode(', ', func_get_args()) . ') no existe, no se puede eliminar.',
                 'error'
@@ -431,7 +436,7 @@ class Controller_Maintainer extends \Controller_App
         $pks = array_slice(func_get_args(), 1);
         $Obj = new $this->model($pks);
         // si el registro que se quiere eliminar no existe error
-        if(!$Obj->exists()) {
+        if (!$Obj->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Registro (' . implode(', ', $pks) . ') no existe. No se puede obtener '.$campo.'.',
                 'error'
@@ -458,5 +463,4 @@ class Controller_Maintainer extends \Controller_App
             'data' => $Obj->{$campo.'_data'},
         ]);
     }
-
 }

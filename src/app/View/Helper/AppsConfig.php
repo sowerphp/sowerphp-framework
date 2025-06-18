@@ -28,8 +28,8 @@ namespace sowerphp\app;
  */
 class View_Helper_AppsConfig
 {
-
     protected $id; ///< ID para las apps que se están configurando
+
     protected $form; ///< Formulario (objeto de FormHelper) que se está usando en el helper
 
     /**
@@ -88,5 +88,4 @@ class View_Helper_AppsConfig
         $buffer .= '</div>'."\n";
         return $buffer;
     }
-
 }

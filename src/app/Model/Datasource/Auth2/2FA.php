@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app;
 
 /**
@@ -29,7 +29,6 @@ namespace sowerphp\app;
  */
 class Model_Datasource_Auth2_2FA extends Model_Datasource_Auth2_Base
 {
-
     protected $need_token = true; ///< 2FA asigna un token aleatorio al usuario
 
     /**
@@ -90,5 +89,4 @@ class Model_Datasource_Auth2_2FA extends Model_Datasource_Auth2_Base
         }
         return true;
     }
-
 }

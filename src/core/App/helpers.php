@@ -145,7 +145,7 @@ function debug($var, ?string $label = null)
     if (is_object($var)) {
         $data['type'] = get_class($var);
         $data['value'] = print_r($var, true);
-    } else if (is_null($var) || is_bool($var)) {
+    } elseif (is_null($var) || is_bool($var)) {
         $data['value'] = json_encode($var, JSON_PRETTY_PRINT);
     } else {
         $data['value'] = print_r($var, true);

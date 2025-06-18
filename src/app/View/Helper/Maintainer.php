@@ -28,7 +28,6 @@ namespace sowerphp\app;
  */
 class View_Helper_Maintainer extends View_Helper_Paginator
 {
-
     /**
      * Método que generará el mantenedor y listará los registros disponibles
      * @param data Registros que se deben renderizar
@@ -38,7 +37,7 @@ class View_Helper_Maintainer extends View_Helper_Paginator
      */
     public function listar($data, $pages = 1, $page = 1, $create = true)
     {
-        $buffer = $this->form->begin(array('onsubmit'=>'buscar(this)'))."\n";
+        $buffer = $this->form->begin(['onsubmit'=>'buscar(this)'])."\n";
         if ($create) {
             $buffer .= '<div class="float-start col-4"><a href="'.$this->options['link'].'/crear'.$this->options['listarFilterUrl'].'" title="Crear nuevo registro" class="btn btn-primary"><i class="fa fa-plus fa-fw" aria-hidden="true"></i></a></div>'."\n";
         }
@@ -57,5 +56,4 @@ class View_Helper_Maintainer extends View_Helper_Paginator
         $buffer .= '</div>'."\n";
         return $buffer;
     }
-
 }

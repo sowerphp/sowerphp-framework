@@ -28,7 +28,6 @@ namespace sowerphp\app;
  */
 class Controller_Component_Notify extends \sowerphp\core\Controller_Component
 {
-
     public $settings = [ ///< Opciones por defecto
         'model' => '\sowerphp\app\Sistema\Usuarios\Model_Usuario',
     ];
@@ -165,5 +164,4 @@ class Controller_Component_Notify extends \sowerphp\core\Controller_Component
             return $severity;
         }
     }
-
 }

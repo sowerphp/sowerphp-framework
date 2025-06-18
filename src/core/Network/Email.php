@@ -28,20 +28,27 @@ namespace sowerphp\core;
  */
 class Network_Email
 {
-
     protected $Sender; ///< Objeto que hará el envío del correo electrónico
+
     protected $default_methods = [
         'smtp' => 'smtp-phpmailer',
     ]; ///< Método por defecto a usar si no se indicó uno
 
     // datos del correo que se enviará
     protected $from = null; ///< Quién envía el correo
+
     protected $replyTo = null; ///< A quien se debe responder el correo enviado
+
     protected $to_default = null; ///< A quien se debe enviar el correo por defecto (si no se indican destinatarios)
+
     protected $to = []; ///< Listado de destinatarios
+
     protected $cc = []; ///< Listado de destinatarios CC
+
     protected $bcc = []; ///< Listado de destinatarios BCC
+
     protected $subject = null; ///< Asunto del correo que se enviará
+
     protected $attach = []; ///< Archivos adjuntos
 
     /**
@@ -153,7 +160,7 @@ class Network_Email
             }
         }
         // En caso que se haya pasado un solo correo
-        else if (!in_array($email, $this->to)) {
+        elseif (!in_array($email, $this->to)) {
             $this->to[] = $email;
         }
     }
@@ -173,7 +180,7 @@ class Network_Email
             }
         }
         // En caso que se haya pasado un solo correo
-        else if (!in_array($email, $this->cc)) {
+        elseif (!in_array($email, $this->cc)) {
             $this->cc[] = $email;
         }
     }
@@ -193,7 +200,7 @@ class Network_Email
             }
         }
         // En caso que se haya pasado un solo correo
-        else if (!in_array($email, $this->bcc)) {
+        elseif (!in_array($email, $this->bcc)) {
             $this->bcc[] = $email;
         }
     }
@@ -241,7 +248,7 @@ class Network_Email
             if (!empty($this->to_default)) {
                 $this->to($this->to_default);
             }
-            else if (empty($this->cc) && empty($this->bcc)) {
+            elseif (empty($this->cc) && empty($this->bcc)) {
                 throw new \sowerphp\core\Exception('No existe destinatario del correo electrónico');
             }
         }
@@ -249,7 +256,7 @@ class Network_Email
         $data = [
             'text'      => !empty($msg['text']) ? $msg['text'] : null,
             'html'      => !empty($msg['html']) ? $msg['html'] : null,
-            'attach'    => $this->attach
+            'attach'    => $this->attach,
         ];
         // Crear header
         $header = [
@@ -258,10 +265,9 @@ class Network_Email
             'to'        => $this->to,
             'cc'        => $this->cc,
             'bcc'       => $this->bcc,
-            'subject'   => $this->subject
+            'subject'   => $this->subject,
         ];
         // Enviar mensaje a todos los destinatarios
         return $this->Sender->send($data, $header);
     }
-
 }

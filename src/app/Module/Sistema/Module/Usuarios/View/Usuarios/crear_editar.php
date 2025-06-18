@@ -11,7 +11,7 @@
 <?php
 // crear formulario
 $form = new \sowerphp\general\View_Helper_Form();
-echo $form->begin(array('onsubmit'=>'Form.check()'));
+echo $form->begin(['onsubmit'=>'Form.check()']);
 
 // atributos del usuario
 echo $form->input([
@@ -65,7 +65,7 @@ echo $form->input([
     'options' => [
         '' => 'Seleccione una opción',
         '1' => 'Si',
-        '0' => 'No'
+        '0' => 'No',
     ],
     'value' => isset($Obj) ? $Obj->activo : '',
     'help'  => $columns['activo']['comment'],

@@ -29,7 +29,6 @@ namespace sowerphp\core;
  */
 class Network_Http_Rest
 {
-
     // Métodos HTTP soportados.
     protected $methods = ['get', 'put', 'patch', 'delete', 'post'];
 
@@ -155,5 +154,4 @@ class Network_Http_Rest
     {
         return $this->errors;
     }
-
 }

@@ -28,8 +28,8 @@ namespace sowerphp\core;
  */
 class Network_Ftp
 {
-
     private $config; ///< Configuración de la conexión FTP
+
     private $link; ///< Enlace a la conexión FTP
 
     /**
@@ -67,7 +67,6 @@ class Network_Ftp
     {
         $this->close();
     }
-
 
     /**
      * Método que permite obtener los archivos de un directorio
@@ -127,5 +126,4 @@ class Network_Ftp
         array_unshift($args, $this->link);
         return call_user_func_array('ftp_'.$func, $args);
     }
-
 }

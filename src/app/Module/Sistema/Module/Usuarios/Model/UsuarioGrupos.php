@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app\Sistema\Usuarios;
 
 /**
@@ -31,9 +31,8 @@ namespace sowerphp\app\Sistema\Usuarios;
  */
 class Model_UsuarioGrupos extends \Model_Plural_App
 {
-
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
-    protected $_table = 'usuario_grupo'; ///< Tabla del modelo
 
+    protected $_table = 'usuario_grupo'; ///< Tabla del modelo
 }

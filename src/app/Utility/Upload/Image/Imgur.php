@@ -28,7 +28,6 @@ namespace sowerphp\app;
  */
 class Utility_Upload_Image_Imgur
 {
-
     /**
      * Método que sube la imagen a imgur
      */
@@ -38,5 +37,4 @@ class Utility_Upload_Image_Imgur
         $response = $Imgur->upload(file_get_contents($file['tmp_name']));
         return $response['link'];
     }
-
 }

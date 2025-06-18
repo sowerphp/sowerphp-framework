@@ -28,7 +28,6 @@ namespace sowerphp\general;
  */
 class View_Helper_HTML
 {
-
     /**
      * Método para cargar todos los archivos de un directorio como código y
      * "pintarlo" mediante http://google-code-prettify.googlecode.com
@@ -109,7 +108,7 @@ class View_Helper_HTML
                 }
                 // mostrar directorio y llamar función de forma recursiva
                 echo '<li style="list-style-image: url(\'',url('/img/icons/16x16/files/directory.png'),'\')">';
-                echo '<span style="display:block;margin-bottom:1em">',str_replace(array('_', '-'), ' ', $file),'</span>',"\n";
+                echo '<span style="display:block;margin-bottom:1em">',str_replace(['_', '-'], ' ', $file),'</span>',"\n";
                 self::linksFrom($dir.'/'.$file, $recursive);
                 echo '</li>',"\n";
             }
@@ -118,10 +117,10 @@ class View_Helper_HTML
                 // definir nombre y extensión
                 if (strrchr($file, '.')!==FALSE) {
                     $ext = substr(strrchr($file, '.'), 1);
-                    $name = str_replace(array('_', '-'), ' ', preg_replace("/.$ext$/", '', $file));
+                    $name = str_replace(['_', '-'], ' ', preg_replace("/.$ext$/", '', $file));
                 } else {
                     $ext = '';
-                    $name = str_replace(array('_', '-'), ' ', $file);
+                    $name = str_replace(['_', '-'], ' ', $file);
                 }
                 // buscar icono a partir de la extension
                 $icon = app('layers')->getFilePath('webroot/img/icons/16x16/files/'.$ext.'.png');
@@ -148,5 +147,4 @@ class View_Helper_HTML
             $string
         );
     }
-
 }

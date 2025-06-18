@@ -28,11 +28,14 @@ namespace sowerphp\app;
  */
 class Controller_Component_Api extends \sowerphp\core\Controller_Component
 {
-
     public $resource; ///< Recurso que se está solicitando a la API
+
     public $method; ///< Método HTTP que se utilizó para acceder a la API
+
     public $headers; ///< Cabeceras HTTP de la solicitud que se hizo a la API
+
     public $data; ///< Datos que se han pasado a la función de la API
+
     public $settings = [
         'auth' => [
             'model' => '\sowerphp\app\Sistema\Usuarios\Model_Usuario',
@@ -47,7 +50,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
                 'auth-bad' => 'Cabecera Authorization es incorrecta.',
                 'not-auth' => 'No está autorizado a acceder al recurso %s a través del método %s en la API %s.',
                 'input-invalid' => 'Los datos enviados a la API no son válidos (no es un JSON válido).',
-            ]
+            ],
         ],
         'localhost' => ['::1', '127.0.0.1'],
         'data' => [
@@ -56,6 +59,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         'cors' => false, // permite activar CORS en las solicitudes a la API
         'http_error_code_5XX' => true,
     ];
+
     protected $User = null; ///< Usuario que se ha autenticado en la API
 
     /**
@@ -141,7 +145,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         $reflectionMethod = new \ReflectionMethod($this->controller, $method);
         if ($n_args < $reflectionMethod->getNumberOfRequiredParameters()) {
             $args = [];
-            foreach($reflectionMethod->getParameters() as &$p) {
+            foreach ($reflectionMethod->getParameters() as &$p) {
                 $args[] = $p->isOptional() ? '['.$p->name.']' : $p->name;
             }
             $this->send(
@@ -225,7 +229,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
     public function resources()
     {
         $resources = [];
-        foreach(get_class_methods($this->controller) as $action) {
+        foreach (get_class_methods($this->controller) as $action) {
             if (substr($action, 0, 5) == '_api_' && $action != __FUNCTION__) {
                 $resources[] = substr($action, 5);
             }
@@ -330,7 +334,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
             if (!empty($_GET['api_hash'])) {
                 $auth = base64_encode('X:' . $_GET['api_hash']);
             }
-            else if (!empty($_GET['api_key'])) {
+            elseif (!empty($_GET['api_key'])) {
                 $auth = $_GET['api_key'];
             }
         }
@@ -443,5 +447,4 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
     {
         return $this->controller->response;
     }
-
 }

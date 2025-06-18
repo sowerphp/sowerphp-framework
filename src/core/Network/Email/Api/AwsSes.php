@@ -30,8 +30,8 @@ namespace sowerphp\core;
  */
 class Network_Email_Api_AwsSes
 {
-
     protected $config = null; ///< Configuración para envíos usando AWS SES
+
     protected $ses; ///< Objeto de AWS SES para los envíos
 
     /**
@@ -85,7 +85,7 @@ class Network_Email_Api_AwsSes
             $email = [
                 'RawMessage'=>[
                     'Data' => $mail->getSentMIMEMessage(),
-                ]
+                ],
             ];
         }
         // si no hay soporte para PHPMailer se crea el correo directo, pero no
@@ -199,5 +199,4 @@ class Network_Email_Api_AwsSes
         // entregar arreglo con los datos del email
         return $email;
     }
-
 }

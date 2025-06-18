@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class View_Helper_Page
 {
-
     /**
      * Método que determina (según la extensión) que tipo de renderizado
      * se necesita hacer y lo ejecuta.
@@ -43,5 +42,4 @@ class View_Helper_Page
         $class = 'View_Helper_Pages_' . ucfirst($ext);
         return $class::render($location, $viewVars);
     }
-
 }

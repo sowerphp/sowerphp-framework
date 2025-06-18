@@ -35,7 +35,9 @@ class Model_Datasource_Ldap extends \sowerphp\core\Model_Datasource
         'version' => 3,
         'timeout' => 3,
         'person_uid' => 'usuario',
-    ]; ///< Configuración de la fuente de datos
+    ];
+
+ ///< Configuración de la fuente de datos
     protected $link; ///< Conexión al servidor LDAP
 
     /**
@@ -62,9 +64,9 @@ class Model_Datasource_Ldap extends \sowerphp\core\Model_Datasource
     {
         $this->config = array_merge($this->config, $config);
         if (!$this->connect()) {
-            throw new \sowerphp\core\Exception (array(
-                'msg' => error_get_last()['message']
-            ));
+            throw new \sowerphp\core\Exception ([
+                'msg' => error_get_last()['message'],
+            ]);
         }
     }
 
@@ -175,5 +177,4 @@ class Model_Datasource_Ldap extends \sowerphp\core\Model_Datasource
     {
         return new Model_Datasource_Ldap_Person($uid, $this);
     }
-
 }

@@ -31,9 +31,10 @@ namespace sowerphp\core;
  */
 abstract class Model_Datasource_Database_Manager extends \PDO
 {
-
     public $config; ///< Configuración de la base de datos
+
     protected $inTransaction = 0; ///< Contador de solicitudes de transacciones en curso
+
     public static $querysCount = 0; ///< Indica la cantidad de consultas que se han realizado entre todas las BD
 
     /**
@@ -45,7 +46,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
             $this->rollBack();
         }
         throw new Exception_Model_Datasource_Database([
-            'msg' => $msg
+            'msg' => $msg,
         ]);
     }
 
@@ -58,7 +59,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     public function query($sql, $params = [])
     {
         // verificar que exista una consulta
-        if(empty($sql)) {
+        if (empty($sql)) {
             $this->error('¡Consulta no puede estar vacía!');
         }
         // contabilizar consulta
@@ -72,7 +73,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
         foreach ($params as $key => &$param) {
             if (is_array($param)) {
                 $stmt->bindParam($key, $param[0], $param[1]);
-            } else if ($param===null || $param==='') {
+            } elseif ($param===null || $param==='') {
                 $stmt->bindValue($key, null, \PDO::PARAM_NULL);
             } else {
                 $stmt->bindParam($key, $param);
@@ -80,7 +81,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
         }
         // realizar consulta
         $stmt->execute();
-        if(!$stmt || $stmt->errorCode()!=='00000') {
+        if (!$stmt || $stmt->errorCode()!=='00000') {
             $this->error(
                 implode("\n", $stmt->errorInfo())."\n\n".$sql
             );
@@ -262,28 +263,28 @@ abstract class Model_Datasource_Database_Manager extends \PDO
         // obtener fks de la tabla
         $fkAux = $this->getFksFromTable($table['name']);
         $fk = [];
-        foreach($fkAux as &$aux) {
+        foreach ($fkAux as &$aux) {
             $fk[array_shift($aux)] = $aux;
         }
         unset($fkAux);
         // obtener columnas de la tabla
         $columns = $this->getColsFromTable($table['name']);
         // recorrer columnas para definir pk, fk, auto, null/not null, default, comentario
-        foreach($columns as &$column) {
+        foreach ($columns as &$column) {
             // definir null o not null
             $column['null'] = $column['null']=='YES' ? 1 : 0;
             // definir si es auto_increment (depende de la base de datos como se hace)
             if ($this->config['type']=='PostgreSQL') {
                 $column['auto'] = substr($column['default'], 0, 7) == 'nextval' ? 1 : 0;
-            } else if ($this->config['type']=='MariaDB' || $this->config['type']=='MySQL') {
+            } elseif ($this->config['type']=='MariaDB' || $this->config['type']=='MySQL') {
                 $column['auto'] = $column['extra']=='auto_increment' ? 1 : 0;
                 unset ($column['extra']);
             }
             // limpiar default, quitar lo que viene despues de ::
-            if(!$column['auto']) {
+            if (!$column['auto']) {
                 $aux = explode('::', $column['default']);
                 $column['default'] = trim(array_shift($aux), '\'');
-                if($column['default']=='NULL') $column['default'] = null;
+                if ($column['default']=='NULL') $column['default'] = null;
             }
             // definir fk
             $column['fk'] = $fk[$column['name']] ?? null;
@@ -308,7 +309,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
         $stmt = $this->query($sql, $params);
         // obtener información de las columnas
         $ncolumnas = $stmt->columnCount();
-        for($i=0; $i<$ncolumnas; ++$i) {
+        for ($i=0; $i<$ncolumnas; ++$i) {
             $aux = $stmt->getColumnMeta($i);
             $columns[$aux['name']] = $aux;
             unset($columns[$aux['name']]['name'], $aux);
@@ -474,5 +475,4 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     {
         return $this->config['type'];
     }
-
 }

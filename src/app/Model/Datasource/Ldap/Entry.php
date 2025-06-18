@@ -28,7 +28,6 @@ namespace sowerphp\app;
  */
 abstract class Model_Datasource_Ldap_Entry
 {
-
     /**
      * Método que asigna los atributos de la clase a partir de los datos de una
      * entrada de LDAP
@@ -41,7 +40,7 @@ abstract class Model_Datasource_Ldap_Entry
                 $key = strtolower($var);
                 if ($var == 'dn') {
                     $this->dn = $entry['dn'];
-                } else if (isset($entry[$key]) && !empty($entry[$key]['count'])) {
+                } elseif (isset($entry[$key]) && !empty($entry[$key]['count'])) {
                     if ($entry[$key]['count'] == 1) {
                         $this->{$var} = $entry[$key][0];
                     } else {
@@ -54,5 +53,4 @@ abstract class Model_Datasource_Ldap_Entry
             }
         }
     }
-
 }

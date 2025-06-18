@@ -28,7 +28,6 @@ namespace sowerphp\general;
  */
 class View_Helper_Gallery
 {
-
     private $_name;
 
     public function __construct ($dir = null, $name = 'galeria')
@@ -50,7 +49,7 @@ class View_Helper_Gallery
         // inicio de la galería
         $buffer .= '<div>'."\n";
         // obtener imagenes (si existen miniaturas se usan)
-        if(file_exists($projectDir . '/public' . $dir . '/miniaturas')) {
+        if (file_exists($projectDir . '/public' . $dir . '/miniaturas')) {
             $imagenes = scandir($projectDir . '/public' . $dir . '/miniaturas');
             $miniaturas = '/miniaturas';
         } else {
@@ -58,7 +57,7 @@ class View_Helper_Gallery
             $miniaturas = '';
         }
         // mostrar imagenes
-        foreach($imagenes as &$imagen) {
+        foreach ($imagenes as &$imagen) {
             if (!is_dir($projectDir . '/public' . $dir . $miniaturas . '/' . $imagen)) {
                 $buffer .= '<a href="'.url($dir.'/'.$imagen).'" rel="prettyPhoto['.$this->_name.']"><img src="'.url($dir.$miniaturas.'/'.$imagen).'" alt="'.$imagen.'" class="pp-thumbnail" /></a>'."\n";
             }
@@ -94,5 +93,4 @@ class View_Helper_Gallery
             </script>
         ';
     }
-
 }

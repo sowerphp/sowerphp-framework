@@ -25,7 +25,6 @@ namespace sowerphp\core;
 
 class Service_Console_Kernel implements Interface_Service
 {
-
     public function register()
     {
     }
@@ -85,7 +84,7 @@ class Service_Console_Kernel implements Interface_Service
                 unset($args[$i]);
             }
             // mostrar ayuda (y no ejecutar comando)
-            else if ($args[$i] == '-h') {
+            elseif ($args[$i] == '-h') {
                 $method = new \ReflectionMethod($shell, 'main');
                 echo '   Modo de uso: ',$command,' ';
                 foreach ($method->getParameters() as &$p) {
@@ -101,7 +100,7 @@ class Service_Console_Kernel implements Interface_Service
             echo 'SowerPHP shell: ',$command,': requiere al menos ',
                 $method->getNumberOfRequiredParameters(),' parámetro(s)',"\n";
             echo '   Modo de uso: ',$command,' ';
-            foreach($method->getParameters() as &$p) {
+            foreach ($method->getParameters() as &$p) {
                 echo ($p->isOptional() ? '['.$p->name.' = '.$p->getDefaultValue().']' : $p->name),' ';
             }
             echo "\n";
@@ -194,5 +193,4 @@ class Service_Console_Kernel implements Interface_Service
         $stdout->write('<error>'.$throwable->getTraceAsString().'</error>', 2);
         exit($throwable->getCode());
     }
-
 }

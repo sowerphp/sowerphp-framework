@@ -28,7 +28,6 @@ namespace sowerphp\general;
  */
 final class Utility_Spreadsheet_XLS
 {
-
     /**
      * Lee una planilla de cálculo
      * @param archivo archivo a leer (ejemplo celda tmp_name de un arreglo $_FILES)
@@ -69,7 +68,7 @@ final class Utility_Spreadsheet_XLS
         $objPHPOffice = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         // si las llaves de $table no son strings, entonces es solo una hoja
         if (!is_string(array_keys($tabla)[0])) {
-            $tabla = array($id=>$tabla);
+            $tabla = [$id=>$tabla];
         }
         // generar hojas
         $hoja = 0;
@@ -120,5 +119,4 @@ final class Utility_Spreadsheet_XLS
         // Retornar hojas
         return $objPHPOffice->getSheetNames();
     }
-
 }

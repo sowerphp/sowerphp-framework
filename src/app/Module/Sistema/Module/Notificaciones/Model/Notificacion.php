@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app\Sistema\Notificaciones;
 
 /**
@@ -31,25 +31,33 @@ namespace sowerphp\app\Sistema\Notificaciones;
  */
 class Model_Notificacion extends \Model_App
 {
-
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table = 'notificacion'; ///< Tabla del modelo
 
     // Atributos de la clase (columnas en la base de datos)
     public $id; ///< bigint(20) NOT NULL DEFAULT '' AUTO PK
+
     public $fechahora; ///< datetime() NOT NULL DEFAULT 'CURRENT_TIMESTAMP'
+
     public $gravedad; ///< smallint(5) NOT NULL DEFAULT ''
+
     public $de; ///< int(10) NULL DEFAULT '' FK:usuario.id
+
     public $para; ///< int(10) NOT NULL DEFAULT '' FK:usuario.id
+
     public $descripcion; ///< text(65535) NOT NULL DEFAULT ''
+
     public $icono; ///< varchar(50) NULL DEFAULT ''
+
     public $enlace; ///< varchar(2000) NULL DEFAULT ''
+
     public $leida; ///< tinyint(3) NOT NULL DEFAULT '0'
 
     // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'id' => array(
+    public static $columnsInfo = [
+        'id' => [
             'name'      => 'Id',
             'comment'   => '',
             'type'      => 'bigint',
@@ -58,9 +66,9 @@ class Model_Notificacion extends \Model_App
             'default'   => '',
             'auto'      => true,
             'pk'        => true,
-            'fk'        => null
-        ),
-        'fechahora' => array(
+            'fk'        => null,
+        ],
+        'fechahora' => [
             'name'      => 'Fechahora',
             'comment'   => '',
             'type'      => 'datetime',
@@ -69,9 +77,9 @@ class Model_Notificacion extends \Model_App
             'default'   => 'CURRENT_TIMESTAMP',
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'gravedad' => array(
+            'fk'        => null,
+        ],
+        'gravedad' => [
             'name'      => 'Gravedad',
             'comment'   => '',
             'type'      => 'smallint',
@@ -80,9 +88,9 @@ class Model_Notificacion extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'de' => array(
+            'fk'        => null,
+        ],
+        'de' => [
             'name'      => 'De',
             'comment'   => '',
             'type'      => 'int',
@@ -91,9 +99,9 @@ class Model_Notificacion extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => false,
-            'fk'        => array('table' => 'usuario', 'column' => 'id')
-        ),
-        'para' => array(
+            'fk'        => ['table' => 'usuario', 'column' => 'id'],
+        ],
+        'para' => [
             'name'      => 'Para',
             'comment'   => '',
             'type'      => 'int',
@@ -102,9 +110,9 @@ class Model_Notificacion extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => false,
-            'fk'        => array('table' => 'usuario', 'column' => 'id')
-        ),
-        'descripcion' => array(
+            'fk'        => ['table' => 'usuario', 'column' => 'id'],
+        ],
+        'descripcion' => [
             'name'      => 'Descripcion',
             'comment'   => '',
             'type'      => 'text',
@@ -113,9 +121,9 @@ class Model_Notificacion extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'icono' => array(
+            'fk'        => null,
+        ],
+        'icono' => [
             'name'      => 'Icono',
             'comment'   => '',
             'type'      => 'varchar',
@@ -124,9 +132,9 @@ class Model_Notificacion extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'enlace' => array(
+            'fk'        => null,
+        ],
+        'enlace' => [
             'name'      => 'Enlace',
             'comment'   => '',
             'type'      => 'varchar',
@@ -135,9 +143,9 @@ class Model_Notificacion extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'leida' => array(
+            'fk'        => null,
+        ],
+        'leida' => [
             'name'      => 'Leida',
             'comment'   => '',
             'type'      => 'tinyint',
@@ -146,17 +154,17 @@ class Model_Notificacion extends \Model_App
             'default'   => '0',
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
+            'fk'        => null,
+        ],
 
-    );
+    ];
 
     // Comentario de la tabla en la base de datos
     public static $tableComment = '';
 
-    public static $fkNamespace = array(
+    public static $fkNamespace = [
         'Model_Usuario' => 'sowerphp\app\Sistema\Usuarios',
-    ); ///< Namespaces que utiliza esta clase
+    ]; ///< Namespaces que utiliza esta clase
 
     /**
      * Método que marca una notifiación como leída
@@ -202,5 +210,4 @@ class Model_Notificacion extends \Model_App
         ];
         return isset($data[$severity]) ? $data[$severity] : $severity;
     }
-
 }

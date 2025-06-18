@@ -34,12 +34,13 @@ namespace sowerphp\app;
  */
 class Model_Datasource_Zimbra extends \sowerphp\core\Model_Datasource
 {
-
     public $config = [
         'ldap' => 'default',
         'sslv3' => false,
         'sslcheck' => true,
-    ]; ///< Configuración de la fuente de datos
+    ];
+
+ ///< Configuración de la fuente de datos
     public $Ldap; ///< Fuente de datos Ldap para el servidor Zimbra
 
     /**
@@ -105,8 +106,8 @@ class Model_Datasource_Zimbra extends \sowerphp\core\Model_Datasource
                     'ssl' => [
                         'verify_peer' => $this->config['sslcheck'],
                         'allow_self_signed' => !$this->config['sslcheck'],
-                    ]
-                ])
+                    ],
+                ]),
             ]
         );
         return (array)$soap->$cmd($args);
@@ -121,5 +122,4 @@ class Model_Datasource_Zimbra extends \sowerphp\core\Model_Datasource
     {
         return new Model_Datasource_Zimbra_Account($uid, $this);
     }
-
 }

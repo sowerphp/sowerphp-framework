@@ -34,8 +34,11 @@ abstract class Model_Plural
 
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table; ///< Tabla del modelo
+
     protected $_class; ///< Clase singular de la clase plural
+
     protected $db; ///< Conexión a base de datos
 
     // caché
@@ -43,12 +46,19 @@ abstract class Model_Plural
 
     // Atributo con configuración para generar consultas SQL
     protected $selectStatement; ///< Columnas a consultar
+
     protected $whereStatement; ///< Condiciones para la consula
+
     protected $groupByStatement; ///< Campos para agrupar
+
     protected $havingStatement; ///< Condiciones de los campos agrupados
+
     protected $orderByStatement; ///< Orden de los resultados
+
     protected $limitStatementRecords; ///< Registros que se seleccionarán
+
     protected $limitStatementOffset; ///< Desde que fila se seleccionarán
+
     protected $queryVars = []; ///< Variables que se utilizarán en la query
 
     /**
@@ -103,21 +113,21 @@ abstract class Model_Plural
             $this->limitStatementOffset = null;
             $this->queryVars = [];
         }
-        else if ($statement == 'select') {
+        elseif ($statement == 'select') {
             $this->selectStatement = null;
-        } else if ($statement == 'where') {
+        } elseif ($statement == 'where') {
             $this->whereStatement = null;
-        } else if ($statement == 'groupBy') {
+        } elseif ($statement == 'groupBy') {
             $this->groupByStatement = null;
-        } else if ($statement == 'having') {
+        } elseif ($statement == 'having') {
             $this->havingStatement = null;
-        } else if ($statement == 'orderBy') {
+        } elseif ($statement == 'orderBy') {
             $this->orderByStatement = null;
-        } else if ($statement == 'limitRecords') {
+        } elseif ($statement == 'limitRecords') {
             $this->limitStatementRecords = null;
-        } else if ($statement == 'limitOffset') {
+        } elseif ($statement == 'limitOffset') {
             $this->limitStatementOffset = null;
-        } else if ($statement == 'queryVars') {
+        } elseif ($statement == 'queryVars') {
             $this->queryVars = [];
         }
     }
@@ -351,11 +361,11 @@ abstract class Model_Plural
             } else {
                 return $tabla;
             }
-        } else if ($solicitado == 'row') {
+        } elseif ($solicitado == 'row') {
             return $this->db->getRow($query, $this->queryVars);
-        } else if ($solicitado == 'col') {
+        } elseif ($solicitado == 'col') {
             return $this->db->getCol($query, $this->queryVars);
-        } else if ($solicitado == 'value') {
+        } elseif ($solicitado == 'value') {
             return $this->db->getValue($query, $this->queryVars);
         }
     }
@@ -456,5 +466,4 @@ abstract class Model_Plural
             ORDER BY '.$glosa
         );
     }
-
 }

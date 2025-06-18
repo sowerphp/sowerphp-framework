@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app\Sistema\Usuarios;
 
 /**
@@ -31,31 +31,43 @@ namespace sowerphp\app\Sistema\Usuarios;
  */
 class Model_Usuario extends \Model_App
 {
-
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table = 'usuario'; ///< Tabla del modelo
 
     public static $fkNamespace = []; ///< Namespaces que utiliza esta clase
 
     // Atributos de la clase (columnas en la base de datos)
     public $id; ///< Identificador (serial): integer(32) NOT NULL DEFAULT 'nextval('usuario_id_seq'::regclass)' AUTO PK
+
     public $nombre; ///< Nombre real del usuario: character varying(50) NOT NULL DEFAULT ''
+
     public $usuario; ///< Nombre de usuario: character varying(30) NOT NULL DEFAULT ''
+
     public $usuario_ldap; ///< Nombre de usuario de LDAP: character varying(30) NOT NULL DEFAULT ''
+
     public $email; ///< Correo electrónico del usuario: character varying(50) NOT NULL DEFAULT ''
+
     public $contrasenia; ///< Contraseña del usuario: character(255) NOT NULL DEFAULT ''
+
     public $contrasenia_intentos; ///< Intentos de inicio de sesión antes de bloquear cuenta: SMALLINT(6) NOT NULL DEFAULT '3'
+
     public $hash; ///< Hash único del usuario (32 caracteres): character(32) NOT NULL DEFAULT ''
+
     public $token; ///< Token para servicio secundario de autorización: character(64) NULL DEFAULT ''
+
     public $activo; ///< Indica si el usuario está o no activo en la aplicación: boolean() NOT NULL DEFAULT 'true'
+
     public $ultimo_ingreso_fecha_hora; ///< Fecha y hora del último ingreso del usuario: timestamp without time zone() NULL DEFAULT ''
+
     public $ultimo_ingreso_desde; ///< Dirección IP del último ingreso del usuario: character varying(45) NULL DEFAULT ''
+
     public $ultimo_ingreso_hash; ///< Hash del último ingreso del usuario: character(32) NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'id' => array(
+    public static $columnsInfo = [
+        'id' => [
             'name'      => 'ID',
             'comment'   => 'Identificador (serial)',
             'type'      => 'integer',
@@ -64,9 +76,9 @@ class Model_Usuario extends \Model_App
             'default'   => "nextval('usuario_id_seq'::regclass)",
             'auto'      => true,
             'pk'        => true,
-            'fk'        => null
-        ),
-        'nombre' => array(
+            'fk'        => null,
+        ],
+        'nombre' => [
             'name'      => 'Nombre',
             'comment'   => 'Nombre real del usuario',
             'type'      => 'character varying',
@@ -75,9 +87,9 @@ class Model_Usuario extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'usuario' => array(
+            'fk'        => null,
+        ],
+        'usuario' => [
             'name'      => 'Usuario',
             'comment'   => 'Nombre de usuario',
             'type'      => 'character varying',
@@ -86,9 +98,9 @@ class Model_Usuario extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'usuario_ldap' => array(
+            'fk'        => null,
+        ],
+        'usuario_ldap' => [
             'name'      => 'Usuario LDAP',
             'comment'   => 'Nombre de usuario de LDAP',
             'type'      => 'character varying',
@@ -97,9 +109,9 @@ class Model_Usuario extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'email' => array(
+            'fk'        => null,
+        ],
+        'email' => [
             'name'      => 'Email',
             'comment'   => 'Correo electrónico del usuario',
             'type'      => 'character varying',
@@ -110,8 +122,8 @@ class Model_Usuario extends \Model_App
             'pk'        => false,
             'fk'        => null,
             'check'     => ['email'],
-        ),
-        'contrasenia' => array(
+        ],
+        'contrasenia' => [
             'name'      => 'Contraseña',
             'comment'   => 'Contraseña del usuario',
             'type'      => 'character',
@@ -120,9 +132,9 @@ class Model_Usuario extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'contrasenia_intentos' => array(
+            'fk'        => null,
+        ],
+        'contrasenia_intentos' => [
             'name'      => 'Contraseña Intentos',
             'comment'   => 'Intentos de inicio de sesión antes de bloquear cuenta',
             'type'      => 'smallint',
@@ -131,9 +143,9 @@ class Model_Usuario extends \Model_App
             'default'   => "3",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'hash' => array(
+            'fk'        => null,
+        ],
+        'hash' => [
             'name'      => 'Hash',
             'comment'   => 'Hash único del usuario (32 caracteres)',
             'type'      => 'character',
@@ -142,9 +154,9 @@ class Model_Usuario extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'token' => array(
+            'fk'        => null,
+        ],
+        'token' => [
             'name'      => 'Token',
             'comment'   => 'Token para servicio secundario de autorización',
             'type'      => 'character',
@@ -153,9 +165,9 @@ class Model_Usuario extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'activo' => array(
+            'fk'        => null,
+        ],
+        'activo' => [
             'name'      => 'Activo',
             'comment'   => 'Indica si el usuario está o no activo en la aplicación',
             'type'      => 'boolean',
@@ -164,9 +176,9 @@ class Model_Usuario extends \Model_App
             'default'   => "true",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'ultimo_ingreso_fecha_hora' => array(
+            'fk'        => null,
+        ],
+        'ultimo_ingreso_fecha_hora' => [
             'name'      => 'Último ingreso',
             'comment'   => 'Fecha y hora del último ingreso del usuario',
             'type'      => 'timestamp without time zone',
@@ -175,9 +187,9 @@ class Model_Usuario extends \Model_App
             'default'   => "",
             'auto'      => true,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'ultimo_ingreso_desde' => array(
+            'fk'        => null,
+        ],
+        'ultimo_ingreso_desde' => [
             'name'      => 'Última IP',
             'comment'   => 'Dirección IP del último ingreso del usuario',
             'type'      => 'character varying',
@@ -186,9 +198,9 @@ class Model_Usuario extends \Model_App
             'default'   => "",
             'auto'      => true,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'ultimo_ingreso_hash' => array(
+            'fk'        => null,
+        ],
+        'ultimo_ingreso_hash' => [
             'name'      => 'Último hash',
             'comment'   => 'Hash del último ingreso del usuario',
             'type'      => 'character',
@@ -197,22 +209,26 @@ class Model_Usuario extends \Model_App
             'default'   => "",
             'auto'      => true,
             'pk'        => false,
-            'fk'        => null
-        ),
+            'fk'        => null,
+        ],
 
-    );
+    ];
 
     // Comentario de la tabla en la base de datos
     public static $tableComment = 'Usuarios de la aplicación';
 
     // atributos para caché
     protected $groups = null; ///< Grupos a los que pertenece el usuario
+
     protected $auths = null; ///< Permisos que tiene el usuario
+
     protected $LdapPerson = null; ///< Caché para objeto Model_Datasource_Ldap_Person (y para Model_Datasource_Zimbra_Account)
 
     // configuración asociada a la tabla usuario_config (configuración extendida y personalizada según la app)
     public static $config_encrypt = []; ///< columnas de la configuración que se deben encriptar para guardar en la base de datos
+
     public static $config_default = []; ///< valores por defecto para columnas de la configuración en caso que no estén especificadas
+
     protected $config = null; ///< Caché para configuraciones
 
     /**
@@ -233,7 +249,7 @@ class Model_Usuario extends \Model_App
                 ', [':email' => mb_strtolower($id)]);
             }
             // se crea usuario a través de su nombre de usuario
-            else if (!isset($id[31])) {
+            elseif (!isset($id[31])) {
                 $id = $this->getDB()->getValue('
                     SELECT id
                     FROM usuario
@@ -357,7 +373,7 @@ class Model_Usuario extends \Model_App
     public function set($array)
     {
         parent::set($array);
-        foreach($array as $name => $value) {
+        foreach ($array as $name => $value) {
             if (strpos($name, 'config_') === 0) {
                 $this->__set($name, $value);
             }
@@ -607,7 +623,7 @@ class Model_Usuario extends \Model_App
         $this->update ([
             'ultimo_ingreso_fecha_hora' => $timestamp,
             'ultimo_ingreso_desde' => $ip,
-            'ultimo_ingreso_hash' => $hash
+            'ultimo_ingreso_hash' => $hash,
         ]);
         return $hash;
     }
@@ -846,7 +862,7 @@ class Model_Usuario extends \Model_App
     {
         $auths2_usuario = [];
         $auths2 = \sowerphp\app\Model_Datasource_Auth2::getAll();
-        foreach($auths2 as $Auth2) {
+        foreach ($auths2 as $Auth2) {
             if ($this->{'config_auth2_' . $Auth2->getName()}) {
                 $auths2_usuario[] = $Auth2;
             }
@@ -887,7 +903,7 @@ class Model_Usuario extends \Model_App
     public function checkAuth2($token)
     {
         $auths2 = $this->getAuth2();
-        foreach($auths2 as $Auth2) {
+        foreach ($auths2 as $Auth2) {
             $datos = ['token' => $token] + (array)($this->config['auth2'][$Auth2->getName()]);
             $Auth2->check($datos);
         }
@@ -979,5 +995,4 @@ class Model_Usuario extends \Model_App
         $msg = $msg."\n\n".'-- '."\n".config('page.body.title');
         return $email->send($msg);
     }
-
 }

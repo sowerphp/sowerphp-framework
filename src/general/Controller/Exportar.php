@@ -25,7 +25,6 @@ namespace sowerphp\general;
 
 class Controller_Exportar extends \Controller_App
 {
-
     public function beforeFilter()
     {
     }
@@ -113,5 +112,4 @@ class Controller_Exportar extends \Controller_App
         $barcodeobj->getBarcodePNG();
         exit(0);
     }
-
 }

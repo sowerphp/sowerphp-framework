@@ -28,7 +28,6 @@ namespace sowerphp\general;
  */
 final class Utility_Spreadsheet_ODS
 {
-
     /**
      * Lee el contenido de una hoja y lo devuelve como arreglo
      * @param sheet Hoja a leer (0..n)
@@ -50,7 +49,7 @@ final class Utility_Spreadsheet_ODS
         $objPHPOffice = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         // si las llaves de $table no son strings, entonces es solo una hoja
         if (!is_string(array_keys($data)[0])) {
-            $data = array($id=>$data);
+            $data = [$id=>$data];
         }
         // generar hojas
         $hoja = 0;
@@ -94,5 +93,4 @@ final class Utility_Spreadsheet_ODS
     {
         return Utility_Spreadsheet_XLS::sheets($archivo, 'Ods');
     }
-
 }

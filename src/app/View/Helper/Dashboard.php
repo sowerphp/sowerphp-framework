@@ -28,7 +28,6 @@ namespace sowerphp\app;
  */
 class View_Helper_Dashboard
 {
-
     /**
      * Método que genera las tarjetas para el dashboard
      */
@@ -37,7 +36,7 @@ class View_Helper_Dashboard
         if (!$config) {
             $config = [];
         }
-        else if (is_string($config)) {
+        elseif (is_string($config)) {
             $config = ['template' => $config];
         }
         $config = array_merge([
@@ -48,7 +47,7 @@ class View_Helper_Dashboard
         unset($config['template']);
         $vars = [];
         $n_cards = count($cards);
-        foreach($cards[0] as $key => $val) {
+        foreach ($cards[0] as $key => $val) {
             for ($i=1; $i<=$n_cards; $i++) {
                 $vars[] = '{card_'.$i.'_'.$key.'}';
                 if ($key == 'link') {
@@ -59,7 +58,7 @@ class View_Helper_Dashboard
         $i = 1;
         $vals = [];
         foreach ($cards as $card) {
-            foreach($card as $key => $val) {
+            foreach ($card as $key => $val) {
                 if ($key == 'quantity') {
                     if (!$val) {
                         $val = 0;
@@ -74,11 +73,10 @@ class View_Helper_Dashboard
         }
         sort($vars);
         ksort($vals);
-        foreach($config as $key => $val) {
+        foreach ($config as $key => $val) {
             $vars[] = '{'.$key.'}';
             $vals[] = $val;
         }
         return str_replace($vars, $vals, $html);
     }
-
 }

@@ -29,5 +29,6 @@ namespace sowerphp\core;
 class Exception_Object_Method_Missing extends Exception
 {
     protected $_messageTemplate = 'Método %s::%s() no existe';
+
     protected $severity = LOG_DEBUG;
 }

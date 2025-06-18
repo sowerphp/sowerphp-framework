@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class Network_Http_Socket
 {
-
     ///< Métodos HTTP soportados
     protected static $methods = ['get', 'put', 'patch', 'delete', 'post'];
 
@@ -154,7 +153,7 @@ class Network_Http_Socket
             $value = trim($value);
             if (!isset($headers[$key])) {
                 $headers[$key] = $value;
-            } else if (!is_array($headers[$key])) {
+            } elseif (!is_array($headers[$key])) {
                 $aux = $headers[$key];
                 $headers[$key] = [$aux, $value];
             } else {
@@ -200,5 +199,4 @@ class Network_Http_Socket
     {
         return self::$errors[count(self::$errors)-1];
     }
-
 }

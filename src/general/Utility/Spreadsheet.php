@@ -30,8 +30,7 @@ namespace sowerphp\general;
  */
 class Utility_Spreadsheet
 {
-
-    public static $exts = array('ods', 'xls', 'xlsx', 'csv'); ///< extensions
+    public static $exts = ['ods', 'xls', 'xlsx', 'csv']; ///< extensions
 
     /**
      * Lee una planilla de cálculo (CSV, ODS o XLS)
@@ -45,19 +44,19 @@ class Utility_Spreadsheet
             return Utility_Spreadsheet_CSV::read($archivo['tmp_name']);
         }
         // en caso que sea archivo ODS
-        else if ($archivo['type'] == 'application/vnd.oasis.opendocument.spreadsheet') {
+        elseif ($archivo['type'] == 'application/vnd.oasis.opendocument.spreadsheet') {
             return Utility_Spreadsheet_ODS::read($archivo['tmp_name'], $hoja);
         }
         // en caso que sea archivo XLS
-        else if ($archivo['type'] == 'application/vnd.ms-excel') {
+        elseif ($archivo['type'] == 'application/vnd.ms-excel') {
             return Utility_Spreadsheet_XLS::read($archivo['tmp_name'], $hoja);
         }
         // en caso que sea archivo XLSX
-        else if ($archivo['type'] == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+        elseif ($archivo['type'] == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
             return Utility_Spreadsheet_XLS::read($archivo['tmp_name'], $hoja, 'Excel2007');
         }
         // en caso que sea archivo XLSM
-        else if ($archivo['type'] == 'application/vnd.ms-excel.sheet.macroEnabled.12') {
+        elseif ($archivo['type'] == 'application/vnd.ms-excel.sheet.macroEnabled.12') {
             return Utility_Spreadsheet_XLS::read($archivo['tmp_name'], $hoja, 'Excel2007');
         }
     }
@@ -75,18 +74,18 @@ class Utility_Spreadsheet
             Utility_Spreadsheet_CSV::generate($data, $id);
         }
         // en caso que sea archivo ODS
-        else if ($formato == 'ods') {
+        elseif ($formato == 'ods') {
             Utility_Spreadsheet_ODS::generate($data, $id);
         }
         // en caso que sea archivo XLS
-        else if ($formato == 'xls') {
+        elseif ($formato == 'xls') {
             Utility_Spreadsheet_XLS::generate($data, $id);
         }
-        else if ($formato == 'xml') {
+        elseif ($formato == 'xml') {
             Utility_Spreadsheet_XML::generate($data, $id);
         }
         // en caso que sea archivo JSON
-        else if ($formato == 'json') {
+        elseif ($formato == 'json') {
             Utility_Spreadsheet_JSON::generate($data, $id);
         }
         // terminar ejecucion del script
@@ -149,15 +148,15 @@ class Utility_Spreadsheet
             return [substr($archivo['name'], 0, -4)];
         }
         // en caso que sea archivo ODS
-        else if ($archivo['type'] == 'application/vnd.oasis.opendocument.spreadsheet') {
+        elseif ($archivo['type'] == 'application/vnd.oasis.opendocument.spreadsheet') {
             return Utility_Spreadsheet_ODS::sheets($archivo['tmp_name']);
         }
         // en caso que sea archivo XLS
-        else if ($archivo['type'] == 'application/vnd.ms-excel') {
+        elseif ($archivo['type'] == 'application/vnd.ms-excel') {
             return Utility_Spreadsheet_XLS::sheets($archivo['tmp_name']);
         }
         // en caso que sea archivo XLSX
-        else if ($archivo['type'] == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+        elseif ($archivo['type'] == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
             return Utility_Spreadsheet_XLS::sheets($archivo['tmp_name'], 'Excel2007');
         }
         throw new \Exception('No fue posible procesar el archivo ' . $archivo['name'] . ' de tipo ' . $archivo['type']);
@@ -173,18 +172,18 @@ class Utility_Spreadsheet
     public static function file2html($file, $options = [])
     {
         // opciones
-        $options = array_merge(array(
+        $options = array_merge([
             'id' => 'file2html',
             'sheet' => -1,
             'export' => true,
-        ), $options);
+        ], $options);
         // helper
         $table = new View_Helper_Table();
         $table->setExport($options['export']);
         // obtener las hojas del archivo
         $sheets = self::sheets($file);
         if ($options['sheet'] > -1) {
-            $sheets = array($options['sheet']=>$sheets[$options['sheet']]);
+            $sheets = [$options['sheet']=>$sheets[$options['sheet']]];
         }
         // agregar títulos de la pestaña
         $buffer = '<script type="text/javascript"> $(function(){ var url = document.location.toString(); if (url.match(\'#\')) $(\'.nav-tabs a[href=#\'+url.split(\'#\')[1]+\']\').tab(\'show\'); else $(\'.nav-tabs > li:first-child > a\').tab(\'show\'); }); </script>'."\n";
@@ -277,5 +276,4 @@ class Utility_Spreadsheet
         // entregar archivo normalizado
         return $archivo;
     }
-
 }

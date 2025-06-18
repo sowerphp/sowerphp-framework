@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app\Sistema\Usuarios;
 
 /**
@@ -31,24 +31,26 @@ namespace sowerphp\app\Sistema\Usuarios;
  */
 class Model_UsuarioGrupo extends \Model_App
 {
-
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table = 'usuario_grupo'; ///< Tabla del modelo
 
-    public static $fkNamespace = array(
+    public static $fkNamespace = [
         'Model_Usuario' => 'sowerphp\app\Sistema\Usuarios',
-        'Model_Grupo' => 'sowerphp\app\Sistema\Usuarios'
-    ); ///< Namespaces que utiliza esta clase
+        'Model_Grupo' => 'sowerphp\app\Sistema\Usuarios',
+    ]; ///< Namespaces que utiliza esta clase
 
     // Atributos de la clase (columnas en la base de datos)
     public $usuario; ///< Usuario de la aplicación: integer(32) NOT NULL DEFAULT '' PK FK:usuario.id
+
     public $grupo; ///< Grupo al que pertenece el usuario: integer(32) NOT NULL DEFAULT '' PK FK:grupo.id
+
     public $primario; ///< Indica si el grupo es el grupo primario del usuario: boolean() NOT NULL DEFAULT 'false'
 
     // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'usuario' => array(
+    public static $columnsInfo = [
+        'usuario' => [
             'name'      => 'Usuario',
             'comment'   => 'Usuario de la aplicación',
             'type'      => 'integer',
@@ -57,9 +59,9 @@ class Model_UsuarioGrupo extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => true,
-            'fk'        => array('table' => 'usuario', 'column' => 'id')
-        ),
-        'grupo' => array(
+            'fk'        => ['table' => 'usuario', 'column' => 'id'],
+        ],
+        'grupo' => [
             'name'      => 'Grupo',
             'comment'   => 'Grupo al que pertenece el usuario',
             'type'      => 'integer',
@@ -68,9 +70,9 @@ class Model_UsuarioGrupo extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => true,
-            'fk'        => array('table' => 'grupo', 'column' => 'id')
-        ),
-        'primario' => array(
+            'fk'        => ['table' => 'grupo', 'column' => 'id'],
+        ],
+        'primario' => [
             'name'      => 'Primario',
             'comment'   => 'Indica si el grupo es el grupo primario del usuario',
             'type'      => 'boolean',
@@ -79,12 +81,11 @@ class Model_UsuarioGrupo extends \Model_App
             'default'   => "false",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
+            'fk'        => null,
+        ],
 
-    );
+    ];
 
     // Comentario de la tabla en la base de datos
     public static $tableComment = 'Relación entre usuarios y los grupos a los que pertenecen';
-
 }

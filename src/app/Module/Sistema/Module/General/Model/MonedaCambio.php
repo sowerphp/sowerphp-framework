@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app\Sistema\General;
 
 /**
@@ -31,20 +31,23 @@ namespace sowerphp\app\Sistema\General;
  */
 class Model_MonedaCambio extends \Model_App
 {
-
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table = 'moneda_cambio'; ///< Tabla del modelo
 
     // Atributos de la clase (columnas en la base de datos)
     public $desde; ///< char(3) NOT NULL DEFAULT '' PK
+
     public $a; ///< char(3) NOT NULL DEFAULT '' PK
+
     public $fecha; ///< date() NOT NULL DEFAULT '0000-00-00' PK
+
     public $valor; ///< float(12) NOT NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'desde' => array(
+    public static $columnsInfo = [
+        'desde' => [
             'name'      => 'Desde',
             'comment'   => '',
             'type'      => 'char',
@@ -53,9 +56,9 @@ class Model_MonedaCambio extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => true,
-            'fk'        => null
-        ),
-        'a' => array(
+            'fk'        => null,
+        ],
+        'a' => [
             'name'      => 'A',
             'comment'   => '',
             'type'      => 'char',
@@ -64,9 +67,9 @@ class Model_MonedaCambio extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => true,
-            'fk'        => null
-        ),
-        'fecha' => array(
+            'fk'        => null,
+        ],
+        'fecha' => [
             'name'      => 'Fecha',
             'comment'   => '',
             'type'      => 'date',
@@ -75,9 +78,9 @@ class Model_MonedaCambio extends \Model_App
             'default'   => '0000-00-00',
             'auto'      => false,
             'pk'        => true,
-            'fk'        => null
-        ),
-        'valor' => array(
+            'fk'        => null,
+        ],
+        'valor' => [
             'name'      => 'Valor',
             'comment'   => '',
             'type'      => 'float',
@@ -86,10 +89,10 @@ class Model_MonedaCambio extends \Model_App
             'default'   => '',
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
+            'fk'        => null,
+        ],
 
-    );
+    ];
 
     // Comentario de la tabla en la base de datos
     public static $tableComment = '';
@@ -140,5 +143,4 @@ class Model_MonedaCambio extends \Model_App
             parent::__construct();
         }
     }
-
 }

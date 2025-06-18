@@ -28,7 +28,6 @@ namespace sowerphp\app;
  */
 class Model_Datasource_Auth2 extends Model_Datasource_Auth2_Base
 {
-
     /**
      * Método que permite obtener un objeto de autenticación secundaria
      * @param name Nombre del método de autenticación secundaria
@@ -72,5 +71,4 @@ class Model_Datasource_Auth2 extends Model_Datasource_Auth2_Base
         }
         return false;
     }
-
 }

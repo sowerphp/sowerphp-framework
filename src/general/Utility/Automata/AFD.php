@@ -29,11 +29,14 @@ namespace sowerphp\general;
 
 class Utility_Automata_AFD
 {
-
     private $transitions; ///< Transiciones del autómata
+
     private $q0; ///< Estado inicial del autómata
+
     private $F; ///< Conjunto de estados finales
+
     private $status; ///< Estado en que se detuvo el AFD
+
     private $input; ///< Entrada en la que se detuvo el AFD
 
     /**
@@ -155,5 +158,4 @@ class Utility_Automata_AFD
         $graphviz = new \Graphp\GraphViz\GraphViz();
         return $graphviz->createImageData($graph);
     }
-
 }

@@ -25,11 +25,11 @@ namespace sowerphp\core;
 
 class Service_Config implements Interface_Service
 {
-
     protected $config = [];
 
     // Dependencias de otros servicios.
     protected $layersService;
+
     protected $moduleService;
 
     public function __construct(Service_Layers $layersService, Service_Module $moduleService)
@@ -185,5 +185,4 @@ class Service_Config implements Interface_Service
         }
         return $config;
     }
-
 }

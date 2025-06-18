@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
 /**
@@ -31,19 +31,21 @@ namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
  */
 class Model_Region extends \Model_App
 {
-
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table = 'region'; ///< Tabla del modelo
 
     // Atributos de la clase (columnas en la base de datos)
     public $codigo; ///< Código de la región: character(2) NOT NULL DEFAULT '' PK
+
     public $region; ///< Nombre de la región: character varying(60) NOT NULL DEFAULT ''
+
     public $orden; ///< smallint(16) NOT NULL DEFAULT '0'
 
     // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'codigo' => array(
+    public static $columnsInfo = [
+        'codigo' => [
             'name'      => 'Codigo',
             'comment'   => 'Código de la región',
             'type'      => 'character',
@@ -52,9 +54,9 @@ class Model_Region extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => true,
-            'fk'        => null
-        ),
-        'region' => array(
+            'fk'        => null,
+        ],
+        'region' => [
             'name'      => 'Region',
             'comment'   => 'Nombre de la región',
             'type'      => 'character varying',
@@ -63,9 +65,9 @@ class Model_Region extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
-        'orden' => array(
+            'fk'        => null,
+        ],
+        'orden' => [
             'name'      => 'Orden',
             'comment'   => '',
             'type'      => 'smallint',
@@ -74,14 +76,13 @@ class Model_Region extends \Model_App
             'default'   => '0',
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
+            'fk'        => null,
+        ],
 
-    );
+    ];
 
     // Comentario de la tabla en la base de datos
     public static $tableComment = 'Regiones del país';
 
     public static $fkNamespace = []; ///< Namespaces que utiliza esta clase
-
 }

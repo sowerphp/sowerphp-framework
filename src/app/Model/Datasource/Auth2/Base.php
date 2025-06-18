@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app;
 
 /**
@@ -29,9 +29,10 @@ namespace sowerphp\app;
  */
 abstract class Model_Datasource_Auth2_Base
 {
-
     protected $Auth2; ///< Instancia del objeto con la autenticación secundaria
+
     protected $config; ///< Configuración de la autenticación secundaria
+
     protected $need_token = false; ///< Por defecto los métodos no requieren token, se debe indicar en cada clase
 
     /**
@@ -74,5 +75,4 @@ abstract class Model_Datasource_Auth2_Base
     {
         return $this->need_token;
     }
-
 }

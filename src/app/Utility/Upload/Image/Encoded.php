@@ -28,7 +28,6 @@ namespace sowerphp\app;
  */
 class Utility_Upload_Image_Encoded
 {
-
     /**
      * Método que sube la imagen y entrega la misma codificada para ser incluida
      * directamente en el atributo "src" del tag "img"
@@ -37,5 +36,4 @@ class Utility_Upload_Image_Encoded
     {
         return 'data:'.$file['type'].';base64,'.base64_encode(file_get_contents($file['tmp_name']));
     }
-
 }

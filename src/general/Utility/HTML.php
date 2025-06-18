@@ -28,7 +28,6 @@ namespace sowerphp\general;
  */
 class Utility_HTML
 {
-
     /**
      * Método que entrega los tamaños de columnas para ser usados en un grid
      * de bootstrap
@@ -56,5 +55,4 @@ class Utility_HTML
         // entregar columnas que se deben usar
         return $cols;
     }
-
 }

@@ -29,8 +29,8 @@ namespace sowerphp\core;
  */
 class Routing_Router
 {
-
     private static $routes = []; ///< Rutas conectadas, "does the magic"
+
     public static $autoStaticPages = true; ///< Permite cargar páginas estáticas desde /, sin usar /pages/
 
     /**
@@ -62,7 +62,7 @@ class Routing_Router
                 'module' => null,
                 'controller' => null,
                 'action' => null,
-                'pass' => []
+                'pass' => [],
             ], $info['to']);
             // buscar parametros con nombre si existen
             if ($info['params']) {
@@ -78,7 +78,7 @@ class Routing_Router
                             continue;
                         }
                         // si es un parámetro se copia a donde corresponda (controlador, acción o variable acción)
-                        else if ($key_partes[$i][0] == ':') {
+                        elseif ($key_partes[$i][0] == ':') {
                             // verificar formato del parámetro contra expresión regular
                             // TODO: pendiente de implementar
                             /*$regexp = '/'.$info['params'][$key_partes[$i]].'/';
@@ -90,7 +90,7 @@ class Routing_Router
                             if ($key_partes[$i] == ':controller') {
                                 $params['controller'] = $url_partes[$i];
                             }
-                            else if ($key_partes[$i] == ':action') {
+                            elseif ($key_partes[$i] == ':action') {
                                 $params['action'] = $url_partes[$i];
                             }
                             else {
@@ -99,7 +99,7 @@ class Routing_Router
                             continue;
                         }
                         // si es asterisco se pasa todo como parámetro de la acción
-                        else if ($key_partes[$i] == '*') {
+                        elseif ($key_partes[$i] == '*') {
                             if (isset($url_partes[$i])) {
                                 $params['pass'] = array_merge((array)$params['pass'], array_slice($url_partes, $i));
                             }
@@ -161,7 +161,7 @@ class Routing_Router
     {
         $params = [];
         $partes = explode('/', $from);
-        foreach($partes as $p) {
+        foreach ($partes as $p) {
             if (isset($p[0]) && $p[0] == ':') {
                 $params[$p] = isset($regexp[$p]) ? $regexp[$p] : '.*';
             }
@@ -187,7 +187,7 @@ class Routing_Router
         $params = [
             'module' => isset($route['module']) ? $route['module'] : null,
             'controller' => $route['controller'],
-            'action' => isset($route['action']) ? $route['action'] : 'index'
+            'action' => isset($route['action']) ? $route['action'] : 'index',
         ];
         unset($route['module'], $route['controller'], $route['action']);
         $params['pass'] = $route;
@@ -228,10 +228,9 @@ class Routing_Router
                 'module' => $module,
                 'controller' => 'pages',
                 'action' => 'display',
-                'pass' => [$url]
+                'pass' => [$url],
             ];
         }
         return false;
     }
-
 }

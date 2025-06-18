@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del controlador
+
 namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
 
 /**
@@ -33,7 +33,5 @@ namespace sowerphp\app\Sistema\General\DivisionGeopolitica;
  */
 class Controller_Comunas extends \Controller_Maintainer
 {
-
     protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
-
 }

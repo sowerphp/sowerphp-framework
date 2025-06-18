@@ -31,7 +31,6 @@ namespace sowerphp\core;
  */
 class Model_Datasource_Database extends Model_Datasource
 {
-
     /**
      * Método para cargar una base de datos
      *
@@ -55,9 +54,9 @@ class Model_Datasource_Database extends Model_Datasource
         try {
             self::$datasources['database'][$config['conf']] = new $class($config);
         } catch (\PDOException $e) {
-            throw new Exception_Model_Datasource_Database(array(
-                'msg' =>'¡Conexión a database.'.$config['conf'].' ('.$config['type'].') falló!<br/><br/>'.$e->getMessage()
-            ));
+            throw new Exception_Model_Datasource_Database([
+                'msg' =>'¡Conexión a database.'.$config['conf'].' ('.$config['type'].') falló!<br/><br/>'.$e->getMessage(),
+            ]);
         }
         return self::$datasources['database'][$config['conf']];
     }
@@ -86,5 +85,4 @@ class Model_Datasource_Database extends Model_Datasource
             }
         }
     }
-
 }

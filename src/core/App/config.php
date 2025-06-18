@@ -52,7 +52,7 @@ return [
                 '/ses$/i' => 's',
                 '/([r|d|j|n|l|m|y|z])es$/i' => '\1',
                 '/as$/i' => 'a',
-                '/([ti])a$/i' => '\1a'
+                '/([ti])a$/i' => '\1a',
             ],
             'irregular' => [],
             'uninflected' => [],
@@ -60,7 +60,7 @@ return [
         'plural' => [
             'rules' => [
                 '/([r|d|j|n|l|m|y|z])$/i' => '\1es',
-                '/a$/i' => '\1as'
+                '/a$/i' => '\1as',
             ],
             'irregular' => ['pais' => 'paises'],
             'uninflected' => [],

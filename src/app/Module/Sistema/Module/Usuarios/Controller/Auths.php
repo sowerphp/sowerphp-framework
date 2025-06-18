@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del controlador
+
 namespace sowerphp\app\Sistema\Usuarios;
 
 /**
@@ -33,7 +33,5 @@ namespace sowerphp\app\Sistema\Usuarios;
  */
 class Controller_Auths extends \sowerphp\app\Controller_Maintainer
 {
-
     protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
-
 }

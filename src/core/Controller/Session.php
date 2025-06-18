@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class Controller_Session extends \Controller_App
 {
-
     public function beforeFilter()
     {
         if (isset($this->Auth)) {
@@ -50,5 +49,4 @@ class Controller_Session extends \Controller_App
             $this->redirect(base64_decode($redirect));
         }
     }
-
 }

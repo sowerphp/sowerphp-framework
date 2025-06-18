@@ -28,8 +28,8 @@ namespace sowerphp\general;
  */
 class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
 {
-
     protected $y; ///< Para la fila actual (parte en 1)
+
     protected $x; ///< Para la columna ctual (parte en 0)
 
     /**
@@ -122,9 +122,9 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
         $this->setActiveSheetIndex($sheet)->getStyle($cell)->applyFromArray([
             'borders' => [
                 'allborders' => [
-                    'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
-                ]
-            ]
+                    'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                ],
+            ],
         ]);
     }
 
@@ -175,9 +175,8 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
         if ($sheet === null) {
             $sheet = $this->getActiveSheetIndex();
         }
-        foreach(range($from, $to) as $columnID) {
+        foreach (range($from, $to) as $columnID) {
             $this->setActiveSheetIndex($sheet)->getColumnDimension($columnID)->setAutoSize(true);
         }
     }
-
 }

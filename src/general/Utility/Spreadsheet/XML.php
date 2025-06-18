@@ -28,7 +28,6 @@ namespace sowerphp\general;
  */
 class Utility_Spreadsheet_XML
 {
-
     /**
      * Clase que lee un archivo XML
      * @todo Implementar método
@@ -58,9 +57,9 @@ class Utility_Spreadsheet_XML
         foreach ($titles as &$col) {
             $col = \sowerphp\core\Utility_String::normalize(trim(strip_tags($col)));
         }
-        foreach($data as &$row) {
+        foreach ($data as &$row) {
             echo "\t",'<',$item,'>',"\n";
-            foreach($row as $key => &$col) {
+            foreach ($row as $key => &$col) {
                 $key = $titles[$key];
                 echo "\t\t",'<',$key,'>',rtrim(str_replace('<br />', ', ', strip_tags($col, '<br>')), " \t\n\r\0\x0B,"),'</',$key,'>',"\n";
             }
@@ -70,5 +69,4 @@ class Utility_Spreadsheet_XML
         // terminar script
         exit(0);
     }
-
 }

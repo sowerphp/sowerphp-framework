@@ -34,7 +34,6 @@ require_once('Mail/mime.php');
  */
 class Network_Email_Smtp_Pear
 {
-
     protected $config = null; ///< Configuración para SMTP
 
     /**
@@ -149,5 +148,4 @@ class Network_Email_Smtp_Pear
             return true;
         }
     }
-
 }

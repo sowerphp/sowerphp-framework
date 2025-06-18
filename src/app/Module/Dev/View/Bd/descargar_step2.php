@@ -2,26 +2,26 @@
 <p>Seleccione las tablas que desea descargar.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form (null);
-echo $f->begin(array('onsubmit'=>'Form.check()'));
-echo $f->input (array(
+echo $f->begin(['onsubmit'=>'Form.check()']);
+echo $f->input ([
     'type'=>'hidden',
     'name'=>'database',
-    'value'=>$database
-));
-echo $f->input (array(
+    'value'=>$database,
+]);
+echo $f->input ([
     'type'=>'hidden',
     'name'=>'type',
-    'value'=>$type
-));
-echo $f->input (array(
+    'value'=>$type,
+]);
+echo $f->input ([
     'type'=>'tablecheck',
     'name'=>'tables',
     'label'=>'Tablas',
-    'titles'=>array('Tabla', 'Comentario'),
+    'titles'=>['Tabla', 'Comentario'],
     'table'=>$tables,
-));
-echo $f->end(array(
+]);
+echo $f->end([
     'name'=>'step2',
     'value'=>'Generar archivo',
     'align'=>'center',
-));
+]);

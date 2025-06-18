@@ -21,7 +21,7 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-// namespace del modelo
+
 namespace sowerphp\app\Sistema\Usuarios;
 
 /**
@@ -31,23 +31,25 @@ namespace sowerphp\app\Sistema\Usuarios;
  */
 class Model_Auth extends \Model_App
 {
-
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
+
     protected $_table = 'auth'; ///< Tabla del modelo
 
-    public static $fkNamespace = array(
-        'Model_Grupo' => 'sowerphp\app\Sistema\Usuarios'
-    ); ///< Namespaces que utiliza esta clase
+    public static $fkNamespace = [
+        'Model_Grupo' => 'sowerphp\app\Sistema\Usuarios',
+    ]; ///< Namespaces que utiliza esta clase
 
     // Atributos de la clase (columnas en la base de datos)
     public $id; ///< Identificador (serial): integer(32) NOT NULL DEFAULT 'nextval('auth_id_seq'::regclass)' AUTO PK
+
     public $grupo; ///< Grupo al que se le condede el permiso: integer(32) NOT NULL DEFAULT '' FK:grupo.id
+
     public $recurso; ///< Recurso al que el grupo tiene acceso: character varying(300) NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
-    public static $columnsInfo = array(
-        'id' => array(
+    public static $columnsInfo = [
+        'id' => [
             'name'      => 'ID',
             'comment'   => 'Identificador (serial)',
             'type'      => 'integer',
@@ -56,9 +58,9 @@ class Model_Auth extends \Model_App
             'default'   => "nextval('auth_id_seq'::regclass)",
             'auto'      => true,
             'pk'        => true,
-            'fk'        => null
-        ),
-        'grupo' => array(
+            'fk'        => null,
+        ],
+        'grupo' => [
             'name'      => 'Grupo',
             'comment'   => 'Grupo al que se le concede el permiso',
             'type'      => 'integer',
@@ -67,9 +69,9 @@ class Model_Auth extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => array('table' => 'grupo', 'column' => 'id')
-        ),
-        'recurso' => array(
+            'fk'        => ['table' => 'grupo', 'column' => 'id'],
+        ],
+        'recurso' => [
             'name'      => 'Recurso',
             'comment'   => 'Recurso al que el grupo tiene acceso',
             'type'      => 'character varying',
@@ -78,12 +80,11 @@ class Model_Auth extends \Model_App
             'default'   => "",
             'auto'      => false,
             'pk'        => false,
-            'fk'        => null
-        ),
+            'fk'        => null,
+        ],
 
-    );
+    ];
 
     // Comentario de la tabla en la base de datos
     public static $tableComment = 'Permisos de grupos para acceder a recursos';
-
 }

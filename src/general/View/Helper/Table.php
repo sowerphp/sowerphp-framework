@@ -28,15 +28,22 @@ namespace sowerphp\general;
  */
 class View_Helper_Table
 {
-
     private $_id = null; ///< Identificador de la tabla
+
     private $_class = 'table table-striped'; ///< Atributo class para la tabla
+
     private $_export = false; ///< Crear o no datos para exportar
+
     private $_exportRemove = []; ///< Datos que se removeran al exportar
+
     private $_display = null; ///< Indica si se debe o no mostrar la tabla
+
     private $_height = null; ///< Altura de la tabla en pixeles
+
     private $_colsWidth = []; ///< Ancho de las columnas en pixeles
+
     private $_showEmptyCols = true; ///< Indica si se deben mostrar las columnas vacías de la tabla
+
     private $extensions = ['ods'=>'OpenDocument', 'csv'=>'Planilla CSV', 'xls'=>'Planilla Excel', 'pdf'=>'Documento PDF', 'xml'=>'Archivo XML', 'json'=>'Archivo JSON']; ///< Formatos por defecto para exportar datos
 
     /**
@@ -312,5 +319,4 @@ class View_Helper_Table
         }
         return $buffer;
     }
-
 }

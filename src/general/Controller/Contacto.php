@@ -28,7 +28,6 @@ namespace sowerphp\general;
  */
 class Controller_Contacto extends \Controller_App
 {
-
     /**
      * Método para autorizar la carga de index en caso que hay autenticación
      */
@@ -96,5 +95,4 @@ class Controller_Contacto extends \Controller_App
             }
         }
     }
-
 }

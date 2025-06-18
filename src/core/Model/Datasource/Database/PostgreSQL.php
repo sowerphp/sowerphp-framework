@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Manager
 {
-
     /**
      * Constructor de la clase
      *
@@ -39,13 +38,13 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
     public function __construct($config)
     {
         // definir configuración para el acceso a la base de datos
-        $this->config = array_merge(array(
+        $this->config = array_merge([
             'host' => 'localhost',
             'port' => '5432',
             'char' => 'utf8',
             'sche' => 'public',
             'pers' => false,
-        ), $config);
+        ], $config);
         // abrir conexión a la base de datos
         parent::__construct(
             'pgsql:host='.$this->config['host'].
@@ -87,10 +86,10 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
      */
     public function concat($par1, $par2)
     {
-        $separators = array(' ', ',', ', ', '-', ' - ', '|', ':', ': ');
+        $separators = [' ', ',', ', ', '-', ' - ', '|', ':', ': '];
         $concat = [];
         $parameters = func_get_args();
-        foreach($parameters as &$parameter) {
+        foreach ($parameters as &$parameter) {
             if (in_array($parameter, $separators)) {
                 $parameter = '\''.$parameter.'\'';
             }
@@ -130,10 +129,10 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
         if ($data_format=='base64_ISO8859-1') {
             $column = 'CONVERT_FROM(DECODE('.$column.', \'base64\'), \'ISO8859-1\')::XML';
         }
-        else if ($data_format=='ISO8859-1') {
+        elseif ($data_format=='ISO8859-1') {
             $column = 'CONVERT_FROM('.$column.', \'ISO8859-1\')::XML';
         }
-        else if ($data_format=='base64') {
+        elseif ($data_format=='base64') {
             $column = 'DECODE('.$column.', \'base64\')::XML';
         }
         else {
@@ -180,7 +179,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
             ORDER BY t.table_name
         ', [':database'=>$this->config['name'], ':schema'=>$this->config['sche']]);
         // buscar comentarios de las tablas
-        foreach($tables as &$table) {
+        foreach ($tables as &$table) {
             $table['comment'] = $this->getCommentFromTable($table['name']);
         }
         // retornar tablas
@@ -239,7 +238,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
             ORDER BY c.ordinal_position ASC
         ', [':database'=>$this->config['name'], ':schema'=>$this->config['sche'], ':table'=>$table]);
         // buscar comentarios para las columnas
-        foreach($cols as &$col) {
+        foreach ($cols as &$col) {
             $col['comment'] = $this->getValue('
                 SELECT
                     d.description
@@ -324,5 +323,4 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
         ', [':database'=>$this->config['name'], ':schema'=>$this->config['sche'], ':table'=>$table]);
         return is_array($fks) ? $fks : [];
     }
-
 }

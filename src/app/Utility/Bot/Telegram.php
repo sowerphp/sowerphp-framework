@@ -28,8 +28,8 @@ namespace sowerphp\app;
  */
 class Utility_Bot_Telegram
 {
-
     private $config; ///< Configuración del Bot
+
     private $data; ///< Datos envíados al Bot a través de POST
 
     /**
@@ -150,7 +150,7 @@ class Utility_Bot_Telegram
     {
         return $this->send([
             'text' => $message,
-            'reply_markup' => $this->getKeyboard($keyboard)
+            'reply_markup' => $this->getKeyboard($keyboard),
         ], $chat_id);
     }
 
@@ -307,5 +307,4 @@ class Utility_Bot_Telegram
     {
         return $this->config['bot'];
     }
-
 }

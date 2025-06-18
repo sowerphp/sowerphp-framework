@@ -28,7 +28,6 @@ namespace sowerphp\core;
  */
 class Model_Datasource_Database_SQLite extends Model_Datasource_Database_Manager
 {
-
     /**
      * Constructor de la clase
      *
@@ -68,10 +67,10 @@ class Model_Datasource_Database_SQLite extends Model_Datasource_Database_Manager
      */
     public function concat($par1, $par2)
     {
-        $separators = array(' ', ',', ', ', '-', ' - ', '|', ':', ': ');
+        $separators = [' ', ',', ', ', '-', ' - ', '|', ':', ': '];
         $concat = [];
         $parameters = func_get_args();
-        foreach($parameters as &$parameter) {
+        foreach ($parameters as &$parameter) {
             if (in_array($parameter, $separators)) {
                 $parameter = "'".$parameter."'";
             }
@@ -79,5 +78,4 @@ class Model_Datasource_Database_SQLite extends Model_Datasource_Database_Manager
         }
         return implode(' || ', $concat);
     }
-
 }
