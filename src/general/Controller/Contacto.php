@@ -48,7 +48,8 @@ class Controller_Contacto extends \Controller_App
         // permirir cargar página de contacto
         if (config('email.default') === null) {
             \sowerphp\core\Model_Datasource_Session::message(
-                __('La página de contacto no se encuentra disponible.'), 'error'
+                __('La página de contacto no se encuentra disponible.'),
+                'error'
             );
             $this->redirect('/');
         }
@@ -59,7 +60,8 @@ class Controller_Contacto extends \Controller_App
                 \sowerphp\general\Utility_Google_Recaptcha::check();
             } catch (\Exception $e) {
                 \sowerphp\core\Model_Datasource_Session::message(
-                    __('Falló validación captcha: '.$e->getMessage()), 'error'
+                    __('Falló validación captcha: '.$e->getMessage()),
+                    'error'
                 );
                 return;
             }
@@ -80,17 +82,20 @@ class Controller_Contacto extends \Controller_App
                 $status = $email->send($msg);
                 if ($status === true) {
                     \sowerphp\core\Model_Datasource_Session::message(
-                        __('Su mensaje ha sido enviado, se responderá a la brevedad.'), 'ok'
+                        __('Su mensaje ha sido enviado, se responderá a la brevedad.'),
+                        'ok'
                     );
                     $this->redirect('/contacto');
                 } else {
                     \sowerphp\core\Model_Datasource_Session::message(
-                        __('Ha ocurrido un error al enviar su mensaje, por favor intente nuevamente.<br /><em>%s</em>', $status['message']), 'error'
+                        __('Ha ocurrido un error al enviar su mensaje, por favor intente nuevamente.<br /><em>%s</em>', $status['message']),
+                        'error'
                     );
                 }
             } else {
                 \sowerphp\core\Model_Datasource_Session::message(
-                    __('Por favor, completar todos los campos del formulario'), 'error'
+                    __('Por favor, completar todos los campos del formulario'),
+                    'error'
                 );
             }
         }

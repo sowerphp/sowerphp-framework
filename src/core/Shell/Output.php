@@ -48,26 +48,27 @@ namespace sowerphp\core;
  * See ConsoleOutput::styles() to learn more about defining your own styles.  Nested styles are not supported
  * at this time.
  */
-class Shell_Output {
+class Shell_Output
+{
     /**
      * Raw output constant - no modification of output text.
      */
-    const RAW = 0;
+    public const RAW = 0;
 
     /**
      * Plain output - tags will be stripped.
      */
-    const PLAIN = 1;
+    public const PLAIN = 1;
 
     /**
      * Color output - Convert known tags in to ANSI color escape codes.
      */
-    const COLOR = 2;
+    public const COLOR = 2;
 
     /**
      * Constant for a newline.
      */
-    const LF = PHP_EOL;
+    public const LF = PHP_EOL;
 
     /**
      * File handle for output.
@@ -150,7 +151,8 @@ class Shell_Output {
      *
      * @param string $stream The identifier of the stream to write output to.
      */
-    public function __construct($stream = 'php://stdout') {
+    public function __construct($stream = 'php://stdout')
+    {
         $this->_output = fopen($stream, 'w');
     }
 
@@ -162,7 +164,8 @@ class Shell_Output {
      * @param integer $newlines Number of newlines to append
      * @return integer Returns the number of bytes returned from writing to stdout.
      */
-    public function write($message, $newlines = 1) {
+    public function write($message, $newlines = 1)
+    {
         if (is_array($message)) {
             $message = implode(self::LF, $message);
         }
@@ -175,7 +178,8 @@ class Shell_Output {
      * @param string $text Text with styling tags.
      * @return string String with color codes added.
      */
-    public function styleText($text) {
+    public function styleText($text)
+    {
         if ($this->_outputAs == self::RAW) {
             return $text;
         }
@@ -184,7 +188,9 @@ class Shell_Output {
             return preg_replace('#</?(?:' . $tags . ')>#', '', $text);
         }
         return preg_replace_callback(
-            '/<(?<tag>[a-z0-9-_]+)>(?<text>.*?)<\/(\1)>/ims', [$this, '_replaceTags'], $text
+            '/<(?<tag>[a-z0-9-_]+)>(?<text>.*?)<\/(\1)>/ims',
+            [$this, '_replaceTags'],
+            $text
         );
     }
 
@@ -194,7 +200,8 @@ class Shell_Output {
      * @param array $matches.
      * @return string
      */
-    protected function _replaceTags($matches) {
+    protected function _replaceTags($matches)
+    {
         $style = $this->styles($matches['tag']);
         if (empty($style)) {
             return '<' . $matches['tag'] . '>' . $matches['text'] . '</' . $matches['tag'] . '>';
@@ -252,7 +259,8 @@ class Shell_Output {
      * @return mixed If you are getting styles, the style or null will be returned. If you are creating/modifying
      *   styles true will be returned.
      */
-    public function styles($style = null, $definition = null) {
+    public function styles($style = null, $definition = null)
+    {
         if ($style === null && $definition === null) {
             return self::$_styles;
         }
@@ -273,7 +281,8 @@ class Shell_Output {
      * @param integer $type The output type to use.  Should be one of the class constants.
      * @return mixed Either null or the value if getting.
      */
-    public function outputAs($type = null) {
+    public function outputAs($type = null)
+    {
         if ($type === null) {
             return $this->_outputAs;
         }
@@ -284,7 +293,8 @@ class Shell_Output {
      * clean up and close handles
      *
      */
-    public function __destruct() {
+    public function __destruct()
+    {
         fclose($this->_output);
     }
 }

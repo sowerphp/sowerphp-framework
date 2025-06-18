@@ -1,7 +1,7 @@
 <div class="page-header"><h1><?=$accion?> AFD</h1></div>
 <?php
-$f = new \sowerphp\general\View_Helper_Form ();
-echo $f->begin(['onsubmit'=>'Form.check()']);
+$f = new \sowerphp\general\View_Helper_Form();
+echo $f->begin(['onsubmit' => 'Form.check()']);
 echo $f->input([
     'name' => 'codigo',
     'label' => 'Código',
@@ -22,8 +22,8 @@ echo $f->input([
     'label' => 'Estados',
     'titles' => ['Código', 'Estado'],
     'inputs' => [
-        ['name'=>'estado_codigo'],
-        ['name'=>'estado_nombre', 'attr'=>'maxlength="50"'],
+        ['name' => 'estado_codigo'],
+        ['name' => 'estado_nombre', 'attr' => 'maxlength="50"'],
     ],
     'values' => isset($Afd) ? $Afd->getEstados('estado_') : [],
 ]);
@@ -33,9 +33,9 @@ echo $f->input([
     'label' => 'Transiciones',
     'titles' => ['Desde', 'Valor', 'Hasta'],
     'inputs' => [
-        ['name'=>'desde'],
-        ['name'=>'valor', 'attr'=>'maxlength="5"'],
-        ['name'=>'hasta'],
+        ['name' => 'desde'],
+        ['name' => 'valor', 'attr' => 'maxlength="5"'],
+        ['name' => 'hasta'],
     ],
     'values' => isset($Afd) ? $Afd->getTransicionesTabla() : [],
 ]);

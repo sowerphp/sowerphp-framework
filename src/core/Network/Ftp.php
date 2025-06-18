@@ -39,8 +39,9 @@ class Network_Ftp
     public function __construct($config = [])
     {
         // definir configuración
-        if (is_string($config))
-            $config = ['host'=>$config];
+        if (is_string($config)) {
+            $config = ['host' => $config];
+        }
         $this->config = array_merge([
             'host' => 'localhost',
             'port' => 21,
@@ -86,8 +87,9 @@ class Network_Ftp
         $aux = $this->rawlist($dir);
         foreach ($aux as $f) {
             $info = preg_split('/[\s]+/', $f, 9);
-            if (!isset($files[$info[0][0]]))
+            if (!isset($files[$info[0][0]])) {
                 $files[$info[0][0]] = [];
+            }
             $files[$info[0][0]][] = [
                 'name' => $info[8],
                 'size' => $info[4],

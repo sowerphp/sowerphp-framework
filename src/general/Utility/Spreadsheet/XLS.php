@@ -68,7 +68,7 @@ final class Utility_Spreadsheet_XLS
         $objPHPOffice = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         // si las llaves de $table no son strings, entonces es solo una hoja
         if (!is_string(array_keys($tabla)[0])) {
-            $tabla = [$id=>$tabla];
+            $tabla = [$id => $tabla];
         }
         // generar hojas
         $hoja = 0;
@@ -79,15 +79,15 @@ final class Utility_Spreadsheet_XLS
             // Colocar título a la hoja
             $objWorkSheet->setTitle(substr($name, 0, 30));
             // Colocar datos
-            $y=1; // fila
-            $x=0; // columna
+            $y = 1; // fila
+            $x = 0; // columna
             foreach ($sheet as &$fila) {
                 foreach ($fila as &$celda) {
                     $objWorkSheet->getCell(
                         \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($x++).$y
                     )->setValue(rtrim(str_replace('<br />', "\n", strip_tags($celda, '<br>'))));
                 }
-                $x=0;
+                $x = 0;
                 ++$y;
             }
             ++$hoja;

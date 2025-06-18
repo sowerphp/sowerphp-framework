@@ -26,7 +26,8 @@ namespace sowerphp\general;
 /**
  * Excepción que se lanza con los códigos de error al subir un archivo mediante formulario
  */
-class Exception_File_Upload extends \Exception {
+class Exception_File_Upload extends \Exception
+{
     public function __construct($code)
     {
         $message = $this->codeToMessage($code);

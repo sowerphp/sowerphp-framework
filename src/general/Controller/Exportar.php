@@ -56,7 +56,7 @@ class Controller_Exportar extends \Controller_App
             $title = 'Listado en PDF';
         }
         $pdf = new \sowerphp\general\View_Helper_PDF();
-        $pdf->setInfo (
+        $pdf->setInfo(
             $title,
             'Tabla: '.$id
         );

@@ -57,12 +57,12 @@ class Controller_Bd extends \Controller_App
                         '(' . $column['length'] . ')'.
                         (($column['null'] === 'YES' || $column['null'] == 1) ? ' NULL' : ' NOT NULL').
                         (" DEFAULT '" . $column['default'] . "' ").
-                        (($column['auto']==='YES'||$column['auto']==1)?'AUTO ':'').
+                        (($column['auto'] === 'YES' || $column['auto'] == 1) ? 'AUTO ' : '').
                         (in_array($column['name'], $info['pk']) ? 'PK ' : '').
                         (is_array($column['fk']) ? ('FK:' . $column['fk']['table'] . '.' . $column['fk']['column']) : '')
                     ;
                 }
-                $row['columns'] = implode ('<br />', $row['columns']);
+                $row['columns'] = implode('<br />', $row['columns']);
                 $data[] = $row;
             }
             // setear las variables para mostrar los datos de la bd
@@ -142,7 +142,7 @@ class Controller_Bd extends \Controller_App
                                 $pkCompleta = false;
                             }
                         }
-                        $where = preg_replace ('/\?/', $row[$cols[$pk]], $where, 1);
+                        $where = preg_replace('/\?/', $row[$cols[$pk]], $where, 1);
                     }
                     // si el registro existe se actualiza
                     if ($pkCompleta && $db->getValue($existsQuery.$where)) {
@@ -155,7 +155,7 @@ class Controller_Bd extends \Controller_App
                                 $values[] = array_shift($auxCols).' = \''.$col.'\'';
                             }
                         }
-                        $db->query ($query = $updateQuery.' '.implode(', ', $values).' '.$where);
+                        $db->query($query = $updateQuery.' '.implode(', ', $values).' '.$where);
                         $registros['actualizados']++;
                     }
                     // si el registro no existe se inserta
@@ -232,7 +232,7 @@ class Controller_Bd extends \Controller_App
             $db = &\sowerphp\core\Model_Datasource_Database::get($_POST['database']);
             $data = [];
             foreach ($_POST['tables'] as &$table) {
-                $data[$table] = $db->getTableWithColsNames ('
+                $data[$table] = $db->getTableWithColsNames('
                     SELECT *
                     FROM '.$table.'
                 ');
@@ -242,13 +242,13 @@ class Controller_Bd extends \Controller_App
                 'type' => $_POST['type'],
                 'data' => $data,
             ]);
-            $this->render ('Bd/descargar_step3');
+            $this->render('Bd/descargar_step3');
         }
         // en caso que no se haya seleccionado aun la bd
         else {
             // setear listado de bases de datos
             $this->_setDatabases();
-            $this->render ('Bd/descargar_step1');
+            $this->render('Bd/descargar_step1');
         }
     }
 
@@ -264,7 +264,8 @@ class Controller_Bd extends \Controller_App
                 $data = $db->getTableWithColsNames($_POST['query']);
             } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
                 \sowerphp\core\Model_Datasource_Session::message(
-                    $e->getMessage(), 'error'
+                    $e->getMessage(),
+                    'error'
                 );
             }
             if (isset($data)) {

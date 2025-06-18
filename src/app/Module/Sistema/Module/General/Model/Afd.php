@@ -21,7 +21,6 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-
 namespace sowerphp\app\Sistema\General;
 
 /**
@@ -123,7 +122,7 @@ class Model_Afd extends \Model_App
             WHERE afd = :afd
         ', [':afd' => $this->codigo]);
         $n = count($codigos);
-        for ($i=0; $i<$n; $i++) {
+        for ($i = 0; $i < $n; $i++) {
             $codigos[$i] = trim($codigos[$i]);
             $nombres[$i] = trim($nombres[$i]);
             if (!isset($codigos[$i][0]) || !isset($nombres[$i][0])) {
@@ -151,7 +150,7 @@ class Model_Afd extends \Model_App
             WHERE afd = :afd
         ', [':afd' => $this->codigo]);
         $n = count($desdes);
-        for ($i=0; $i<$n; $i++) {
+        for ($i = 0; $i < $n; $i++) {
             $desdes[$i] = trim($desdes[$i]);
             $valores[$i] = trim($valores[$i]);
             $hastas[$i] = trim($hastas[$i]);

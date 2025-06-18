@@ -116,14 +116,14 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      */
     public function getTables()
     {
-        return $this->getTable ('
+        return $this->getTable('
             SELECT table_name AS name, table_comment AS comment
             FROM information_schema.tables
             WHERE
                 table_schema = :database
                 AND table_type != \'VIEW\'
             ORDER BY table_name
-        ', [':database'=>$this->config['name']]);
+        ', [':database' => $this->config['name']]);
     }
 
     /**
@@ -133,13 +133,13 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      */
     public function getCommentFromTable($table)
     {
-        return $this->getValue ('
+        return $this->getValue('
             SELECT table_comment
             FROM information_schema.tables
             WHERE
                 table_schema = :database
                 AND table_name = :table
-        ', [':database'=>$this->config['name'], ':table'=>$table]);
+        ', [':database' => $this->config['name'], ':table' => $table]);
     }
 
     /**
@@ -150,7 +150,7 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      */
     public function getColsFromTable($table)
     {
-        return $this->getTable ('
+        return $this->getTable('
             SELECT
                 column_name AS name
                 , SUBSTRING_INDEX(column_type, \'(\', 1) AS type
@@ -164,7 +164,7 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
                 table_schema = :database
                 AND table_name = :table
             ORDER BY ordinal_position ASC
-        ', [':database'=>$this->config['name'], ':table'=>$table]);
+        ', [':database' => $this->config['name'], ':table' => $table]);
     }
 
     /**
@@ -174,14 +174,14 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      */
     public function getPksFromTable($table)
     {
-        return $this->getCol ('
+        return $this->getCol('
             SELECT column_name
             FROM information_schema.key_column_usage
             WHERE
                 constraint_schema = :database
                 AND table_name = :table
                 AND constraint_name = "PRIMARY"
-        ', [':database'=>$this->config['name'], ':table'=>$table]);
+        ', [':database' => $this->config['name'], ':table' => $table]);
     }
 
     /**
@@ -191,7 +191,7 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
      */
     public function getFksFromTable($table)
     {
-        $fks =  $this->getTable ('
+        $fks =  $this->getTable('
             SELECT
                 column_name AS name
                 , referenced_table_name AS `table`
@@ -208,7 +208,7 @@ class Model_Datasource_Database_MySQL extends Model_Datasource_Database_Manager
                         constraint_schema = :database
                         AND table_name = :table
                         AND constraint_type = "FOREIGN KEY")
-        ', [':database'=>$this->config['name'], ':table'=>$table]);
+        ', [':database' => $this->config['name'], ':table' => $table]);
         return is_array($fks) ? $fks : [];
     }
 }

@@ -29,7 +29,6 @@ namespace sowerphp\core;
  */
 abstract class Model
 {
-
     use Trait_Object;
 
     // Datos para la conexión a la base de datos
@@ -42,17 +41,17 @@ abstract class Model
     /**
      * Constructor de la clase abstracta
      */
-    public function __construct($pk=null)
+    public function __construct($pk = null)
     {
         // recuperar conexión a la base de datos
         $this->getDB();
         // setear nombre de la tabla según la clase que se está usando
         if (empty($this->_table)) {
-            $this->_table = Utility_Inflector::underscore (explode('_', get_class($this))[1]);
+            $this->_table = Utility_Inflector::underscore(explode('_', get_class($this))[1]);
         }
         // setear atributos del objeto con lo que se haya pasado al
         // constructor como parámetros
-        if (func_num_args()>0) {
+        if (func_num_args() > 0) {
             $firstArg = func_get_arg(0);
             if (is_array($firstArg)) {
                 $this->set(array_combine($this->getPk(), $firstArg));
@@ -88,7 +87,7 @@ abstract class Model
      */
     protected function preparePk()
     {
-        $pk = ['where'=>[], 'values'=>[]];
+        $pk = ['where' => [], 'values' => []];
         foreach ($this::$columnsInfo as $col => &$info) {
             if ($info['pk']) {
                 if (empty($this->$col) && $this->$col != 0) {
@@ -117,8 +116,7 @@ abstract class Model
         // recuperar datos
         $datos = $this->db->getRow('
             SELECT *
-            FROM ' . $this->_table . ' WHERE ' . $pk['where']
-        , $pk['values']);
+            FROM ' . $this->_table . ' WHERE ' . $pk['where'], $pk['values']);
         // si se encontraron datos asignar columnas a los atributos
         // del objeto
         if (count($datos)) {
@@ -167,7 +165,7 @@ abstract class Model
             'DELETE FROM '.$this->_table.' WHERE '.$pk['where'],
             $pk['values']
         );
-        if ($stmt->errorCode()==='00000') {
+        if ($stmt->errorCode() === '00000') {
             if ($beginTransaction) {
                 $this->db->commit();
             }
@@ -200,7 +198,7 @@ abstract class Model
         $alias = [];
         $values = [];
         foreach ($this::$columnsInfo as $col => &$info) {
-            if ($info['auto'] || $this->$col===null || $this->$col==='') {
+            if ($info['auto'] || $this->$col === null || $this->$col === '') {
                 continue;
             }
             $cols[] = $col;
@@ -216,7 +214,7 @@ abstract class Model
                 '.implode(', ', $alias).'
             )
         ', $values);
-        if ($stmt->errorCode()==='00000') {
+        if ($stmt->errorCode() === '00000') {
             if (property_exists($this, 'id')) {
                 $this->id = $this->db->getValue('SELECT MAX(id) FROM '.$this->_table);
             }
@@ -263,12 +261,11 @@ abstract class Model
         }
         // realizar consulta
         $beginTransaction = $this->db->beginTransaction();
-        $stmt = $this->db->query ('
+        $stmt = $this->db->query('
             UPDATE '.$this->_table.'
             SET '.implode(', ', $querySet).'
-            WHERE '.$pk['where']
-        , array_merge($columns, $pk['values']));
-        if ($stmt->errorCode()==='00000') {
+            WHERE '.$pk['where'], array_merge($columns, $pk['values']));
+        if ($stmt->errorCode() === '00000') {
             if ($beginTransaction) {
                 $this->db->commit();
             }
@@ -306,7 +303,7 @@ abstract class Model
             }
         }
         // si la solicitud es un setAttribute()
-        elseif ($request=='set') {
+        elseif ($request == 'set') {
             $attribute = \sowerphp\core\Utility_Inflector::underscore(substr($method, 3));
             if (isset($this::$columnsInfo[$attribute])) {
                 return call_user_func_array([$this, 'setAttribute'], array_merge([$attribute], $args));
@@ -339,9 +336,9 @@ abstract class Model
         // clase plural solo existe al tener la extesión sowerphp\app
         if (class_exists($fkClasss)) {
             if (isset($args[0])) {
-                return (new $fkClasss)->get($args[0]);
+                return (new $fkClasss())->get($args[0]);
             } else {
-                return (new $fkClasss)->get($this->{Utility_Inflector::underscore($fk)});
+                return (new $fkClasss())->get($this->{Utility_Inflector::underscore($fk)});
             }
         }
         // recuperar directamente con la clase singular
@@ -377,7 +374,7 @@ abstract class Model
             }
             if (is_array($check)) {
                 $status = \sowerphp\core\Utility_Data_Validation::check($value, $check);
-                if ($status!==true) {
+                if ($status !== true) {
                     return false;
                 }
             }
@@ -415,7 +412,8 @@ abstract class Model
             // validaciones del modelo estándares
             if (isset($this::$columnsInfo[$attribute]['check'])) {
                 $status = \sowerphp\core\Utility_Data_Validation::check(
-                    $this->{$attribute}, $this::$columnsInfo[$attribute]['check']
+                    $this->{$attribute},
+                    $this::$columnsInfo[$attribute]['check']
                 );
                 if ($status !== true) {
                     throw new \Exception($status);

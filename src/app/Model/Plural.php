@@ -29,7 +29,6 @@ namespace sowerphp\app;
  */
 abstract class Model_Plural
 {
-
     use \sowerphp\core\Trait_Object;
 
     // Datos para la conexión a la base de datos
@@ -78,7 +77,7 @@ abstract class Model_Plural
             }*/
         }
         if (empty($this->_table)) {
-            $this->_table = \sowerphp\core\Utility_Inflector::underscore (
+            $this->_table = \sowerphp\core\Utility_Inflector::underscore(
                 $this->_class
             );
         }
@@ -112,8 +111,7 @@ abstract class Model_Plural
             $this->limitStatementRecords = null;
             $this->limitStatementOffset = null;
             $this->queryVars = [];
-        }
-        elseif ($statement == 'select') {
+        } elseif ($statement == 'select') {
             $this->selectStatement = null;
         } elseif ($statement == 'where') {
             $this->whereStatement = null;
@@ -271,7 +269,7 @@ abstract class Model_Plural
      * @param campo Campo que se consultará
      * @return int|float Suma de todos las filas en el campo indicado
      */
-    public function getSum ($campo)
+    public function getSum($campo)
     {
         $query = 'SELECT SUM('.$campo.') FROM '.$this->_table;
         if ($this->whereStatement) {
@@ -388,7 +386,7 @@ abstract class Model_Plural
      * limitStatement, de orderbyStatement y de selectStatement
      * @return array Arreglo con filas y columnas de la tabla
      */
-    public function getTable ()
+    public function getTable()
     {
         return $this->getData('table');
     }
@@ -460,7 +458,8 @@ abstract class Model_Plural
         $cols = array_keys($class::$columnsInfo);
         $id = $cols[0];
         $glosa = in_array($this->_table, $cols) ? $this->_table : $cols[1];
-        return $this->db->getTable('
+        return $this->db->getTable(
+            '
             SELECT '.$id.' AS id, '.$glosa.' AS glosa
             FROM '.$this->_table.'
             ORDER BY '.$glosa

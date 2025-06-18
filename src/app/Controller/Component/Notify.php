@@ -45,7 +45,7 @@ class Controller_Component_Notify extends \sowerphp\core\Controller_Component
             $to = [$to];
         }
         if (!is_array($message)) {
-            $message = ['descripcion'=>$message];
+            $message = ['descripcion' => $message];
         }
         $message = array_merge([
             'fechahora' => date('Y-m-d H:i:s'),

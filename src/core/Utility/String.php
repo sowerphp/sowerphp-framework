@@ -26,20 +26,24 @@ namespace sowerphp\core;
 /**
  * String handling methods.
  */
-class Utility_String {
+class Utility_String
+{
     /**
      * Generate a random UUID
      *
      * @see http://www.ietf.org/rfc/rfc4122.txt
      * @return RFC 4122 UUID
      */
-    public static function uuid() {
+    public static function uuid()
+    {
         $node = env('SERVER_ADDR');
 
         if (strpos($node, ':') !== false) {
             if (substr_count($node, '::')) {
                 $node = str_replace(
-                    '::', str_repeat(':0000', 8 - substr_count($node, ':')) . ':', $node
+                    '::',
+                    str_repeat(':0000', 8 - substr_count($node, ':')) . ':',
+                    $node
                 );
             }
             $node = explode(':', $node) ;
@@ -95,8 +99,14 @@ class Utility_String {
 
         list($timeMid, $timeLow) = explode(' ', microtime());
         $uuid = sprintf(
-            "%08x-%04x-%04x-%02x%02x-%04x%08x", (int)$timeLow, (int)substr($timeMid, 2) & 0xffff,
-            mt_rand(0, 0xfff) | 0x4000, mt_rand(0, 0x3f) | 0x80, mt_rand(0, 0xff), $pid, $node
+            "%08x-%04x-%04x-%02x%02x-%04x%08x",
+            (int)$timeLow,
+            (int)substr($timeMid, 2) & 0xffff,
+            mt_rand(0, 0xfff) | 0x4000,
+            mt_rand(0, 0x3f) | 0x80,
+            mt_rand(0, 0xff),
+            $pid,
+            $node
         );
 
         return $uuid;
@@ -112,7 +122,8 @@ class Utility_String {
      * @param string $rightBound The right boundary to ignore separators in.
      * @return array Array of tokens in $data.
      */
-    public static function tokenize($data, $separator = ',', $leftBound = '(', $rightBound = ')') {
+    public static function tokenize($data, $separator = ',', $leftBound = '(', $rightBound = ')')
+    {
         if (empty($data) || is_array($data)) {
             return $data;
         }
@@ -201,7 +212,8 @@ class Utility_String {
      * @param string $options An array of options, see description above
      * @return string
      */
-    public static function insert($str, $data, $options = []) {
+    public static function insert($str, $data, $options = [])
+    {
         $defaults = [
             'before' => ':', 'after' => null, 'escape' => '\\', 'format' => null, 'clean' => false,
         ];
@@ -267,7 +279,8 @@ class Utility_String {
      * @return string
      * @see String::insert()
      */
-    public static function cleanInsert($str, $options) {
+    public static function cleanInsert($str, $options)
+    {
         $clean = $options['clean'];
         if (!$clean) {
             return $str;
@@ -335,7 +348,8 @@ class Utility_String {
      * @param mixed $options Array of options to use, or an integer to wrap the text to.
      * @return string Formatted text.
      */
-    public static function wrap($text, $options = []) {
+    public static function wrap($text, $options = [])
+    {
         if (is_numeric($options)) {
             $options = ['width' => $options];
         }
@@ -362,19 +376,25 @@ class Utility_String {
      * @param n Si se desea (=true) o no (=false) usar números
      * @param sc Si se desea (=true) o no (=false) usar caracteres especiales
      */
-    public static function random($length=10, $uc=true, $n=true, $sc=false)
+    public static function random($length = 10, $uc = true, $n = true, $sc = false)
     {
         $source = 'abcdefghijklmnopqrstuvwxyz';
-        if ($uc) $source .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        if ($n) $source .= '0123456789';
-        if ($sc) $source .= '|@#~$%()=^*+[]{}-_';
-        if ($length>0) {
+        if ($uc) {
+            $source .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        }
+        if ($n) {
+            $source .= '0123456789';
+        }
+        if ($sc) {
+            $source .= '|@#~$%()=^*+[]{}-_';
+        }
+        if ($length > 0) {
             $rstr = '';
-            $source = str_split($source,1);
-            for ($i=1; $i<=$length; $i++){
-                mt_srand((double)microtime() * 1000000);
-                $num = mt_rand(1,count($source));
-                $rstr .= $source[$num-1];
+            $source = str_split($source, 1);
+            for ($i = 1; $i <= $length; $i++) {
+                mt_srand((float)microtime() * 1000000);
+                $num = mt_rand(1, count($source));
+                $rstr .= $source[$num - 1];
             }
         }
         return $rstr;
@@ -387,9 +407,9 @@ class Utility_String {
      * @param subject String donde se está buscando
      * @return string String nuevo con el reemplazo realizado
      */
-    public static function replaceFirst ($search, $replace, $subject)
+    public static function replaceFirst($search, $replace, $subject)
     {
-        $pos = strpos ($subject, $search);
+        $pos = strpos($subject, $search);
         if ($pos !== false) {
             return substr_replace($subject, $replace, $pos, strlen($search));
         }
@@ -441,18 +461,18 @@ class Utility_String {
             return false;
         }
         return [
-            'string'=>trim(substr($text, $start, $end-$start)),
-            'start'=>$start,
-            'end'=>$end,
+            'string' => trim(substr($text, $start, $end - $start)),
+            'start' => $start,
+            'end' => $end,
         ];
     }
 
     /**
      * @link https://stackoverflow.com/a/27194169
      */
-    public static function mb_str_pad($str, $pad_len, $pad_str = ' ', $dir = STR_PAD_RIGHT, $encoding = NULL)
+    public static function mb_str_pad($str, $pad_len, $pad_str = ' ', $dir = STR_PAD_RIGHT, $encoding = null)
     {
-        $encoding = $encoding === NULL ? mb_internal_encoding() : $encoding;
+        $encoding = $encoding === null ? mb_internal_encoding() : $encoding;
         $padBefore = $dir === STR_PAD_BOTH || $dir === STR_PAD_LEFT;
         $padAfter = $dir === STR_PAD_BOTH || $dir === STR_PAD_RIGHT;
         $pad_len -= mb_strlen($str, $encoding);

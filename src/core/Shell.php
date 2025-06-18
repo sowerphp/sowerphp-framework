@@ -89,11 +89,11 @@ abstract class Shell
         // tiempo que tomó la ejecución del comando
         $time = microtime(true) - TIME_START;
         if ($time < 60) {
-            $out->write('Proceso ejecutado en '.num($time,1).' segundos.'."\n");
+            $out->write('Proceso ejecutado en '.num($time, 1).' segundos.'."\n");
         } elseif ($time < 3600) {
-            $out->write('Proceso ejecutado en '.num($time/60,1).' minutos.'."\n");
+            $out->write('Proceso ejecutado en '.num($time / 60, 1).' minutos.'."\n");
         } else {
-            $out->write('Proceso ejecutado en '.num($time/3600,1).' horas.'."\n");
+            $out->write('Proceso ejecutado en '.num($time / 3600, 1).' horas.'."\n");
         }
     }
 

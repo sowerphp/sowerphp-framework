@@ -50,7 +50,7 @@ class View_Helper_HTML
                     continue;
                 }
                 // si se limitan extensiones y no esta en las permitidas saltar
-                if ($restrictExtensions && !in_array(substr($file, strrpos($file, '.')+1), $ext)) {
+                if ($restrictExtensions && !in_array(substr($file, strrpos($file, '.') + 1), $ext)) {
                     continue;
                 }
                 // si es un directorio, verificar que se deba procesar
@@ -115,7 +115,7 @@ class View_Helper_HTML
             // si es un archivo
             else {
                 // definir nombre y extensión
-                if (strrchr($file, '.')!==FALSE) {
+                if (strrchr($file, '.') !== false) {
                     $ext = substr(strrchr($file, '.'), 1);
                     $name = str_replace(['_', '-'], ' ', preg_replace("/.$ext$/", '', $file));
                 } else {

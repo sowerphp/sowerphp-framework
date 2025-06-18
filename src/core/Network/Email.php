@@ -113,7 +113,8 @@ class Network_Email
      * @param email Correo desde donde se envía supuestamente el email
      * @param name Nombre de quien envía supuestamente el email
      */
-    public function from($email, $name = null) {
+    public function from($email, $name = null)
+    {
         if (is_array($email)) {
             $name = $email['name'];
             $email = $email['email'];
@@ -247,8 +248,7 @@ class Network_Email
         if (empty($this->to[0])) {
             if (!empty($this->to_default)) {
                 $this->to($this->to_default);
-            }
-            elseif (empty($this->cc) && empty($this->bcc)) {
+            } elseif (empty($this->cc) && empty($this->bcc)) {
                 throw new \sowerphp\core\Exception('No existe destinatario del correo electrónico');
             }
         }

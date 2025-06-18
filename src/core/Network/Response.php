@@ -231,9 +231,9 @@ class Network_Response //extends Response
             gmdate('D, d M Y H:i:s', time()).' GMT'
         ;
         $this->responseData['headers']['Expires'] =
-            gmdate('D, d M Y H:i:s', time()+$options['cache']).' GMT'
+            gmdate('D, d M Y H:i:s', time() + $options['cache']).' GMT'
         ;
-        $this->responseData['headers']['Pragma'] ='cache';
+        $this->responseData['headers']['Pragma'] = 'cache';
         $this->responseData['headers']['Content-Length'] = $file['size'];
         $this->responseData['body'] = $file['data'];
         // Retornar objeto de la respuesta.

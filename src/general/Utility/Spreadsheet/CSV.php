@@ -80,7 +80,7 @@ final class Utility_Spreadsheet_CSV
      */
     public static function get($data, $delimiter = null, $enclosure = '"', $size_mib = 2)
     {
-        $fd = self::save($data, 'php://temp/maxmemory:'.(string)($size_mib*1024*2014), $delimiter, $enclosure, false);
+        $fd = self::save($data, 'php://temp/maxmemory:'.(string)($size_mib * 1024 * 2014), $delimiter, $enclosure, false);
         rewind($fd);
         $csv = stream_get_contents($fd);
         fclose($fd);

@@ -3,8 +3,8 @@
 <?php
 
 // crear formulario
-$form = new \sowerphp\general\View_Helper_Form ();
-echo $form->begin(['onsubmit'=>'Form.check()']);
+$form = new \sowerphp\general\View_Helper_Form();
+echo $form->begin(['onsubmit' => 'Form.check()']);
 
 // opciones para select en caso que sea un campo boolean
 $optionsBoolean = [
@@ -22,14 +22,14 @@ foreach ($columns as $column => &$info) {
             'name'  => $column,
             'label' => $info['name'],
             'help'  => $info['comment'],
-            'check' => (!$info['null']?['notempty']:[]),
+            'check' => (!$info['null'] ? ['notempty'] : []),
         ];
         // si es un archivo
         $end = substr($column, -5);
         if (in_array($end, ['_data', '_name', '_type', '_size'])) {
             $col = substr($column, 0, -5);
             if (isset($columns[$col.'_data']) && isset($columns[$col.'_name']) && isset($columns[$col.'_type']) && isset($columns[$col.'_size'])) {
-                if ($end=='_name') {
+                if ($end == '_name') {
                     $input['name'] = $col;
                     $input['type'] = 'file';
                     echo $form->input($input);
@@ -40,21 +40,27 @@ foreach ($columns as $column => &$info) {
         // si es de tipo text se muestra un textarea
         if (substr($info['type'], -4) == 'text') {
             $input['type'] = 'textarea';
-            if (isset($Obj)) $input['value'] = $Obj->{$column};
+            if (isset($Obj)) {
+                $input['value'] = $Obj->{$column};
+            }
             echo $form->input($input);
         }
         // si es de tipo boolean se muestra lista desplegable
-        elseif ($info['type']=='boolean' || $info['type']=='tinyint') {
+        elseif ($info['type'] == 'boolean' || $info['type'] == 'tinyint') {
             $input['type'] = 'select';
             $input['options'] = $optionsBoolean;
-            if (isset($Obj)) $input['value'] = $Obj->{$column};
+            if (isset($Obj)) {
+                $input['value'] = $Obj->{$column};
+            }
             echo $form->input($input);
         }
         // si es de tipo date se muestra calendario
-        elseif ($info['type']=='date') {
+        elseif ($info['type'] == 'date') {
             $input['type'] = 'date';
             $input['check'][] = 'date';
-            if (isset($Obj)) $input['value'] = $Obj->{$column};
+            if (isset($Obj)) {
+                $input['value'] = $Obj->{$column};
+            }
             echo $form->input($input);
         }
         // si es llave foránea
@@ -69,7 +75,9 @@ foreach ($columns as $column => &$info) {
             array_unshift($options, ['', 'Seleccione una opción']);
             $input['type'] = 'select';
             $input['options'] = $options;
-            if (isset($Obj)) $input['value'] = $Obj->{$column};
+            if (isset($Obj)) {
+                $input['value'] = $Obj->{$column};
+            }
             echo $form->input($input);
         }
         // si es contraseña
@@ -79,9 +87,12 @@ foreach ($columns as $column => &$info) {
         }
         // si es cualquier otro tipo de datos
         else {
-            if (!empty($info['check']))
+            if (!empty($info['check'])) {
                 $input['check'] = array_merge($input['check'], $info['check']);
-            if (isset($Obj)) $input['value'] = $Obj->{$column};
+            }
+            if (isset($Obj)) {
+                $input['value'] = $Obj->{$column};
+            }
             echo $form->input($input);
         }
     }

@@ -35,13 +35,13 @@ class Utility_File
 {
     // constantes para errores de la subida de archivos
     // errores propios de sowerphp no compatibles con los estándares de PHP
-    const UPLOAD_ERROR = 1;
+    public const UPLOAD_ERROR = 1;
 
-    const UPLOAD_ERROR_EXTENSION = 2;
+    public const UPLOAD_ERROR_EXTENSION = 2;
 
-    const UPLOAD_ERROR_MIMETYPE = 3;
+    public const UPLOAD_ERROR_MIMETYPE = 3;
 
-    const UPLOAD_ERROR_SIZE = 4;
+    public const UPLOAD_ERROR_SIZE = 4;
 
     /**
      * Recibe y procesa un archivo enviado por POST a la apliación
@@ -95,7 +95,7 @@ class Utility_File
             }
         }
         // verificar tamaño
-        if ($filters['size'] && $src['size']>($filters['size']*1024)) {
+        if ($filters['size'] && $src['size'] > ($filters['size'] * 1024)) {
             return self::UPLOAD_ERROR_SIZE;
         }
         // si se ha definido ancho o algo máximo entonces es una imagen y se
@@ -104,7 +104,9 @@ class Utility_File
             list($file['width'], $file['height']) = getimagesize($src['tmp_name']);
             if ($file['width'] > $filters['width'] || $file['height'] > $filters['height']) {
                 list($file['width'], $file['height']) = Utility_Image::resizeOnFile(
-                    $src['tmp_name'], $filters['width'], $filters['height']
+                    $src['tmp_name'],
+                    $filters['width'],
+                    $filters['height']
                 );
             }
         }
@@ -192,15 +194,15 @@ class Utility_File
             return $size.' B';
         }
         if ($size >= pow(1024, 4)) {
-            return round($size/pow(1024, 4), 2).' TiB';
+            return round($size / pow(1024, 4), 2).' TiB';
         }
         if ($size >= pow(1024, 3)) {
-            return round($size/pow(1024, 3), 2).' GiB';
+            return round($size / pow(1024, 3), 2).' GiB';
         }
         if ($size >= pow(1024, 2)) {
-            return round($size/pow(1024, 2), 2).' MiB';
+            return round($size / pow(1024, 2), 2).' MiB';
         }
-        return round($size/1024, 2).' KiB';
+        return round($size / 1024, 2).' KiB';
     }
 
     /**
@@ -242,12 +244,12 @@ class Utility_File
             // For each directory entry
             foreach ($dir_content as &$entry) {
                 // Unix symbolic shortcuts, we go
-                if (!in_array($entry,  ['.','..'])) {
+                if (!in_array($entry, ['.','..'])) {
                     // We find the path from the beginning
                     $entry = $dir.DIRECTORY_SEPARATOR. $entry;
                     // This entry is not an issue: it clears
                     if (!is_dir($entry)) {
-                        unlink ($entry);
+                        unlink($entry);
                     }
                     // This entry is a folder, it again on this issue
                     else {
@@ -386,12 +388,12 @@ class Utility_File
         // enviar archivo
         if ($options['download']) {
             ob_clean();
-            header ('Content-Disposition: attachment; filename='.$file_compressed);
+            header('Content-Disposition: attachment; filename='.$file_compressed);
             $mimetype = self::mimetype($dir.DIRECTORY_SEPARATOR.$file_compressed);
             if ($mimetype) {
-                header ('Content-Type: '.$mimetype);
+                header('Content-Type: '.$mimetype);
             }
-            header ('Content-Length: '.filesize($dir.DIRECTORY_SEPARATOR.$file_compressed));
+            header('Content-Length: '.filesize($dir.DIRECTORY_SEPARATOR.$file_compressed));
             readfile($dir.DIRECTORY_SEPARATOR.$file_compressed);
             unlink($dir.DIRECTORY_SEPARATOR.$file_compressed);
         }
@@ -479,7 +481,7 @@ class Utility_File
     {
         $extension = \sowerphp\core\Utility_String::normalize(self::extension($filename));
         return \sowerphp\core\Utility_String::normalize(
-            substr($filename, 0, strrpos($filename,'.'))
+            substr($filename, 0, strrpos($filename, '.'))
         ) . '.' . $extension;
     }
 }

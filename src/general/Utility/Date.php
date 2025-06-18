@@ -69,13 +69,13 @@ class Utility_Date
             if ($total % 5 == 0) {
                 $fds -= 2;
             }
-            $end = $start + ($dias+$fds)*86400;
+            $end = $start + ($dias + $fds) * 86400;
         }
         $nuevaFecha = date('Y-m-d', $end);
         // ver si hay feriados, por cada feriado encontrado mover un día hábil
         // la fecha, hacer esto hasta que no hayan más días feriados en el rango
         // que se movió la fecha
-        while (($dias=self::countDaysMatch($fecha, $nuevaFecha, $feriados, true)) != 0) {
+        while (($dias = self::countDaysMatch($fecha, $nuevaFecha, $feriados, true)) != 0) {
             $fecha = date('Y-m-d', strtotime($nuevaFecha) + 86400);
             $nuevaFecha = self::addWorkingDays($nuevaFecha, $dias);
         }
@@ -103,15 +103,15 @@ class Utility_Date
             }
         } else {
             $total = $dia - $dias;
-            $fds = $total > 0 ? (int)(abs($total)/5) * 2 : (int)(abs($total)/5) * 2 + 2;
+            $fds = $total > 0 ? (int)(abs($total) / 5) * 2 : (int)(abs($total) / 5) * 2 + 2;
             $end = $start - ($dias + $fds) * 86400;
         }
         $nuevaFecha = date('Y-m-d', $end);
         // ver si hay feriados, por cada feriado encontrado mover un día hábil
         // la fecha, hacer esto hasta que no hayan más días feriados en el rango
         // que se movió la fecha
-        while (($dias=self::countDaysMatch($nuevaFecha, $fecha, $feriados, true))!=0) {
-            $fecha = date('Y-m-d', strtotime($nuevaFecha)-86400);
+        while (($dias = self::countDaysMatch($nuevaFecha, $fecha, $feriados, true)) != 0) {
+            $fecha = date('Y-m-d', strtotime($nuevaFecha) - 86400);
             $nuevaFecha = self::subtractWorkingDays($nuevaFecha, $dias);
         }
         // retornar fecha
@@ -129,10 +129,10 @@ class Utility_Date
     {
         list($anio, $mes, $dia) = explode('-', $fecha);
         $desde = $anio.'-'.$mes.'-01';
-        for ($i=0; $i<$dia; $i++) {
+        for ($i = 0; $i < $dia; $i++) {
             $f = self::addWorkingDays($desde, $i, $feriados);
             if ($f == $fecha) {
-                return $i+1;
+                return $i + 1;
             }
         }
         return false;
@@ -149,7 +149,7 @@ class Utility_Date
     public static function getWorkingDay($anio, $mes, $dia_habil, $feriados = [])
     {
         $fecha = self::addWorkingDays($anio.'-'.$mes.'-01', 0, $feriados); // obtiene primer día hábil
-        $fecha = self::addWorkingDays($fecha, $dia_habil-1, $feriados);
+        $fecha = self::addWorkingDays($fecha, $dia_habil - 1, $feriados);
         list($anio2, $mes2, $dia2) = explode('-', $fecha);
         return ($anio2 == $anio && $mes2 == $mes) ? $fecha : false;
     }
@@ -187,7 +187,7 @@ class Utility_Date
         $end = strtotime($to);
         while ($date <= $end) {
             $dayOfTheWeek = date('N', $date);
-            if ($excludeWeekend && ($dayOfTheWeek==6 || $dayOfTheWeek==7)) {
+            if ($excludeWeekend && ($dayOfTheWeek == 6 || $dayOfTheWeek == 7)) {
                 $date += 86400;
                 continue;
             }
@@ -219,16 +219,16 @@ class Utility_Date
             $fecha = date('j \d\e \M\E\S \d\e\l Y', $unixtime);
         }
         if ($mostrarHora && strpos($timestamp, ':')) {
-            $fecha .= ' a las '.date ('H:i', $unixtime);
+            $fecha .= ' a las '.date('H:i', $unixtime);
         }
         $dia = self::$dias[date('w', $unixtime)];
-        $mes = self::$meses[date('n', $unixtime)-1];
+        $mes = self::$meses[date('n', $unixtime) - 1];
         if ($letrasFormato == 'l') {
-            $dia = strtolower ($dia);
-            $mes = strtolower ($mes);
+            $dia = strtolower($dia);
+            $mes = strtolower($mes);
         } elseif ($letrasFormato == 'u') {
-            $dia = strtoupper ($dia);
-            $mes = strtoupper ($mes);
+            $dia = strtoupper($dia);
+            $mes = strtoupper($mes);
         }
         return str_replace(['DIA', 'MES'], [$dia, $mes], $fecha);
     }
@@ -295,7 +295,7 @@ class Utility_Date
         ];
         foreach ($string as $k => &$v) {
             if ($diff->$k) {
-                $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? ($k=='m'?'es':'s') : '');
+                $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? ($k == 'm' ? 'es' : 's') : '');
             } else {
                 unset($string[$k]);
             }
@@ -423,13 +423,11 @@ class Utility_Date
         if ($n_period == 4) {
             $period = (int)$period;
             return ($period >= $year_from && $period <= $year_to);
-        }
-        elseif ($n_period == 6) {
+        } elseif ($n_period == 6) {
             $year = (int)substr((string)$period, 0, 4);
             $month = (int)substr((string)$period, 4);
             return ($year >= $year_from && $year <= $year_to && $month >= 1 && $month <= 12);
-        }
-        else {
+        } else {
             return false;
         }
     }
@@ -492,11 +490,10 @@ class Utility_Date
                 $d = 28;
             }
             return $y.'-'.$m.'-'.$d;
-        }
-        elseif ($tiempo == 'M') {
+        } elseif ($tiempo == 'M') {
             list($y, $m, $d) = explode('-', $fecha);
             $siguientePeriodo = $y.$m;
-            for ($i=0; $i<$cantidad; $i++) {
+            for ($i = 0; $i < $cantidad; $i++) {
                 if ($operacion == '+') {
                     $siguientePeriodo = self::nextPeriod($siguientePeriodo);
                 } else {
@@ -511,11 +508,9 @@ class Utility_Date
                 $d = 30;
             }
             return $y.'-'.$m.'-'.$d;
-        }
-        elseif ($tiempo == 'S') {
-            return self::getNext($fecha, 'D', 7*$cantidad, $operacion);
-        }
-        elseif ($tiempo == 'D') {
+        } elseif ($tiempo == 'S') {
+            return self::getNext($fecha, 'D', 7 * $cantidad, $operacion);
+        } elseif ($tiempo == 'D') {
             $date = new \DateTime($fecha);
             if ($operacion == '+') {
                 $date->add(new \DateInterval('P'.$cantidad.'D'));
@@ -523,11 +518,9 @@ class Utility_Date
                 $date->sub(new \DateInterval('P'.$cantidad.'D'));
             }
             return $date->format('Y-m-d');
-        }
-        elseif (is_numeric($tiempo)) {
+        } elseif (is_numeric($tiempo)) {
             return self::getNext($fecha, 'M', (int)$tiempo, $operacion);
-        }
-        else {
+        } else {
             return false;
         }
     }

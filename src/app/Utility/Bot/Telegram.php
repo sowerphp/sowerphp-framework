@@ -118,7 +118,7 @@ class Utility_Bot_Telegram
     {
         return $this->sendMessage(array_merge([
             'chat_id' => $chat_id ? $chat_id : $this->data->message->chat->id,
-            'reply_markup' => json_encode(['hide_keyboard'=>true]),
+            'reply_markup' => json_encode(['hide_keyboard' => true]),
         ], !is_array($message) ? ['text' => $message] : $message));
     }
 

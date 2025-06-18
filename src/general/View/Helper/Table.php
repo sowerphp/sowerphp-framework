@@ -44,7 +44,7 @@ class View_Helper_Table
 
     private $_showEmptyCols = true; ///< Indica si se deben mostrar las columnas vacías de la tabla
 
-    private $extensions = ['ods'=>'OpenDocument', 'csv'=>'Planilla CSV', 'xls'=>'Planilla Excel', 'pdf'=>'Documento PDF', 'xml'=>'Archivo XML', 'json'=>'Archivo JSON']; ///< Formatos por defecto para exportar datos
+    private $extensions = ['ods' => 'OpenDocument', 'csv' => 'Planilla CSV', 'xls' => 'Planilla Excel', 'pdf' => 'Documento PDF', 'xml' => 'Archivo XML', 'json' => 'Archivo JSON']; ///< Formatos por defecto para exportar datos
 
     /**
      * Constructor de la clase para crear una tabla
@@ -152,7 +152,7 @@ class View_Helper_Table
             $n_rows = count($table) - 1;
             // contar las filas vacías en cada columna
             $empty_cols = [];
-            for ($i=1; $i<=$n_rows; $i++) {
+            for ($i = 1; $i <= $n_rows; $i++) {
                 $col_count = 0;
                 foreach ($table[$i] as $col) {
                     if (empty($col)) {
@@ -200,7 +200,7 @@ class View_Helper_Table
         }
         // Iniciar tabla
         $buffer .= '<div class="clearfix"></div><div class="table-responsive">'."\n";
-        $buffer .= '<table style="width:100%" class="'.$this->_class.'"'.($this->_id?' id="'.$this->_id.'"':'').'>'."\n";
+        $buffer .= '<table style="width:100%" class="'.$this->_class.'"'.($this->_id ? ' id="'.$this->_id.'"' : '').'>'."\n";
         // Definir cabecera de la tabla
         // títulos de columnas
         $buffer .= "\t".'<thead>'."\n";
@@ -218,7 +218,7 @@ class View_Helper_Table
         }
         $buffer .= "\t\t".'</tr>'."\n";
         // extraer otras filas que son parte de la cabecera
-        for ($i=1; $i<$thead; ++$i) {
+        for ($i = 1; $i < $thead; ++$i) {
             $titles = array_shift($table);
             if ($titles) {
                 $buffer .= "\t\t".'<tr>'."\n";
@@ -266,7 +266,7 @@ class View_Helper_Table
         foreach ($table as &$row) {
             $nRow++;
             if (isset($this->_exportRemove['rows'])) {
-                if (in_array($nRow, $this->_exportRemove['rows']) || in_array($nRow-$nRows-1, $this->_exportRemove['rows'])) {
+                if (in_array($nRow, $this->_exportRemove['rows']) || in_array($nRow - $nRows - 1, $this->_exportRemove['rows'])) {
                     continue;
                 }
             }
@@ -276,7 +276,7 @@ class View_Helper_Table
             foreach ($row as &$col) {
                 $nCol++;
                 if (isset($this->_exportRemove['cols'])) {
-                    if (in_array($nCol, $this->_exportRemove['cols']) || in_array($nCol-$nCols-1, $this->_exportRemove['cols'])) {
+                    if (in_array($nCol, $this->_exportRemove['cols']) || in_array($nCol - $nCols - 1, $this->_exportRemove['cols'])) {
                         continue;
                     }
                 }

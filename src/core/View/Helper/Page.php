@@ -35,7 +35,7 @@ class View_Helper_Page
      * @param array $viewVars Variables que se deben pasar a la vista.
      * @return string Buffer de la página renderizada.
      */
-    public static function render(string $location, array $viewVars=[]): string
+    public static function render(string $location, array $viewVars = []): string
     {
 
         $ext = substr($location, strrpos($location, '.') + 1);

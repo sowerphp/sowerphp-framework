@@ -172,7 +172,7 @@ class Network_Http_Socket
     private static function parseStatus($response_line): array
     {
         if (is_array($response_line)) {
-            $response_line = $response_line[count($response_line)-1];
+            $response_line = $response_line[count($response_line) - 1];
         }
         $parts = explode(' ', $response_line, 3);
         return [
@@ -197,6 +197,6 @@ class Network_Http_Socket
      */
     public static function getLastError(): string
     {
-        return self::$errors[count(self::$errors)-1];
+        return self::$errors[count(self::$errors) - 1];
     }
 }

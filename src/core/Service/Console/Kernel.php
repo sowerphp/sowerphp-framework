@@ -77,7 +77,7 @@ class Service_Console_Kernel implements Interface_Service
         $shell = new $class();
         // revisar posibles flags especiales
         $argc = count($args);
-        for ($i=0; $i<$argc; $i++) {
+        for ($i = 0; $i < $argc; $i++) {
             // poner modo verbose que corresponda (de 1 a 5)
             if (preg_match('/^\-v+$/', $args[$i])) {
                 $shell->verbose = strlen($args[$i]) - 1;
@@ -98,7 +98,7 @@ class Service_Console_Kernel implements Interface_Service
         $method = new \ReflectionMethod($shell, 'main');
         if (count($args) < $method->getNumberOfRequiredParameters()) {
             echo 'SowerPHP shell: ',$command,': requiere al menos ',
-                $method->getNumberOfRequiredParameters(),' parámetro(s)',"\n";
+            $method->getNumberOfRequiredParameters(),' parámetro(s)',"\n";
             echo '   Modo de uso: ',$command,' ';
             foreach ($method->getParameters() as &$p) {
                 echo ($p->isOptional() ? '['.$p->name.' = '.$p->getDefaultValue().']' : $p->name),' ';

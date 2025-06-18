@@ -113,7 +113,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
             'm' => 'mm',
             'd' => 'DD',
         ];
-        return 'TO_CHAR('.$datetime.', \''.$formats[$format].'\')'.($cast?('::'.$cast):'');
+        return 'TO_CHAR('.$datetime.', \''.$formats[$format].'\')'.($cast ? ('::'.$cast) : '');
     }
 
     /**
@@ -126,16 +126,13 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
             $path = [$path];
         }
         $select = [];
-        if ($data_format=='base64_ISO8859-1') {
+        if ($data_format == 'base64_ISO8859-1') {
             $column = 'CONVERT_FROM(DECODE('.$column.', \'base64\'), \'ISO8859-1\')::XML';
-        }
-        elseif ($data_format=='ISO8859-1') {
+        } elseif ($data_format == 'ISO8859-1') {
             $column = 'CONVERT_FROM('.$column.', \'ISO8859-1\')::XML';
-        }
-        elseif ($data_format=='base64') {
+        } elseif ($data_format == 'base64') {
             $column = 'DECODE('.$column.', \'base64\')::XML';
-        }
-        else {
+        } else {
             $column = $column.'::XML';
         }
         foreach ($path as $k => $p) {
@@ -159,7 +156,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
                 }
             }
         }
-        return count($select)>1 ? $select : array_shift($select);
+        return count($select) > 1 ? $select : array_shift($select);
     }
 
     /**
@@ -177,7 +174,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
                 AND t.table_schema = :schema
                 AND t.table_type = \'BASE TABLE\'
             ORDER BY t.table_name
-        ', [':database'=>$this->config['name'], ':schema'=>$this->config['sche']]);
+        ', [':database' => $this->config['name'], ':schema' => $this->config['sche']]);
         // buscar comentarios de las tablas
         foreach ($tables as &$table) {
             $table['comment'] = $this->getCommentFromTable($table['name']);
@@ -202,7 +199,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
                 AND c.relname = :table
                 AND d.objoid = c.oid
                 AND d.objsubid = 0
-        ', [':database'=>$this->config['name'], ':schema'=>$this->config['sche'], ':table'=>$table]);
+        ', [':database' => $this->config['name'], ':schema' => $this->config['sche'], ':table' => $table]);
     }
 
     /**
@@ -236,7 +233,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
                 AND pg_namespace.nspname = :schema
                 AND pg_namespace.oid = t.relnamespace
             ORDER BY c.ordinal_position ASC
-        ', [':database'=>$this->config['name'], ':schema'=>$this->config['sche'], ':table'=>$table]);
+        ', [':database' => $this->config['name'], ':schema' => $this->config['sche'], ':table' => $table]);
         // buscar comentarios para las columnas
         foreach ($cols as &$col) {
             $col['comment'] = $this->getValue('
@@ -256,7 +253,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
                     AND pg_namespace.oid = t.relnamespace
                     AND d.objoid = t.oid
                     AND d.objsubid = c.ordinal_position
-            ', [':database'=>$this->config['name'], ':schema'=>$this->config['sche'], ':table'=>$table, ':colname'=>$col['name']]);
+            ', [':database' => $this->config['name'], ':schema' => $this->config['sche'], ':table' => $table, ':colname' => $col['name']]);
         }
         // retornar columnas
         return $cols;
@@ -292,7 +289,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
                         AND indisprimary = \'t\'
                 )
             ) AND table_catalog = :database AND table_name = :table
-        ', [':database'=>$database, ':schema'=>$schema, ':table'=>$table]);
+        ', [':database' => $database, ':schema' => $schema, ':table' => $table]);
     }
 
     /**
@@ -320,7 +317,7 @@ class Model_Datasource_Database_PostgreSQL extends Model_Datasource_Database_Man
                         AND constraint_schema = :schema
                         AND constraint_type = \'FOREIGN KEY\'
                 )
-        ', [':database'=>$this->config['name'], ':schema'=>$this->config['sche'], ':table'=>$table]);
+        ', [':database' => $this->config['name'], ':schema' => $this->config['sche'], ':table' => $table]);
         return is_array($fks) ? $fks : [];
     }
 }

@@ -89,11 +89,9 @@ class Routing_Router
                             // asignar parte a donde corresponda
                             if ($key_partes[$i] == ':controller') {
                                 $params['controller'] = $url_partes[$i];
-                            }
-                            elseif ($key_partes[$i] == ':action') {
+                            } elseif ($key_partes[$i] == ':action') {
                                 $params['action'] = $url_partes[$i];
-                            }
-                            else {
+                            } else {
                                 $params['pass'][] = $url_partes[$i];
                             }
                             continue;
@@ -116,7 +114,7 @@ class Routing_Router
                 }
             }
             // Si no es una ruta con parámetros entonces se busca si la ruta tiene al final un *
-            if ($key[strlen($key)-1] == '*') {
+            if ($key[strlen($key) - 1] == '*') {
                 $ruta = substr($key, 0, -1);
                 // Si se encuentra la ruta al inicio de la url
                 if (strpos($url, $ruta) === 0) {
@@ -221,7 +219,8 @@ class Routing_Router
      * @param string $module Nombre del módulo (ejemplo: Nombre.De.ModuloQueSeEjecuta)
      * @return array Parámetros para despachar la página estática o false si no se encontró una
      */
-    private static function parseStaticPage(string $url, string $module = null) {
+    private static function parseStaticPage(string $url, string $module = null)
+    {
         $location = View::location('Pages'.$url, $module);
         if ($location) {
             return [

@@ -70,18 +70,19 @@ class View_Helper_Form
     {
         // transformar a arreglo en caso que no lo sea
         if (!is_array($config)) {
-            $config = ['action'=>$config];
+            $config = ['action' => $config];
         }
         // asignar configuración
         $config = array_merge(
             [
                 'id' => 'formulario',
                 'action' => $_SERVER['REQUEST_URI'],
-                'method'=> 'post',
+                'method' => 'post',
                 'onsubmit' => null,
                 'focus' => null,
                 'attr' => '',
-            ], $config
+            ],
+            $config
         );
         // crear onsubmit
         if ($config['onsubmit']) {
@@ -108,10 +109,10 @@ class View_Helper_Form
     public function end($config = [])
     {
         // solo se procesa la configuración si no es falsa
-        if ($config!==false) {
+        if ($config !== false) {
             // transformar a arreglo en caso que no lo sea
             if (!is_array($config)) {
-                $config = ['value'=>$config];
+                $config = ['value' => $config];
             }
             // asignar configuración
             $config['type'] = 'submit';
@@ -121,7 +122,8 @@ class View_Helper_Form
                     'name' => 'submit',
                     'value' => 'Enviar',
                     'label' => '',
-                ], $config
+                ],
+                $config
             );
             // generar fin del formulario
             return $this->input($config).'</form>'."\n\n";
@@ -140,7 +142,7 @@ class View_Helper_Form
     {
         // transformar a arreglo en caso que no lo sea
         if (!is_array($config)) {
-            $config = ['name'=>$config, 'label'=>$config];
+            $config = ['name' => $config, 'label' => $config];
         }
         // asignar configuración
         $config = array_merge(
@@ -158,7 +160,8 @@ class View_Helper_Form
                 'style' => $this->_style,
                 'placeholder' => '',
                 'sanitize' => true,
-            ], $config
+            ],
+            $config
         );
         if (!isset($config['default']) && isset($config['value'])) {
             $config['default'] = $config['value'];
@@ -178,7 +181,7 @@ class View_Helper_Form
         if ($config['check']) {
             // si no es arreglo se convierte
             if (!is_array($config['check'])) {
-                $config['check'] = explode(' ',$config['check']);
+                $config['check'] = explode(' ', $config['check']);
             }
             // hacer implode, agregar check y meter al class
             $config['class'] = $config['class'].' check '.implode(' ', $config['check']);
@@ -191,15 +194,15 @@ class View_Helper_Form
             $config['class'] = (!empty($config['class']) ? $config['class'] : '').' form-control';
         }
         // asignar id si no se asignó
-        if (!isset($config['id']) && !empty($config['name']) && substr($config['name'], -2)!='[]') {
+        if (!isset($config['id']) && !empty($config['name']) && substr($config['name'], -2) != '[]') {
             $config['id'] = $config['name'].'Field';
         }
         // determinar popover
-        if ($config['popover']!='') {
+        if ($config['popover'] != '') {
             $config['popover'] = ' data-bs-toggle="popover" data-bs-trigger="focus" title="'.$config['label'].'" data-bs-placement="top" data-bs-content="'.$config['popover'].'" onmouseover="$(this).popover(\'show\')" onmouseout="$(this).popover(\'hide\')"';
         }
         // limpiar valor del campo
-        if ($config['type']!='div' && $config['sanitize'] && isset($config['value'][0]) && !is_array($config['value'])) {
+        if ($config['type'] != 'div' && $config['sanitize'] && isset($config['value'][0]) && !is_array($config['value'])) {
             $config['value'] = trim(strip_tags($config['value']));
             if (!in_array($config['type'], ['submit', 'button'])) {
                 $config['value'] = htmlentities($config['value']);
@@ -218,31 +221,31 @@ class View_Helper_Form
     private function _format($field, $config)
     {
         if ($config['help'] != '') {
-            $config['help'] = ' <div class="form-text text-muted"'.(isset($config['id'])?' id="'.$config['id'].'Help"':'').'>'.$config['help'].'</div>';
+            $config['help'] = ' <div class="form-text text-muted"'.(isset($config['id']) ? ' id="'.$config['id'].'Help"' : '').'>'.$config['help'].'</div>';
         }
         // si es campo oculto no se aplica ningún estilo
         if ($config['type'] == 'hidden') {
             $buffer = '    '.$field."\n";
         }
         // si se debe aplicar estilo horizontal
-        elseif ($config['style']=='horizontal') {
-            $buffer = '    <div class="mb-3 row'.($config['notempty']?' required':'').'">'."\n";
+        elseif ($config['style'] == 'horizontal') {
+            $buffer = '    <div class="mb-3 row'.($config['notempty'] ? ' required' : '').'">'."\n";
             if (!empty($config['label'])) {
                 $required = $config['notempty'] ? '<span style="color:red"><strong>*</strong></span> ' : '';
-                $buffer .= '        <label'.(isset($config['id'])?(' for="'.$config['id'].'"'):'').' class="col-sm-'.$this->_cols_label.' col-form-label text-end">'.$required.$config['label'].'</label>'."\n";
+                $buffer .= '        <label'.(isset($config['id']) ? (' for="'.$config['id'].'"') : '').' class="col-sm-'.$this->_cols_label.' col-form-label text-end">'.$required.$config['label'].'</label>'."\n";
             }
             if (!in_array($config['type'], ['submit'])) {
-                $buffer .= '        <div class="col-sm-'.(12-$this->_cols_label).'">'.$field.$config['help'].'</div>'."\n";
+                $buffer .= '        <div class="col-sm-'.(12 - $this->_cols_label).'">'.$field.$config['help'].'</div>'."\n";
             } else {
-                $buffer .= '        <div class="mt-2 offset-sm-'.$this->_cols_label.' col-sm-'.(12-$this->_cols_label).'">'.$field.$config['help'].'</div>'."\n";
+                $buffer .= '        <div class="mt-2 offset-sm-'.$this->_cols_label.' col-sm-'.(12 - $this->_cols_label).'">'.$field.$config['help'].'</div>'."\n";
             }
             $buffer .= '    </div>'."\n";
         }
         // si se debe aplicar estilo inline
-        elseif ($config['style']=='inline') {
+        elseif ($config['style'] == 'inline') {
             $buffer = '<div>';
             if ($config['type'] != 'checkbox') {
-                $buffer .= '<label class="visually-hidden"'.(isset($config['id'])?' for="'.$config['id'].'"':'').'>'.$config['label'].'</label>'."\n";
+                $buffer .= '<label class="visually-hidden"'.(isset($config['id']) ? ' for="'.$config['id'].'"' : '').'>'.$config['label'].'</label>'."\n";
             }
             if (isset($config['addon-icon'])) {
                 $buffer .= '<div class="input-group-addon"><i class="fa fa-'.$config['addon-icon'].'" aria-hidden="true"></i></div>'."\n";
@@ -250,8 +253,8 @@ class View_Helper_Form
                 $buffer .= '<div class="input-group-addon">'.$config['addon-text'].'</div>'."\n";
             }
             $buffer .= $field;
-            if ($config['type']=='checkbox') {
-                $buffer .= ' <label '.(isset($config['id'])?' for="'.$config['id'].'"':'').' style="fw-:normal"'.$config['popover'].'>'.$config['label'].'</label>'."\n";
+            if ($config['type'] == 'checkbox') {
+                $buffer .= ' <label '.(isset($config['id']) ? ' for="'.$config['id'].'"' : '').' style="fw-:normal"'.$config['popover'].'>'.$config['label'].'</label>'."\n";
             }
             $buffer .= $config['help'];
             $buffer .= '</div>'."\n";
@@ -277,7 +280,7 @@ class View_Helper_Form
 
     private function _input_div($config)
     {
-        return '<div'.(!empty($config['attr'])?(' '.$config['attr']):'').(!empty($config['id'])?(' id="'.$config['id'].'"'):'').' class="form-control-plaintext '.$config['class'].'">'.$config['value'].'</div>';
+        return '<div'.(!empty($config['attr']) ? (' '.$config['attr']) : '').(!empty($config['id']) ? (' id="'.$config['id'].'"') : '').' class="form-control-plaintext '.$config['class'].'">'.$config['value'].'</div>';
     }
 
     private function _input_hidden($config)
@@ -301,7 +304,7 @@ class View_Helper_Form
     {
         $id = isset($config['id']) ? ' id="'.$config['id'].'"' : '';
         $growup = !empty($config['growup']) ? 'ondblclick="Form.growup(this)"' : '';
-        $autocomplete = (isset($config['autocomplete']) && $config['autocomplete']===false) ? 'autocomplete="off"' : '';
+        $autocomplete = (isset($config['autocomplete']) && $config['autocomplete'] === false) ? 'autocomplete="off"' : '';
         return '<input type="text" name="'.$config['name'].'" value="'.$config['value'].'"'.$id.' class="'.$config['class'].'" placeholder="'.$config['placeholder'].'" '.$config['attr'].$config['popover'].' '.$growup.' '.$autocomplete.' />';
     }
 
@@ -341,9 +344,10 @@ class View_Helper_Form
     {
         $config = array_merge(
             [
-                'rows'=>5,
-                'cols'=>10,
-            ], $config
+                'rows' => 5,
+                'cols' => 10,
+            ],
+            $config
         );
         $id = isset($config['id']) ? ' id="'.$config['id'].'"' : '';
         $growup = !empty($config['growup']) ? 'ondblclick="Form.growup(this)"' : '';
@@ -419,7 +423,7 @@ class View_Helper_Form
             }
         }
         if (!is_array($config['value'])) {
-            $config['value'] = ($config['value'] || (string)$config['value']=='0') ? [$config['value']] : [];
+            $config['value'] = ($config['value'] || (string)$config['value'] == '0') ? [$config['value']] : [];
         }
         if (!empty($config['value'])) {
             $any_option_selected = true;
@@ -437,7 +441,7 @@ class View_Helper_Form
                     $value = array_shift($value);
                 }
                 if (!empty($any_option_selected)) {
-                    $selected = (in_array((string)$key, $config['value'], true)?' selected="selected"':'');
+                    $selected = (in_array((string)$key, $config['value'], true) ? ' selected="selected"' : '');
                     if (!empty($selected)) {
                         $keys_not_in_options = array_filter($keys_not_in_options, function ($k) use ($key) {
                             return (string)$k != (string)$key;
@@ -455,7 +459,7 @@ class View_Helper_Form
                         $value2 = array_shift($value2);
                     }
                     if (!empty($any_option_selected)) {
-                        $selected = (in_array((string)$key2, $config['value'], true)?' selected="selected"':'');
+                        $selected = (in_array((string)$key2, $config['value'], true) ? ' selected="selected"' : '');
                         if (!empty($selected)) {
                             $keys_not_in_options = array_filter($keys_not_in_options, function ($k) use ($key2) {
                                 return (string)$k != (string)$key2;
@@ -485,7 +489,7 @@ class View_Helper_Form
                 ];
                 $buffer .= '<optgroup label="Valores temporales">';
                 foreach ($keys_not_in_options as $k) {
-                    $buffer .= '<option value="'.$k.'" selected="selected">'.(isset($values[$k])?$values[$k]:$k).'</option>';
+                    $buffer .= '<option value="'.$k.'" selected="selected">'.(isset($values[$k]) ? $values[$k] : $k).'</option>';
                 }
                 $buffer .= '</optgroup>';
             }
@@ -510,7 +514,7 @@ class View_Helper_Form
             'label' => $config['label'],
             'titles' => [$config['title']],
             'inputs' => [
-                ['type'=>'file', 'name'=>$config['name']],
+                ['type' => 'file', 'name' => $config['name']],
             ],
         ]);
     }
@@ -558,10 +562,10 @@ class View_Helper_Form
         $col_i = 0;
         foreach ($config['inputs'] as $input) {
             $style = [];
-            if (isset($input['type']) && $input['type']=='hidden') {
+            if (isset($input['type']) && $input['type'] == 'hidden') {
                 $style[] = 'display:none';
             }
-            $cols_style[] = !empty($style) ? (' style="'.implode(';',$style).'"') : '';
+            $cols_style[] = !empty($style) ? (' style="'.implode(';', $style).'"') : '';
             $col_i++;
         }
         // botón de borrado de la fila
@@ -574,7 +578,7 @@ class View_Helper_Form
             if (!empty($config['cols_width'][$col_i])) {
                 $input['width'] = $config['cols_width'][$col_i];
             }
-            $inputs .= '<td'.(isset($cols_style[$col_i])?$cols_style[$col_i]:'').'>'.rtrim($this->input($input)).'</td>';
+            $inputs .= '<td'.(isset($cols_style[$col_i]) ? $cols_style[$col_i] : '').'>'.rtrim($this->input($input)).'</td>';
             $col_i++;
         }
         if ($js) {
@@ -586,7 +590,7 @@ class View_Helper_Form
             if (isset($config['inputs'][0]) && isset($config['inputs'][0]['name']) && isset($_POST[$config['inputs'][0]['name']])) {
                 $values = '';
                 $filas = count($_POST[$config['inputs'][0]['name']]);
-                for ($i=0; $i<$filas; $i++) {
+                for ($i = 0; $i < $filas; $i++) {
                     $values .= '<tr>';
                     $col_i = 0;
                     foreach ($config['inputs'] as $input) {
@@ -595,7 +599,7 @@ class View_Helper_Form
                         if (!empty($config['cols_width'][$col_i])) {
                             $input['width'] = $config['cols_width'][$col_i];
                         }
-                        $values .= '<td'.(isset($cols_style[$col_i])?$cols_style[$col_i]:'').'>'.rtrim($this->input($input)).'</td>';
+                        $values .= '<td'.(isset($cols_style[$col_i]) ? $cols_style[$col_i] : '').'>'.rtrim($this->input($input)).'</td>';
                         $col_i++;
                     }
                     if ($js) {
@@ -620,10 +624,10 @@ class View_Helper_Form
                         $value[$input['name']] = '';
                     }
                     if (!is_array($value[$input['name']])) {
-                        $value[$input['name']] = ['value'=>$value[$input['name']]];
+                        $value[$input['name']] = ['value' => $value[$input['name']]];
                     }
                     $input = array_merge($input, $value[$input['name']]);
-                    if (isset($input['type']) && $input['type']=='checkbox') {
+                    if (isset($input['type']) && $input['type'] == 'checkbox') {
                         $input['checked'] = $input['value'];
                         unset($input['value']);
                     }
@@ -631,7 +635,7 @@ class View_Helper_Form
                     if (!empty($config['cols_width'][$col_i])) {
                         $input['width'] = $config['cols_width'][$col_i];
                     }
-                    $values .= '<td'.(isset($cols_style[$col_i])?$cols_style[$col_i]:'').'>'.rtrim($this->input($input)).'</td>';
+                    $values .= '<td'.(isset($cols_style[$col_i]) ? $cols_style[$col_i] : '').'>'.rtrim($this->input($input)).'</td>';
                     $col_i++;
                 }
                 if ($js) {
@@ -702,7 +706,7 @@ class View_Helper_Form
             'titles' => [],
             'width' => '100%',
             'mastercheck' => false,
-            'checked' => (isset($_POST[$config['name']])?$_POST[$config['name']]:[]),
+            'checked' => (isset($_POST[$config['name']]) ? $_POST[$config['name']] : []),
             'display-key' => true,
         ], $config);
         if (!isset($config['key'])) {
@@ -726,12 +730,12 @@ class View_Helper_Form
             foreach ($config['key'] as $k) {
                 $key[] = $row[$k];
             }
-            $key = implode (';', $key);
+            $key = implode(';', $key);
             // agregar fila
             $buffer .= '<tr>';
             $count = 0;
             foreach ($row as &$col) {
-                if ($config['display-key'] || $count>=$n_keys) {
+                if ($config['display-key'] || $count >= $n_keys) {
                     $buffer .= '<td>'.$col.'</td>';
                 }
                 $count++;
@@ -759,8 +763,8 @@ class View_Helper_Form
                 $key = array_shift($value);
                 $value = array_shift($value);
             }
-            $checked = isset($config['checked']) && $config['checked']==$key ? 'checked="checked"' : '';
-            $buffer_radios[ ]= '<input type="radio" name="'.$config['name'].'" value="'.$key.'" '.$checked.'> '.$value;
+            $checked = isset($config['checked']) && $config['checked'] == $key ? 'checked="checked"' : '';
+            $buffer_radios[ ] = '<input type="radio" name="'.$config['name'].'" value="'.$key.'" '.$checked.'> '.$value;
         }
         return implode('<br/>', $buffer_radios);
     }
@@ -793,7 +797,7 @@ class View_Helper_Form
                 $buffer .= '<td>'.$col.'</td>';
             }
             foreach ($options as &$value) {
-                if (isset($_POST[$config['name'].'_'.$key]) && $_POST[$config['name'].'_'.$key]==$value) {
+                if (isset($_POST[$config['name'].'_'.$key]) && $_POST[$config['name'].'_'.$key] == $value) {
                     $checked = 'checked="checked" ';
                 } else {
                     $checked = '';

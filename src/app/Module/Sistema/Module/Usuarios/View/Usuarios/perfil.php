@@ -125,7 +125,7 @@ echo $form->input([
 ]);
 echo $form->end([
     'name' => 'cambiarContrasenia',
-    'value'=>'Cambiar contraseña',
+    'value' => 'Cambiar contraseña',
 ]);
 ?>
         </div>
@@ -136,60 +136,60 @@ echo $form->end([
                 <div class="card-body">
 <?php
 $method = $Auth2->getName();
-if (!$_Auth->User->{'config_auth2_'.$method}) {
-    echo '<p>Aquí podrá activar <a href="',$Auth2->getUrl(),'" target="_blank">',$Auth2->getName(),'</a> para proteger el acceso a su cuenta.</p>',"\n";
-    echo $form->begin([
-        'id' => 'crearToken'.$Auth2->getName(),
-        'onsubmit' => 'Form.check(\'crearToken'.$Auth2->getName().'\')',
-    ]);
-    echo $form->input([
-        'type' => 'hidden',
-        'name' => 'auth2',
-        'value' => $Auth2->getName(),
-    ]);
-    $secret = $Auth2->createSecret($_Auth->User->usuario);
-    if ($secret) {
+    if (!$_Auth->User->{'config_auth2_'.$method}) {
+        echo '<p>Aquí podrá activar <a href="',$Auth2->getUrl(),'" target="_blank">',$Auth2->getName(),'</a> para proteger el acceso a su cuenta.</p>',"\n";
+        echo $form->begin([
+            'id' => 'crearToken'.$Auth2->getName(),
+            'onsubmit' => 'Form.check(\'crearToken'.$Auth2->getName().'\')',
+        ]);
         echo $form->input([
             'type' => 'hidden',
-            'name' => 'secret',
-            'value' => $secret->text,
+            'name' => 'auth2',
+            'value' => $Auth2->getName(),
+        ]);
+        $secret = $Auth2->createSecret($_Auth->User->usuario);
+        if ($secret) {
+            echo $form->input([
+                'type' => 'hidden',
+                'name' => 'secret',
+                'value' => $secret->text,
+            ]);
+            echo $form->input([
+                'type' => 'div',
+                'name' => 'secretDisplay',
+                'label' => 'Código pareo',
+                'value' => '<img src="'.$secret->qr.'" class="img-fluid img-thumbnail" alt="QR para '.$Auth2->getName().'" />',
+                'help' => 'Escanear el código QR o copiar el siguiente código en '.$Auth2->getName().': '.$secret->text,
+            ]);
+        }
+        echo $form->input([
+            'name' => 'verification',
+            'label' => 'Código verificación',
+            'help' => 'Código de verificación para parear aplicación y proteger con '.$Auth2->getName(),
+            'check' => 'notempty',
+        ]);
+        echo $form->end([
+            'name' => 'crearAuth2',
+            'value' => 'Proteger cuenta con '.$Auth2->getName(),
+        ]);
+    } else {
+        echo '<p>Aquí podrá desasociar su cuenta de usuario con la protección entregada por <a href="',$Auth2->getUrl(),'" target="_blank">',$Auth2->getName(),'</a>.</p>',"\n";
+        echo $form->begin([
+            'onsubmit' => '__.confirm(this, \'¿Está seguro de querer eliminar la protección con '.$Auth2->getName().'?\')',
         ]);
         echo $form->input([
-            'type' => 'div',
-            'name' => 'secretDisplay',
-            'label' => 'Código pareo',
-            'value' => '<img src="'.$secret->qr.'" class="img-fluid img-thumbnail" alt="QR para '.$Auth2->getName().'" />',
-            'help' => 'Escanear el código QR o copiar el siguiente código en '.$Auth2->getName().': '.$secret->text,
+            'type' => 'hidden',
+            'name' => 'auth2',
+            'value' => $Auth2->getName(),
         ]);
+        echo $form->input([
+            'type' => 'hidden',
+            'name' => 'destruirAuth2',
+            'value' => 1,
+        ]);
+        echo $form->end('Eliminar protección con '.$Auth2->getName());
     }
-    echo $form->input([
-        'name' => 'verification',
-        'label' => 'Código verificación',
-        'help' => 'Código de verificación para parear aplicación y proteger con '.$Auth2->getName(),
-        'check' => 'notempty',
-    ]);
-    echo $form->end([
-        'name' => 'crearAuth2',
-        'value' => 'Proteger cuenta con '.$Auth2->getName(),
-    ]);
-} else {
-    echo '<p>Aquí podrá desasociar su cuenta de usuario con la protección entregada por <a href="',$Auth2->getUrl(),'" target="_blank">',$Auth2->getName(),'</a>.</p>',"\n";
-    echo $form->begin([
-        'onsubmit' => '__.confirm(this, \'¿Está seguro de querer eliminar la protección con '.$Auth2->getName().'?\')',
-    ]);
-    echo $form->input([
-        'type' => 'hidden',
-        'name' => 'auth2',
-        'value' => $Auth2->getName(),
-    ]);
-    echo $form->input([
-        'type' => 'hidden',
-        'name' => 'destruirAuth2',
-        'value' => 1,
-    ]);
-    echo $form->end('Eliminar protección con '.$Auth2->getName());
-}
-?>
+    ?>
                 </div>
             </div>
 <?php endforeach; endif; ?>
@@ -207,17 +207,19 @@ if (!$_Auth->User->{'config_auth2_'.$method}) {
                 <div class="card-header">Grupos y permisos</div>
                 <div class="card-body">
 <?php
-$grupos = $_Auth->User->groups();
+    $grupos = $_Auth->User->groups();
 if ($grupos) {
     echo '<p>Los siguientes son los grupos a los que usted pertenece:</p>',"\n";
     echo '<ul>',"\n";
-    foreach ($grupos as &$grupo)
+    foreach ($grupos as &$grupo) {
         echo '<li>',$grupo,'</li>';
+    }
     echo '</ul>',"\n";
     echo '<p>A través de estos grupos, tiene acceso a los siguientes recursos:</p>',"\n";
     echo '<ul>',"\n";
-    foreach ($_Auth->User->auths() as &$auth)
+    foreach ($_Auth->User->auths() as &$auth) {
         echo '<li>',$auth,'</li>';
+    }
     echo '</ul>',"\n";
 } else {
     echo '<p>No pertenece a ningún grupo.</p>',"\n";

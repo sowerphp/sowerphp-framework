@@ -134,8 +134,20 @@ class Network_Email_Api_Postmark
         // enviar mensaje
         try {
             $result = $this->pm->sendEmail(
-                $from, $to, $subject, $htmlBody, $textBody, $tag, $trackOpens,
-                $replyTo, $cc, $bcc, $headers, $attachments, $trackLinks, $metadata
+                $from,
+                $to,
+                $subject,
+                $htmlBody,
+                $textBody,
+                $tag,
+                $trackOpens,
+                $replyTo,
+                $cc,
+                $bcc,
+                $headers,
+                $attachments,
+                $trackLinks,
+                $metadata
             );
             return true;
         } catch (\Postmark\Models\PostmarkException $e) {

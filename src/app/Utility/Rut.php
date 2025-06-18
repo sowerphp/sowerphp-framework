@@ -56,8 +56,8 @@ class Utility_Rut
         $r = str_replace('.', '', $r);
         $r = str_replace(',', '', $r);
         $s = 1;
-        for ($m = 0; $r != 0; $r/=10) {
-            $s = ($s + $r%10 * (9 - $m++ % 6)) % 11;
+        for ($m = 0; $r != 0; $r /= 10) {
+            $s = ($s + $r % 10 * (9 - $m++ % 6)) % 11;
         }
         return strtoupper(chr($s ? $s + 47 : 75));
     }
@@ -79,7 +79,7 @@ class Utility_Rut
 
     private static function normalizar_array($arreglo, $quitarDV = true)
     {
-        if (isset($arreglo[1]) && (!empty($arreglo[1]) || $arreglo[1]==='0')) {
+        if (isset($arreglo[1]) && (!empty($arreglo[1]) || $arreglo[1] === '0')) {
             $arreglo[0] .= '-' . strtoupper($arreglo[1]);
         }
         if (!strpos($arreglo[0], '-')) {
@@ -104,7 +104,7 @@ class Utility_Rut
             return (int)str_replace('-', '', $rut);
         } else {
             $rutNew = number_format((int)substr($rut, 0, -1), 0, '', '.');
-            return $rutNew . '-' . $rut[strlen($rut)-1];
+            return $rutNew . '-' . $rut[strlen($rut) - 1];
         }
     }
 

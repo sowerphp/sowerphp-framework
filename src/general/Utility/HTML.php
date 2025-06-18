@@ -38,9 +38,9 @@ class Utility_HTML
     {
         $cols = [];
         // llenar filas completas primero
-        $filas_completas = floor($items/$max_items);
-        for ($i=0; $i<$filas_completas; $i++) {
-            for ($j=0; $j<$max_items; $j++) {
+        $filas_completas = floor($items / $max_items);
+        for ($i = 0; $i < $filas_completas; $i++) {
+            for ($j = 0; $j < $max_items; $j++) {
                 $cols[] = $grid_width / $max_items;
             }
         }
@@ -48,7 +48,7 @@ class Utility_HTML
         $items_ultima_fila = $items - $filas_completas * $max_items;
         if ($items_ultima_fila) {
             $tam_cols_ultima_fila = $grid_width / $items_ultima_fila;
-            for ($i=0; $i<$items_ultima_fila; $i++) {
+            for ($i = 0; $i < $items_ultima_fila; $i++) {
                 $cols[] = $tam_cols_ultima_fila;
             }
         }

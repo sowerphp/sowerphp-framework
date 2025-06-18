@@ -216,10 +216,10 @@ class Controller_Maintainer extends \Controller_App
             $this->redirect($this->request->getRequestUriDecoded());
         }
         // paginar si es necesario
-        if ((integer)$page>0) {
+        if ((int)$page > 0) {
             $registers_per_page = config('app.registers_per_page');
-            $pages = ceil($registers_total/$registers_per_page);
-            $Objs->setLimitStatement($registers_per_page, ($page-1)*$registers_per_page);
+            $pages = ceil($registers_total / $registers_per_page);
+            $Objs->setLimitStatement($registers_per_page, ($page - 1) * $registers_per_page);
             if ($page != 1 && $page > $pages) {
                 $this->redirect(
                     $this->module_url . $this->request->getParsedParams()['controller'] . '/listar/1'
@@ -349,11 +349,13 @@ class Controller_Maintainer extends \Controller_App
                 $Obj->checkAttributes();
                 if ($Obj->save()) {
                     \sowerphp\core\Model_Datasource_Session::message(
-                        'Registro ('.implode(', ', func_get_args()).') editado.', 'ok'
+                        'Registro ('.implode(', ', func_get_args()).') editado.',
+                        'ok'
                     );
                 } else {
                     \sowerphp\core\Model_Datasource_Session::message(
-                        'Registro ('.implode(', ', func_get_args()).') no editado.', 'error'
+                        'Registro ('.implode(', ', func_get_args()).') no editado.',
+                        'error'
                     );
                 }
                 $this->redirect(
@@ -385,7 +387,8 @@ class Controller_Maintainer extends \Controller_App
     {
         if (!$this->deleteRecord) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'No se permite el borrado de registros.', 'error'
+                'No se permite el borrado de registros.',
+                'error'
             );
             $this->redirect(
                 $this->module_url . $this->request->getParsedParams()['controller'] . '/listar' . $filterListar
@@ -406,11 +409,13 @@ class Controller_Maintainer extends \Controller_App
         try {
             $Obj->delete();
             \sowerphp\core\Model_Datasource_Session::message(
-                'Registro (' . implode(', ', func_get_args()) . ') eliminado.', 'ok'
+                'Registro (' . implode(', ', func_get_args()) . ') eliminado.',
+                'ok'
             );
         } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'No se pudo eliminar el registro (' . implode(', ', func_get_args()) . '): '.$e->getMessage(), 'error'
+                'No se pudo eliminar el registro (' . implode(', ', func_get_args()) . '): '.$e->getMessage(),
+                'error'
             );
         }
         $this->redirect(
@@ -427,7 +432,8 @@ class Controller_Maintainer extends \Controller_App
         $model = $this->model;
         if (!isset($model::$columnsInfo[$campo . '_data'])) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'Campo '.$campo.' no existe.', 'error'
+                'Campo '.$campo.' no existe.',
+                'error'
             );
             $this->redirect(
                 $this->module_url . $this->request->getParsedParams()['controller'] . '/listar'

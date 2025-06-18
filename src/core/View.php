@@ -117,7 +117,7 @@ class View
             $_header_extra = '';
         }
         // dependiendo de la extensión de la página se renderiza
-        $ext = substr($location, strrpos($location, '.')+1);
+        $ext = substr($location, strrpos($location, '.') + 1);
         $class = 'View_Helper_Pages_' . ucfirst($ext);
         $page_content = $class::render($location, $this->viewVars);
         // determinar si se usa el layout por defecto de la app
@@ -235,7 +235,8 @@ class View
             return null;
         }
         // Buscar la vista en los posibles paths de la aplicación
-        $base_location = ($module
+        $base_location = (
+            $module
             ? ('/Module/' . str_replace('.', '/Module/', $module))
             : ''
         ) . '/View/' . $view . '.';

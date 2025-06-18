@@ -21,7 +21,6 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-
 namespace sowerphp\app;
 
 /**
@@ -117,7 +116,7 @@ abstract class Utility_Apps_Base_Apps
      */
     public function getNombre()
     {
-        if ($this->nombre===null) {
+        if ($this->nombre === null) {
             $this->nombre = \sowerphp\core\Utility_Inflector::humanize(
                 \sowerphp\core\Utility_Inflector::underscore(
                     explode('Utility_Apps_', get_class($this))[1]
@@ -247,7 +246,8 @@ abstract class Utility_Apps_Base_Apps
     /**
      * Método que redirecciona una URL en la aplicación
      */
-    protected function redirect($url) {
+    protected function redirect($url)
+    {
         header('location: '.$url);
         exit(0); // no hay otra opción, debe ser exit para que location funcione
     }

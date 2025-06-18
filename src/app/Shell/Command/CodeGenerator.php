@@ -72,7 +72,7 @@ class Shell_Command_CodeGenerator extends \Shell_App
         }
         if (!empty($procesarTablas) && $procesarTablas != '*') {
             if (strpos($procesarTablas, ',')) {
-                $procesarTablas = str_replace (' ', '', $procesarTablas);
+                $procesarTablas = str_replace(' ', '', $procesarTablas);
                 $tables = explode(',', $procesarTablas);
             } else {
                 $tables = explode(' ', $procesarTablas);
@@ -81,7 +81,7 @@ class Shell_Command_CodeGenerator extends \Shell_App
         // obtener información de las tablas
         self::$nTables = count($tables);
         $nTables = 0;
-        $this->out('<info>Recuperando información de las tablas '.round(($nTables/self::$nTables)*100).'%</info>', 0);
+        $this->out('<info>Recuperando información de las tablas '.round(($nTables / self::$nTables) * 100).'%</info>', 0);
         self::$tables = [];
         foreach ($tables as &$table) {
             $table_info = self::$db->getInfoFromTable($table);
@@ -91,7 +91,7 @@ class Shell_Command_CodeGenerator extends \Shell_App
             }
             self::$tables[$table] = $table_info;
             $nTables++;
-            $this->out("\r".'<info>Recuperando información de las tablas '.round(($nTables/self::$nTables)*100).'%</info>', 0);
+            $this->out("\r".'<info>Recuperando información de las tablas '.round(($nTables / self::$nTables) * 100).'%</info>', 0);
         }
         unset($tables);
         unset($nTables);
@@ -100,9 +100,9 @@ class Shell_Command_CodeGenerator extends \Shell_App
         self::$destination = $this->selectDestination();
         // determinar namespace
         if (empty(self::$extension)) {
-            self::$namespace = 'website'.(!empty(self::$module)?'\\'.str_replace('.', '\\', self::$module):'');
+            self::$namespace = 'website'.(!empty(self::$module) ? '\\'.str_replace('.', '\\', self::$module) : '');
         } else {
-            self::$namespace = str_replace('/', '\\', self::$extension).(!empty(self::$module)?'\\'.str_replace('.', '\\', self::$module):'');
+            self::$namespace = str_replace('/', '\\', self::$extension).(!empty(self::$module) ? '\\'.str_replace('.', '\\', self::$module) : '');
         }
         // crear directorios para archivos que se crearán
         if (!file_exists(self::$destination.'/Model')) {
@@ -148,7 +148,7 @@ class Shell_Command_CodeGenerator extends \Shell_App
                 $opcion = $this->in('Seleccionar una base de datos: ');
             } while ($opcion < 1 || $opcion > $encontradas);
             // retornar nombre de la conexión
-            return $keys[$opcion-1];
+            return $keys[$opcion - 1];
         }
         // no se encontró configuración válida
         return false;
@@ -192,14 +192,14 @@ class Shell_Command_CodeGenerator extends \Shell_App
             return 'project:/src/website';
         }
         // la ubicación es un módulo dentro del proyecto principal
-        elseif (isset($modulos[$opcion-2])) {
-            $modulo = $modulos[$opcion-2];
+        elseif (isset($modulos[$opcion - 2])) {
+            $modulo = $modulos[$opcion - 2];
             $this->setModuleUrl($modulo);
             return 'project:/src/website/Module/' . str_replace('.', '/Module/', $modulo);
         }
         // la ubicación está en una extensión
         else {
-            $modulo = $extensiones_modulos[$opcion-2-count($modulos)];
+            $modulo = $extensiones_modulos[$opcion - 2 - count($modulos)];
             $this->setModuleUrl($modulo['module']);
             self::$extension = $modulo['extension'];
             return 'project:/extensions/' . $modulo['extension'] . '/Module/'
@@ -324,14 +324,14 @@ class Shell_Command_CodeGenerator extends \Shell_App
                 // generar atributo
                 $columns[] = $this->src('public ${column}; ///< {comment}{type}({length}){null}{default}{auto}{pk}{fk}', [
                     'column'    => $column['name'],
-                    'comment'    => $column['comment']!=''?$column['comment'].': ':'',
+                    'comment'    => $column['comment'] != '' ? $column['comment'].': ' : '',
                     'type'        => $column['type'],
                     'length'    => $column['length'],
-                    'null'        => ($column['null']==='YES'||$column['null']==1)?' NULL':' NOT NULL',
+                    'null'        => ($column['null'] === 'YES' || $column['null'] == 1) ? ' NULL' : ' NOT NULL',
                     'default'    => " DEFAULT '".$column['default']."' ",
-                    'auto'        => ($column['auto']==='YES'||$column['auto']==1)?'AUTO ':'',
-                    'pk'        => in_array($column['name'], $info['pk'])?'PK ':'',
-                    'fk'        => is_array($column['fk'])?'FK:'.$column['fk']['table'].'.'.$column['fk']['column']:'',
+                    'auto'        => ($column['auto'] === 'YES' || $column['auto'] == 1) ? 'AUTO ' : '',
+                    'pk'        => in_array($column['name'], $info['pk']) ? 'PK ' : '',
+                    'fk'        => is_array($column['fk']) ? 'FK:'.$column['fk']['table'].'.'.$column['fk']['column'] : '',
                 ]);
                 // generar información de la columna
                 $columnsInfo[] = $this->src('Model/columnInfo.phps', [
@@ -339,12 +339,12 @@ class Shell_Command_CodeGenerator extends \Shell_App
                     'name'        => \sowerphp\core\Utility_Inflector::humanize($column['name']),
                     'comment'    => $column['comment'],
                     'type'        => $column['type'],
-                    'length'    => !empty($column['length'])?$column['length']:'null',
-                    'null'        => ($column['null']==='YES'||$column['null']==1)?'true':'false',
+                    'length'    => !empty($column['length']) ? $column['length'] : 'null',
+                    'null'        => ($column['null'] === 'YES' || $column['null'] == 1) ? 'true' : 'false',
                     'default'    => str_replace("'", "\'", $column['default']),
-                    'auto'        => ($column['auto']==='YES'||$column['auto']==1)?'true':'false',
-                    'pk'        => in_array($column['name'], $info['pk'])?'true':'false',
-                    'fk'        => is_array($column['fk']) ? '[\'table\' => \''.$column['fk']['table'].'\', \'column\' => \''.$column['fk']['column'].'\']':'null',
+                    'auto'        => ($column['auto'] === 'YES' || $column['auto'] == 1) ? 'true' : 'false',
+                    'pk'        => in_array($column['name'], $info['pk']) ? 'true' : 'false',
+                    'fk'        => is_array($column['fk']) ? '[\'table\' => \''.$column['fk']['table'].'\', \'column\' => \''.$column['fk']['column'].'\']' : 'null',
                 ]);
             }
             $fkNamespace = count($fkNamespace) ? ("\n        ".implode(",\n        ", $fkNamespace)."\n    ") : '';

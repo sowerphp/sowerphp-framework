@@ -49,28 +49,28 @@ final class Utility_Spreadsheet_ODS
         $objPHPOffice = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         // si las llaves de $table no son strings, entonces es solo una hoja
         if (!is_string(array_keys($data)[0])) {
-            $data = [$id=>$data];
+            $data = [$id => $data];
         }
         // generar hojas
         $hoja = 0;
-        $n_hojas = count ($data);
+        $n_hojas = count($data);
         foreach ($data as $name => &$sheet) {
             // agregar hoja
             $objWorkSheet = $objPHPOffice->setActiveSheetIndex($hoja);
             // Colocar título a la hoja
             $objWorkSheet->setTitle(substr($name, 0, 30));
             // Colocar datos
-            $y=1; // fila
-            $x=0; // columna
+            $y = 1; // fila
+            $x = 0; // columna
             foreach ($sheet as &$fila) {
                 foreach ($fila as &$celda) {
                     $objWorkSheet->getCell(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($x++).$y)->setValue(rtrim(str_replace('<br />', "\n", strip_tags($celda, '<br>'))));
                 }
-                $x=0;
+                $x = 0;
                 ++$y;
             }
             ++$hoja;
-            if ($hoja<$n_hojas) {
+            if ($hoja < $n_hojas) {
                 $objPHPOffice->createSheet($hoja);
             }
         }

@@ -21,30 +21,30 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
- app('config')->set([
+app('config')->set([
 
-    // Menú para el módulo
-    'nav.module' => [
-        '/bd/tablas' => [
-            'name' => 'Listado de tablas',
-            'desc' => 'Información de las tablas de la base de datos',
-            'icon' => 'fa fa-database',
-        ],
-        '/bd/poblar' => [
-            'name' => 'Poblar tablas',
-            'desc' => 'Cargar datos a tablas de la base de datos',
-            'icon' => 'fa fa-upload',
-        ],
-        '/bd/descargar' => [
-            'name' => 'Descargar datos de tablas',
-            'desc' => 'Descargar datos de tablas de la base de datos',
-            'icon' => 'fa fa-download',
-        ],
-        '/bd/consulta' => [
-            'name' => 'Ejecutar consulta',
-            'desc' => 'Ejecutar consulta SQL en la base de datos',
-            'icon' => 'fa fa-code',
-        ],
-    ],
+   // Menú para el módulo
+   'nav.module' => [
+       '/bd/tablas' => [
+           'name' => 'Listado de tablas',
+           'desc' => 'Información de las tablas de la base de datos',
+           'icon' => 'fa fa-database',
+       ],
+       '/bd/poblar' => [
+           'name' => 'Poblar tablas',
+           'desc' => 'Cargar datos a tablas de la base de datos',
+           'icon' => 'fa fa-upload',
+       ],
+       '/bd/descargar' => [
+           'name' => 'Descargar datos de tablas',
+           'desc' => 'Descargar datos de tablas de la base de datos',
+           'icon' => 'fa fa-download',
+       ],
+       '/bd/consulta' => [
+           'name' => 'Ejecutar consulta',
+           'desc' => 'Ejecutar consulta SQL en la base de datos',
+           'icon' => 'fa fa-code',
+       ],
+   ],
 
 ]);

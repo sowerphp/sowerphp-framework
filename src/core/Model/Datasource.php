@@ -53,7 +53,7 @@ abstract class Model_Datasource
         // se crea configuración
         $config = array_merge((array)config($datasource.'.'.$name), $config);
         if (empty($config)) {
-            throw new Exception_Model_Datasource_Database ([
+            throw new Exception_Model_Datasource_Database([
                 'msg' => 'No se encontró configuración '.$datasource.'.'.$name,
             ]);
         }

@@ -70,7 +70,7 @@ class Utility_Automata_AFD
     {
         $estado = $this->q0;
         $symbols = is_array($input) ? count($input) : strlen($input);
-        for ($i=0; $i<$symbols; ++$i) {
+        for ($i = 0; $i < $symbols; ++$i) {
             if (isset($this->transitions[$estado][$input[$i]])) {
                 $this->input = $input[$i];
                 $estado = $this->transitions[$estado][$input[$i]];

@@ -78,11 +78,9 @@ class Model_Imgur
         if ($response['status']['code'] != 200) {
             if (!empty($response['body']['message'])) {
                 throw new \Exception($response['body']['message'], $response['status']['code']);
-            }
-            elseif (!empty($response['body'])) {
+            } elseif (!empty($response['body'])) {
                 throw new \Exception($response['body'], $response['status']['code']);
-            }
-            else {
+            } else {
                 throw new \Exception(
                     'Error '.$response['status']['code'].': '.$response['status']['message'],
                     $response['status']['code']

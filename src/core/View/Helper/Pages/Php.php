@@ -42,7 +42,7 @@ class View_Helper_Pages_Php
         include $__viewFn;
         $vars = get_defined_vars();
         foreach ($vars as $var => $val) {
-            if (substr($var,0,8) === '__block_') {
+            if (substr($var, 0, 8) === '__block_') {
                 $__dataForView[$var] = $val;
             }
         }

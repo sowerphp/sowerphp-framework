@@ -21,7 +21,6 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-
 namespace sowerphp\app\Sistema\Notificaciones;
 
 /**
@@ -36,7 +35,7 @@ class Controller_Notificaciones extends \Controller_Maintainer
     protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
 
     protected $columnsView = [
-        'listar'=>['id', 'fechahora', 'de', 'para', 'descripcion', 'leida'],
+        'listar' => ['id', 'fechahora', 'de', 'para', 'descripcion', 'leida'],
     ]; ///< Columnas que se deben mostrar en las vistas
 
     public function beforeFilter()
@@ -58,14 +57,16 @@ class Controller_Notificaciones extends \Controller_Maintainer
         $Notificacion = new Model_Notificacion($notificacion);
         if (!$Notificacion->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'Notificación solicitada no existe.', 'error'
+                'Notificación solicitada no existe.',
+                'error'
             );
             $this->redirect('/sistema/notificaciones/notificaciones');
         }
         // si el usuario autenticado no es dueño de la notificación entonces error
         if ($this->Auth->User->id != $Notificacion->para) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'Usuario autenticado no es destinatario de la notificación solicitada', 'error'
+                'Usuario autenticado no es destinatario de la notificación solicitada',
+                'error'
             );
             $this->redirect('/sistema/notificaciones/notificaciones');
         }
@@ -87,7 +88,7 @@ class Controller_Notificaciones extends \Controller_Maintainer
     public function _api_leida_GET($notificacion)
     {
         // obtener usuario autenticado
-        if (($User=$this->Auth->User) === false && is_string($User = $this->Api->getAuthUser())) {
+        if (($User = $this->Auth->User) === false && is_string($User = $this->Api->getAuthUser())) {
             $this->Api->send('Usuario no autenticado.', 401);
         }
         // verificar que la notificación exista

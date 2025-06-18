@@ -1,7 +1,7 @@
 <div class="page-header"><h1>Sistema &raquo; Usuarios &raquo; Enviar email a grupos</h1></div>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
-echo $f->begin(['onsubmit'=>'Form.check() && __.confirm(this, \'¿Enviar email?\')']);
+echo $f->begin(['onsubmit' => 'Form.check() && __.confirm(this, \'¿Enviar email?\')']);
 echo $f->input([
     'type' => 'tablecheck',
     'id' => 'grupos',
@@ -15,7 +15,7 @@ echo $f->input([
     'type' => 'select',
     'name' => 'enviar_como',
     'label' => 'Enviar como',
-    'options' => ['bcc'=>'BCC: copia oculta', 'cc'=>'CC: copia'],
+    'options' => ['bcc' => 'BCC: copia oculta', 'cc' => 'CC: copia'],
     'check' => 'notempty',
 ]);
 echo $f->input([
@@ -36,7 +36,7 @@ echo $f->input([
     'name' => 'adjuntos',
     'label' => 'Adjuntos',
     'titles' => ['Archivo adjunto'],
-    'inputs' => [['type'=>'file', 'name'=>'adjuntos']],
+    'inputs' => [['type' => 'file', 'name' => 'adjuntos']],
     'help' => 'Archivos adjuntos que se enviarán con el correo a los usuarios',
 ]);
 echo $f->input([

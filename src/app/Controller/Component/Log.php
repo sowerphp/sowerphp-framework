@@ -69,7 +69,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         'syslog_facility' => LOG_LOCAL7,
     ];
 
- ///< Opciones por defecto del componente
+    ///< Opciones por defecto del componente
     protected $Log = null; ///< Objeto para escribir eventos en la base de datos
 
     protected $User = null;
@@ -116,7 +116,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
         if (is_array($priority)) {
             list($facility, $severity) = $priority;
         } else {
-            $facility = floor($priority/8);
+            $facility = floor($priority / 8);
             $severity = $priority - $facility * 8;
         }
         // reportar el mensaje de acuerdo la severidad del mismo
@@ -164,7 +164,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
     private function getURL()
     {
         $get = strpos($_SERVER['QUERY_STRING'], '&')
-            ? ('?'.substr($_SERVER['QUERY_STRING'], strpos($_SERVER['QUERY_STRING'], '&')+1))
+            ? ('?'.substr($_SERVER['QUERY_STRING'], strpos($_SERVER['QUERY_STRING'], '&') + 1))
             : ''
         ;
         return $this->controller->request->getFullUrlWithoutQuery().$this->controller->request->getRequestUriDecoded().$get;
@@ -293,7 +293,7 @@ class Controller_Component_Log extends \sowerphp\core\Controller_Component
                 // si es un arreglo de archivos
                 if (is_array($_FILES[$key]['name'])) {
                     $n = count($_FILES[$key]['name']);
-                    for ($i=0; $i<$n; $i++) {
+                    for ($i = 0; $i < $n; $i++) {
                         if (!$_FILES[$key]['error'][$i]) {
                             $email->attach([
                                 'name' => $_FILES[$key]['name'][$i],

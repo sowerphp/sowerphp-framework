@@ -50,19 +50,19 @@ class Utility_Image
                 // buscar area que reune a todas las caras de la foto (x1,y1 y x2,y2)
                 foreach ($faces as &$face) {
                     // determinar inicio
-                    if (!isset($coordinates['x1']) || $face['x']<$coordinates['x1']) {
+                    if (!isset($coordinates['x1']) || $face['x'] < $coordinates['x1']) {
                         $coordinates['x1'] = $face['x'];
                     }
-                    if (!isset($coordinates['y1']) || $face['y']<$coordinates['y1']) {
+                    if (!isset($coordinates['y1']) || $face['y'] < $coordinates['y1']) {
                         $coordinates['y1'] = $face['y'];
                     }
                     // determinar fin
                     $x2 = $face['x'] + $face['w'];
                     $y2 = $face['y'] + $face['h'];
-                    if (!isset($coordinates['x2']) || $x2>$coordinates['x2']) {
+                    if (!isset($coordinates['x2']) || $x2 > $coordinates['x2']) {
                         $coordinates['x2'] = $x2;
                     }
-                    if (!isset($coordinates['y2']) || $y2>$coordinates['y2']) {
+                    if (!isset($coordinates['y2']) || $y2 > $coordinates['y2']) {
                         $coordinates['y2'] = $y2;
                     }
                 }
@@ -79,13 +79,13 @@ class Utility_Image
             if ($y > $x) {
                 $coordinates['x1'] = 0;
                 $coordinates['x2'] = $x;
-                $coordinates['y1'] = ($y-$x)/2;
-                $coordinates['y2'] = $coordinates['y1'] + $x -1;
+                $coordinates['y1'] = ($y - $x) / 2;
+                $coordinates['y2'] = $coordinates['y1'] + $x - 1;
             }
             // la imagen se encuentra vertical (o es cuadrada)
             else {
-                $coordinates['x1'] = ($x-$y)/2;
-                $coordinates['x2'] = $coordinates['x1'] + $y -1;
+                $coordinates['x1'] = ($x - $y) / 2;
+                $coordinates['x2'] = $coordinates['x1'] + $y - 1;
                 $coordinates['y1'] = 0;
                 $coordinates['y2'] = $y;
             }
@@ -123,7 +123,7 @@ class Utility_Image
         // crear imagen para ser usada con GD
         $src = imagecreatefromstring($file['data']);
         // calcular imagen a recortar
-        $ratio = $w/$h;
+        $ratio = $w / $h;
         if ($file['ratio'] > $ratio) {
             // determinar tamaño del cuadro de recorte
             $y1 = 0;
@@ -138,7 +138,7 @@ class Utility_Image
             if ($delta) { // si hay diferencia horizontal se debe mover la imagen
                 // delta > 0 mover a la derecha (sumar delta sin salir del margen derecho)
                 if ($delta > 0) {
-                    $move = (($file['w']-$x2)<$delta)?($file['w']-$x2):$delta;
+                    $move = (($file['w'] - $x2) < $delta) ? ($file['w'] - $x2) : $delta;
                     $x1 += $move;
                     $x2 += $move;
                     $x = $x1 + ($x2 - $x1) / 2;
@@ -198,7 +198,7 @@ class Utility_Image
         if ($thumbnail['type'] == 'image/jpeg') {
             imagejpeg($dst);
         } elseif ($thumbnail['type'] == 'image/gif') {
-            imagegif ($dst);
+            imagegif($dst);
         } elseif ($thumbnail['type'] == 'image/png') {
             imagepng($dst);
         }
@@ -208,13 +208,13 @@ class Utility_Image
         // eliminar imagenes gd
         imagedestroy($dst);
         // guardar coordenadas utilizadas para generar el thumbnail y su tamaño final mas ratio
-        $thumbnail['w'] = (integer)$w;
-        $thumbnail['h'] = (integer)$h;
+        $thumbnail['w'] = (int)$w;
+        $thumbnail['h'] = (int)$h;
         $thumbnail['ratio'] = $w / $h;
-        $thumbnail['x1'] = (integer)$x1;
-        $thumbnail['y1'] = (integer)$y1;
-        $thumbnail['x2'] = (integer)$x2;
-        $thumbnail['y2'] = (integer)$y2;
+        $thumbnail['x1'] = (int)$x1;
+        $thumbnail['y1'] = (int)$y1;
+        $thumbnail['x2'] = (int)$x2;
+        $thumbnail['y2'] = (int)$y2;
         // retornar thumbnail
         return $thumbnail;
     }
@@ -230,7 +230,7 @@ class Utility_Image
             if ($file['type'] == 'image/jpeg') {
                 imagejpeg($dst);
             } elseif ($file['type'] == 'image/gif') {
-                imagegif ($dst);
+                imagegif($dst);
             } elseif ($file['type'] == 'image/png') {
                 imagepng($dst);
             }
@@ -254,7 +254,7 @@ class Utility_Image
         if ($file['type'] == 'image/jpeg') {
             imagejpeg($src, $file['tmp_name']);
         } elseif ($file['type'] == 'image/gif') {
-            imagegif ($src, $file['tmp_name']);
+            imagegif($src, $file['tmp_name']);
         } elseif ($file['type'] == 'image/png') {
             imagepng($src, $file['tmp_name']);
         }
@@ -288,7 +288,7 @@ class Utility_Image
         if ($ext == 'jpg' || $ext == 'jpeg') {
             imagejpeg($dst);
         } elseif ($ext == 'gif') {
-            imagegif ($dst);
+            imagegif($dst);
         } elseif ($ext == 'png') {
             imagepng($dst);
         }
@@ -319,22 +319,22 @@ class Utility_Image
             return [$ancho, $alto];
         }
         // determinar el nuevo ancho y alto que tendra la imagen (manteniendo proporciones)
-        $ratio = min($dst_w/$ancho, $dst_h/$alto);
+        $ratio = min($dst_w / $ancho, $dst_h / $alto);
         $new_w = round($ancho * $ratio);
         $new_h = round($alto * $ratio);
         // crear variable para la imagen segun el formato de la misma
         $mimetype = Utility_File::mimetype($file);
-        if ($mimetype == 'image/png'){
+        if ($mimetype == 'image/png') {
             $src_img = imagecreatefrompng($file);
         } elseif ($mimetype == 'image/jpeg') {
             $src_img = imagecreatefromjpeg($file);
         } elseif ($mimetype == 'image/gif') {
-            $src_img = imagecreatefromgif ($file);
+            $src_img = imagecreatefromgif($file);
         }
         // generar imagen nueva
         $dst_img = imagecreatetruecolor($new_w, $new_h);
         // mantener transparencia
-        if ($mimetype == 'image/png' || $mimetype == 'image/gif'){
+        if ($mimetype == 'image/png' || $mimetype == 'image/gif') {
             imagecolortransparent($dst_img, imagecolorallocatealpha($dst_img, 0, 0, 0, 127));
             imagealphablending($dst_img, false);
             imagesavealpha($dst_img, true);
@@ -347,7 +347,7 @@ class Utility_Image
         } elseif ($mimetype == 'image/jpeg') {
             imagejpeg($dst_img, $file, 100);
         } elseif ($mimetype == 'image/gif') {
-            imagegif ($dst_img, $file);
+            imagegif($dst_img, $file);
         }
         // destruir imagenes usadas
         imagedestroy($src_img);
@@ -359,7 +359,8 @@ class Utility_Image
     /**
      * Método que entrega un mapa de bits de la imagen
      */
-    public static function bitmap($img) {
+    public static function bitmap($img)
+    {
         $data = [];
         $w = imagesx($img);
         $h = imagesy($img);

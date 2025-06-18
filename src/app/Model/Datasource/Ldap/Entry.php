@@ -45,7 +45,7 @@ abstract class Model_Datasource_Ldap_Entry
                         $this->{$var} = $entry[$key][0];
                     } else {
                         $this->{$var} = [];
-                        for ($i=0; $i < $entry[$key]['count']; $i++) {
+                        for ($i = 0; $i < $entry[$key]['count']; $i++) {
                             $this->{$var}[] = $entry[$key][$i];
                         }
                     }

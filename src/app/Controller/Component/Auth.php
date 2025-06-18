@@ -153,7 +153,8 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     public function allow($action = null)
     {
         $this->allowedActions = array_merge(
-            $this->allowedActions, func_get_args()
+            $this->allowedActions,
+            func_get_args()
         );
     }
 
@@ -164,7 +165,8 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
     public function allowWithLogin($action = null)
     {
         $this->allowedActionsWithLogin = array_merge(
-            $this->allowedActionsWithLogin, func_get_args()
+            $this->allowedActionsWithLogin,
+            func_get_args()
         );
     }
 
@@ -232,7 +234,8 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
                         sprintf(
                             $this->settings['messages']['error']['newlogin'],
                             $this->User->usuario
-                        ), 'error'
+                        ),
+                        'error'
                     );
                     $this->__logged = false;
                 } else {
@@ -276,7 +279,8 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         // si el usuario no existe -> error
         if (!$this->User->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
-                sprintf($this->settings['messages']['error']['notexist'], $usuario), 'error'
+                sprintf($this->settings['messages']['error']['notexist'], $usuario),
+                'error'
             );
             if (isset($this->settings['redirect']['notexist'])) {
                 $this->controller->redirect($this->settings['redirect']['notexist']);
@@ -287,7 +291,8 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
         // si el usuario no está activo -> error
         if (!$this->User->isActive()) {
             \sowerphp\core\Model_Datasource_Session::message(
-                sprintf($this->settings['messages']['error']['inactive'], $usuario), 'error'
+                sprintf($this->settings['messages']['error']['inactive'], $usuario),
+                'error'
             );
             return;
         }
@@ -300,12 +305,13 @@ class Controller_Component_Auth extends \sowerphp\core\Controller_Component
             return;
         }
         // si ya hubo un intento de login fallido entonces se pedirá captcha
-        if ($this->settings['maxLoginAttempts'] && $this->User->contrasenia_intentos<$this->settings['maxLoginAttempts']) {
+        if ($this->settings['maxLoginAttempts'] && $this->User->contrasenia_intentos < $this->settings['maxLoginAttempts']) {
             try {
                 \sowerphp\general\Utility_Google_Recaptcha::check();
             } catch (\Exception $e) {
                 \sowerphp\core\Model_Datasource_Session::message(
-                    sprintf($this->settings['messages']['error']['recaptcha_invalid'], $usuario).': '.$e->getMessage(), 'error'
+                    sprintf($this->settings['messages']['error']['recaptcha_invalid'], $usuario).': '.$e->getMessage(),
+                    'error'
                 );
                 return;
             }

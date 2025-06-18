@@ -43,8 +43,7 @@ class Service_Http_Kernel implements Interface_Service
         Service_Config $configService,
         Service_Http_Session $sessionService,
         Network_Request $request
-    )
-    {
+    ) {
         $this->layersService = $layersService;
         $this->moduleService = $moduleService;
         $this->configService = $configService;
@@ -270,7 +269,7 @@ class Service_Http_Kernel implements Interface_Service
 
     public function handleThrowable(\Throwable $throwable): void
     {
-        if ($throwable instanceof \Error ) {
+        if ($throwable instanceof \Error) {
             $this->handleError($throwable);
         } else {
             $this->handleException($throwable);

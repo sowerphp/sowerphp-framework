@@ -109,7 +109,7 @@ class Controller_Module extends \Controller_App
             );
             $title = config('module.title');
             if (!$title) {
-                $title = str_replace (
+                $title = str_replace(
                     '.',
                     ' &raquo; ',
                     $this->request->getParsedParams()['module']

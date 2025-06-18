@@ -35,8 +35,7 @@ class View_Helper_Dashboard
     {
         if (!$config) {
             $config = [];
-        }
-        elseif (is_string($config)) {
+        } elseif (is_string($config)) {
             $config = ['template' => $config];
         }
         $config = array_merge([
@@ -48,7 +47,7 @@ class View_Helper_Dashboard
         $vars = [];
         $n_cards = count($cards);
         foreach ($cards[0] as $key => $val) {
-            for ($i=1; $i<=$n_cards; $i++) {
+            for ($i = 1; $i <= $n_cards; $i++) {
                 $vars[] = '{card_'.$i.'_'.$key.'}';
                 if ($key == 'link') {
                     $config['link-display'] = 'block';

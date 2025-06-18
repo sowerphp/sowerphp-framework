@@ -55,7 +55,7 @@ class Model_Datasource_Database extends Model_Datasource
             self::$datasources['database'][$config['conf']] = new $class($config);
         } catch (\PDOException $e) {
             throw new Exception_Model_Datasource_Database([
-                'msg' =>'¡Conexión a database.'.$config['conf'].' ('.$config['type'].') falló!<br/><br/>'.$e->getMessage(),
+                'msg' => '¡Conexión a database.'.$config['conf'].' ('.$config['type'].') falló!<br/><br/>'.$e->getMessage(),
             ]);
         }
         return self::$datasources['database'][$config['conf']];

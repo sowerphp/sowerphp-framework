@@ -66,14 +66,14 @@ abstract class Model_Datasource_Database_Manager extends \PDO
         self::$querysCount++;
         // preparar consulta
         $stmt = $this->prepare($sql);
-        if ($stmt===false) {
+        if ($stmt === false) {
             $this->error('No fue posible preparar la consulta:'."\n\n".$sql);
         }
         // asignar parámetros
         foreach ($params as $key => &$param) {
             if (is_array($param)) {
                 $stmt->bindParam($key, $param[0], $param[1]);
-            } elseif ($param===null || $param==='') {
+            } elseif ($param === null || $param === '') {
                 $stmt->bindValue($key, null, \PDO::PARAM_NULL);
             } else {
                 $stmt->bindParam($key, $param);
@@ -81,7 +81,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
         }
         // realizar consulta
         $stmt->execute();
-        if (!$stmt || $stmt->errorCode()!=='00000') {
+        if (!$stmt || $stmt->errorCode() !== '00000') {
             $this->error(
                 implode("\n", $stmt->errorInfo())."\n\n".$sql
             );
@@ -155,7 +155,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     public function getTableGenerator($sql, $params = [])
     {
         $stmt = $this->query($sql, $params);
-        while (($row = $stmt->fetch(\PDO::FETCH_ASSOC))!==false) {
+        while (($row = $stmt->fetch(\PDO::FETCH_ASSOC)) !== false) {
             yield $row;
         }
         $stmt->closeCursor();
@@ -170,7 +170,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     public function getColGenerator($sql, $params = [])
     {
         $stmt = $this->query($sql, $params);
-        while (($col = $stmt->fetchColumn())!==false) {
+        while (($col = $stmt->fetchColumn()) !== false) {
             yield $col;
         }
         $stmt->closeCursor();
@@ -225,7 +225,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
     public function commit()
     {
         if ($this->inTransaction) {
-            if ($this->inTransaction==1) {
+            if ($this->inTransaction == 1) {
                 parent::commit();
             }
             $this->inTransaction--;
@@ -272,19 +272,21 @@ abstract class Model_Datasource_Database_Manager extends \PDO
         // recorrer columnas para definir pk, fk, auto, null/not null, default, comentario
         foreach ($columns as &$column) {
             // definir null o not null
-            $column['null'] = $column['null']=='YES' ? 1 : 0;
+            $column['null'] = $column['null'] == 'YES' ? 1 : 0;
             // definir si es auto_increment (depende de la base de datos como se hace)
-            if ($this->config['type']=='PostgreSQL') {
+            if ($this->config['type'] == 'PostgreSQL') {
                 $column['auto'] = substr($column['default'], 0, 7) == 'nextval' ? 1 : 0;
-            } elseif ($this->config['type']=='MariaDB' || $this->config['type']=='MySQL') {
-                $column['auto'] = $column['extra']=='auto_increment' ? 1 : 0;
-                unset ($column['extra']);
+            } elseif ($this->config['type'] == 'MariaDB' || $this->config['type'] == 'MySQL') {
+                $column['auto'] = $column['extra'] == 'auto_increment' ? 1 : 0;
+                unset($column['extra']);
             }
             // limpiar default, quitar lo que viene despues de ::
             if (!$column['auto']) {
                 $aux = explode('::', $column['default']);
                 $column['default'] = trim(array_shift($aux), '\'');
-                if ($column['default']=='NULL') $column['default'] = null;
+                if ($column['default'] == 'NULL') {
+                    $column['default'] = null;
+                }
             }
             // definir fk
             $column['fk'] = $fk[$column['name']] ?? null;
@@ -309,7 +311,7 @@ abstract class Model_Datasource_Database_Manager extends \PDO
         $stmt = $this->query($sql, $params);
         // obtener información de las columnas
         $ncolumnas = $stmt->columnCount();
-        for ($i=0; $i<$ncolumnas; ++$i) {
+        for ($i = 0; $i < $ncolumnas; ++$i) {
             $aux = $stmt->getColumnMeta($i);
             $columns[$aux['name']] = $aux;
             unset($columns[$aux['name']]['name'], $aux);

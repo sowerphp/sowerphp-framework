@@ -106,7 +106,7 @@ class Model_Datasource_Ldap_Person extends Model_Datasource_Ldap_Entry
      */
     public function checkPassword(string $plain)
     {
-        if (substr($this->userPassword,0,6) == '{SSHA}') {
+        if (substr($this->userPassword, 0, 6) == '{SSHA}') {
             $hash = base64_decode(substr($this->userPassword, 6));
             $original_hash = substr($hash, 0, 20);
             $salt = substr($hash, 20);
@@ -124,7 +124,7 @@ class Model_Datasource_Ldap_Person extends Model_Datasource_Ldap_Entry
      */
     public function hashPassword(string $plain)
     {
-        mt_srand((double)microtime() * 1000000);
+        mt_srand((float)microtime() * 1000000);
         $salt = mhash_keygen_s2k(MHASH_SHA1, $plain, substr(pack('h*', md5(mt_rand())), 0, 8), 4);
         return '{SSHA}'.base64_encode(mhash(MHASH_SHA1, $plain.$salt).$salt);
     }

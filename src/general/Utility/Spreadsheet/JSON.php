@@ -31,7 +31,8 @@ final class Utility_Spreadsheet_JSON
     /**
      * @todo Implementar método (debe ser el "inverso" de self::generate())
      */
-    public static function read($archivo) {
+    public static function read($archivo)
+    {
     }
 
     /**

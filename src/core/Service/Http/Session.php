@@ -76,7 +76,7 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
             if (@session_start() === false) {
                 die('Service_Session::start() No fue posible iniciar la sesión de PHP "'.$session_name.'" usando '.ini_get('session.save_handler').'.');
             }
-            setcookie(session_name(), session_id(), time()+$lifetime, $path, $domain, $secure, $httponly);
+            setcookie(session_name(), session_id(), time() + $lifetime, $path, $domain, $secure, $httponly);
         }
     }
 
@@ -343,8 +343,7 @@ class Model_Datasource_Session_Message
     {
         if ($type == 'ok') {
             $type = 'success';
-        }
-        elseif ($type == 'error') {
+        } elseif ($type == 'error') {
             $type = 'danger';
         }
         $messages = self::flush();

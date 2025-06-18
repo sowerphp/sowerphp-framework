@@ -40,7 +40,7 @@ class Model_Datasource_Zimbra extends \sowerphp\core\Model_Datasource
         'sslcheck' => true,
     ];
 
- ///< Configuración de la fuente de datos
+    ///< Configuración de la fuente de datos
     public $Ldap; ///< Fuente de datos Ldap para el servidor Zimbra
 
     /**

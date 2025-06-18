@@ -21,7 +21,6 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-
 namespace sowerphp\app\Sistema\Usuarios;
 
 /**
@@ -45,7 +44,8 @@ class Controller_Email extends \Controller_App
         if (isset($_POST['submit'])) {
             if (!isset($_POST['grupos']) || empty($_POST['asunto']) || empty($_POST['mensaje'])) {
                 \sowerphp\core\Model_Datasource_Session::message(
-                    'Debe completar todos los campos del formulario', 'error'
+                    'Debe completar todos los campos del formulario',
+                    'error'
                 );
             } else {
                 $emails = $Grupos->emails($_POST['grupos']);
@@ -56,13 +56,14 @@ class Controller_Email extends \Controller_App
                 $n_emails = count($emails);
                 if (!$n_emails) {
                     \sowerphp\core\Model_Datasource_Session::message(
-                        'No hay destinatarios para el correo electrónico con los grupos seleccionados.', 'error'
+                        'No hay destinatarios para el correo electrónico con los grupos seleccionados.',
+                        'error'
                     );
                 } else {
                     // preparar mensaje a enviar
                     $layout = $this->layout;
                     $this->layout = null;
-                    $this->set ([
+                    $this->set([
                         'mensaje' => $_POST['mensaje'],
                         'n_emails' => $n_emails,
                         'grupos' => $Grupos->getGlosas($_POST['grupos']),
@@ -75,7 +76,7 @@ class Controller_Email extends \Controller_App
                     if ($_POST['agrupar']) {
                         $grupo = -1;
                         $destinatarios = [];
-                        for ($i=0; $i<$n_emails; $i++) {
+                        for ($i = 0; $i < $n_emails; $i++) {
                             if ($i % $_POST['agrupar'] == 0) {
                                 $destinatarios[++$grupo] = [];
                             }
@@ -102,7 +103,7 @@ class Controller_Email extends \Controller_App
                         $email->subject('['.$page_title.'] '.$_POST['asunto']);
                         // adjuntar archivos si se pasaron
                         $n_adjuntos = !empty($_FILES['adjuntos']) ? count($_FILES['adjuntos']['name']) : 0;
-                        for ($i=0; $i<$n_adjuntos; $i++) {
+                        for ($i = 0; $i < $n_adjuntos; $i++) {
                             if (!$_FILES['adjuntos']['error'][$i]) {
                                 $email->attach([
                                     'tmp_name' => $_FILES['adjuntos']['tmp_name'][$i],
@@ -113,17 +114,19 @@ class Controller_Email extends \Controller_App
                         }
                         // enviar archivo
                         $status = $email->send($msg);
-                        if ($status!==true) {
+                        if ($status !== true) {
                             break;
                         }
                     }
                     if ($status === true) {
                         \sowerphp\core\Model_Datasource_Session::message(
-                            'Mensaje envíado a '.num($n_emails).' usuarios.', 'ok'
+                            'Mensaje envíado a '.num($n_emails).' usuarios.',
+                            'ok'
                         );
                     } else {
                         \sowerphp\core\Model_Datasource_Session::message(
-                            'Ha ocurrido un error al intentar enviar su mensaje, por favor intente nuevamente.<br /><em>'.$status['message'].'</em>', 'error'
+                            'Ha ocurrido un error al intentar enviar su mensaje, por favor intente nuevamente.<br /><em>'.$status['message'].'</em>',
+                            'error'
                         );
                     }
                     $this->redirect($this->request->getRequestUriDecoded());

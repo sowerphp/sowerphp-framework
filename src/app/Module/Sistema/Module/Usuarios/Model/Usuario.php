@@ -21,7 +21,6 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-
 namespace sowerphp\app\Sistema\Usuarios;
 
 /**
@@ -620,7 +619,7 @@ class Model_Usuario extends \Model_App
         }
         $timestamp = date('Y-m-d H:i:s');
         $hash = md5($multipleLogins ? $this->contrasenia : ($ip . $timestamp . $this->contrasenia));
-        $this->update ([
+        $this->update([
             'ultimo_ingreso_fecha_hora' => $timestamp,
             'ultimo_ingreso_desde' => $ip,
             'ultimo_ingreso_hash' => $hash,
@@ -709,7 +708,7 @@ class Model_Usuario extends \Model_App
         $grupos = array_map('intval', $grupos);
         $this->getDB()->beginTransaction();
         if ($grupos) {
-            $this->getDB()->query ('
+            $this->getDB()->query('
                 DELETE FROM usuario_grupo
                 WHERE
                     usuario = :usuario
@@ -719,7 +718,7 @@ class Model_Usuario extends \Model_App
                 (new Model_UsuarioGrupo($this->id, $grupo))->save();
             }
         } else {
-            $this->getDB()->query ('
+            $this->getDB()->query('
                 DELETE FROM usuario_grupo
                 WHERE usuario = :usuario
             ', [':usuario' => $this->id]);
@@ -819,7 +818,7 @@ class Model_Usuario extends \Model_App
         // revisar por cada permiso
         foreach ($permisos as &$permiso) {
             // buscar si el permiso es del tipo recurso*
-            if ($permiso[strlen($permiso)-1] == '*' && strpos($recurso, substr($permiso, 0, -1)) === 0) {
+            if ($permiso[strlen($permiso) - 1] == '*' && strpos($recurso, substr($permiso, 0, -1)) === 0) {
                 return true;
             }
             // buscar por partes
@@ -850,8 +849,9 @@ class Model_Usuario extends \Model_App
     {
         $this->contrasenia_intentos = $intentos;
         $this->getDB()->query(
-            'UPDATE usuario SET contrasenia_intentos = :intentos WHERE id = :id'
-        , [':id' => $this->id, ':intentos' => $intentos]);
+            'UPDATE usuario SET contrasenia_intentos = :intentos WHERE id = :id',
+            [':id' => $this->id, ':intentos' => $intentos]
+        );
     }
 
     /**

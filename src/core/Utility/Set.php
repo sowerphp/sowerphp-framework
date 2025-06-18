@@ -26,7 +26,8 @@ namespace sowerphp\core;
 /**
  * Class used for manipulation of arrays.
  */
-class Utility_Set {
+class Utility_Set
+{
     /**
      * This function can be thought of as a hybrid between PHP's array_merge and array_merge_recursive. The difference
      * to the two is that if an array key contains another array then the function behaves recursive (unlike array_merge)
@@ -40,12 +41,13 @@ class Utility_Set {
      * @return array Merged array
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::merge
      */
-    public static function merge($arr1, $arr2 = null) {
+    public static function merge($arr1, $arr2 = null)
+    {
         $args = func_get_args();
 
         $r = (array)current($args);
         while (($arg = next($args)) !== false) {
-            foreach ((array)$arg as $key => $val)     {
+            foreach ((array)$arg as $key => $val) {
                 if (!empty($r[$key]) && is_array($r[$key]) && is_array($val)) {
                     $r[$key] = self::merge($r[$key], $val);
                 } elseif (is_int($key)) {
@@ -65,7 +67,8 @@ class Utility_Set {
      * @return mixed Either filtered array, or true/false when in callback
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::filter
      */
-    public static function filter(array $var) {
+    public static function filter(array $var)
+    {
         foreach ($var as $k => $v) {
             if (is_array($v)) {
                 $var[$k] = self::filter($v);
@@ -96,7 +99,8 @@ class Utility_Set {
      * @return array Combined array
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::pushDiff
      */
-    public static function pushDiff($array, $array2) {
+    public static function pushDiff($array, $array2)
+    {
         if (empty($array) && !empty($array2)) {
             return $array2;
         }
@@ -123,7 +127,8 @@ class Utility_Set {
      * @return object Hierarchical object
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::map
      */
-    public static function map($class = 'stdClass', $tmp = 'stdClass') {
+    public static function map($class = 'stdClass', $tmp = 'stdClass')
+    {
         if (is_array($class)) {
             $val = $class;
             $class = $tmp;
@@ -148,11 +153,12 @@ class Utility_Set {
      * @param bool $primary whether to assign first array key as the _name_
      * @return mixed Mapped object
      */
-    protected static function _map(&$array, $class, $primary = false) {
+    protected static function _map(&$array, $class, $primary = false)
+    {
         if ($class === true) {
-            $out = new stdClass;
+            $out = new stdClass();
         } else {
-            $out = new $class;
+            $out = new $class();
         }
         if (is_array($array)) {
             $keys = array_keys($array);
@@ -210,7 +216,8 @@ class Utility_Set {
      * @return bool true if values are numeric, false otherwise
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::numeric
      */
-    public static function numeric($array = null) {
+    public static function numeric($array = null)
+    {
         if (empty($array)) {
             return null;
         }
@@ -247,7 +254,8 @@ class Utility_Set {
      * @return string the value of the array key or null if no match
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::enum
      */
-    public static function enum($select, $list = null) {
+    public static function enum($select, $list = null)
+    {
         if (empty($list)) {
             $list = ['no', 'yes'];
         }
@@ -270,7 +278,8 @@ class Utility_Set {
      * @return array An array of strings extracted from $keys and formatted with $format
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::format
      */
-    public static function format($data, $format, $keys) {
+    public static function format($data, $format, $keys)
+    {
         $extracted = [];
         $count = count($keys);
 
@@ -349,7 +358,8 @@ class Utility_Set {
      * @return array An array of matched items
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::extract
      */
-    public static function extract($path, $data = null, $options = []) {
+    public static function extract($path, $data = null, $options = [])
+    {
         if (is_string($data)) {
             $tmp = $data;
             $data = $path;
@@ -500,7 +510,8 @@ class Utility_Set {
      * @return bool
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::matches
      */
-    public static function matches($conditions, $data = [], $i = null, $length = null) {
+    public static function matches($conditions, $data = [], $i = null, $length = null)
+    {
         if (empty($conditions)) {
             return true;
         }
@@ -574,7 +585,8 @@ class Utility_Set {
      * @return array Extracted data
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::classicExtract
      */
-    public static function classicExtract($data, $path = null) {
+    public static function classicExtract($data, $path = null)
+    {
         if (empty($path)) {
             return $data;
         }
@@ -662,11 +674,12 @@ class Utility_Set {
      * @return array
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::insert
      */
-    public static function insert($list, $path, $data = null) {
+    public static function insert($list, $path, $data = null)
+    {
         if (!is_array($path)) {
             $path = explode('.', $path);
         }
-        $_list =& $list;
+        $_list = & $list;
 
         $count = count($path);
         foreach ($path as $i => $key) {
@@ -679,7 +692,7 @@ class Utility_Set {
                 if (!isset($_list[$key])) {
                     $_list[$key] = [];
                 }
-                $_list =& $_list[$key];
+                $_list = & $_list[$key];
             }
             if (!is_array($_list)) {
                 return [];
@@ -696,14 +709,15 @@ class Utility_Set {
      * @return array Array with $path removed from its value
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::remove
      */
-    public static function remove($list, $path = null) {
+    public static function remove($list, $path = null)
+    {
         if (empty($path)) {
             return $list;
         }
         if (!is_array($path)) {
             $path = explode('.', $path);
         }
-        $_list =& $list;
+        $_list = & $list;
 
         foreach ($path as $i => $key) {
             if (is_numeric($key) && intval($key) > 0 || $key === '0') {
@@ -715,7 +729,7 @@ class Utility_Set {
                 if (!isset($_list[$key])) {
                     return $list;
                 }
-                $_list =& $_list[$key];
+                $_list = & $_list[$key];
             }
         }
         return $list;
@@ -729,7 +743,8 @@ class Utility_Set {
      * @return bool true if path is found, false otherwise
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::check
      */
-    public static function check($data, $path = null) {
+    public static function check($data, $path = null)
+    {
         if (empty($path)) {
             return $data;
         }
@@ -748,7 +763,7 @@ class Utility_Set {
             if (!is_array($data) || !array_key_exists($key, $data)) {
                 return false;
             }
-            $data =& $data[$key];
+            $data = & $data[$key];
         }
         return true;
     }
@@ -762,7 +777,8 @@ class Utility_Set {
      * The expression for this function is ($val1 - $val2) + ($val2 - ($val1 - $val2))
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::diff
      */
-    public static function diff($val1, $val2 = null) {
+    public static function diff($val1, $val2 = null)
+    {
         if (empty($val1)) {
             return (array)$val2;
         }
@@ -789,7 +805,8 @@ class Utility_Set {
      * @return bool true if $val1 contains $val2, false otherwise
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::contains
      */
-    public static function contains($val1, $val2 = null) {
+    public static function contains($val1, $val2 = null)
+    {
         if (empty($val1) || empty($val2)) {
             return false;
         }
@@ -816,7 +833,8 @@ class Utility_Set {
      * @return int The number of dimensions in $array
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::countDim
      */
-    public static function countDim($array = null, $all = false, $count = 0) {
+    public static function countDim($array = null, $all = false, $count = 0)
+    {
         if ($all) {
             $depth = [$count];
             if (is_array($array) && reset($array) !== false) {
@@ -845,7 +863,8 @@ class Utility_Set {
      * @return array
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::normalize
      */
-    public static function normalize($list, $assoc = true, $sep = ',', $trim = true) {
+    public static function normalize($list, $assoc = true, $sep = ',', $trim = true)
+    {
         if (is_string($list)) {
             $list = explode($sep, $list);
             if ($trim) {
@@ -897,7 +916,8 @@ class Utility_Set {
      * @return array Combined array
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::combine
      */
-    public static function combine($data, $path1 = null, $path2 = null, $groupPath = null) {
+    public static function combine($data, $path1 = null, $path2 = null, $groupPath = null)
+    {
         if (empty($data)) {
             return [];
         }
@@ -958,7 +978,8 @@ class Utility_Set {
      * @return array Array representation of given object
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::reverse
      */
-    public static function reverse($object) {
+    public static function reverse($object)
+    {
         $out = [];
         if ($object instanceof SimpleXMLElement) {
             return Xml::toArray($object);
@@ -1005,7 +1026,8 @@ class Utility_Set {
      * @return array
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::flatten
      */
-    public static function flatten($data, $separator = '.') {
+    public static function flatten($data, $separator = '.')
+    {
         $result = [];
         $path = null;
 
@@ -1037,7 +1059,8 @@ class Utility_Set {
      * @param string $key
      * @return array
      */
-    protected static function _flatten($results, $key = null) {
+    protected static function _flatten($results, $key = null)
+    {
         $stack = [];
         foreach ($results as $k => $r) {
             $id = $k;
@@ -1062,7 +1085,8 @@ class Utility_Set {
      * @return array Sorted array of data
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::sort
      */
-    public static function sort($data, $path, $dir) {
+    public static function sort($data, $path, $dir)
+    {
         $originalKeys = array_keys($data);
         if (is_numeric(implode('', $originalKeys))) {
             $data = array_values($data);
@@ -1102,7 +1126,8 @@ class Utility_Set {
      * @return mixed Result of the callback when applied to extracted data
      * @link http://book.cakephp.org/2.0/en/core-utility-libraries/set.html#Set::apply
      */
-    public static function apply($path, $data, $callback, $options = []) {
+    public static function apply($path, $data, $callback, $options = [])
+    {
         $defaults = ['type' => 'pass'];
         $options = array_merge($defaults, $options);
         $extracted = self::extract($path, $data);

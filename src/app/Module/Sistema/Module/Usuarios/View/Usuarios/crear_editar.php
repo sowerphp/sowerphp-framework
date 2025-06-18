@@ -11,7 +11,7 @@
 <?php
 // crear formulario
 $form = new \sowerphp\general\View_Helper_Form();
-echo $form->begin(['onsubmit'=>'Form.check()']);
+echo $form->begin(['onsubmit' => 'Form.check()']);
 
 // atributos del usuario
 echo $form->input([
@@ -19,7 +19,7 @@ echo $form->input([
     'label' => $columns['nombre']['name'],
     'value' => isset($Obj) ? $Obj->nombre : '',
     'help'  => $columns['nombre']['comment'],
-    'check' => (!$columns['nombre']['null']?['notempty']:[]),
+    'check' => (!$columns['nombre']['null'] ? ['notempty'] : []),
     'attr' => 'maxlength="'.$columns['nombre']['length'].'"',
 ]);
 echo $form->input([
@@ -27,10 +27,10 @@ echo $form->input([
     'label' => $columns['usuario']['name'],
     'value' => isset($Obj) ? $Obj->usuario : '',
     'help'  => $columns['usuario']['comment'],
-    'check' => (!$columns['usuario']['null']?['notempty']:[]),
+    'check' => (!$columns['usuario']['null'] ? ['notempty'] : []),
     'attr' => 'maxlength="'.$columns['usuario']['length'].'"',
 ]);
-if (is_array($ldap) && isset($ldap['person_uid']) && $ldap['person_uid']=='usuario_ldap') {
+if (is_array($ldap) && isset($ldap['person_uid']) && $ldap['person_uid'] == 'usuario_ldap') {
     echo $form->input([
         'name' => 'usuario_ldap',
         'label' => $columns['usuario_ldap']['name'],
@@ -69,17 +69,17 @@ echo $form->input([
     ],
     'value' => isset($Obj) ? $Obj->activo : '',
     'help'  => $columns['activo']['comment'],
-    'check' => (!$columns['activo']['null']?['notempty']:[]),
+    'check' => (!$columns['activo']['null'] ? ['notempty'] : []),
 ]);
 
 // agregar campo para los grupos a los que pertenece el usuario
 echo $form->input([
-    'type'=>'tablecheck',
-    'name'=>'grupos',
-    'label'=>'Grupos',
-    'titles'=>['GID', 'Grupo'],
-    'table'=>$grupos,
-    'checked'=>$grupos_asignados,
+    'type' => 'tablecheck',
+    'name' => 'grupos',
+    'label' => 'Grupos',
+    'titles' => ['GID', 'Grupo'],
+    'table' => $grupos,
+    'checked' => $grupos_asignados,
 ]);
 
 // terminar formulario

@@ -45,7 +45,7 @@ class Controller_App extends \sowerphp\core\Controller
      */
     public function __construct(\sowerphp\core\Network_Request $request, \sowerphp\core\Network_Response $response)
     {
-        parent::__construct ($request, $response);
+        parent::__construct($request, $response);
         $this->Cache = new \sowerphp\core\Cache();
         $this->set('_Auth', $this->Auth);
     }

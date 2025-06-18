@@ -83,7 +83,7 @@ class Network_Email_Api_AwsSes
                 die($mail->ErrorInfo);
             }
             $email = [
-                'RawMessage'=>[
+                'RawMessage' => [
                     'Data' => $mail->getSentMIMEMessage(),
                 ],
             ];
@@ -111,7 +111,7 @@ class Network_Email_Api_AwsSes
                 'message' => $e->getAwsErrorMessage(),
                 'full_message' => $e->getMessage(),
             ];
-        } catch(\Aws\Ses\Exception\SesException $e) {
+        } catch (\Aws\Ses\Exception\SesException $e) {
             return [
                 'type' => 'error',
                 'code' => $e->getCode(),
@@ -145,7 +145,7 @@ class Network_Email_Api_AwsSes
      */
     private function createEmailData($data, $header)
     {
-        $email = ['Destination'=>[], 'Message'=>[]];
+        $email = ['Destination' => [], 'Message' => []];
         // agregar quien envía el correo
         if (!empty($header['from'])) {
             if (is_array($header['from'])) {

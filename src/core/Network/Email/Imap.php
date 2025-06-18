@@ -36,7 +36,7 @@ class Network_Email_Imap
         'folder' => 'INBOX',
     ];
 
- ///< Configuración para IMAP
+    ///< Configuración para IMAP
     protected $link = null; ///< Conexión al servidor IMAP
 
     /**
@@ -101,7 +101,7 @@ class Network_Email_Imap
                     $options[] = 'novalidate-cert';
                 }
             }
-            $this->config['mailbox'] = '{'.$this->config['host'].':'.$this->config['port'].'/'.implode('/',$options).'}'.$default_folder;
+            $this->config['mailbox'] = '{'.$this->config['host'].':'.$this->config['port'].'/'.implode('/', $options).'}'.$default_folder;
         }
         // se separa la carpeta del mailbox y se agrega la carpeta real que se busca
         $aux = explode('}', $this->config['mailbox']);
@@ -209,7 +209,7 @@ class Network_Email_Imap
             'date' => null,
             'charset' => '',
             'header' => imap_rfc822_parse_headers($header_string),
-            'body' => ['plain'=>'', 'html'=>''],
+            'body' => ['plain' => '', 'html' => ''],
             'attachments' => [],
         ];
         $message['date'] = $this->getMessageDate($message);
@@ -255,9 +255,9 @@ class Network_Email_Imap
                 elseif (isset($filter['extension']) && (($p->ifdisposition && strtoupper($p->disposition) == 'ATTACHMENT') || (in_array($p->subtype, ['OCTET-STREAM', '*']) && ($p->ifparameters || $p->ifdparameters)))) {
                     $extension = array_map('strtolower', $filter['extension']);
                     $add = false;
-                    $params = $p->ifparameters ? $p->parameters : ( $p->ifdparameters ? $p->dparameters : [] );
+                    $params = $p->ifparameters ? $p->parameters : ($p->ifdparameters ? $p->dparameters : []);
                     foreach ($params as $parameter) {
-                        $value = strpos($parameter->value, '=?UTF-8?Q?')===0 ? imap_utf8($parameter->value) : $parameter->value;
+                        $value = strpos($parameter->value, '=?UTF-8?Q?') === 0 ? imap_utf8($parameter->value) : $parameter->value;
                         if (in_array(strtolower(substr($value, -3)), $extension)) {
                             $add = true;
                             break;
@@ -298,7 +298,7 @@ class Network_Email_Imap
     {
         // DECODE DATA
         $data = $partno ?
-                imap_fetchbody($this->link, $uid, $partno, FT_UID | FT_PEEK) :  // multipart
+                imap_fetchbody($this->link, $uid, $partno, FT_UID | FT_PEEK) : // multipart
                 imap_body($this->link, $uid, FT_UID | FT_PEEK); // simple
         // Any part may be encoded, even plain text messages, so check everything.
         if ($p->encoding == 4) {
@@ -359,8 +359,8 @@ class Network_Email_Imap
 
         // SUBPART RECURSION
         if (isset($p->parts)) {
-            foreach ($p->parts as $partno0=>$p2) {
-                $this->getMessagePart($uid, $p2, $partno.'.'.($partno0+1), $message);
+            foreach ($p->parts as $partno0 => $p2) {
+                $this->getMessagePart($uid, $p2, $partno.'.'.($partno0 + 1), $message);
             }
         }
 

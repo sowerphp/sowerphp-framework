@@ -162,7 +162,7 @@ abstract class Controller
             }
             // Verificar la cantidad de parámetros que se están pasando
             $n_args = count($this->request->getParsedParams()['pass']);
-            if ($n_args<$method->getNumberOfRequiredParameters()) {
+            if ($n_args < $method->getNumberOfRequiredParameters()) {
                 $args = [];
                 foreach ($method->getParameters() as &$p) {
                     $args[] = $p->isOptional() ? '['.$p->name.']' : $p->name;
@@ -174,11 +174,12 @@ abstract class Controller
                 ]);
             }
             // Invocar el método con los argumentos de $request->getParsedParams()['pass']
-            if ($n_args)
+            if ($n_args) {
                 return $method->invokeArgs($this, $this->request->getParsedParams()['pass']);
-            else
+            } else {
                 return $method->invoke($this);
-        // Si el método no se encuentra
+            }
+            // Si el método no se encuentra
         } catch (\ReflectionException $e) {
             // Generar excepción
             throw new Exception_Controller_Action_Missing([
@@ -204,7 +205,7 @@ abstract class Controller
         }
         // Crear vista para este controlador
         if (!$this->View) {
-            $this->View = new View ($this);
+            $this->View = new View($this);
         }
         // Renderizar vista y layout
         $this->response->body($this->View->render($view, $location));

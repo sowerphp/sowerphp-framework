@@ -30,7 +30,7 @@ class View_Helper_Gallery
 {
     private $_name;
 
-    public function __construct ($dir = null, $name = 'galeria')
+    public function __construct($dir = null, $name = 'galeria')
     {
         $this->_name = $name;
         // si se indico un directorio se genera e imprime (like TableHelper)
@@ -68,7 +68,7 @@ class View_Helper_Gallery
         return $buffer;
     }
 
-    private function header ()
+    private function header()
     {
         return '
             <link rel="stylesheet" href="'.url('/css/prettyPhoto.css').'" type="text/css" media="screen" charset="utf-8" />

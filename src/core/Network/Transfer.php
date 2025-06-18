@@ -155,7 +155,7 @@ class Network_Transfer
             throw new \Exception(__('No se especificó la ruta en el servidor FTP'));
         }
         // conectar al servidor FTP
-        if ($config['scheme']=='ftp') {
+        if ($config['scheme'] == 'ftp') {
             $connection = ftp_connect($config['host'], $config['port']);
         } else {
             $connection = ftp_ssl_connect($config['host'], $config['port']);

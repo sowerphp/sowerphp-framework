@@ -48,7 +48,7 @@ class Utility_Array
     public static function mergeRecursiveDistinct(array &$array1, array &$array2): array
     {
         $merged = $array1;
-        foreach ($array2 as $key => &$value ) {
+        foreach ($array2 as $key => &$value) {
             if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
                 $merged [$key] = self::mergeRecursiveDistinct($merged[$key], $value);
             } else {
@@ -78,7 +78,7 @@ class Utility_Array
     public static function toXML($array, $root = 'root')
     {
         $xml = new \SimpleXMLElement('<'.$root.'/>');
-        foreach ($array as $key => $value){
+        foreach ($array as $key => $value) {
             if (is_array($value)) {
                 if (is_numeric($key)) {
                     $key = 'item';
@@ -133,7 +133,7 @@ class Utility_Array
         $n_keys = count($keys);
         // determinar el arreglo con más elementos y cuantos son
         $n_elementos = count($array[$keys[0]]);
-        for ($j=1; $j<$n_keys; ++$j) {
+        for ($j = 1; $j < $n_keys; ++$j) {
             $aux = count($array[$keys[$j]]);
             if ($aux > $n_elementos) {
                 $n_elementos = $aux;
@@ -141,9 +141,9 @@ class Utility_Array
         }
         // extrar datos
         $data = [];
-        for ($i=0; $i<$n_elementos; ++$i) {
+        for ($i = 0; $i < $n_elementos; ++$i) {
             $d = [];
-            for ($j=0; $j<$n_keys; ++$j) {
+            for ($j = 0; $j < $n_keys; ++$j) {
                 if (isset($array[$keys[$j]][$i])) {
                     $d[$keys[$j]] = $array[$keys[$j]][$i];
                 } else {

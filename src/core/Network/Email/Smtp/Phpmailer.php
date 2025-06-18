@@ -67,7 +67,7 @@ class Network_Email_Smtp_Phpmailer
             $aux = explode('/', $config['host']);
             $config['host'] = array_shift($aux);
             foreach ($aux as $option) {
-                if ($option=='novalidate-cert') {
+                if ($option == 'novalidate-cert') {
                     $config['verify_ssl'] = false;
                 }
             }

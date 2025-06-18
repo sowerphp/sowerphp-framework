@@ -43,7 +43,7 @@ class View_Helper_FTP
         if (isset($_GET['download'])) {
             $this->download($_GET['download']);
         } else {
-            $this->browse(isset($_GET['dir'])?$_GET['dir']:'/');
+            $this->browse(isset($_GET['dir']) ? $_GET['dir'] : '/');
         }
     }
 
@@ -69,11 +69,11 @@ class View_Helper_FTP
     {
         $dir = str_replace('../', '', substr($dir, 1));
         $aux = $this->ftp->scandir($this->rootDir.$dir);
-        $files = array_merge(isset($aux['d'])?$aux['d']:[], isset($aux['-'])?$aux['-']:[]);
+        $files = array_merge(isset($aux['d']) ? $aux['d'] : [], isset($aux['-']) ? $aux['-'] : []);
         foreach ($files as &$f) {
-            $link = $f['type']=='d' ? 'dir=/'.$dir.$f['name'].'/' : 'download=/'.$dir.$f['name'];
-            $f['name'] = '<a href="?'.$link.'">'.($f['type']=='d'?'<span class="fa fa-folder"></span> ':'').$f['name'].'</a>';
-            $f['size'] = $f['type']=='d' ? null : $this->sizeFormat($f['size']);
+            $link = $f['type'] == 'd' ? 'dir=/'.$dir.$f['name'].'/' : 'download=/'.$dir.$f['name'];
+            $f['name'] = '<a href="?'.$link.'">'.($f['type'] == 'd' ? '<span class="fa fa-folder"></span> ' : '').$f['name'].'</a>';
+            $f['size'] = $f['type'] == 'd' ? null : $this->sizeFormat($f['size']);
             unset($f['type'], $f['perm'], $link);
         }
         if ($dir != '') {
@@ -81,7 +81,7 @@ class View_Helper_FTP
             array_unshift(
                 $files,
                 [
-                    '<a href="?dir=/'.($link?$link.'/':$link).'"><span class="fa fa-folder"></span> ..</a>',
+                    '<a href="?dir=/'.($link ? $link.'/' : $link).'"><span class="fa fa-folder"></span> ..</a>',
                     '',
                     '',
                 ]
@@ -104,9 +104,9 @@ class View_Helper_FTP
         $buffer = '<nav aria-label="breadcrumb">';
         $buffer .= '<ol class="breadcrumb">';
         $buffer .= $dirs ? '<li class="breadcrumb-item"><a href="?dir=/">Raíz</a></li>' : '<li class=" breadcrumb-item active">Raíz</li>';
-        for ($i=0; $i<$n_dirs; $i++) {
-            if ($i+1<$n_dirs) {
-                $buffer .= '<li class="breadcrumb-item"><a href="?dir=/'.implode('/', array_slice($dirs, 0, $i+1)).'/">'.$dirs[$i].'</a></li>';
+        for ($i = 0; $i < $n_dirs; $i++) {
+            if ($i + 1 < $n_dirs) {
+                $buffer .= '<li class="breadcrumb-item"><a href="?dir=/'.implode('/', array_slice($dirs, 0, $i + 1)).'/">'.$dirs[$i].'</a></li>';
             } else {
                 $buffer .= '<li class="breadcrumb-item active">'.$dirs[$i].'</li>';
             }
@@ -126,10 +126,10 @@ class View_Helper_FTP
         $units = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB'];
         $n_units = count($units);
         $unit = 0;
-        for ($i=0; $i<$n_units; $i++) {
-            if ($size>=1024) {
+        for ($i = 0; $i < $n_units; $i++) {
+            if ($size >= 1024) {
                 $size /= 1024;
-                $unit = $i+1;
+                $unit = $i + 1;
             }
         }
         return round($size, 1).' '.$units[$unit];

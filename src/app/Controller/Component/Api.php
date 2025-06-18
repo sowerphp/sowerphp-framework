@@ -93,7 +93,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         // cors
         if ($this->settings['cors']) {
             $headers = ['Origin', 'Content-Type', 'Accept', 'Access-Control-Request-Method', 'Authorization'];
-            $this->controller->response->header('Access-Control-Allow-Headers',  implode(',', $headers));
+            $this->controller->response->header('Access-Control-Allow-Headers', implode(',', $headers));
             $this->controller->response->header('Access-Control-Allow-Origin', '*');
         }
         // si se solicitan opciones se buscan para el recurso
@@ -101,7 +101,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
             $resources = $this->resources();
             $methods = ['OPTIONS'];
             foreach ($resources as $r) {
-                $method = substr($r, strrpos($r, '_')+1);
+                $method = substr($r, strrpos($r, '_') + 1);
                 if ($r == $api_class_method.'_'.$method && !in_array($method, $methods)) {
                     $methods[] = $method;
                 }
@@ -109,11 +109,13 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
             if (isset($methods[1])) {
                 if ($this->settings['cors']) {
                     $this->controller->response->header(
-                        'Access-Control-Allow-Methods', implode(',', $methods)
+                        'Access-Control-Allow-Methods',
+                        implode(',', $methods)
                     );
                 }
                 $this->controller->response->header(
-                    'Allow', implode(',', $methods)
+                    'Allow',
+                    implode(',', $methods)
                 );
                 $this->send($methods);
             } else {
@@ -190,7 +192,8 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         try {
             if ($n_args) {
                 $data = call_user_func_array(
-                    [$this->controller, $method], array_slice(func_get_args(), 1)
+                    [$this->controller, $method],
+                    array_slice(func_get_args(), 1)
                 );
             } else {
                 $data = $this->controller->$method();
@@ -275,15 +278,16 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
      * @param request Objeto con la solicitud a la aplicación
      * @param response Objeto con la respuesta de la API
      */
-    public function log() {
+    public function log()
+    {
         if (\sowerphp\core\Trigger::run('api_log', $this) !== true) {
             if ($this->settings['log']) {
                 $msg = $this->method . ' ' . $this->getResource() . ' '
                     . $this->controller->response->status() . ' '
                     . $this->controller->response->length()
                 ;
-                $msg .= ' ' . round(microtime(true)-TIME_START, 2);
-                $msg .= ' ' . round(memory_get_usage()/1024/1024,2);
+                $msg .= ' ' . round(microtime(true) - TIME_START, 2);
+                $msg .= ' ' . round(memory_get_usage() / 1024 / 1024, 2);
                 $msg .= ' ' . \sowerphp\core\Model_Datasource_Database_Manager::$querysCount;
                 $msg .= ' ' . \sowerphp\core\Cache::$setCount . ' ' . \sowerphp\core\Cache::$getCount;
                 $this->controller->Log->write($msg, LOG_INFO, $this->settings['log']);
@@ -295,7 +299,8 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
      * Método que envía una página de error por la API
      * @param e Excepción que se desea enviar (también puede ser un error)
      */
-    public function sendException($e) {
+    public function sendException($e)
+    {
         // Se busca y corrobora que el estado sea un número del rango de los 400 o superior
         $status = $e->getCode();
         if ($status < 400) {
@@ -333,8 +338,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
         if ($auth === false) {
             if (!empty($_GET['api_hash'])) {
                 $auth = base64_encode('X:' . $_GET['api_hash']);
-            }
-            elseif (!empty($_GET['api_key'])) {
+            } elseif (!empty($_GET['api_key'])) {
                 $auth = $_GET['api_key'];
             }
         }
@@ -396,7 +400,7 @@ class Controller_Component_Api extends \sowerphp\core\Controller_Component
             }
             // si la contraseña no es correcta -> error
             if (!$User->checkPassword($pass)) {
-                $User->setContraseniaIntentos($User->contrasenia_intentos-1);
+                $User->setContraseniaIntentos($User->contrasenia_intentos - 1);
                 if ($User->contrasenia_intentos) {
                     $this->User = sprintf(
                         $this->controller->Auth->settings['messages']['error']['invalid'],

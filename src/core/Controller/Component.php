@@ -45,8 +45,9 @@ abstract class Controller_Component
     public function __construct(Controller_Component_Collection $Components, $settings = [])
     {
         $this->Components = $Components;
-        $this->settings = Utility_Array::mergeRecursiveDistinct (
-            $this->settings, $settings
+        $this->settings = Utility_Array::mergeRecursiveDistinct(
+            $this->settings,
+            $settings
         );
     }
 

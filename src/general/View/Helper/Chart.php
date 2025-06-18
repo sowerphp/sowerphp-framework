@@ -60,8 +60,7 @@ class View_Helper_Chart
             }
             if ($type == 'Line') {
                 $chart->getPlot()->getPalette()->setLineColor($colors);
-            }
-            elseif ($type == 'VerticalBar') {
+            } elseif ($type == 'VerticalBar') {
                 $chart->getPlot()->getPalette()->setBarColor($colors);
             }
         }
@@ -97,8 +96,8 @@ class View_Helper_Chart
     private function render(&$chart, $title, $data, $options, $exit = true)
     {
         // opciones por defecto
-        $options = array_merge (
-            ['disposition'=>'inline', 'filename'=>'grafico.png'],
+        $options = array_merge(
+            ['disposition' => 'inline', 'filename' => 'grafico.png'],
             $options
         );
         // asignar opciones al gráfico
@@ -115,7 +114,7 @@ class View_Helper_Chart
         $chart->setDataSet($data);
         $chart->getPlot()->setGraphCaptionRatio($options['ratio']);
         // enviar cabeceras
-        ob_clean ();
+        ob_clean();
         header('Content-type: image/png');
         header('Pragma: no-cache');
         header('Expires: 0');
@@ -134,9 +133,9 @@ class View_Helper_Chart
      * @param options Opciones para el gráfico
      * @param exit =true si se debe terminar el script, =false si no se debe terminar
      */
-    public function line($title, $series, $options = [], $exit= true)
+    public function line($title, $series, $options = [], $exit = true)
     {
-        $this->generate ($title, $series, 'Line', $options, $exit);
+        $this->generate($title, $series, 'Line', $options, $exit);
     }
 
     /**
@@ -173,7 +172,7 @@ class View_Helper_Chart
     public function pie($title, $data, $options = [], $exit = true)
     {
         // asignar opciones por defecto del gráfico
-        $options = array_merge($this->defaultOptions, ['padding'=>false], $options);
+        $options = array_merge($this->defaultOptions, ['padding' => false], $options);
         // crear gráfico
         $chart = new \Libchart\View\Chart\PieChart($options['width'], $options['height']);
         // asignar colores

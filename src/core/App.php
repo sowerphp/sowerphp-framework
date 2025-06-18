@@ -122,8 +122,14 @@ class App
                 .' %s.' . "\n\n"
                 . 'En %s:%d.' . "\n\n"
                 . 'Traza completa:' . "\n\n"
-                . '%s'
-            , $class, $type, $severity, $message, $file, $line, $trace
+                . '%s',
+            $class,
+            $type,
+            $severity,
+            $message,
+            $file,
+            $line,
+            $trace
         );
         // Generar mensaje con el error o excepción.
         header('Content-Type: text/plain');

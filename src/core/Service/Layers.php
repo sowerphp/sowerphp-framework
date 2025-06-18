@@ -23,12 +23,12 @@
 
 namespace sowerphp\core;
 
- /**
- * Servicio para administrar las capas de la aplicación.
- * Cada capa tiene su propia ubicación y namespace base, que puede o no tener
- * otros namespaces en subniveles. Si existen namespaces inferiores serán
- * módulos de la capa (no se usa PSR-4).
- */
+/**
+* Servicio para administrar las capas de la aplicación.
+* Cada capa tiene su propia ubicación y namespace base, que puede o no tener
+* otros namespaces en subniveles. Si existen namespaces inferiores serán
+* módulos de la capa (no se usa PSR-4).
+*/
 class Service_Layers implements Interface_Service
 {
     /**
@@ -175,7 +175,7 @@ class Service_Layers implements Interface_Service
         if (!isset($this->directories['project'])) {
             // Construir el patrón de expresión regular a partir del arreglo de
             // archivos.
-            $pattern = '#(' . implode('|', array_map(function($file) {
+            $pattern = '#(' . implode('|', array_map(function ($file) {
                 return preg_quote($file, '#');
             }, $this->start_files)) . ')$#';
             // Obtener el rastreo de depuración
@@ -300,7 +300,7 @@ class Service_Layers implements Interface_Service
     {
         // Si las rutas no están definidas se definen.
         if (!isset($this->paths)) {
-            $this->paths = array_map(function($layer) {
+            $this->paths = array_map(function ($layer) {
                 return $layer['path'];
             }, $this->getLayers());
         }
@@ -434,7 +434,7 @@ class Service_Layers implements Interface_Service
                         $magic_class_file_parts_count - 1
                     )
                 ) . '/'
-                . $magic_class_file_parts[$magic_class_file_parts_count-1]
+                . $magic_class_file_parts[$magic_class_file_parts_count - 1]
             ;
         } else {
             $magic_class_file = '/' . $magic_class_file;

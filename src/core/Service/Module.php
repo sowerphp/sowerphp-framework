@@ -243,10 +243,10 @@ class Service_Module implements Interface_Service
         // módulo.
         $npartes = count($partes);
         $hasta = -1;
-        for ($i=0; $i<$npartes; ++$i) {
+        for ($i = 0; $i < $npartes; ++$i) {
             // Armar nombre del modulo.
             $module = [];
-            for ($j=0; $j<=$i; ++$j) {
+            for ($j = 0; $j <= $i; ++$j) {
                 $module[] = Utility_Inflector::camelize($partes[$j]);
             }
             $module = implode('.', $module);
@@ -260,7 +260,7 @@ class Service_Module implements Interface_Service
             // Armar nombre final del modulo (considerando hasta $hasta partes
             // del arreglo de partes).
             $module = [];
-            for ($i=0; $i<=$hasta; ++$i) {
+            for ($i = 0; $i <= $hasta; ++$i) {
                 $module[] = Utility_Inflector::camelize($partes[$i]);
             }
             // cargar módulo

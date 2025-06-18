@@ -80,8 +80,7 @@ class Utility_Spreadsheet
         // en caso que sea archivo XLS
         elseif ($formato == 'xls') {
             Utility_Spreadsheet_XLS::generate($data, $id);
-        }
-        elseif ($formato == 'xml') {
+        } elseif ($formato == 'xml') {
             Utility_Spreadsheet_XML::generate($data, $id);
         }
         // en caso que sea archivo JSON
@@ -109,7 +108,7 @@ class Utility_Spreadsheet
         // saca la de la posición (número) requerida
         if (is_numeric($tableId)) {
             $tables = $xpath->query('//table');
-            $table = $tables->item($tableId-1);
+            $table = $tables->item($tableId - 1);
         }
         // si se está buscando por id la tabla, se hace la búsqueda de forma
         // directa
@@ -119,7 +118,7 @@ class Utility_Spreadsheet
         // procesar filas
         $rows = $table->getElementsByTagName('tr');
         $from = $withColsNames ? 0 : 1;
-        for ($i=$from; $i<$rows->length; ++$i) {
+        for ($i = $from; $i < $rows->length; ++$i) {
             // procesar columnas de cada fila
             $cols = $rows->item($i)->getElementsByTagName('td');
             $row = [];
@@ -142,7 +141,7 @@ class Utility_Spreadsheet
      */
     public static function sheets($archivo)
     {
-        $archivo = self::archivo ($archivo);
+        $archivo = self::archivo($archivo);
         // en caso que sea archivo CSV
         if ($archivo['type'] == 'text/csv' || $archivo['type'] == 'text/plain') {
             return [substr($archivo['name'], 0, -4)];
@@ -183,7 +182,7 @@ class Utility_Spreadsheet
         // obtener las hojas del archivo
         $sheets = self::sheets($file);
         if ($options['sheet'] > -1) {
-            $sheets = [$options['sheet']=>$sheets[$options['sheet']]];
+            $sheets = [$options['sheet'] => $sheets[$options['sheet']]];
         }
         // agregar títulos de la pestaña
         $buffer = '<script type="text/javascript"> $(function(){ var url = document.location.toString(); if (url.match(\'#\')) $(\'.nav-tabs a[href=#\'+url.split(\'#\')[1]+\']\').tab(\'show\'); else $(\'.nav-tabs > li:first-child > a\').tab(\'show\'); }); </script>'."\n";
@@ -225,7 +224,7 @@ class Utility_Spreadsheet
         $aux = [];
         foreach ($data as &$row) {
             $auxRow = [];
-            for ($i=0; $i<$cols; ++$i) {
+            for ($i = 0; $i < $cols; ++$i) {
                 $auxRow[$colNames[$i]] = $row[$i];
             }
             $aux[] = $auxRow;
@@ -251,7 +250,7 @@ class Utility_Spreadsheet
         }
         // extensión siempre se chequea y reemplaza (ya que PHP puede cambiar
         // esto entre distintas versiones)
-        switch (strtolower(substr($archivo['name'], strrpos($archivo['name'], '.')+1))) {
+        switch (strtolower(substr($archivo['name'], strrpos($archivo['name'], '.') + 1))) {
             case 'csv': {
                 $archivo['type'] = 'text/csv';
                 break;

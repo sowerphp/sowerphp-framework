@@ -108,8 +108,9 @@ class Controller_Component_Collection
             $Controller->components
         );
         foreach ($components as $name => $properties) {
-            $Controller->{$name} = $this->load (
-                $properties['class'], $properties['settings']
+            $Controller->{$name} = $this->load(
+                $properties['class'],
+                $properties['settings']
             );
         }
     }

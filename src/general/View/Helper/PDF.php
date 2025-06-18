@@ -24,7 +24,7 @@
 namespace sowerphp\general;
 
 // Directorio para imagenes vació (no se asume nada)
-define ('K_PATH_IMAGES', '');
+define('K_PATH_IMAGES', '');
 
 /**
  * Clase para generar PDFs
@@ -70,8 +70,8 @@ class View_Helper_PDF extends \TCPDF
     {
         parent::__construct($o, $u, $s);
         $this->margin_top = $top;
-        $this->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP+$top, PDF_MARGIN_RIGHT);
-        $this->SetHeaderMargin(PDF_MARGIN_HEADER+$top);
+        $this->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP + $top, PDF_MARGIN_RIGHT);
+        $this->SetHeaderMargin(PDF_MARGIN_HEADER + $top);
         $this->SetFooterMargin(PDF_MARGIN_FOOTER);
     }
 
@@ -91,8 +91,12 @@ class View_Helper_PDF extends \TCPDF
     public function setStandardHeaderFooter($logo, $title, $subtitle = '')
     {
         $size = getimagesize($logo);
-        $width = round(($size[0]*$this->defaultOptions['header']['logoheight'])/$size[1]);
-        $this->SetHeaderData($logo, $width, $title, $subtitle,
+        $width = round(($size[0] * $this->defaultOptions['header']['logoheight']) / $size[1]);
+        $this->SetHeaderData(
+            $logo,
+            $width,
+            $title,
+            $subtitle,
             $this->defaultOptions['header']['textcolor'],
             $this->defaultOptions['header']['linecolor']
         );
@@ -111,8 +115,8 @@ class View_Helper_PDF extends \TCPDF
     {
         parent::Header();
         $this->SetFont('helvetica', 'B', 10);
-        $link = 'http'.(isset($_SERVER['HTTPS'])?'s':null).'://'.$_SERVER['HTTP_HOST'];
-        $this->Texto($link, null, 20+$this->margin_top, 'R', null, $link);
+        $link = 'http'.(isset($_SERVER['HTTPS']) ? 's' : null).'://'.$_SERVER['HTTP_HOST'];
+        $this->Texto($link, null, 20 + $this->margin_top, 'R', null, $link);
     }
 
     /**
@@ -134,13 +138,12 @@ class View_Helper_PDF extends \TCPDF
     {
         $widths = [];
         if (is_int($cells)) {
-            $width = floor($total/$cells);
-            for ($i=0; $i < $cells; ++$i) {
+            $width = floor($total / $cells);
+            for ($i = 0; $i < $cells; ++$i) {
                 $widths[] = $width;
             }
-        }
-        elseif (is_array($cells)) {
-            $width = floor($total/count($cells));
+        } elseif (is_array($cells)) {
+            $width = floor($total / count($cells));
             foreach ($cells as $i) {
                 $widths[$i] = $width;
             }
@@ -204,15 +207,15 @@ class View_Helper_PDF extends \TCPDF
     /**
      * Agregar una tabla al PDF
      */
-    public function addTable ($headers, $data, $options = [], $html = false)
+    public function addTable($headers, $data, $options = [], $html = false)
     {
         // asignar opciones por defecto
-        $options = array_merge($this->defaultOptions['table'],$options);
+        $options = array_merge($this->defaultOptions['table'], $options);
         // generar tabla
         if ($html) {
-            $this->addHTMLTable ($headers, $data, $options);
+            $this->addHTMLTable($headers, $data, $options);
         } else {
-            $this->addNormalTable ($headers, $data, $options);
+            $this->addNormalTable($headers, $data, $options);
         }
     }
 
@@ -220,7 +223,7 @@ class View_Helper_PDF extends \TCPDF
      * Agregar una tabla generada a través de código HTML al PDF
      * @todo Utilizar las opciones para definir estilo de la tabla HTML
      */
-    private function addHTMLTable ($headers, $data, $options = [])
+    private function addHTMLTable($headers, $data, $options = [])
     {
         $w = (isset($options['width']) && is_array($options['width'])) ? $options['width'] : null;
         $a = (isset($options['align']) && is_array($options['align'])) ? $options['align'] : [];
@@ -263,7 +266,7 @@ class View_Helper_PDF extends \TCPDF
         // Finalizar tabla
         $buffer .= '</table>';
         // generar tabla en HTML
-        $this->writeHTML ($buffer, true, false, false, false, '');
+        $this->writeHTML($buffer, true, false, false, false, '');
     }
 
     /**
@@ -288,7 +291,7 @@ class View_Helper_PDF extends \TCPDF
             $options['bordercolor'][2]
         );
         $this->SetLineWidth($options['borderwidth']);
-        $this->SetFont($this->defaultOptions['font']['family'], 'B',  $options['fontsize']);
+        $this->SetFont($this->defaultOptions['font']['family'], 'B', $options['fontsize']);
         // corregir indices
         $headers_keys = array_keys($headers);
         if (is_array($options['width'])) {
@@ -312,7 +315,7 @@ class View_Helper_PDF extends \TCPDF
         }
         $this->Ln();
         // Color and font restoration
-        $this->SetFillColor (
+        $this->SetFillColor(
             $options['bodybackground'][0],
             $options['bodybackground'][1],
             $options['bodybackground'][2]
@@ -369,7 +372,7 @@ class View_Helper_PDF extends \TCPDF
      * definir un ancho al texto. Además recibe menos parámetros para ser
      * más simple (parámetros comunes solamente).
      */
-    public function Texto($txt, $x=null, $y=null, $align='', $w=0, $link='', $border=0, $fill=false)
+    public function Texto($txt, $x = null, $y = null, $align = '', $w = 0, $link = '', $border = 0, $fill = false)
     {
         if ($x === null) {
             $x = $this->GetX();
@@ -392,7 +395,7 @@ class View_Helper_PDF extends \TCPDF
      * MultiCell. La principal diferencia es que este método no permite
      * agregar un enlace y Texto si.
      */
-    public function MultiTexto($txt, $x=null, $y=null, $align='', $w=0, $border=0, $fill=false)
+    public function MultiTexto($txt, $x = null, $y = null, $align = '', $w = 0, $border = 0, $fill = false)
     {
         if ($x === null) {
             $x = $this->GetX();

@@ -158,7 +158,7 @@ class View_Helper_Spreadsheet extends \PhpOffice\PhpSpreadsheet\Spreadsheet
      */
     public function setRotateCellValue($value, $col, $end)
     {
-        $this->getActiveSheet()->mergeCells($col.$this->y.':'.$col.($this->y+$end));
+        $this->getActiveSheet()->mergeCells($col.$this->y.':'.$col.($this->y + $end));
         $this->getActiveSheet()->getStyle($col.$this->y)->getAlignment()->setTextRotation(90);
         $this->setFormatCenterBold($col.$this->y);
         $this->getActiveSheet()->getStyle($col.$this->y)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);

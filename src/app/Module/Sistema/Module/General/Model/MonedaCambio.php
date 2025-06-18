@@ -21,7 +21,6 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-
 namespace sowerphp\app\Sistema\General;
 
 /**
@@ -130,9 +129,9 @@ class Model_MonedaCambio extends \Model_App
             parent::__construct($desde, $a, $fecha);
             // si no existe el tipo de cambio, buscar si existe "a" USD y luego desde USD a la moneda $a original
             if (!$this->valor && $a != 'USD') {
-                $MonedaCambioUSD = (new Model_MonedaCambios)->get($desde, 'USD', $fecha);
+                $MonedaCambioUSD = (new Model_MonedaCambios())->get($desde, 'USD', $fecha);
                 if ($MonedaCambioUSD->valor) {
-                    $USD = (new Model_MonedaCambios)->get('USD', $a, $fecha);
+                    $USD = (new Model_MonedaCambios())->get('USD', $a, $fecha);
                     if ($USD->valor) {
                         $this->valor = $MonedaCambioUSD->valor * $USD->valor;
                         $this->save();

@@ -21,7 +21,6 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
-
 namespace sowerphp\app;
 
 /**
@@ -49,7 +48,7 @@ class Utility_Apps
      */
     public function getApp($app)
     {
-        $apps = $this->getApps(['apps'=>[$app]]);
+        $apps = $this->getApps(['apps' => [$app]]);
         return $apps ? $apps[$app] : false;
     }
 
@@ -76,7 +75,7 @@ class Utility_Apps
                 if ($archivo[0] == '.' || is_dir($config['directory'].'/'.$archivo)) {
                     continue;
                 }
-                $class = substr($archivo,0,-4);
+                $class = substr($archivo, 0, -4);
                 $app = \sowerphp\core\Utility_Inflector::underscore($class);
                 if ($filtros['apps'] && !in_array($app, $filtros['apps'])) {
                     continue;
@@ -96,8 +95,8 @@ class Utility_Apps
         }
         // ordenar apps
         if ($apps) {
-            uasort($apps, function($app1, $app2) {
-                return $app1->getNombre() == $app2->getNombre() ? 0 : ( $app1->getNombre() < $app2->getNombre() ? -1 : 1);
+            uasort($apps, function ($app1, $app2) {
+                return $app1->getNombre() == $app2->getNombre() ? 0 : ($app1->getNombre() < $app2->getNombre() ? -1 : 1);
             });
         }
         // entregar apps como objetos
