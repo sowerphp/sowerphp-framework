@@ -68,7 +68,7 @@ class Service_Http_Session implements Interface_Service, Interface_Service_Sessi
             if (strpos($domain, ':')) {
                 list($domain, $port) = explode(':', $domain);
             }
-            $secure = isset($_SERVER['HTTPS']) ? true : false;
+            $secure = isset($_SERVER['HTTPS']) || $this->request->headers->get('X-Forwarded-Proto') === 'https';
             $httponly = true;
             ini_set('session.use_only_cookies', true);
             ini_set('session.gc_maxlifetime', $lifetime <= 65535 ? $lifetime : 65535);
