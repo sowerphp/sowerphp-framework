@@ -19,22 +19,22 @@
         "classmap": ["src/"]
     },
     "require": {
-        "php": "^7.4",
+        "php": "^7.3",
         "clue/graph": "0.9.3",
         "google/recaptcha": "1.2.4",
         "graphp/graphviz": "0.2.2",
-        "guzzlehttp/guzzle": "^7",
-        "libchart/libchart": "1.5.0",
-        "michelf/php-markdown": "1.7.0",
-        "phpmailer/phpmailer": "^6.9.1",
+        "guzzlehttp/guzzle": "7.10.0",
+        "illuminate/cache": "8.83.27",
+        "illuminate/container": "8.83.27",
+        "illuminate/http": "8.83.27",
+        "illuminate/session": "8.83.27",
+        "league/flysystem": "2.5.0",
+        "libchart/libchart": "1.6.0",
+        "michelf/php-markdown": "1.9.1",
+        "phpmailer/phpmailer": "7.0.2",
         "phpoffice/phpspreadsheet": "1.25.2",
         "robthree/twofactorauth": "1.8.2",
-        "vlucas/phpdotenv": "^5.6.0",
-        "tecnickcom/tcpdf": "6.7.5",
-        "illuminate/container": "^8.83",
-        "illuminate/session": "^8.83",
-        "illuminate/cache": "^8.83",
-        "illuminate/http": "^8.83",
-        "league/flysystem": "^2.5"
+        "vlucas/phpdotenv": "5.6.3",
+        "tecnickcom/tcpdf": "6.11.2"
     }
 }
