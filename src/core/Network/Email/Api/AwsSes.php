@@ -59,6 +59,7 @@ class Network_Email_Api_AwsSes
             'region'  => $config['region'],
             'profile' => $config['profile'],
             'credentials' => $config['credentials'],
+            'suppress_php_deprecation_warning' => true,
         ];
         if (!empty($this->config['credentials'])) {
             unset($this->config['profile']);
