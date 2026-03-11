@@ -78,7 +78,7 @@ class Network_Request extends Request
     {
         if (!isset($this->requestUriDecoded)) {
             $aux = explode('?', $this->getRequestUri());
-            $this->requestUriDecoded = $aux[0];
+            $this->requestUriDecoded = urldecode($aux[0]);
             // if (!isset($_SERVER['QUERY_STRING'])) {
             //     $request = '';
             // } else {
@@ -128,6 +128,7 @@ class Network_Request extends Request
                     ? substr($parts[0], 0, $last)
                     : $parts[0]
                 ;
+                // Remover slash del final de la base si existe.
                 $position = strlen($base) - 1;
                 if ($position >= 0 && $base[$position] == '/') {
                     $base = substr($base, 0, -1);
