@@ -237,7 +237,10 @@ class Model_Usuario extends \Model_App
      */
     public function __construct($id = null)
     {
-        if ($id !== null && !is_array($id) && !is_numeric($id)) {
+        if (is_array($id)) {
+            $id = $id[0];
+        }
+        if ($id !== null && !is_numeric($id)) {
             $this->db = \sowerphp\core\Model_Datasource_Database::get($this->_database);
             // se crea usuario a través de su correo electrónico
             if (strpos($id, '@')) {
